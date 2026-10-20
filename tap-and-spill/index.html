@@ -88,8 +88,8 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
 const $ = s => document.querySelector(s);
 const W = 360, H = 640;
 const MAX_RATE = 420;      // units/sec at fully open tap
-const MIN_POUR = 20;       // minimum units per turn...
-const MIN_TIME = 0.2;      // ...or minimum seconds of pouring
+const MIN_POUR = 25;       // minimum units per turn...
+const MIN_TIME = 0.25;     // ...or minimum seconds of pouring
 const COLORS = ['#ff6b6b', '#ffb84d', '#ffe066', '#51cf66', '#4dabf7', '#b197fc', '#f783ac', '#63e6be'];
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
@@ -185,7 +185,7 @@ class WaterSimulation {
     this.cv.width = Math.round(r.width * d); this.cv.height = Math.round(r.height * d);
     this.sx = this.cv.width / W; this.sy = this.cv.height / H;
   }
-  get dome() { return this.level > 1 ? clamp((this.level - 1) / 0.05, 0, 1) * 16 : 0; }
+  get dome() { return this.level > 1 ? clamp((this.level - 1) / 0.10, 0, 1) * 16 : 0; }
   surf(x) {
     const { T, B, XL, XR } = this;
     const base = this.level <= 1 ? B - 6 - this.level * (B - 6 - T) : T;
@@ -304,7 +304,7 @@ class GameStateMachine {
   beginTurn() { this.state = 'TURN'; this.turnPoured = this.turnTime = 0; }
   pour(u, dt) {
     this.turnTime += dt; this.poured += u; this.turnPoured += u; this.cur.total += u;
-    if (this.level > 1.05) { this.loser = this.cur; this.state = 'OVER'; return true; }
+    if (this.level > 1.10) { this.loser = this.cur; this.state = 'OVER'; return true; }
     return false;
   }
   endPour() { // false = below minimum, same player keeps pouring
