@@ -82,7 +82,8 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
 const $ = s => document.querySelector(s);
 const W = 360, H = 640;
 const MAX_RATE = 420;      // units/sec at fully open tap
-const MIN_POUR = 30;       // minimum units per turn
+const MIN_POUR = 20;       // minimum units per turn...
+const MIN_TIME = 0.2;      // ...or minimum seconds of pouring
 const COLORS = ['#ff6b6b', '#ffb84d', '#ffe066', '#51cf66', '#4dabf7', '#b197fc', '#f783ac', '#63e6be'];
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
@@ -288,20 +289,20 @@ class GameStateMachine {
   start(players) {
     this.players = players.map(p => ({ ...p, total: 0 }));
     this.capacity = 1000 + Math.floor(Math.random() * 1501);
-    this.poured = this.turn = this.turns = this.turnPoured = 0;
+    this.poured = this.turn = this.turns = this.turnPoured = this.turnTime = 0;
     this.loser = null; this.state = 'HANDOFF';
   }
   get cur() { return this.players[this.turn]; }
   get level() { return this.poured / this.capacity; }
   get rounds() { return Math.floor(this.turns / this.players.length) + 1; }
-  beginTurn() { this.state = 'TURN'; this.turnPoured = 0; }
-  pour(u) {
-    this.poured += u; this.turnPoured += u; this.cur.total += u;
+  beginTurn() { this.state = 'TURN'; this.turnPoured = this.turnTime = 0; }
+  pour(u, dt) {
+    this.turnTime += dt; this.poured += u; this.turnPoured += u; this.cur.total += u;
     if (this.level > 1.05) { this.loser = this.cur; this.state = 'OVER'; return true; }
     return false;
   }
   endPour() { // false = below minimum, same player keeps pouring
-    if (this.turnPoured < MIN_POUR) return false;
+    if (this.turnPoured < MIN_POUR && this.turnTime < MIN_TIME) return false;
     this.turns++; this.turn = (this.turn + 1) % this.players.length; this.state = 'HANDOFF';
     return true;
   }
@@ -318,7 +319,7 @@ const input = new InputHandler($('#touch'), {
     sim.flowing = false; sim.gauge = false; audio.flow(0);
     if (sm.state !== 'TURN') return;
     if (sm.endPour()) showHandoff();
-    else hint('太少了！至少要注水 ' + MIN_POUR + ' 單位，再按住一次');
+    else hint('太短了！至少注水 ' + MIN_TIME + ' 秒或 ' + MIN_POUR + ' 單位，再按住一次');
   }
 });
 
@@ -388,7 +389,7 @@ function frame(now) {
     sim.opening += (target - sim.opening) * Math.min(1, 14 * dt);
     $('#mode').textContent = input.mode === 'pressure' ? '感壓模式：越用力水越大' : '相容模式：按越久／往下滑越大';
     audio.flow(sim.opening);
-    if (sm.pour(MAX_RATE * Math.pow(sim.opening, 1.5) * dt)) { sim.level = sm.level; overflow(); }
+    if (sm.pour(MAX_RATE * Math.pow(sim.opening, 1.5) * dt, dt)) { sim.level = sm.level; overflow(); }
   } else sim.opening += (0 - sim.opening) * Math.min(1, 10 * dt);
   sim.level = sm.state === 'SETUP' ? 0 : sm.level;
   sim.update(dt); sim.draw();
