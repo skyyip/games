@@ -2,7 +2,7 @@ name: Deploy Grid Rush to Pages
 on:
   push:
     branches: [main]
-    paths: [grid-rush/**,/**, tap-and-spill/**, .github/workflows/pages.yml]
+    paths: [grid-rush/**, tap-and-spill/**, .github/workflows/pages.yml]
   workflow_dispatch:
 permissions:
   contents: read
