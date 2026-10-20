@@ -21,6 +21,10 @@ body{display:flex;align-items:center;justify-content:center}
 #who b{display:block;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #who small{opacity:.7;font-size:12px}
 button{font:inherit;color:#fff;border:0;cursor:pointer}
+#back{top:14px;right:62px;width:40px;height:40px;border-radius:50%;background:#ffffff22;display:grid;place-items:center;color:#fff;text-decoration:none;font-size:18px;z-index:5}
+#who{margin-right:48px}
+#back{top:14px;right:62px;width:40px;height:40px;border-radius:50%;background:#ffffff22;display:grid;place-items:center;color:#fff;text-decoration:none;font-size:18px;z-index:5}
+#who{margin-right:48px}
 #mute{pointer-events:auto;width:40px;height:40px;border-radius:50%;background:#ffffff22;font-size:18px}
 #bottom{left:0;right:0;bottom:0;padding:0 18px calc(24px + env(safe-area-inset-bottom));text-align:center;pointer-events:none}
 .btn{display:block;width:100%;padding:16px;border-radius:16px;font-size:18px;font-weight:700;background:linear-gradient(#4dabf7,#1c7ed6);box-shadow:0 6px 0 #0b4a8f;pointer-events:auto}
@@ -49,6 +53,8 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
 <body>
 <div id="app">
   <canvas id="cv"></canvas>
+  <a id="back" href="../" aria-label="回到遊戲列表">⌂</a>
+  <a id="back" href="../" aria-label="回到遊戲列表">⌂</a>
   <div id="vig"></div>
   <div id="touch"></div>
   <header id="hud" hidden>

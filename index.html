@@ -3,28 +3,85 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1530">
-<title>Games</title>
+<meta name="theme-color" content="#070b1a">
+<title>Games — pick one and play</title>
 <style>
+:root{--bg:#070b1a;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#0b1530;color:#fff;font-family:system-ui,-apple-system,"PingFang TC",sans-serif;padding:40px 20px}
-main{max-width:640px;margin:auto}
-h1{margin:0 0 24px;font-size:32px}
-ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
-a{display:block;padding:20px;border-radius:16px;background:#ffffff14;color:inherit;text-decoration:none;border:2px solid #ffffff22}
-a:hover,a:focus-visible{background:#ffffff26;border-color:#4dabf7}
-b{display:block;font-size:20px;margin-bottom:4px}
-span{opacity:.7;font-size:14px}
+html{color-scheme:dark}
+body{margin:0;min-height:100vh;background:var(--bg);color:#fff;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;overflow-x:hidden}
+.blob{position:fixed;width:46vmax;height:46vmax;border-radius:50%;filter:blur(90px);opacity:.45;z-index:-1;animation:float 18s ease-in-out infinite alternate}
+.b1{background:#7c3aed;top:-18vmax;left:-12vmax}
+.b2{background:#0ea5e9;bottom:-20vmax;right:-14vmax;animation-delay:-6s}
+.b3{background:#f97316;width:28vmax;height:28vmax;top:40%;left:55%;opacity:.25;animation-delay:-11s}
+@keyframes float{to{transform:translate(6vmax,4vmax) scale(1.15)}}
+main{max-width:980px;margin:0 auto;padding:72px 22px 48px}
+.eyebrow{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:99px;background:var(--glass);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1}
+h1{margin:18px 0 12px;font-size:clamp(40px,8vw,76px);line-height:1.02;letter-spacing:-.03em;background:linear-gradient(120deg,#fff 20%,#a5b4fc 55%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:0 0 44px;max-width:520px;color:#94a3b8;font-size:18px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.card{position:relative;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;color:inherit;text-decoration:none;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover,.card:focus-visible{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 60px -20px var(--accent);outline:none}
+.art{height:190px;display:grid;place-items:center;background:var(--art)}
+.art svg{width:96px;height:96px;filter:drop-shadow(0 10px 18px #0006);transition:transform .35s}
+.card:hover .art svg{transform:scale(1.12) rotate(-4deg)}
+.body{padding:22px 24px 24px}
+.tags{display:flex;gap:8px;margin-bottom:12px}
+.tags span{font-size:12px;padding:4px 10px;border-radius:99px;background:#ffffff14;color:#cbd5e1}
+h2{margin:0 0 6px;font-size:24px;letter-spacing:-.01em}
+.body p{margin:0 0 18px;color:#94a3b8;line-height:1.45;font-size:15px}
+.play{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--accent)}
+.play i{font-style:normal;transition:transform .25s}
+.card:hover .play i{transform:translateX(6px)}
+footer{margin-top:56px;text-align:center;color:#64748b;font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <main>
-  <h1>🎮 Games</h1>
-  <ul>
-    <li><a href="grid-rush/"><b>Grid Rush</b><span>Every click counts.</span></a></li>
-    <li><a href="grid-rush-in-order/"><b>Grid Rush: In Order</b><span>Find every number or letter in sequence. Race your best.</span></a></li>
-    <li><a href="tap-and-spill/"><b>水滿則溢 Tap &amp; Spill</b><span>Pass &amp; play — don't be the one who overflows the cup.</span></a></li>
-  </ul>
+  <span class="eyebrow">Mini game arcade</span>
+  <h1>Pick a game.<br>Start playing.</h1>
+  <p class="lead">Quick, no-install browser games. Works on your phone and desktop — just tap a card.</p>
+
+  <section class="grid" aria-label="Games">
+    <a class="card" href="grid-rush/" style="--accent:#fb7c4f;--art:linear-gradient(135deg,#fb7c4f,#be3f1a)">
+      <div class="art">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><g fill="#fff"><rect x="8" y="8" width="38" height="38" rx="9"/><rect x="50" y="8" width="38" height="38" rx="9" opacity=".55"/><rect x="8" y="50" width="38" height="38" rx="9" opacity=".55"/><rect x="50" y="50" width="38" height="38" rx="9"/></g></svg>
+      </div>
+      <div class="body">
+        <div class="tags"><span>Solo</span><span>Speed</span></div>
+        <h2>Grid Rush</h2>
+        <p>Race the clock and tap the grid in order. Every click counts.</p>
+        <span class="play">Play now <i>→</i></span>
+      </div>
+    </a>
+
+    <a class="card" href="grid-rush-in-order/" style="--accent:#a78bfa;--art:linear-gradient(135deg,#8b5cf6,#0f766e)">
+      <div class="art">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><g fill="#fff"><rect x="8" y="8" width="38" height="38" rx="9"/><rect x="50" y="8" width="38" height="38" rx="9" opacity=".55"/><rect x="8" y="50" width="38" height="38" rx="9" opacity=".55"/><rect x="50" y="50" width="38" height="38" rx="9"/></g><g fill="#4c1d95" font-family="system-ui" font-weight="800" font-size="24" text-anchor="middle"><text x="27" y="36">1</text><text x="69" y="36" fill="#fff">2</text><text x="27" y="78" fill="#fff">3</text><text x="69" y="78">4</text></g></svg>
+      </div>
+      <div class="body">
+        <div class="tags"><span>Solo</span><span>Sequence</span></div>
+        <h2>Grid Rush: In Order</h2>
+        <p>Find every number or letter in sequence. Race your best.</p>
+        <span class="play">Play now <i>→</i></span>
+      </div>
+    </a>
+
+    <a class="card" href="tap-and-spill/" style="--accent:#38bdf8;--art:linear-gradient(135deg,#0ea5e9,#4338ca)">
+      <div class="art">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M20 12h56l-8 76H28z" fill="#ffffff2e" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M24 42c10-6 18 6 24 0s14-6 24 0l-4 46H28z" fill="#bae6fd"/></svg>
+      </div>
+      <div class="body">
+        <div class="tags"><span>2–6 players</span><span>Pass &amp; play</span></div>
+        <h2>水滿則溢 Tap &amp; Spill</h2>
+        <p>Take turns filling the glass. Whoever makes it overflow loses.</p>
+        <span class="play">Play now <i>→</i></span>
+      </div>
+    </a>
+  </section>
+  <footer>More games coming soon</footer>
 </main>
 </body>
 </html>
