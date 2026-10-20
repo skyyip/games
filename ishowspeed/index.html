@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f7f2">
+    <meta name="description" content="Small grid. Big rush. Click every tile, race the clock, and beat your personal best in Grid Rush.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Grid Rush">
+    <title>Grid Rush — Every click counts.</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./src/app.js"></script>
+    <script type="module" src="./src/pwa.js"></script>
+  </head>
+  <body>
+    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+        <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-8z"/></symbol>
+        <symbol id="icon-trophy" viewBox="0 0 24 24"><path d="M8 3h8v6a4 4 0 0 1-8 0V3Zm0 2H4v2a4 4 0 0 0 5 4m7-6h4v2a4 4 0 0 1-5 4m-3 2v5m-4 3h8m-7-3h6v3H9z"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+        <symbol id="icon-reset" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></symbol>
+        <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+        <symbol id="icon-cursor" viewBox="0 0 24 24"><path d="m5 3 14 9-7 1-3 7z"/></symbol>
+      </defs>
+    </svg>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Grid Rush home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>grid<span class="brand-rush">rush</span><span class="brand-period">.</span></span>
+      </a>
+      <nav aria-label="Main navigation"><a class="nav-active" href="#game">The game</a><a href="#how-to-play">How to play <span aria-hidden="true">↗</span></a></nav>
+      <div class="header-motto"><span></span> NO DOWNLOAD. JUST GO.</div>
+    </header>
+
+    <main id="game">
+      <section class="intro" aria-labelledby="page-title">
+        <div><p class="eyebrow"><span class="tiny-cross" aria-hidden="true">✳</span> SMALL GRID. BIG RUSH.</p><h1 id="page-title">Every click <span>counts.</span></h1></div>
+        <p class="intro-copy">A race against the clock. A test of your reflexes.<br> Clear the grid. Find your flow. Beat your best.</p>
+      </section>
+
+      <div class="arena">
+        <aside class="setup-panel" aria-label="Game setup and instructions">
+          <p class="section-index">01 <span>/ THE CHALLENGE</span></p>
+          <h2>Pick your pace<span class="orange">.</span></h2>
+          <p class="panel-description">Bigger grid. Bigger challenge.</p>
+          <fieldset id="grid-options" class="grid-options">
+            <legend class="sr-only">Choose a grid size</legend>
+          </fieldset>
+          <p class="size-note"><span class="status-dot" aria-hidden="true"></span><span id="size-description">9 tiles. A little warm-up.</span></p>
+
+          <details class="how-to-play" id="how-to-play" open>
+            <summary id="instructions-title">THE GAME PLAN</summary>
+            <ol>
+              <li><span class="step-number">1</span><span>Pick a grid.<small>Start small. Work your way up.</small></span></li>
+              <li><span class="step-number">2</span><span>Hit every tile.<small>Any order. Make each click count.</small></span></li>
+              <li><span class="step-number">3</span><span>Beat your best.<small>One more round? We get it.</small></span></li>
+            </ol>
+          </details>
+        </aside>
+
+        <section class="play-panel" aria-label="Game board">
+          <div class="timer-block"><p class="timer-label"><svg class="icon" aria-hidden="true"><use href="#icon-bolt"/></svg> <span id="timer-label">READY WHEN YOU ARE</span></p><div class="timer" role="timer" aria-label="Elapsed time"><span id="timer">00.00</span><span class="timer-unit">s</span></div></div>
+          <div class="board-frame">
+            <div class="board-topline"><span id="board-label">THE 3 × 3 GRID</span><span class="board-status" id="board-status"><i></i> STANDBY</span></div>
+            <div id="board" class="board" aria-label="3 by 3 game board"></div>
+            <div class="board-bottomline"><span id="progress-label">LET’S MAKE IT A QUICK ONE.</span><span class="progress-count"><span id="progress">0</span><span class="progress-divider">/</span><span id="total">9</span></span></div>
+            <div class="progress-track" role="progressbar" aria-label="Tiles completed" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0"><div id="progress-fill"></div></div>
+
+            <div id="result" class="result-overlay" role="region" aria-labelledby="result-title" hidden>
+              <div class="result-decoration" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>
+              <div class="result-icon"><svg class="icon" aria-hidden="true"><use href="#icon-trophy"/></svg></div>
+              <p class="eyebrow" id="result-kicker">GRID CLEARED</p>
+              <h2 id="result-title">That was a rush.</h2>
+              <p class="result-time"><span id="result-time">0.00</span><span>s</span></p>
+              <p class="result-message" id="result-message"></p>
+              <button class="primary-button" id="play-again" type="button">Play Again <svg class="icon" aria-hidden="true"><use href="#icon-reset"/></svg></button>
+              <button class="text-button" id="change-grid" type="button">Change Grid Size <span aria-hidden="true">↗</span></button>
+            </div>
+          </div>
+          <button class="primary-button start-button" id="start" type="button"><span>Start Game</span><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+          <button class="restart-button" id="restart" type="button" hidden><svg class="icon" aria-hidden="true"><use href="#icon-reset"/></svg> Restart round</button>
+          <p class="board-hint" id="board-hint">Your timer starts when you do. No pressure. <span>Okay, a little.</span></p>
+          <p id="announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+
+        <aside class="records-panel" aria-label="Personal records">
+          <p class="section-index">02 <span>/ YOU VS. YOU</span></p>
+          <div class="records-heading"><h2>Your best runs<span class="orange">.</span></h2><svg class="icon" aria-hidden="true"><use href="#icon-trophy"/></svg></div>
+          <p class="panel-description">A little friendly self-competition.</p>
+          <div class="record-grid-label"><span id="record-grid">3 × 3 GRID</span><span>PERSONAL TOP 3</span></div>
+          <ol id="leaderboard" class="leaderboard" aria-label="Fastest three completion times"></ol>
+          <p id="records-caption" class="records-caption">Your next personal best is one game away.</p>
+
+          <div class="personal-best-card"><div class="best-card-label"><svg class="icon" aria-hidden="true"><use href="#icon-bolt"/></svg> THE ONE TO BEAT</div><div class="best-time"><span id="personal-best">—</span><span id="personal-best-unit" hidden>s</span></div><p id="best-caption">Your first finish sets the pace.</p><span class="best-card-spark" aria-hidden="true">✳</span></div>
+          <p class="storage-note"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg><span id="storage-note">Just your records, in your browser.<br>No account. No leaderboard anxiety.</span></p>
+        </aside>
+      </div>
+
+      <section class="install-banner" id="install-banner" aria-labelledby="install-heading">
+        <div><h2 id="install-heading">Take the rush with you.</h2><p>Install once. Play offline, anytime.</p></div>
+        <button class="primary-button" id="install-app" type="button">Install app <span aria-hidden="true">↗</span></button>
+      </section>
+      <div class="bottom-strip"><div><svg class="icon" aria-hidden="true"><use href="#icon-cursor"/></svg><span>Simple to play. <strong>Hard to play just once.</strong></span></div><span class="bottom-coordinates" aria-hidden="true">LESS SCROLLING <span>↗</span> MORE CLICKING</span></div>
+    </main>
+    <footer class="site-footer"><span>A tiny challenge for your competitive side.</span><span>Made for the <span class="orange">rush.</span></span></footer>
+    <dialog id="install-dialog" class="install-dialog" aria-labelledby="install-dialog-title">
+      <h2 id="install-dialog-title">Your rush. One tap away.</h2>
+      <p>Open Grid Rush in your preferred browser, then add it to your device:</p>
+      <ul>
+        <li><strong>Chrome or Edge:</strong> use the install icon in the address bar, or choose Install Grid Rush from the browser menu.</li>
+        <li><strong>Safari on Mac:</strong> choose File → Add to Dock.</li>
+        <li><strong>iPhone or iPad:</strong> open Share → Add to Home Screen.</li>
+      </ul>
+      <p id="offline-status" role="status">Preparing offline play…</p>
+      <form method="dialog"><button class="primary-button" type="submit">Got it <svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg></button></form>
+    </dialog>
+    <noscript><p class="noscript-notice">Enable JavaScript to play Grid Rush.</p></noscript>
+  </body>
+</html>
