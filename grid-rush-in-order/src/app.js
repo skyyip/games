@@ -1,0 +1,325 @@
+import { OrderedGame, GRID_SIZES } from './game.js';
+import { addResult, readLeaderboard, saveLeaderboard } from './leaderboard.js';
+
+const $ = selector => document.querySelector(selector);
+const game = new OrderedGame();
+const board = $('#board');
+const timer = $('#timer');
+const startButton = $('#start');
+const restartButton = $('#restart');
+const resultPanel = $('#result');
+const options = $('#grid-options');
+const modes = $('#mode-options');
+let numericSize = 3;
+const progressBar = $('.progress-track');
+const instructions = $('#how-to-play');
+instructions.open = !window.matchMedia('(max-width: 600px)').matches;
+document.querySelector('a[href="#how-to-play"]').addEventListener('click', () => {
+  instructions.open = true;
+});
+const modeNames = { numbers: 'Numbers', lowercase: 'Lowercase', uppercase: 'Uppercase', mixed: 'Mixed case' };
+const roundName = () => game.mode === 'numbers' ? `${game.size} × ${game.size} numbers` : `${modeNames[game.mode]} · 26 letters`;
+const descriptions = {
+  3: ['The warm-up', '9 tiles. A little warm-up.'],
+  4: ['Finding your flow', '16 tiles. Find your rhythm.'],
+  5: ['Getting serious', '25 tiles. Time to focus.'],
+  6: ['Full send', '36 tiles. Leave it all on the grid.'],
+};
+let frameId = null;
+let highlightedRank = null;
+let suppressTouchClick = false;
+let storage = null;
+try { storage = window.localStorage; } catch { /* Storage can be blocked by browser settings. */ }
+const loaded = readLeaderboard(storage);
+let records = loaded.records;
+let storageAvailable = loaded.available;
+
+const seconds = milliseconds => (milliseconds / 1000).toFixed(2);
+const announce = message => { $('#announcements').textContent = message; };
+
+for (const size of GRID_SIZES) {
+  const label = document.createElement('label');
+  label.className = 'grid-option';
+  label.innerHTML = `<input type="radio" name="grid-size" value="${size}" ${size === 3 ? 'checked' : ''} aria-label="${size} by ${size}, ${size * size} tiles">
+    <span class="grid-option-content"><span class="mini-grid" style="--size:${size}" aria-hidden="true">${'<i></i>'.repeat(size * size)}</span><strong>${size} × ${size}</strong><small>${descriptions[size][0]}</small></span>`;
+  options.append(label);
+}
+
+function renderBoard() {
+  const tiles = document.createDocumentFragment();
+  for (const [index, value] of game.tiles.entries()) {
+    if (value === null) {
+      const blank = document.createElement('span');
+      blank.className = 'empty-tile';
+      blank.setAttribute('aria-hidden', 'true');
+      tiles.append(blank);
+      continue;
+    }
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tile';
+    tile.dataset.index = index;
+    tile.dataset.value = value;
+    tile.disabled = game.state !== 'playing';
+    tile.setAttribute('aria-label', `${symbolName(value)}, not cleared`);
+    tile.innerHTML = `<span class="tile-corner" aria-hidden="true">+</span><span class="tile-number" aria-hidden="true"></span>`;
+    tile.querySelector('.tile-number').textContent = game.mode === 'numbers' ? value.padStart(2, '0') : value;
+    tiles.append(tile);
+  }
+  board.replaceChildren(tiles);
+  board.style.setProperty('--size', game.size);
+  board.dataset.size = game.size;
+  board.setAttribute('aria-label', `${game.size} by ${game.size} game board`);
+  $('#board-label').textContent = `THE ${game.size} × ${game.size} GRID`;
+  $('#size-description').textContent = game.mode === 'numbers' ? descriptions[game.size][1] : 'All 26 letters. A 6 × 6 board.';
+  options.hidden = game.mode !== 'numbers';
+  $('#mode-note').textContent = game.mode === 'mixed' ? 'A → b → C … Case changes. Alphabetical order stays.' : game.mode === 'numbers' ? 'Find 1, then 2, then 3…' : `Find ${game.mode === 'uppercase' ? 'A, then B, then C' : 'a, then b, then c'}…`;
+  renderNext();
+  $('#total').textContent = game.total;
+  progressBar.setAttribute('aria-valuemax', game.total);
+  renderProgress();
+}
+
+function symbolName(value) {
+  if (game.mode === 'numbers') return `Number ${value}`;
+  return `${value === value.toUpperCase() ? 'Uppercase' : 'Lowercase'} ${value}`;
+}
+
+function renderNext() {
+  $('#next-label').textContent = game.state === 'completed' ? 'ALL IN ORDER' : game.state === 'playing' ? 'NEXT UP' : 'START WITH';
+  $('#next-symbol').textContent = game.next ?? '✓';
+  $('#next-description').textContent = game.state === 'completed' ? 'Sequence complete. Nicely done.' : game.state === 'playing' ? 'Find this tile. Keep the order.' : 'The board shuffles when you start.';
+}
+
+function renderProgress() {
+  $('#progress').textContent = game.progress;
+  $('#progress-fill').style.width = `${game.progress / game.total * 100}%`;
+  progressBar.setAttribute('aria-valuenow', game.progress);
+}
+
+function renderLeaderboard() {
+  $('#record-grid').textContent = roundName().toUpperCase();
+  const list = $('#leaderboard');
+  list.replaceChildren();
+  for (let index = 0; index < 3; index += 1) {
+    const record = records[game.recordKey][index];
+    const item = document.createElement('li');
+    item.className = `${index === 0 ? 'record-first' : ''} ${record ? '' : 'record-empty'} ${highlightedRank === index + 1 ? 'record-new' : ''}`;
+    const rank = document.createElement('span');
+    rank.className = 'record-rank';
+    rank.textContent = String(index + 1).padStart(2, '0');
+    const detail = document.createElement('div');
+    detail.className = 'record-detail';
+    const time = document.createElement('p');
+    time.className = 'record-time';
+    time.textContent = record ? seconds(record.time) : '— —';
+    if (record) {
+      const unit = document.createElement('span');
+      unit.textContent = 's';
+      time.append(unit);
+    }
+    const date = document.createElement('p');
+    date.className = 'record-date';
+    date.textContent = record
+      ? new Date(record.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : ['A spot for your fastest run', 'Room for another good one', 'Go on. Make it yours.'][index];
+    detail.append(time, date);
+    item.append(rank, detail);
+    if (highlightedRank === index + 1) {
+      const badge = document.createElement('span');
+      badge.className = 'new-record-badge';
+      badge.textContent = 'NEW';
+      item.append(badge);
+    } else if (index === 0 && record) {
+      const medal = document.createElement('span');
+      medal.className = 'record-medal';
+      medal.textContent = '✦';
+      medal.setAttribute('aria-label', 'Personal best');
+      item.append(medal);
+    }
+    list.append(item);
+  }
+  const best = records[game.recordKey][0];
+  $('#personal-best').textContent = best ? seconds(best.time) : '—';
+  $('#personal-best-unit').hidden = !best;
+  $('#best-caption').textContent = best ? `Your fastest ${roundName()} run.` : 'Your first finish sets the pace.';
+  $('#records-caption').textContent = best ? 'Every fraction of a second is a fresh challenge.' : 'Your next personal best is one game away.';
+  $('#storage-note').textContent = storageAvailable
+    ? 'Just your records, in your browser. No account. No leaderboard anxiety.'
+    : 'Browser storage is unavailable. Your records stay for this visit only.';
+}
+
+function setBoardStatus(label, state = '') {
+  const status = $('#board-status');
+  status.className = `board-status ${state ? `is-${state}` : ''}`;
+  status.replaceChildren(document.createElement('i'), document.createTextNode(label));
+}
+
+function updateTimer() {
+  timer.textContent = seconds(game.elapsed).padStart(5, '0');
+  if (game.state === 'playing') frameId = requestAnimationFrame(updateTimer);
+}
+
+function resetRound() {
+  cancelAnimationFrame(frameId);
+  frameId = null;
+  game.reset({ mode: modes.querySelector('input:checked').value, size: numericSize });
+  board.classList.remove('is-playing');
+  highlightedRank = null;
+  resultPanel.hidden = true;
+  startButton.hidden = false;
+  restartButton.hidden = true;
+  options.disabled = false;
+  modes.disabled = false;
+  $('#timer-label').textContent = 'READY WHEN YOU ARE';
+  $('#progress-label').textContent = 'LET’S MAKE IT A QUICK ONE.';
+  $('#board-hint').textContent = 'Choose your sequence. Start the clock. Find each symbol in order.';
+  setBoardStatus('STANDBY');
+  updateTimer();
+  renderBoard();
+  renderLeaderboard();
+}
+
+function startRound() {
+  resetRound();
+  game.start();
+  renderBoard();
+  board.classList.add('is-playing');
+  startButton.hidden = true;
+  restartButton.hidden = false;
+  options.disabled = true;
+  modes.disabled = true;
+  $('#timer-label').textContent = 'MAKE EVERY CLICK COUNT';
+  $('#progress-label').textContent = 'ONE BY ONE. IN ORDER.';
+  $('#board-hint').textContent = 'Wrong taps don’t count. Use Tab or arrow keys, then Enter or Space.';
+  setBoardStatus('IN PLAY', 'playing');
+  updateTimer();
+  board.querySelector('button').focus({ preventScroll: true });
+  announce(`Game started. Find ${symbolName(game.next)} first. Clear all ${game.total} tiles in order.`);
+}
+
+function finishRound() {
+  board.classList.remove('is-playing');
+  cancelAnimationFrame(frameId);
+  frameId = null;
+  updateTimer();
+  const previousBest = records[game.recordKey][0]?.time;
+  const result = addResult(records, game.recordKey, game.elapsed);
+  records = result.records;
+  highlightedRank = result.rank;
+  storageAvailable = saveLeaderboard(storage, records);
+  renderLeaderboard();
+  setBoardStatus('CLEARED', 'completed');
+  renderNext();
+  $('#timer-label').textContent = 'A LITTLE FASTER EVERY TIME';
+  $('#progress-label').textContent = 'EVERY SYMBOL. IN ORDER. DONE.';
+  $('#result-time').textContent = seconds(game.elapsed);
+  $('#result-kicker').textContent = result.personalBest ? 'YOU JUST RAISED THE BAR' : 'EVERY LAST TILE. CLEARED.';
+  $('#result-title').textContent = result.personalBest ? 'New Personal Best!' : 'That was a rush.';
+  $('#result-message').textContent = result.personalBest
+    ? previousBest === undefined ? 'Your first record is on the board. This is just the beginning.' : `${seconds(previousBest - game.elapsed)}s faster. Your future self has a new time to chase.`
+    : result.rank ? `Straight into your top three. A fresh #${result.rank} for the collection.` : 'A grid well cleared. Your personal best is waiting for a rematch.';
+  resultPanel.hidden = false;
+  restartButton.hidden = true;
+  options.disabled = false;
+  modes.disabled = false;
+  $('#board-hint').textContent = 'Sharp eyes. Quick hands. Your next sequence is waiting.';
+  $('#play-again').focus({ preventScroll: true });
+  announce(`Grid cleared in ${seconds(game.elapsed)} seconds. ${result.personalBest ? 'New Personal Best!' : result.rank ? `New number ${result.rank} result.` : ''}`);
+}
+
+options.addEventListener('change', event => {
+  if (game.state === 'playing' || !event.target.matches('input[name="grid-size"]')) return;
+  numericSize = Number(event.target.value);
+  resetRound();
+  announce(`${game.size} by ${game.size} selected. ${game.total} tiles. Ready to start.`);
+});
+
+modes.addEventListener('change', () => {
+  if (game.state === 'playing') return;
+  resetRound();
+  announce(`${roundName()} selected. ${$('#mode-note').textContent}`);
+});
+
+function activateTile(tile, keyboard = false) {
+  if (!tile || tile.disabled || game.state !== 'playing') return;
+  if (!game.click(Number(tile.dataset.index))) {
+    tile.classList.add('is-wrong');
+    setTimeout(() => tile.classList.remove('is-wrong'), 220);
+    $('#next-description').textContent = `Not yet. Find ${game.next} first.`;
+    announce(`Not yet. Find ${symbolName(game.next)} next.`);
+    return;
+  }
+  tile.classList.remove('is-wrong');
+  tile.disabled = true;
+  tile.classList.add('clicked');
+  tile.setAttribute('aria-label', `${symbolName(tile.dataset.value)}, cleared`);
+  tile.querySelector('.tile-number').innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg>';
+  renderProgress();
+  renderNext();
+  if (game.state === 'completed') {
+    finishRound();
+  } else {
+    if (keyboard) {
+      const remaining = [...board.querySelectorAll('button:not(:disabled)')];
+      const next = remaining.find(button => Number(button.dataset.index) > Number(tile.dataset.index)) ?? remaining[0];
+      next.focus({ preventScroll: true });
+    }
+    announce(`${game.progress} of ${game.total} cleared. Next: ${symbolName(game.next)}.`);
+  }
+}
+
+// A consumed touch must not click a result button that appears under the finger.
+// A new gesture clears suppression immediately; keyboard clicks stay available.
+document.addEventListener('pointerdown', () => {
+  suppressTouchClick = false;
+}, true);
+
+document.addEventListener('click', event => {
+  if (!suppressTouchClick || event.detail === 0) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}, true);
+
+board.addEventListener('pointerdown', event => {
+  if (!['touch', 'pen'].includes(event.pointerType) || event.button !== 0 || game.state !== 'playing') return;
+  const tile = event.target.closest('.tile');
+  if (!tile) return;
+  suppressTouchClick = true;
+  // Count contact immediately and suppress compatibility mouse events.
+  event.preventDefault();
+  activateTile(tile);
+});
+
+board.addEventListener('click', event => {
+  activateTile(event.target.closest('.tile'), event.detail === 0);
+});
+
+board.addEventListener('keydown', event => {
+  const direction = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: game.size, ArrowUp: -game.size }[event.key];
+  if (direction === undefined || game.state !== 'playing' || !event.target.matches('.tile')) return;
+  event.preventDefault();
+  const index = Number(event.target.dataset.index);
+  for (let step = 1; step <= board.children.length; step += 1) {
+    const next = (index + direction * step % board.children.length + board.children.length) % board.children.length;
+    if (board.children[next].matches('button:not(:disabled)')) {
+      board.children[next].focus({ preventScroll: true });
+      break;
+    }
+  }
+});
+
+startButton.addEventListener('click', startRound);
+$('#play-again').addEventListener('click', startRound);
+restartButton.addEventListener('click', () => {
+  resetRound();
+  startButton.focus({ preventScroll: true });
+  announce('Round reset. Timer stopped. Ready to start again.');
+});
+$('#change-grid').addEventListener('click', () => {
+  resetRound();
+  modes.querySelector('input:checked').focus();
+  announce('Choose your next sequence and grid size.');
+});
+
+resetRound();
