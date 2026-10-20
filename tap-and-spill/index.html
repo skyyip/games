@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1530">
+<title>水滿則溢 Tap &amp; Spill</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:#050a18;color:#fff;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;overflow:hidden;overscroll-behavior:none}
+body{display:flex;align-items:center;justify-content:center}
+#app{position:relative;width:min(100vw,56.25dvh);height:min(100dvh,177.78vw);background:linear-gradient(#142a5a,#0b1530 60%,#081024);overflow:hidden;box-shadow:0 0 60px #000a;touch-action:none}
+#app>*{position:absolute}
+#cv{inset:0;width:100%;height:100%}
+#vig{inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 45%,#ff2d4acc 100%)}
+#touch{inset:0;pointer-events:none;touch-action:none}
+#touch.on{pointer-events:auto}
+#hud{top:0;left:0;right:0;padding:14px 14px 0;display:flex;align-items:center;gap:10px;pointer-events:none}
+#av{width:44px;height:44px;border-radius:50%;border:3px solid #fff;flex:none}
+#who{flex:1;min-width:0}
+#who b{display:block;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#who small{opacity:.7;font-size:12px}
+button{font:inherit;color:#fff;border:0;cursor:pointer}
+#mute{pointer-events:auto;width:40px;height:40px;border-radius:50%;background:#ffffff22;font-size:18px}
+#bottom{left:0;right:0;bottom:0;padding:0 18px calc(24px + env(safe-area-inset-bottom));text-align:center;pointer-events:none}
+.btn{display:block;width:100%;padding:16px;border-radius:16px;font-size:18px;font-weight:700;background:linear-gradient(#4dabf7,#1c7ed6);box-shadow:0 6px 0 #0b4a8f;pointer-events:auto}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #0b4a8f}
+.btn.alt{background:#ffffff22;box-shadow:none;margin-top:10px}
+#hint{margin:0;font-size:15px;opacity:.85;min-height:22px}
+#tag{top:38%;left:0;right:0;text-align:center;font-size:44px;font-weight:900;color:#ff6b6b;text-shadow:0 4px 0 #000a;pointer-events:none;transform:rotate(-6deg)}
+#tension{top:17%;left:0;right:0;text-align:center;font-size:20px;font-weight:800;color:#ffe066;pointer-events:none;animation:blink .5s infinite alternate}
+@keyframes blink{to{opacity:.35}}
+.panel{inset:0;background:#0b1530ee;padding:26px 22px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+.panel h1{margin:6px 0 0;text-align:center;font-size:34px}
+.panel p.sub{margin:0 0 6px;text-align:center;opacity:.7;font-size:14px}
+.row{display:flex;align-items:center;gap:10px}
+.row input{flex:1;min-width:0;padding:11px 12px;border-radius:12px;border:2px solid #ffffff33;background:#ffffff11;color:#fff;font:inherit;font-size:16px;-webkit-user-select:text;user-select:text}
+.sw{width:42px;height:42px;border-radius:50%;border:3px solid #fff}
+.count{display:flex;align-items:center;justify-content:center;gap:18px;font-size:18px}
+.count button{width:42px;height:42px;border-radius:50%;background:#ffffff22;font-size:22px}
+.bar{height:14px;border-radius:7px;margin-top:4px}
+.res{display:flex;flex-direction:column;gap:8px}
+.res .n{display:flex;justify-content:space-between;font-size:15px}
+[hidden]{display:none!important}
+.shake{animation:sh .6s}
+@keyframes sh{20%{transform:translate(-10px,6px)}40%{transform:translate(9px,-7px)}60%{transform:translate(-7px,-4px)}80%{transform:translate(5px,5px)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="cv"></canvas>
+  <div id="vig"></div>
+  <div id="touch"></div>
+  <header id="hud" hidden>
+    <div id="av"></div>
+    <div id="who"><b id="whoName"></b><small id="mode"></small></div>
+    <button id="mute" aria-label="音效">🔊</button>
+  </header>
+  <div id="tension" hidden>表面張力！別再加了…</div>
+  <div id="tag" hidden>溢出失敗！</div>
+  <div id="bottom" hidden><p id="hint"></p><button class="btn" id="go"></button></div>
+
+  <section id="setup" class="panel">
+    <h1>💧 水滿則溢</h1>
+    <p class="sub">Tap &amp; Spill · 輪流注水，讓杯子溢出的人就輸了</p>
+    <div class="count"><button id="minus">−</button><span id="cnt"></span><button id="plus">+</button></div>
+    <div id="rows" class="res"></div>
+    <button class="btn" id="start" style="margin-top:auto">開始遊戲</button>
+  </section>
+
+  <section id="result" class="panel" hidden>
+    <h1 id="loser"></h1>
+    <p class="sub" id="roundInfo"></p>
+    <div id="stats" class="res"></div>
+    <button class="btn" id="again" style="margin-top:auto">再來一局</button>
+    <button class="btn alt" id="toSetup">修改玩家</button>
+  </section>
+</div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const W = 360, H = 640;
+const MAX_RATE = 420;      // units/sec at fully open tap
+const MIN_POUR = 30;       // minimum units per turn
+const COLORS = ['#ff6b6b', '#ffb84d', '#ffe066', '#51cf66', '#4dabf7', '#b197fc', '#f783ac', '#63e6be'];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/* ---------- Audio ---------- */
+class AudioFx {
+  constructor() { this.muted = false; this.ctx = null; }
+  ensure() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const c = this.ctx = new AC();
+    const len = c.sampleRate * 2, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this.noise = buf;
+    this.master = c.createGain(); this.master.gain.value = this.muted ? 0 : 1; this.master.connect(c.destination);
+    const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
+    this.bp = c.createBiquadFilter(); this.bp.type = 'bandpass'; this.bp.Q.value = 0.8;
+    this.pg = c.createGain(); this.pg.gain.value = 0;
+    src.connect(this.bp).connect(this.pg).connect(this.master); src.start();
+  }
+  setMuted(m) { this.muted = m; if (this.master) this.master.gain.value = m ? 0 : 1; }
+  flow(o) { // thin trickle = low/quiet, torrent = bright/loud
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    this.pg.gain.setTargetAtTime(o > 0.02 ? 0.03 + o * 0.45 : 0, t, 0.05);
+    this.bp.frequency.setTargetAtTime(700 + o * 2600, t, 0.05);
+  }
+  burst(freq0, freq1, dur, vol, type = 'lowpass') {
+    if (!this.ctx) return;
+    const c = this.ctx, t = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = this.noise; f.type = type;
+    f.frequency.setValueAtTime(freq0, t); f.frequency.exponentialRampToValueAtTime(freq1, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    s.connect(f).connect(g).connect(this.master); s.start(t, Math.random()); s.stop(t + dur);
+  }
+  open() { this.burst(300, 2000, 0.12, 0.3, 'bandpass'); this.thump(140, 0.25, 0.08); }
+  thump(freq, vol, dur) {
+    if (!this.ctx) return;
+    const c = this.ctx, t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq * 0.6, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(this.master); o.start(t); o.stop(t + dur + 0.02);
+  }
+  heartbeat() { this.thump(60, 0.7, 0.14); setTimeout(() => this.thump(52, 0.45, 0.14), 170); }
+  splash() { this.burst(4000, 250, 1, 0.8); setTimeout(() => this.burst(2500, 200, 0.7, 0.5), 150); }
+}
+
+/* ---------- Input: pressure with graceful fallback ---------- */
+class InputHandler {
+  constructor(el, cb) {
+    this.el = el; this.cb = cb; this.active = false; this.id = null;
+    this.vals = new Set(); this.capable = false; this.p = 0;
+    el.addEventListener('pointerdown', e => {
+      if (this.active) return;
+      this.id = e.pointerId; this.active = true;
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      this.t0 = performance.now(); this.y0 = this.y = e.clientY;
+      this.track(e); cb.start();
+    });
+    el.addEventListener('pointermove', e => { if (e.pointerId === this.id) { this.y = e.clientY; this.track(e); } });
+    const up = e => { if (e.pointerId === this.id) this.end(); };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('contextmenu', e => e.preventDefault());
+    addEventListener('blur', () => this.end());
+  }
+  track(e) {
+    this.p = e.pressure;
+    if (e.pressure > 0) this.vals.add(Math.round(e.pressure * 100));
+    // constant 0.5 (or a couple of values) means no real force sensing
+    if (this.vals.size >= 3) this.capable = true;
+  }
+  end() { if (!this.active) return; this.active = false; this.cb.end(); }
+  get mode() { return this.capable ? 'pressure' : 'fallback'; }
+  // returns tap opening 0..1
+  read(now) {
+    if (this.capable) return clamp(this.p, 0, 1);
+    const hold = clamp((now - this.t0) / 2500, 0, 1);
+    const drag = clamp((this.y - this.y0) / (this.el.clientHeight * 0.35), 0, 1);
+    return Math.max(hold, drag);
+  }
+}
+
+/* ---------- Water rendering ---------- */
+class WaterSimulation {
+  constructor(cv) {
+    this.cv = cv; this.c = cv.getContext('2d');
+    this.T = 300; this.B = 560; this.XL = 100; this.XR = 260; this.BL = 120; this.BR = 240; this.NX = 180; this.NY = 105;
+    this.reset(); this.resize();
+  }
+  reset() { this.level = 0; this.opening = 0; this.flowing = false; this.amp = 0; this.parts = []; this.t = 0; this.spilling = false; this.spill = 0; this.gauge = false; }
+  resize() {
+    const r = this.cv.getBoundingClientRect(), d = devicePixelRatio || 1;
+    this.cv.width = Math.round(r.width * d); this.cv.height = Math.round(r.height * d);
+    this.sx = this.cv.width / W; this.sy = this.cv.height / H;
+  }
+  get dome() { return this.level > 1 ? clamp((this.level - 1) / 0.05, 0, 1) * 16 : 0; }
+  surf(x) {
+    const { T, B, XL, XR } = this;
+    const base = this.level <= 1 ? B - 6 - this.level * (B - 6 - T) : T;
+    const w = this.amp * (Math.sin(x * 0.09 + this.t * 6) + 0.6 * Math.sin(x * 0.17 - this.t * 9)) * (this.level > 1 ? 0.4 : 1);
+    return base + w - this.dome * Math.sin(Math.PI * clamp((x - XL) / (XR - XL), 0, 1));
+  }
+  update(dt) {
+    this.t += dt;
+    const target = this.flowing ? 1.5 + this.opening * 4 : 0;
+    this.amp += (target - this.amp) * Math.min(1, (target > this.amp ? 6 : 1.2) * dt);
+    if (this.flowing && this.opening > 0.03) {
+      const n = Math.floor(this.opening * 60 * dt + Math.random());
+      for (let i = 0; i < n; i++) this.parts.push({ x: this.NX + (Math.random() - .5) * 6, y: this.surf(this.NX), vx: (Math.random() - .5) * (60 + this.opening * 180), vy: -(80 + Math.random() * 200) * (0.3 + this.opening), r: 1.2 + Math.random() * 1.8 });
+    }
+    if (this.spilling) {
+      this.spill += dt;
+      if (Math.random() < 0.8) for (const s of [-1, 1]) this.parts.push({ x: s < 0 ? this.XL : this.XR, y: this.T, vx: s * (30 + Math.random() * 60), vy: -Math.random() * 90, r: 1.5 + Math.random() * 2 });
+    }
+    for (let i = this.parts.length - 1; i >= 0; i--) {
+      const p = this.parts[i];
+      p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      const inCup = p.x > this.XL && p.x < this.XR;
+      if (p.vy > 0 && (inCup ? p.y > this.surf(p.x) : p.y > this.B)) this.parts.splice(i, 1);
+    }
+  }
+  poly(c) { c.beginPath(); c.moveTo(this.XL, this.T); c.lineTo(this.BL, this.B); c.lineTo(this.BR, this.B); c.lineTo(this.XR, this.T); }
+  draw() {
+    const c = this.c, { T, B, XL, XR, BL, BR, NX, NY } = this;
+    c.setTransform(this.sx, 0, 0, this.sy, 0, 0); c.clearRect(0, 0, W, H);
+    // table + puddle
+    c.fillStyle = '#16264d'; c.fillRect(0, B, W, H - B);
+    if (this.spill > 0) {
+      c.fillStyle = 'rgba(110,198,255,.75)'; c.beginPath();
+      c.ellipse(180, B + 16, Math.min(this.spill * 55, 190), Math.min(this.spill * 8, 22), 0, 0, 7); c.fill();
+    }
+    // cup back
+    this.poly(c); c.fillStyle = 'rgba(255,255,255,.08)'; c.fill();
+    // water
+    c.save();
+    c.beginPath(); c.moveTo(XL, T - 40); c.lineTo(XR, T - 40); c.lineTo(XR, T); c.lineTo(BR, B); c.lineTo(BL, B); c.lineTo(XL, T); c.closePath(); c.clip();
+    if (this.level > 0) {
+      const g = c.createLinearGradient(0, T, 0, B); g.addColorStop(0, '#7fd0ff'); g.addColorStop(1, '#1c6fc4');
+      c.beginPath(); c.moveTo(XL - 5, this.surf(XL - 5));
+      for (let x = XL - 5; x <= XR + 5; x += 6) c.lineTo(x, this.surf(x));
+      c.lineTo(XR + 5, B); c.lineTo(XL - 5, B); c.closePath();
+      c.globalAlpha = .92; c.fillStyle = g; c.fill(); c.globalAlpha = 1;
+      c.beginPath(); for (let x = XL - 5; x <= XR + 5; x += 6) c[x === XL - 5 ? 'moveTo' : 'lineTo'](x, this.surf(x));
+      c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 2; c.stroke();
+    }
+    c.restore();
+    // glass
+    this.poly(c); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 4; c.lineJoin = 'round'; c.stroke();
+    c.beginPath(); c.moveTo(XL + 12, T + 14); c.lineTo(BL + 10, B - 20); c.strokeStyle = 'rgba(255,255,255,.25)'; c.lineWidth = 5; c.lineCap = 'round'; c.stroke();
+    // faucet
+    const fg = c.createLinearGradient(160, 0, 200, 0); fg.addColorStop(0, '#cfd8e6'); fg.addColorStop(.5, '#fff'); fg.addColorStop(1, '#8e9bb3');
+    c.fillStyle = fg; c.fillRect(168, -10, 24, 95);
+    c.beginPath(); c.roundRect(158, 82, 44, 24, 8); c.fill();
+    c.save(); c.translate(192, 45); c.rotate(-this.opening * 1.2);
+    c.fillStyle = '#ff6b6b'; c.beginPath(); c.roundRect(0, -4, 36, 8, 4); c.fill();
+    c.beginPath(); c.arc(38, 0, 7, 0, 7); c.fill(); c.restore();
+    // stream
+    if (this.flowing && this.opening > 0.03) {
+      const sy = this.surf(NX), o = this.opening, w = 1.5 + Math.pow(o, .8) * 13;
+      if (o < 0.12) {
+        c.setLineDash([5, 14]); c.lineDashOffset = -this.t * 300; c.strokeStyle = '#a9dcff'; c.lineWidth = w + 1.5; c.lineCap = 'butt';
+        c.beginPath(); c.moveTo(NX, NY + 4); c.lineTo(NX, sy); c.stroke(); c.setLineDash([]);
+      } else {
+        c.beginPath();
+        const off = y => Math.sin(y * .05 - this.t * 20) * o * 1.2;
+        for (let y = NY + 4; y < sy; y += 8) c.lineTo(NX - w / 2 + off(y), y);
+        c.lineTo(NX - w / 2, sy);
+        c.lineTo(NX + w / 2, sy);
+        for (let y = sy - 1; y > NY + 4; y -= 8) c.lineTo(NX + w / 2 + off(y), y);
+        c.closePath(); c.fillStyle = 'rgba(169,220,255,.95)'; c.fill();
+        c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = Math.max(1, w * .15);
+        c.beginPath(); c.moveTo(NX - w * .15, NY + 4); c.lineTo(NX - w * .15, sy); c.stroke();
+      }
+    }
+    // overflow sheets down the outer wall
+    if (this.spilling) {
+      const k = clamp(this.spill * 2.5, 0, 1);
+      c.strokeStyle = 'rgba(110,198,255,.9)'; c.lineWidth = 8; c.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        c.beginPath();
+        for (let u = 0; u <= k; u += 0.05) {
+          const x0 = s < 0 ? XL : XR, dx = s * 18 * Math.sin(u * Math.PI / 2) - s * 20 * u;
+          c[u === 0 ? 'moveTo' : 'lineTo'](x0 + dx, T + u * (B - T));
+        }
+        c.stroke();
+      }
+    }
+    // droplets
+    c.fillStyle = '#c4e8ff';
+    for (const p of this.parts) { c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); }
+    // tap-opening gauge
+    if (this.gauge) {
+      c.fillStyle = 'rgba(255,255,255,.15)'; c.beginPath(); c.roundRect(334, 150, 10, 300, 5); c.fill();
+      const h = 300 * this.opening; c.fillStyle = `hsl(${200 - this.opening * 200},90%,60%)`;
+      c.beginPath(); c.roundRect(334, 450 - h, 10, Math.max(h, 0), 5); c.fill();
+    }
+  }
+}
+
+/* ---------- Rules / turns ---------- */
+class GameStateMachine {
+  constructor() { this.state = 'SETUP'; }
+  start(players) {
+    this.players = players.map(p => ({ ...p, total: 0 }));
+    this.capacity = 1000 + Math.floor(Math.random() * 1501);
+    this.poured = this.turn = this.turns = this.turnPoured = 0;
+    this.loser = null; this.state = 'HANDOFF';
+  }
+  get cur() { return this.players[this.turn]; }
+  get level() { return this.poured / this.capacity; }
+  get rounds() { return Math.floor(this.turns / this.players.length) + 1; }
+  beginTurn() { this.state = 'TURN'; this.turnPoured = 0; }
+  pour(u) {
+    this.poured += u; this.turnPoured += u; this.cur.total += u;
+    if (this.level > 1.05) { this.loser = this.cur; this.state = 'OVER'; return true; }
+    return false;
+  }
+  endPour() { // false = below minimum, same player keeps pouring
+    if (this.turnPoured < MIN_POUR) return false;
+    this.turns++; this.turn = (this.turn + 1) % this.players.length; this.state = 'HANDOFF';
+    return true;
+  }
+}
+
+/* ---------- App glue ---------- */
+const audio = new AudioFx(), sm = new GameStateMachine(), sim = new WaterSimulation($('#cv'));
+let setupPlayers = Array.from({ length: 2 }, (_, i) => ({ name: '玩家' + (i + 1), color: COLORS[i] }));
+let beatAt = 0, vigPhase = 0, last = performance.now(), toastT = 0;
+
+const input = new InputHandler($('#touch'), {
+  start() { audio.ensure(); audio.open(); sim.flowing = true; sim.gauge = true; },
+  end() {
+    sim.flowing = false; sim.gauge = false; audio.flow(0);
+    if (sm.state !== 'TURN') return;
+    if (sm.endPour()) showHandoff();
+    else hint('太少了！至少要注水 ' + MIN_POUR + ' 單位，再按住一次');
+  }
+});
+
+function hint(t) { $('#hint').textContent = t; }
+function renderSetup() {
+  $('#cnt').textContent = setupPlayers.length + ' 位玩家';
+  $('#rows').innerHTML = '';
+  setupPlayers.forEach((p, i) => {
+    const r = document.createElement('div'); r.className = 'row';
+    const sw = document.createElement('button'); sw.className = 'sw'; sw.style.background = p.color; sw.setAttribute('aria-label', '換顏色');
+    sw.onclick = () => { // next colour not used by anyone else
+      const used = setupPlayers.map(q => q.color);
+      for (let k = 1; k <= COLORS.length; k++) { const c = COLORS[(COLORS.indexOf(p.color) + k) % COLORS.length]; if (!used.includes(c)) { p.color = c; break; } }
+      sw.style.background = p.color;
+    };
+    const inp = document.createElement('input'); inp.value = p.name; inp.maxLength = 10; inp.oninput = () => p.name = inp.value;
+    r.append(sw, inp); $('#rows').append(r);
+  });
+}
+function resize(n) {
+  n = clamp(n, 2, 6);
+  while (setupPlayers.length < n) { const i = setupPlayers.length; setupPlayers.push({ name: '玩家' + (i + 1), color: COLORS.find(c => !setupPlayers.some(p => p.color === c)) }); }
+  setupPlayers.length = n; renderSetup();
+}
+function newGame() {
+  sm.start(setupPlayers.map((p, i) => ({ name: p.name.trim() || '玩家' + (i + 1), color: p.color })));
+  sim.reset(); audio.flow(0);
+  for (const s of ['#setup', '#result', '#tag', '#tension']) $(s).hidden = true;
+  $('#hud').hidden = $('#bottom').hidden = false;
+  showHandoff();
+}
+function showHandoff() {
+  const p = sm.cur;
+  $('#av').style.background = p.color; $('#whoName').textContent = '當前輪到：' + p.name;
+  $('#touch').classList.remove('on'); $('#go').hidden = false;
+  $('#go').textContent = `${p.name}：確認換人 / 開始注水`;
+  hint('把裝置交給 ' + p.name); $('#mode').textContent = '';
+}
+function startTurn() {
+  audio.ensure(); sm.beginTurn();
+  $('#touch').classList.add('on'); $('#go').hidden = true;
+  hint('按住畫面注水，放開即換人');
+}
+function overflow() {
+  input.end(); input.id = null;
+  sim.spilling = true; sim.flowing = false; sim.gauge = false;
+  audio.flow(0); audio.splash(); navigator.vibrate?.([200, 60, 300]);
+  $('#touch').classList.remove('on'); $('#bottom').hidden = true; $('#tension').hidden = true; $('#tag').hidden = false;
+  const app = $('#app'); app.classList.remove('shake'); void app.offsetWidth; app.classList.add('shake');
+  $('#vig').style.opacity = 0;
+  setTimeout(showResult, 2200);
+}
+function showResult() {
+  $('#tag').hidden = true; $('#hud').hidden = true;
+  $('#loser').innerHTML = `<span style="color:${sm.loser.color}">${esc(sm.loser.name)}</span> 溢出了！💦`;
+  $('#roundInfo').textContent = `本局共 ${sm.rounds} 輪 · 杯子容量 ${sm.capacity} 單位`;
+  const max = Math.max(...sm.players.map(p => p.total));
+  $('#stats').innerHTML = sm.players.map(p => `<div><div class="n"><span>${p === sm.loser ? '💦 ' : ''}${esc(p.name)}</span><span>${Math.round(p.total)}</span></div><div class="bar" style="width:${Math.max(3, p.total / max * 100)}%;background:${p.color}"></div></div>`).join('');
+  $('#result').hidden = false;
+}
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (sm.state === 'TURN' && input.active) {
+    const target = input.read(now);
+    sim.opening += (target - sim.opening) * Math.min(1, 14 * dt);
+    $('#mode').textContent = input.mode === 'pressure' ? '感壓模式：越用力水越大' : '相容模式：按越久／往下滑越大';
+    audio.flow(sim.opening);
+    if (sm.pour(MAX_RATE * Math.pow(sim.opening, 1.5) * dt)) { sim.level = sm.level; overflow(); }
+  } else sim.opening += (0 - sim.opening) * Math.min(1, 10 * dt);
+  sim.level = sm.state === 'SETUP' ? 0 : sm.level;
+  sim.update(dt); sim.draw();
+  // tension: heartbeat + red vignette
+  const lv = sm.state === 'SETUP' || sm.state === 'OVER' ? 0 : sm.level, ten = clamp((lv - 0.6) / 0.45, 0, 1);
+  if (ten > 0) {
+    if (now > beatAt) { audio.heartbeat(); if (lv > 1) navigator.vibrate?.(20); beatAt = now + 1000 - ten * 600; }
+    vigPhase += dt * (3 + ten * 6); $('#vig').style.opacity = ten * (0.45 + 0.4 * Math.sin(vigPhase));
+  } else $('#vig').style.opacity = 0;
+  $('#tension').hidden = !(lv > 1 && sm.state !== 'OVER');
+  requestAnimationFrame(frame);
+}
+
+$('#minus').onclick = () => resize(setupPlayers.length - 1);
+$('#plus').onclick = () => resize(setupPlayers.length + 1);
+$('#start').onclick = () => { audio.ensure(); newGame(); };
+$('#go').onclick = startTurn;
+$('#again').onclick = () => { audio.ensure(); newGame(); };
+$('#toSetup').onclick = () => { $('#result').hidden = true; $('#setup').hidden = false; $('#hud').hidden = $('#bottom').hidden = true; sm.state = 'SETUP'; sim.reset(); };
+$('#mute').onclick = e => { audio.setMuted(!audio.muted); e.currentTarget.textContent = audio.muted ? '🔇' : '🔊'; };
+addEventListener('resize', () => sim.resize());
+renderSetup(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
