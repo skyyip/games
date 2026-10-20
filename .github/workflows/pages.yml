@@ -2,7 +2,7 @@ name: Deploy Grid Rush to Pages
 on:
   push:
     branches: [main]
-    paths: [grid-rush/**, ishowspeed/**, tap-and-spill/**, .github/workflows/pages.yml]
+    paths: [grid-rush/**,/**, tap-and-spill/**, .github/workflows/pages.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
       url: ${{ steps.d.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir _site && cp -R grid-rush ishowspeed tap-and-spill _site/
+      - run: mkdir _site && cp -R grid-rush tap-and-spill _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
