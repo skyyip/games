@@ -2,11 +2,16 @@
 
 A responsive, installable speed-clicking web app. Clear every tile as fast as you can, then challenge your own top three times. Runs locally and works offline after its first successful load.
 
+The repository's GitHub Pages workflow publishes the game at [skyyip.github.io/games/grid-rush/](https://skyyip.github.io/games/grid-rush/).
+
 ## Run locally
 
 Requires Node.js 20 or newer. No packages need to be installed.
 
+From the repository root:
+
 ```sh
+cd grid-rush
 npm start
 ```
 
@@ -48,7 +53,7 @@ tests/                 Dependency-free Node test suite
 
 ## Gameplay and records
 
-Choose a 3×3, 4×4, 5×5, or 6×6 grid, then press **Start Game**. Click or tap every tile in any order. Keyboard players can navigate with Tab or arrow keys and activate a tile with Enter or Space. Cleared tiles show a check mark and become disabled. Keyboard activation advances focus to the next remaining tile.
+Choose a 3×3, 4×4, 5×5, or 6×6 grid, then press **Start Game**. Click or tap every tile in any order. Touch and pen input register on contact, without waiting for release. Scrolling and zoom gestures are suppressed only over the active board so rapid taps are not interrupted. Keyboard players can navigate with Tab or arrow keys and activate a tile with Enter or Space. Cleared tiles show a check mark and become disabled. Grid rows and columns keep their dimensions as tiles are cleared; feedback changes color and shows a check without moving or scaling tiles. Keyboard activation advances focus to the next remaining tile.
 
 `GridGame` measures elapsed milliseconds with `performance.now()`. `requestAnimationFrame` updates the display; frame counts never determine the time. The last valid click captures the final elapsed time before rendering results. A `Set` prevents duplicate clicks. Restart resets the round to idle; **Play Again** starts a fresh round immediately.
 
@@ -61,3 +66,5 @@ Stored JSON is validated, sorted, and capped when loaded. Invalid entries are di
 The automated suite covers unique clicks, exact timer capture, all four grid sizes, replay/reset, invalid inputs, independent top-three rankings, full precision, stable ties, persistence, malformed data, and storage failures. Browser verification is described in `VERIFICATION.md`.
 
 `scripts/pwa-check.mjs` optionally verifies installability and offline games using an existing Playwright installation. To update a shipped app, change `CACHE_NAME` in `sw.js` whenever an app asset changes. New versions wait until existing app windows close, keeping active rounds uninterrupted.
+
+`scripts/touch-check.mjs` verifies contact-time activation, duplicate suppression, stable grid geometry, simultaneous touches, and final-touch/replay handling. It uses the same optional Playwright setup as the other browser checks.

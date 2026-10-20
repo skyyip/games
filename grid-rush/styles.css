@@ -575,9 +575,14 @@ h2 {
 .board {
   display:grid;
   grid-template-columns:repeat(var(--size,3),minmax(0,1fr));
+  grid-template-rows:repeat(var(--size,3),minmax(0,1fr));
   gap:9px;
   aspect-ratio:1;
   isolation:isolate;
+}
+
+.board.is-playing {
+  touch-action:none;
 }
 
 .tile {
@@ -592,7 +597,7 @@ h2 {
   font-family:var(--mono);
   font-size:29px;
   font-weight:500;
-  transition:background .12s,transform .12s,box-shadow .12s;
+  transition:background .12s,box-shadow .12s;
   user-select:none;
   -webkit-user-select:none;
   padding:0;
@@ -621,12 +626,10 @@ h2 {
 
 .tile:not(:disabled):hover {
   background:#c0441d;
-  transform:translateY(-2px);
   box-shadow:inset 0 -3px 0 #ad3e2433,0 4px 7px #c9502b20;
 }
 
 .tile:not(:disabled):active {
-  transform:scale(.94);
   background:#c0441d;
   box-shadow:none;
 }
@@ -640,7 +643,6 @@ h2 {
 .tile.clicked {
   background:#eef1e9;
   box-shadow:inset 0 0 0 1px #e5e9de;
-  animation:tile-pop .18s ease-out;
   color:#5c774c;
 }
 
@@ -1176,18 +1178,6 @@ h2 {
   top:39%;
   font-size:13px;
   color:#e8a98b;
-}
-
-@keyframes tile-pop {
-  0% {
-    transform:scale(.94);
-  }
-  70% {
-    transform:scale(1.025);
-  }
-  100% {
-    transform:scale(1);
-  }
 }
 
 @keyframes result-arrive {

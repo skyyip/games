@@ -23,6 +23,7 @@ const descriptions = {
 };
 let frameId = null;
 let highlightedRank = null;
+let suppressTouchClick = false;
 let storage = null;
 try { storage = window.localStorage; } catch { /* Storage can be blocked by browser settings. */ }
 const loaded = readLeaderboard(storage);
@@ -136,6 +137,7 @@ function resetRound(size = game.size) {
   cancelAnimationFrame(frameId);
   frameId = null;
   game.reset(size);
+  board.classList.remove('is-playing');
   highlightedRank = null;
   resultPanel.hidden = true;
   startButton.hidden = false;
@@ -153,6 +155,7 @@ function resetRound(size = game.size) {
 function startRound() {
   resetRound();
   game.start();
+  board.classList.add('is-playing');
   startButton.hidden = true;
   restartButton.hidden = false;
   options.disabled = true;
@@ -167,6 +170,7 @@ function startRound() {
 }
 
 function finishRound() {
+  board.classList.remove('is-playing');
   cancelAnimationFrame(frameId);
   frameId = null;
   updateTimer();
@@ -199,8 +203,7 @@ options.addEventListener('change', event => {
   announce(`${game.size} by ${game.size} selected. ${game.total} tiles. Ready to start.`);
 });
 
-board.addEventListener('click', event => {
-  const tile = event.target.closest('.tile');
+function activateTile(tile, keyboard = false) {
   if (!tile || !game.click(Number(tile.dataset.index))) return;
   tile.disabled = true;
   tile.classList.add('clicked');
@@ -210,13 +213,39 @@ board.addEventListener('click', event => {
   if (game.state === 'completed') {
     finishRound();
   } else {
-    if (event.detail === 0) {
+    if (keyboard) {
       const remaining = [...board.children].filter(button => !button.disabled);
       const next = remaining.find(button => Number(button.dataset.index) > Number(tile.dataset.index)) ?? remaining[0];
       next.focus({ preventScroll: true });
     }
     announce(`${game.progress} of ${game.total} tiles cleared.`);
   }
+}
+
+// A consumed touch must not click a result button that appears under the finger.
+// A new gesture clears suppression immediately; keyboard clicks stay available.
+document.addEventListener('pointerdown', () => {
+  suppressTouchClick = false;
+}, true);
+
+document.addEventListener('click', event => {
+  if (!suppressTouchClick || event.detail === 0) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}, true);
+
+board.addEventListener('pointerdown', event => {
+  if (!['touch', 'pen'].includes(event.pointerType) || event.button !== 0 || game.state !== 'playing') return;
+  const tile = event.target.closest('.tile');
+  if (!tile) return;
+  suppressTouchClick = true;
+  // Count contact immediately and suppress compatibility mouse events.
+  event.preventDefault();
+  activateTile(tile);
+});
+
+board.addEventListener('click', event => {
+  activateTile(event.target.closest('.tile'), event.detail === 0);
 });
 
 board.addEventListener('keydown', event => {

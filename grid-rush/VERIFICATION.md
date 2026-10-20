@@ -61,7 +61,7 @@ The app was extended with a web app manifest, locally generated device icons, an
 - Installation promotion is hidden when standalone display mode is emulated.
 - Offline game sessions produce no uncaught browser errors.
 
-The **5 logic tests and original 18 browser checks also pass** after the web-app additions. The app remains local; no hosted deployment was created. Actual OS installation requires the player's choice in their browser and was not automated.
+The **5 logic tests and original 18 browser checks also pass** after the web-app additions. Actual OS installation requires the player's choice in their browser and was not automated.
 
 Run the optional PWA checks with the local server running:
 
@@ -70,3 +70,21 @@ node scripts/pwa-check.mjs
 ```
 
 As with the gameplay browser checks, `GRID_RUSH_PLAYWRIGHT_MODULE` can point to an existing Playwright installation.
+
+## Immediate touch and stable grids
+
+The original regressions were reproduced before changes: touch did not count until release, and clearing a 6×6 tile changed a neighboring tile's height from 45.83 px to 44.33 px. A separate check also caught scaling during press feedback.
+
+Touch and pen input now activate on pointer contact. Explicit equal-height grid rows prevent checkmark content from resizing cells, and tile feedback no longer transforms their geometry. Compatibility clicks from an already-counted gesture are suppressed, including a reproduced case where releasing the final finger accidentally clicked Play Again. The next deliberate gesture and keyboard input remain available immediately. The offline cache version was incremented for the updated assets.
+
+`scripts/touch-check.mjs` — **17 regression checks passed**:
+
+- Touch counts before the finger lifts and cannot count again on release or a compatibility click.
+- A cleared 6×6 tile keeps every row and neighbor fixed, including during visual feedback.
+- All four grids preserve every tile's position, width, and height while clearing each row at 320, 375, and 768 px widths.
+- Two simultaneous fingers register two unique contacts.
+- The final contact stops timing immediately; releasing that finger leaves results visible, and a new deliberate tap can replay.
+
+The project now lives in `grid-rush/`. Run local commands from that directory. The GitHub Pages workflow was updated to publish that folder.
+
+Final regression verification: **5 logic tests, 18 general browser checks, 9 web-app checks, and 17 touch checks**.
