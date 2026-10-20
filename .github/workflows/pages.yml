@@ -19,8 +19,9 @@ jobs:
       url: ${{ steps.d.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - run: mkdir _site && cp -R ishowspeed _site/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ishowspeed
+          path: _site
       - id: d
         uses: actions/deploy-pages@v4
