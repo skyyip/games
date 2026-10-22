@@ -49,7 +49,8 @@ src/
   leaderboard.js       Storage validation, ranking, and persistence
   app.js               DOM rendering, input, animation, and result feedback
   pwa.js               Installation controls and offline setup
-  playground-ui.js     Shared press feedback, optional haptics and cue animation
+  playground-ui.js     Shared spring interactions, navigation and optional haptics
+  motion.js            Small deterministic spring, attraction and gesture helpers
 scripts/serve.js       Small local static development server
 tests/                 Dependency-free Node test suite
 ```
@@ -75,3 +76,15 @@ The automated suite covers unique clicks, exact timer capture, all four grid siz
 `scripts/ui-check.mjs` verifies the landing page and every game: mobile two-column cards, return navigation, supplied install icons, responsive layouts, wrong-input haptics and reduced-motion support. Run it with the optional Playwright module environment variable; `PLAYGROUND_URL` defaults to `http://localhost:5173/`.
 
 When changing the shared `playground-ui.css` or `src/playground-ui.js`, bump the cache versions in both games so installed copies receive the new assets. The home-screen artwork is supplied by the site owner.
+
+## Shared interaction design
+
+The landing page and all three games use the existing [UI/UX Pro Max skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)'s motion guidance without adding a runtime dependency. Controls use bounded magnetic attraction and spring press feedback. Landing cards have separate foreground, body and background movement, gentle scroll-centre emphasis, and a resisted desktop tug that deforms the visual surface before returning it to place. Their native link hit areas stay fixed; touch retains native page scrolling.
+
+Grid and mode selections have a spring-driven outline that stretches between the current native radio choices. Tile labels and completion panels receive brief arrival feedback; grid cells, input handling and accurate game timers keep their existing behavior. Supported browsers expand a selected game card into the game panel during navigation, with normal links as the fallback.
+
+Installation help supports dragging its header downward: short/cancelled drags return to place, while a longer drag or deliberate flick closes it. Close, Got it and Escape provide button/keyboard alternatives. Tap & Spill adds spring response to the water and tap lever, and one decorative droplet rebound on water/table contact; poured volume and turn rules stay authoritative.
+
+Reduced-motion preferences disable decorative animation, including when changed during a visit. The shared spring scheduler runs only while something is moving. Both installed grid games cache `motion.js` for offline use.
+
+`scripts/motion-check.mjs` checks card hit areas, drag recovery, parallax layers, selection alignment, mobile scrolling, sheet gestures and alternatives, live motion preferences, fixed game tiles, replay and Tap & Spill overflow. Use the existing optional Playwright module and `PLAYGROUND_URL` environment variables as above. It does not install packages.

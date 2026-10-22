@@ -47,11 +47,57 @@
 .how-to-play[open] ol { animation:record-arrive 220ms ease-out; }
 .how-to-play summary { min-height:44px; }
 
+/* Shared motion vocabulary: small controls are light; cards and sheets carry weight. */
+:root { --motion-settle:420ms;--motion-out:cubic-bezier(.2,.8,.2,1);--card-radius:26px; }
+::view-transition { pointer-events:none; }
+::view-transition-group(game-stage) { animation-duration:var(--motion-settle);animation-timing-function:var(--motion-out); }
+::view-transition-old(game-stage) { animation:stage-out 180ms ease-in both; }
+::view-transition-new(game-stage) { animation:stage-in var(--motion-settle) var(--motion-out) both; }
+@keyframes stage-out { to { opacity:0; } }
+@keyframes stage-in { from { opacity:.5; } to { opacity:1; } }
+.play-panel,#app { view-transition-name:game-stage; }
+.motion-control { translate:var(--motion-x,0px) var(--motion-y,0px);scale:var(--motion-scale,1); }
+.motion-reveal.result-overlay,.panel.motion-reveal { animation:none; }
+.grid-options,.mode-options { position:relative;isolation:isolate; }
+.grid-option:hover .grid-option-content { transform:none; }
+.choice-ink { position:absolute;left:0;top:0;z-index:2;width:100px;height:100px;transform-origin:0 0;pointer-events:none; }
+.choice-ink svg { display:block;width:100%;height:100%;overflow:visible; }
+.choice-ink rect { fill:none;stroke:var(--orange,#c44d28);stroke-width:2;vector-effect:non-scaling-stroke; }
+fieldset:disabled>.choice-ink { visibility:hidden; }
+
+/* Only the card's visual surface moves; its native link and focus ring stay put. */
+.grid .card.motion-card { overflow:visible;background:transparent;border-color:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;transform:none;transition:none;animation:none;perspective:1000px; }
+.grid .card.motion-card .card-surface { position:relative;display:flex;flex-direction:column;flex:1;min-width:0;background:var(--glass);border:1px solid var(--line);border-radius:calc(var(--card-radius) + var(--bend,0px)) calc(var(--card-radius) - var(--bend,0px)) calc(var(--card-radius) + var(--bend,0px)) calc(var(--card-radius) - var(--bend,0px));overflow:hidden;box-shadow:0 8px 28px #0002;transform-style:preserve-3d;transition:border-color 180ms,box-shadow 180ms; }
+.grid .card.motion-card:is(:hover,:focus-visible,.is-tugging) .card-surface { border-color:var(--accent);box-shadow:0 20px 46px -22px var(--accent); }
+.grid .card.motion-card.is-tugging { cursor:grabbing;z-index:2; }
+.grid .card.motion-card .art { position:relative;overflow:hidden; }
+.grid .card.motion-card .art:before { content:'';position:absolute;inset:-20%;background:radial-gradient(circle at 28% 24%,#fff5,transparent 42%),radial-gradient(circle at 78% 80%,#ffffff24,transparent 35%);translate:calc(var(--layer-x,0px) * .3) calc(var(--layer-y,0px) * .3);pointer-events:none; }
+.grid .card.motion-card .art svg { position:relative;transform:translate3d(var(--layer-x,0px),var(--layer-y,0px),18px) scale(1.025);transition:none; }
+.grid .card.motion-card .body { transform:translate3d(calc(var(--layer-x,0px) * .18),calc(var(--layer-y,0px) * .12),0); }
+.grid .card.motion-card .play i { transform:translateX(calc(var(--layer-x,0px) * .35));transition:transform 160ms var(--motion-out); }
+.grid .card.motion-card:is(:hover,:focus-visible) .play i { transform:translateX(calc(4px + var(--layer-x,0px) * .35)); }
+
+dialog.motion-sheet { max-height:min(85dvh,680px);overflow:auto;translate:0 var(--sheet-y,0px);scale:calc(1 + var(--sheet-strain,0));opacity:0;transform:translateY(38px) scale(.985);transition:opacity 160ms ease-out,transform 180ms var(--motion-out),display 180ms allow-discrete,overlay 180ms allow-discrete; }
+dialog.motion-sheet[open] { opacity:1;transform:translateY(0) scale(1);transition-duration:160ms,320ms,320ms,320ms; }
+dialog.motion-sheet:not([open]) { pointer-events:none; }
+dialog.motion-sheet:not([open])::backdrop { pointer-events:none; }
+dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); }
+@starting-style { dialog.motion-sheet[open] { opacity:0;transform:translateY(38px) scale(.985); } }
+.sheet-grip { position:relative;display:grid;place-items:center;height:44px;margin:-14px -6px 12px;touch-action:none;cursor:grab; }
+.sheet-grip:active { cursor:grabbing; }
+.sheet-grip>span { width:38px;height:4px;border-radius:99px;background:#8b9480; }
+.sheet-close { position:absolute;right:0;top:0;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#454e3d;cursor:pointer; }
+.sheet-close:hover { background:#e9eddf; }
+.sheet-close:focus-visible { outline:3px solid #285b89;outline-offset:2px; }
+.sheet-close svg { width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round; }
+
 @media(max-width:900px) {
   .site-header .header-motto { display:none; }
   .site-header { gap:18px; }
 }
 @media(max-width:600px) {
+  :root { --card-radius:18px; }
+  dialog.motion-sheet { inset:auto 0 0;width:calc(100% - 24px);max-height:calc(100dvh - 24px - env(safe-area-inset-bottom));margin:12px auto calc(12px + env(safe-area-inset-bottom));border-radius:22px; }
   html { scroll-padding-top:12px; }
   .site-header { height:auto; min-height:76px; padding:12px 0; margin:0 16px; display:grid; grid-template-columns:1fr auto; gap:8px 12px; }
   .site-header .brand { font-size:25px; }
@@ -100,6 +146,10 @@
   .grid-option small { font-size:8px; }
 }
 @media(prefers-reduced-motion:reduce) {
-  @view-transition { navigation:none; }
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation:none!important; }
   *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+  .motion-control { translate:none!important;scale:1!important; }
+  .grid .motion-card .card-surface,.grid .motion-card .art svg,.grid .motion-card .body { transform:none!important; }
+  .choice-ink { display:none; }
+  dialog.motion-sheet { translate:none!important;scale:1!important;transform:none!important; }
 }

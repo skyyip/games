@@ -12,9 +12,11 @@ const errors = [];
 let checks = 0;
 const pass = text => { checks += 1; console.log(`PASS ${text}`); };
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const silenceAnalytics = context => context.route('https://www.googletagmanager.com/**', route => route.fulfill({ contentType:'text/javascript', body:'' }));
 await mkdir(output, { recursive: true });
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  await silenceAnalytics(context);
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(baseURL);
@@ -78,6 +80,7 @@ try {
   }
 
   const mobile = await browser.newContext({ viewport: { width:375,height:812 }, isMobile:true,hasTouch:true });
+  await silenceAnalytics(mobile);
   await mobile.addInitScript(() => {
     window.haptics = [];
     Object.defineProperty(navigator, 'vibrate', { configurable:true,value:pattern => { window.haptics.push(pattern); return true; } });
@@ -129,6 +132,7 @@ try {
   await mobile.close();
 
   const noHaptics = await browser.newContext({ reducedMotion:'reduce' });
+  await silenceAnalytics(noHaptics);
   await noHaptics.addInitScript(() => Object.defineProperty(navigator,'vibrate',{value:undefined}));
   const quiet = await noHaptics.newPage();
   quiet.on('pageerror', error => errors.push(error.message));

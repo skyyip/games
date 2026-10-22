@@ -10,9 +10,11 @@ const output = process.env.GRID_RUSH_SCREENSHOTS || '/tmp/grid-rush-qa';
 await mkdir(output, { recursive: true });
 let checks = 0;
 const pass = message => { checks += 1; console.log(`PASS ${message}`); };
+const silenceAnalytics = context => context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  await silenceAnalytics(context);
   const page = await context.newPage();
   const errors = [];
   const requests = [];
@@ -102,6 +104,7 @@ try {
 
   for (const width of [320, 375]) {
     const mobile = await browser.newContext({ viewport: { width, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+    await silenceAnalytics(mobile);
     const mobilePage = await mobile.newPage();
     mobilePage.on('pageerror', error => errors.push(error.message));
     await mobilePage.goto(baseURL);
@@ -126,6 +129,7 @@ try {
   }
 
   const denied = await browser.newContext();
+  await silenceAnalytics(denied);
   await denied.addInitScript(() => {
     Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked', 'SecurityError'); } });
   });
@@ -146,8 +150,8 @@ try {
   pass('reduced motion respected; no uncaught browser errors');
   assert.ok(requests.some(url => url.endsWith('/assets/fonts/SpaceGrotesk.ttf')));
   assert.ok(requests.some(url => url.endsWith('/assets/fonts/DMSans.ttf')));
-  assert.ok(requests.every(url => new URL(url).origin === new URL(baseURL).origin));
-  pass('bundled fonts load and the application makes no external network requests');
+  assert.ok(requests.every(url => new URL(url).origin === new URL(baseURL).origin || url.startsWith('https://www.googletagmanager.com/gtm.js?id=GTM-TZ646NJ9')));
+  pass('bundled fonts load locally; only the configured analytics script is external');
   await context.close();
   console.log(`\n${checks} browser checks passed. Screenshots: ${output}`);
 } finally {

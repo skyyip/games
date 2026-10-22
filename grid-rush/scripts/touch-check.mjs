@@ -39,6 +39,7 @@ function assertStable(before, after) {
 
 try {
   const context = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  await context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));

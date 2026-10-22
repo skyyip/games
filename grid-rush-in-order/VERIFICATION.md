@@ -54,3 +54,9 @@ Touch tests are automated Chrome device emulation, not physical iOS/Android devi
 - **43 browser checks passed:** all 28 challenges, eight signed-number combinations, wrong/repeated clicks, retained labels/ticks, stopped timing, mouse/keyboard/touch play and persisted scores. Worst-case `−999` text fits every grid size at 320/375/600/768/1024/1440px without horizontal scrolling or changes to cell geometry.
 - **9 PWA checks passed:** installation, all 28 challenges after an offline reload, fresh offline launch, cache isolation and persisted records. Cache version is v7. Automated sessions suppress analytics requests.
 - Reviewed signed-number screenshots at 320px and 768px. Labels use a clear minus sign, accessible negative-number names and fonts that scale with board width. No dependencies or other game files were changed. Touch tests use Chrome emulation; a physical device and screen reader were not used.
+
+## Shared spring interaction update — 2026-10-22
+
+- Shared magnetic controls, spring selection outlines, label/result feedback, native card expansion and gesture-driven install sheets now apply to this game. Active cells retain fixed geometry and immediate touch activation. Reduced motion and native keyboard/button alternatives remain available.
+- Re-ran **15 ordered unit tests, 43 ordered browser checks and 9 ordered PWA checks**, including every signed-number, letter, mixed-symbol and colour challenge. Cleared colour labels retain the requested 3:1 minimum contrast. The v8 service worker caches `../grid-rush/src/motion.js` alongside the shared UI module/styles.
+- Full playground motion, touch, accessibility-related behavior and offline regression results are recorded in [the shared verification log](../grid-rush/VERIFICATION.md#spring-interaction-update--2026-10-22). No gameplay or record-format changes were needed.

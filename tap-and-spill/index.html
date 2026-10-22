@@ -17,6 +17,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="stylesheet" href="../grid-rush/playground-ui.css">
+<script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;background:#050a18;color:#fff;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;overflow:hidden;overscroll-behavior:none}
@@ -116,7 +117,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script type="module">
-import { wrongFeedback, animateChange } from '../grid-rush/src/playground-ui.js';
+import { wrongFeedback, animateChange, reducedMotion } from '../grid-rush/src/playground-ui.js';
+import { springStep } from '../grid-rush/src/motion.js';
 'use strict';
 const $ = s => document.querySelector(s);
 const W = 360, H = 640;
@@ -212,7 +214,7 @@ class WaterSimulation {
     this.T = 300; this.B = 560; this.XL = 100; this.XR = 260; this.BL = 120; this.BR = 240; this.NX = 180; this.NY = 105;
     this.reset(); this.resize();
   }
-  reset() { this.level = 0; this.opening = 0; this.flowing = false; this.amp = 0; this.parts = []; this.t = 0; this.spilling = false; this.spill = 0; this.gauge = false; }
+  reset() { this.level = 0; this.opening = 0; this.lever = 0; this.leverVelocity = 0; this.flowing = false; this.amp = 0; this.ampVelocity = 0; this.parts = []; this.t = 0; this.spilling = false; this.spill = 0; this.gauge = false; }
   resize() {
     const r = this.cv.getBoundingClientRect(), d = devicePixelRatio || 1;
     this.cv.width = Math.round(r.width * d); this.cv.height = Math.round(r.height * d);
@@ -228,20 +230,35 @@ class WaterSimulation {
   update(dt) {
     this.t += dt;
     const target = this.flowing ? 1.5 + this.opening * 4 : 0;
-    this.amp += (target - this.amp) * Math.min(1, (target > this.amp ? 6 : 1.2) * dt);
-    if (this.flowing && this.opening > 0.03) {
+    if (reducedMotion.matches) {
+      this.amp = this.ampVelocity = this.leverVelocity = 0; this.lever = this.opening; this.parts.length = 0;
+    } else {
+      const wave = springStep(this.amp,this.ampVelocity,target,dt,{stiffness:110,damping:14,mass:1.2});
+      this.amp = wave.position; this.ampVelocity = wave.velocity;
+      const lever = springStep(this.lever,this.leverVelocity,this.opening,dt,{stiffness:280,damping:22,mass:0.8});
+      this.lever = lever.position; this.leverVelocity = lever.velocity;
+    }
+    if (!reducedMotion.matches && this.flowing && this.opening > 0.03) {
       const n = Math.floor(this.opening * 60 * dt + Math.random());
       for (let i = 0; i < n; i++) this.parts.push({ x: this.NX + (Math.random() - .5) * 6, y: this.surf(this.NX), vx: (Math.random() - .5) * (60 + this.opening * 180), vy: -(80 + Math.random() * 200) * (0.3 + this.opening), r: 1.2 + Math.random() * 1.8 });
     }
     if (this.spilling) {
       this.spill += dt;
-      if (Math.random() < 0.8) for (const s of [-1, 1]) this.parts.push({ x: s < 0 ? this.XL : this.XR, y: this.T, vx: s * (30 + Math.random() * 60), vy: -Math.random() * 90, r: 1.5 + Math.random() * 2 });
+      if (!reducedMotion.matches && Math.random() < 0.8) for (const s of [-1, 1]) this.parts.push({ x: s < 0 ? this.XL : this.XR, y: this.T, vx: s * (30 + Math.random() * 60), vy: -Math.random() * 90, r: 1.5 + Math.random() * 2 });
     }
     for (let i = this.parts.length - 1; i >= 0; i--) {
       const p = this.parts[i];
       p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
       const inCup = p.x > this.XL && p.x < this.XR;
-      if (p.vy > 0 && (inCup ? p.y > this.surf(p.x) : p.y > this.B)) this.parts.splice(i, 1);
+      const surface = inCup ? this.surf(p.x) : this.B;
+      if (p.vy > 0 && p.y > surface) {
+        if (p.bounced) this.parts.splice(i, 1);
+        else {
+          // Decorative droplets collide once, then settle; poured volume stays authoritative.
+          p.y = surface; p.vy *= -Math.min(0.4,0.65/p.r); p.vx *= 0.55; p.bounced = true;
+          if (inCup) this.ampVelocity = Math.min(12,this.ampVelocity+p.r*0.5);
+        }
+      }
     }
   }
   poly(c) { c.beginPath(); c.moveTo(this.XL, this.T); c.lineTo(this.BL, this.B); c.lineTo(this.BR, this.B); c.lineTo(this.XR, this.T); }
@@ -276,7 +293,7 @@ class WaterSimulation {
     const fg = c.createLinearGradient(160, 0, 200, 0); fg.addColorStop(0, '#cfd8e6'); fg.addColorStop(.5, '#fff'); fg.addColorStop(1, '#8e9bb3');
     c.fillStyle = fg; c.fillRect(168, -10, 24, 95);
     c.beginPath(); c.roundRect(158, 82, 44, 24, 8); c.fill();
-    c.save(); c.translate(192, 45); c.rotate(-this.opening * 1.2);
+    c.save(); c.translate(192, 45); c.rotate(-this.lever * 1.2);
     c.fillStyle = '#ff6b6b'; c.beginPath(); c.roundRect(0, -4, 36, 8, 4); c.fill();
     c.beginPath(); c.arc(38, 0, 7, 0, 7); c.fill(); c.restore();
     // stream
@@ -441,7 +458,7 @@ function frame(now) {
   const lv = sm.state === 'SETUP' || sm.state === 'OVER' ? 0 : sm.level, ten = clamp((lv - 0.6) / 0.45, 0, 1);
   if (ten > 0) {
     if (now > beatAt) { audio.heartbeat(); if (lv > 1) navigator.vibrate?.(20); beatAt = now + 1000 - ten * 600; }
-    vigPhase += dt * (3 + ten * 6); $('#vig').style.opacity = ten * (0.45 + 0.4 * Math.sin(vigPhase));
+    vigPhase += dt * (3 + ten * 6); $('#vig').style.opacity = reducedMotion.matches ? ten * 0.45 : ten * (0.45 + 0.4 * Math.sin(vigPhase));
   } else $('#vig').style.opacity = 0;
   $('#tension').hidden = !(lv > 1 && sm.state !== 'OVER');
   requestAnimationFrame(frame);

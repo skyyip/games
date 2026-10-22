@@ -11,6 +11,11 @@ const profile = await mkdtemp(join(tmpdir(), 'grid-rush-in-order-pwa-'));
 const context = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true });
 // Offline/gameplay checks do not send analytics events.
 await context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
+// Test the accessible fallback without leaving Chrome's native install UI open.
+// CDP still checks actual manifest installability below.
+await context.addInitScript(() => addEventListener('beforeinstallprompt', event => {
+  event.preventDefault(); event.stopImmediatePropagation();
+}));
 const browser = context.browser();
 const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5174/grid-rush-in-order/';
 let checks = 0;
@@ -61,11 +66,11 @@ try {
   pass('Chrome reports no app installability errors');
 
   await page.locator('#install-app').click();
-  if (await page.locator('#install-dialog').isVisible()) {
-    assert.match(await page.locator('#offline-status').textContent(), /ready.*offline/i);
-    await page.keyboard.press('Escape');
-    assert.equal(await page.locator('#install-dialog').isHidden(), true);
-  }
+  assert.equal(await page.locator('#install-dialog').isVisible(), true);
+  assert.match(await page.locator('#offline-status').textContent(), /ready.*offline/i);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#install-dialog').evaluate(dialog => dialog.open), false);
+  await page.locator('#install-dialog').waitFor({ state:'hidden' });
   pass('installation action works with accessible browser instructions when needed');
 
   await context.setOffline(true);

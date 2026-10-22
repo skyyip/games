@@ -9,6 +9,12 @@ const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'pl
 // installation is intentionally unavailable in incognito browser contexts.
 const profile = await mkdtemp(join(tmpdir(), 'grid-rush-pwa-'));
 const context = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true });
+await context.route('https://www.googletagmanager.com/**', route => route.fulfill({ contentType:'text/javascript', body:'' }));
+// Headless Chrome cannot complete the native installation UI. Exercise the
+// instructions fallback deterministically; installability is checked via CDP.
+await context.addInitScript(() => addEventListener('beforeinstallprompt', event => {
+  event.preventDefault(); event.stopImmediatePropagation();
+}));
 const browser = context.browser();
 const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173/grid-rush/';
 let checks = 0;
@@ -57,11 +63,11 @@ try {
   pass('Chrome reports no app installability errors');
 
   await page.locator('#install-app').click();
-  if (await page.locator('#install-dialog').isVisible()) {
-    assert.match(await page.locator('#offline-status').textContent(), /ready.*offline/i);
-    await page.keyboard.press('Escape');
-    assert.equal(await page.locator('#install-dialog').isHidden(), true);
-  }
+  assert.equal(await page.locator('#install-dialog').isVisible(), true);
+  assert.match(await page.locator('#offline-status').textContent(), /ready.*offline/i);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#install-dialog').evaluate(dialog => dialog.open), false);
+  await page.locator('#install-dialog').waitFor({ state:'hidden' });
   pass('installation action works with accessible browser instructions when needed');
 
   await context.setOffline(true);
@@ -86,6 +92,7 @@ try {
   pass('a fresh tab can launch the cached app while the network is offline');
 
   const standalone = await browser.newContext();
+  await standalone.route('https://www.googletagmanager.com/**', route => route.fulfill({ contentType:'text/javascript', body:'' }));
   await standalone.addInitScript(() => {
     const original = window.matchMedia.bind(window);
     window.matchMedia = query => query === '(display-mode: standalone)' ? { matches: true } : original(query);
