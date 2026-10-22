@@ -2035,3 +2035,56 @@ h2 {
   outline-offset:5px;
   border-radius:3px;
 }
+
+/* Ordered challenges: keep cleared values visible and preserve every grid track. */
+.setup-panel .mode-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.setup-panel .mode-option>span { min-height:76px; }
+.mode-option .colour-mode-mark { background:linear-gradient(90deg,#b83c39 32%,#087576 32% 66%,#265fb0 66%);background-clip:text;-webkit-background-clip:text;color:transparent;letter-spacing:-2px; }
+.order-control { display:flex;flex-direction:column;gap:7px;margin-top:16px;font-size:11px;font-weight:600;color:#454e3d; }
+.order-control select { width:100%;min-height:44px;padding:9px 12px;border:1px solid #d5d9cd;border-radius:9px;background:#fffdf7;color:#292c27;font:500 12px 'DM Sans',sans-serif; }
+.order-control select:focus-visible { outline:3px solid #285b89;outline-offset:3px; }
+.order-control select:disabled { opacity:.6; }
+.play-panel .next-cue { height:78px;min-height:78px; }
+.next-cue>div { min-width:0; }
+.next-cue strong.is-color { min-width:74px;padding:9px;border-radius:8px;background:var(--cue-color);color:#fff;font-size:18px; }
+.color-key { margin:0 0 12px;padding:12px;border:1px solid #e1e2d9;border-radius:11px;background:#fafbf7; }
+.color-key-heading { display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:8px;letter-spacing:.6px;color:#636b59; }
+.color-key ol { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;list-style:none;margin:10px 0 0;padding:0; }
+.color-key li { position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 3px;border-radius:8px;box-shadow:inset 0 0 0 1px #e1e2d9;transition:opacity .15s,background .15s,box-shadow .15s; }
+.color-key li i { width:17px;height:17px;border-radius:50%; }
+.color-key li span { font-size:10px;font-weight:600; }
+.color-key li small { font:500 9px var(--mono);color:#636b59; }
+.color-key li.is-current { background:#fff;box-shadow:inset 0 0 0 2px #454e3d; }
+.color-key li.is-cleared { opacity:.5; }
+.color-key li.is-cleared small:after { content:' ✓'; }
+.board .tile.tile-color { background:var(--tile-color);color:#fff; }
+.board .tile-color .tile-number { font-size:14px;padding:2px; }
+.board .tile.tile-color:not(:disabled):hover { background:var(--tile-color);box-shadow:inset 0 0 0 2px #ffffff70; }
+.board .tile.clicked { background:var(--tile-color,#c44d28);color:#fffaf1;opacity:.6;box-shadow:none; }
+.board .tile.clicked .tile-corner { display:none; }
+.board .tile-check { position:absolute;right:5px;top:5px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#182316; }
+.board .tile .tile-check .icon { width:15px;height:15px;stroke-width:2.5; }
+.board[data-size="6"] .tile-check { width:15px;height:15px;right:3px;top:3px; }
+.board[data-size="6"] .tile .tile-check .icon { width:11px;height:11px; }
+.board[data-size="8"] { gap:5px; }
+.board[data-size="8"] .tile { border-radius:6px;font:600 18px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.board[data-size="8"] .tile-corner { display:none; }
+.board[data-size="8"] .tile-check { right:2px;top:2px;width:11px;height:11px; }
+.board[data-size="8"] .tile .tile-check .icon { width:9px;height:9px;stroke-width:2.5; }
+.board-frame .result-overlay { position:relative;inset:auto;z-index:auto;margin-top:16px;padding:24px 18px;border:1px solid #dce4cf;border-radius:12px;background:#f4f7ee;backdrop-filter:none; }
+.board-frame .result-icon { width:44px;height:44px;margin-bottom:12px; }
+.board-frame .result-icon .icon { width:24px;height:24px; }
+.board-frame .result-time { font-size:48px; }
+.board-frame .result-message { margin-bottom:16px; }
+@media(max-width:600px) {
+  .setup-panel .mode-options { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .setup-panel .mode-option>span { min-height:78px;padding:10px 8px; }
+  .setup-panel .mode-option small { font-size:10px;line-height:1.35; }
+  .order-control { margin-top:13px; }
+  .board[data-size="6"] .tile-color .tile-number { font-size:10px; }
+  .board[data-size="8"] { gap:3px; }
+  .board[data-size="8"] .tile { font-size:15px;border-radius:5px; }
+  .board[data-size="8"] .tile-check { width:9px;height:9px;right:1px;top:1px; }
+  .board[data-size="8"] .tile .tile-check .icon { width:7px;height:7px; }
+  .board-frame .result-overlay h2 { font-size:25px; }
+}

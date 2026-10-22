@@ -1,6 +1,6 @@
 // Bump the version whenever an app asset changes. An update waits until existing
 // app windows close, so it cannot replace a player's game during a round.
-const CACHE_NAME = 'grid-rush-in-order-app-v2';
+const CACHE_NAME = 'grid-rush-in-order-app-v3';
 const APP_FILES = [
   './',
   './index.html',
@@ -23,7 +23,7 @@ const APP_FILES = [
 const HOME = new URL('./index.html', self.location.href).href;
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES.map(url => new Request(url, { cache: 'reload' })))));
 });
 
 self.addEventListener('activate', event => {

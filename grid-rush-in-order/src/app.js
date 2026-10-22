@@ -1,5 +1,5 @@
 import { wrongFeedback, animateChange } from '../../grid-rush/src/playground-ui.js';
-import { OrderedGame, GRID_SIZES } from './game.js';
+import { OrderedGame, GRID_SIZES, tileColor } from './game.js';
 import { addResult, readLeaderboard, saveLeaderboard } from './leaderboard.js';
 
 const $ = selector => document.querySelector(selector);
@@ -11,15 +11,25 @@ const restartButton = $('#restart');
 const resultPanel = $('#result');
 const options = $('#grid-options');
 const modes = $('#mode-options');
-let numericSize = 3;
+const orderSelect = $('#sort-order');
+let selectedSize = 3;
 const progressBar = $('.progress-track');
 const instructions = $('#how-to-play');
 instructions.open = !window.matchMedia('(max-width: 600px)').matches;
 document.querySelector('a[href="#how-to-play"]').addEventListener('click', () => {
   instructions.open = true;
 });
-const modeNames = { numbers: 'Numbers', lowercase: 'Lowercase', uppercase: 'Uppercase', mixed: 'Mixed case' };
-const roundName = () => game.mode === 'numbers' ? `${game.size} × ${game.size} numbers` : `${modeNames[game.mode]} · 26 letters`;
+const modeNames = { numbers: 'Numbers', lowercase: 'Lowercase', uppercase: 'Uppercase', mixed: 'Mixed case', alphanumeric: 'Letters + numbers', colors: 'Colours' };
+const roundName = () => game.mode === 'colors' ? `${game.size} × ${game.size} colours` : `${game.mode === 'numbers' ? `${game.size} × ${game.size} numbers` : modeNames[game.mode]} · ${game.order === 'ascending' ? 'ascending' : 'descending'}`;
+
+function sequenceNote() {
+  if (game.mode === 'colors') return 'A new colour key each round. Clear every tile of one colour, then the next.';
+  const ascending = game.order === 'ascending';
+  if (game.mode === 'numbers') return ascending ? `1 → 2 → … → ${game.total}` : `${game.total} → … → 2 → 1`;
+  if (game.mode === 'alphanumeric') return ascending ? '0–9 → A, a → B, b → … → Z, z. Uppercase first.' : 'z, Z → y, Y → … → a, A → 9–0. The ascending sequence, reversed.';
+  if (game.mode === 'mixed') return ascending ? 'A → b → C … → Z. Case does not change alphabet order.' : 'Z → y → X … → A. Case does not change alphabet order.';
+  return game.mode === 'uppercase' ? ascending ? 'A → B → C … → Z' : 'Z → Y → X … → A' : ascending ? 'a → b → c … → z' : 'z → y → x … → a';
+}
 const descriptions = {
   3: ['The warm-up', '9 tiles. A little warm-up.'],
   4: ['Finding your flow', '16 tiles. Find your rhythm.'],
@@ -61,10 +71,16 @@ function renderBoard() {
     tile.className = 'tile';
     tile.dataset.index = index;
     tile.dataset.value = value;
+    const color = tileColor(value);
+    if (color) {
+      tile.classList.add('tile-color');
+      tile.dataset.color = color.id;
+      tile.style.setProperty('--tile-color', color.hex);
+    }
     tile.disabled = game.state !== 'playing';
     tile.setAttribute('aria-label', `${symbolName(value)}, not cleared`);
     tile.innerHTML = `<span class="tile-corner" aria-hidden="true">+</span><span class="tile-number" aria-hidden="true"></span>`;
-    tile.querySelector('.tile-number').textContent = game.mode === 'numbers' ? value.padStart(2, '0') : value;
+    tile.querySelector('.tile-number').textContent = color ? color.name : game.mode === 'numbers' ? value.padStart(2, '0') : value;
     tiles.append(tile);
   }
   board.replaceChildren(tiles);
@@ -72,9 +88,11 @@ function renderBoard() {
   board.dataset.size = game.size;
   board.setAttribute('aria-label', `${game.size} by ${game.size} game board`);
   $('#board-label').textContent = `THE ${game.size} × ${game.size} GRID`;
-  $('#size-description').textContent = game.mode === 'numbers' ? descriptions[game.size][1] : 'All 26 letters. A 6 × 6 board.';
-  options.hidden = game.mode !== 'numbers';
-  $('#mode-note').textContent = game.mode === 'mixed' ? 'A → b → C … Case changes. Alphabetical order stays.' : game.mode === 'numbers' ? 'Find 1, then 2, then 3…' : `Find ${game.mode === 'uppercase' ? 'A, then B, then C' : 'a, then b, then c'}…`;
+  $('#size-description').textContent = ['numbers', 'colors'].includes(game.mode) ? `${game.total} tiles. ${game.mode === 'colors' ? 'Four random colours.' : descriptions[game.size][0] + '.'}` : game.mode === 'alphanumeric' ? 'All 62 symbols. An 8 × 8 board.' : 'All 26 letters. A 6 × 6 board.';
+  options.hidden = !['numbers', 'colors'].includes(game.mode);
+  $('#order-control').hidden = game.mode === 'colors';
+  $('#mode-note').textContent = sequenceNote();
+  renderColorKey();
   renderNext();
   $('#total').textContent = game.total;
   progressBar.setAttribute('aria-valuemax', game.total);
@@ -82,15 +100,46 @@ function renderBoard() {
 }
 
 function symbolName(value) {
-  if (game.mode === 'numbers') return `Number ${value}`;
+  const color = tileColor(value);
+  if (color) return color.name;
+  if (/^\d+$/.test(value)) return `Number ${value}`;
   return `${value === value.toUpperCase() ? 'Uppercase' : 'Lowercase'} ${value}`;
 }
 
+function renderColorKey() {
+  $('#color-key').hidden = game.mode !== 'colors';
+  $('#color-sequence').replaceChildren(...game.colorOrder.map((color, index) => {
+    const item = document.createElement('li');
+    item.dataset.color = color.id;
+    item.setAttribute('aria-label', `Step ${index + 1}: ${color.name}`);
+    item.innerHTML = `<i aria-hidden="true"></i><span></span><small aria-hidden="true">${index + 1}</small>`;
+    item.querySelector('i').style.backgroundColor = color.hex;
+    item.querySelector('span').textContent = color.name;
+    return item;
+  }));
+}
+
 function renderNext() {
+  const color = tileColor(game.next);
+  const cue = $('#next-symbol');
   $('#next-label').textContent = game.state === 'completed' ? 'ALL IN ORDER' : game.state === 'playing' ? 'NEXT UP' : 'START WITH';
-  $('#next-symbol').textContent = game.next ?? '✓';
-  if (game.state === 'playing') animateChange($('#next-symbol'));
-  $('#next-description').textContent = game.state === 'completed' ? 'Sequence complete. Nicely done.' : game.state === 'playing' ? 'Find this tile. Keep the order.' : 'The board shuffles when you start.';
+  cue.textContent = color?.name ?? game.next ?? '✓';
+  cue.dataset.value = game.next ?? '';
+  cue.dataset.color = color?.id ?? '';
+  cue.classList.toggle('is-color', Boolean(color));
+  cue.style.setProperty('--cue-color', color?.hex ?? 'transparent');
+  if (game.state === 'playing') animateChange(cue);
+  $('#next-description').textContent = game.state === 'completed' ? 'Sequence complete. Results below.' : game.state === 'playing' ? color ? `Clear all ${color.name} tiles.` : 'Find this tile. Keep the order.' : 'The board shuffles when you start.';
+  const currentIndex = game.colorOrder.findIndex(entry => entry.id === color?.id);
+  for (const [index, item] of [...$('#color-sequence').children].entries()) {
+    const current = index === currentIndex;
+    item.classList.toggle('is-current', current);
+    const cleared = game.state === 'completed' || index < currentIndex;
+    item.classList.toggle('is-cleared', cleared);
+    item.setAttribute('aria-label', `Step ${index + 1}: ${item.querySelector('span').textContent}${cleared ? ', cleared' : current ? ', current' : ''}`);
+    if (current) item.setAttribute('aria-current', 'step');
+    else item.removeAttribute('aria-current');
+  }
 }
 
 function renderProgress() {
@@ -100,7 +149,7 @@ function renderProgress() {
 }
 
 function renderLeaderboard() {
-  $('#record-grid').textContent = roundName().toUpperCase();
+  $('#record-grid').textContent = game.mode === 'colors' ? `${game.size} × ${game.size} COLOURS` : `${game.mode === 'numbers' ? `${game.size} × ${game.size}` : game.mode === 'alphanumeric' ? '62 SYMBOLS' : modeNames[game.mode].toUpperCase()} · ${game.order === 'ascending' ? 'ASC' : 'DESC'}`;
   const list = $('#leaderboard');
   list.replaceChildren();
   for (let index = 0; index < 3; index += 1) {
@@ -165,7 +214,7 @@ function updateTimer() {
 function resetRound() {
   cancelAnimationFrame(frameId);
   frameId = null;
-  game.reset({ mode: modes.querySelector('input:checked').value, size: numericSize });
+  game.reset({ mode: modes.querySelector('input:checked').value, size: selectedSize, order: orderSelect.value });
   board.classList.remove('is-playing');
   highlightedRank = null;
   resultPanel.hidden = true;
@@ -173,6 +222,7 @@ function resetRound() {
   restartButton.hidden = true;
   options.disabled = false;
   modes.disabled = false;
+  orderSelect.disabled = false;
   $('#timer-label').textContent = 'READY WHEN YOU ARE';
   $('#progress-label').textContent = 'LET’S MAKE IT A QUICK ONE.';
   $('#board-hint').textContent = 'Choose your sequence. Start the clock. Find each symbol in order.';
@@ -183,7 +233,7 @@ function resetRound() {
 }
 
 function startRound() {
-  resetRound();
+  if (game.state !== 'idle') resetRound();
   game.start();
   renderBoard();
   board.classList.add('is-playing');
@@ -191,6 +241,7 @@ function startRound() {
   restartButton.hidden = false;
   options.disabled = true;
   modes.disabled = true;
+  orderSelect.disabled = true;
   $('#timer-label').textContent = 'MAKE EVERY CLICK COUNT';
   $('#progress-label').textContent = 'ONE BY ONE. IN ORDER.';
   $('#board-hint').textContent = 'Wrong taps don’t count. Use Tab or arrow keys, then Enter or Space.';
@@ -225,6 +276,7 @@ function finishRound() {
   restartButton.hidden = true;
   options.disabled = false;
   modes.disabled = false;
+  orderSelect.disabled = false;
   $('#board-hint').textContent = 'Sharp eyes. Quick hands. Your next sequence is waiting.';
   $('#play-again').focus({ preventScroll: true });
   announce(`Grid cleared in ${seconds(game.elapsed)} seconds. ${result.personalBest ? 'New Personal Best!' : result.rank ? `New number ${result.rank} result.` : ''}`);
@@ -232,7 +284,7 @@ function finishRound() {
 
 options.addEventListener('change', event => {
   if (game.state === 'playing' || !event.target.matches('input[name="grid-size"]')) return;
-  numericSize = Number(event.target.value);
+  selectedSize = Number(event.target.value);
   resetRound();
   announce(`${game.size} by ${game.size} selected. ${game.total} tiles. Ready to start.`);
 });
@@ -243,13 +295,19 @@ modes.addEventListener('change', () => {
   announce(`${roundName()} selected. ${$('#mode-note').textContent}`);
 });
 
+orderSelect.addEventListener('change', () => {
+  if (game.state === 'playing') return;
+  resetRound();
+  announce(`${roundName()} selected. ${sequenceNote()}`);
+});
+
 function activateTile(tile, keyboard = false) {
   if (!tile || tile.disabled || game.state !== 'playing') return;
   if (!game.click(Number(tile.dataset.index))) {
     wrongFeedback(tile);
     tile.classList.add('is-wrong');
     setTimeout(() => tile.classList.remove('is-wrong'), 220);
-    $('#next-description').textContent = `Not yet. Find ${game.next} first.`;
+    $('#next-description').textContent = `Not yet. Find ${tileColor(game.next)?.name ?? game.next} first.`;
     announce(`Not yet. Find ${symbolName(game.next)} next.`);
     return;
   }
@@ -257,7 +315,11 @@ function activateTile(tile, keyboard = false) {
   tile.disabled = true;
   tile.classList.add('clicked');
   tile.setAttribute('aria-label', `${symbolName(tile.dataset.value)}, cleared`);
-  tile.querySelector('.tile-number').innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg>';
+  const check = document.createElement('span');
+  check.className = 'tile-check';
+  check.setAttribute('aria-hidden', 'true');
+  check.innerHTML = '<svg class="icon"><use href="#icon-check"/></svg>';
+  tile.append(check);
   renderProgress();
   renderNext();
   if (game.state === 'completed') {

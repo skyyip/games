@@ -16,7 +16,7 @@ async function selectMode(page, mode) {
 }
 async function finish(page, method = 'click') {
   while (await page.locator('#result').isHidden()) {
-    const next = await page.locator('#next-symbol').textContent();
+    const next = await page.locator('#next-symbol').getAttribute('data-value');
     const tile = tileFor(page, next);
     if (method === 'keyboard') {
       await tile.focus();
@@ -99,8 +99,8 @@ try {
 
   const saved = await page.evaluate(key => localStorage.getItem(key), key);
   const data = JSON.parse(saved);
-  assert.equal(Object.keys(data).length, 7);
-  assert.ok(Object.values(data).every(records => records.length === 1));
+  assert.equal(Object.keys(data).length, 20);
+  assert.equal(Object.values(data).filter(records => records.length === 1).length, 7);
   await page.evaluate(() => localStorage.setItem('grid-rush.records.v1', 'original-game-sentinel'));
   await page.reload();
   assert.equal(await page.evaluate(key => localStorage.getItem(key), key), saved);
@@ -121,8 +121,112 @@ try {
   assert.equal(await page.locator('.tile:disabled').count(), 26);
   pass('keyboard navigation skips blanks; restarting stops timing and resets progress');
 
+  const alphanumericSequence = [...'0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz'];
+  for (const order of ['ascending', 'descending']) {
+    await selectMode(page, 'alphanumeric');
+    await page.locator('#sort-order').selectOption(order);
+    assert.equal(await page.locator('#board').getAttribute('data-size'), '8');
+    assert.equal(await page.locator('.tile').count(), 62);
+    assert.equal(await page.locator('.empty-tile').count(), 2);
+    await page.locator('#start').click();
+    assert.equal(await page.locator('#sort-order').isDisabled(), true);
+    const expected = order === 'ascending' ? alphanumericSequence : [...alphanumericSequence].reverse();
+    await tileFor(page, expected[1]).click();
+    assert.equal(await page.locator('#progress').textContent(), '0');
+    const before = await geometry(page);
+    await tileFor(page, expected[0]).click();
+    const cleared = tileFor(page, expected[0]);
+    assert.equal(await cleared.locator('.tile-number').textContent(), expected[0]);
+    assert.equal(await cleared.locator('.tile-check').count(), 1);
+    const opacity = await cleared.evaluate(el => Number(getComputedStyle(el).opacity));
+    assert.ok(opacity > 0.4 && opacity < 1);
+    stable(before, await geometry(page));
+    await cleared.dispatchEvent('click');
+    assert.equal(await page.locator('#progress').textContent(), '1');
+    for (const value of expected.slice(1)) {
+      assert.equal(await page.locator('#next-symbol').textContent(), value);
+      await tileFor(page, value).click();
+    }
+    assert.equal(await page.locator('.tile.clicked .tile-check').count(), 62);
+    const labels = await page.locator('.tile-number').allTextContents();
+    assert.deepEqual(labels.sort(), [...alphanumericSequence].sort());
+    const regions = await page.evaluate(() => ({ board:document.querySelector('#board').getBoundingClientRect().bottom,result:document.querySelector('#result').getBoundingClientRect().top }));
+    assert.ok(regions.result > regions.board, 'results must leave the cleared board visible');
+    await page.screenshot({ path:`${output}/alphanumeric-${order}-completed.png`,fullPage:true,animations:'disabled' });
+    await page.locator('#change-grid').click();
+    pass(`62-symbol ${order}: exact case order, retained labels, faded ticked tiles and results below the board`);
+  }
+
+  for (const size of [3,4,5,6]) {
+    await selectMode(page, 'numbers');
+    await page.locator(`.grid-option:has(input[value="${size}"])`).click();
+    await page.locator('#sort-order').selectOption('descending');
+    assert.equal(await page.locator('#next-symbol').textContent(), String(size**2));
+    await page.locator('#start').click();
+    await finish(page);
+    assert.equal(await page.locator('#progress').textContent(),String(size**2));
+    await page.locator('#change-grid').click();
+    pass(`${size}×${size}: descending numeric round completes`);
+  }
+  for (const mode of ['lowercase','uppercase','mixed']) {
+    await selectMode(page,mode);
+    await page.locator('#sort-order').selectOption('descending');
+    assert.equal((await page.locator('#next-symbol').textContent()).toLowerCase(),'z');
+    await page.locator('#start').click();
+    await finish(page, mode === 'uppercase' ? 'keyboard' : 'click');
+    assert.equal(await page.locator('#progress').textContent(),'26');
+    await page.locator('#change-grid').click();
+    pass(`${mode}: descending alphabet round completes`);
+  }
+
+  for (const size of [3,4,5,6]) {
+    await selectMode(page,'colors');
+    await page.locator(`.grid-option:has(input[value="${size}"])`).click();
+    assert.equal(await page.locator('#order-control').isHidden(),true);
+    const previewColors = await page.locator('#color-sequence li').evaluateAll(items => items.map(item=>item.dataset.color));
+    await page.locator('#start').click();
+    const colors = await page.locator('#color-sequence li').evaluateAll(items => items.map(item=>item.dataset.color));
+    assert.deepEqual(colors,previewColors,'starting must preserve the colour key shown in setup');
+    assert.equal(new Set(colors).size,4);
+    const first = colors[0];
+    const wrong = page.locator(`.tile:not([data-color="${first}"])`).first();
+    await wrong.click();
+    assert.equal(await page.locator('#progress').textContent(),'0');
+    const before = await geometry(page);
+    const selected = page.locator(`.tile[data-color="${first}"]`).last();
+    const name = await selected.locator('.tile-number').textContent();
+    const background = await selected.evaluate(el=>getComputedStyle(el).backgroundColor);
+    await selected.click();
+    assert.equal(await selected.locator('.tile-number').textContent(),name);
+    assert.equal(await selected.evaluate(el=>getComputedStyle(el).backgroundColor),background);
+    assert.equal(await selected.locator('.tile-check').count(),1);
+    stable(before,await geometry(page));
+    while (await page.locator('#next-symbol').getAttribute('data-color') === first) {
+      await page.locator(`.tile[data-color="${first}"]:not(:disabled)`).last().click();
+      stable(before,await geometry(page));
+    }
+    assert.equal(await page.locator('#color-sequence li').first().getAttribute('class'),'is-cleared');
+    assert.equal(await page.locator('#color-sequence li[aria-current="step"]').getAttribute('data-color'),colors[1]);
+    if (size===6) await page.screenshot({path:`${output}/colors-playing.png`,fullPage:true,animations:'disabled'});
+    await finish(page);
+    assert.equal(await page.locator('.tile-check').count(),size**2);
+    await page.locator('#change-grid').click();
+    pass(`${size}×${size}: random four-colour key, arbitrary tiles within each group and retained colour labels`);
+  }
+  const allRecords = await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
+  assert.equal(Object.keys(allRecords).length,20);
+  assert.ok(Object.values(allRecords).every(records=>records.length===1));
+  for (const legacyKey of ['numbers-3','numbers-4','numbers-5','numbers-6','lowercase','uppercase','mixed']) {
+    assert.deepEqual(allRecords[legacyKey],data[legacyKey]);
+  }
+  await page.reload();
+  assert.deepEqual(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key),allRecords);
+  pass('all twenty challenge records persist independently and retain every earlier ascending score');
+
   for (const width of [320, 375, 600, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
+    for (const mode of ['mixed','alphanumeric','colors']) {
+      await selectMode(page,mode);
     const layout = await page.evaluate(() => ({
       width: document.documentElement.clientWidth,
       scroll: document.documentElement.scrollWidth,
@@ -132,7 +236,9 @@ try {
     }));
     assert.ok(layout.scroll <= layout.width, `horizontal overflow at ${width}px`);
     assert.ok(layout.cells.every(([w, h]) => Math.abs(w - h) < 1));
-    if ([320, 375, 768].includes(width)) await page.screenshot({ path: `${output}/mixed-${width}.png`, fullPage: true });
+    if (mode==='alphanumeric') assert.ok(layout.cells.every(([w])=>w>=24),'dense-board touch targets must remain at least 24px');
+    if ([320,375,768].includes(width)) await page.screenshot({path:`${output}/${mode}-${width}.png`,fullPage:true,animations:'disabled'});
+    }
     pass(`${width}px: square cells and no horizontal overflow`);
   }
 
@@ -168,7 +274,19 @@ try {
   await touchPage.screenshot({ path: `${output}/mobile-result.png`, fullPage: true });
   await touchPage.locator('#play-again').tap();
   assert.equal(await touchPage.locator('#progress').textContent(), '0');
+  await touchPage.locator('#restart').tap();
+  await selectMode(touchPage,'alphanumeric');
+  await touchPage.locator('#start').tap();
+  await finish(touchPage,'tap');
+  assert.equal(await touchPage.locator('.tile-check').count(),62);
+  assert.equal(await touchPage.locator('#progress').textContent(),'62');
+  await touchPage.locator('#change-grid').tap();
+  await selectMode(touchPage,'colors');
+  await touchPage.locator('#start').tap();
+  await finish(touchPage,'tap');
+  assert.equal(await touchPage.locator('#progress').textContent(),'9');
   await mobile.close();
+  pass('62-symbol and colour rounds complete with real touch input');
   pass('touch counts on contact, never resizes cells, finishes before release, and replays deliberately');
 
   const denied = await browser.newContext();

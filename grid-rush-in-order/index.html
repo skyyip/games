@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f7f2">
-    <meta name="description" content="Find the next number or letter. Clear a shuffled grid in order, race the clock, and beat your personal best.">
+    <meta name="description" content="Order numbers, letters, all 62 alphanumeric symbols or random colours. Race the clock and beat your best.">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Grid Rush: In Order">
@@ -44,21 +44,24 @@
     <main id="game">
       <section class="intro" aria-labelledby="page-title">
         <div><p class="eyebrow"><span class="tiny-cross" aria-hidden="true">✳</span> A NEW TWIST. THE SAME RUSH.</p><h1 id="page-title">Find your <span>order.</span></h1></div>
-        <p class="intro-copy">Sharp eyes. Quick hands. One right sequence.<br> Find the next number or letter. Race your best.</p>
+        <p class="intro-copy">Sharp eyes. Quick hands. One right sequence.<br> Find the next symbol or colour. Race your best.</p>
       </section>
 
       <div class="arena">
         <aside class="setup-panel" aria-label="Game setup and instructions">
           <p class="section-index">01 <span>/ THE CHALLENGE</span></p>
           <h2>Pick your sequence<span class="orange">.</span></h2>
-          <p class="panel-description">Numbers or letters. You decide.</p>
+          <p class="panel-description">Numbers, letters, or a colour rush.</p>
           <fieldset id="mode-options" class="mode-options">
             <legend class="sr-only">Choose a sequence</legend>
             <label class="mode-option"><input type="radio" name="game-mode" value="numbers" checked><span><strong>123</strong><small>Numbers</small></span></label>
             <label class="mode-option"><input type="radio" name="game-mode" value="lowercase"><span><strong>abc</strong><small>Lowercase</small></span></label>
             <label class="mode-option"><input type="radio" name="game-mode" value="uppercase"><span><strong>ABC</strong><small>Uppercase</small></span></label>
             <label class="mode-option"><input type="radio" name="game-mode" value="mixed"><span><strong>AbC</strong><small>Mixed case</small></span></label>
+            <label class="mode-option"><input type="radio" name="game-mode" value="alphanumeric"><span><strong>Aa9</strong><small>Letters + numbers</small></span></label>
+            <label class="mode-option"><input type="radio" name="game-mode" value="colors"><span><strong class="colour-mode-mark" aria-hidden="true">● ● ●</strong><small>Colours</small></span></label>
           </fieldset>
+          <label class="order-control" id="order-control"><span>Play order</span><select id="sort-order" aria-describedby="mode-note"><option value="ascending">Smallest → largest</option><option value="descending">Largest → smallest</option></select></label>
           <p id="mode-note" class="mode-note">Find 1, then 2, then 3…</p>
           <fieldset id="grid-options" class="grid-options">
             <legend class="sr-only">Choose a grid size</legend>
@@ -68,9 +71,9 @@
           <details class="how-to-play" id="how-to-play" open>
             <summary id="instructions-title">THE GAME PLAN</summary>
             <ol>
-              <li><span class="step-number">1</span><span>Pick a sequence.<small>Numbers, a–z, A–Z, or mixed case.</small></span></li>
-              <li><span class="step-number">2</span><span>Follow the order.<small>The board shuffles. Wrong taps don’t count.</small></span></li>
-              <li><span class="step-number">3</span><span>Beat your best.<small>26 letters, one alphabet. Case doesn’t change order.</small></span></li>
+              <li><span class="step-number">1</span><span>Pick a sequence.<small>Numbers, letters, all 62 symbols, or colours.</small></span></li>
+              <li><span class="step-number">2</span><span>Follow the order.<small>Pick ascending or descending. Colours follow a random key.</small></span></li>
+              <li><span class="step-number">3</span><span>Beat your best.<small>Cleared tiles stay visible with a tick. Wrong taps don’t count.</small></span></li>
             </ol>
           </details>
         </aside>
@@ -81,6 +84,10 @@
             <div><span id="next-label">START WITH</span><p id="next-description">The board shuffles when you start.</p></div>
             <strong id="next-symbol">1</strong>
           </div>
+          <section class="color-key" id="color-key" aria-labelledby="color-key-title" hidden>
+            <div class="color-key-heading"><span id="color-key-title">FOLLOW THE COLOURS</span><span>LEFT → RIGHT</span></div>
+            <ol id="color-sequence" aria-label="Colour sequence"></ol>
+          </section>
           <div class="board-frame">
             <div class="board-topline"><span id="board-label">THE 3 × 3 GRID</span><span class="board-status" id="board-status"><i></i> STANDBY</span></div>
             <div id="board" class="board" aria-label="3 by 3 game board"></div>

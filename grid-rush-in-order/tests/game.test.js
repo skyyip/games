@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { OrderedGame } from '../src/game.js';
+import { OrderedGame, tileColor } from '../src/game.js';
 
 test('a shuffled numeric round accepts only the next number and stops at the final contact', () => {
   let now = 100;
@@ -96,4 +96,99 @@ test('every numeric size, reset, invalid input, and mode switch keep state predi
   const tiles = game.tiles;
   tiles[0] = 'changed';
   assert.equal(game.tiles[0], '1');
+});
+
+test('descending rounds reverse numeric and alphabet order without counting wrong or repeated tiles', () => {
+  const game = new OrderedGame({ size: 3, order: 'descending' });
+  assert.equal(game.order, 'descending');
+  assert.equal(game.recordKey, 'numbers-3-descending');
+  assert.equal(game.next, '9');
+  game.start();
+  assert.equal(game.click(game.tiles.indexOf('1')), false);
+  for (const value of ['9', '8', '7', '6', '5', '4', '3', '2', '1']) {
+    assert.equal(game.next, value);
+    const index = game.tiles.indexOf(value);
+    assert.equal(game.click(index), true);
+    assert.equal(game.click(index), false);
+  }
+  assert.equal(game.state, 'completed');
+  for (const mode of ['lowercase', 'uppercase', 'mixed']) {
+    game.reset({ mode });
+    assert.equal(game.order, 'descending');
+    assert.equal(game.next.toLowerCase(), 'z');
+    game.start();
+    for (const letter of 'zyxwvutsrqponmlkjihgfedcba') {
+      assert.equal(game.next.toLowerCase(), letter);
+      assert.equal(game.click(game.tiles.indexOf(game.next)), true);
+    }
+    assert.equal(game.state, 'completed');
+  }
+  assert.throws(() => game.reset({ order: 'invalid' }), RangeError);
+  game.reset({ mode: 'numbers', size: 4, order: 'ascending' });
+  assert.equal(game.recordKey, 'numbers-4');
+  assert.equal(game.next, '1');
+});
+
+test('alphanumeric rounds contain 62 distinct symbols in digit and uppercase-before-lowercase order', () => {
+  const sequence = [...'0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz'];
+  for (const order of ['ascending', 'descending']) {
+    const game = new OrderedGame({ mode: 'alphanumeric', order });
+    assert.equal(game.size, 8);
+    assert.equal(game.total, 62);
+    assert.equal(game.tiles.length, 64);
+    assert.equal(game.tiles.filter(value => value === null).length, 2);
+    assert.equal(new Set(game.tiles.filter(value => value !== null)).size, 62);
+    game.start();
+    const expected = order === 'ascending' ? sequence : [...sequence].reverse();
+    assert.equal(game.click(game.tiles.indexOf(expected[1])), false);
+    for (const value of expected) {
+      assert.equal(game.next, value);
+      assert.equal(game.click(game.tiles.indexOf(value)), true);
+    }
+    assert.equal(game.state, 'completed');
+    game.reset();
+    assert.equal(game.size, 8);
+    assert.equal(game.progress, 0);
+    assert.equal(game.next, expected[0]);
+    game.reset({ mode: 'numbers', size: 3 });
+    assert.equal(game.size, 3);
+    assert.equal(game.total, 9);
+  }
+});
+
+test('colour rounds generate a random key and accept each colour group in any tile order, once only', () => {
+  let now = 10;
+  const game = new OrderedGame({ mode: 'colors', size: 3, random: () => 0, now: () => now });
+  const other = new OrderedGame({ mode: 'colors', random: () => 0.99 });
+  assert.equal(game.total, 9);
+  assert.equal(game.size, 3);
+  assert.equal(game.recordKey, 'colors-3');
+  assert.equal(game.colorOrder.length, 4);
+  assert.equal(new Set(game.colorOrder.map(color => color.id)).size, 4);
+  assert.notDeepEqual(game.colorOrder, other.colorOrder);
+  game.start();
+  const first = game.colorOrder[0].id;
+  const wrong = game.tiles.findIndex(value => tileColor(value).id !== first);
+  assert.equal(game.click(wrong), false);
+  assert.equal(game.progress, 0);
+  for (const color of game.colorOrder) {
+    const positions = game.tiles.map((value, index) => tileColor(value).id === color.id ? index : -1)
+      .filter(index => index !== -1).reverse();
+    assert.ok(positions.length > 0);
+    for (const index of positions) {
+      assert.equal(tileColor(game.next).id, color.id);
+      now += 50;
+      assert.equal(game.click(index), true);
+      assert.equal(game.click(index), false);
+    }
+  }
+  assert.equal(game.state, 'completed');
+  assert.equal(game.progress, 9);
+  now = 1000;
+  assert.equal(game.elapsed, 450);
+  game.reset({ size: 6, order: 'descending' });
+  assert.equal(game.total, 36);
+  assert.equal(game.order, 'ascending');
+  assert.equal(game.recordKey, 'colors-6');
+  assert.equal(game.progress, 0);
 });

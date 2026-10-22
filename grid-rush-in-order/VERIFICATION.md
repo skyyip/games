@@ -20,3 +20,12 @@ Touch tests are automated Chrome device emulation, not physical iOS/Android devi
 - Updated both service-worker cache versions and cached the shared styles/scripts; retained independent score keys and cache prefixes.
 - Dev servers now serve the whole playground and block hidden files; README URLs and optional QA defaults match the game subpaths.
 - Final regression results: **11 unit tests, 18 original-game browser checks, 19 ordered-game browser checks, 17 immediate-touch checks, 17 shared-UI checks and 18 PWA checks passed**. Six additional local-server route checks passed. Visual screenshots were captured after entrance animations completed.
+
+## Ordered modes update — 2026-10-22
+
+- **10 unit tests passed:** ascending/descending sequence validation, all 62 distinct alphanumeric symbols in `0–9, A, a, B, b … Z, z` order and its reverse, 8×8 resets, random colour-key generation, group selection in arbitrary tile order, duplicate rejection, precise final-input timing, storage validation, and new-category isolation with legacy-score preservation.
+- **34 browser checks passed:** every one of the 20 challenge categories, locked setup controls during play, symbol/colour labels retained on disabled faded tiles with corner ticks, fixed cell geometry, results below the board, records across reload, keyboard input, touch input and unsupported storage.
+- Checked the 26-letter, 62-symbol and colour boards at 320/375/600/768/1024/1440px. The 8×8 board fits without horizontal scrolling, with cells at least 24px wide at the smallest tested viewport.
+- **9 PWA checks passed:** Chrome installability, all 20 challenge combinations playable after an offline reload, fresh offline tab launch, independent caches and persisted scores. The updated service worker reloads assets during installation to avoid stale HTTP-cache copies.
+- Checked all eight palette backgrounds against white labels: each exceeds 4.5:1 contrast. Named colours and a numbered reference key accompany the swatches; current/cleared steps also have accessible status labels.
+- Screenshots reviewed: mobile 8×8 layout, colour play with a cleared group, and the retained ticked board above completion results. Real-device vibration and screen-reader sessions were not performed; automated touch testing uses Chrome emulation.

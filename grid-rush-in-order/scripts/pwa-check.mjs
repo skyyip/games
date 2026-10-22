@@ -68,23 +68,26 @@ try {
 
   await context.setOffline(true);
   await page.reload();
-  for (const mode of ['numbers', 'lowercase', 'uppercase', 'mixed']) {
+  for (const mode of ['numbers', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']) {
     await page.locator(`.mode-option:has(input[value="${mode}"])`).click();
-    for (const size of mode === 'numbers' ? [3, 4, 5, 6] : [6]) {
-    if (mode === 'numbers') await page.locator(`.grid-option:has(input[value="${size}"])`).click();
-    await page.locator('#start').click();
-    while (await page.locator('#result').isHidden()) {
-      const next = await page.locator('#next-symbol').textContent();
-      await page.locator(`.tile[data-value="${next}"]`).click();
+    for (const size of ['numbers','colors'].includes(mode) ? [3,4,5,6] : [6]) {
+      if (['numbers','colors'].includes(mode)) await page.locator(`.grid-option:has(input[value="${size}"])`).click();
+      for (const order of mode === 'colors' ? ['ascending'] : ['ascending','descending']) {
+        if (mode !== 'colors') await page.locator('#sort-order').selectOption(order);
+        await page.locator('#start').click();
+        while (await page.locator('#result').isHidden()) {
+          const next = await page.locator('#next-symbol').getAttribute('data-value');
+          await page.locator(`.tile[data-value="${next}"]`).click();
+        }
+        assert.equal(await page.locator('#result').isVisible(),true);
+        await page.locator('#change-grid').click();
+      }
     }
-    assert.equal(await page.locator('#result').isVisible(), true);
-    await page.locator('#change-grid').click();
   }
-    }
   const saved = await page.evaluate(() => localStorage.getItem('grid-rush-in-order.records.v1'));
   await page.reload();
   assert.equal(await page.evaluate(() => localStorage.getItem('grid-rush-in-order.records.v1')), saved);
-  pass('offline reload supports all seven challenges and preserves records across another reload');
+  pass('offline reload supports all twenty challenges and preserves records across another reload');
 
   const offlineTab = await context.newPage();
   offlineTab.on('pageerror', error => errors.push(error.message));
