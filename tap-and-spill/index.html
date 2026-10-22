@@ -2,9 +2,14 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1530">
-<title>水滿則溢 Tap &amp; Spill</title>
+<meta name="apple-mobile-web-app-title" content="Tap &amp; Spill">
+<title>水滿則溢 Tap &amp; Spill · Sky’s Playground</title>
+<link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="../grid-rush/playground-ui.css">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;background:#050a18;color:#fff;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;overflow:hidden;overscroll-behavior:none}
@@ -21,9 +26,7 @@ body{display:flex;align-items:center;justify-content:center}
 #who b{display:block;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #who small{opacity:.7;font-size:12px}
 button{font:inherit;color:#fff;border:0;cursor:pointer}
-#back{top:14px;right:62px;width:40px;height:40px;border-radius:50%;background:#ffffff22;display:grid;place-items:center;color:#fff;text-decoration:none;font-size:18px;z-index:5}
 #who{margin-right:48px}
-#back{top:14px;right:62px;width:40px;height:40px;border-radius:50%;background:#ffffff22;display:grid;place-items:center;color:#fff;text-decoration:none;font-size:18px;z-index:5}
 #who{margin-right:48px}
 #mute{pointer-events:auto;width:40px;height:40px;border-radius:50%;background:#ffffff22;font-size:18px}
 #bottom{left:0;right:0;bottom:0;padding:0 18px calc(24px + env(safe-area-inset-bottom));text-align:center;pointer-events:none}
@@ -48,13 +51,31 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
 [hidden]{display:none!important}
 .shake{animation:sh .6s}
 @keyframes sh{20%{transform:translate(-10px,6px)}40%{transform:translate(9px,-7px)}60%{transform:translate(-7px,-4px)}80%{transform:translate(5px,5px)}}
+#back{top:calc(12px + env(safe-area-inset-top));left:14px;z-index:6;background:#182b50;color:#e8efff;border-color:#ffffff33;font-size:12px}
+#back:hover{background:#25406c}
+#hud{padding-top:calc(68px + env(safe-area-inset-top))}
+#who b{font-size:17px}#who small{line-height:1.4;display:block}
+.panel{padding:calc(76px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));overscroll-behavior:contain;-webkit-overflow-scrolling:touch;animation:panel-arrive 260ms ease-out}
+.panel h1{font-size:clamp(26px,7vw,34px);line-height:1.2}
+.panel p.sub{line-height:1.6}
+.row input{min-height:46px}
+.count button,.sw,#mute{min-height:44px;min-width:44px}
+.btn{min-height:50px;font-size:16px;transition:transform 130ms,box-shadow 130ms,filter 160ms}
+.btn:hover{filter:brightness(1.08)}.btn:focus-visible,button:focus-visible,.row input:focus-visible{outline:3px solid #ffe066;outline-offset:3px}
+#bottom{padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+#hint{font-size:14px;line-height:1.5;min-height:42px}
+.res{gap:10px}.res .bar{animation:bar-fill 400ms ease-out;transform-origin:left}
+@keyframes bar-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes panel-arrive{from{opacity:0;clip-path:circle(0 at 50% 35%)}to{opacity:1;clip-path:circle(150% at 50% 35%)}}
+@media(max-width:600px) and (orientation:portrait){#app{width:100vw;height:100dvh}.panel{gap:14px}.panel .btn{margin-top:auto}#tag{font-size:38px}}
+@media(max-height:600px){.panel{gap:8px;padding-left:14px;padding-right:14px}.panel h1{font-size:24px}.panel p.sub{font-size:12px}.row input{padding:8px}.btn{padding:12px}#hud{padding-top:62px}#who b{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.shake{transform:none}}
 </style>
 </head>
 <body>
 <div id="app">
+  <a id="back" class="playground-home" href="../" aria-label="回到 Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
   <canvas id="cv"></canvas>
-  <a id="back" href="../" aria-label="回到遊戲列表">⌂</a>
-  <a id="back" href="../" aria-label="回到遊戲列表">⌂</a>
   <div id="vig"></div>
   <div id="touch"></div>
   <header id="hud" hidden>
@@ -64,12 +85,12 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
   </header>
   <div id="tension" hidden>表面張力！別再加了…</div>
   <div id="tag" hidden>溢出失敗！</div>
-  <div id="bottom" hidden><p id="hint"></p><button class="btn" id="go"></button></div>
+  <div id="bottom" hidden><p id="hint" role="status" aria-live="polite"></p><button class="btn" id="go"></button></div>
 
   <section id="setup" class="panel">
     <h1>💧 水滿則溢</h1>
     <p class="sub">Tap &amp; Spill · 輪流注水，讓杯子溢出的人就輸了</p>
-    <div class="count"><button id="minus">−</button><span id="cnt"></span><button id="plus">+</button></div>
+    <div class="count"><button id="minus" aria-label="減少玩家">−</button><span id="cnt"></span><button id="plus" aria-label="增加玩家">+</button></div>
     <div id="rows" class="res"></div>
     <button class="btn" id="start" style="margin-top:auto">開始遊戲</button>
   </section>
@@ -83,7 +104,8 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
   </section>
 </div>
 
-<script>
+<script type="module">
+import { wrongFeedback, animateChange } from '../grid-rush/src/playground-ui.js';
 'use strict';
 const $ = s => document.querySelector(s);
 const W = 360, H = 640;
@@ -325,11 +347,14 @@ const input = new InputHandler($('#touch'), {
     sim.flowing = false; sim.gauge = false; audio.flow(0);
     if (sm.state !== 'TURN') return;
     if (sm.endPour()) showHandoff();
-    else hint('太短了！至少注水 ' + MIN_TIME + ' 秒或 ' + MIN_POUR + ' 單位，再按住一次');
+    else {
+      hint('太短了！至少注水 ' + MIN_TIME + ' 秒或 ' + MIN_POUR + ' 單位，再按住一次');
+      wrongFeedback($('#hint'));
+    }
   }
 });
 
-function hint(t) { $('#hint').textContent = t; }
+function hint(t) { $('#hint').textContent = t; animateChange($('#hint')); }
 function renderSetup() {
   $('#cnt').textContent = setupPlayers.length + ' 位玩家';
   $('#rows').innerHTML = '';
@@ -340,8 +365,9 @@ function renderSetup() {
       const used = setupPlayers.map(q => q.color);
       for (let k = 1; k <= COLORS.length; k++) { const c = COLORS[(COLORS.indexOf(p.color) + k) % COLORS.length]; if (!used.includes(c)) { p.color = c; break; } }
       sw.style.background = p.color;
+      animateChange(sw);
     };
-    const inp = document.createElement('input'); inp.value = p.name; inp.maxLength = 10; inp.oninput = () => p.name = inp.value;
+    const inp = document.createElement('input'); inp.value = p.name; inp.maxLength = 10; inp.setAttribute('aria-label', '玩家 ' + (i + 1) + ' 名稱'); inp.oninput = () => p.name = inp.value;
     r.append(sw, inp); $('#rows').append(r);
   });
 }
@@ -385,6 +411,7 @@ function showResult() {
   const max = Math.max(...sm.players.map(p => p.total));
   $('#stats').innerHTML = sm.players.map(p => `<div><div class="n"><span>${p === sm.loser ? '💦 ' : ''}${esc(p.name)}</span><span>${Math.round(p.total)}</span></div><div class="bar" style="width:${Math.max(3, p.total / max * 100)}%;background:${p.color}"></div></div>`).join('');
   $('#result').hidden = false;
+  $('#again').focus({ preventScroll: true });
 }
 function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 

@@ -15,7 +15,7 @@ cd grid-rush
 npm start
 ```
 
-Open **http://localhost:5173**. To use another port, run `PORT=8080 npm start`.
+Open **http://localhost:5173/grid-rush/**. The same server also serves the landing page and other games so the All games link works locally. To use another port, run `PORT=8080 npm start`.
 
 ```sh
 npm test
@@ -23,7 +23,7 @@ npm test
 
 ## Install as an app
 
-1. Run `npm start` and open **http://localhost:5173** in Chrome, Edge, or Safari.
+1. Run `npm start` and open **http://localhost:5173/grid-rush/** in Chrome, Edge, or Safari.
 2. Select **Install app** below the game. A supporting browser shows its native installation prompt; other browsers show installation instructions.
 3. On macOS Safari, use **File → Add to Dock**. On iPhone or iPad, use **Share → Add to Home Screen**.
 4. Wait for **Ready to play offline** in the installation help before disconnecting. The app caches its game code, styles, fonts, and icons, so later offline launches and reloads work. Scores remain in localStorage.
@@ -36,7 +36,9 @@ Installation controls vary by browser; see [MDN's installation guide](https://de
 
 ```text
 index.html             Semantic page structure
-styles.css             Responsive layout, tile states, and motion preferences
+styles.css             Responsive layout and tile states
+playground-ui.css      Shared navigation, mobile refinements and reduced-motion feedback
+playground.webmanifest Landing-page installation name and icon
 favicon.svg            Grid Rush mark
 manifest.webmanifest   Standalone app metadata and icons
 sw.js                  Versioned offline app cache
@@ -47,6 +49,7 @@ src/
   leaderboard.js       Storage validation, ranking, and persistence
   app.js               DOM rendering, input, animation, and result feedback
   pwa.js               Installation controls and offline setup
+  playground-ui.js     Shared press feedback, optional haptics and cue animation
 scripts/serve.js       Small local static development server
 tests/                 Dependency-free Node test suite
 ```
@@ -68,3 +71,7 @@ The automated suite covers unique clicks, exact timer capture, all four grid siz
 `scripts/pwa-check.mjs` optionally verifies installability and offline games using an existing Playwright installation. To update a shipped app, change `CACHE_NAME` in `sw.js` whenever an app asset changes. New versions wait until existing app windows close, keeping active rounds uninterrupted.
 
 `scripts/touch-check.mjs` verifies contact-time activation, duplicate suppression, stable grid geometry, simultaneous touches, and final-touch/replay handling. It uses the same optional Playwright setup as the other browser checks.
+
+`scripts/ui-check.mjs` verifies the landing page and every game: mobile two-column cards, return navigation, supplied install icons, responsive layouts, wrong-input haptics and reduced-motion support. Run it with the optional Playwright module environment variable; `PLAYGROUND_URL` defaults to `http://localhost:5173/`.
+
+When changing the shared `playground-ui.css` or `src/playground-ui.js`, bump the cache versions in both games so installed copies receive the new assets. The home-screen artwork is supplied by the site owner.

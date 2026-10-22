@@ -10,7 +10,7 @@ const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'pl
 const profile = await mkdtemp(join(tmpdir(), 'grid-rush-pwa-'));
 const context = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true });
 const browser = context.browser();
-const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173';
+const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173/grid-rush/';
 let checks = 0;
 const pass = message => { checks += 1; console.log(`PASS ${message}`); };
 

@@ -88,3 +88,13 @@ Touch and pen input now activate on pointer contact. Explicit equal-height grid 
 The project now lives in `grid-rush/`. Run local commands from that directory. The GitHub Pages workflow was updated to publish that folder.
 
 Final regression verification: **5 logic tests, 18 general browser checks, 9 web-app checks, and 17 touch checks**.
+
+## Shared UI update — 2026-10-22
+
+- Updated the landing page to Sky’s Playground with two mobile columns; supplied artwork is used for the favicon, touch icons and install manifests.
+- Added one labelled, 44px-minimum All games control per game. Checked layouts at 320, 375, 430, 600, 768, 1024 and 1440px.
+- Added press ripples, selection/check feedback, result reveals and reduced-motion fallbacks while preserving board dimensions and contact-time activation.
+- Verified wrong-selection vibration calls with an emulated vibration API, and verified gameplay when that API is unavailable. Physical-device vibration remains browser/device dependent.
+- Updated both service-worker cache versions and cached the shared styles/scripts; retained independent score keys and cache prefixes.
+- Dev servers now serve the whole playground and block hidden files; README URLs and optional QA defaults match the game subpaths.
+- Final regression results: **11 unit tests, 18 original-game browser checks, 19 ordered-game browser checks, 17 immediate-touch checks, 17 shared-UI checks and 18 PWA checks passed**. Six additional local-server route checks passed. Visual screenshots were captured after entrance animations completed.

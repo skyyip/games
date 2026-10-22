@@ -11,7 +11,7 @@ cd grid-rush-in-order
 npm start
 ```
 
-Open **http://localhost:5174/**. Set `PORT` to use another port. Serve the folder over HTTP rather than opening `index.html` as a file, so JavaScript modules and offline installation work.
+Open **http://localhost:5174/grid-rush-in-order/**. Set `PORT` to use another port. The dev server serves the full playground so shared navigation and assets work. Use HTTP rather than opening `index.html` as a file, so JavaScript modules and offline installation work.
 
 ## How to play
 
@@ -22,7 +22,7 @@ Choose a sequence before starting:
 - **Uppercase:** A through Z, all 26 letters.
 - **Mixed case:** all 26 letters, each shown once in randomly chosen uppercase or lowercase. Follow alphabetical order regardless of case: `A → b → C …`.
 
-Letter rounds use a 6×6 board with ten noninteractive blank cells. Every round shuffles the board. Find the symbol shown in **Next up**, then continue in sequence. Wrong taps do not advance the game or add a penalty; the clock keeps running. Cleared tiles show a checkmark and cannot count again.
+Letter rounds use a 6×6 board with ten noninteractive blank cells. Every round shuffles the board. Find the symbol shown in **Next up**, then continue in sequence. Wrong taps give visual feedback and a short vibration when supported. They do not advance the game or add a penalty; the clock keeps running. Cleared tiles show a checkmark and cannot count again.
 
 Mouse clicks, immediate touch/pen contact, Tab, arrow keys, Enter and Space are supported. Restart stops the clock and returns to setup; Play Again starts a fresh shuffled round.
 
@@ -34,7 +34,7 @@ Mouse clicks, immediate touch/pen contact, Tab, arrow keys, Enter and Space are 
 - Records use **`grid-rush-in-order.records.v1`**, separate from the original game's storage. Scores stay in this browser and on this device.
 - `manifest.webmanifest`, `sw.js` and `src/pwa.js`: standalone installation and offline play, with a separate cache prefix that preserves Grid Rush's cache. Bump the cache version when changing app assets.
 
-This folder is self-contained and can be served under a subdirectory such as `/games/grid-rush-in-order/`. The original `grid-rush` game remains independent.
+Publish this folder alongside `grid-rush`, which supplies the shared `playground-ui.css` and `src/playground-ui.js` navigation/feedback assets. All paths work under `/games/`. Game logic, records and offline caches remain separate.
 
 ## Verification
 

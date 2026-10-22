@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173';
+const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173/grid-rush/';
 let failures = 0;
 let checks = 0;
 

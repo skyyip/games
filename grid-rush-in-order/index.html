@@ -8,11 +8,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Grid Rush: In Order">
-    <title>Grid Rush: In Order — Find your order.</title>
-    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <title>Grid Rush: In Order · Sky’s Playground</title>
+    <link rel="icon" href="./assets/icons/icon-192.png" type="image/png">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="../grid-rush/playground-ui.css">
+    <script type="module" src="../grid-rush/src/playground-ui.js"></script>
     <script type="module" src="./src/app.js"></script>
     <script type="module" src="./src/pwa.js"></script>
   </head>
@@ -34,7 +36,8 @@
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span class="brand-wordmark">grid<span class="brand-rush">rush</span><span class="brand-period">.</span><small>IN ORDER</small></span>
       </a>
-      <nav aria-label="Main navigation"><a href="../">← All games</a><a class="nav-active" href="#game">The game</a><a href="#how-to-play">How to play <span aria-hidden="true">↗</span></a></nav>
+      <a class="playground-home" href="../" aria-label="Back to Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
+      <nav aria-label="Main navigation"><a class="nav-active" href="#game">The game</a><a href="#how-to-play">How to play <span aria-hidden="true">↗</span></a></nav>
       <div class="header-motto"><span></span> NO DOWNLOAD. JUST GO.</div>
     </header>
 

@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#070b1a">
-<title>Games — pick one and play</title>
+<meta name="description" content="Sky’s Playground — small games, good times. Play on your phone or desktop.">
+<meta name="apple-mobile-web-app-title" content="Sky’s Playground">
+<title>Sky’s Playground</title>
+<link rel="icon" href="./grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./grid-rush/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="./grid-rush/playground.webmanifest">
+<link rel="stylesheet" href="./grid-rush/playground-ui.css">
+<script type="module" src="./grid-rush/src/playground-ui.js"></script>
 <style>
 :root{--bg:#070b1a;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}
@@ -35,13 +42,45 @@ h2{margin:0 0 6px;font-size:24px;letter-spacing:-.01em}
 .card:hover .play i{transform:translateX(6px)}
 footer{margin-top:56px;text-align:center;color:#64748b;font-size:13px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.playground-brand{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.playground-brand img{border-radius:16px;border:1px solid #ffffff24;box-shadow:0 8px 28px #0003}
+.playground-brand .eyebrow{background:none;border:0;padding:0;font-size:11px;letter-spacing:.12em}
+.title-dot{color:#fda4af;-webkit-text-fill-color:#fda4af}
+.card{isolation:isolate;animation:card-arrive 480ms cubic-bezier(.2,.7,.2,1) backwards;}
+.card:nth-child(2){animation-delay:65ms}.card:nth-child(3){animation-delay:130ms}
+.card:active{transform:translateY(-2px) scale(.985);box-shadow:0 8px 28px -12px var(--accent)}
+.card:focus-visible{outline:3px solid var(--accent);outline-offset:5px}
+.card .body{display:flex;flex:1;flex-direction:column;align-items:flex-start}
+.card .play{margin-top:auto;min-height:32px;position:relative}
+.play:after{content:'';position:absolute;left:0;right:22px;bottom:2px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform 220ms}
+.card:hover .play:after,.card:focus-visible .play:after{transform:scaleX(1)}
+.card:focus-visible .art svg{transform:scale(1.08) rotate(-3deg)}
+@keyframes card-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){
+  main{padding:32px 16px calc(28px + env(safe-area-inset-bottom))}
+  .playground-brand{gap:10px;margin-bottom:22px}.playground-brand img{width:44px;height:44px;border-radius:12px}
+  .playground-brand .eyebrow{font-size:10px;letter-spacing:.08em}
+  h1{font-size:clamp(44px,11vw,68px);margin:0 0 18px;line-height:1.05}
+  .lead{font-size:14px;line-height:1.65;margin-bottom:28px;max-width:340px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
+  .card{border-radius:18px;min-width:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:#ffffff0d}
+  .art{height:122px}.art svg{width:66px;height:66px}
+  .body{padding:14px 12px 16px}.tags{gap:5px;flex-wrap:wrap;margin-bottom:10px}
+  .tags span{font-size:10px;padding:3px 7px;line-height:1.4}
+  h2{font-size:17px;line-height:1.22;overflow-wrap:anywhere;margin-bottom:9px}
+  .body p{font-size:12px;line-height:1.55;margin-bottom:12px;color:#b2bdd0}
+  .play{font-size:12px;gap:7px}.card:hover{transform:none}.card:active{transform:scale(.985)}
+  footer{margin-top:32px;font-size:11px;line-height:1.6;color:#94a3b8}
+  .blob{filter:blur(65px);opacity:.3;animation:none}
+}
+@media(max-width:360px){.grid{gap:10px}.body{padding:12px 10px 14px}.art{height:108px}h2{font-size:16px}.tags span{font-size:9px;padding:3px 6px}}
 </style>
 </head>
 <body>
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <main>
-  <span class="eyebrow">Mini game arcade</span>
-  <h1>Pick a game.<br>Start playing.</h1>
+  <header class="playground-brand"><img src="./grid-rush/assets/icons/icon-192.png" width="56" height="56" alt=""><span class="eyebrow">SMALL GAMES. GOOD TIMES.</span></header>
+  <h1>Sky’s<br>Playground<span class="title-dot">.</span></h1>
   <p class="lead">Quick, no-install browser games. Works on your phone and desktop — just tap a card.</p>
 
   <section class="grid" aria-label="Games">
@@ -52,7 +91,7 @@ footer{margin-top:56px;text-align:center;color:#64748b;font-size:13px}
       <div class="body">
         <div class="tags"><span>Solo</span><span>Speed</span></div>
         <h2>Grid Rush</h2>
-        <p>Race the clock and tap the grid in order. Every click counts.</p>
+        <p>Clear every tile, in any order. Every click counts.</p>
         <span class="play">Play now <i>→</i></span>
       </div>
     </a>
@@ -81,7 +120,7 @@ footer{margin-top:56px;text-align:center;color:#64748b;font-size:13px}
       </div>
     </a>
   </section>
-  <footer>More games coming soon</footer>
+  <footer>Made for a little break. Stay for another round.</footer>
 </main>
 </body>
 </html>

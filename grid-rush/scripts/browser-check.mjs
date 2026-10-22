@@ -5,7 +5,7 @@ import { mkdir } from 'node:fs/promises';
 
 const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173';
+const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5173/grid-rush/';
 const output = process.env.GRID_RUSH_SCREENSHOTS || '/tmp/grid-rush-qa';
 await mkdir(output, { recursive: true });
 let checks = 0;

@@ -4,7 +4,7 @@ import { mkdir } from 'node:fs/promises';
 
 const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5174';
+const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5174/grid-rush-in-order/';
 const output = process.env.GRID_RUSH_SCREENSHOTS || '/tmp/grid-rush-in-order-qa';
 const key = 'grid-rush-in-order.records.v1';
 await mkdir(output, { recursive: true });

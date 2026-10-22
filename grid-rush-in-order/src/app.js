@@ -1,3 +1,4 @@
+import { wrongFeedback, animateChange } from '../../grid-rush/src/playground-ui.js';
 import { OrderedGame, GRID_SIZES } from './game.js';
 import { addResult, readLeaderboard, saveLeaderboard } from './leaderboard.js';
 
@@ -88,6 +89,7 @@ function symbolName(value) {
 function renderNext() {
   $('#next-label').textContent = game.state === 'completed' ? 'ALL IN ORDER' : game.state === 'playing' ? 'NEXT UP' : 'START WITH';
   $('#next-symbol').textContent = game.next ?? '✓';
+  if (game.state === 'playing') animateChange($('#next-symbol'));
   $('#next-description').textContent = game.state === 'completed' ? 'Sequence complete. Nicely done.' : game.state === 'playing' ? 'Find this tile. Keep the order.' : 'The board shuffles when you start.';
 }
 
@@ -244,6 +246,7 @@ modes.addEventListener('change', () => {
 function activateTile(tile, keyboard = false) {
   if (!tile || tile.disabled || game.state !== 'playing') return;
   if (!game.click(Number(tile.dataset.index))) {
+    wrongFeedback(tile);
     tile.classList.add('is-wrong');
     setTimeout(() => tile.classList.remove('is-wrong'), 220);
     $('#next-description').textContent = `Not yet. Find ${game.next} first.`;
