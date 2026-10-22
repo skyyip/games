@@ -1,10 +1,12 @@
 export const GRID_SIZES = Object.freeze([3, 4, 5, 6]);
 export const GAME_MODES = Object.freeze(['numbers', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']);
 export const SORT_ORDERS = Object.freeze(['ascending', 'descending']);
-const BASE_RECORD_KEYS = [...GRID_SIZES.map(size => `numbers-${size}`), 'lowercase', 'uppercase', 'mixed', 'alphanumeric'];
+const BASE_RECORD_KEYS = [...GRID_SIZES.map(size => `numbers-${size}`), 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26'];
 export const RECORD_KEYS = Object.freeze([
   ...BASE_RECORD_KEYS, ...BASE_RECORD_KEYS.map(key => `${key}-descending`),
   ...GRID_SIZES.map(size => `colors-${size}`),
+  // Retain old 62-symbol scores without comparing them to the new 26-position rounds.
+  'alphanumeric', 'alphanumeric-descending',
 ]);
 export const COLOR_PALETTE = Object.freeze([
   { id: 'red', name: 'Red', hex: '#b83c39' },
@@ -35,7 +37,10 @@ function sequenceFor(mode, size, random, colors) {
   }
   const letters = [...'abcdefghijklmnopqrstuvwxyz'];
   if (mode === 'alphanumeric') {
-    return [...'0123456789', ...letters.flatMap(letter => [letter.toUpperCase(), letter])];
+    const forms = letters.map(() => Math.floor(random() * 3));
+    // Every round includes numbers and both letter cases, even with an unlucky draw.
+    if ([0, 1, 2].some(form => !forms.includes(form))) forms.splice(0, 3, 0, 1, 2);
+    return letters.map((letter, index) => forms[index] === 0 ? String(index + 1) : forms[index] === 1 ? letter : letter.toUpperCase());
   }
   if (mode === 'lowercase') return letters;
   if (mode === 'uppercase') return letters.map(letter => letter.toUpperCase());
@@ -81,7 +86,7 @@ export class OrderedGame {
   get order() { return this.#order; }
   get colorOrder() { return [...this.#colorOrder]; }
   get recordKey() {
-    const key = ['numbers', 'colors'].includes(this.#mode) ? `${this.#mode}-${this.#size}` : this.#mode;
+    const key = this.#mode === 'alphanumeric' ? 'alphanumeric-26' : ['numbers', 'colors'].includes(this.#mode) ? `${this.#mode}-${this.#size}` : this.#mode;
     return this.#order === 'descending' ? `${key}-descending` : key;
   }
   get total() { return this.#sequence.length; }
@@ -96,13 +101,13 @@ export class OrderedGame {
     return this.#state === 'playing' ? this.#now() - this.#startedAt : this.#finishedTime;
   }
 
-  reset({ size = GRID_SIZES.includes(this.#size) ? this.#size : 3, mode = this.#mode, order = this.#order } = {}) {
-    if (!GRID_SIZES.includes(size) && !(mode === 'alphanumeric' && size === 8)) throw new RangeError('Unsupported grid size');
+  reset({ size = this.#size, mode = this.#mode, order = this.#order } = {}) {
+    if (!GRID_SIZES.includes(size)) throw new RangeError('Unsupported grid size');
     if (!GAME_MODES.includes(mode)) throw new RangeError('Unsupported game mode');
     if (!SORT_ORDERS.includes(order)) throw new RangeError('Unsupported sort order');
     this.#mode = mode;
     this.#order = mode === 'colors' ? 'ascending' : order;
-    this.#size = mode === 'alphanumeric' ? 8 : ['numbers', 'colors'].includes(mode) ? size : 6;
+    this.#size = ['numbers', 'colors'].includes(mode) ? size : 6;
     this.#state = 'idle';
     this.#progress = 0;
     this.#clicked.clear();

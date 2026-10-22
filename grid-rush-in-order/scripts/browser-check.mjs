@@ -99,7 +99,7 @@ try {
 
   const saved = await page.evaluate(key => localStorage.getItem(key), key);
   const data = JSON.parse(saved);
-  assert.equal(Object.keys(data).length, 20);
+  assert.equal(Object.keys(data).length, 22);
   assert.equal(Object.values(data).filter(records => records.length === 1).length, 7);
   await page.evaluate(() => localStorage.setItem('grid-rush.records.v1', 'original-game-sentinel'));
   await page.reload();
@@ -121,16 +121,25 @@ try {
   assert.equal(await page.locator('.tile:disabled').count(), 26);
   pass('keyboard navigation skips blanks; restarting stops timing and resets progress');
 
-  const alphanumericSequence = [...'0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz'];
+  const position = value => /^\d+$/.test(value) ? Number(value) : value.toLowerCase().charCodeAt(0) - 96;
   for (const order of ['ascending', 'descending']) {
     await selectMode(page, 'alphanumeric');
     await page.locator('#sort-order').selectOption(order);
-    assert.equal(await page.locator('#board').getAttribute('data-size'), '8');
-    assert.equal(await page.locator('.tile').count(), 62);
-    assert.equal(await page.locator('.empty-tile').count(), 2);
+    assert.equal(await page.locator('#board').getAttribute('data-size'), '6');
+    assert.equal(await page.locator('.tile').count(), 26);
+    assert.equal(await page.locator('.empty-tile').count(), 10);
+    const preview = await page.locator('.tile').evaluateAll(tiles => tiles.map(tile => tile.dataset.value));
+    assert.deepEqual(preview.map(position).sort((a,b) => a-b), Array.from({length:26},(_,index)=>index+1));
+    assert.ok(preview.some(value => /^\d+$/.test(value)));
+    assert.ok(preview.some(value => /^[A-Z]$/.test(value)));
+    assert.ok(preview.some(value => /^[a-z]$/.test(value)));
+    assert.match(await page.locator('#mode-note').textContent(), /1 = A = a, 2 = B = b/);
+    assert.match(await page.locator('#record-grid').textContent(), /26 POSITIONS/);
     await page.locator('#start').click();
     assert.equal(await page.locator('#sort-order').isDisabled(), true);
-    const expected = order === 'ascending' ? alphanumericSequence : [...alphanumericSequence].reverse();
+    const labelsAtStart = await page.locator('.tile').evaluateAll(tiles => tiles.map(tile => tile.dataset.value));
+    assert.deepEqual([...labelsAtStart].sort(), [...preview].sort(), 'starting must preserve the previewed symbol forms');
+    const expected = [...preview].sort((a,b) => order === 'ascending' ? position(a)-position(b) : position(b)-position(a));
     await tileFor(page, expected[1]).click();
     assert.equal(await page.locator('#progress').textContent(), '0');
     const before = await geometry(page);
@@ -147,14 +156,14 @@ try {
       assert.equal(await page.locator('#next-symbol').textContent(), value);
       await tileFor(page, value).click();
     }
-    assert.equal(await page.locator('.tile.clicked .tile-check').count(), 62);
+    assert.equal(await page.locator('.tile.clicked .tile-check').count(), 26);
     const labels = await page.locator('.tile-number').allTextContents();
-    assert.deepEqual(labels.sort(), [...alphanumericSequence].sort());
+    assert.deepEqual(labels.sort(), [...preview].sort());
     const regions = await page.evaluate(() => ({ board:document.querySelector('#board').getBoundingClientRect().bottom,result:document.querySelector('#result').getBoundingClientRect().top }));
     assert.ok(regions.result > regions.board, 'results must leave the cleared board visible');
     await page.screenshot({ path:`${output}/alphanumeric-${order}-completed.png`,fullPage:true,animations:'disabled' });
     await page.locator('#change-grid').click();
-    pass(`62-symbol ${order}: exact case order, retained labels, faded ticked tiles and results below the board`);
+    pass(`26-position ${order}: shared number/letter ranks, retained labels, faded ticked tiles and results below the board`);
   }
 
   for (const size of [3,4,5,6]) {
@@ -214,8 +223,10 @@ try {
     pass(`${size}×${size}: random four-colour key, arbitrary tiles within each group and retained colour labels`);
   }
   const allRecords = await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
-  assert.equal(Object.keys(allRecords).length,20);
-  assert.ok(Object.values(allRecords).every(records=>records.length===1));
+  assert.equal(Object.keys(allRecords).length,22);
+  assert.equal(Object.values(allRecords).filter(records=>records.length===1).length,20);
+  assert.deepEqual(allRecords.alphanumeric,[]);
+  assert.deepEqual(allRecords['alphanumeric-descending'],[]);
   for (const legacyKey of ['numbers-3','numbers-4','numbers-5','numbers-6','lowercase','uppercase','mixed']) {
     assert.deepEqual(allRecords[legacyKey],data[legacyKey]);
   }
@@ -236,7 +247,10 @@ try {
     }));
     assert.ok(layout.scroll <= layout.width, `horizontal overflow at ${width}px`);
     assert.ok(layout.cells.every(([w, h]) => Math.abs(w - h) < 1));
-    if (mode==='alphanumeric') assert.ok(layout.cells.every(([w])=>w>=24),'dense-board touch targets must remain at least 24px');
+    if (mode==='alphanumeric') {
+      assert.equal(await page.locator('.tile').count(),26);
+      assert.ok(layout.cells.every(([w])=>w>=32),'mixed-symbol touch targets must remain at least 32px');
+    }
     if ([320,375,768].includes(width)) await page.screenshot({path:`${output}/${mode}-${width}.png`,fullPage:true,animations:'disabled'});
     }
     pass(`${width}px: square cells and no horizontal overflow`);
@@ -278,15 +292,15 @@ try {
   await selectMode(touchPage,'alphanumeric');
   await touchPage.locator('#start').tap();
   await finish(touchPage,'tap');
-  assert.equal(await touchPage.locator('.tile-check').count(),62);
-  assert.equal(await touchPage.locator('#progress').textContent(),'62');
+  assert.equal(await touchPage.locator('.tile-check').count(),26);
+  assert.equal(await touchPage.locator('#progress').textContent(),'26');
   await touchPage.locator('#change-grid').tap();
   await selectMode(touchPage,'colors');
   await touchPage.locator('#start').tap();
   await finish(touchPage,'tap');
   assert.equal(await touchPage.locator('#progress').textContent(),'9');
   await mobile.close();
-  pass('62-symbol and colour rounds complete with real touch input');
+  pass('26-position mixed-symbol and colour rounds complete with real touch input');
   pass('touch counts on contact, never resizes cells, finishes before release, and replays deliberately');
 
   const denied = await browser.newContext();

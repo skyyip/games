@@ -26,7 +26,7 @@ function sequenceNote() {
   if (game.mode === 'colors') return 'A new colour key each round. Clear every tile of one colour, then the next.';
   const ascending = game.order === 'ascending';
   if (game.mode === 'numbers') return ascending ? `1 → 2 → … → ${game.total}` : `${game.total} → … → 2 → 1`;
-  if (game.mode === 'alphanumeric') return ascending ? '0–9 → A, a → B, b → … → Z, z. Uppercase first.' : 'z, Z → y, Y → … → a, A → 9–0. The ascending sequence, reversed.';
+  if (game.mode === 'alphanumeric') return `${ascending ? '1 → b → 3 → 4 → e → F → 7 …' : '26 → y → 24 → W → 22 …'} Numbers and letters share positions: 1 = A = a, 2 = B = b, …, 26 = Z = z. One random form per position.`;
   if (game.mode === 'mixed') return ascending ? 'A → b → C … → Z. Case does not change alphabet order.' : 'Z → y → X … → A. Case does not change alphabet order.';
   return game.mode === 'uppercase' ? ascending ? 'A → B → C … → Z' : 'Z → Y → X … → A' : ascending ? 'a → b → c … → z' : 'z → y → x … → a';
 }
@@ -86,9 +86,10 @@ function renderBoard() {
   board.replaceChildren(tiles);
   board.style.setProperty('--size', game.size);
   board.dataset.size = game.size;
+  board.dataset.mode = game.mode;
   board.setAttribute('aria-label', `${game.size} by ${game.size} game board`);
   $('#board-label').textContent = `THE ${game.size} × ${game.size} GRID`;
-  $('#size-description').textContent = ['numbers', 'colors'].includes(game.mode) ? `${game.total} tiles. ${game.mode === 'colors' ? 'Four random colours.' : descriptions[game.size][0] + '.'}` : game.mode === 'alphanumeric' ? 'All 62 symbols. An 8 × 8 board.' : 'All 26 letters. A 6 × 6 board.';
+  $('#size-description').textContent = ['numbers', 'colors'].includes(game.mode) ? `${game.total} tiles. ${game.mode === 'colors' ? 'Four random colours.' : descriptions[game.size][0] + '.'}` : game.mode === 'alphanumeric' ? '26 mixed tiles. A 6 × 6 board.' : 'All 26 letters. A 6 × 6 board.';
   options.hidden = !['numbers', 'colors'].includes(game.mode);
   $('#order-control').hidden = game.mode === 'colors';
   $('#mode-note').textContent = sequenceNote();
@@ -149,7 +150,7 @@ function renderProgress() {
 }
 
 function renderLeaderboard() {
-  $('#record-grid').textContent = game.mode === 'colors' ? `${game.size} × ${game.size} COLOURS` : `${game.mode === 'numbers' ? `${game.size} × ${game.size}` : game.mode === 'alphanumeric' ? '62 SYMBOLS' : modeNames[game.mode].toUpperCase()} · ${game.order === 'ascending' ? 'ASC' : 'DESC'}`;
+  $('#record-grid').textContent = game.mode === 'colors' ? `${game.size} × ${game.size} COLOURS` : `${game.mode === 'numbers' ? `${game.size} × ${game.size}` : game.mode === 'alphanumeric' ? '26 POSITIONS' : modeNames[game.mode].toUpperCase()} · ${game.order === 'ascending' ? 'ASC' : 'DESC'}`;
   const list = $('#leaderboard');
   list.replaceChildren();
   for (let index = 0; index < 3; index += 1) {

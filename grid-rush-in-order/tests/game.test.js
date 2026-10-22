@@ -129,30 +129,52 @@ test('descending rounds reverse numeric and alphabet order without counting wron
   assert.equal(game.next, '1');
 });
 
-test('alphanumeric rounds contain 62 distinct symbols in digit and uppercase-before-lowercase order', () => {
-  const sequence = [...'0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz'];
+test('letters and numbers share 26 positions and accept the user example in either direction', () => {
+  const sequence = ['1', 'b', '3', '4', 'e', 'F', '7', ...Array.from({ length: 19 }, (_, index) => String(index + 8))];
   for (const order of ['ascending', 'descending']) {
-    const game = new OrderedGame({ mode: 'alphanumeric', order });
-    assert.equal(game.size, 8);
-    assert.equal(game.total, 62);
-    assert.equal(game.tiles.length, 64);
-    assert.equal(game.tiles.filter(value => value === null).length, 2);
-    assert.equal(new Set(game.tiles.filter(value => value !== null)).size, 62);
-    game.start();
+    let draw = 0;
+    const game = new OrderedGame({ mode: 'alphanumeric', order,
+      random: () => [0.1, 0.5, 0.1, 0.1, 0.5, 0.9, 0.1][draw++] ?? 0.1 });
+    assert.equal(game.size, 6);
+    assert.equal(game.total, 26);
+    assert.equal(game.tiles.length, 36);
+    assert.equal(game.tiles.filter(value => value === null).length, 10);
+    assert.equal(new Set(game.tiles.filter(value => value !== null)).size, 26);
+    assert.equal(game.recordKey, order === 'ascending' ? 'alphanumeric-26' : 'alphanumeric-26-descending');
     const expected = order === 'ascending' ? sequence : [...sequence].reverse();
+    assert.deepEqual(game.tiles.filter(value => value !== null), expected);
+    game.start();
     assert.equal(game.click(game.tiles.indexOf(expected[1])), false);
     for (const value of expected) {
       assert.equal(game.next, value);
-      assert.equal(game.click(game.tiles.indexOf(value)), true);
+      const index = game.tiles.indexOf(value);
+      assert.equal(game.click(index), true);
+      assert.equal(game.click(index), false);
     }
     assert.equal(game.state, 'completed');
+    draw = 0;
     game.reset();
-    assert.equal(game.size, 8);
+    assert.equal(game.size, 6);
+    assert.equal(game.total, 26);
     assert.equal(game.progress, 0);
+    assert.equal(game.elapsed, 0);
     assert.equal(game.next, expected[0]);
     game.reset({ mode: 'numbers', size: 3 });
     assert.equal(game.size, 3);
     assert.equal(game.total, 9);
+  }
+});
+
+test('every mixed-symbol round contains numbers and both cases, one form per rank from 1 to 26', () => {
+  for (const random of [() => 0, () => 0.5, () => 0.99, Math.random]) {
+    const game = new OrderedGame({ mode: 'alphanumeric', size: 6, random });
+    const labels = game.tiles.filter(value => value !== null);
+    assert.ok(labels.some(value => /^\d+$/.test(value)));
+    assert.ok(labels.some(value => /^[A-Z]$/.test(value)));
+    assert.ok(labels.some(value => /^[a-z]$/.test(value)));
+    assert.deepEqual(labels.map(value => /^\d+$/.test(value) ? Number(value) : value.toLowerCase().charCodeAt(0) - 96),
+      Array.from({ length: 26 }, (_, index) => index + 1));
+    assert.throws(() => game.reset({ size: 8 }), RangeError);
   }
 });
 

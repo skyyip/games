@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { addResult, readLeaderboard, saveLeaderboard, STORAGE_KEY } from '../src/leaderboard.js';
 
-const originalKeys = ['numbers-3', 'numbers-4', 'numbers-5', 'numbers-6', 'lowercase', 'uppercase', 'mixed', 'alphanumeric'];
+const originalKeys = ['numbers-3', 'numbers-4', 'numbers-5', 'numbers-6', 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26'];
 const empty = () => Object.fromEntries([
   ...originalKeys, ...originalKeys.map(key => `${key}-descending`), 'colors-3', 'colors-4', 'colors-5', 'colors-6',
+  'alphanumeric', 'alphanumeric-descending',
 ].map(key => [key, []]));
 
 const date = '2026-10-20T08:00:00.000Z';
@@ -69,16 +70,24 @@ test('records survive saving and reading from browser storage', () => {
   assert.deepEqual(reloaded.records['numbers-4'], [{ time: 3456.7890123, date }]);
 });
 
-test('new challenge records stay independent and legacy ascending records are retained', () => {
-  const legacy = { 'numbers-3': [{ time: 1234.5678, date }], mixed: [{ time: 9876.5432, date }] };
+test('26-position scores stay independent and legacy 62-symbol and other records survive a save', () => {
+  const legacy = { 'numbers-3': [{ time: 1234.5678, date }], mixed: [{ time: 9876.5432, date }],
+    alphanumeric: [{ time: 62000.123, date }], 'alphanumeric-descending': [{ time: 63000.456, date }] };
   let records = readLeaderboard({ getItem: () => JSON.stringify(legacy) }).records;
   assert.deepEqual(records['numbers-3'], legacy['numbers-3']);
   assert.deepEqual(records.mixed, legacy.mixed);
-  for (const key of ['numbers-3-descending', 'alphanumeric', 'alphanumeric-descending', 'colors-3', 'colors-6']) {
+  for (const key of ['numbers-3-descending', 'alphanumeric-26', 'alphanumeric-26-descending', 'colors-3', 'colors-6']) {
     for (const time of [4000.1234, 3000, 2000, 1000, 9000]) records = addResult(records, key, time, date).records;
     assert.deepEqual(records[key].map(record => record.time), [1000, 2000, 3000]);
   }
   assert.deepEqual(records['numbers-3'], legacy['numbers-3']);
   assert.deepEqual(records.mixed, legacy.mixed);
   assert.deepEqual(records.uppercase, []);
+  let saved;
+  const storage = { getItem: () => saved, setItem: (_, value) => { saved = value; } };
+  assert.equal(saveLeaderboard(storage, records), true);
+  const reloaded = readLeaderboard(storage).records;
+  assert.deepEqual(reloaded.alphanumeric, legacy.alphanumeric);
+  assert.deepEqual(reloaded['alphanumeric-descending'], legacy['alphanumeric-descending']);
+  assert.deepEqual(reloaded['alphanumeric-26'].map(record => record.time), [1000, 2000, 3000]);
 });

@@ -29,3 +29,11 @@ Touch tests are automated Chrome device emulation, not physical iOS/Android devi
 - **9 PWA checks passed:** Chrome installability, all 20 challenge combinations playable after an offline reload, fresh offline tab launch, independent caches and persisted scores. The updated service worker reloads assets during installation to avoid stale HTTP-cache copies.
 - Checked all eight palette backgrounds against white labels: each exceeds 4.5:1 contrast. Named colours and a numbered reference key accompany the swatches; current/cleared steps also have accessible status labels.
 - Screenshots reviewed: mobile 8×8 layout, colour play with a cleared group, and the retained ticked board above completion results. Real-device vibration and screen-reader sessions were not performed; automated touch testing uses Chrome emulation.
+
+## Shared number-and-letter order — 2026-10-22
+
+- Replaced the 62-symbol challenge with 26 shared positions. Each position appears once, randomly as a number, lowercase letter or uppercase letter (`1 = A = a`, …, `26 = Z = z`). Both directions follow these positions; each round includes all three forms.
+- **11 unit tests passed:** the exact `1 → b → 3 → 4 → e → F → 7` example and its reverse, wrong/repeated input rejection, 26-tile resets, mixed forms under extreme random draws, and separate new leaderboards that preserve earlier 62-symbol scores through saving/reloading. Existing numeric, alphabet, colour, timing and storage tests also pass.
+- **34 browser checks passed:** all 20 current challenges, shared numeric/alphabet ranks, 26 interactive tiles plus ten blank cells, unchanged previewed forms on Start, fixed cell geometry, retained ticked labels, keyboard/touch input, responsive layouts at 320/375/600/768/1024/1440px, persisted records and no uncaught errors.
+- **9 PWA checks passed:** installation, all 20 challenges after an offline reload, persisted offline scores, fresh offline launch and cache isolation. The service-worker cache version is v4.
+- Reviewed the 320px mixed-symbol layout and the completed desktop board. All changes are confined to `grid-rush-in-order/`; no dependencies were added. Touch verification uses Chrome emulation, rather than a physical device.
