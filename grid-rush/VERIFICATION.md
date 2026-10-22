@@ -114,3 +114,9 @@ Final regression verification: **5 logic tests, 18 general browser checks, 9 web
 ## Selection border radius — 2026-10-22
 
 The animated grid/mode selection outline now reads the original option's corner radius and compensates for its SVG scaling, keeping its stroke, corners and edges aligned during spring movement and after responsive resizing. **36 rendered geometry checks passed** across both grid games at 320, 375, 768 and 1440px, with no uncaught browser errors; desktop and mobile screenshots were visually reviewed. JavaScript syntax and diff whitespace checks passed. Cache versions are now `grid-rush-app-v6` and `grid-rush-in-order-app-v9`.
+
+## Icon tiles — 2026-10-22
+
+Original Grid Rush tiles now show the owner's supplied cat artwork in place of visible numbers. The existing `assets/icons/playground-source.png` is byte-identical to the attachment. Decorative images retain native tile labels and clear to the existing checkmarks; absolute sizing keeps every grid cell fixed. The ordered game's number labels remain intact.
+
+**50 browser checks passed:** 6 icon-specific checks across all four grid sizes at 320/375/768/1440px, 18 gameplay checks, 17 immediate-touch checks and 9 install/offline checks. Verified exact image bytes, loaded dimensions, image containment, checkmark/reset behavior, fixed geometry, keyboard/touch completion and offline image decoding, with no uncaught browser errors. Reviewed mobile and desktop screenshots in `/tmp/grid-rush-icon-qa` and `/tmp/grid-rush-qa`. JavaScript syntax and diff whitespace checks passed. The v7 original-game cache includes the artwork.

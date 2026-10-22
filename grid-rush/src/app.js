@@ -50,7 +50,7 @@ function renderBoard() {
     tile.dataset.index = index;
     tile.disabled = game.state !== 'playing';
     tile.setAttribute('aria-label', `Tile ${index + 1}, unclicked`);
-    tile.innerHTML = `<span class="tile-corner" aria-hidden="true">+</span><span class="tile-number" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>`;
+    tile.innerHTML = '<span class="tile-corner" aria-hidden="true">+</span><span class="tile-number" aria-hidden="true"><img class="tile-art" src="./assets/icons/playground-source.png" width="400" height="400" alt="" draggable="false"></span>';
     tiles.append(tile);
   }
   board.replaceChildren(tiles);

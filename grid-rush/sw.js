@@ -1,6 +1,6 @@
 // Bump the version whenever an app asset changes. An update waits until existing
 // app windows close, so it cannot replace a player's game during a round.
-const CACHE_NAME = 'grid-rush-app-v6';
+const CACHE_NAME = 'grid-rush-app-v7';
 const APP_FILES = [
   './',
   './index.html',
@@ -20,6 +20,7 @@ const APP_FILES = [
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',
   './assets/icons/apple-touch-icon.png',
+  './assets/icons/playground-source.png',
 ].map(path => new URL(path, self.location.href).href);
 const HOME = new URL('./index.html', self.location.href).href;
 
