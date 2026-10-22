@@ -76,6 +76,7 @@ function renderBoard() {
       tile.classList.add('tile-color');
       tile.dataset.color = color.id;
       tile.style.setProperty('--tile-color', color.hex);
+      tile.style.setProperty('--tile-ink', color.ink ?? '#ffffff');
     }
     tile.disabled = game.state !== 'playing';
     tile.setAttribute('aria-label', `${symbolName(value)}, not cleared`);
@@ -129,6 +130,7 @@ function renderNext() {
   cue.dataset.color = color?.id ?? '';
   cue.classList.toggle('is-color', Boolean(color));
   cue.style.setProperty('--cue-color', color?.hex ?? 'transparent');
+  cue.style.setProperty('--cue-ink', color?.ink ?? '#ffffff');
   if (game.state === 'playing') animateChange(cue);
   $('#next-description').textContent = game.state === 'completed' ? 'Sequence complete. Results below.' : game.state === 'playing' ? color ? `Clear all ${color.name} tiles.` : 'Find this tile. Keep the order.' : 'The board shuffles when you start.';
   const currentIndex = game.colorOrder.findIndex(entry => entry.id === color?.id);

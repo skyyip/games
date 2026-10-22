@@ -11,6 +11,26 @@ await mkdir(output, { recursive: true });
 let checks = 0;
 const pass = message => { checks += 1; console.log(`PASS ${message}`); };
 const tileFor = (page, value) => page.locator(`.tile[data-value="${value}"]`);
+async function checkColorContrast(page) {
+  const samples = await page.locator('.tile-color, #next-symbol.is-color').evaluateAll(elements => elements.map(el => {
+    const style = getComputedStyle(el);
+    const backdrop = getComputedStyle(el.matches('.tile') ? el.closest('.board-frame') : el.parentElement).backgroundColor;
+    return { name:el.textContent.trim(), color:style.color, background:style.backgroundColor,
+      opacity:Number(style.opacity), backdrop };
+  }));
+  const rgb = value => value.match(/[\d.]+/g).slice(0,3).map(Number);
+  const luminance = channels => channels.map(value => value/255)
+    .map(value => value <= 0.04045 ? value/12.92 : ((value+0.055)/1.055)**2.4)
+    .reduce((sum,value,index) => sum+value*[0.2126,0.7152,0.0722][index],0);
+  for (const sample of samples) {
+    const backdrop = rgb(sample.backdrop);
+    const blend = color => rgb(color).map((value,index) => value*sample.opacity+backdrop[index]*(1-sample.opacity));
+    const a = luminance(blend(sample.color));
+    const b = luminance(blend(sample.background));
+    const ratio = (Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
+    assert.ok(ratio >= 3, `${sample.name} rendered label contrast is ${ratio}:1`);
+  }
+}
 async function selectMode(page, mode) {
   await page.locator(`.mode-option:has(input[value="${mode}"])`).click();
 }
@@ -197,6 +217,7 @@ try {
     const colors = await page.locator('#color-sequence li').evaluateAll(items => items.map(item=>item.dataset.color));
     assert.deepEqual(colors,previewColors,'starting must preserve the colour key shown in setup');
     assert.equal(new Set(colors).size,4);
+    await checkColorContrast(page);
     const first = colors[0];
     const wrong = page.locator(`.tile:not([data-color="${first}"])`).first();
     await wrong.click();
@@ -209,6 +230,7 @@ try {
     assert.equal(await selected.locator('.tile-number').textContent(),name);
     assert.equal(await selected.evaluate(el=>getComputedStyle(el).backgroundColor),background);
     assert.equal(await selected.locator('.tile-check').count(),1);
+    await checkColorContrast(page);
     stable(before,await geometry(page));
     while (await page.locator('#next-symbol').getAttribute('data-color') === first) {
       await page.locator(`.tile[data-color="${first}"]:not(:disabled)`).last().click();
@@ -219,8 +241,9 @@ try {
     if (size===6) await page.screenshot({path:`${output}/colors-playing.png`,fullPage:true,animations:'disabled'});
     await finish(page);
     assert.equal(await page.locator('.tile-check').count(),size**2);
+    await checkColorContrast(page);
     await page.locator('#change-grid').click();
-    pass(`${size}×${size}: random four-colour key, arbitrary tiles within each group and retained colour labels`);
+    pass(`${size}×${size}: distinct random colour key, ordered groups, retained labels and 3:1 contrast before/after clearing`);
   }
   const allRecords = await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
   assert.equal(Object.keys(allRecords).length,22);

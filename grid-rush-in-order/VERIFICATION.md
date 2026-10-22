@@ -37,3 +37,11 @@ Touch tests are automated Chrome device emulation, not physical iOS/Android devi
 - **34 browser checks passed:** all 20 current challenges, shared numeric/alphabet ranks, 26 interactive tiles plus ten blank cells, unchanged previewed forms on Start, fixed cell geometry, retained ticked labels, keyboard/touch input, responsive layouts at 320/375/600/768/1024/1440px, persisted records and no uncaught errors.
 - **9 PWA checks passed:** installation, all 20 challenges after an offline reload, persisted offline scores, fresh offline launch and cache isolation. The service-worker cache version is v4.
 - Reviewed the 320px mixed-symbol layout and the completed desktop board. All changes are confined to `grid-rush-in-order/`; no dependencies were added. Touch verification uses Chrome emulation, rather than a physical device.
+
+## Colour contrast update — 2026-10-22
+
+- Random colour rounds choose from three reviewed four-colour combinations, then shuffle the key. The eight-colour pool remains available across rounds; similar shades are kept apart. Gold and teal are lighter and use dark labels, with white labels on the other six colours.
+- The requested label/background minimum is **3:1**. Active palette pairs measure 5.61–11.35:1. Cleared tiles retain their colour, labels and ticks at 75% opacity, giving at least 3.42:1 over the white board. The colour cue stays opaque during its movement animation; bright tiles, swatches and cues have visible borders, and keyboard focus uses the contrasting label colour.
+- **13 unit tests passed:** includes independent sRGB luminance checks and a 0.18 minimum Oklab-distance guardrail between colours in generated rounds. The distance guardrail is a product choice, not a WCAG contrast ratio or a guarantee of colour-vision accessibility. Visible colour names continue to provide an alternative to hue.
+- **34 browser checks passed:** includes rendered label/background contrast before and after clearing every colour-grid size, stable geometry, preserved labels, keyboard/touch play, responsive layouts and no uncaught errors. Reviewed desktop colour play and the 320px colour layout.
+- **9 PWA checks passed:** installation and all 20 challenge categories offline, fresh offline launch, cache isolation and persisted records. Cache version is v5. No application dependencies or other games were changed.

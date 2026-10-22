@@ -2046,21 +2046,24 @@ h2 {
 .order-control select:disabled { opacity:.6; }
 .play-panel .next-cue { height:78px;min-height:78px; }
 .next-cue>div { min-width:0; }
-.next-cue strong.is-color { min-width:74px;padding:9px;border-radius:8px;background:var(--cue-color);color:#fff;font-size:18px; }
+/* Keep the colour cue readable throughout its shared movement animation. */
+.next-cue strong.is-color { min-width:74px;padding:9px;border:1px solid #293226;border-radius:8px;background:var(--cue-color);color:var(--cue-ink);font-size:18px;opacity:1!important; }
 .color-key { margin:0 0 12px;padding:12px;border:1px solid #e1e2d9;border-radius:11px;background:#fafbf7; }
 .color-key-heading { display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:8px;letter-spacing:.6px;color:#636b59; }
 .color-key ol { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;list-style:none;margin:10px 0 0;padding:0; }
 .color-key li { position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 3px;border-radius:8px;box-shadow:inset 0 0 0 1px #e1e2d9;transition:opacity .15s,background .15s,box-shadow .15s; }
-.color-key li i { width:17px;height:17px;border-radius:50%; }
+.color-key li i { width:17px;height:17px;border:1px solid #293226;border-radius:50%; }
 .color-key li span { font-size:10px;font-weight:600; }
 .color-key li small { font:500 9px var(--mono);color:#636b59; }
 .color-key li.is-current { background:#fff;box-shadow:inset 0 0 0 2px #454e3d; }
-.color-key li.is-cleared { opacity:.5; }
+.color-key li.is-cleared { opacity:.75; }
 .color-key li.is-cleared small:after { content:' ✓'; }
-.board .tile.tile-color { background:var(--tile-color);color:#fff; }
+.board .tile.tile-color { background:var(--tile-color);color:var(--tile-ink);border:1px solid #293226; }
 .board .tile-color .tile-number { font-size:14px;padding:2px; }
 .board .tile.tile-color:not(:disabled):hover { background:var(--tile-color);box-shadow:inset 0 0 0 2px #ffffff70; }
 .board .tile.clicked { background:var(--tile-color,#c44d28);color:#fffaf1;opacity:.6;box-shadow:none; }
+.board .tile.tile-color.clicked { color:var(--tile-ink);opacity:.75; }
+.board .tile-color:focus-visible { outline:3px solid var(--tile-ink);outline-offset:-4px; }
 .board .tile.clicked .tile-corner { display:none; }
 .board .tile-check { position:absolute;right:5px;top:5px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#182316; }
 .board .tile .tile-check .icon { width:15px;height:15px;stroke-width:2.5; }

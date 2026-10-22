@@ -11,13 +11,20 @@ export const RECORD_KEYS = Object.freeze([
 export const COLOR_PALETTE = Object.freeze([
   { id: 'red', name: 'Red', hex: '#b83c39' },
   { id: 'blue', name: 'Blue', hex: '#265fb0' },
-  { id: 'gold', name: 'Gold', hex: '#8a5a00' },
+  { id: 'gold', name: 'Gold', hex: '#f5d65b', ink: '#182316' },
   { id: 'green', name: 'Green', hex: '#287446' },
   { id: 'violet', name: 'Violet', hex: '#713fc2' },
   { id: 'pink', name: 'Pink', hex: '#a52c75' },
-  { id: 'teal', name: 'Teal', hex: '#087576' },
+  { id: 'teal', name: 'Teal', hex: '#58c4c2', ink: '#182316' },
   { id: 'orange', name: 'Orange', hex: '#a94718' },
 ].map(color => Object.freeze(color)));
+// Choose a reviewed combination, then randomise its order. Similar shades never
+// share a round; lighter colours also add a useful difference in brightness.
+const COLOR_SETS = [
+  ['blue', 'gold', 'red', 'teal'],
+  ['violet', 'gold', 'orange', 'green'],
+  ['blue', 'gold', 'pink', 'green'],
+];
 
 export function tileColor(value) {
   if (typeof value !== 'string' || !value.startsWith('color:')) return null;
@@ -111,7 +118,11 @@ export class OrderedGame {
     this.#state = 'idle';
     this.#progress = 0;
     this.#clicked.clear();
-    this.#colorOrder = mode === 'colors' ? shuffled(COLOR_PALETTE, this.#random).slice(0, 4) : [];
+    this.#colorOrder = [];
+    if (mode === 'colors') {
+      const palette = COLOR_SETS[Math.floor(this.#random() * COLOR_SETS.length)];
+      this.#colorOrder = shuffled(palette.map(id => COLOR_PALETTE.find(color => color.id === id)), this.#random);
+    }
     this.#sequence = sequenceFor(mode, this.#size, this.#random, this.#colorOrder);
     if (this.#order === 'descending') this.#sequence.reverse();
     this.#tiles = [...this.#sequence, ...Array(this.#size ** 2 - this.total).fill(null)];

@@ -22,7 +22,7 @@ Choose a sequence before starting:
 - **Uppercase:** A through Z, all 26 letters.
 - **Mixed case:** all 26 letters, each shown once in randomly chosen uppercase or lowercase. Follow alphabetical order regardless of case: `A → b → C …`.
 - **Letters + numbers:** **26 shared positions**. Each position randomly appears as its number, uppercase letter or lowercase letter: `1 = A = a`, `2 = B = b`, …, `26 = Z = z`. Each position appears exactly once, with numbers and both cases in every round. Follow the shared position order, for example `1 → b → 3 → 4 → e → F → 7 …`.
-- **Colours:** a randomly chosen key of four named colours. Clear every tile matching the first colour, in any tile order, before moving to the next colour. A fresh palette/order is chosen each round. All four grid sizes are available; names accompany swatches and tiles so the game never relies on colour alone.
+- **Colours:** a randomly chosen key of four named colours. Clear every tile matching the first colour, in any tile order, before moving to the next colour. Each round randomly chooses one of three reviewed colour combinations and shuffles its order, avoiding similar shades together. Gold and teal use dark labels; the other colours use white. Label/background contrast stays at least **3:1**, including faded cleared tiles. All four grid sizes are available; names accompany swatches and tiles so the game never relies on colour alone.
 
 Select **Smallest → largest** or **Largest → smallest** before starting a symbol round. Descending order reverses the complete sequence; letters and numbers still share positions in the mixed-symbol mode. Colour rounds always follow the displayed random key from left to right.
 
