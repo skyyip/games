@@ -62,7 +62,7 @@ Choose a 3×3, 4×4, 5×5, or 6×6 grid, then press **Start Game**. Click or tap
 
 The `grid-rush.records.v1` localStorage key holds separate arrays for each grid size. Each record has a full-precision millisecond `time` and an ISO `date`. Only the fastest three records are retained. Display values are rounded to two decimal seconds. Equal times retain their original order and do not qualify as a new personal best.
 
-Stored JSON is validated, sorted, and capped when loaded. Invalid entries are discarded. If storage is blocked or full, the game continues with records kept in memory for the current visit, and the records panel explains the limitation. Records are specific to the current browser and origin. Fonts are bundled locally under their SIL Open Font Licenses; the application makes no external network requests.
+Stored JSON is validated, sorted, and capped when loaded. Invalid entries are discarded. If storage is blocked or full, the game continues with records kept in memory for the current visit, and the records panel explains the limitation. Records are specific to the current browser and origin. Fonts are bundled locally under their SIL Open Font Licenses. Online pages load Google Tag Manager container `GTM-TZ646NJ9`; gameplay and local records continue to work when analytics is unavailable.
 
 ## Verification
 
