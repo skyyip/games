@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TZ646NJ9');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f7f7f2">
+<meta name="description" content="One line. One percentage. Take turns guessing the length on a randomly shaped line. The closest guess wins.">
+<meta name="apple-mobile-web-app-title" content="Line Up">
+<title>Line Up · Sky’s Playground</title>
+<link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="../grid-rush/playground-ui.css">
+<script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
+<script type="module" src="./src/app.js"></script>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TZ646NJ9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="site-top">
+  <a class="brand" href="./" aria-label="Line Up home"><svg viewBox="0 0 38 30" aria-hidden="true"><path d="M4 22C12 22 12 8 22 8h12"/><circle cx="4" cy="22" r="3"/><circle cx="34" cy="8" r="3"/></svg><span>line<span class="brand-light">up</span><span class="brand-dot">.</span></span></a>
+  <a class="playground-home" href="../" aria-label="Back to Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
+  <p class="header-note">A LITTLE GAME OF GOOD JUDGEMENT</p>
+</header>
+<main id="app">
+  <section class="intro">
+    <div><p class="eyebrow"><span class="spark" aria-hidden="true">✳</span> TRUST YOUR EYES. CHALLENGE YOUR FRIENDS.</p><h1>How close can<br>you <em>get?</em></h1></div>
+    <p class="intro-copy">One line. One percentage. A little friendly rivalry. <br>Find the length. The closest guess takes the win.</p>
+  </section>
+  <div class="arena">
+    <aside class="round-info">
+      <section class="target-card" aria-labelledby="target-heading"><p class="eyebrow" id="target-heading">THE LENGTH TO FIND</p><p class="target-number"><span id="target">—</span><small>%</small></p><p id="target-note">A random target from 1% to 100%.<br>Revealed when you start.</p><span class="shape-badge" id="shape-name">A new shape each round</span><svg class="target-art" viewBox="0 0 140 85" aria-hidden="true"><path d="M5 65C45 65 45 15 100 15h35"/><circle cx="5" cy="65" r="4"/><circle cx="135" cy="15" r="4"/></svg></section>
+      <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol><li><b>Get the same target.</b><span>Everyone sees the same percentage and randomly shaped line.</span></li><li><b>Make your best guess.</b><span>Drag a segment, or tap its start and end. Any part of the line counts.</span></li><li><b>Lock it. Pass it.</b><span>Guesses stay hidden until everyone finishes. The smallest error wins; ties share the win.</span></li></ol></details>
+      <p class="small-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="3"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>Just friends and a good eye.<br>No accounts. No measuring tools.</p>
+    </aside>
+    <div class="game-stage">
+      <section id="setup" class="panel" aria-labelledby="setup-title">
+        <p class="eyebrow section-index">01 <span>/ GATHER ROUND</span></p><h2 id="setup-title">Good company.<br>Better guesswork<span class="green">.</span></h2><p class="panel-copy">Two to six players. One device. Who has the sharpest eye?</p>
+        <form id="player-form">
+          <div class="count-control"><span>How many players?</span><div><button type="button" id="minus" aria-label="Remove a player">−</button><output id="player-count" aria-live="polite">2</output><button type="button" id="plus" aria-label="Add a player">+</button></div></div>
+          <div id="rows" class="player-rows"></div>
+          <button type="submit" id="start" class="primary-button">Start round <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="shape-list" aria-label="Possible line shapes"><span>Straight</span><span>Parabola</span><span>Wavy</span><span>Rounded bend</span></div>
+        <p class="footnote">The target and shape are picked at the start, then stay the same for every player.</p>
+      </section>
+      <section id="handoff" class="panel handoff-panel" aria-labelledby="handoff-title" hidden>
+        <p class="eyebrow section-index">YOUR TURN <span id="handoff-count"></span></p><div class="player-monogram" id="monogram" aria-hidden="true">1</div><h2 id="handoff-title">Over to <span id="next-player"></span><span class="green">.</span></h2><p class="panel-copy">Pass the device, then take your best shot. Everyone gets the same target and line.</p>
+        <svg class="line-preview" id="handoff-preview" viewBox="0 0 1000 420" aria-hidden="true"><path class="path-base"/></svg>
+        <p class="locked-note" id="locked-note">Your guesses stay under wraps.</p><button type="button" id="ready" class="primary-button">I’m ready <span aria-hidden="true">→</span></button>
+      </section>
+      <section id="play" class="panel play-panel-local" aria-labelledby="play-title" hidden>
+        <div class="turn-header"><p class="eyebrow section-index" id="turn-count"></p><span class="turn-badge" id="turn-name"></span></div><h2 id="play-title">Find <span id="inline-target" class="green">—%</span> of the line<span class="green">.</span></h2><p class="panel-copy" id="selection-help" role="status" aria-live="polite">Drag along the line, or tap a start point and an end point.</p>
+        <div class="drawing-board">
+          <div class="line-topline"><span id="line-kind">YOUR LINE</span><span><i aria-hidden="true"></i> TAKE YOUR TIME</span></div>
+          <div class="line-scene"><div class="path-stage" id="path-stage">
+            <svg id="line-svg" viewBox="0 0 1000 420" role="img" aria-label="Select a portion of the line" aria-describedby="selection-help keyboard-help"><path id="line-base" class="path-base"/><path id="line-selection" class="path-selection"/><circle id="origin-cap" class="end-cap" r="5"/><circle id="finish-cap" class="end-cap" r="5"/></svg>
+            <button type="button" class="marker marker-start" id="start-marker" data-point="start" tabindex="-1" aria-label="Move start point" hidden><span aria-hidden="true">S</span></button>
+            <button type="button" class="marker marker-end" id="end-marker" data-point="end" tabindex="-1" aria-label="Move end point" hidden><span aria-hidden="true">E</span></button>
+          </div></div>
+          <div class="line-bottomline"><span>FOLLOW THE LINE. TRUST YOUR EYE.</span><button type="button" id="clear" class="text-button">Clear selection <span aria-hidden="true">↺</span></button></div>
+        </div>
+        <div class="point-controls" aria-label="Adjust endpoints">
+          <div class="point-control" data-point="start"><button type="button" id="edit-start" aria-pressed="true"><span class="point-letter" aria-hidden="true">S</span> Start point <span aria-hidden="true">↔</span></button><input type="range" class="sr-only" id="start-point" min="0" max="100" step="0.1" value="0" tabindex="-1" aria-label="Start point position along the line"></div>
+          <div class="point-control" data-point="end"><button type="button" id="edit-end" aria-pressed="false"><span class="point-letter" aria-hidden="true">E</span> End point <span aria-hidden="true">↔</span></button><input type="range" class="sr-only" id="end-point" min="0" max="100" step="0.1" value="100" tabindex="-1" aria-label="End point position along the line"></div>
+        </div>
+        <p class="keyboard-help" id="keyboard-help">Select an endpoint to adjust it. Keyboard: arrow keys move; Shift + arrow moves finely. Home/End reach the line’s ends.</p>
+        <button type="button" id="lock" class="primary-button" disabled>Lock my guess <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button><p class="footnote">Your exact length is revealed after everyone has locked a guess.</p>
+      </section>
+      <section id="result" class="panel result-panel" aria-labelledby="result-title" hidden>
+        <p class="eyebrow section-index" id="result-kicker">THE CLOSEST CALL</p><svg class="winner-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 10h24v15a12 12 0 0 1-24 0V10Z M20 14H10v7a12 12 0 0 0 13 12M44 14h10v7a12 12 0 0 1-13 12M32 37v13M22 54h20M25 50h14"/></svg><h2 id="result-title"></h2><p class="panel-copy" id="result-summary"></p>
+        <div class="result-reference"><div><strong id="reference-label"></strong><span id="reference-kind"></span></div><svg id="result-preview" viewBox="0 0 1000 420" aria-hidden="true"><path class="path-base"/><path class="path-selection"/></svg><p>One way to make the target length. Your segment could start anywhere.</p></div>
+        <div class="standings-heading"><h3>How everyone lined up</h3><span>SMALLEST ERROR FIRST</span></div><ol id="standings" aria-label="Round ranking"></ol><p class="footnote">Error is measured in percentage points. Full precision decides the ranking; equal errors share the win.</p>
+        <button type="button" id="again" class="primary-button">Another round <span aria-hidden="true">↻</span></button><button type="button" id="change-players" class="secondary-button">Change players</button>
+      </section>
+    </div>
+  </div>
+  <footer class="site-footer"><span>Small game. Surprisingly tricky.</span><span id="offline-status" role="status">Play here, or add Line Up to your home screen.</span><span>Made for the fun of it<span class="green">.</span></span></footer>
+</main>
+<p id="announcements" class="sr-only" role="status" aria-live="polite"></p>
+<noscript><p class="noscript-note">Enable JavaScript to play Line Up.</p></noscript>
+</body>
+</html>
