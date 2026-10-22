@@ -222,16 +222,27 @@ function initChoices() {
   for (const group of document.querySelectorAll('.grid-options, .mode-options')) {
     const ink = document.createElement('span');
     ink.className = 'choice-ink'; ink.setAttribute('aria-hidden', 'true');
-    ink.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="1" y="1" width="98" height="98" rx="12"/></svg>';
+    ink.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect/></svg>';
     group.append(ink);
-    let positioned = false;
+    const border = ink.querySelector('rect');
+    let positioned = false, radius = 0;
     const spring = makeSpring({ x: 0, y: 0, width: 0, height: 0 }, state => {
+      // Counter the outline's scaling so its 2px stroke follows the option's
+      // original outer corners, including while the spring stretches it.
+      const sx = Math.max(1, state.width) / 100, sy = Math.max(1, state.height) / 100;
+      const corner = Math.max(0, radius - 1);
+      for (const [attribute, value] of Object.entries({
+        x: 1 / sx, y: 1 / sy,
+        width: Math.max(0, 100 - 2 / sx), height: Math.max(0, 100 - 2 / sy),
+        rx: corner / sx, ry: corner / sy,
+      })) border.setAttribute(attribute, value);
       ink.style.transform = `translate(${state.x}px,${state.y}px) scale(${Math.max(0, state.width) / 100},${Math.max(0, state.height) / 100})`;
     }, { mass: 0.7, stiffness: 330, damping: 22 });
     const position = animate => {
       const selected = group.querySelector('input:checked')?.nextElementSibling;
       if (!selected || !group.offsetWidth) return;
       const box = selected.getBoundingClientRect(), parent = group.getBoundingClientRect();
+      radius = parseFloat(getComputedStyle(selected).borderTopLeftRadius);
       const target = { x: box.left - parent.left, y: box.top - parent.top, width: box.width, height: box.height };
       if (positioned && animate && !reducedMotion.matches) {
         const dx = Math.abs(target.x - spring.target.x), dy = Math.abs(target.y - spring.target.y);

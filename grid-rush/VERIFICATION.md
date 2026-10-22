@@ -110,3 +110,7 @@ Final regression verification: **5 logic tests, 18 general browser checks, 9 web
 - Cache versions are `grid-rush-app-v5` and `grid-rush-in-order-app-v8`, both including the shared motion module. Existing installed windows must close before the new worker activates. Native card expansion is progressive enhancement; normal links work without it.
 - PWA automation suppresses Chrome's native install prompt to exercise the help-dialog fallback consistently; CDP verifies actual manifest installability, and gameplay is then tested with the network disabled. Actual OS installation remains a manual browser choice.
 - Verification used Chrome, including touch emulation. Physical devices, other browser engines and screen-reader software were not exercised.
+
+## Selection border radius — 2026-10-22
+
+The animated grid/mode selection outline now reads the original option's corner radius and compensates for its SVG scaling, keeping its stroke, corners and edges aligned during spring movement and after responsive resizing. **36 rendered geometry checks passed** across both grid games at 320, 375, 768 and 1440px, with no uncaught browser errors; desktop and mobile screenshots were visually reviewed. JavaScript syntax and diff whitespace checks passed. Cache versions are now `grid-rush-app-v6` and `grid-rush-in-order-app-v9`.
