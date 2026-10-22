@@ -1,7 +1,8 @@
 export const GRID_SIZES = Object.freeze([3, 4, 5, 6]);
-export const GAME_MODES = Object.freeze(['numbers', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']);
+export const GAME_MODES = Object.freeze(['numbers', 'number-range', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']);
 export const SORT_ORDERS = Object.freeze(['ascending', 'descending']);
-const BASE_RECORD_KEYS = [...GRID_SIZES.map(size => `numbers-${size}`), 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26'];
+const BASE_RECORD_KEYS = [...GRID_SIZES.map(size => `numbers-${size}`), 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26',
+  ...GRID_SIZES.map(size => `number-range-${size}`)];
 export const RECORD_KEYS = Object.freeze([
   ...BASE_RECORD_KEYS, ...BASE_RECORD_KEYS.map(key => `${key}-descending`),
   ...GRID_SIZES.map(size => `colors-${size}`),
@@ -34,6 +35,12 @@ export function tileColor(value) {
 function sequenceFor(mode, size, random, colors) {
   if (mode === 'numbers') {
     return Array.from({ length: size ** 2 }, (_, index) => String(index + 1));
+  }
+  if (mode === 'number-range') {
+    const available = Array.from({ length: 1999 }, (_, index) => index - 999);
+    // Remove each sampled value so duplicates cannot occur, even with repeated random draws.
+    const numbers = Array.from({ length: size ** 2 }, () => available.splice(Math.floor(random() * available.length), 1)[0]);
+    return numbers.sort((a, b) => a - b).map(String);
   }
   if (mode === 'colors') {
     return colors.flatMap((color, rank) => {
@@ -93,7 +100,7 @@ export class OrderedGame {
   get order() { return this.#order; }
   get colorOrder() { return [...this.#colorOrder]; }
   get recordKey() {
-    const key = this.#mode === 'alphanumeric' ? 'alphanumeric-26' : ['numbers', 'colors'].includes(this.#mode) ? `${this.#mode}-${this.#size}` : this.#mode;
+    const key = this.#mode === 'alphanumeric' ? 'alphanumeric-26' : ['numbers', 'number-range', 'colors'].includes(this.#mode) ? `${this.#mode}-${this.#size}` : this.#mode;
     return this.#order === 'descending' ? `${key}-descending` : key;
   }
   get total() { return this.#sequence.length; }
@@ -114,7 +121,7 @@ export class OrderedGame {
     if (!SORT_ORDERS.includes(order)) throw new RangeError('Unsupported sort order');
     this.#mode = mode;
     this.#order = mode === 'colors' ? 'ascending' : order;
-    this.#size = ['numbers', 'colors'].includes(mode) ? size : 6;
+    this.#size = ['numbers', 'number-range', 'colors'].includes(mode) ? size : 6;
     this.#state = 'idle';
     this.#progress = 0;
     this.#clicked.clear();

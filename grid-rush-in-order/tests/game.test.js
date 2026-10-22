@@ -129,6 +129,57 @@ test('descending rounds reverse numeric and alphabet order without counting wron
   assert.equal(game.next, '1');
 });
 
+test('number-range rounds order negative numbers, zero and positive numbers numerically in either direction', () => {
+  for (const order of ['ascending', 'descending']) {
+    let now = 100;
+    const game = new OrderedGame({ mode: 'number-range', order, random: () => 0.5, now: () => now });
+    const expected = order === 'ascending' ? ['-4','-3','-2','-1','0','1','2','3','4'] : ['4','3','2','1','0','-1','-2','-3','-4'];
+    assert.equal(game.total, 9);
+    assert.equal(game.size, 3);
+    assert.equal(game.recordKey, `number-range-3${order === 'descending' ? '-descending' : ''}`);
+    assert.deepEqual(game.tiles, expected);
+    game.start();
+    assert.equal(game.click(game.tiles.indexOf(expected[1])), false);
+    for (const value of expected) {
+      assert.equal(game.next, value);
+      const index = game.tiles.indexOf(value);
+      now += 10.12345;
+      assert.equal(game.click(index), true);
+      assert.equal(game.click(index), false);
+    }
+    assert.equal(game.state, 'completed');
+    const elapsed = game.elapsed;
+    now = 10000;
+    assert.equal(game.elapsed, elapsed);
+    game.reset();
+    assert.equal(game.elapsed, 0);
+    assert.equal(game.progress, 0);
+    assert.equal(game.next, expected[0]);
+  }
+});
+
+test('all number-range sizes sample unique integers within the inclusive bounds and reset safely', () => {
+  for (const size of [3,4,5,6]) {
+    for (const draw of [0, 0.5, 0.999999]) {
+      const game = new OrderedGame({ mode: 'number-range', size, random: () => draw });
+      const values = game.tiles.map(Number);
+      assert.equal(game.size, size);
+      assert.equal(values.length, size ** 2);
+      assert.equal(new Set(values).size, values.length);
+      assert.ok(values.every(value => Number.isInteger(value) && value >= -999 && value <= 999));
+      assert.ok(values.every((value,index) => index === 0 || values[index-1] < value));
+      if (draw === 0) assert.equal(values[0], -999);
+      if (draw === 0.999999) assert.equal(values.at(-1), 999);
+      game.start();
+      for (const value of values) assert.equal(game.click(game.tiles.indexOf(String(value))), true);
+      game.reset({ mode: 'numbers', size: 3 });
+      assert.equal(game.next, '1');
+      assert.equal(game.total, 9);
+      assert.equal(game.progress, 0);
+    }
+  }
+});
+
 test('letters and numbers share 26 positions and accept the user example in either direction', () => {
   const sequence = ['1', 'b', '3', '4', 'e', 'F', '7', ...Array.from({ length: 19 }, (_, index) => String(index + 8))];
   for (const order of ['ascending', 'descending']) {

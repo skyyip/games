@@ -19,13 +19,15 @@ instructions.open = !window.matchMedia('(max-width: 600px)').matches;
 document.querySelector('a[href="#how-to-play"]').addEventListener('click', () => {
   instructions.open = true;
 });
-const modeNames = { numbers: 'Numbers', lowercase: 'Lowercase', uppercase: 'Uppercase', mixed: 'Mixed case', alphanumeric: 'Letters + numbers', colors: 'Colours' };
-const roundName = () => game.mode === 'colors' ? `${game.size} × ${game.size} colours` : `${game.mode === 'numbers' ? `${game.size} × ${game.size} numbers` : modeNames[game.mode]} · ${game.order === 'ascending' ? 'ascending' : 'descending'}`;
+const modeNames = { numbers: 'Numbers', 'number-range': 'Number range', lowercase: 'Lowercase', uppercase: 'Uppercase', mixed: 'Mixed case', alphanumeric: 'Letters + numbers', colors: 'Colours' };
+const roundName = () => game.mode === 'colors' ? `${game.size} × ${game.size} colours` : `${['numbers','number-range'].includes(game.mode) ? `${game.size} × ${game.size} ${modeNames[game.mode].toLowerCase()}` : modeNames[game.mode]} · ${game.order === 'ascending' ? 'ascending' : 'descending'}`;
+const displaySymbol = value => value === null ? '✓' : value.replace(/^-/, '−');
 
 function sequenceNote() {
   if (game.mode === 'colors') return 'A new colour key each round. Clear every tile of one colour, then the next.';
   const ascending = game.order === 'ascending';
   if (game.mode === 'numbers') return ascending ? `1 → 2 → … → ${game.total}` : `${game.total} → … → 2 → 1`;
+  if (game.mode === 'number-range') return `Unique random whole numbers from −999 to 999. ${ascending ? 'Smallest → largest, e.g. −20 → −3 → 0 → 8.' : 'Largest → smallest, e.g. 8 → 0 → −3 → −20.'}`;
   if (game.mode === 'alphanumeric') return `${ascending ? '1 → b → 3 → 4 → e → F → 7 …' : '26 → y → 24 → W → 22 …'} Numbers and letters share positions: 1 = A = a, 2 = B = b, …, 26 = Z = z. One random form per position.`;
   if (game.mode === 'mixed') return ascending ? 'A → b → C … → Z. Case does not change alphabet order.' : 'Z → y → X … → A. Case does not change alphabet order.';
   return game.mode === 'uppercase' ? ascending ? 'A → B → C … → Z' : 'Z → Y → X … → A' : ascending ? 'a → b → c … → z' : 'z → y → x … → a';
@@ -81,7 +83,7 @@ function renderBoard() {
     tile.disabled = game.state !== 'playing';
     tile.setAttribute('aria-label', `${symbolName(value)}, not cleared`);
     tile.innerHTML = `<span class="tile-corner" aria-hidden="true">+</span><span class="tile-number" aria-hidden="true"></span>`;
-    tile.querySelector('.tile-number').textContent = color ? color.name : game.mode === 'numbers' ? value.padStart(2, '0') : value;
+    tile.querySelector('.tile-number').textContent = color ? color.name : game.mode === 'numbers' ? value.padStart(2, '0') : displaySymbol(value);
     tiles.append(tile);
   }
   board.replaceChildren(tiles);
@@ -90,8 +92,8 @@ function renderBoard() {
   board.dataset.mode = game.mode;
   board.setAttribute('aria-label', `${game.size} by ${game.size} game board`);
   $('#board-label').textContent = `THE ${game.size} × ${game.size} GRID`;
-  $('#size-description').textContent = ['numbers', 'colors'].includes(game.mode) ? `${game.total} tiles. ${game.mode === 'colors' ? 'Four random colours.' : descriptions[game.size][0] + '.'}` : game.mode === 'alphanumeric' ? '26 mixed tiles. A 6 × 6 board.' : 'All 26 letters. A 6 × 6 board.';
-  options.hidden = !['numbers', 'colors'].includes(game.mode);
+  $('#size-description').textContent = game.mode === 'number-range' ? `${game.total} tiles. Random values from −999 to 999.` : ['numbers', 'colors'].includes(game.mode) ? `${game.total} tiles. ${game.mode === 'colors' ? 'Four random colours.' : descriptions[game.size][0] + '.'}` : game.mode === 'alphanumeric' ? '26 mixed tiles. A 6 × 6 board.' : 'All 26 letters. A 6 × 6 board.';
+  options.hidden = !['numbers', 'number-range', 'colors'].includes(game.mode);
   $('#order-control').hidden = game.mode === 'colors';
   $('#mode-note').textContent = sequenceNote();
   renderColorKey();
@@ -104,7 +106,7 @@ function renderBoard() {
 function symbolName(value) {
   const color = tileColor(value);
   if (color) return color.name;
-  if (/^\d+$/.test(value)) return `Number ${value}`;
+  if (/^-?\d+$/.test(value)) return `Number ${value.startsWith('-') ? `minus ${value.slice(1)}` : value}`;
   return `${value === value.toUpperCase() ? 'Uppercase' : 'Lowercase'} ${value}`;
 }
 
@@ -125,7 +127,7 @@ function renderNext() {
   const color = tileColor(game.next);
   const cue = $('#next-symbol');
   $('#next-label').textContent = game.state === 'completed' ? 'ALL IN ORDER' : game.state === 'playing' ? 'NEXT UP' : 'START WITH';
-  cue.textContent = color?.name ?? game.next ?? '✓';
+  cue.textContent = color?.name ?? displaySymbol(game.next);
   cue.dataset.value = game.next ?? '';
   cue.dataset.color = color?.id ?? '';
   cue.classList.toggle('is-color', Boolean(color));
@@ -152,7 +154,7 @@ function renderProgress() {
 }
 
 function renderLeaderboard() {
-  $('#record-grid').textContent = game.mode === 'colors' ? `${game.size} × ${game.size} COLOURS` : `${game.mode === 'numbers' ? `${game.size} × ${game.size}` : game.mode === 'alphanumeric' ? '26 POSITIONS' : modeNames[game.mode].toUpperCase()} · ${game.order === 'ascending' ? 'ASC' : 'DESC'}`;
+  $('#record-grid').textContent = game.mode === 'colors' ? `${game.size} × ${game.size} COLOURS` : `${game.mode === 'number-range' ? `${game.size} × ${game.size} · −999…999` : game.mode === 'numbers' ? `${game.size} × ${game.size}` : game.mode === 'alphanumeric' ? '26 POSITIONS' : modeNames[game.mode].toUpperCase()} · ${game.order === 'ascending' ? 'ASC' : 'DESC'}`;
   const list = $('#leaderboard');
   list.replaceChildren();
   for (let index = 0; index < 3; index += 1) {
@@ -310,7 +312,7 @@ function activateTile(tile, keyboard = false) {
     wrongFeedback(tile);
     tile.classList.add('is-wrong');
     setTimeout(() => tile.classList.remove('is-wrong'), 220);
-    $('#next-description').textContent = `Not yet. Find ${tileColor(game.next)?.name ?? game.next} first.`;
+    $('#next-description').textContent = `Not yet. Find ${tileColor(game.next)?.name ?? displaySymbol(game.next)} first.`;
     announce(`Not yet. Find ${symbolName(game.next)} next.`);
     return;
   }

@@ -18,6 +18,7 @@ Open **http://localhost:5174/grid-rush-in-order/**. Set `PORT` to use another po
 Choose a sequence before starting:
 
 - **Numbers:** 1 through 9, 16, 25 or 36, using a 3×3, 4×4, 5×5 or 6×6 board.
+- **Number range:** 9, 16, 25 or 36 unique random integers from **−999 to 999 inclusive**, using the same grid sizes. Choose smallest to largest or largest to smallest. Negative values and zero follow numeric order, for example `−20 → −3 → 0 → 8`. Values are sampled without replacement, so repeated random draws cannot produce duplicate tiles or stall generation. Start preserves the previewed set; a new round samples a fresh set.
 - **Lowercase:** a through z, all 26 letters.
 - **Uppercase:** A through Z, all 26 letters.
 - **Mixed case:** all 26 letters, each shown once in randomly chosen uppercase or lowercase. Follow alphabetical order regardless of case: `A → b → C …`.
@@ -34,7 +35,7 @@ Mouse clicks, immediate touch/pen contact, Tab, arrow keys, Enter and Space are 
 
 - `src/game.js`: an `idle → playing → completed` state model, sequence generation, Fisher–Yates shuffle and ordered input validation. It uses `performance.now()` and freezes the elapsed milliseconds on the final correct input.
 - `src/app.js`: DOM rendering, next-symbol feedback, keyboard/touch interaction and a `requestAnimationFrame` timer display. Explicit CSS Grid rows and columns preserve cell geometry after clicks.
-- `src/leaderboard.js`: fastest three full-precision times and ISO dates for each of **20 challenges**: the eight symbol/grid combinations in both ascending and descending order, plus four colour-grid sizes. Existing ascending scores retain their original keys; new modes and descending scores are stored separately. Only display values are rounded. Invalid records are filtered and storage failures fall back to records for the current visit.
+- `src/leaderboard.js`: fastest three full-precision times and ISO dates for each of **28 challenges**: the twelve symbol/grid combinations in both ascending and descending order, plus four colour-grid sizes. Existing ascending scores retain their original keys; new modes and descending scores are stored separately. The number-range mode uses `number-range-3` through `number-range-6`, with a `-descending` suffix for reverse order. Only display values are rounded. Invalid records are filtered and storage failures fall back to records for the current visit.
 - Records use **`grid-rush-in-order.records.v1`**, separate from the original game's storage. Scores stay in this browser and on this device.
 - The 26-position mixed-symbol mode uses `alphanumeric-26` and `alphanumeric-26-descending`. Earlier 62-symbol scores remain stored under their original keys, but are excluded from the new leaderboards because round lengths differ.
 - `manifest.webmanifest`, `sw.js` and `src/pwa.js`: standalone installation and offline play, with a separate cache prefix that preserves Grid Rush's cache. Bump the cache version when changing app assets.

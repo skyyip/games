@@ -2070,6 +2070,12 @@ h2 {
 .board[data-size="6"] .tile-check { width:15px;height:15px;right:3px;top:3px; }
 .board[data-size="6"] .tile .tile-check .icon { width:11px;height:11px; }
 .board[data-mode="alphanumeric"] .tile { font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:600; }
+/* Fit the longest signed value to the actual board width at every grid size. */
+.board[data-mode="number-range"] { container-type:inline-size; }
+.board[data-mode="number-range"] .tile { font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:16px;font-size:clamp(13px,calc(100cqw / var(--size) / 3),26px); }
+.board[data-mode="number-range"] .tile-corner { display:none; }
+.board[data-mode="number-range"] .tile-check { width:12px;height:12px;top:2px;right:2px; }
+.board[data-mode="number-range"] .tile .tile-check .icon { width:9px;height:9px; }
 .board-frame .result-overlay { position:relative;inset:auto;z-index:auto;margin-top:16px;padding:24px 18px;border:1px solid #dce4cf;border-radius:12px;background:#f4f7ee;backdrop-filter:none; }
 .board-frame .result-icon { width:44px;height:44px;margin-bottom:12px; }
 .board-frame .result-icon .icon { width:24px;height:24px; }

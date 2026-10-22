@@ -45,3 +45,12 @@ Touch tests are automated Chrome device emulation, not physical iOS/Android devi
 - **13 unit tests passed:** includes independent sRGB luminance checks and a 0.18 minimum Oklab-distance guardrail between colours in generated rounds. The distance guardrail is a product choice, not a WCAG contrast ratio or a guarantee of colour-vision accessibility. Visible colour names continue to provide an alternative to hue.
 - **34 browser checks passed:** includes rendered label/background contrast before and after clearing every colour-grid size, stable geometry, preserved labels, keyboard/touch play, responsive layouts and no uncaught errors. Reviewed desktop colour play and the 320px colour layout.
 - **9 PWA checks passed:** installation and all 20 challenge categories offline, fresh offline launch, cache isolation and persisted records. Cache version is v5. No application dependencies or other games were changed.
+
+## Signed number range — 2026-10-22
+
+- Added **Number range**, sampling unique integers from −999 through 999 inclusive for 3×3, 4×4, 5×5 and 6×6 grids. Smallest-to-largest and largest-to-smallest use numeric comparison, including negative values and zero. Starting preserves the previewed set; replay/reset samples a fresh set.
+- Added eight separate record categories, bringing the current challenge count to 28. Existing score keys, archived 62-symbol scores, the original number mode and Google Tag Manager snippets are preserved.
+- **15 unit tests passed:** signed numeric order in both directions, zero, inclusive endpoints, uniqueness under repeated random draws, every grid size, timer/reset behaviour and independent top-three records, plus the existing game, colour-contrast and storage checks.
+- **43 browser checks passed:** all 28 challenges, eight signed-number combinations, wrong/repeated clicks, retained labels/ticks, stopped timing, mouse/keyboard/touch play and persisted scores. Worst-case `−999` text fits every grid size at 320/375/600/768/1024/1440px without horizontal scrolling or changes to cell geometry.
+- **9 PWA checks passed:** installation, all 28 challenges after an offline reload, fresh offline launch, cache isolation and persisted records. Cache version is v7. Automated sessions suppress analytics requests.
+- Reviewed signed-number screenshots at 320px and 768px. Labels use a clear minus sign, accessible negative-number names and fonts that scale with board width. No dependencies or other game files were changed. Touch tests use Chrome emulation; a physical device and screen reader were not used.

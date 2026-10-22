@@ -11,6 +11,8 @@ await mkdir(output, { recursive: true });
 let checks = 0;
 const pass = message => { checks += 1; console.log(`PASS ${message}`); };
 const tileFor = (page, value) => page.locator(`.tile[data-value="${value}"]`);
+// Keep automated test sessions out of production analytics.
+const silenceAnalytics = context => context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
 async function checkColorContrast(page) {
   const samples = await page.locator('.tile-color, #next-symbol.is-color').evaluateAll(elements => elements.map(el => {
     const style = getComputedStyle(el);
@@ -57,6 +59,7 @@ function stable(before, after) {
 }
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  await silenceAnalytics(context);
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -119,7 +122,7 @@ try {
 
   const saved = await page.evaluate(key => localStorage.getItem(key), key);
   const data = JSON.parse(saved);
-  assert.equal(Object.keys(data).length, 22);
+  assert.equal(Object.keys(data).length, 30);
   assert.equal(Object.values(data).filter(records => records.length === 1).length, 7);
   await page.evaluate(() => localStorage.setItem('grid-rush.records.v1', 'original-game-sentinel'));
   await page.reload();
@@ -245,9 +248,54 @@ try {
     await page.locator('#change-grid').click();
     pass(`${size}×${size}: distinct random colour key, ordered groups, retained labels and 3:1 contrast before/after clearing`);
   }
+  for (const size of [3,4,5,6]) {
+    for (const order of ['ascending','descending']) {
+      await selectMode(page,'number-range');
+      assert.equal(await page.locator('#grid-options').isVisible(),true);
+      await page.locator(`.grid-option:has(input[value="${size}"])`).click();
+      await page.locator('#sort-order').selectOption(order);
+      const values = await page.locator('.tile').evaluateAll(tiles=>tiles.map(tile=>tile.dataset.value));
+      assert.equal(values.length,size**2);
+      assert.equal(new Set(values).size,size**2);
+      assert.ok(values.every(value=>Number.isInteger(Number(value)) && Number(value)>=-999 && Number(value)<=999));
+      assert.match(await page.locator('#mode-note').textContent(),/−999 to 999/);
+      const expected = [...values].sort((a,b)=>order==='ascending' ? Number(a)-Number(b) : Number(b)-Number(a));
+      await page.locator('#start').click();
+      const started = await page.locator('.tile').evaluateAll(tiles=>tiles.map(tile=>tile.dataset.value));
+      assert.deepEqual(started.sort(),[...values].sort(),'Start must preserve the sampled number set');
+      assert.equal(await page.locator('#sort-order').isDisabled(),true);
+      await tileFor(page,expected[1]).click();
+      assert.equal(await page.locator('#progress').textContent(),'0');
+      const before = await geometry(page);
+      const first = tileFor(page,expected[0]);
+      await first.click();
+      assert.equal(await first.locator('.tile-number').textContent(),expected[0].replace(/^-/,'−'));
+      assert.match(await first.getAttribute('aria-label'),expected[0].startsWith('-') ? /Number minus \d+, cleared/ : /Number \d+, cleared/);
+      await first.dispatchEvent('click');
+      assert.equal(await page.locator('#progress').textContent(),'1');
+      stable(before,await geometry(page));
+      for (const value of expected.slice(1)) {
+        assert.equal(await page.locator('#next-symbol').getAttribute('data-value'),value);
+        assert.equal(await page.locator('#next-symbol').textContent(),value.replace(/^-/,'−'));
+        if (size===4) {
+          await tileFor(page,value).focus();
+          await page.keyboard.press('Enter');
+        } else await tileFor(page,value).click();
+      }
+      assert.equal(await page.locator('.tile-check').count(),size**2);
+      stable(before,await geometry(page));
+      const finalTime = await page.locator('#timer').textContent();
+      await page.waitForTimeout(50);
+      assert.equal(await page.locator('#timer').textContent(),finalTime);
+      assert.equal(await page.locator('.record-new').count(),1);
+      await page.locator('#change-grid').click();
+      assert.equal(await page.locator('#timer').textContent(),'00.00');
+      pass(`${size}×${size} number range ${order}: numeric order, unique signed values, retained labels, keyboard/mouse play and reset`);
+    }
+  }
   const allRecords = await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
-  assert.equal(Object.keys(allRecords).length,22);
-  assert.equal(Object.values(allRecords).filter(records=>records.length===1).length,20);
+  assert.equal(Object.keys(allRecords).length,30);
+  assert.equal(Object.values(allRecords).filter(records=>records.length===1).length,28);
   assert.deepEqual(allRecords.alphanumeric,[]);
   assert.deepEqual(allRecords['alphanumeric-descending'],[]);
   for (const legacyKey of ['numbers-3','numbers-4','numbers-5','numbers-6','lowercase','uppercase','mixed']) {
@@ -255,32 +303,54 @@ try {
   }
   await page.reload();
   assert.deepEqual(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key),allRecords);
-  pass('all twenty challenge records persist independently and retain every earlier ascending score');
+  pass('all twenty-eight challenge records persist independently and retain every earlier ascending score');
 
-  for (const width of [320, 375, 600, 768, 1024, 1440]) {
-    await page.setViewportSize({ width, height: 900 });
-    for (const mode of ['mixed','alphanumeric','colors']) {
-      await selectMode(page,mode);
-    const layout = await page.evaluate(() => ({
-      width: document.documentElement.clientWidth,
-      scroll: document.documentElement.scrollWidth,
-      cells: [...document.querySelectorAll('#board > *')].map(el => {
-        const r = el.getBoundingClientRect(); return [r.width, r.height];
-      }),
-    }));
-    assert.ok(layout.scroll <= layout.width, `horizontal overflow at ${width}px`);
-    assert.ok(layout.cells.every(([w, h]) => Math.abs(w - h) < 1));
-    if (mode==='alphanumeric') {
-      assert.equal(await page.locator('.tile').count(),26);
-      assert.ok(layout.cells.every(([w])=>w>=32),'mixed-symbol touch targets must remain at least 32px');
+  {
+    const page = await context.newPage();
+    // Seed before the game captures its RNG, forcing four-character negative values.
+    await page.addInitScript(()=>{Math.random=()=>0;});
+    await page.goto(baseURL);
+    await page.evaluate(()=>document.fonts.ready);
+    for (const width of [320, 375, 600, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const mode of ['mixed','alphanumeric','colors','number-range']) {
+        await selectMode(page,mode);
+        for (const size of mode==='number-range' ? [3,4,5,6] : [null]) {
+          if (size) await page.locator(`.grid-option:has(input[value="${size}"])`).click();
+          const layout = await page.evaluate(() => ({
+            width: document.documentElement.clientWidth,
+            scroll: document.documentElement.scrollWidth,
+            cells: [...document.querySelectorAll('#board > *')].map(el => {
+              const r = el.getBoundingClientRect(); return [r.width, r.height];
+            }),
+          }));
+          assert.ok(layout.scroll <= layout.width, `horizontal overflow at ${width}px`);
+          assert.ok(layout.cells.every(([w, h]) => Math.abs(w - h) < 1));
+          if (mode==='alphanumeric') {
+            assert.equal(await page.locator('.tile').count(),26);
+            assert.ok(layout.cells.every(([w])=>w>=32),'mixed-symbol touch targets must remain at least 32px');
+          }
+          if (mode==='number-range') {
+            const textFits = await page.locator('.tile').evaluateAll(tiles=>tiles.every(tile=>{
+              const range=document.createRange();range.selectNodeContents(tile.querySelector('.tile-number'));
+              const text=range.getBoundingClientRect();const cell=tile.getBoundingClientRect();
+              return text.left>=cell.left && text.right<=cell.right && text.top>=cell.top && text.bottom<=cell.bottom;
+            }));
+            assert.ok(textFits,`signed number text must fit ${size}×${size} cells at ${width}px`);
+            assert.ok((await page.locator('.tile-number').allTextContents()).includes('−999'));
+          }
+          if ([320,375,768].includes(width)) await page.screenshot({path:`${output}/${mode}-${width}.png`,fullPage:true,animations:'disabled'});
+        }
+      }
+      pass(`${width}px: square cells, signed-number text fits every size, and no horizontal overflow`);
     }
-    if ([320,375,768].includes(width)) await page.screenshot({path:`${output}/${mode}-${width}.png`,fullPage:true,animations:'disabled'});
-    }
-    pass(`${width}px: square cells and no horizontal overflow`);
+    await page.close();
   }
 
   const mobile = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  await silenceAnalytics(mobile);
   const touchPage = await mobile.newPage();
+  await touchPage.addInitScript(()=>{Math.random=()=>0;});
   touchPage.on('pageerror', error => errors.push(error.message));
   await touchPage.goto(baseURL);
   await selectMode(touchPage, 'mixed');
@@ -322,11 +392,24 @@ try {
   await touchPage.locator('#start').tap();
   await finish(touchPage,'tap');
   assert.equal(await touchPage.locator('#progress').textContent(),'9');
+  await touchPage.locator('#change-grid').tap();
+  await selectMode(touchPage,'number-range');
+  await touchPage.locator('.grid-option:has(input[value="6"])').tap();
+  await touchPage.locator('#sort-order').selectOption('descending');
+  await touchPage.locator('#start').tap();
+  await touchPage.locator('#board').scrollIntoViewIfNeeded();
+  const rangeBefore = await geometry(touchPage);
+  await finish(touchPage,'tap');
+  assert.equal(await touchPage.locator('#progress').textContent(),'36');
+  assert.equal(await touchPage.locator('.tile-check').count(),36);
+  stable(rangeBefore,await geometry(touchPage));
+  pass('6×6 signed number range completes with touch input and stable cell geometry');
   await mobile.close();
   pass('26-position mixed-symbol and colour rounds complete with real touch input');
   pass('touch counts on contact, never resizes cells, finishes before release, and replays deliberately');
 
   const denied = await browser.newContext();
+  await silenceAnalytics(denied);
   await denied.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked', 'SecurityError'); } }));
   const deniedPage = await denied.newPage();
   deniedPage.on('pageerror', error => errors.push(error.message));

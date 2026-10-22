@@ -9,6 +9,8 @@ const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'pl
 // installation is intentionally unavailable in incognito browser contexts.
 const profile = await mkdtemp(join(tmpdir(), 'grid-rush-in-order-pwa-'));
 const context = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true });
+// Offline/gameplay checks do not send analytics events.
+await context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
 const browser = context.browser();
 const baseURL = process.env.GRID_RUSH_URL || 'http://localhost:5174/grid-rush-in-order/';
 let checks = 0;
@@ -68,10 +70,10 @@ try {
 
   await context.setOffline(true);
   await page.reload();
-  for (const mode of ['numbers', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']) {
+  for (const mode of ['numbers', 'number-range', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']) {
     await page.locator(`.mode-option:has(input[value="${mode}"])`).click();
-    for (const size of ['numbers','colors'].includes(mode) ? [3,4,5,6] : [6]) {
-      if (['numbers','colors'].includes(mode)) await page.locator(`.grid-option:has(input[value="${size}"])`).click();
+    for (const size of ['numbers','number-range','colors'].includes(mode) ? [3,4,5,6] : [6]) {
+      if (['numbers','number-range','colors'].includes(mode)) await page.locator(`.grid-option:has(input[value="${size}"])`).click();
       for (const order of mode === 'colors' ? ['ascending'] : ['ascending','descending']) {
         if (mode !== 'colors') await page.locator('#sort-order').selectOption(order);
         await page.locator('#start').click();
@@ -87,7 +89,7 @@ try {
   const saved = await page.evaluate(() => localStorage.getItem('grid-rush-in-order.records.v1'));
   await page.reload();
   assert.equal(await page.evaluate(() => localStorage.getItem('grid-rush-in-order.records.v1')), saved);
-  pass('offline reload supports all twenty challenges and preserves records across another reload');
+  pass('offline reload supports all twenty-eight challenges and preserves records across another reload');
 
   const offlineTab = await context.newPage();
   offlineTab.on('pageerror', error => errors.push(error.message));
@@ -97,6 +99,7 @@ try {
   pass('a fresh tab can launch the cached app while the network is offline');
 
   const standalone = await browser.newContext();
+  await standalone.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
   await standalone.addInitScript(() => {
     const original = window.matchMedia.bind(window);
     window.matchMedia = query => query === '(display-mode: standalone)' ? { matches: true } : original(query);

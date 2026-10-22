@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { addResult, readLeaderboard, saveLeaderboard, STORAGE_KEY } from '../src/leaderboard.js';
 
-const originalKeys = ['numbers-3', 'numbers-4', 'numbers-5', 'numbers-6', 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26'];
+const originalKeys = ['numbers-3', 'numbers-4', 'numbers-5', 'numbers-6', 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26',
+  'number-range-3', 'number-range-4', 'number-range-5', 'number-range-6'];
 const empty = () => Object.fromEntries([
   ...originalKeys, ...originalKeys.map(key => `${key}-descending`), 'colors-3', 'colors-4', 'colors-5', 'colors-6',
   'alphanumeric', 'alphanumeric-descending',
@@ -76,7 +77,9 @@ test('26-position scores stay independent and legacy 62-symbol and other records
   let records = readLeaderboard({ getItem: () => JSON.stringify(legacy) }).records;
   assert.deepEqual(records['numbers-3'], legacy['numbers-3']);
   assert.deepEqual(records.mixed, legacy.mixed);
-  for (const key of ['numbers-3-descending', 'alphanumeric-26', 'alphanumeric-26-descending', 'colors-3', 'colors-6']) {
+  for (const key of ['numbers-3-descending', 'alphanumeric-26', 'alphanumeric-26-descending', 'colors-3', 'colors-6',
+    'number-range-3', 'number-range-4', 'number-range-5', 'number-range-6',
+    'number-range-3-descending', 'number-range-4-descending', 'number-range-5-descending', 'number-range-6-descending']) {
     for (const time of [4000.1234, 3000, 2000, 1000, 9000]) records = addResult(records, key, time, date).records;
     assert.deepEqual(records[key].map(record => record.time), [1000, 2000, 3000]);
   }
