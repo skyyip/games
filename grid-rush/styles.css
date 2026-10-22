@@ -632,6 +632,11 @@ h2 {
   object-fit:contain;
   border-radius:5px;
   pointer-events:none;
+  transition:transform 90ms ease-out;
+}
+
+.tile:not(:disabled):active .tile-art {
+  transform:scale(.9);
 }
 
 .tile:disabled {
@@ -669,6 +674,51 @@ h2 {
   width:30px;
   height:30px;
   stroke-width:1.7;
+}
+
+/* Animate the artwork and feedback inside the fixed button hit area. */
+.tile.clicked::before {
+  content:'';
+  position:absolute;
+  inset:8%;
+  border-radius:5px;
+  background:url('./assets/icons/playground-source.png') center/contain no-repeat;
+  opacity:0;
+  pointer-events:none;
+  animation:tile-icon-clear 160ms ease-out;
+}
+
+.tile.clicked::after {
+  content:'';
+  position:absolute;
+  inset:3px;
+  border:2px solid currentColor;
+  border-radius:inherit;
+  opacity:0;
+  pointer-events:none;
+  animation:tile-clear-ring 360ms ease-out;
+}
+
+.board .tile.clicked .icon {
+  animation:tile-check-arrive 320ms ease-out;
+}
+
+@keyframes tile-icon-clear {
+  from { opacity:1;transform:scale(1); }
+  45% { opacity:.7;transform:scale(.86) rotate(-6deg); }
+  to { opacity:0;transform:scale(.55) rotate(-10deg); }
+}
+
+@keyframes tile-check-arrive {
+  from { opacity:0;transform:scale(.35) rotate(-12deg);stroke-dashoffset:32; }
+  45% { opacity:1;transform:scale(1.16) rotate(4deg);stroke-dashoffset:0; }
+  72% { transform:scale(.95) rotate(-2deg); }
+  to { opacity:1;transform:scale(1) rotate(0);stroke-dashoffset:0; }
+}
+
+@keyframes tile-clear-ring {
+  from { opacity:.45;transform:scale(.68); }
+  to { opacity:0;transform:scale(1); }
 }
 
 .board[data-size="5"],.board[data-size="6"] {
@@ -1776,6 +1826,9 @@ h2 {
     animation:none!important;
     transition:none!important;
     scroll-behavior:auto!important;
+  }
+  .tile:not(:disabled):active .tile-art {
+    transform:none;
   }
 }
 
