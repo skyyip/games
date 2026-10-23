@@ -1,6 +1,6 @@
 # Pikmin Fling
 
-Clear a fenced garden of 30 wandering Pikmin by feeding a hungry plant. Choose **Normal** or **Challenge**. Both begin with 20 normal (leaf), 5 bud and 5 flower Pikmin. Red, yellow, blue, ice (light blue), rock (black) and winged (pink) characters are mixed randomly, with matching leaf/bud/flower artwork and visible gesture badges.
+Clear a fenced garden of 30 wandering Pikmin by feeding a hungry plant. Choose **Normal**, **Challenge** or **20s Rush**. All modes begin with 20 normal (leaf), 5 bud and 5 flower Pikmin. Red, yellow, blue, ice (light blue), rock (black) and winged (pink) characters are mixed randomly, with matching leaf/bud/flower artwork and visible gesture badges.
 
 Play at [skyyip.github.io/games/pikmin-fling/](https://skyyip.github.io/games/pikmin-fling/).
 
@@ -28,7 +28,7 @@ Start the game to start the clock and let the crowd wander inside the larger fen
 
 Chains can mix character colours, but never growth stages. Tracing through a different stage leaves it unselected. The final flick uses the upward end of the gesture, so a sideways tracing path does not spoil the throw. Releasing without a flick cancels the chain. Multiple pointers may independently hold or fling different Pikmin.
 
-Every throw automatically follows a parabolic path into the mouth. The cartoon plant sways gently above the rounded cream fence. Throws track the mouth as it moves. The plant opens, the character disappears on arrival, and the plant bites. The **last arrival** stops the timer. Play again starts a fresh round; Reset round clears the timer, selections and in-flight characters without saving an unfinished score.
+Every throw automatically follows a parabolic path into the mouth. The cartoon plant sways gently above the rounded cream fence. Throws track the mouth as it moves. The plant opens, the character disappears on arrival, and the plant bites. In Normal and Challenge, the **last arrival** stops the timer. In 20s Rush, the round ends at 20 seconds or when the garden is cleared, whichever comes first. Play again starts a fresh round; Reset round clears the timer, selections and in-flight characters without saving an unfinished score.
 
 ### Challenge mode
 
@@ -39,6 +39,18 @@ Every random **3–8 seconds**, choose a new random count from each group:
 - 1–10 normal Pikmin become buds.
 
 Each group is sampled without replacement from the states at the start of the wave, capped at the number available. Changes apply together; no character changes twice in a single wave. Held, linked, focused, selected, pending-double-tap and flying characters keep their current state. The countdown shows the next wave. Cycles continue until completion or reset. Returning from a background tab applies one due wave and schedules the next, avoiding a burst of missed changes.
+
+### 20s Rush
+
+Clear as many of the same 30 Pikmin as possible within **20 seconds**. The countdown starts immediately with Start game. This mode uses the same recurring 3–8 second growth waves and gesture protection as Challenge.
+
+- Normal / leaf: **1 point**.
+- Bud: **2 points**.
+- Flower: **3 points**.
+
+Each unique arrival in the mouth adds the value of its growth stage. Flying Pikmin keep their launch stage. Throws that have not arrived before the deadline earn no points. The score counts upward, pulses and shows a floating points gain; reduced motion shows the total immediately. Clearing all 30 finishes early and totals the score. Otherwise the 20-second deadline disables the remaining characters, releases held gestures and removes unfinished flights.
+
+This mode keeps the **highest three scores**, separately from the other modes’ fastest times. Scores, date, new-result highlighting and personal best feedback survive a refresh. Equal scores preserve the older result’s order and do not count as a new personal best.
 
 ### Accessibility
 
@@ -51,7 +63,7 @@ The 44×58px native buttons have visible focus, labels naming their growth stage
 ```text
 index.html                 Mode controls, stage guide, garden/plant SVG, results
 styles.css                 Responsive garden, walking, charge rings and linked states
-src/game.js                Fixed roster, lifecycle, gesture validation and growth waves
+src/game.js                Roster, deadline, stage scoring, gestures and growth waves
 src/interaction.js         Walking/separation, pointer gesture, double tap, flight geometry
 src/leaderboard.js         Safe local storage and separate top-three mode rankings
 src/app.js                 Pointer/keyboard input, frame loop and DOM rendering
@@ -60,14 +72,15 @@ assets/README.md           Artwork sources and credits
 manifest.webmanifest       Standalone app and shared cat icons
 sw.js                      Scoped, versioned offline cache
 tests/                     Dependency-free Node tests
-scripts/browser-check.mjs   Optional Chrome, touch, responsive and offline checks
+scripts/browser-check.mjs   Original-mode Chrome, touch, responsive and offline checks
+scripts/timed-check.mjs     Countdown, animated scores, cancellation and score records
 ```
 
 ## Timing and records
 
-`performance.now()` measures elapsed milliseconds. `requestAnimationFrame` refreshes the clock, advances roaming and draws each 480ms flight. Unique ready → flying → eaten transitions prevent duplicate scoring. Reset cancels gestures, effects and flights before replacing the roster.
+`performance.now()` measures elapsed milliseconds. `requestAnimationFrame` refreshes the clock, advances roaming and draws each 480ms flight. Unique ready → flying → eaten transitions prevent duplicate scoring. Timed mode checks its absolute `performance.now()` deadline before growth, launch and arrival; `setTimeout` also ends the round when frame updates are suspended. Its elapsed duration is capped at 20,000ms, so a late callback cannot extend the scoring window. Reset cancels the deadline and score animation as well as gameplay work. Reset cancels gestures, effects and flights before replacing the roster.
 
-The **`pikmin-fling.records.v2`** localStorage key contains independent `normal` and `challenge` arrays. Each entry stores full-precision milliseconds and an ISO date. Reads validate, sort and cap each array at three. A slower fourth result leaves the existing three intact. Equal times keep their original order and do not count as a new personal best. Display rounding never changes stored times.
+The **`pikmin-fling.records.v2`** localStorage key contains independent `normal` and `challenge` arrays. Each time entry stores full-precision milliseconds and an ISO date. The additional `timed` array stores integer `{score, date}` entries, ranked highest first. Timed scores must be integers from 0 to 90; malformed entries are ignored. Adding this array preserves existing Normal and Challenge records. Reads validate, sort and cap each array at three. A slower fourth result leaves the existing three intact. Equal times keep their original order and do not count as a new personal best. Display rounding never changes stored times.
 
 The previous `pikmin-fling.records.v1` count-based records are left untouched. They are not mixed with the new modes because the rules differ. Malformed storage is discarded safely; unavailable/full storage falls back to in-memory records with a visible notice.
 

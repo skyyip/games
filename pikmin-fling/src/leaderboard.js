@@ -3,9 +3,11 @@ import { MODES } from './game.js';
 export const STORAGE_KEY = 'pikmin-fling.records.v2';
 
 const emptyRecords = () => Object.fromEntries(MODES.map(mode => [mode, []]));
-const validRecord = record => record !== null && typeof record === 'object' &&
-  typeof record.time === 'number' && Number.isFinite(record.time) && record.time >= 0 &&
-  typeof record.date === 'string' && Number.isFinite(Date.parse(record.date));
+const validRecord = (record, mode) => record !== null && typeof record === 'object' &&
+  typeof record.date === 'string' && Number.isFinite(Date.parse(record.date)) &&
+  (mode === 'timed' ? Number.isInteger(record.score) && record.score >= 0 && record.score <= 90 :
+    typeof record.time === 'number' && Number.isFinite(record.time) && record.time >= 0);
+const compare = mode => mode === 'timed' ? (a, b) => b.score - a.score : (a, b) => a.time - b.time;
 
 export function readLeaderboard(storage) {
   const records = emptyRecords();
@@ -19,9 +21,9 @@ export function readLeaderboard(storage) {
     const parsed = JSON.parse(raw ?? 'null');
     for (const mode of MODES) {
       if (!Array.isArray(parsed?.[mode])) continue;
-      records[mode] = parsed[mode].filter(validRecord)
-        .map(({ time, date }) => ({ time, date }))
-        .sort((a, b) => a.time - b.time).slice(0, 3);
+      records[mode] = parsed[mode].filter(record => validRecord(record, mode))
+        .map(record => mode === 'timed' ? { score: record.score, date: record.date } : { time: record.time, date: record.date })
+        .sort(compare(mode)).slice(0, 3);
     }
   } catch {
     // Invalid JSON is treated as an empty leaderboard, ready for the next game.
@@ -38,17 +40,17 @@ export function saveLeaderboard(storage, records) {
   }
 }
 
-export function addResult(records, mode, time, date = new Date().toISOString()) {
-  if (!MODES.includes(mode) || !validRecord({ time, date })) {
+export function addResult(records, mode, value, date = new Date().toISOString()) {
+  const result = mode === 'timed' ? { score: value, date } : { time: value, date };
+  if (!MODES.includes(mode) || !validRecord(result, mode)) {
     throw new RangeError('Invalid leaderboard result');
   }
-  const previous = records[mode];
-  const result = { time, date };
-  const topThree = [...previous, result].sort((a, b) => a.time - b.time).slice(0, 3);
+  const previous = records[mode] ?? [];
+  const topThree = [...previous, result].sort(compare(mode)).slice(0, 3);
   const index = topThree.indexOf(result);
   return {
     records: { ...records, [mode]: topThree },
     rank: index === -1 ? null : index + 1,
-    personalBest: previous.length === 0 || time < previous[0].time,
+    personalBest: previous.length === 0 || compare(mode)(result, previous[0]) < 0,
   };
 }

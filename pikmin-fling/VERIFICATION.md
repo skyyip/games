@@ -62,3 +62,35 @@ The shared `grid-rush/scripts/ui-check.mjs` suite also passed **19 checks** acro
 Review found an Escape handler scoped too narrowly to the garden. A failing browser regression reproduced the issue before the handler was moved to `window`; the complete suite then passed. The fence selection fix extends native-selection protection from individual buttons to their enclosing delegated gesture area, with a failing-then-passing browser regression and an offline-cache version bump. A final local review checked rule coverage, native controls, labels/focus, gesture cancellation, reduced motion, record validation and scoped service-worker updates.
 
 Chrome touch emulation was tested. Physical phones, other browser engines, screen readers and native operating-system installation were not directly tested.
+
+## 20s Rush — 2026-10-23
+
+**58 repository logic tests passed**, including **21 Pikmin tests**. Five new tests cover the 20-second deadline (including delayed/background updates), 1/2/3-point unique arrivals, late-input rejection, early completion, recurring protected growth waves, score reset, highest-three ordering, stable ties, validation and preserving existing completion-time records. These were added incrementally with failing-then-passing core cases.
+
+The existing **32 Pikmin browser checks passed** for Normal/Challenge, mouse/keyboard/touch gestures, growth, reset, records, responsive layouts and offline play.
+
+The new `scripts/timed-check.mjs` suite passed **13 browser checks**:
+
+- Native third mode, idle 20.00 countdown, zero score, point guide and highest-score heading.
+- 320/375/430/768/1440px layouts, no horizontal overflow and at least 44px mode controls. Phone and desktop screenshots were visually inspected.
+- Individual normal/bud/flower arrivals add 1/2/3 points, animate the cumulative number and floating gain, and expose the actual score to assistive technology.
+- Recurring growth waves during timed play.
+- Partial-round timeout at 0.00, disabled input and one saved final record.
+- Replay resets score; reset cancels pending arrivals and the old deadline without saving.
+- Timeout while a flower is held and a character is flying: both are cancelled, release cannot throw, and unfinished arrivals score nothing.
+- Early clear of all 30 totals 45 points before any growth wave, freezes the countdown above zero and highlights the best result.
+- Highest-three cap, lower/tied fourth-score rejection, refresh persistence and switching back to original time-based modes.
+- Real Chrome touch input for an upward fling and double-tap bud in timed mode.
+- Reduced motion skips optional score effects, retains immediate scores and keyboard play, and works with blocked storage.
+- Offline reload supports timed play and score storage.
+- No uncaught browser errors. Analytics requests were stubbed during QA.
+
+Run the same local server, then:
+
+```sh
+GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
+PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
+node pikmin-fling/scripts/timed-check.mjs
+```
+
+Screenshots default to `/tmp/pikmin-timed-qa`. Review confirmed that scoring occurs on unique arrival, deadline enforcement precedes input and arrival processing, completed records save once, pending score effects cancel on reset/reduced motion, and the updated offline cache includes the new game code. Physical phones, other browser engines and screen readers were not directly tested.

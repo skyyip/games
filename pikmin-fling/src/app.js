@@ -1,4 +1,4 @@
-import {FlingGame,GROWTH} from './game.js';
+import {FlingGame,GROWTH,ROUND_LIMIT,POINTS} from './game.js';
 import {createRoster,walkRoster,TYPES,TYPE_NAMES,PointerGesture,DoubleTap,distanceToSegment,flightPoint} from './interaction.js';
 import {readLeaderboard,saveLeaderboard,addResult} from './leaderboard.js';
 import {animateChange,reducedMotion} from '../../grid-rush/src/playground-ui.js';
@@ -7,6 +7,7 @@ const $=selector=>document.querySelector(selector);
 const game=new FlingGame(),world=$('#world'),units=$('#units'),plant=$('#plant');
 const flights=new Map(),gestures=new Map(),effects=new Set(),taps=new DoubleTap();
 const growthNames={leaf:'Normal',bud:'Bud',flower:'Flower'};
+const modeNames={normal:'Normal',challenge:'Challenge',timed:'20s Rush'};
 const hints={leaf:'Fling upward.',bud:'Double-tap to feed.',flower:'Hold still for 1 second until the ring fills, then fling upward.'};
 const symbols={leaf:'↗',bud:'2×',flower:'✿'};
 let storage;
@@ -14,6 +15,7 @@ try{storage=window.localStorage;}catch{/* In-memory records still work. */}
 let {records,available:storageAvailable}=readLeaderboard(storage);
 let roster=[],buttons=[],selected=null,newRank=null,frame=0,assetsReady=false;
 let bite=null,nom=null,lastFrame=0,fieldWidth=0,fieldHeight=0,cycle=0;
+let deadlineTimer=0,scoreFrame=0,scorePulse=null,scoreGain=null;
 const seconds=time=>(time/1000).toFixed(2);
 const announce=text=>{$('#announcements').textContent=text;};
 const source=(type,growth)=>`./assets/pikmin/${type}-${growth}.png`;
@@ -28,7 +30,7 @@ function renderUnit(id) {
   // Compensate for the generous transparent padding in the Winged bud artwork.
   button.querySelector('img').style.setProperty('--art-scale',roster[id].type==='winged'&&unit.growth==='bud'?1.6:1);
   button.querySelector('.growth-badge').textContent=symbols[unit.growth];
-  button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}. ${hints[unit.growth]} Keyboard: Enter to feed.`);
+  button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}.${game.mode==='timed'?` Worth ${POINTS[unit.growth]} points.`:''} ${hints[unit.growth]} Keyboard: Enter to feed.`);
 }
 function positionUnits() {
   for(const unit of roster)buttons[unit.id].style.transform=`translate(${unit.x-22}px,${unit.y-29}px)`;
@@ -63,28 +65,32 @@ function protectedIds() {
   return ids;
 }
 function renderRecords() {
+  const timed=game.mode==='timed';
   const fragment=document.createDocumentFragment();
   records[game.mode].forEach((record,index)=>{
     const row=document.createElement('li');row.className=`record${newRank===index+1?' is-new':''}`;
     const rank=document.createElement('span');rank.className='record-rank';rank.textContent=String(index+1).padStart(2,'0');
-    const score=document.createElement('span');score.className='record-score';score.append(document.createTextNode(seconds(record.time)));
-    const suffix=document.createElement('small');suffix.textContent='s';score.append(suffix);
+    const score=document.createElement('span');score.className='record-score';score.append(document.createTextNode(timed?record.score:seconds(record.time)));
+    const suffix=document.createElement('small');suffix.textContent=timed?'pts':'s';score.append(suffix);
     if(newRank===index+1){const badge=document.createElement('span');badge.className='record-new';badge.textContent='NEW RECORD';score.append(badge);}
     const date=document.createElement('time');date.className='record-date';date.dateTime=record.date;
     date.textContent=new Date(record.date).toLocaleDateString(undefined,{month:'short',day:'numeric'});
     row.append(rank,score,date);fragment.append(row);
   });
-  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent='A clean garden deserves a record. Set your first time.';fragment.append(row);}
-  $('#records').replaceChildren(fragment);$('#records-count').textContent=game.mode.toUpperCase();
+  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Twenty seconds. Make every Pikmin count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
+  $('#records').replaceChildren(fragment);$('#records-count').textContent=modeNames[game.mode].toUpperCase();
+  $('#records-title').textContent=timed?'Your highest three':'Your fastest three';
+  $('#records').setAttribute('aria-label',timed?'Highest total scores':'Fastest completion times');
   $('#storage-status').textContent=storageAvailable?'Saved on this device.':'Storage is unavailable. Records stay for this visit.';
 }
 
 function renderProgress() {
-  $('#timer').textContent=seconds(game.elapsed);
+  $('#timer').textContent=seconds(game.mode==='timed'?game.remainingTime:game.elapsed);
+  $('.scoreboard').classList.toggle('is-urgent',game.mode==='timed'&&game.state==='playing'&&game.remainingTime<=5000);
   $('#fed').textContent=game.progress;$('#total').textContent=game.count;
   $('#progress').max=game.count;$('#progress').value=game.progress;
   for(const [growth,count] of Object.entries(game.growthCounts))$(`#${growth}-count`).textContent=count;
-  $('#phase').textContent=game.state==='playing'?'FEEDING TIME':game.state==='completed'?'CLEAN SWEEP':'READY TO FLING';
+  $('#phase').textContent=game.state==='playing'?'FEEDING TIME':game.state==='completed'?(game.endReason==='timeout'?"TIME’S UP":'CLEAN SWEEP'):'READY TO FLING';
 }
 
 function cancelEffects() {
@@ -95,7 +101,24 @@ function effect(target,keyframes,options) {
   const animation=target.animate(keyframes,options);effects.add(animation);
   animation.finished.catch(()=>{}).finally(()=>effects.delete(animation));return animation;
 }
-reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)cancelEffects();});
+reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches){cancelEffects();cancelAnimationFrame(scoreFrame);scoreFrame=0;$('#score').textContent=game.score;}});
+function addScoreFeedback(points) {
+  const output=$('#score'),target=game.score,from=Number(output.textContent),started=performance.now();
+  output.setAttribute('aria-label',`Score: ${target} points`);
+  announce(`${game.progress} of 30 fed. ${target} points.`);
+  cancelAnimationFrame(scoreFrame);scorePulse?.cancel();scoreGain?.cancel();
+  if(reducedMotion.matches){output.textContent=target;return;}
+  // Retarget from the visible number so simultaneous arrivals never run competing counters.
+  const count=now=>{
+    const t=Math.min(1,(now-started)/260);
+    output.textContent=Math.round(from+(target-from)*(1-(1-t)**3));
+    scoreFrame=t<1?requestAnimationFrame(count):0;
+  };
+  scoreFrame=requestAnimationFrame(count);
+  scorePulse=effect(output,[{transform:'scale(1)'},{transform:'scale(1.14)',offset:.35},{transform:'scale(1)'}],{duration:300,easing:'ease-out'});
+  $('#score-gain').textContent=`+${points}`;
+  scoreGain=effect($('#score-gain'),[{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(-3px)',offset:.2},{opacity:0,transform:'translateY(-20px)'}],{duration:650,easing:'ease-out'});
+}
 function chomp() {
   bite?.cancel();nom?.cancel();
   bite=effect($('#plant-head'),[{transform:'scale(1)'},{transform:'scale(1.1,.82)',offset:.3},{transform:'scale(.98,1.04)',offset:.7},{transform:'scale(1)'}],{duration:260,easing:'ease-out'});
@@ -104,39 +127,57 @@ function chomp() {
 
 function resetRound(mode=game.mode) {
   cancelAnimationFrame(frame);frame=0;lastFrame=0;
+  clearTimeout(deadlineTimer);deadlineTimer=0;cancelAnimationFrame(scoreFrame);scoreFrame=0;
   for(const pointerId of [...gestures.keys()])release({pointerId},true);
   taps.clear();gestures.clear();flights.clear();$('#flights').replaceChildren();$('#chains').replaceChildren();cancelEffects();
   game.reset(mode);selected=null;newRank=null;cycle=0;plant.classList.remove('is-open');world.classList.remove('is-playing');
+  const timed=mode==='timed';
+  $('.scoreboard').classList.toggle('is-timed',timed);$('#score-panel').hidden=!timed;
+  $('#score').textContent='0';$('#score').setAttribute('aria-label','Score: 0 points');$('#score-gain').textContent='';
+  $('#time-label').textContent=timed?'TIME LEFT':'YOUR TIME';$('#timer').setAttribute('aria-label',timed?'Seconds remaining':'Elapsed seconds');
+  for(const label of document.querySelectorAll('.point-value'))label.hidden=!timed;
   $('#results').hidden=true;$('#mode-options').disabled=false;
   $('#start').hidden=false;$('#reset').hidden=true;
   $('#gesture-help').textContent='Hold to link: 0.5s for normal/buds, 1s for flowers. Trace the same stage, then flick up.';
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
-  $('#cycle-status').textContent=mode==='challenge'?'Challenge · growth changes every 3–8s':'Normal mode · states stay the same';
+  $('#cycle-status').textContent=mode==='normal'?'Normal mode · states stay the same':`${modeNames[mode]} · growth changes every 3–8s`;
+  $('#control-note').textContent=timed?'20 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 30 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock and Winged Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.';
   renderRoster();renderProgress();setSelected(null);renderRecords();
 }
 function startRound(keyboard=false) {
   if(!assetsReady)return;
   resetRound();game.start();
+  if(game.mode==='timed')deadlineTimer=setTimeout(()=>{if(game.expire()){renderProgress();finishRound();}},ROUND_LIMIT);
   for(const button of buttons)button.disabled=false;
   $('#mode-options').disabled=true;$('#start').hidden=true;$('#reset').hidden=false;world.classList.add('is-playing');
   $('#garden-label').textContent='HOLD. LINK. FLING.';
   renderProgress();$('.scoreboard').scrollIntoView({block:'start',behavior:'auto'});
   if(keyboard)buttons[0].focus({preventScroll:true});
-  announce(`30 Pikmin. ${game.mode} mode. Timer started. 20 normal, 5 buds, 5 flowers.`);
+  announce(`30 Pikmin. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'20-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 20 normal, 5 buds, 5 flowers.`);
   frame=requestAnimationFrame(tick);
 }
 function finishRound() {
-  const result=addResult(records,game.mode,game.elapsed);records=result.records;newRank=result.rank;
+  if(!$('#results').hidden)return;
+  cancelAnimationFrame(frame);frame=0;clearTimeout(deadlineTimer);deadlineTimer=0;cancelGestures();
+  flights.clear();$('#flights').replaceChildren();plant.classList.remove('is-open');
+  for(const button of buttons)button.disabled=true;
+  const timed=game.mode==='timed',timeout=game.endReason==='timeout';
+  const result=addResult(records,game.mode,timed?game.score:game.elapsed);records=result.records;newRank=result.rank;
   storageAvailable=saveLeaderboard(storage,records)&&storageAvailable;
-  $('#final-time').textContent=seconds(game.elapsed);
-  $('#result-badge').textContent=result.personalBest?'NEW PERSONAL BEST!':newRank?`TOP THREE / #${newRank}`:'CLEAN SWEEP';
-  $('#result-note').textContent=`All ${game.count} Pikmin fed. ${result.personalBest?'Your quickest clean-up yet.':newRank?'A new spot in your fastest three.':'One hungry plant, one very tidy garden.'}`;
+  $('#final-time').textContent=timed?game.score:seconds(game.elapsed);$('#result-unit').textContent=timed?'pts':'s';
+  $('#result-title').textContent=timeout?'Time’s up.':'Garden cleared.';
+  $('#result-badge').textContent=result.personalBest?'NEW PERSONAL BEST!':newRank?`TOP THREE / #${newRank}`:timed?'NICE FEEDING!':'CLEAN SWEEP';
+  $('#result-note').textContent=timed?`${game.progress} of ${game.count} Pikmin fed in ${seconds(game.elapsed)}s. ${result.personalBest?'Your highest score yet.':newRank?'A new spot in your highest three.':'Every Pikmin counts. Try for a higher score!'}`:`All ${game.count} Pikmin fed. ${result.personalBest?'Your quickest clean-up yet.':newRank?'A new spot in your fastest three.':'One hungry plant, one very tidy garden.'}`;
   $('#results').hidden=false;renderRecords();setSelected(null);
-  $('#garden-label').textContent='ONE VERY HAPPY PLANT';
+  $('#garden-label').textContent=timeout?'A LITTLE BREAK. A BIG APPETITE.':'ONE VERY HAPPY PLANT';
   world.classList.remove('is-playing');$('#cycle-timer').textContent='';
+  if(timed){
+    $('#cycle-status').textContent=`${timeout?'Time’s up':'Garden cleared'} · ${game.score} points`;
+    $('#gesture-help').textContent='Round finished. Play again for a fresh countdown, or choose another mode.';
+  }
   animateChange($('#results'));$('#result-title').focus({preventScroll:true});
   $('#results').scrollIntoView({block:'center',behavior:reducedMotion.matches?'auto':'smooth'});
-  announce(`Garden cleared in ${seconds(game.elapsed)} seconds. ${$('#result-badge').textContent}`);
+  announce(timed?`${timeout?'Time is up.':'Garden cleared.'} ${game.progress} of 30 fed. Final score ${game.score} points. ${$('#result-badge').textContent}`:`Garden cleared in ${seconds(game.elapsed)} seconds. ${$('#result-badge').textContent}`);
 }
 
 function renderGestures(now) {
@@ -161,18 +202,19 @@ function tick(now) {
   frame=0;taps.expire(now);renderGestures(now);
   const frozen=protectedIds();
   const changed=game.advance(frozen);
+  if(game.state==='completed'){renderProgress();finishRound();return;}
   if(changed.length){
     cycle++;for(const id of changed){renderUnit(id);effect(buttons[id].querySelector('.growth-badge'),[{transform:'scale(.7)'},{transform:'scale(1.2)',offset:.6},{transform:'scale(1)'}],{duration:300});}
     $('#cycle-status').textContent=`Growth wave ${cycle} · ${changed.length} changed`;
   }
-  if(game.mode==='challenge')$('#cycle-timer').textContent=`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`;
+  if(game.mode!=='normal')$('#cycle-timer').textContent=`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`;
   const ready=roster.filter(p=>game.units[p.id].status==='ready');
   if(!reducedMotion.matches)walkRoster(ready,lastFrame?(now-lastFrame)/1000:0,fieldWidth,fieldHeight,frozen);
   for(const unit of ready)buttons[unit.id].classList.toggle('is-paused',frozen.has(unit.id));
   lastFrame=now;positionUnits();
   const bounds=world.getBoundingClientRect(),mouth=$('#mouth-target').getBoundingClientRect();
   const target={x:mouth.x+mouth.width/2-bounds.x,y:mouth.y+mouth.height/2-bounds.y};
-  let arrivals=0;
+  let arrivals=0;const previousScore=game.score;
   for(const [id,flight] of flights) {
     const t=Math.min(1,(now-flight.started)/480);
     if(t>=1) {
@@ -187,6 +229,7 @@ function tick(now) {
   }
   plant.classList.toggle('is-open',flights.size>0);
   if(arrivals)chomp();
+  if(game.score>previousScore)addScoreFeedback(game.score-previousScore);
   renderProgress();
   if(game.state==='completed')finishRound();
   else if(game.state==='playing')frame=requestAnimationFrame(tick);

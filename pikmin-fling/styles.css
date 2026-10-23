@@ -37,3 +37,32 @@ main{max-width:1200px;padding:0 24px;margin:auto}.intro{display:flex;align-items
 .is-playing .pikmin:not(.is-paused):not(.is-held):not(.is-gone) .walk-feet i:last-child{animation-delay:calc(var(--walk-delay) - 300ms)}
 @keyframes footstep{0%,100%{transform:translate(-1px,0) rotate(-12deg)}50%{transform:translate(2px,-4px) rotate(18deg)}}
 @media(prefers-reduced-motion:reduce){.plant-sway,.walk-feet i{animation:none!important}}
+
+/* The timed round keeps its countdown, score and progress readable on phones. */
+.fling-modes label:last-child{grid-column:1/-1}
+.fling-modes label:last-child span{min-height:60px}
+.scoreboard.is-timed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+.scoreboard.is-timed .clock{min-width:0}
+.scoreboard.is-timed .progress-wrap{grid-column:1/-1;max-width:none}
+.scoreboard.is-timed .progress-wrap>div{flex-wrap:nowrap;justify-content:space-between}
+.score-panel{padding-left:22px;border-left:1px solid var(--line)}
+.score-total{display:flex;align-items:baseline;position:relative;font:500 44px/1.1 var(--display);letter-spacing:-2px;font-variant-numeric:tabular-nums;color:var(--green)}
+.score-total output{display:inline-block;min-width:1.2ch;transform-origin:50% 80%}
+.score-total>span{font-size:16px;letter-spacing:0;margin-left:6px;color:var(--muted)}
+.score-total #score-gain{position:absolute;left:90px;top:8px;margin:0;font-size:16px;font-weight:700;color:var(--green);opacity:0;pointer-events:none}
+.scoreboard.is-urgent .clock{color:#a43d31}
+.point-value{font-weight:600;color:var(--green);white-space:nowrap}
+@media(max-width:760px){
+  .control-card{grid-template-columns:minmax(0,1fr)}
+  .control-card fieldset{grid-column:1}
+  .control-card .primary-button,.control-card .secondary-button{grid-column:1;grid-row:3}
+  .control-card .control-note{grid-row:4}
+  .fling-modes{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fling-modes label:last-child{grid-column:auto}
+  .fling-modes span,.fling-modes label:last-child span{min-height:66px}
+  .scoreboard.is-timed{gap:12px 18px}
+  .score-panel{padding-left:18px}
+  .score-total{font-size:39px}
+  .score-total #score-gain{left:78px;font-size:14px}
+}
+@media(max-width:380px){.score-total{font-size:38px}.score-total #score-gain{left:70px;font-size:13px}.fling-modes span{padding:8px 6px}.fling-modes b{font-size:12px}.fling-modes small{font-size:9px}}
