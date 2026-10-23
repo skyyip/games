@@ -118,7 +118,7 @@ try{
   await swipe(page,flower,1080);assert.equal(await flower.isDisabled(),true);
   pass('flowers reject immediate/700ms flings and launch only after a full stationary second');
   const first=await stable(page,pikmin(page,'bud').first()),a=await centre(first);
-  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.waitForTimeout(560);
+  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.waitForTimeout(240);
   assert.equal(await first.evaluate(b=>b.classList.contains('is-linked')),true);
   const firstId=await first.getAttribute('data-id');
   const secondId=await pikmin(page,'bud').evaluateAll((items,id)=>items.find(b=>b.dataset.id!==id).dataset.id,firstId);
@@ -133,10 +133,10 @@ try{
   await page.mouse.move(wrong.x,wrong.y-70,{steps:4});await page.mouse.up();
   assert.equal(await first.isDisabled(),true);assert.equal(await target.isDisabled(),true);
   assert.equal(await page.locator('.is-linked').count(),0);
-  pass('long-press traces same-stage buds, ignores flowers, draws a chain and launches the group with a final upward flick');
+  pass('a short press traces same-stage buds, ignores flowers, draws a chain and launches the group with a final upward flick');
   const cancelUnit=await stable(page,pikmin(page,'leaf').first());
   await page.locator('#reset').focus();const cancelOrigin=await centre(cancelUnit);
-  await page.mouse.move(cancelOrigin.x,cancelOrigin.y);await page.mouse.down();await page.waitForTimeout(560);
+  await page.mouse.move(cancelOrigin.x,cancelOrigin.y);await page.mouse.down();await page.waitForTimeout(240);
   assert.equal(await cancelUnit.evaluate(b=>b.classList.contains('is-linked')),true);
   await page.keyboard.press('Escape');assert.equal(await page.locator('.is-held,.is-linked').count(),0);
   await page.mouse.move(cancelOrigin.x,cancelOrigin.y-70,{steps:4});await page.mouse.up();
@@ -193,17 +193,29 @@ try{
   pass('real touch input supports double-tap buds, press-and-fling flowers and simultaneous normal flings without scrolling');
   const tap=await stable(p,pikmin(p,'flower').first());await tap.tap();await p.locator('#feed-selected').tap();assert.equal(await tap.isDisabled(),true);
   pass('tap plus Feed selected provides a drag-free alternative for every growth state');
-  const chainStart=await stable(p,pikmin(p,'leaf').first()),ca=await centre(chainStart);
-  const chainStartId=await chainStart.getAttribute('data-id');
-  const chainTargetId=await pikmin(p,'leaf').evaluateAll((items,id)=>items.find(b=>b.dataset.id!==id).dataset.id,chainStartId);
-  const chainTarget=p.locator(`.pikmin[data-id="${chainTargetId}"]`);
-  await touch(protocol,'touchStart',[ca]);await p.waitForTimeout(560);
-  const cb=await centre(chainTarget);
-  await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y}]);
-  assert.equal(await chainTarget.evaluate(b=>b.classList.contains('is-linked')),true);
-  await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y-70}]);await touch(protocol,'touchEnd',[]);
-  assert.equal(await chainStart.isDisabled(),true);assert.equal(await chainTarget.isDisabled(),true);
-  pass('a finger can long-press, trace same-stage Pikmin and fling the full chain');
+  for(const growth of ['leaf','bud','flower']) {
+    await p.waitForTimeout(550);
+    const fedBefore=Number(await p.locator('#fed').textContent()),scrollBefore=await p.evaluate(()=>scrollY);
+    const chainStart=await stable(p,pikmin(p,growth).first()),ca=await centre(chainStart);
+    const chainStartId=await chainStart.getAttribute('data-id');
+    const chainTargetId=await pikmin(p,growth).evaluateAll((items,id)=>items.find(b=>b.dataset.id!==id).dataset.id,chainStartId);
+    const chainTarget=p.locator(`.pikmin[data-id="${chainTargetId}"]`);
+    await touch(protocol,'touchStart',[ca]);await p.waitForTimeout(240);
+    const cb=await centre(chainTarget);
+    await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y}]);
+    assert.equal(await chainTarget.evaluate(b=>b.classList.contains('is-linked')),true);
+    assert.equal(await p.locator(`.pikmin.is-linked:not([data-growth="${growth}"])`).count(),0);
+    assert.ok(await p.locator('#chains polyline').count()>0);
+    if(growth==='flower')await p.screenshot({path:`${output}/short-flower-chain-touch.png`});
+    await p.waitForTimeout(250); // A new flick must work after pausing the drag, too.
+    await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y-70}]);await touch(protocol,'touchEnd',[]);
+    assert.equal(await chainStart.isDisabled(),true);assert.equal(await chainTarget.isDisabled(),true);
+    const count=await p.locator('.flying-pikmin').count();assert.ok(count>=2);
+    assert.equal(await p.locator('.flying-pikmin').evaluateAll((images,growth)=>images.every(image=>image.getAttribute('src').endsWith(`-${growth}.png`)),growth),true);
+    await p.waitForTimeout(550);assert.equal(Number(await p.locator('#fed').textContent()),fedBefore+count);
+    assert.equal(await p.evaluate(()=>scrollY),scrollBefore);
+    pass(`${growth}: a finger can short-press 240ms, drag-link, pause and flick the full matching chain into the mouth without scrolling`);
+  }
   await p.locator('#pen').scrollIntoViewIfNeeded();
   await p.waitForTimeout(100);
   const blank=await p.locator('#pen').boundingBox(),scrollBefore=await p.evaluate(()=>scrollY);

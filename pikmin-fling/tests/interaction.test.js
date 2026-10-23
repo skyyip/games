@@ -48,13 +48,29 @@ test('random crowds can include Ice, Rock and Winged Pikmin alongside the origin
   assert.deepEqual([...seen],['red','yellow','blue','ice','rock','winged']);
 });
 
-test('normal/bud chains need half a second; flowers require a full stationary second before flinging or chaining',()=>{
+test('short press and drag links matching stages after 200ms, while a single flower still needs one second',()=>{
+  for(const growth of ['leaf','bud','flower']) {
+    const g=new PointerGesture(0,growth,{x:100,y:200,t:0});
+    g.update(199);assert.equal(g.chaining,false);assert.equal(g.add(1,growth),false);
+    g.update(200);assert.equal(g.chaining,true);
+    assert.equal(g.add(2,growth==='leaf'?'bud':'leaf'),false);
+    assert.equal(g.add(1,growth),true);assert.equal(g.add(1,growth),false);
+    g.move({x:200,y:200,t:220});g.move({x:200,y:170,t:240});
+    assert.deepEqual(g.action({x:200,y:130,t:260}),{kind:'chain',held:220});
+    assert.deepEqual(g.ids,[0,1]);
+  }
+  const solo=new PointerGesture(0,'flower',{x:100,y:200,t:0});
+  solo.update(200);solo.move({x:100,y:130,t:210});
+  assert.equal(solo.action({x:100,y:130,t:220}),null);
+});
+
+test('single-flower charging, longer holds and chain flick detection keep their original behaviour',()=>{
   const begin={x:100,y:200,t:0};
   const flower=new PointerGesture(2,'flower',begin);
   flower.move({x:100,y:140,t:100});
   assert.equal(flower.action({x:100,y:130,t:1200}),null); // waiting after swiping is not a charge
   const early=new PointerGesture(2,'flower',begin);
-  early.update(999);assert.equal(early.charged,false);assert.equal(early.chaining,false);
+  early.update(999);assert.equal(early.charged,false);assert.equal(early.chaining,true);
   early.move({x:100,y:150,t:999});assert.equal(early.action({x:100,y:130,t:999}),null);
   const charged=new PointerGesture(2,'flower',begin);
   charged.update(1000);assert.equal(charged.charged,true);assert.equal(charged.chaining,true);
@@ -86,6 +102,14 @@ test('a fast sideways chain trace followed immediately by an upward flick uses o
   chain.move({x:500,y:180,t:780});chain.move({x:500,y:140,t:810});
   assert.equal(chain.action({x:500,y:130,t:830})?.kind,'chain');
   assert.equal(chain.action({x:500,y:140,t:1200}),null); // releasing after a pause is not a flick
+});
+
+test('a short-press chain can pause after dragging and then fling with one coalesced upward move',()=>{
+  const chain=new PointerGesture(0,'flower',{x:100,y:200,t:0});chain.update(200);
+  chain.add(1,'flower');chain.move({x:200,y:200,t:240});chain.update(1000);
+  chain.move({x:200,y:130,t:1050});
+  assert.equal(chain.action({x:200,y:130,t:1060})?.kind,'chain');
+  assert.equal(chain.action({x:200,y:130,t:1500}),null,'stale flick velocity must still expire');
 });
 
 test('walking takes longer routes across the garden rather than only shuffling near the starting spot',()=>{

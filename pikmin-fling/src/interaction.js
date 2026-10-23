@@ -51,11 +51,12 @@ export class PointerGesture {
     this.held=0;this.moved=false;this.chaining=false;
   }
   get charged(){return this.held>=FLOWER_HOLD;}
+  // The flower ring tracks its solo charge; every chain arms after a short press.
   get holdTarget(){return this.growth==='flower'?FLOWER_HOLD:CHAIN_HOLD;}
   update(now) {
     if(!this.moved){
       this.held=Math.max(this.held,now-this.from.t);
-      if(this.held>=this.holdTarget)this.chaining=true;
+      if(this.held>=CHAIN_HOLD)this.chaining=true;
       // Keep a recent stationary anchor so the first move after a long hold is recognised.
       this.samples=[{...this.last,t:now}];
     }
@@ -63,6 +64,8 @@ export class PointerGesture {
   move(point) {
     this.update(point.t);
     if(Math.hypot(point.x-this.from.x,point.y-this.from.y)>10)this.moved=true;
+    // A fresh flick after a pause starts at the last stationary finger position.
+    if(point.t-this.last.t>180)this.samples=[{...this.last,t:point.t}];
     this.last=point;this.samples.push(point);
     this.samples=this.samples.filter(p=>point.t-p.t<=180);
   }
@@ -86,6 +89,7 @@ export class PointerGesture {
       }
     }
     if(!isUpwardSwipe(from,point))return null;
+    if(this.growth==='flower'&&this.ids.length===1&&!this.charged)return null;
     if(this.chaining)return {kind:'chain',held:this.held};
     if(this.growth==='bud'||(this.growth==='flower'&&!this.charged))return null;
     return {kind:'fling',held:this.held};

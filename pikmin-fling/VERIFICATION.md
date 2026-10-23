@@ -8,12 +8,12 @@ Verified with Node.js 24 and headless Chrome using the existing optional Playwri
 node --test grid-rush/tests/*.test.js grid-rush-in-order/tests/*.test.js line-up/tests/*.test.js pikmin-fling/tests/*.test.js
 ```
 
-**49 tests passed**, including 16 Pikmin Fling tests covering:
+**61 tests passed**, including 24 Pikmin Fling tests covering:
 
 - Fixed 30-character roster in both modes: 20 normal, 5 buds, 5 flowers.
 - Random selection includes Red, Yellow, Blue, Ice, Rock and Winged Pikmin, with accessible type names.
 - Start/reset lifecycle, duplicate/invalid input, unique arrivals and final-arrival time freezing at full precision.
-- State-specific actions: upward fling, double tap, a full 1-second flower charge and homogeneous atomic chain throws. Flower chains also require 1 second; normal/bud chains retain 500ms.
+- State-specific actions: upward fling, double tap, a full 1-second flower charge and homogeneous atomic chain throws. All same-stage groups arm after a 200ms short press; a single flower retains its 1-second charge.
 - Challenge timing within 3–8 seconds, simultaneous state snapshots, 1–5 / 1–5 / 1–10 transition limits, available-count caps, protected interaction/flying states, no catch-up burst, reset and completion.
 - Longer roaming routes within the larger field while held characters stay still; a clear six-second walk covers over 100px.
 - Charge/chain thresholds, rejected premature movement, same-stage membership, duplicate membership, expired/different-target taps and final upward flick after fast sideways tracing. The first coalesced touch move after a long flower hold remains valid.
@@ -31,7 +31,7 @@ PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
 node pikmin-fling/scripts/browser-check.mjs
 ```
 
-**32 checks passed**:
+**34 checks passed**:
 
 - Each new Ice, Rock and Winged type completes a round with distinct leaf/bud/flower sprites and labels, matching flight artwork, and the correct fling/double-tap/one-second-hold gestures.
 - Idle timer and inactive board; all current artwork loads with the correct stage distribution.
@@ -117,3 +117,11 @@ node pikmin-fling/scripts/scroll-check.mjs
 ```
 
 Review checked lock cleanup on reset/completion/timeout, focus with covered controls inert, single-touch cancellation, stable gesture coordinates, rotation without target overlap, unchanged growth/scoring and the offline cache bump. Screenshots default to `/tmp/pikmin-scroll-qa`. Chrome touch emulation was tested; physical iOS/Android devices and other browser engines were not directly exercised.
+
+## Short-press drag chains — 2026-10-23
+
+**61 repository logic tests passed**, including **24 Pikmin tests**. Failing-then-passing cases verify the 199/200ms boundary, matching-stage selection and duplicate rejection, atomic group validation, short flower groups versus a single flower’s 1-second charge, and a fresh one-move flick after pausing a drag. Stale flick velocity still expires.
+
+The updated full-game browser suite passed **34 checks**. Real Chrome touch input short-presses for 240ms, drags through matching normal/bud/flower characters, pauses, then delivers a single upward move and release. Each group flies into the mouth, every unique arrival counts once, incompatible growth stages stay unlinked and the phone page does not move. The mouse short-press case also verifies a matching bud group, ignored flowers and the visible chain. Original single-character gestures, gesture cancellation, completion, records, responsive layouts and offline play remain covered.
+
+The timed-mode suite passed **14 checks**, adding a real 240ms flower-chain throw and verifying that every arrival contributes three points. The screen-lock suite also passed its **14 checks**. Group readiness, help text and the game plan now use the same 200ms rule; the flower ring still reflects the original one-second solo charge. The offline cache was bumped for updated code and instructions.

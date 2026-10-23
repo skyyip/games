@@ -110,8 +110,20 @@ try{
   await p.waitForFunction(()=>document.querySelector('#score').textContent==='1');
   const bud=unit(p,'bud');await bud.focus();await bud.tap();await bud.tap();
   await p.waitForFunction(()=>document.querySelector('#score').textContent==='3');
-  await protocol.detach();await touch.context.close();
   pass('real finger input in timed mode scores an upward fling and a double-tap bud');
+  const flowers=p.locator('.pikmin[data-growth="flower"]:not(:disabled)');
+  const first=flowers.first(),second=flowers.nth(1);await first.focus();
+  const a=await first.boundingBox(),b=await second.boundingBox(),finger={id:1,x:a.x+a.width/2,y:a.y+a.height/2};
+  await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[finger]});await p.waitForTimeout(240);
+  await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...finger,x:b.x+b.width/2,y:b.y+b.height/2}]});
+  await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...finger,x:b.x+b.width/2,y:b.y+b.height/2-65}]});
+  await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  const flying=await p.locator('.flying-pikmin').count();assert.ok(flying>=2);
+  const expected=3+flying*3;
+  await p.waitForFunction(expected=>document.querySelector('#score').textContent===String(expected),expected);
+  assert.equal(await p.locator('#score').getAttribute('aria-label'),`Score: ${expected} points`);
+  await protocol.detach();await touch.context.close();
+  pass('a 240ms flower drag chain in timed mode scores every arrival at three points');
 
   const quiet=await setup({reducedMotion:'reduce',viewport:{width:320,height:568}},()=>{Math.random=()=>0;Object.defineProperty(window,'localStorage',{get(){throw new Error('denied');}});});
   await quiet.page.clock.install();await quiet.page.locator('#start').focus();await quiet.page.keyboard.press('Enter');

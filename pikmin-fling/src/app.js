@@ -161,7 +161,7 @@ function resetRound(mode=game.mode,playing=false) {
   for(const label of document.querySelectorAll('.point-value'))label.hidden=!timed;
   $('#results').hidden=true;$('#mode-options').disabled=false;
   $('#start').hidden=false;$('#reset').hidden=true;
-  $('#gesture-help').textContent='Hold to link: 0.5s for normal/buds, 1s for flowers. Trace the same stage, then flick up.';
+  $('#gesture-help').textContent='Short press 0.2s, keep pressed and drag through the same stage, then flick up to feed the whole chain.';
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
   $('#cycle-status').textContent=mode==='normal'?'Normal mode · states stay the same':`${modeNames[mode]} · growth changes every 3–8s`;
   $('#control-note').textContent=timed?'20 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 30 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock and Winged Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.';
@@ -209,12 +209,15 @@ function renderGestures(now) {
   const rect=units.getBoundingClientRect(),fragment=document.createDocumentFragment();
   $('#chains').setAttribute('viewBox',`0 0 ${fieldWidth} ${fieldHeight}`);
   for(const g of gestures.values()) {
-    const wasChain=g.chaining;g.update(now);
+    const wasChain=g.chaining,wasCharged=g.charged;g.update(now);
     g.button.style.setProperty('--hold',`${Math.min(1,g.held/g.holdTarget)*360}deg`);
     g.button.classList.toggle('is-charged',g.charged && g.growth==='flower');
     if(g.chaining) {
       for(const id of g.ids)buttons[id].classList.add('is-linked');
-      if(!wasChain){$('#gesture-help').textContent=g.growth==='flower'?'Flower ready! Flick up, or trace other flowers to link.':`Chain ready. Trace more ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.`;try{navigator.vibrate?.(10);}catch{}}
+      if(!wasChain||g.growth==='flower'&&!wasCharged&&g.charged){
+        $('#gesture-help').textContent=g.growth==='flower'&&g.charged?'Flower charged. Flick up, or drag through more flowers to link.':`Link ready. Keep pressed and drag through more ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.${g.growth==='flower'?' A single flower needs a full 1-second hold.':''}`;
+        try{navigator.vibrate?.(10);}catch{}
+      }
       const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');
       line.setAttribute('points',[...g.ids.map(id=>`${roster[id].x},${roster[id].y}`),`${g.last.x-rect.x},${g.last.y-rect.y}`].join(' '));
       fragment.append(line);
@@ -314,7 +317,7 @@ function release(event,cancelled=false) {
     else $('#gesture-help').textContent='One more tap on this bud!';
   }else if(!launched && !cancelled){
     taps.clear();
-    $('#gesture-help').textContent=g.chaining?'Chain released. Hold still to link again, then finish with a quick upward flick.':hints[g.growth];
+    $('#gesture-help').textContent=g.chaining&&(g.growth!=='flower'||g.ids.length>1)?'Chain released. Short press 0.2s, drag through matching Pikmin, then finish with an upward flick.':hints[g.growth];
     if(g.moved){try{navigator.vibrate?.(18);}catch{}}
   }
   g.button.querySelector('img').style.transform='';
