@@ -19,6 +19,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="manifest" href="./grid-rush/playground.webmanifest">
 <link rel="stylesheet" href="./grid-rush/playground-ui.css">
 <script type="module" blocking="render" src="./grid-rush/src/playground-ui.js"></script>
+<script type="module" blocking="render" src="./grid-rush/src/landing.js"></script>
 <style>
 :root{--bg:#070b1a;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}
@@ -82,6 +83,25 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
   .blob{filter:blur(65px);opacity:.3;animation:none}
 }
 @media(max-width:360px){.grid{gap:10px}.body{padding:12px 10px 14px}.art{height:108px}h2{font-size:16px}.tags span{font-size:9px;padding:3px 6px}}
+
+/* Favourite controls are siblings of native game links. */
+.grid{overflow-anchor:none}
+.game-card{position:relative;min-width:0;display:flex;transform-origin:top left}
+.game-card>.card{width:100%}
+.game-card:focus-within{z-index:2}
+.favourites-hint{margin:-22px 0 22px;color:#b2bdd0;font-size:13px;line-height:1.6}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.favourite-button{position:absolute;top:12px;left:12px;z-index:3;display:grid;place-items:center;width:44px;height:44px;padding:7px;border:1px solid #ffffff70;border-radius:14px;background:#0b1426e8;color:#f8fafc;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 12px #0003;transition:background 140ms,border-color 140ms,color 140ms,box-shadow 140ms}
+.favourite-button svg{width:28px;height:28px;overflow:visible;transform-origin:center;transition:transform 100ms}
+.favourite-button .star-shape{fill:transparent;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;transition:fill 140ms}
+.favourite-button .star-rays{opacity:0;fill:none;stroke:#fbbf24;stroke-width:2;stroke-linecap:round;transform-origin:16px 16px}
+.favourite-button[aria-pressed=true]{background:#fff3c7;color:#765100;border-color:#fbbf24;box-shadow:0 3px 14px #0003,0 0 0 2px #fbbf2426}
+.favourite-button[aria-pressed=true] .star-shape{fill:#fbbf24}
+.favourite-button:active svg{transform:scale(.85)}
+.favourite-button:focus-visible{outline:3px solid #fff;outline-offset:4px;box-shadow:0 0 0 6px #172033}
+.favourite-button:disabled{opacity:.45;cursor:default}
+@media(hover:hover){.favourite-button:hover{border-color:#fbbf24;background:#17253b;color:#fde68a}.favourite-button[aria-pressed=true]:hover{background:#ffe8a0;color:#624300}}
+@media(max-width:640px){.favourites-hint{margin:-10px 0 18px;font-size:12px}.favourite-button{top:8px;left:8px;border-radius:12px}}
 </style>
 </head>
 <body>
@@ -95,8 +115,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1>Sky’s<br>Playground<span class="title-dot">.</span></h1>
   <p class="lead">Made for a little break. Stay for another round.</p>
 
+  <p class="favourites-hint">Star a game to move it to the front.</p>
+  <p id="favourite-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
   <section class="grid" aria-label="Games">
-    <a class="card" href="grid-rush/" style="--accent:#fb7c4f;--art:linear-gradient(135deg,#fb7c4f,#be3f1a)">
+    <article class="game-card" data-game="grid-rush">
+      <button class="favourite-button" type="button" aria-label="Favourite: Grid Rush" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="grid-rush/" style="--accent:#fb7c4f;--art:linear-gradient(135deg,#fb7c4f,#be3f1a)">
       <div class="art">
         <svg viewBox="0 0 96 96" aria-hidden="true"><g fill="#fff"><rect x="8" y="8" width="38" height="38" rx="9"/><rect x="50" y="8" width="38" height="38" rx="9" opacity=".55"/><rect x="8" y="50" width="38" height="38" rx="9" opacity=".55"/><rect x="50" y="50" width="38" height="38" rx="9"/></g></svg>
       </div>
@@ -107,8 +131,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="play">Play now <i>→</i></span>
       </div>
     </a>
+    </article>
 
-    <a class="card" href="grid-rush-in-order/" style="--accent:#a78bfa;--art:linear-gradient(135deg,#8b5cf6,#0f766e)">
+    <article class="game-card" data-game="grid-rush-in-order">
+      <button class="favourite-button" type="button" aria-label="Favourite: Grid Rush: In Order" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="grid-rush-in-order/" style="--accent:#a78bfa;--art:linear-gradient(135deg,#8b5cf6,#0f766e)">
       <div class="art">
         <svg viewBox="0 0 96 96" aria-hidden="true"><g fill="#fff"><rect x="8" y="8" width="38" height="38" rx="9"/><rect x="50" y="8" width="38" height="38" rx="9" opacity=".55"/><rect x="8" y="50" width="38" height="38" rx="9" opacity=".55"/><rect x="50" y="50" width="38" height="38" rx="9"/></g><g fill="#4c1d95" font-family="system-ui" font-weight="800" font-size="24" text-anchor="middle"><text x="27" y="36">1</text><text x="69" y="36" fill="#fff">2</text><text x="27" y="78" fill="#fff">3</text><text x="69" y="78">4</text></g></svg>
       </div>
@@ -119,8 +146,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="play">Play now <i>→</i></span>
       </div>
     </a>
+    </article>
 
-    <a class="card" href="tap-and-spill/" style="--accent:#38bdf8;--art:linear-gradient(135deg,#0ea5e9,#4338ca)">
+    <article class="game-card" data-game="tap-and-spill">
+      <button class="favourite-button" type="button" aria-label="Favourite: 水滿則溢 Tap &amp; Spill" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="tap-and-spill/" style="--accent:#38bdf8;--art:linear-gradient(135deg,#0ea5e9,#4338ca)">
       <div class="art">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M20 12h56l-8 76H28z" fill="#ffffff2e" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M24 42c10-6 18 6 24 0s14-6 24 0l-4 46H28z" fill="#bae6fd"/></svg>
       </div>
@@ -131,7 +161,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="play">Play now <i>→</i></span>
       </div>
     </a>
-    <a class="card" href="line-up/" style="--accent:#6ee7b7;--art:linear-gradient(135deg,#19866a,#155e59)">
+    </article>
+    <article class="game-card" data-game="line-up">
+      <button class="favourite-button" type="button" aria-label="Favourite: Line Up" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="line-up/" style="--accent:#6ee7b7;--art:linear-gradient(135deg,#19866a,#155e59)">
       <div class="art">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M10 70C38 70 38 26 65 26h21" fill="none" stroke="#ffffff60" stroke-width="8" stroke-linecap="round"/><path d="M10 70C30 70 35 48 45 35" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/><circle cx="10" cy="70" r="7" fill="#fff"/><circle cx="45" cy="35" r="7" fill="#fff"/><path d="M58 59h23M58 69h14" fill="none" stroke="#d1fae5" stroke-width="4" stroke-linecap="round"/></svg>
       </div>
@@ -142,10 +175,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="play">Play now <i>→</i></span>
       </div>
     </a>
-    <a class="card" href="pikmin-fling/" style="--accent:#bef264;--art:linear-gradient(135deg,#b5d477,#648b40)">
+    </article>
+    <article class="game-card" data-game="pikmin-fling">
+      <button class="favourite-button" type="button" aria-label="Favourite: Pikmin Fling" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="pikmin-fling/" style="--accent:#bef264;--art:linear-gradient(135deg,#b5d477,#648b40)">
       <div class="art" aria-hidden="true"><div class="pikmin-preview"><img src="./pikmin-fling/assets/pikmin/yellow.png" alt="" draggable="false"><img src="./pikmin-fling/assets/pikmin/red.png" alt="" draggable="false"><img src="./pikmin-fling/assets/pikmin/blue.png" alt="" draggable="false"></div></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Fling &amp; swipe</span></div><h2>Pikmin Fling</h2><p>Fling a colourful crowd into one hungry plant. Clear the garden. Beat your best.</p><span class="play">Play now <i>→</i></span></div>
     </a>
+    </article>
   </section>
   <footer><p class="site-copyright">&copy; Copyright 2026 Sky Yip. All rights reserved.</p></footer>
 </main>

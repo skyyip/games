@@ -51,6 +51,8 @@ src/
   pwa.js               Installation controls and offline setup
   playground-ui.js     Shared spring interactions, navigation and optional haptics
   motion.js            Small deterministic spring, attraction and gesture helpers
+  landing.js           Landing-page star controls and card reorder animations
+  favourites.js        Favourite ordering and validated device storage
 scripts/serve.js       Small local static development server
 tests/                 Dependency-free Node test suite
 ```
@@ -88,3 +90,19 @@ Installation help supports dragging its header downward: short/cancelled drags r
 Reduced-motion preferences disable decorative animation, including when changed during a visit. The shared spring scheduler runs only while something is moving. Both installed grid games cache `motion.js` for offline use.
 
 `scripts/motion-check.mjs` checks card hit areas, drag recovery, parallax layers, selection alignment, mobile scrolling, sheet gestures and alternatives, live motion preferences, fixed game tiles, replay and Tap & Spill overflow. Use the existing optional Playwright module and `PLAYGROUND_URL` environment variables as above. It does not install packages.
+
+## Landing-page favourites
+
+Open the repository root (for example, **http://localhost:5173/**) for Sky’s Playground. Every card has an independent star button in its top-left corner. Starring a game fills the star and moves it to the start; the most recently starred game is first. Unstarring clears the star and moves that card to the end, preserving the other cards’ relative order.
+
+The `playground.favourites.v1` localStorage key stores `{version:1, order:[gameIds], favourites:[gameIds]}`. Both the favourite state and full card order survive reloads. Reads remove unknown/duplicate IDs, add newly available games, and safely fall back on corrupt data. Blocked/full storage keeps the controls working for the current visit.
+
+Stars are native buttons beside native game links, with constant game-specific accessible names, `aria-pressed`, hover/press/focus states and a polite status announcement. The card wrapper animates between grid positions while its existing parallax surface remains independent. Rapid changes cancel previous animations. Keyboard focus is retained and brought into view; reduced-motion preferences skip or cancel decorative effects.
+
+Run `node --test tests/favourites.test.js` from this folder for the storage/order tests. With the local server running, browser verification uses the existing optional Playwright installation:
+
+```sh
+GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
+PLAYGROUND_URL=http://localhost:5173/ \
+node scripts/favourites-check.mjs
+```

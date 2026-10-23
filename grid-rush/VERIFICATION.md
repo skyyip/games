@@ -126,3 +126,13 @@ Original Grid Rush tiles now show the owner's supplied cat artwork in place of v
 Added CSS feedback inside the original Grid Rush buttons: the icon compresses while pressed, shrinks/fades on a valid selection, and transitions into a drawn checkmark with a small spring rebound and a soft inset ring. Button dimensions and hit areas stay fixed; native inputs, progress and final timing are unchanged. Initial and live reduced-motion settings disable these effects. The v8 cache includes the updated stylesheet.
 
 **50 browser checks passed:** 6 animation checks plus the existing 18 gameplay, 17 immediate-touch and 9 installation/offline checks. Verified mouse press/clear states, real touch contact before release, unchanged geometry throughout animation, duplicate-click suppression without restarting feedback, rapid completion, frozen final timing, immediate replay, animation settling and reduced-motion cancellation. No uncaught browser errors occurred; reviewed the transition screenshot in `/tmp/grid-rush-tile-motion`. Diff whitespace checks passed. No JavaScript or dependencies were added.
+
+## Landing-page favourites — 2026-10-23
+
+**53 logic tests passed** across the four tested game folders, including four new favourites tests for front/end ordering, multiple selected games, persistence, corrupt/unknown/duplicate records, newly added games and blocked/full storage.
+
+**14 favourites browser checks passed** using `scripts/favourites-check.mjs`: separate native star buttons and game links; outlined/filled states and accessible names; star pop, rays, removal feedback and card movement; most-recent-first favourites; unstarring to the end; refresh and return navigation; rapid Space toggles, retained/visible keyboard focus, Enter activation; mobile touch; 44px top-left targets and two-column layouts at 320/375/768/1440px; layout-neutral status announcements; initial and live reduced motion; corrupt/blocked/full storage; no uncaught page errors.
+
+The existing **12 motion interaction checks** and **19 shared UI checks** also passed. Desktop and mobile favourite-state screenshots were visually inspected. Chrome touch emulation was exercised; physical phones, other browser engines and screen readers were not tested.
+
+The native game link stays inside a separate card wrapper so the star never becomes a nested interactive control. Shared card motion now recognises those wrappers and reads spacing from the grid. Installed-game cache versions were bumped for the shared script update; active rounds retain their existing version until their windows close.

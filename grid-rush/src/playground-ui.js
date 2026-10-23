@@ -125,7 +125,7 @@ function initControls() {
 }
 
 function initCards() {
-  const cards = [...document.querySelectorAll('.grid > .card')];
+  const cards = [...document.querySelectorAll('.grid > .card, .grid > .game-card > .card')];
   if (!cards.length) return;
   const motions = [];
   const suppressed = new WeakSet();
@@ -166,7 +166,7 @@ function initCards() {
         if (gesture.dragging) {
           event.preventDefault();
           const speed = Math.hypot(event.clientX - gesture.lastX, event.clientY - gesture.lastY) / Math.max(1, event.timeStamp - gesture.time);
-          const gap = parseFloat(getComputedStyle(card.parentElement).columnGap) || 10;
+          const gap = parseFloat(getComputedStyle(card.closest('.grid')).columnGap) || 10;
           const limit = Math.min(6, (gap - 4) / 2);
           const strain = Math.min(0.012, speed * 0.008) * (Math.abs(dx) >= Math.abs(dy) ? 1 : -1);
           spring.set({ x: resistedDrag(dx, limit), y: resistedDrag(dy, limit), strain, rx: -resistedDrag(dy, 2), ry: resistedDrag(dx, 2) }, true);
