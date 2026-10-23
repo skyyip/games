@@ -8,9 +8,10 @@ Verified with Node.js 24 and headless Chrome using the existing optional Playwri
 node --test grid-rush/tests/*.test.js grid-rush-in-order/tests/*.test.js line-up/tests/*.test.js pikmin-fling/tests/*.test.js
 ```
 
-**45 tests passed**, including 15 Pikmin Fling tests covering:
+**49 tests passed**, including 16 Pikmin Fling tests covering:
 
 - Fixed 30-character roster in both modes: 20 normal, 5 buds, 5 flowers.
+- Random selection includes Red, Yellow, Blue, Ice, Rock and Winged Pikmin, with accessible type names.
 - Start/reset lifecycle, duplicate/invalid input, unique arrivals and final-arrival time freezing at full precision.
 - State-specific actions: upward fling, double tap, a full 1-second flower charge and homogeneous atomic chain throws. Flower chains also require 1 second; normal/bud chains retain 500ms.
 - Challenge timing within 3–8 seconds, simultaneous state snapshots, 1–5 / 1–5 / 1–10 transition limits, available-count caps, protected interaction/flying states, no catch-up burst, reset and completion.
@@ -30,8 +31,9 @@ PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
 node pikmin-fling/scripts/browser-check.mjs
 ```
 
-**29 checks passed**:
+**32 checks passed**:
 
+- Each new Ice, Rock and Winged type completes a round with distinct leaf/bud/flower sprites and labels, matching flight artwork, and the correct fling/double-tap/one-second-hold gestures.
 - Idle timer and inactive board; all current artwork loads with the correct stage distribution.
 - Native fence selection regression: a triple-click previously entered browser Range selection; it now stays unselected. The fence, delegated gesture container, SVG and artwork suppress selection/tap highlights; selection, drag and context-menu events are blocked only inside the fence.
 - The cartoon plant sways slowly; its SVG mouth target moves with the plant and is used by automatic flights.
@@ -48,10 +50,10 @@ node pikmin-fling/scripts/browser-check.mjs
 - 320/375/430/600/768/1024/1440px layouts: no horizontal overflow, 44×58px character buttons and all roaming targets inside the fence. Measurements allow 0.01px for floating-point transform rounding.
 - Reduced motion: stationary crowd, no body/footstep/plant-sway animation and in-place fading flights. Keyboard completion still works with localStorage blocked.
 - Corrupt new storage recovers without deleting old records.
-- New modes and all nine growth sprites work offline, including a fresh offline tab.
+- New modes and all 18 growth sprites decode offline, including a fresh offline tab.
 - All games navigation returns to the five-card landing page; no uncaught browser errors.
 
-Analytics requests were stubbed during QA. Screenshots default to `/tmp/pikmin-fling-qa`; desktop/mobile gameplay, chaining, flight and completed results were visually inspected. Active gesture screenshots use viewport capture because full-page capture can resize the viewport and intentionally cancel the gesture.
+Analytics requests were stubbed during QA. Screenshots default to `/tmp/pikmin-fling-qa`; desktop/mobile gameplay, chaining, flight and completed results were visually inspected. Garden-only mobile captures also verify all three growth stages for Ice, Rock and Winged crowds; the Winged bud artwork’s transparent padding is compensated without changing the original image. Active gesture screenshots use viewport capture because full-page capture can resize the viewport and intentionally cancel the gesture.
 
 The shared `grid-rush/scripts/ui-check.mjs` suite also passed **19 checks** across the landing page and all five games, including home navigation, supplied install icons, mobile two-column cards, touch feedback, reduced motion and no uncaught errors.
 

@@ -36,6 +36,29 @@ async function stored(page){return page.evaluate(key=>JSON.parse(localStorage.ge
 async function touch(protocol,type,points){await protocol.send('Input.dispatchTouchEvent',{type,touchPoints:points});}
 try{
   await mkdir(output,{recursive:true});
+  for(const [type,label,random] of [['ice','Ice',.55],['rock','Rock',.7],['winged','Winged',.9]]) {
+    const variant=await setup({viewport:{width:375,height:900},reducedMotion:'reduce'});
+    await variant.page.evaluate(value=>{Math.random=()=>value;},random);
+    await variant.page.locator('#start').click();
+    assert.equal(await variant.page.locator(`.pikmin[data-type="${type}"]`).count(),30);
+    await variant.page.locator('#world').screenshot({path:`${output}/${type}-crowd-mobile.png`,animations:'disabled'});
+    for(const growth of ['leaf','bud','flower']) {
+      const unit=await stable(variant.page,pikmin(variant.page,growth).first());
+      assert.match(await unit.getAttribute('aria-label'),new RegExp(`${label} .*Pikmin`));
+      assert.equal(await unit.locator('img').evaluate(img=>img.complete&&img.naturalWidth>0),true);
+      assert.ok((await unit.locator('img').getAttribute('src')).endsWith(`${type}-${growth}.png`));
+      if(growth==='bud')await unit.dblclick();
+      else await swipe(variant.page,unit,growth==='flower'?1050:0);
+      assert.equal(await unit.isDisabled(),true,`${type} ${growth} should launch after its valid gesture`);
+      assert.equal(await variant.page.locator(`.flying-pikmin[src$="${type}-${growth}.png"]`).count(),1);
+      await variant.page.waitForTimeout(550);
+    }
+    assert.equal(await variant.page.locator('#fed').textContent(),'3');
+    await finishByKeyboard(variant.page);
+    assert.equal(await variant.page.locator('#fed').textContent(),'30');
+    await variant.context.close();
+    pass(`${label}: leaf/bud/flower artwork and labels load, correct gestures launch matching sprites, and the round completes`);
+  }
   const {context,page}=await setup({viewport:{width:1440,height:1100}});
   assert.equal(await page.title(),'Pikmin Fling · Sky’s Playground');
   await page.waitForTimeout(80);assert.equal(await page.locator('#timer').textContent(),'0.00');
@@ -227,6 +250,11 @@ try{
   const offline=await setup({serviceWorkers:'allow'});
   await offline.page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
   await offline.context.setOffline(true);await offline.page.reload();await offline.page.locator('#start:not(:disabled)').waitFor();
+  const cachedArtwork=await offline.page.evaluate(async()=>{
+    const paths=['red','yellow','blue','ice','rock','winged'].flatMap(type=>['leaf','bud','flower'].map(growth=>`./assets/pikmin/${type}-${growth}.png`));
+    return Promise.all(paths.map(async path=>{const image=new Image();image.src=path;await image.decode();return image.naturalWidth>0;}));
+  });
+  assert.equal(cachedArtwork.length,18);assert.ok(cachedArtwork.every(Boolean));
   await offline.page.locator('input[value="challenge"]').check();await offline.page.locator('#start').click();await finishByKeyboard(offline.page);
   const fresh=await offline.context.newPage();await fresh.goto(base);await fresh.locator('#start:not(:disabled)').waitFor();
   assert.equal(await fresh.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.naturalWidth>0)),true);

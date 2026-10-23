@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {isUpwardSwipe,flightPoint,createRoster,TYPES,PointerGesture,DoubleTap,walkRoster} from '../src/interaction.js';
+import {isUpwardSwipe,flightPoint,createRoster,TYPES,TYPE_NAMES,PointerGesture,DoubleTap,walkRoster} from '../src/interaction.js';
 
 test('upward flings and slow swipes work, while taps, sideways and downward gestures do not',()=>{
   const from={x:100,y:250,t:0};
@@ -25,6 +25,16 @@ test('30 random characters roam within the fence while held characters stay stil
   for(let i=0;i<500;i++)walkRoster(roster,.02,300,410,new Set([0]));
   assert.deepEqual({x:roster[0].x,y:roster[0].y},before);
   assert.ok(roster.every(p=>p.x>=22 && p.x<=278 && p.y>=29 && p.y<=381));
+});
+
+test('random crowds can include Ice, Rock and Winged Pikmin alongside the original three types',()=>{
+  const seen=new Set();
+  for(const random of [.01,.2,.4,.55,.7,.9]) {
+    const roster=createRoster(700,480,()=>random);
+    assert.equal(roster.length,30);
+    for(const unit of roster){seen.add(unit.type);assert.ok(TYPE_NAMES[unit.type]);}
+  }
+  assert.deepEqual([...seen],['red','yellow','blue','ice','rock','winged']);
 });
 
 test('normal/bud chains need half a second; flowers require a full stationary second before flinging or chaining',()=>{

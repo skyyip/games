@@ -1,6 +1,6 @@
 # Pikmin Fling
 
-Clear a fenced garden of 30 wandering Pikmin by feeding a hungry plant. Choose **Normal** or **Challenge**. Both begin with 20 normal (leaf), 5 bud and 5 flower Pikmin. Red, yellow and blue characters are mixed randomly, with matching leaf/bud/flower artwork and visible gesture badges.
+Clear a fenced garden of 30 wandering Pikmin by feeding a hungry plant. Choose **Normal** or **Challenge**. Both begin with 20 normal (leaf), 5 bud and 5 flower Pikmin. Red, yellow, blue, ice (light blue), rock (black) and winged (pink) characters are mixed randomly, with matching leaf/bud/flower artwork and visible gesture badges.
 
 Play at [skyyip.github.io/games/pikmin-fling/](https://skyyip.github.io/games/pikmin-fling/).
 
@@ -73,6 +73,6 @@ The previous `pikmin-fling.records.v1` count-based records are left untouched. T
 
 ## Offline
 
-After a successful online load, wait for **Ready to play offline**. The scoped service worker caches all nine growth images, game code, shared UI, fonts and icons. Supporting browsers can install the game using their native action. Updates wait for existing app windows to close; reopen to use the updated version. Bump `CACHE_NAME` when editing cached assets.
+After a successful online load, wait for **Ready to play offline**. The scoped service worker caches all 18 growth images, game code, shared UI, fonts and icons. Supporting browsers can install the game using their native action. Updates wait for existing app windows to close; reopen to use the updated version. Bump `CACHE_NAME` when editing cached assets.
 
 Pikmin artwork © Nintendo; this is an unofficial fan game. The plant and fence use local SVG markup. No gameplay backend or external artwork server is required. See [VERIFICATION.md](./VERIFICATION.md) for verification results.

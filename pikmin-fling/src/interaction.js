@@ -1,7 +1,7 @@
 import {FLOWER_HOLD,CHAIN_HOLD} from './game.js';
 
-export const TYPES=Object.freeze(['red','yellow','blue']);
-export const TYPE_NAMES={red:'Red',yellow:'Yellow',blue:'Blue'};
+export const TYPES=Object.freeze(['red','yellow','blue','ice','rock','winged']);
+export const TYPE_NAMES={red:'Red',yellow:'Yellow',blue:'Blue',ice:'Ice',rock:'Rock',winged:'Winged'};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 
 export function createRoster(width,height,random=Math.random) {

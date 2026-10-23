@@ -25,6 +25,8 @@ function renderUnit(id) {
   const button=buttons[id],unit=game.units[id];
   button.dataset.growth=unit.growth;button.dataset.type=roster[id].type;
   button.querySelector('img').src=source(roster[id].type,unit.growth);
+  // Compensate for the generous transparent padding in the Winged bud artwork.
+  button.querySelector('img').style.setProperty('--art-scale',roster[id].type==='winged'&&unit.growth==='bud'?1.6:1);
   button.querySelector('.growth-badge').textContent=symbols[unit.growth];
   button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}. ${hints[unit.growth]} Keyboard: Enter to feed.`);
 }
