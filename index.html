@@ -18,6 +18,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="apple-touch-icon" href="./grid-rush/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="./grid-rush/playground.webmanifest">
 <link rel="stylesheet" href="./grid-rush/playground-ui.css">
+<script src="./grid-rush/src/navigation.js"></script>
 <script type="module" blocking="render" src="./grid-rush/src/playground-ui.js"></script>
 <script type="module" blocking="render" src="./grid-rush/src/landing.js"></script>
 <style>
@@ -91,16 +92,17 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 .game-card:focus-within{z-index:2}
 .favourites-hint{margin:-22px 0 22px;color:#b2bdd0;font-size:13px;line-height:1.6}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-.favourite-button{position:absolute;top:12px;left:12px;z-index:3;display:grid;place-items:center;width:44px;height:44px;padding:7px;border:1px solid #ffffff70;border-radius:14px;background:#0b1426e8;color:#f8fafc;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 12px #0003;transition:background 140ms,border-color 140ms,color 140ms,box-shadow 140ms}
-.favourite-button svg{width:28px;height:28px;overflow:visible;transform-origin:center;transition:transform 100ms}
+.favourite-button{--star-bg:#0b1426e8;--star-border:#ffffff70;--star-shadow:0 3px 12px #0003;position:absolute;top:12px;left:12px;z-index:3;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:12px;background:transparent;color:#f8fafc;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:color 140ms}
+.favourite-button:before{content:'';position:absolute;inset:4px;box-sizing:border-box;border:1px solid var(--star-border);border-radius:10px;background:var(--star-bg);box-shadow:var(--star-shadow);pointer-events:none;transition:background 140ms,border-color 140ms,box-shadow 140ms}
+.favourite-button svg{position:relative;width:22px;height:22px;overflow:visible;transform-origin:center;transition:transform 100ms}
 .favourite-button .star-shape{fill:transparent;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;transition:fill 140ms}
 .favourite-button .star-rays{opacity:0;fill:none;stroke:#fbbf24;stroke-width:2;stroke-linecap:round;transform-origin:16px 16px}
-.favourite-button[aria-pressed=true]{background:#fff3c7;color:#765100;border-color:#fbbf24;box-shadow:0 3px 14px #0003,0 0 0 2px #fbbf2426}
+.favourite-button[aria-pressed=true]{--star-bg:#fff3c7;--star-border:#fbbf24;--star-shadow:0 3px 14px #0003,0 0 0 2px #fbbf2426;color:#765100}
 .favourite-button[aria-pressed=true] .star-shape{fill:#fbbf24}
 .favourite-button:active svg{transform:scale(.85)}
 .favourite-button:focus-visible{outline:3px solid #fff;outline-offset:4px;box-shadow:0 0 0 6px #172033}
 .favourite-button:disabled{opacity:.45;cursor:default}
-@media(hover:hover){.favourite-button:hover{border-color:#fbbf24;background:#17253b;color:#fde68a}.favourite-button[aria-pressed=true]:hover{background:#ffe8a0;color:#624300}}
+@media(hover:hover){.favourite-button:hover{--star-border:#fbbf24;--star-bg:#17253b;color:#fde68a}.favourite-button[aria-pressed=true]:hover{--star-bg:#ffe8a0;color:#624300}}
 @media(max-width:640px){.favourites-hint{margin:-10px 0 18px;font-size:12px}.favourite-button{top:8px;left:8px;border-radius:12px}}
 </style>
 </head>

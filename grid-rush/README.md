@@ -51,6 +51,7 @@ src/
   pwa.js               Installation controls and offline setup
   playground-ui.js     Shared spring interactions, navigation and optional haptics
   motion.js            Small deterministic spring, attraction and gesture helpers
+  navigation.js        Early native page-transition promise and motion handling
   landing.js           Landing-page star controls and card reorder animations
   favourites.js        Favourite ordering and validated device storage
 scripts/serve.js       Small local static development server

@@ -6,15 +6,6 @@ const running = new Set(), springs = new Set(), animations = new Set();
 const feedback = new WeakMap();
 let frame = 0, previousTime = 0;
 
-// A native navigation transition can be skipped (including when reduced motion
-// turns on). Its optional animation promises must not become unhandled errors.
-for (const event of ['pageswap', 'pagereveal']) window.addEventListener(event, ({ viewTransition }) => {
-  viewTransition?.ready.catch(() => {});
-  viewTransition?.finished.catch(() => {});
-  viewTransition?.updateCallbackDone.catch(() => {});
-  if (reducedMotion.matches) viewTransition?.skipTransition();
-});
-
 // One clock for the springs that are actually moving. It sleeps when they settle.
 function tick(now) {
   const dt = previousTime ? (now - previousTime) / 1000 : 1 / 60;

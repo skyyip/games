@@ -136,3 +136,7 @@ Added CSS feedback inside the original Grid Rush buttons: the icon compresses wh
 The existing **12 motion interaction checks** and **19 shared UI checks** also passed. Desktop and mobile favourite-state screenshots were visually inspected. Chrome touch emulation was exercised; physical phones, other browser engines and screen readers were not tested.
 
 The native game link stays inside a separate card wrapper so the star never becomes a nested interactive control. Shared card motion now recognises those wrappers and reads spacing from the grid. Installed-game cache versions were bumped for the shared script update; active rounds retain their existing version until their windows close.
+
+Rapid return navigation exposed a native page-transition promise rejection before the deferred module handler could run. Transition handlers now load in a small classic head script before the first rendering opportunity, and every offline game caches it. The favourites navigation check deliberately returns immediately, without a timing delay.
+
+The favourite icon now renders at **22px** inside a **36px** badge while its native button retains a **44px** touch target. The responsive favourites checks verify these dimensions at 320, 375, 768 and 1440px.
