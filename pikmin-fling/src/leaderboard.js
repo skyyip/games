@@ -1,8 +1,8 @@
-import { COUNTS } from './game.js';
+import { MODES } from './game.js';
 
-export const STORAGE_KEY = 'pikmin-fling.records.v1';
+export const STORAGE_KEY = 'pikmin-fling.records.v2';
 
-const emptyRecords = () => Object.fromEntries(COUNTS.map(size => [size, []]));
+const emptyRecords = () => Object.fromEntries(MODES.map(mode => [mode, []]));
 const validRecord = record => record !== null && typeof record === 'object' &&
   typeof record.time === 'number' && Number.isFinite(record.time) && record.time >= 0 &&
   typeof record.date === 'string' && Number.isFinite(Date.parse(record.date));
@@ -17,9 +17,9 @@ export function readLeaderboard(storage) {
   }
   try {
     const parsed = JSON.parse(raw ?? 'null');
-    for (const size of COUNTS) {
-      if (!Array.isArray(parsed?.[size])) continue;
-      records[size] = parsed[size].filter(validRecord)
+    for (const mode of MODES) {
+      if (!Array.isArray(parsed?.[mode])) continue;
+      records[mode] = parsed[mode].filter(validRecord)
         .map(({ time, date }) => ({ time, date }))
         .sort((a, b) => a.time - b.time).slice(0, 3);
     }
@@ -38,16 +38,16 @@ export function saveLeaderboard(storage, records) {
   }
 }
 
-export function addResult(records, size, time, date = new Date().toISOString()) {
-  if (!COUNTS.includes(size) || !validRecord({ time, date })) {
+export function addResult(records, mode, time, date = new Date().toISOString()) {
+  if (!MODES.includes(mode) || !validRecord({ time, date })) {
     throw new RangeError('Invalid leaderboard result');
   }
-  const previous = records[size];
+  const previous = records[mode];
   const result = { time, date };
   const topThree = [...previous, result].sort((a, b) => a.time - b.time).slice(0, 3);
   const index = topThree.indexOf(result);
   return {
-    records: { ...records, [size]: topThree },
+    records: { ...records, [mode]: topThree },
     rank: index === -1 ? null : index + 1,
     personalBest: previous.length === 0 || time < previous[0].time,
   };

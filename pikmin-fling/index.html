@@ -28,10 +28,16 @@
   <span class="header-note">SMALL PIKMIN. BIG APPETITE.</span>
 </header>
 <main id="app">
-  <section class="intro"><div><p class="eyebrow">A LITTLE GARDEN CHAOS</p><h1>Ready, set, <br><em>feed.</em></h1></div><p>A colourful crowd. One hungry plant. <br>Fling every Pikmin up, and make a clean sweep.</p></section>
+  <section class="intro"><div><p class="eyebrow">A LITTLE GARDEN CHAOS</p><h1>Ready, set, <br><em>feed.</em></h1></div><p>A colourful crowd. One hungry plant. <br>Read the leaves. Link your crowd. Make a clean sweep.</p></section>
   <div class="arena">
     <section class="play-panel" aria-label="Pikmin garden">
-      <div class="scoreboard"><div><span class="eyebrow">YOUR TIME</span><div class="clock"><output id="timer" aria-label="Elapsed seconds" aria-live="off">0.00</output><span>s</span></div></div><div class="progress-wrap"><div><span id="phase">READY TO FLING</span><strong><span id="fed">0</span><small> / <span id="total">20</span> fed</small></strong></div><progress id="progress" value="0" max="20" aria-label="Pikmin fed"></progress></div></div>
+      <div class="scoreboard"><div><span class="eyebrow">YOUR TIME</span><div class="clock"><output id="timer" aria-label="Elapsed seconds" aria-live="off">0.00</output><span>s</span></div></div><div class="progress-wrap"><div><span id="phase">READY TO FLING</span><strong><span id="fed">0</span><small> / <span id="total">30</span> fed</small></strong></div><progress id="progress" value="0" max="30" aria-label="Pikmin fed"></progress></div></div>
+      <div class="growth-guide" aria-label="Pikmin gestures">
+        <div><span class="guide-symbol leaf-symbol" aria-hidden="true">↗</span><span><b>Normal · <output id="leaf-count" aria-live="off">20</output></b><small>Fling up</small></span></div>
+        <div><span class="guide-symbol bud-symbol" aria-hidden="true">2×</span><span><b>Bud · <output id="bud-count" aria-live="off">5</output></b><small>Double-tap</small></span></div>
+        <div><span class="guide-symbol flower-symbol" aria-hidden="true">✿</span><span><b>Flower · <output id="flower-count" aria-live="off">5</output></b><small>Hold, then fling</small></span></div>
+      </div>
+      <div class="round-status"><span id="cycle-status" role="status">Normal mode · states stay the same</span><span id="cycle-timer" aria-live="off"></span></div>
       <div class="world" id="world">
         <svg class="garden-scenery" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true"><path d="M0 150Q170 80 340 150T800 120V600H0Z" fill="#d7e6bf"/><path d="M0 195Q220 140 430 190T800 150V600H0Z" fill="#c7dca7"/><g fill="#fff" opacity=".65"><ellipse cx="115" cy="59" rx="43" ry="12"/><ellipse cx="139" cy="51" rx="22" ry="17"/><ellipse cx="654" cy="81" rx="42" ry="11"/><ellipse cx="633" cy="71" rx="22" ry="15"/></g></svg>
         <div class="plant-wrap" id="plant" aria-label="Hungry plant">
@@ -53,18 +59,23 @@
         <div class="garden-label" id="garden-label">THE LUNCH CROWD</div>
         <div class="pen" id="pen" role="group" aria-label="Fenced Pikmin area" aria-describedby="gesture-help">
           <svg class="fence" viewBox="0 0 1000 370" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="pickets" width="45" height="42" patternUnits="userSpaceOnUse"><path d="M15 42V10l7-7 7 7v32" fill="#ddbd85" stroke="#a77c4e" stroke-width="2"/></pattern></defs><rect x="13" y="17" width="974" height="336" rx="10" fill="none" stroke="#a78559" stroke-width="9"/><path d="M14 36V338M986 36V338" stroke="#e4c895" stroke-width="12"/><g transform="scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g><g transform="translate(0 343) scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g><path d="M14 17H986M14 359H986" stroke="#b48b55" stroke-width="8"/></svg>
-          <div id="units" class="units"></div>
+          <div id="units" class="units"></div><svg id="chains" class="chain-lines" aria-hidden="true"></svg>
         </div>
         <div id="flights" class="flight-layer" aria-hidden="true"></div>
-        <section id="results" class="results" aria-labelledby="result-title" hidden><span class="result-icon" aria-hidden="true">✓</span><p class="eyebrow" id="result-badge">CLEAN SWEEP</p><h2 id="result-title" tabindex="-1">Garden cleared.</h2><p class="final-time"><span id="final-time"></span><small>s</small></p><p id="result-note"></p><button class="primary-button" type="button" id="again">Play again <span aria-hidden="true">↗</span></button><button class="text-button" type="button" id="change-count">Change Pikmin count</button></section>
+        <section id="results" class="results" aria-labelledby="result-title" hidden><span class="result-icon" aria-hidden="true">✓</span><p class="eyebrow" id="result-badge">CLEAN SWEEP</p><h2 id="result-title" tabindex="-1">Garden cleared.</h2><p class="final-time"><span id="final-time"></span><small>s</small></p><p id="result-note"></p><button class="primary-button" type="button" id="again">Play again <span aria-hidden="true">↗</span></button><button class="text-button" type="button" id="change-mode">Change game mode</button></section>
       </div>
-      <div class="garden-tools"><p id="gesture-help" role="status">Swipe a Pikmin upward to send it flying. The plant will take care of the rest.</p><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
-      <p class="keyboard-help">Tap to select, then use Feed selected. Keyboard: Tab to a Pikmin; Enter, Space or ↑ to fling.</p>
+      <div class="garden-tools"><p id="gesture-help" role="status">Follow each growth stage. Hold still for 0.5s to start a same-stage chain.</p><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
+      <p class="keyboard-help">Drag-free option: tap a Pikmin, then Feed selected. Keyboard: Tab to a Pikmin; Enter, Space or ↑ feeds it. Focused and selected Pikmin pause.</p>
     </section>
     <aside class="sidebar">
-      <section class="control-card"><p class="eyebrow">PICK YOUR CROWD</p><h2>A little snack?<br>Or a feast?</h2><fieldset id="count-options"><legend>How many Pikmin?</legend><div class="count-options"><label><input type="radio" name="count" value="20" checked><span><b>20</b> Pikmin</span></label><label><input type="radio" name="count" value="30"><span><b>30</b> Pikmin</span></label><label><input type="radio" name="count" value="40"><span><b>40</b> Pikmin</span></label></div></fieldset><button id="start" type="button" class="primary-button" disabled>Loading Pikmin…</button><button id="reset" type="button" class="secondary-button" hidden>Reset round</button><p class="control-note" id="control-note">A fresh mix of six types, every round.<br>The clock starts when you do.</p></section>
-      <section class="records-card" aria-labelledby="records-title"><div class="records-heading"><h2 id="records-title">Your fastest three</h2><span id="records-count">20 PIKMIN</span></div><ol id="records" aria-label="Fastest completion times"></ol><p id="storage-status">Saved on this device.</p></section>
-      <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol><li><b>Start the clock.</b> Pick 20, 30 or 40 Pikmin.</li><li><b>Fling upward.</b> Use a finger or mouse. No need to aim for the mouth.</li><li><b>Feed them all.</b> The last arrival stops the clock. Beat your best three.</li></ol></details>
+      <section class="control-card"><p class="eyebrow">30 PIKMIN. THREE WAYS TO PLAY.</p><h2>A growing<br>appetite.</h2><fieldset id="mode-options"><legend>Choose your mode</legend><div class="fling-modes"><label><input type="radio" name="mode" value="normal" checked><span><b>Normal</b><small>Find your rhythm</small></span></label><label><input type="radio" name="mode" value="challenge"><span><b>Challenge</b><small>Keep up with change</small></span></label></div></fieldset><button id="start" type="button" class="primary-button" disabled>Loading Pikmin…</button><button id="reset" type="button" class="secondary-button" hidden>Reset round</button><p class="control-note" id="control-note">Start with 20 normal, 5 buds and 5 flowers. Every round, a fresh colourful crowd.</p></section>
+      <section class="records-card" aria-labelledby="records-title"><div class="records-heading"><h2 id="records-title">Your fastest three</h2><span id="records-count">NORMAL</span></div><ol id="records" aria-label="Fastest completion times"></ol><p id="storage-status">Saved on this device.</p></section>
+      <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol>
+        <li><b>Read the growth stage.</b> Normal: fling up. Bud: double-tap. Flower: hold still for 0.22s, then fling up. Every throw finds the mouth.</li>
+        <li><b>Make a chain.</b> Hold any Pikmin still for 0.5s until its ring fills. Trace others of the same stage, then finish with an upward flick. Release without a flick to cancel.</li>
+        <li><b>Watch them grow.</b> Challenge mode changes states every 3–8s: 1–5 buds bloom, 1–5 flowers return to normal, and 1–10 normal Pikmin become buds. Held, linked or flying Pikmin are protected.</li>
+        <li><b>Clear all 30.</b> The last arrival stops the clock. Each mode keeps its own fastest three.</li>
+      </ol></details>
     </aside>
   </div>
   <footer><span id="offline-status" role="status">Play here, or add Pikmin Fling to your home screen.</span><span>Pikmin artwork © Nintendo. <a href="https://pikmin.nintendo.com/" target="_blank" rel="noopener noreferrer">Character source</a> · Unofficial fan game.</span></footer>

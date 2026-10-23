@@ -15,4 +15,12 @@ Source page: [The official home for Pikmin](https://pikmin.nintendo.com/).
 | `pikmin/rock.png` | https://pikmin.nintendo.com/_images/layouts/short-movies/hidden-pikmin/pikmin-rock.png |
 | `pikmin/winged.png` | https://pikmin.nintendo.com/_images/layouts/home/hidden-pikmin/pink-pikmin.png |
 
-Characters load from these local files during play. No external artwork server is required at runtime. The hungry plant and fence are drawn in the game’s own SVG markup.
+The original images above are retained for the landing card and previous artwork. The current game uses the nine stage-specific variants below, so the character itself shows the correct growth stage.
+
+| Local files | Official source pattern (`STAGE` = `leaf`, `bud`, `flower`) |
+| --- | --- |
+| `pikmin/red-STAGE.png` | https://pikmin.nintendo.com/_images/hoverable-pikmin/pikmin-red-lay/pikmin-red-lay-STAGE.png |
+| `pikmin/yellow-STAGE.png` | https://pikmin.nintendo.com/_images/hoverable-pikmin/pikmin-yellow-sit/pikmin-yellow-sit-STAGE.png |
+| `pikmin/blue-STAGE.png` | https://pikmin.nintendo.com/_images/hoverable-pikmin/pikmin-blue-fall/pikmin-blue-fall-STAGE.png |
+
+Characters load from local files during play. No external artwork server is required at runtime. The hungry plant and fence are drawn in the game’s own SVG markup.

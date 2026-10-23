@@ -1,70 +1,78 @@
 # Pikmin Fling
 
-Fling every Pikmin out of a fenced garden and into a hungry plant. Choose 20, 30 or 40 randomly placed Pikmin from six types: red, yellow, blue, white, rock and winged. Each count has its own three fastest completion times.
+Clear a fenced garden of 30 wandering Pikmin by feeding a hungry plant. Choose **Normal** or **Challenge**. Both begin with 20 normal (leaf), 5 bud and 5 flower Pikmin. Red, yellow and blue characters are mixed randomly, with matching leaf/bud/flower artwork and visible gesture badges.
 
 Play at [skyyip.github.io/games/pikmin-fling/](https://skyyip.github.io/games/pikmin-fling/).
 
 ## Run locally
 
-Requires Node.js 20 or newer. No dependencies or build step.
-
-From the repository root:
+Node.js 20 or newer; no dependencies or build step.
 
 ```sh
 cd pikmin-fling
 npm start
 ```
 
-Open **http://localhost:5173/pikmin-fling/**. The same server serves the landing page and other games. Use `PORT=8080 npm start` for another port.
-
-```sh
-npm test
-```
+Open **http://localhost:5173/pikmin-fling/**. The server also serves the landing page and other games. Use `PORT=8080 npm start` for another port. Run core tests with `npm test`.
 
 ## Play
 
-Choose a count and press **Start game**. The timer starts immediately. Use a finger, mouse or pen to swipe a Pikmin upward, then release. Fast short flings and longer slow swipes both work; taps, sideways swipes and downward gestures do not throw. Throws aim automatically at the mouth. Multiple Pikmin can be in flight at the same time, including throws from simultaneous touches.
+Start the game to start the clock and let the crowd wander inside the fence.
 
-Each throw follows a parabolic flight. The plant opens before arrival, the Pikmin disappears at the mouth, and the plant recoils with a bite. Progress counts arrivals, not launches. The final arrival freezes the timer and saves the result. **Play again** immediately starts a fresh round; **Reset round** returns to a stopped clock and a fresh board without saving the interrupted game.
+| Growth stage | Touch / mouse gesture |
+| --- | --- |
+| Normal / leaf ↗ | Swipe upward and release. |
+| Bud 2× | Tap the same Pikmin twice within 350ms. |
+| Flower ✿ | Hold still for at least 220ms, then swipe upward and release. |
+| Any stage: chain | Hold still for 500ms until the ring fills, drag through others of the **same stage**, then finish with an upward flick. |
 
-Alternatives to dragging:
+Chains can mix character colours, but never growth stages. Tracing through a different stage leaves it unselected. The final flick uses the upward end of the gesture, so a sideways tracing path does not spoil the throw. Releasing without a flick cancels the chain. Multiple pointers may independently hold or fling different Pikmin.
 
-- Tap/click to select a Pikmin, then press **Feed selected**.
-- Keyboard: Tab to a Pikmin and press Enter, Space or Up Arrow to throw it. Focus advances to another remaining Pikmin.
+Every throw automatically follows a parabolic path into the mouth. The plant opens, the character disappears on arrival, and the plant bites. The **last arrival** stops the timer. Play again starts a fresh round; Reset round clears the timer, selections and in-flight characters without saving an unfinished score.
 
-Character hit areas stay at least 44×44px. Only character buttons suppress touch scrolling; the surrounding garden and page retain native scrolling. Reduced motion replaces travelling sprites with an in-place fade and disables decorative movement. Flight duration and scoring stay the same.
+### Challenge mode
+
+Every random **3–8 seconds**, choose a new random count from each group:
+
+- 1–5 buds become flowers.
+- 1–5 flowers return to normal.
+- 1–10 normal Pikmin become buds.
+
+Each group is sampled without replacement from the states at the start of the wave, capped at the number available. Changes apply together; no character changes twice in a single wave. Held, linked, focused, selected, pending-double-tap and flying characters keep their current state. The countdown shows the next wave. Cycles continue until completion or reset. Returning from a background tab applies one due wave and schedules the next, avoiding a burst of missed changes.
+
+### Accessibility
+
+A tap selects and pauses a character; **Feed selected** is a single-pointer alternative to dragging and timed gestures. Keyboard: Tab to a character, then Enter, Space or Up Arrow to feed it. Focus advances to the next remaining character. These alternatives intentionally work for all three growth stages. Escape cancels a pointer chain. Pointer cancellation, tab hiding and loss of window focus also release active gestures.
+
+The 44×58px native buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. Only characters suppress touch scrolling; surrounding page content retains native scrolling. Reduced motion keeps the crowd stationary, disables walking/bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
 
 ## Structure
 
 ```text
-index.html                 Semantic controls, garden, plant/fence SVG and results
-styles.css                 Responsive layout, character states and jaw feedback
-src/game.js                Idle → playing → completed, unique arrivals and timing
-src/interaction.js         Swipe classification, random roster and parabolic position
-src/leaderboard.js         Validated browser storage and independent top-three ranking
-src/app.js                 Pointer/keyboard input, animation and DOM rendering
-assets/pikmin/             Six local transparent character images
+index.html                 Mode controls, stage guide, garden/plant SVG, results
+styles.css                 Responsive garden, walking, charge rings and linked states
+src/game.js                Fixed roster, lifecycle, gesture validation and growth waves
+src/interaction.js         Walking/separation, pointer gesture, double tap, flight geometry
+src/leaderboard.js         Safe local storage and separate top-three mode rankings
+src/app.js                 Pointer/keyboard input, frame loop and DOM rendering
+assets/pikmin/             Local character and growth-stage artwork
 assets/README.md           Artwork sources and credits
-manifest.webmanifest       Standalone app name and shared cat icons
+manifest.webmanifest       Standalone app and shared cat icons
 sw.js                      Scoped, versioned offline cache
 tests/                     Dependency-free Node tests
-scripts/browser-check.mjs   Optional Chrome, touch and offline checks
+scripts/browser-check.mjs   Optional Chrome, touch, responsive and offline checks
 ```
-
-There are no backend services or gameplay dependencies. The plant and fence use the game’s own SVG markup. The downloaded Pikmin artwork is credited to Nintendo; see [asset sources](./assets/README.md). This is an unofficial fan game.
 
 ## Timing and records
 
-`FlingGame` uses `performance.now()` for elapsed milliseconds. `requestAnimationFrame` refreshes the clock and interpolates each 480ms flight. Frame counts do not measure elapsed time. A Pikmin can move only from ready → flying → eaten, so repeated input cannot count it twice. Reset cancels pending gestures, animations and flights before replacing the board.
+`performance.now()` measures elapsed milliseconds. `requestAnimationFrame` refreshes the clock, advances roaming and draws each 480ms flight. Unique ready → flying → eaten transitions prevent duplicate scoring. Reset cancels gestures, effects and flights before replacing the roster.
 
-The `pikmin-fling.records.v1` localStorage key contains separate arrays for `20`, `30` and `40`. Each entry stores a full-precision millisecond `time` and ISO `date`. Reading validates entries, sorts ascending and keeps at most three. Saving a slower fourth result preserves the existing three. Equal times retain their original order and do not count as a new personal best. Times are rounded only for display.
+The **`pikmin-fling.records.v2`** localStorage key contains independent `normal` and `challenge` arrays. Each entry stores full-precision milliseconds and an ISO date. Reads validate, sort and cap each array at three. A slower fourth result leaves the existing three intact. Equal times keep their original order and do not count as a new personal best. Display rounding never changes stored times.
 
-Malformed JSON and records are discarded safely. If storage is unavailable or full, the game and in-memory records continue for the current visit, with a visible explanation. Records remain local to the browser/origin. Google Tag Manager uses the existing site container; analytics failure does not block play.
+The previous `pikmin-fling.records.v1` count-based records are left untouched. They are not mixed with the new modes because the rules differ. Malformed storage is discarded safely; unavailable/full storage falls back to in-memory records with a visible notice.
 
-## Offline and installation
+## Offline
 
-After one successful online load, wait for **Ready to play offline** in the footer. The service worker caches all six characters, game code, shared UI, local fonts and supplied cat icons. A supporting browser can install the game or add it to the home screen using its native action.
+After a successful online load, wait for **Ready to play offline**. The scoped service worker caches all nine growth images, game code, shared UI, fonts and icons. Supporting browsers can install the game using their native action. Updates wait for existing app windows to close; reopen to use the updated version. Bump `CACHE_NAME` when editing cached assets.
 
-When editing a cached asset, bump `CACHE_NAME` in `sw.js`. Updates wait for existing game windows to close, preserving active rounds. Navigation caching is restricted to this game’s home page; it does not replace the landing page or another game.
-
-See [VERIFICATION.md](./VERIFICATION.md) for test results and browser commands.
+Pikmin artwork © Nintendo; this is an unofficial fan game. The plant and fence use local SVG markup. No gameplay backend or external artwork server is required. See [VERIFICATION.md](./VERIFICATION.md) for verification results.

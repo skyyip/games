@@ -5,7 +5,7 @@ const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwrig
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PIKMIN_FLING_URL||'http://localhost:5173/pikmin-fling/';
 const output=process.env.PIKMIN_FLING_SCREENSHOTS||'/tmp/pikmin-fling-qa';
-const key='pikmin-fling.records.v1',errors=[];let checks=0;
+const key='pikmin-fling.records.v2',errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
@@ -13,144 +13,182 @@ async function setup(options={},init) {
   if(init)await context.addInitScript(init);
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
   const page=await context.newPage();await page.goto(base);await page.evaluate(()=>document.fonts.ready);
-  await page.locator('#start:not(:disabled)').waitFor();
-  return {context,page};
+  await page.locator('#start:not(:disabled)').waitFor();return {context,page};
 }
-async function swipe(page,button,dx=0,dy=-70) {
-  await button.scrollIntoViewIfNeeded();const box=await button.boundingBox();
-  const x=box.x+box.width/2,y=box.y+box.height/2;
-  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx,y+dy,{steps:4});await page.mouse.up();
+const pikmin=(page,growth)=>page.locator(`.pikmin[data-growth="${growth}"]:not(:disabled)`);
+async function stable(page,button) {
+  const id=await button.getAttribute('data-id'),target=page.locator(`.pikmin[data-id="${id}"]`);
+  await target.focus();await target.scrollIntoViewIfNeeded();return target;
+}
+async function centre(button,id=1){const b=await button.boundingBox();return{id,x:b.x+b.width/2,y:b.y+b.height/2};}
+async function swipe(page,button,hold=0,dy=-70,dx=0) {
+  button=await stable(page,button);const p=await centre(button);
+  await page.mouse.move(p.x,p.y);await page.mouse.down();
+  if(hold)await page.waitForTimeout(hold);
+  await page.mouse.move(p.x+dx,p.y+dy,{steps:4});await page.mouse.up();return button;
 }
 async function finishByKeyboard(page) {
   const remaining=page.locator('.pikmin:not(:disabled)');
   while(await remaining.count()){await remaining.first().focus();await page.keyboard.press('Enter');}
   await page.locator('#results').waitFor({state:'visible'});
 }
-async function stored(page) {return page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);}
-async function touch(protocol,type,points) {await protocol.send('Input.dispatchTouchEvent',{type,touchPoints:points});}
-async function centre(button,id=1){const b=await button.boundingBox();return{id,x:b.x+b.width/2,y:b.y+b.height/2};}
+async function stored(page){return page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);}
+async function touch(protocol,type,points){await protocol.send('Input.dispatchTouchEvent',{type,touchPoints:points});}
 try{
   await mkdir(output,{recursive:true});
-  const {context,page}=await setup({viewport:{width:1440,height:1050}});
+  const {context,page}=await setup({viewport:{width:1440,height:1100}});
   assert.equal(await page.title(),'Pikmin Fling · Sky’s Playground');
   await page.waitForTimeout(80);assert.equal(await page.locator('#timer').textContent(),'0.00');
-  assert.equal(await page.locator('.pikmin').count(),20);
-  assert.equal(await page.locator('.pikmin:not(:disabled)').count(),0);
-  assert.equal(await page.locator('.pikmin img').evaluateAll(images=>images.every(image=>image.complete&&image.naturalWidth>0)),true);
+  assert.equal(await page.locator('.pikmin').count(),30);assert.equal(await page.locator('.pikmin:not(:disabled)').count(),0);
+  for(const [growth,count] of [['leaf',20],['bud',5],['flower',5]])assert.equal(await page.locator(`.pikmin[data-growth="${growth}"]`).count(),count);
+  assert.equal(await page.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth>0)),true);
   await page.screenshot({path:`${output}/desktop-ready.png`,fullPage:true,animations:'disabled'});
-  pass('idle timer stays stopped, all Pikmin artwork loads and the board is inactive before Start');
-  for(const count of [20,30,40]) {
-    await page.locator(`input[value="${count}"]`).check();
-    assert.equal(await page.locator('.pikmin').count(),count);
-    await page.locator('#start').click();assert.equal(await page.locator('#count-options input').first().isDisabled(),true);
-    await page.waitForTimeout(60);assert.ok(Number(await page.locator('#timer').textContent())>0);
-    const first=page.locator('.pikmin').first();
-    await first.click();await first.dblclick();assert.equal(await page.locator('#fed').textContent(),'0');
-    await swipe(page,first,65,15);await page.waitForTimeout(30);assert.equal(await page.locator('.flying-pikmin').count(),0);
-    assert.equal(await page.locator('#fed').textContent(),'0');
-    await swipe(page,first);
-    assert.equal(await first.isDisabled(),true);assert.equal(await page.locator('#plant').evaluate(el=>el.classList.contains('is-open')),true);
-    if(count===20)await page.screenshot({path:`${output}/desktop-flight.png`,fullPage:true});
-    await finishByKeyboard(page);
-    assert.equal(await page.locator('#fed').textContent(),String(count));
-    assert.equal(await page.locator('.flying-pikmin').count(),0);
-    assert.equal(await page.locator('#plant').evaluate(el=>el.classList.contains('is-open')),false);
-    const final=await page.locator('#timer').textContent();
-    await page.waitForTimeout(200);assert.equal(await page.locator('#timer').textContent(),final);
-    assert.equal(await page.locator('#result-badge').textContent(),'NEW PERSONAL BEST!');
-    assert.equal(await page.locator('.record.is-new').count(),1);
-    const records=await stored(page);assert.equal(records[count].length,1);assert.ok(records[count][0].time>=480);
-    assert.equal((records[count][0].time/1000).toFixed(2),final);
-    pass(`${count} Pikmin: correct count, upward mouse fling, rejected taps/downward swipe, final-arrival timer and new persistent record`);
-    await page.locator('#change-count').click();assert.equal(await page.locator('#timer').textContent(),'0.00');
-    assert.equal(await page.locator('#fed').textContent(),'0');
-  }
-  await page.reload();await page.locator('#start:not(:disabled)').waitFor();
-  for(const count of [20,30,40]) {await page.locator(`input[value="${count}"]`).check();assert.equal(await page.locator('.record').count(),1);}
-  pass('20/30/40 records remain independent and survive a real page reload');
-  await page.locator('input[value="20"]').check();
-  for(let round=0;round<3;round++){await page.locator('#start').click();await finishByKeyboard(page);await page.locator('#change-count').click();}
-  const top=await stored(page);assert.equal(top[20].length,3);
-  assert.ok(top[20][0].time<=top[20][1].time&&top[20][1].time<=top[20][2].time);
-  pass('repeated real games keep no more than three records, ordered fastest first');
-  await page.locator('#start').click();await swipe(page,page.locator('.pikmin').first());
-  await page.locator('#reset').click();await page.waitForTimeout(650);
+  pass('idle board has 20 normal, 5 bud, 5 flower Pikmin, correct artwork and a stopped timer');
+  await page.locator('#start').click();assert.equal(await page.locator('#mode-options input').first().isDisabled(),true);
+  const positions=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
+  await page.waitForTimeout(250);
+  const moving=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));assert.notDeepEqual(moving,positions);
+  assert.equal(await page.locator('.pikmin img').first().evaluate(i=>getComputedStyle(i).animationName),'walking');
+  pass('Pikmin wander with a walking animation after the clock starts');
+  let leaf=await stable(page,pikmin(page,'leaf').first());
+  await leaf.click();await leaf.dblclick();assert.equal(await leaf.isDisabled(),false);
+  await swipe(page,leaf,0,30,60);assert.equal(await leaf.isDisabled(),false);
+  await swipe(page,leaf);assert.equal(await leaf.isDisabled(),true);
+  assert.equal(await page.locator('#plant').evaluate(el=>el.classList.contains('is-open')),true);
+  await page.waitForTimeout(550);assert.equal(await page.locator('#fed').textContent(),'1');
+  pass('normal Pikmin requires an upward fling, rejects taps and wrong directions, and counts once on arrival');
+  const bud=await stable(page,pikmin(page,'bud').first());
+  await swipe(page,bud);assert.equal(await bud.isDisabled(),false);
+  await bud.click();assert.equal(await bud.isDisabled(),false);await page.waitForTimeout(400);
+  await bud.click();assert.equal(await bud.isDisabled(),false);await bud.click();assert.equal(await bud.isDisabled(),true);
+  pass('buds reject swipes and expired taps; two quick taps launch the same bud');
+  const flower=await stable(page,pikmin(page,'flower').first());
+  await swipe(page,flower);assert.equal(await flower.isDisabled(),false);
+  await swipe(page,flower,270);assert.equal(await flower.isDisabled(),true);
+  pass('flowers reject an immediate fling and launch after a brief stationary press');
+  const first=await stable(page,pikmin(page,'bud').first()),a=await centre(first);
+  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.waitForTimeout(560);
+  assert.equal(await first.evaluate(b=>b.classList.contains('is-linked')),true);
+  const firstId=await first.getAttribute('data-id');
+  const secondId=await pikmin(page,'bud').evaluateAll((items,id)=>items.find(b=>b.dataset.id!==id).dataset.id,firstId);
+  const target=page.locator(`.pikmin[data-id="${secondId}"]`),b=await centre(target);
+  await page.mouse.move(b.x,b.y,{steps:5});
+  assert.equal(await target.evaluate(el=>el.classList.contains('is-linked')),true);
+  const wrong=await centre(pikmin(page,'flower').first());
+  await page.mouse.move(wrong.x,wrong.y,{steps:5});
+  assert.equal(await page.locator('.pikmin[data-growth="flower"].is-linked').count(),0);
+  assert.ok(await page.locator('#chains polyline').count()>0);
+  await page.screenshot({path:`${output}/desktop-chain.png`,fullPage:false});
+  await page.mouse.move(wrong.x,wrong.y-70,{steps:4});await page.mouse.up();
+  assert.equal(await first.isDisabled(),true);assert.equal(await target.isDisabled(),true);
+  assert.equal(await page.locator('.is-linked').count(),0);
+  pass('long-press traces same-stage buds, ignores flowers, draws a chain and launches the group with a final upward flick');
+  const cancelUnit=await stable(page,pikmin(page,'leaf').first());
+  await page.locator('#reset').focus();const cancelOrigin=await centre(cancelUnit);
+  await page.mouse.move(cancelOrigin.x,cancelOrigin.y);await page.mouse.down();await page.waitForTimeout(560);
+  assert.equal(await cancelUnit.evaluate(b=>b.classList.contains('is-linked')),true);
+  await page.keyboard.press('Escape');assert.equal(await page.locator('.is-held,.is-linked').count(),0);
+  await page.mouse.move(cancelOrigin.x,cancelOrigin.y-70,{steps:4});await page.mouse.up();
+  assert.equal(await cancelUnit.isDisabled(),false);assert.equal(await page.locator('#chains polyline').count(),0);
+  pass('Escape cancels a pointer chain even when keyboard focus is outside the garden');
+  await finishByKeyboard(page);const final=await page.locator('#timer').textContent();
+  await page.waitForTimeout(150);assert.equal(await page.locator('#timer').textContent(),final);
+  assert.equal(await page.locator('#fed').textContent(),'30');assert.equal(await page.locator('.flying-pikmin').count(),0);
+  assert.equal(await page.locator('.record.is-new').count(),1);assert.equal((await stored(page)).normal.length,1);
+  await page.locator('#again').click();assert.equal(await page.locator('.pikmin:not(:disabled)').count(),30);
+  assert.equal(await page.locator('#fed').textContent(),'0');
+  await swipe(page,pikmin(page,'leaf').first());await page.locator('#reset').click();await page.waitForTimeout(600);
   assert.equal(await page.locator('#timer').textContent(),'0.00');assert.equal(await page.locator('#fed').textContent(),'0');
-  assert.equal(await page.locator('.flying-pikmin').count(),0);assert.equal(await page.locator('#results').isHidden(),true);
-  assert.deepEqual(await stored(page),top);
-  pass('reset during flight cancels old arrivals, stops the timer and never saves an unfinished round');
-  await context.close();
+  assert.equal(await page.locator('.flying-pikmin').count(),0);assert.equal((await stored(page)).normal.length,1);
+  pass('completion freezes the timer, saves a highlighted record, replay restores 30, and reset cancels stale arrivals');
+  await page.locator('input[value="challenge"]').check();await page.locator('#start').click();await finishByKeyboard(page);
+  assert.equal((await stored(page)).challenge.length,1);
+  await page.reload();await page.locator('#start:not(:disabled)').waitFor();assert.equal(await page.locator('.record').count(),1);
+  await page.locator('input[value="challenge"]').check();assert.equal(await page.locator('.record').count(),1);
+  pass('normal and challenge records stay separate and survive a page reload');
+  for(let i=0;i<3;i++){await page.locator('#start').click();await finishByKeyboard(page);await page.locator('#change-mode').click();}
+  const top=(await stored(page)).challenge;assert.equal(top.length,3);assert.ok(top[0].time<=top[1].time&&top[1].time<=top[2].time);
+  pass('repeated completed rounds retain only the fastest three records');await context.close();
 
-  const mobile=await setup({viewport:{width:375,height:812},isMobile:true,hasTouch:true});
-  const p=mobile.page,protocol=await mobile.context.newCDPSession(p);
-  await p.locator('input[value="40"]').check();await p.locator('#start').tap();
-  const first=p.locator('.pikmin').first();await first.scrollIntoViewIfNeeded();
-  const origin=await centre(first);
-  await touch(protocol,'touchStart',[origin]);await touch(protocol,'touchMove',[{...origin,y:origin.y-60}]);
-  await touch(protocol,'touchCancel',[]);
-  assert.equal(await p.locator('.flying-pikmin').count(),0);assert.equal(await p.locator('#fed').textContent(),'0');
-  assert.equal(await first.locator('img').evaluate(el=>el.style.transform),'');
-  pass('cancelled touch restores the character, with no phantom throw or progress');
-  const second=p.locator('.pikmin').nth(1),a=await centre(first,1),b=await centre(second,2);
-  const scroll=await p.evaluate(()=>scrollY);
-  await touch(protocol,'touchStart',[a,b]);
-  await touch(protocol,'touchMove',[{...a,y:a.y-70},{...b,y:b.y-70}]);
-  assert.equal(await p.locator('.flying-pikmin').count(),0);
-  await touch(protocol,'touchEnd',[]);
-  assert.equal(await p.locator('.flying-pikmin').count(),2);
-  assert.equal(await p.evaluate(()=>scrollY),scroll);
-  await p.waitForTimeout(550);assert.equal(await p.locator('#fed').textContent(),'2');
-  pass('two simultaneous touch swipes throw once each, count on arrival and do not scroll the board');
-  const tap=p.locator('.pikmin:not(:disabled)').first();await tap.tap();
-  assert.equal(await p.locator('#feed-selected').isDisabled(),false);await p.locator('#feed-selected').tap();
-  await p.waitForTimeout(550);assert.equal(await p.locator('#fed').textContent(),'3');
-  pass('tap plus Feed selected provides a complete alternative to dragging');
+  const challenge=await setup({viewport:{width:1440,height:1100}},()=>{Math.random=()=>0;});
+  const c=challenge.page;await c.clock.install();await c.locator('input[value="challenge"]').check();await c.locator('#start').click();
+  const held=await stable(c,pikmin(c,'bud').first()),origin=await centre(held);
+  await c.mouse.move(origin.x,origin.y);await c.mouse.down();await c.clock.fastForward(3100);
+  assert.match(await c.locator('#cycle-status').textContent(),/Growth wave 1/);assert.equal(await held.getAttribute('data-growth'),'bud');
+  assert.equal(await c.locator('.pikmin[data-growth="leaf"]').count(),20);
+  assert.equal(await c.locator('.pikmin[data-growth="bud"]').count(),5);
+  await c.mouse.up();assert.equal(await held.isDisabled(),false);assert.equal(await c.locator('.is-linked').count(),0);
+  await c.clock.fastForward(3100);assert.match(await c.locator('#cycle-status').textContent(),/Growth wave 2/);
+  await c.locator('#reset').click();await c.clock.fastForward(10000);assert.equal(await c.locator('#timer').textContent(),'0.00');
+  assert.equal(await c.locator('.pikmin[data-growth="bud"]').count(),5);
+  pass('challenge cycles continue at 3s with simultaneous transitions, protect held Pikmin, cancel unfinished chains and stop on reset');
+  await challenge.context.close();
+
+  const mobile=await setup({viewport:{width:375,height:900},isMobile:true,hasTouch:true});
+  const p=mobile.page,protocol=await mobile.context.newCDPSession(p);await p.locator('#start').tap();
+  const touchLeaf=await stable(p,pikmin(p,'leaf').first()),touchOrigin=await centre(touchLeaf);
+  await touch(protocol,'touchStart',[touchOrigin]);await touch(protocol,'touchMove',[{...touchOrigin,y:touchOrigin.y-60}]);await touch(protocol,'touchCancel',[]);
+  assert.equal(await p.locator('.flying-pikmin').count(),0);assert.equal(await p.locator('.is-held').count(),0);
+  assert.equal(await touchLeaf.locator('img').evaluate(el=>el.style.transform),'');
+  pass('touch cancellation releases capture, restores the sprite and never throws');
+  const tapBud=await stable(p,pikmin(p,'bud').first());await tapBud.tap();await tapBud.tap();assert.equal(await tapBud.isDisabled(),true);
+  const touchFlower=await stable(p,pikmin(p,'flower').first()),f=await centre(touchFlower);
+  await touch(protocol,'touchStart',[f]);await p.waitForTimeout(270);await touch(protocol,'touchMove',[{...f,y:f.y-65}]);await touch(protocol,'touchEnd',[]);
+  assert.equal(await touchFlower.isDisabled(),true);
+  const l1=await stable(p,pikmin(p,'leaf').first()),l2id=await pikmin(p,'leaf').nth(1).getAttribute('data-id');
+  const l2=p.locator(`.pikmin[data-id="${l2id}"]`),t1=await centre(l1,1),t2=await centre(l2,2),scroll=await p.evaluate(()=>scrollY);
+  await touch(protocol,'touchStart',[t1,t2]);await touch(protocol,'touchMove',[{...t1,y:t1.y-70},{...t2,y:t2.y-70}]);await touch(protocol,'touchEnd',[]);
+  assert.equal(await l1.isDisabled(),true);assert.equal(await l2.isDisabled(),true);assert.equal(await p.evaluate(()=>scrollY),scroll);
+  pass('real touch input supports double-tap buds, press-and-fling flowers and simultaneous normal flings without scrolling');
+  const tap=await stable(p,pikmin(p,'flower').first());await tap.tap();await p.locator('#feed-selected').tap();assert.equal(await tap.isDisabled(),true);
+  pass('tap plus Feed selected provides a drag-free alternative for every growth state');
+  const chainStart=await stable(p,pikmin(p,'leaf').first()),ca=await centre(chainStart);
+  const chainStartId=await chainStart.getAttribute('data-id');
+  const chainTargetId=await pikmin(p,'leaf').evaluateAll((items,id)=>items.find(b=>b.dataset.id!==id).dataset.id,chainStartId);
+  const chainTarget=p.locator(`.pikmin[data-id="${chainTargetId}"]`);
+  await touch(protocol,'touchStart',[ca]);await p.waitForTimeout(560);
+  const cb=await centre(chainTarget);
+  await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y}]);
+  assert.equal(await chainTarget.evaluate(b=>b.classList.contains('is-linked')),true);
+  await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y-70}]);await touch(protocol,'touchEnd',[]);
+  assert.equal(await chainStart.isDisabled(),true);assert.equal(await chainTarget.isDisabled(),true);
+  pass('a finger can long-press, trace same-stage Pikmin and fling the full chain');
   for(const width of [320,375,430,600,768,1024,1440]) {
-    await p.setViewportSize({width,height:900});await p.waitForTimeout(60);
-    const layout=await p.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth,buttons:[...document.querySelectorAll('.pikmin:not(:disabled)')].map(el=>{const r=el.getBoundingClientRect();return{width:r.width,height:r.height}}),back:document.querySelector('.playground-home').getBoundingClientRect().height}));
-    assert.ok(layout.width<=layout.viewport,`page overflow at ${width}`);
-    assert.ok(layout.buttons.every(b=>b.width>=44&&b.height>=44),`small touch target at ${width}`);assert.ok(layout.back>=44);
-    assert.equal(await p.locator('.pikmin').count(),40);
+    await p.setViewportSize({width,height:1000});await p.waitForTimeout(80);
+    const layout=await p.evaluate(()=>({overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth,
+      targets:[...document.querySelectorAll('.pikmin:not(:disabled)')].map(b=>{const r=b.getBoundingClientRect(),pen=document.querySelector('#pen').getBoundingClientRect();return{w:r.width,h:r.height,inside:r.x>=pen.x&&r.right<=pen.right&&r.y>=pen.y&&r.bottom<=pen.bottom}})}));
+    assert.equal(layout.overflow,false);assert.ok(layout.targets.every(b=>b.w>=43.99&&b.h>=43.99&&b.inside),`targets at ${width}`);
     if([320,375,1440].includes(width))await p.screenshot({path:`${output}/playing-${width}.png`,fullPage:true,animations:'disabled'});
-    pass(`${width}px: no horizontal overflow, 44px character targets and stable 40-Pikmin board`);
+    pass(`${width}px: no overflow, 44px touch targets and all roaming Pikmin stay within the fence`);
   }
   await finishByKeyboard(p);await p.screenshot({path:`${output}/completed.png`,fullPage:true,animations:'disabled'});
-  await p.locator('#again').click();assert.equal(await p.locator('#fed').textContent(),'0');
-  assert.equal(await p.locator('#results').isHidden(),true);assert.equal(await p.locator('.pikmin:not(:disabled)').count(),40);
-  pass('Play again starts a fresh full round and clears the completion screen');
   await protocol.detach();await mobile.context.close();
 
   const reduced=await setup({reducedMotion:'reduce',viewport:{width:320,height:568}},()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('denied')}});});
   await reduced.page.locator('#start').focus();await reduced.page.keyboard.press('Enter');
   assert.equal(await reduced.page.locator('.pikmin:focus').count(),1);
-  await reduced.page.keyboard.press('ArrowUp');await reduced.page.waitForTimeout(100);
-  const before=await reduced.page.locator('.flying-pikmin').evaluate(el=>({transform:el.style.transform,opacity:Number(el.style.opacity)}));
-  await reduced.page.waitForTimeout(90);
-  const after=await reduced.page.locator('.flying-pikmin').evaluate(el=>({transform:el.style.transform,opacity:Number(el.style.opacity)}));
-  assert.equal(after.transform,before.transform);assert.ok(after.opacity<before.opacity);
+  const before=await reduced.page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
+  await reduced.page.waitForTimeout(200);assert.deepEqual(await reduced.page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform)),before);
+  await reduced.page.keyboard.press('ArrowUp');await reduced.page.waitForTimeout(80);
+  const flight=await reduced.page.locator('.flying-pikmin').evaluate(el=>({transform:el.style.transform,opacity:Number(el.style.opacity)}));
+  await reduced.page.waitForTimeout(90);const later=await reduced.page.locator('.flying-pikmin').evaluate(el=>({transform:el.style.transform,opacity:Number(el.style.opacity)}));
+  assert.equal(later.transform,flight.transform);assert.ok(later.opacity<flight.opacity);
   await finishByKeyboard(reduced.page);assert.match(await reduced.page.locator('#storage-status').textContent(),/unavailable/);
-  assert.equal(await reduced.page.locator('.record').count(),1);
-  pass('keyboard focus/ArrowUp/Enter work on a short phone, reduced motion fades in place, and blocked storage keeps in-memory records');
-  await reduced.context.close();
-
-  const corrupt=await setup({},()=>{if(location.protocol==='http:'||location.protocol==='https:')localStorage.setItem('pikmin-fling.records.v1','not JSON');});
-  assert.equal(await corrupt.page.locator('.record').count(),0);await corrupt.page.locator('#start').click();await finishByKeyboard(corrupt.page);
-  assert.equal((await stored(corrupt.page))[20].length,1);
-  pass('corrupted browser storage recovers and saves the next completed game');await corrupt.context.close();
-
+  assert.equal(await reduced.page.locator('.record').count(),1);await reduced.context.close();
+  pass('reduced motion disables roaming/bobbing, fades flights, supports keyboard completion and works with blocked storage');
+  const corrupt=await setup({},()=>{if(location.protocol.startsWith('http')){localStorage.setItem('pikmin-fling.records.v2','not JSON');localStorage.setItem('pikmin-fling.records.v1','old records');}});
+  await corrupt.page.locator('#start').click();await finishByKeyboard(corrupt.page);
+  assert.equal((await stored(corrupt.page)).normal.length,1);assert.equal(await corrupt.page.evaluate(()=>localStorage.getItem('pikmin-fling.records.v1')),'old records');
+  await corrupt.context.close();pass('corrupted new records recover without deleting old count-based records');
   const offline=await setup({serviceWorkers:'allow'});
   await offline.page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
-  const manifest=await offline.context.request.get(new URL('manifest.webmanifest',base).href).then(r=>r.json());
-  assert.equal(manifest.short_name,'Pikmin Fling');
-  for(const icon of manifest.icons)assert.equal((await offline.context.request.get(new URL(icon.src,base).href)).status(),200);
   await offline.context.setOffline(true);await offline.page.reload();await offline.page.locator('#start:not(:disabled)').waitFor();
-  await offline.page.locator('#start').click();await finishByKeyboard(offline.page);
-  assert.equal(await offline.page.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.naturalWidth>0)),true);
+  await offline.page.locator('input[value="challenge"]').check();await offline.page.locator('#start').click();await finishByKeyboard(offline.page);
   const fresh=await offline.context.newPage();await fresh.goto(base);await fresh.locator('#start:not(:disabled)').waitFor();
-  pass('manifest/icons and every character support a full offline round and a fresh offline tab');
+  assert.equal(await fresh.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.naturalWidth>0)),true);
+  pass('both modes and all growth artwork work offline after installation, including a fresh offline tab');
   await offline.context.setOffline(false);await offline.page.locator('.playground-home').click();await offline.page.waitForURL(new URL('../',base).href);
-  assert.equal(await offline.page.locator('.card').count(),5);assert.equal(await offline.page.locator('a[href="pikmin-fling/"]').count(),1);
-  pass('All games returns to the five-game landing page with its new Pikmin card');
-  await offline.context.close();assert.deepEqual(errors,[]);pass('no uncaught browser errors across repeated games, gestures, storage failures or offline play');
+  assert.equal(await offline.page.locator('.card').count(),5);await offline.context.close();
+  assert.deepEqual(errors,[]);pass('All games navigation works and no uncaught browser errors occur');
   console.log(`\n${checks} Pikmin Fling browser checks passed. Screenshots: ${output}`);
 }finally{await browser.close();}

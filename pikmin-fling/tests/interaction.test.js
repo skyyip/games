@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {isUpwardSwipe,flightPoint,createRoster,TYPES} from '../src/interaction.js';
+import {isUpwardSwipe,flightPoint,createRoster,TYPES,PointerGesture,DoubleTap,walkRoster} from '../src/interaction.js';
 
 test('upward flings and slow swipes work, while taps, sideways and downward gestures do not',()=>{
   const from={x:100,y:250,t:0};
@@ -18,14 +18,48 @@ test('a parabolic flight starts at the released character and ends exactly insid
   assert.equal(halfway.x,200);assert.ok(halfway.y<250);
 });
 
-test('all counts get random valid species and unique slots wholly within the fenced field',()=>{
-  for(const count of [20,30,40]) {
-    const roster=createRoster(count);
-    assert.equal(roster.length,count);assert.equal(new Set(roster.map(p=>p.slot)).size,count);
-    assert.deepEqual(roster.map(p=>p.id),Array.from({length:count},(_,i)=>i));
-    assert.ok(roster.every(p=>p.slot>=0 && p.slot<40 && TYPES.includes(p.type)));
-  }
-  const first=createRoster(20,()=>0),second=createRoster(20,()=>.99);
-  assert.notEqual(first[0].type,second[0].type);
-  assert.notDeepEqual(first.map(p=>p.slot),second.map(p=>p.slot));
+test('30 random characters roam within the fence while held characters stay still',()=>{
+  const roster=createRoster(300,410,()=>.25);
+  assert.equal(roster.length,30);assert.ok(roster.every(p=>TYPES.includes(p.type)));
+  const before={x:roster[0].x,y:roster[0].y};
+  for(let i=0;i<500;i++)walkRoster(roster,.02,300,410,new Set([0]));
+  assert.deepEqual({x:roster[0].x,y:roster[0].y},before);
+  assert.ok(roster.every(p=>p.x>=22 && p.x<=278 && p.y>=29 && p.y<=381));
+});
+
+test('a stationary half-second hold enables chaining; flower charging requires holding before moving',()=>{
+  const begin={x:100,y:200,t:0};
+  const flower=new PointerGesture(2,'flower',begin);
+  flower.move({x:100,y:140,t:100});
+  assert.equal(flower.action({x:100,y:130,t:600}),null); // waiting after swiping is not a charge
+  const charged=new PointerGesture(2,'flower',begin);
+  charged.update(220);assert.equal(charged.charged,true);
+  charged.move({x:100,y:150,t:280});
+  assert.deepEqual(charged.action({x:100,y:140,t:300}),{kind:'fling',held:280});
+  const chain=new PointerGesture(2,'bud',begin);
+  chain.update(500);assert.equal(chain.chaining,true);
+  assert.equal(chain.add(3,'leaf'),false);assert.equal(chain.add(4,'bud'),true);assert.equal(chain.add(4,'bud'),false);
+  chain.move({x:250,y:300,t:800});chain.move({x:250,y:280,t:850});
+  assert.deepEqual(chain.action({x:250,y:235,t:900}),{kind:'chain',held:800}); // final flick, not whole path
+  assert.deepEqual(chain.ids,[2,4]);
+  const tap=new PointerGesture(1,'bud',begin);
+  assert.equal(tap.isTap({x:102,y:202,t:180}),true);
+  assert.equal(tap.isTap({x:102,y:202,t:600}),false);
+});
+
+test('double taps must hit the same Pikmin within the window; cancellation clears pending taps',()=>{
+  const taps=new DoubleTap();
+  assert.equal(taps.tap(2,100),false);assert.equal(taps.tap(3,150),false);
+  assert.equal(taps.tap(3,400),true);assert.equal(taps.pending,null);
+  assert.equal(taps.tap(2,500),false);assert.equal(taps.tap(2,900),false);
+  taps.clear();assert.equal(taps.tap(2,950),false);
+  taps.expire(1400);assert.equal(taps.pending,null);
+});
+
+test('a fast sideways chain trace followed immediately by an upward flick uses only the final direction',()=>{
+  const chain=new PointerGesture(0,'leaf',{x:100,y:200,t:0});chain.update(500);
+  chain.move({x:100,y:200,t:700});chain.move({x:500,y:200,t:750});
+  chain.move({x:500,y:180,t:780});chain.move({x:500,y:140,t:810});
+  assert.equal(chain.action({x:500,y:130,t:830})?.kind,'chain');
+  assert.equal(chain.action({x:500,y:140,t:1200}),null); // releasing after a pause is not a flick
 });
