@@ -38,6 +38,7 @@ h1{margin:18px 0 12px;font-size:clamp(40px,8vw,76px);line-height:1.02;letter-spa
 .card:hover,.card:focus-visible{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 60px -20px var(--accent);outline:none}
 .art{height:190px;display:grid;place-items:center;background:var(--art)}
 .art svg{width:96px;height:96px;filter:drop-shadow(0 10px 18px #0006);transition:transform .35s}
+.pikmin-preview{display:flex;align-items:center;gap:8px}.pikmin-preview img{width:70px;height:130px;object-fit:contain;filter:drop-shadow(0 8px 9px #243c3555)}.pikmin-preview img:first-child{transform:rotate(-13deg)}.pikmin-preview img:last-child{transform:rotate(12deg)}
 .card:hover .art svg{transform:scale(1.12) rotate(-4deg)}
 .body{padding:22px 24px 24px}
 .tags{display:flex;gap:8px;margin-bottom:12px}
@@ -71,7 +72,7 @@ footer{margin-top:56px;text-align:center;color:#64748b;font-size:13px}
   .lead{font-size:14px;line-height:1.65;margin-bottom:28px;max-width:340px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   .card{border-radius:18px;min-width:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:#ffffff0d}
-  .art{height:122px}.art svg{width:66px;height:66px}
+  .art{height:122px}.art svg{width:66px;height:66px}.pikmin-preview{gap:0}.pikmin-preview img{width:39px;height:88px}
   .body{padding:14px 12px 16px}.tags{gap:5px;flex-wrap:wrap;margin-bottom:10px}
   .tags span{font-size:10px;padding:3px 7px;line-height:1.4}
   h2{font-size:17px;line-height:1.22;overflow-wrap:anywhere;margin-bottom:9px}
@@ -140,6 +141,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p>Guess a percentage of a randomly shaped line. Closest guess wins.</p>
         <span class="play">Play now <i>→</i></span>
       </div>
+    </a>
+    <a class="card" href="pikmin-fling/" style="--accent:#bef264;--art:linear-gradient(135deg,#b5d477,#648b40)">
+      <div class="art" aria-hidden="true"><div class="pikmin-preview"><img src="./pikmin-fling/assets/pikmin/yellow.png" alt="" draggable="false"><img src="./pikmin-fling/assets/pikmin/red.png" alt="" draggable="false"><img src="./pikmin-fling/assets/pikmin/blue.png" alt="" draggable="false"></div></div>
+      <div class="body"><div class="tags"><span>Solo</span><span>Fling &amp; swipe</span></div><h2>Pikmin Fling</h2><p>Fling a colourful crowd into one hungry plant. Clear the garden. Beat your best.</p><span class="play">Play now <i>→</i></span></div>
     </a>
   </section>
   <footer>Made for a little break. Stay for another round.</footer>

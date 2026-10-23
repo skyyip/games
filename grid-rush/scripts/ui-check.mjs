@@ -7,7 +7,7 @@ const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'pl
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const baseURL = process.env.PLAYGROUND_URL || 'http://localhost:5173/';
 const output = process.env.PLAYGROUND_SCREENSHOTS || '/tmp/skys-playground-qa';
-const games = ['grid-rush/', 'grid-rush-in-order/', 'tap-and-spill/', 'line-up/'];
+const games = ['grid-rush/', 'grid-rush-in-order/', 'tap-and-spill/', 'line-up/', 'pikmin-fling/'];
 const errors = [];
 let checks = 0;
 const pass = text => { checks += 1; console.log(`PASS ${text}`); };
@@ -21,13 +21,13 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(baseURL);
   assert.equal(await page.title(), 'Sky’s Playground');
-  assert.equal(await page.locator('.card').count(), 4);
+  assert.equal(await page.locator('.card').count(), 5);
   const manifest = await context.request.get(new URL(await page.locator('link[rel="manifest"]').getAttribute('href'), baseURL).href).then(r => r.json());
   assert.equal(manifest.name, 'Sky’s Playground');
   assert.equal(new URL(manifest.start_url, new URL('grid-rush/playground.webmanifest', baseURL)).href, baseURL);
   await page.locator('.card').evaluateAll(cards => Promise.all(cards.flatMap(card => card.getAnimations().map(animation => animation.finished))));
   await page.screenshot({ path: `${output}/landing-desktop.png`, fullPage: true, animations: 'disabled' });
-  pass('landing name, manifest and all four games are present');
+  pass('landing name, manifest and all five games are present');
 
   const expectedIcon = hash(await readFile(new URL('../assets/icons/apple-touch-icon.png', import.meta.url)));
   for (const path of ['', ...games]) {

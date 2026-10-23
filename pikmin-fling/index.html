@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TZ646NJ9');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f5ed">
+<meta name="description" content="Fling a colourful crowd of Pikmin into one very hungry plant. Clear the fenced garden and race your three best times.">
+<meta name="apple-mobile-web-app-title" content="Pikmin Fling">
+<title>Pikmin Fling · Sky’s Playground</title>
+<link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="../grid-rush/playground-ui.css">
+<script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
+<script type="module" src="./src/app.js"></script>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TZ646NJ9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="site-top">
+  <a class="brand" href="./" aria-label="Pikmin Fling home"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 31V15M16 19C3 20 3 7 3 7s13-1 13 12ZM16 15C16 2 29 3 29 3s1 13-13 12Z"/></svg><span>pikmin <b>fling</b><i>.</i></span></a>
+  <a class="playground-home" href="../" aria-label="Back to Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
+  <span class="header-note">SMALL PIKMIN. BIG APPETITE.</span>
+</header>
+<main id="app">
+  <section class="intro"><div><p class="eyebrow">A LITTLE GARDEN CHAOS</p><h1>Ready, set, <br><em>feed.</em></h1></div><p>A colourful crowd. One hungry plant. <br>Fling every Pikmin up, and make a clean sweep.</p></section>
+  <div class="arena">
+    <section class="play-panel" aria-label="Pikmin garden">
+      <div class="scoreboard"><div><span class="eyebrow">YOUR TIME</span><div class="clock"><output id="timer" aria-label="Elapsed seconds" aria-live="off">0.00</output><span>s</span></div></div><div class="progress-wrap"><div><span id="phase">READY TO FLING</span><strong><span id="fed">0</span><small> / <span id="total">20</span> fed</small></strong></div><progress id="progress" value="0" max="20" aria-label="Pikmin fed"></progress></div></div>
+      <div class="world" id="world">
+        <svg class="garden-scenery" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true"><path d="M0 150Q170 80 340 150T800 120V600H0Z" fill="#d7e6bf"/><path d="M0 195Q220 140 430 190T800 150V600H0Z" fill="#c7dca7"/><g fill="#fff" opacity=".65"><ellipse cx="115" cy="59" rx="43" ry="12"/><ellipse cx="139" cy="51" rx="22" ry="17"/><ellipse cx="654" cy="81" rx="42" ry="11"/><ellipse cx="633" cy="71" rx="22" ry="15"/></g></svg>
+        <div class="plant-wrap" id="plant" aria-label="Hungry plant">
+          <svg class="plant-art" viewBox="0 0 200 230" aria-hidden="true">
+            <defs><linearGradient id="stem" gradientUnits="userSpaceOnUse" x1="85" x2="110" y1="0" y2="0"><stop stop-color="#2c743c"/><stop offset=".5" stop-color="#65a84d"/><stop offset="1" stop-color="#2c743c"/></linearGradient><radialGradient id="petal" cx=".35" cy=".2"><stop stop-color="#fc8267"/><stop offset=".6" stop-color="#dc493f"/><stop offset="1" stop-color="#ad2f32"/></radialGradient></defs>
+            <ellipse cx="100" cy="215" rx="61" ry="10" fill="#406c3330"/>
+            <path d="M100 201V112" stroke="url(#stem)" stroke-width="19" stroke-linecap="round"/>
+            <path d="M99 184C73 143 35 164 35 164s21 40 64 20ZM101 162c23-35 60-22 60-22s-18 40-60 22Z" fill="url(#stem)" stroke="#39773d" stroke-width="2"/>
+            <path d="m45 168 49 15M106 161l45-16" fill="none" stroke="#93bc67" stroke-width="2"/>
+            <g class="plant-head" id="plant-head">
+              <ellipse class="mouth-inside" cx="100" cy="75" rx="53" ry="34" fill="#472333"/>
+              <ellipse class="tongue" cx="100" cy="90" rx="25" ry="12" fill="#ef8c99"/>
+              <g class="jaw upper-jaw"><path d="M45 71C34 1 165 0 155 71Z" fill="url(#petal)" stroke="#a73432" stroke-width="3"/><g fill="#fff7dc"><ellipse cx="77" cy="28" rx="11" ry="8" transform="rotate(-22 77 28)"/><ellipse cx="123" cy="23" rx="9" ry="7" transform="rotate(22 123 23)"/><circle cx="143" cy="47" r="7"/><circle cx="57" cy="50" r="7"/></g><path d="M46 69Q100 54 154 69" fill="none" stroke="#fff7dc" stroke-width="10" stroke-linecap="round"/><path d="m65 67 7 13 7-15m20-3 7 15 7-14m17 2 7 13 7-10" fill="#fff7dc"/></g>
+              <g class="jaw lower-jaw"><path d="M47 79C48 130 150 129 153 79Z" fill="url(#petal)" stroke="#a73432" stroke-width="3"/><ellipse cx="77" cy="103" rx="9" ry="6" fill="#fff7dc"/><ellipse cx="127" cy="104" rx="8" ry="5" fill="#fff7dc"/><path d="M48 80Q100 93 152 80" fill="none" stroke="#fff7dc" stroke-width="10" stroke-linecap="round"/><path d="m69 84 7-12 7 14m24 1 7-13 7 11" fill="#fff7dc"/></g>
+            </g>
+            <path d="M63 205h74l-7 21H70Z" fill="#b47b4c" stroke="#93623d" stroke-width="2"/><rect x="59" y="196" width="82" height="12" rx="4" fill="#cb9462"/>
+          </svg><span id="mouth-target" aria-hidden="true"></span><span class="chomp-word" id="chomp-word" aria-hidden="true">NOM!</span>
+        </div>
+        <div class="garden-label" id="garden-label">THE LUNCH CROWD</div>
+        <div class="pen" id="pen" role="group" aria-label="Fenced Pikmin area" aria-describedby="gesture-help">
+          <svg class="fence" viewBox="0 0 1000 370" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="pickets" width="45" height="42" patternUnits="userSpaceOnUse"><path d="M15 42V10l7-7 7 7v32" fill="#ddbd85" stroke="#a77c4e" stroke-width="2"/></pattern></defs><rect x="13" y="17" width="974" height="336" rx="10" fill="none" stroke="#a78559" stroke-width="9"/><path d="M14 36V338M986 36V338" stroke="#e4c895" stroke-width="12"/><g transform="scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g><g transform="translate(0 343) scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g><path d="M14 17H986M14 359H986" stroke="#b48b55" stroke-width="8"/></svg>
+          <div id="units" class="units"></div>
+        </div>
+        <div id="flights" class="flight-layer" aria-hidden="true"></div>
+        <section id="results" class="results" aria-labelledby="result-title" hidden><span class="result-icon" aria-hidden="true">✓</span><p class="eyebrow" id="result-badge">CLEAN SWEEP</p><h2 id="result-title" tabindex="-1">Garden cleared.</h2><p class="final-time"><span id="final-time"></span><small>s</small></p><p id="result-note"></p><button class="primary-button" type="button" id="again">Play again <span aria-hidden="true">↗</span></button><button class="text-button" type="button" id="change-count">Change Pikmin count</button></section>
+      </div>
+      <div class="garden-tools"><p id="gesture-help" role="status">Swipe a Pikmin upward to send it flying. The plant will take care of the rest.</p><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
+      <p class="keyboard-help">Tap to select, then use Feed selected. Keyboard: Tab to a Pikmin; Enter, Space or ↑ to fling.</p>
+    </section>
+    <aside class="sidebar">
+      <section class="control-card"><p class="eyebrow">PICK YOUR CROWD</p><h2>A little snack?<br>Or a feast?</h2><fieldset id="count-options"><legend>How many Pikmin?</legend><div class="count-options"><label><input type="radio" name="count" value="20" checked><span><b>20</b> Pikmin</span></label><label><input type="radio" name="count" value="30"><span><b>30</b> Pikmin</span></label><label><input type="radio" name="count" value="40"><span><b>40</b> Pikmin</span></label></div></fieldset><button id="start" type="button" class="primary-button" disabled>Loading Pikmin…</button><button id="reset" type="button" class="secondary-button" hidden>Reset round</button><p class="control-note" id="control-note">A fresh mix of six types, every round.<br>The clock starts when you do.</p></section>
+      <section class="records-card" aria-labelledby="records-title"><div class="records-heading"><h2 id="records-title">Your fastest three</h2><span id="records-count">20 PIKMIN</span></div><ol id="records" aria-label="Fastest completion times"></ol><p id="storage-status">Saved on this device.</p></section>
+      <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol><li><b>Start the clock.</b> Pick 20, 30 or 40 Pikmin.</li><li><b>Fling upward.</b> Use a finger or mouse. No need to aim for the mouth.</li><li><b>Feed them all.</b> The last arrival stops the clock. Beat your best three.</li></ol></details>
+    </aside>
+  </div>
+  <footer><span id="offline-status" role="status">Play here, or add Pikmin Fling to your home screen.</span><span>Pikmin artwork © Nintendo. <a href="https://pikmin.nintendo.com/" target="_blank" rel="noopener noreferrer">Character source</a> · Unofficial fan game.</span></footer>
+</main>
+<p id="announcements" class="sr-only" role="status" aria-live="polite"></p>
+<noscript><p class="noscript-note">Enable JavaScript to play Pikmin Fling.</p></noscript>
+</body>
+</html>
