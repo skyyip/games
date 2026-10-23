@@ -1,5 +1,5 @@
 // Leave active rounds intact; updates activate after existing app windows close.
-const CACHE_NAME='pikmin-fling-app-v4';
+const CACHE_NAME='pikmin-fling-app-v5';
 const BASE=new URL('./',self.location.href).href;
 const HOME=new URL('./index.html',self.location.href).href;
 const APP_FILES=['./','./index.html','./styles.css','./manifest.webmanifest','./src/app.js','./src/game.js','./src/interaction.js','./src/leaderboard.js',...['red','yellow','blue'].flatMap(type=>['leaf','bud','flower'].map(growth=>`./assets/pikmin/${type}-${growth}.png`)),'../grid-rush/playground-ui.css','../grid-rush/src/playground-ui.js','../grid-rush/src/motion.js','../grid-rush/assets/fonts/DMSans.ttf','../grid-rush/assets/fonts/SpaceGrotesk.ttf','../grid-rush/assets/icons/icon-192.png','../grid-rush/assets/icons/icon-512.png','../grid-rush/assets/icons/apple-touch-icon.png'].map(path=>new URL(path,self.location.href).href);

@@ -153,3 +153,7 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
   .choice-ink { display:none; }
   dialog.motion-sheet { translate:none!important;scale:1!important;transform:none!important; }
 }
+
+/* Copyright stays on its own final line across the playground and game footers. */
+footer{flex-wrap:wrap}
+footer .site-copyright{flex:0 0 100%;order:10;width:100%;margin:0;font-size:11px;line-height:1.6;text-align:center}
