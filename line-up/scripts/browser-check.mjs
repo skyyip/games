@@ -1,6 +1,7 @@
 // Optional QA using an existing Playwright installation; no runtime dependencies.
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
+import {SHAPES, SHAPE_NAMES} from '../src/geometry.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.LINE_UP_URL||'http://localhost:5173/line-up/';
@@ -10,10 +11,10 @@ const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},kind=0,target=.36) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
   await context.route('https://www.googletagmanager.com/**',route=>route.fulfill({contentType:'text/javascript',body:''}));
-  await context.addInitScript(({kind,target})=>{
-    let draw=0;const values=[target,(kind+.1)/4,.7,.6,.5];
+  await context.addInitScript(({kind,target,count})=>{
+    let draw=0;const values=[target,(kind+.1)/count,.7,.6,.5];
     Math.random=()=>values[draw++%values.length];
-  },{kind,target});
+  },{kind,target,count:SHAPES.length});
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
   const page=await context.newPage();await page.goto(base);await page.evaluate(()=>document.fonts.ready);
   return {context,page};
@@ -49,12 +50,12 @@ async function touchPoint(protocol,page,fraction,type='touchStart') {
 }
 try{
   await mkdir(output,{recursive:true});
-  for(const [kind,label] of ['straight','parabola','wave','bend'].entries()){
+  for(const [kind,label] of SHAPES.entries()){
     const {context,page}=await setup({viewport:{width:1440,height:1050}},kind);
     assert.equal(await page.title(),'Line Up · Sky’s Playground');
     await page.locator('#player-0').fill('Alice');await page.locator('#player-1').fill('Bob');
     await page.locator('#start').click();assert.equal(await page.locator('#target').textContent(),'37');
-    assert.match(await page.locator('#shape-name').textContent(),new RegExp(['Straight','Parabola','Wavy','Rounded bend'][kind]));
+    assert.match(await page.locator('#shape-name').textContent(),new RegExp(SHAPE_NAMES[label]));
     const path=await page.locator('#line-base').getAttribute('d');
     await page.locator('#ready').click();assert.equal(await page.locator('#lock').isDisabled(),true);
     await choose(page,.1,.5,kind%2===0);await page.locator('#lock').click();
@@ -78,6 +79,63 @@ try{
     pass(`${label}: another round resets every guess and starts the first player`);
     await context.close();
   }
+
+  const closed=await setup({viewport:{width:375,height:812},isMobile:true,hasTouch:true},4);
+  await closed.page.locator('#start').tap();await closed.page.locator('#ready').tap();
+  assert.equal(await closed.page.locator('#closed-controls').isVisible(),true);
+  assert.equal(await closed.page.locator('#other-side').isDisabled(),true);
+  const closedProtocol=await closed.context.newCDPSession(closed.page);
+  await closed.page.locator('#line-svg').scrollIntoViewIfNeeded();
+  await touchPoint(closedProtocol,closed.page,.1);
+  await closedProtocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await touchPoint(closedProtocol,closed.page,.73);
+  await closedProtocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await closed.page.locator('#other-side').tap();
+  assert.equal(await closed.page.locator('#other-side').getAttribute('aria-pressed'),'true');
+  let closedRatio=await closed.page.evaluate(()=>document.querySelector('#line-selection').getTotalLength()/document.querySelector('#line-base').getTotalLength());
+  assert.ok(Math.abs(closedRatio-.37)<.0001,'the other arc crosses the closing join and measures 37%');
+  pass('closed circle accepts separate touch points and switches to the complementary arc across the join');
+  const closedBefore=[await closed.page.locator('#start-point').inputValue(),await closed.page.locator('#end-point').inputValue()];
+  for(const width of [320,375,600,768,1024,1440]) {
+    await closed.page.setViewportSize({width,height:900});await closed.page.waitForTimeout(80);
+    const layout=await closed.page.evaluate(()=>{
+      const path=document.querySelector('#line-base'),box=path.getBBox(),m=path.getScreenCTM();
+      return {overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth,width:box.width*m.a,height:box.height*m.d,
+        controls:[...document.querySelectorAll('.closed-controls button,.marker')].map(el=>el.getBoundingClientRect().height)};
+    });
+    assert.equal(layout.overflow,false);assert.ok(Math.abs(layout.width-layout.height)<.1,'a circle stays circular');
+    assert.ok(layout.controls.every(height=>height>=44));
+    assert.deepEqual([await closed.page.locator('#start-point').inputValue(),await closed.page.locator('#end-point').inputValue()],closedBefore);
+    const p=await point(closed.page,Number(closedBefore[0])/100),marker=await closed.page.locator('#start-marker').boundingBox();
+    assert.ok(Math.abs(marker.x+marker.width/2-p.x)<.6);assert.ok(Math.abs(marker.y+marker.height/2-p.y)<.6);
+    if([375,1440].includes(width))await closed.page.screenshot({path:`${output}/circle-choosing-${width}.png`,fullPage:true,animations:'disabled'});
+  }
+  pass('closed shapes stay proportional with aligned 44px markers and no overflow at six phone/tablet/desktop widths');
+  await closed.page.locator('#lock').click();
+  assert.equal(await closed.page.locator('#other-side').getAttribute('aria-pressed'),'false');
+  await closed.page.locator('#ready').click();
+  await closed.page.locator('#whole-outline').click();
+  closedRatio=await closed.page.evaluate(()=>document.querySelector('#line-selection').getTotalLength()/document.querySelector('#line-base').getTotalLength());
+  assert.ok(Math.abs(closedRatio-1)<.0001);
+  await closed.page.locator('#clear').click();assert.equal(await closed.page.locator('#lock').isDisabled(),true);
+  await choose(closed.page,.1,.5);await closed.page.locator('#lock').click();
+  assert.match(await closed.page.locator('#result-title').textContent(),/Player 1 wins/);
+  assert.match(await closed.page.locator('.result-score strong').first().textContent(),/37\.00%/);
+  pass('closed-shape scoring uses the chosen arc, hides it at handoff, and clears a whole-outline selection');
+  await closedProtocol.detach();await closed.context.close();
+
+  const full=await setup({reducedMotion:'reduce',viewport:{width:320,height:568}},5,.999999);
+  await full.page.locator('#start').click();
+  for(let player=0;player<2;player++) {
+    await full.page.locator('#ready').click();
+    if(player===0){await full.page.locator('#whole-outline').focus();await full.page.keyboard.press('Enter');await full.page.locator('#lock').click();}
+    else await keyboardGuess(full.page,100);
+  }
+  assert.match(await full.page.locator('#result-title').textContent(),/share the win/);
+  assert.equal(await full.page.locator('.result-row.winner').count(),2);
+  assert.equal(await full.page.locator('#result').evaluate(el=>el.getAnimations().length),0);
+  pass('100% closed outlines work with a button and endpoint keyboard controls, including reduced motion');
+  await full.context.close();
 
   const {context,page}=await setup({viewport:{width:375,height:812},isMobile:true,hasTouch:true},2);
   await page.locator('#start').tap();await page.locator('#ready').tap();

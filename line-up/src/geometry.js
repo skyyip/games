@@ -1,5 +1,6 @@
-export const SHAPES = ['straight','parabola','wave','bend'];
-export const SHAPE_NAMES = { straight:'Straight', parabola:'Parabola', wave:'Wavy', bend:'Rounded bend' };
+export const CLOSED_SHAPES = ['circle','square','rectangle','triangle','oval','irregular'];
+export const SHAPES = ['straight','parabola','wave','bend',...CLOSED_SHAPES];
+export const SHAPE_NAMES = { straight:'Straight', parabola:'Parabola', wave:'Wavy', bend:'Rounded bend', circle:'Circle', square:'Square', rectangle:'Rectangle', triangle:'Triangle', oval:'Oval', irregular:'Irregular' };
 const clamp = value => Math.max(0,Math.min(1,value));
 const pathData = points => points.map((p,i)=>`${i?'L':'M'}${p.x},${p.y}`).join(' ');
 
@@ -11,18 +12,32 @@ export function measureLine(points) {
   return { points, lengths, total, d:pathData(points) };
 }
 
+export function selectionFraction(line, start, end, otherSide=false) {
+  const distance=Math.abs(end-start);
+  return line.closed && otherSide?1-distance:distance;
+}
+
 // A separate subpath preserves the exact segment under responsive scaling,
 // without coupling its length to the visual stroke width or SVG dash units.
-export function segmentPath(line, start, end) {
+export function segmentPath(line, start, end, otherSide=false) {
   const low=clamp(Math.min(start,end)),high=clamp(Math.max(start,end));
-  if(low===high)return '';
+  if(line.closed && otherSide) {
+    if(low===0 && high===1)return '';
+    // Join at the shared closing point so the other arc is one continuous path.
+    const tail=sectionPoints(line,high,1),head=sectionPoints(line,0,low);
+    return pathData([...tail,...head.slice(1)]);
+  }
+  return low===high?'':pathData(sectionPoints(line,low,high));
+}
+
+function sectionPoints(line, low, high) {
   const points=[pointAt(line,low)];
   for(let i=1;i<line.points.length-1;i++) {
     const fraction=line.lengths[i]/line.total;
     if(fraction>low && fraction<high)points.push(line.points[i]);
   }
   points.push(pointAt(line,high));
-  return pathData(points);
+  return points;
 }
 
 export function pointAt(line, fraction) {
@@ -50,6 +65,7 @@ export function projectPoint(line, point) {
 
 export function createLine(kind, random=Math.random) {
   if(!SHAPES.includes(kind)) throw new RangeError('Unknown line shape.');
+  const closed=CLOSED_SHAPES.includes(kind);
   const flip=random()<.5?-1:1;
   const amplitude=65+random()*45;
   let points;
@@ -78,5 +94,23 @@ export function createLine(kind, random=Math.random) {
     points.push({x:920,y:105});
     if(flip<0) points=points.map(p=>({x:p.x,y:420-p.y}));
   }
-  return {kind,...measureLine(points)};
+  if(kind==='circle' || kind==='oval') {
+    const rx=kind==='circle'?245:270,ry=kind==='circle'?245:190;
+    points=Array.from({length:256},(_,i)=>{
+      const angle=i/256*Math.PI*2-Math.PI/2;
+      return {x:350+rx*Math.cos(angle),y:350+ry*Math.sin(angle)};
+    });
+  }
+  if(kind==='square') points=[{x:110,y:110},{x:590,y:110},{x:590,y:590},{x:110,y:590}];
+  if(kind==='rectangle') points=[{x:80,y:180},{x:620,y:180},{x:620,y:520},{x:80,y:520}];
+  if(kind==='triangle') points=[{x:350,y:90},{x:610,y:560},{x:90,y:560}];
+  if(kind==='irregular') {
+    const count=7+Math.floor(random()*4);
+    points=Array.from({length:count},(_,i)=>{
+      const angle=i/count*Math.PI*2-Math.PI/2,radius=170+random()*100;
+      return {x:350+radius*Math.cos(angle),y:350+radius*Math.sin(angle)};
+    });
+  }
+  if(closed)points.push({...points[0]});
+  return {kind,closed,width:closed?700:1000,height:closed?700:420,...measureLine(points)};
 }

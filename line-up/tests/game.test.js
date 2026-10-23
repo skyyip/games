@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LineGame } from '../src/game.js';
+import { SHAPES } from '../src/geometry.js';
 
 test('players share the target and closest length wins, regardless of where the segment starts', () => {
   const game = new LineGame(() => 0.36);
@@ -57,9 +58,23 @@ test('invalid and repeated submissions cannot consume turns; reset and six-playe
 
 test('one random shape is shared for the whole round and a new round generates a new line', () => {
   const game=new LineGame(()=>.36);game.start(['A','B']);
-  assert.equal(game.line.kind,'parabola');const line=game.line;
+  assert.equal(game.line.kind,SHAPES[Math.floor(.36*SHAPES.length)]);const line=game.line;
   game.beginTurn();game.submit(.2,.5);assert.equal(game.line,line);
   game.beginTurn();game.submit(.1,.7);assert.equal(game.line,line);
   game.start(['A','B']);assert.notEqual(game.line,line);
   game.reset();assert.equal(game.line,null);
+});
+
+test('closed shapes score the chosen arc and allow the whole outline without consuming invalid turns', () => {
+  let draw=0;
+  const game=new LineGame(()=>draw++===0?.19:.45); // Target 20%, circle.
+  game.start(['A','B']);assert.equal(game.line.kind,'circle');
+  game.beginTurn();assert.equal(game.submit(0,1,true),false);
+  assert.equal(game.submit(.1,.9,true),true);
+  assert.ok(Math.abs(game.guesses[0].percent-20)<1e-9);
+  assert.equal(game.guesses[0].otherSide,true);
+  assert.equal(game.submit(.1,.9,true),false);
+  game.beginTurn();assert.equal(game.submit(.4,.4,true),true);
+  assert.equal(game.guesses[1].percent,100);
+  assert.equal(game.winners[0].name,'A');
 });

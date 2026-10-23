@@ -1,5 +1,5 @@
 import { LineGame } from './game.js';
-import { pointAt, projectPoint, segmentPath, SHAPE_NAMES } from './geometry.js';
+import { pointAt, projectPoint, segmentPath, selectionFraction, SHAPE_NAMES } from './geometry.js';
 import { animateChange } from '../../grid-rush/src/playground-ui.js';
 
 const $ = selector => document.querySelector(selector);
@@ -33,30 +33,40 @@ function renderPlayers() {
 
 function resetDraft() {
   gesture = null;
-  draft = { start:null, end:null, active:'start', manual:false };
+  draft = { start:null, end:null, active:'start', manual:false, otherSide:false };
   $('#start-point').value = 0; $('#end-point').value = 100;
 }
 
 function renderLine() {
   for(const path of document.querySelectorAll('#line-base, #handoff-preview .path-base, #result-preview .path-base')) path.setAttribute('d',game.line.d);
+  for(const svg of document.querySelectorAll('#line-svg, #handoff-preview, #result-preview')) svg.setAttribute('viewBox',`0 0 ${game.line.width} ${game.line.height}`);
+  stage.style.aspectRatio=`${game.line.width}/${game.line.height}`;
+  stage.classList.toggle('is-closed',game.line.closed);
+  $('#closed-controls').hidden=!game.line.closed;
+  $('#play-subject').textContent=game.line.closed?'outline':'line';
+  for(const endpoint of ['start','end'])$(`#${endpoint}-point`).setAttribute('aria-label',`${endpoint==='start'?'Start':'End'} point position along the ${game.line.closed?'outline':'line'}`);
+  $('#path-motto').textContent=game.line.closed?'FOLLOW THE OUTLINE. TRUST YOUR EYE.':'FOLLOW THE LINE. TRUST YOUR EYE.';
+  $('#keyboard-help').textContent=`Select an endpoint to adjust it. Keyboard: arrow keys move; Shift + arrow moves finely. ${game.line.closed?'Home/End meet at the outline’s join. Other side switches arcs.':'Home/End reach the line’s ends.'}`;
   for(const [id,fraction] of [['origin-cap',0],['finish-cap',1]]) {
     const point=pointAt(game.line,fraction);$( `#${id}`).setAttribute('cx',point.x);$(`#${id}`).setAttribute('cy',point.y);
   }
-  $('#line-kind').textContent = `${SHAPE_NAMES[game.line.kind].toUpperCase()} / YOUR LINE`;
+  $('#finish-cap').style.display=game.line.closed?'none':'';
+  $('#line-kind').textContent = `${SHAPE_NAMES[game.line.kind].toUpperCase()} / ${game.line.closed?'OUTLINE':'YOUR LINE'}`;
   $('#shape-name').textContent = `${SHAPE_NAMES[game.line.kind]} this round`;
-  $('#line-svg').setAttribute('aria-label',`Select a portion of the ${SHAPE_NAMES[game.line.kind].toLowerCase()} line`);
+  $('#line-svg').setAttribute('aria-label',`Select a portion of the ${SHAPE_NAMES[game.line.kind].toLowerCase()} ${game.line.closed?'outline':'line'}`);
 }
 
 function renderSelection() {
-  const complete=draft.start!==null && draft.end!==null && draft.start!==draft.end;
-  $('#line-selection').setAttribute('d',complete?segmentPath(game.line,draft.start,draft.end):'');
+  const hasEndpoints=draft.start!==null && draft.end!==null;
+  const complete=hasEndpoints && selectionFraction(game.line,draft.start,draft.end,draft.otherSide)>0;
+  $('#line-selection').setAttribute('d',complete?segmentPath(game.line,draft.start,draft.end,draft.otherSide):'');
   $('#line-selection').style.visibility=complete?'visible':'hidden';
   for(const endpoint of ['start','end']) {
     const marker=$(`#${endpoint}-marker`),value=draft[endpoint];
     marker.hidden=value===null;
     if(value!==null && game.line) {
       const point=pointAt(game.line,value);
-      marker.style.left=`${point.x/10}%`;marker.style.top=`${point.y/4.2}%`;
+      marker.style.left=`${point.x/game.line.width*100}%`;marker.style.top=`${point.y/game.line.height*100}%`;
       $(`#${endpoint}-point`).value=value*100;
     }
     marker.classList.toggle('is-active',draft.active===endpoint);
@@ -64,8 +74,14 @@ function renderSelection() {
     $(`#edit-${endpoint}`).setAttribute('aria-pressed',String(draft.active===endpoint));
   }
   $('#lock').disabled=!complete || gesture!==null;
+  $('#other-side').disabled=!hasEndpoints || gesture!==null;
+  $('#other-side').setAttribute('aria-pressed',String(draft.otherSide));
+  $('#whole-outline').disabled=gesture!==null;
   $('#clear').disabled=draft.start===null && draft.end===null;
-  const help=draft.start===null?'Drag along the line, or tap a start point and an end point.':draft.end===null?'Start point placed. Tap an end point, or keep dragging to draw your segment.':!complete?'The endpoints overlap. Move one point to give your segment some length.':'Looking good? Adjust either endpoint, or lock your guess when you’re ready.';
+  let help=game.line?.closed?'The green arc is your guess. Adjust the points, switch sides, or lock it in.':'Looking good? Adjust either endpoint, or lock your guess when you’re ready.';
+  if(draft.start===null)help=game.line?.closed?'Choose two points on the outline. Other side switches between the two arcs.':'Drag along the line, or tap a start point and an end point.';
+  else if(draft.end===null)help='Start point placed. Tap an end point, or keep dragging to draw your segment.';
+  else if(!complete)help=game.line?.closed?'No length selected. Move an endpoint or choose the other side of the outline.':'The endpoints overlap. Move one point to give your segment some length.';
   if($('#selection-help').textContent!==help) $('#selection-help').textContent=help;
 }
 
@@ -73,7 +89,7 @@ function showState() {
   for(const [state,id] of Object.entries(panelIds)) $(`#${id}`).hidden=game.state!==state;
   $('#target').textContent=game.target??'—';
   $('#inline-target').textContent=`${game.target??'—'}%`;
-  $('#target-note').textContent=game.target===null?'A random target from 1% to 100%. Revealed when you start.':'Of the full line, measured along its path. The same target for every player.';
+  $('#target-note').textContent=game.target===null?'A random target from 1% to 100%. Revealed when you start.':game.line.closed?'Of the full outline, measured around its edge. The same shape and target for every player.':'Of the full line, measured along its path. The same target for every player.';
   if(game.state==='handoff') {
     resetDraft();renderSelection();
     $('#next-player').textContent=game.players[game.turn];$('#monogram').textContent=game.turn+1;
@@ -82,7 +98,7 @@ function showState() {
     $('#ready').setAttribute('aria-label',`I’m ready. Start ${game.players[game.turn]}'s turn`);
     animateChange($('#handoff'));
     $('#handoff').scrollIntoView({block:'start',behavior:'auto'});$('#ready').focus({preventScroll:true});
-    announce(`Target ${game.target}%. ${SHAPE_NAMES[game.line.kind]} line. Pass to ${game.players[game.turn]}.`);
+    announce(`Target ${game.target}%. ${SHAPE_NAMES[game.line.kind]} ${game.line.closed?'outline':'line'}. Pass to ${game.players[game.turn]}.`);
   }
   if(game.state==='choosing') {
     $('#turn-count').textContent=`PLAYER ${game.turn+1} / ${game.players.length}`;
@@ -104,7 +120,7 @@ function renderResults() {
   const winners=game.winners,results=game.results,winning=new Set(winners.map(result=>result.index));
   $('#result-kicker').textContent=winners.length>1?'A SHARED VICTORY':'THE CLOSEST CALL';
   $('#result-title').textContent=`${winners.map(result=>result.name).join(' & ')} ${winners.length>1?'share the win!':'wins!'}`;
-  $('#result-summary').textContent=winners[0].error<1e-9?`Spot on. Exactly ${game.target}% of the line. That’s a good eye.`:`Closest to ${game.target}%, with an error of ${format(winners[0].error)} percentage points. Nicely judged.`;
+  $('#result-summary').textContent=winners[0].error<1e-9?`Spot on. Exactly ${game.target}% of the ${game.line.closed?'outline':'line'}. That’s a good eye.`:`Closest to ${game.target}%, with an error of ${format(winners[0].error)} percentage points. Nicely judged.`;
   $('#reference-label').textContent=`THE TARGET / ${game.target}%`;
   $('#reference-kind').textContent=SHAPE_NAMES[game.line.kind];
   $('#result-preview .path-selection').setAttribute('d',segmentPath(game.line,0,game.target/100));
@@ -128,7 +144,7 @@ function renderResults() {
 
 function fractionAt(event) {
   const bounds=$('#line-svg').getBoundingClientRect();
-  return projectPoint(game.line,{x:(event.clientX-bounds.left)/bounds.width*1000,y:(event.clientY-bounds.top)/bounds.height*420});
+  return projectPoint(game.line,{x:(event.clientX-bounds.left)/bounds.width*game.line.width,y:(event.clientY-bounds.top)/bounds.height*game.line.height});
 }
 
 stage.addEventListener('pointerdown',event=>{
@@ -190,7 +206,9 @@ for(const endpoint of ['start','end']) {
   control.addEventListener('keydown',keydown);marker.addEventListener('keydown',keydown);
 }
 $('#clear').addEventListener('click',()=>{resetDraft();renderSelection();});
-$('#lock').addEventListener('click',()=>{if(!gesture && game.submit(draft.start,draft.end))showState();});
+$('#other-side').addEventListener('click',()=>{if(game.state==='choosing' && game.line.closed && !gesture){draft.otherSide=!draft.otherSide;renderSelection();announce('Selected the other arc of the outline.');}});
+$('#whole-outline').addEventListener('click',()=>{if(game.state==='choosing' && game.line.closed && !gesture){draft.start=0;draft.end=1;draft.otherSide=false;renderSelection();announce('Whole outline selected.');}});
+$('#lock').addEventListener('click',()=>{if(!gesture && game.submit(draft.start,draft.end,draft.otherSide))showState();});
 $('#ready').addEventListener('click',()=>{if(game.beginTurn())showState();});
 $('#player-form').addEventListener('submit',event=>{event.preventDefault();startRound();});
 $('#plus').addEventListener('click',()=>{if(names.length<6){names.push(`Player ${names.length+1}`);renderPlayers();}});
