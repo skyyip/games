@@ -44,7 +44,7 @@ Each group is sampled without replacement from the states at the start of the wa
 
 A tap selects and pauses a character; **Feed selected** is a single-pointer alternative to dragging and timed gestures. Keyboard: Tab to a character, then Enter, Space or Up Arrow to feed it. Focus advances to the next remaining character. These alternatives intentionally work for all three growth stages. Escape cancels a pointer chain. Pointer cancellation, tab hiding and loss of window focus also release active gestures.
 
-The 44×58px native buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. Only characters suppress touch scrolling; surrounding page content retains native scrolling. Reduced motion keeps the crowd stationary, disables walking/bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
+The 44×58px native buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. Only characters suppress touch scrolling; surrounding page content retains native scrolling. Native text/image selection, tap highlighting, artwork dragging and long-press menus are disabled throughout the fenced area, including its gesture container; blank fence margins still scroll and instructions outside the fence remain selectable. Reduced motion keeps the crowd stationary, disables walking/bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
 
 ## Structure
 

@@ -30,9 +30,10 @@ PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
 node pikmin-fling/scripts/browser-check.mjs
 ```
 
-**26 checks passed**:
+**28 checks passed**:
 
 - Idle timer and inactive board; all current artwork loads with the correct stage distribution.
+- Native fence selection regression: a triple-click previously entered browser Range selection; it now stays unselected. The fence, delegated gesture container, SVG and artwork suppress selection/tap highlights; selection, drag and context-menu events are blocked only inside the fence.
 - Free walking and body animation after start.
 - Real mouse actions for normal, bud and flower rules, including rejected taps, wrong directions, expired double taps and premature flower flings.
 - Long-press same-stage chaining, incompatible-stage exclusion, visible chain lines and batch release by the final upward flick.
@@ -41,6 +42,7 @@ node pikmin-fling/scripts/browser-check.mjs
 - Independent normal/challenge records after reload and fastest-three limits after repeated rounds.
 - Repeated challenge growth waves with deterministic time, simultaneous transitions, held-character protection and stopped updates after reset.
 - Chrome touch input: cancellation, double-tap buds, charged flower fling, two simultaneous normal flings without page scroll, and a complete finger-drawn chain.
+- Blank fence margins retain native finger scrolling without selecting the garden.
 - Tap-plus-Feed-selected and keyboard alternatives for all stages.
 - 320/375/430/600/768/1024/1440px layouts: no horizontal overflow, 44×58px character buttons and all roaming targets inside the fence. Measurements allow 0.01px for floating-point transform rounding.
 - Reduced motion: stationary crowd, no body animation and in-place fading flights. Keyboard completion still works with localStorage blocked.
@@ -54,6 +56,6 @@ The shared `grid-rush/scripts/ui-check.mjs` suite also passed **19 checks** acro
 
 ## Review
 
-Review found an Escape handler scoped too narrowly to the garden. A failing browser regression reproduced the issue before the handler was moved to `window`; the complete suite then passed. A final local review checked rule coverage, native controls, labels/focus, gesture cancellation, reduced motion, record validation and scoped service-worker updates.
+Review found an Escape handler scoped too narrowly to the garden. A failing browser regression reproduced the issue before the handler was moved to `window`; the complete suite then passed. The fence selection fix extends native-selection protection from individual buttons to their enclosing delegated gesture area, with a failing-then-passing browser regression and an offline-cache version bump. A final local review checked rule coverage, native controls, labels/focus, gesture cancellation, reduced motion, record validation and scoped service-worker updates.
 
 Chrome touch emulation was tested. Physical phones, other browser engines, screen readers and native operating-system installation were not directly tested.

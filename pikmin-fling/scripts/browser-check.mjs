@@ -44,6 +44,21 @@ try{
   assert.equal(await page.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth>0)),true);
   await page.screenshot({path:`${output}/desktop-ready.png`,fullPage:true,animations:'disabled'});
   pass('idle board has 20 normal, 5 bud, 5 flower Pikmin, correct artwork and a stopped timer');
+  await page.locator('#pen').scrollIntoViewIfNeeded();
+  const fenceBounds=await page.locator('#pen').boundingBox();
+  await page.mouse.click(fenceBounds.x+4,fenceBounds.y+40,{clickCount:3});
+  assert.notEqual(await page.evaluate(()=>getSelection().type),'Range','the browser must not select the fenced region');
+  const nativeSelection=await page.locator('#pen').evaluate(pen=>({
+    styles:[pen,pen.querySelector('#units'),pen.querySelector('.fence'),pen.querySelector('.pikmin img')].map(el=>{
+      const style=getComputedStyle(el);return {select:style.userSelect,tap:style.webkitTapHighlightColor};
+    }),
+    blocked:['selectstart','dragstart','contextmenu'].every(type=>!pen.querySelector('.fence').dispatchEvent(new Event(type,{bubbles:true,cancelable:true})))
+  }));
+  assert.ok(nativeSelection.styles.every(style=>style.select==='none'&&style.tap==='rgba(0, 0, 0, 0)'));
+  assert.equal(nativeSelection.blocked,true);
+  assert.equal(await page.locator('.keyboard-help').evaluate(el=>el.dispatchEvent(new Event('selectstart',{bubbles:true,cancelable:true}))),true);
+  pass('the entire fence prevents native selection, ancestor tap highlighting, artwork dragging and long-press menus');
+
   await page.locator('#start').click();assert.equal(await page.locator('#mode-options input').first().isDisabled(),true);
   const positions=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
   await page.waitForTimeout(250);
@@ -153,6 +168,20 @@ try{
   await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y-70}]);await touch(protocol,'touchEnd',[]);
   assert.equal(await chainStart.isDisabled(),true);assert.equal(await chainTarget.isDisabled(),true);
   pass('a finger can long-press, trace same-stage Pikmin and fling the full chain');
+  await p.locator('#pen').scrollIntoViewIfNeeded();
+  await p.waitForTimeout(100);
+  const blank=await p.locator('#pen').boundingBox(),scrollBefore=await p.evaluate(()=>scrollY);
+  const blankTouch={id:1,x:blank.x+3,y:blank.y+180};
+  await touch(protocol,'touchStart',[blankTouch]);
+  for(let step=1;step<=5;step++){
+    await touch(protocol,'touchMove',[{...blankTouch,y:blankTouch.y-step*20}]);await p.waitForTimeout(50);
+  }
+  await touch(protocol,'touchEnd',[]);await p.waitForTimeout(100);
+  const scrollAfter=await p.evaluate(()=>scrollY);
+  assert.ok(scrollAfter>scrollBefore,JSON.stringify({scrollBefore,scrollAfter,blank}));
+  assert.notEqual(await p.evaluate(()=>getSelection().type),'Range');
+  pass('the blank fence still scrolls naturally with a finger without selecting the garden');
+
   for(const width of [320,375,430,600,768,1024,1440]) {
     await p.setViewportSize({width,height:1000});await p.waitForTimeout(80);
     const layout=await p.evaluate(()=>({overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth,

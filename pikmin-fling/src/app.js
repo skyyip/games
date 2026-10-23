@@ -255,7 +255,7 @@ function release(event,cancelled=false) {
 units.addEventListener('pointerup',event=>release(event));
 units.addEventListener('pointercancel',event=>release(event,true));
 units.addEventListener('lostpointercapture',event=>release(event,true));
-units.addEventListener('contextmenu',event=>event.preventDefault());
+for(const type of ['selectstart','dragstart','contextmenu'])$('#pen').addEventListener(type,event=>event.preventDefault());
 const cancelGestures=()=>{for(const pointerId of [...gestures.keys()])release({pointerId},true);taps.clear();};
 window.addEventListener('blur',cancelGestures);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelGestures();});
