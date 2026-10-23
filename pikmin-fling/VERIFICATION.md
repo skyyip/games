@@ -45,9 +45,9 @@ node pikmin-fling/scripts/browser-check.mjs
 - Independent normal/challenge records after reload and fastest-three limits after repeated rounds.
 - Repeated challenge growth waves with deterministic time, simultaneous transitions, held-character protection and stopped updates after reset.
 - Chrome touch input: cancellation, double-tap buds, charged flower fling, two simultaneous normal flings without page scroll, and a complete finger-drawn chain.
-- Blank fence margins retain native finger scrolling without selecting the garden.
+- Blank fence gestures cannot scroll the fixed phone play view. Native scrolling remains available before/after a round.
 - Tap-plus-Feed-selected and keyboard alternatives for all stages.
-- 320/375/430/600/768/1024/1440px layouts: no horizontal overflow, 44×58px character buttons and all roaming targets inside the fence. Measurements allow 0.01px for floating-point transform rounding.
+- 320/375/430/600/768/1024/1440px layouts: no horizontal overflow, at least 44px character buttons and all roaming targets inside the fence. Measurements allow 0.01px for floating-point transform rounding.
 - Reduced motion: stationary crowd, no body/footstep/plant-sway animation and in-place fading flights. Keyboard completion still works with localStorage blocked.
 - Corrupt new storage recovers without deleting old records.
 - New modes and all 18 growth sprites decode offline, including a fresh offline tab.
@@ -94,3 +94,26 @@ node pikmin-fling/scripts/timed-check.mjs
 ```
 
 Screenshots default to `/tmp/pikmin-timed-qa`. Review confirmed that scoring occurs on unique arrival, deadline enforcement precedes input and arrival processing, completed records save once, pending score effects cancel on reset/reduced motion, and the updated offline cache includes the new game code. Physical phones, other browser engines and screen readers were not directly tested.
+
+## Phone scroll lock — 2026-10-23
+
+A real Chrome touch regression reproduced the reported bug: a blank-fence upward swipe moved the playing page from **505px to 590px**. Only individual character buttons previously suppressed panning; missed touches still began native page scrolling. The same regression passed after adding a fixed mobile play view and page lock.
+
+**59 repository logic tests passed**, including a new compact-garden case verifying 30 non-overlapping initial 44px targets in short portrait/landscape fields and bounded roaming. The original **32 game browser checks** and **13 timed-mode checks** passed.
+
+The new `scripts/scroll-check.mjs` passed **14 checks**:
+
+- Upward blank-fence swipes, downward swipes, momentum and wheel input cannot move the playing page.
+- A real finger fling still feeds a character, native focus does not move the viewport and End round is reachable.
+- 320×568, 375×812, 430×932, 568×320, 812×375 and 768×1024 play views fit the garden and controls, retain 44px targets, avoid horizontal overflow and make covered page controls inert. Rotation repacks targets without stacking them. Portrait and landscape screenshots were visually inspected.
+- End round restores native finger scrolling, normal controls and the reset button’s original location.
+- Normal/Challenge completion and timed-mode timeout release the lock and allow mode changes.
+- No uncaught browser errors.
+
+```sh
+GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
+PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
+node pikmin-fling/scripts/scroll-check.mjs
+```
+
+Review checked lock cleanup on reset/completion/timeout, focus with covered controls inert, single-touch cancellation, stable gesture coordinates, rotation without target overlap, unchanged growth/scoring and the offline cache bump. Screenshots default to `/tmp/pikmin-scroll-qa`. Chrome touch emulation was tested; physical iOS/Android devices and other browser engines were not directly exercised.

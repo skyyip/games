@@ -27,6 +27,17 @@ test('30 random characters roam within the fence while held characters stay stil
   assert.ok(roster.every(p=>p.x>=22 && p.x<=278 && p.y>=29 && p.y<=381));
 });
 
+test('compact phone and landscape gardens fit 30 full 44px touch targets and keep roaming inside their bounds',()=>{
+  for(const [width,height] of [[296,250],[444,184],[700,150]]) {
+    const roster=createRoster(width,height,()=>0,44);
+    assert.equal(roster.length,30);
+    assert.ok(roster.every(p=>p.x>=22&&p.x<=width-22&&p.y>=22&&p.y<=height-22));
+    for(let i=0;i<30;i++)for(let j=i+1;j<30;j++)assert.ok(Math.abs(roster[i].x-roster[j].x)>=44||Math.abs(roster[i].y-roster[j].y)>=44);
+    for(let i=0;i<100;i++)walkRoster(roster,.02,width,height,new Set(),()=>0,44);
+    assert.ok(roster.every(p=>p.x>=22&&p.x<=width-22&&p.y>=22&&p.y<=height-22));
+  }
+});
+
 test('random crowds can include Ice, Rock and Winged Pikmin alongside the original three types',()=>{
   const seen=new Set();
   for(const random of [.01,.2,.4,.55,.7,.9]) {

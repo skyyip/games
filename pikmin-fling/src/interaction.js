@@ -4,8 +4,10 @@ export const TYPES=Object.freeze(['red','yellow','blue','ice','rock','winged']);
 export const TYPE_NAMES={red:'Red',yellow:'Yellow',blue:'Blue',ice:'Ice',rock:'Rock',winged:'Winged'};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 
-export function createRoster(width,height,random=Math.random) {
-  const columns=width>=500?6:5,rows=Math.ceil(30/columns);
+export function createRoster(width,height,random=Math.random,unitHeight=58) {
+  const availableRows=Math.max(1,Math.floor(height/(unitHeight+2)));
+  const columns=Math.max(1,Math.min(Math.floor(width/46),Math.max(width>=500?6:5,Math.ceil(30/availableRows))));
+  const rows=Math.ceil(30/columns);
   return Array.from({length:30},(_,id)=>{
     const angle=random()*Math.PI*2,speed=18+random()*6;
     return {id,type:TYPES[Math.floor(random()*TYPES.length)],x:(id%columns+.5)*width/columns,
@@ -13,27 +15,28 @@ export function createRoster(width,height,random=Math.random) {
   });
 }
 
-export function walkRoster(roster,dt,width,height,frozen=new Set(),random=Math.random) {
+export function walkRoster(roster,dt,width,height,frozen=new Set(),random=Math.random,unitHeight=58) {
   dt=Math.min(.04,Math.max(0,dt));
+  const halfHeight=unitHeight/2;
   for(const p of roster) {
     if(frozen.has(p.id))continue;
     p.turn-=dt;
     if(p.turn<=0){const angle=random()*Math.PI*2,speed=18+random()*6;p.vx=Math.cos(angle)*speed;p.vy=Math.sin(angle)*speed;p.turn=4+random()*4;}
     p.x+=p.vx*dt;p.y+=p.vy*dt;
     if(p.x<22||p.x>width-22)p.vx*=-1;
-    if(p.y<29||p.y>height-29)p.vy*=-1;
-    p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,29,height-29);
+    if(p.y<halfHeight||p.y>height-halfHeight)p.vy*=-1;
+    p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,halfHeight,height-halfHeight);
   }
   // Soft separation keeps the full touch targets reachable in the small garden.
   for(let i=0;i<roster.length;i++)for(let j=i+1;j<roster.length;j++) {
     const a=roster[i],b=roster[j],dx=b.x-a.x,dy=b.y-a.y;
-    const overlapX=46-Math.abs(dx),overlapY=60-Math.abs(dy);
+    const overlapX=46-Math.abs(dx),overlapY=unitHeight+2-Math.abs(dy);
     if(overlapX<=0||overlapY<=0)continue;
     const axis=overlapX<overlapY?'x':'y',delta=axis==='x'?dx:dy,amount=Math.min(overlapX,overlapY);
     const am=frozen.has(a.id)?0:frozen.has(b.id)?1:.5,bm=frozen.has(b.id)?0:frozen.has(a.id)?1:.5;
     const sign=delta<0?-1:1;
     a[axis]-=sign*amount*am;b[axis]+=sign*amount*bm;
-    for(const p of [a,b])if(!frozen.has(p.id)){p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,29,height-29);p.turn=Math.min(p.turn,.5);}
+    for(const p of [a,b])if(!frozen.has(p.id)){p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,halfHeight,height-halfHeight);p.turn=Math.min(p.turn,.5);}
   }
 }
 

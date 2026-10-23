@@ -56,7 +56,13 @@ This mode keeps the **highest three scores**, separately from the other modes’
 
 A tap selects and pauses a character; **Feed selected** is a single-pointer alternative to dragging and timed gestures. Keyboard: Tab to a character, then Enter, Space or Up Arrow to feed it. Focus advances to the next remaining character. These alternatives intentionally work for all three growth stages. Escape cancels a pointer chain. Pointer cancellation, tab hiding and loss of window focus also release active gestures.
 
-The 44×58px native buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. Only characters suppress touch scrolling; surrounding page content retains native scrolling. Native text/image selection, tap highlighting, artwork dragging and long-press menus are disabled throughout the fenced area, including its gesture container; blank fence margins still scroll and instructions outside the fence remain selectable. Reduced motion keeps the crowd stationary, disables walking, footsteps, plant sway and bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
+Native character buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. They measure 44×58px in the regular page and 44×44px in the compact play view. Native text/image selection, tap highlighting, artwork dragging and long-press menus are disabled throughout the fence. Reduced motion keeps the crowd stationary, disables walking, footsteps, plant sway and bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
+
+### Fixed phone play view
+
+On small screens and touch devices, starting any mode opens a fixed play view that fits the visible viewport. The page cannot pan while playing, including when a swipe starts in the blank fence or misses a character. A fixed-body lock, local touch-action rules and a non-passive single-touch fallback prevent unwanted page scrolling. The garden adapts to portrait/landscape space while retaining 44px character targets; rotation repacks their positions without changing their types, growth stages or scores. The regular desktop mouse layout remains available.
+
+The existing Reset round button moves into the play view as **End round**. It resets without saving an unfinished round, then returns to mode controls. Completion and the 20-second deadline also release the lock, restore the page, and show results. Covered navigation and sidebar controls are inert while the fixed play view is active. Idle/completed pages retain native scrolling. The stage guide stays visible in portrait; very short landscape screens prioritise the garden, timer/score and action buttons. Full instructions remain on the setup page and character labels retain their gesture instructions.
 
 ## Structure
 
@@ -74,6 +80,7 @@ sw.js                      Scoped, versioned offline cache
 tests/                     Dependency-free Node tests
 scripts/browser-check.mjs   Original-mode Chrome, touch, responsive and offline checks
 scripts/timed-check.mjs     Countdown, animated scores, cancellation and score records
+scripts/scroll-check.mjs    Fixed play view, real touch scrolling and exit restoration
 ```
 
 ## Timing and records

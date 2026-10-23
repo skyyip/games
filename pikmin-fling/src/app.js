@@ -14,8 +14,30 @@ let storage;
 try{storage=window.localStorage;}catch{/* In-memory records still work. */}
 let {records,available:storageAvailable}=readLeaderboard(storage);
 let roster=[],buttons=[],selected=null,newRank=null,frame=0,assetsReady=false;
-let bite=null,nom=null,lastFrame=0,fieldWidth=0,fieldHeight=0,cycle=0;
+let bite=null,nom=null,lastFrame=0,fieldWidth=0,fieldHeight=0,unitHeight=58,cycle=0;
 let deadlineTimer=0,scoreFrame=0,scorePulse=null,scoreGain=null;
+let savedScroll=0;
+const resetHome=$('#reset').parentElement;
+function setPlayLock(playing) {
+  const locked=playing&&matchMedia('(max-width:760px), (pointer:coarse)').matches;
+  if(locked===document.body.classList.contains('play-locked'))return;
+  if(locked){
+    savedScroll=window.scrollY;document.body.style.setProperty('--page-top',`${-savedScroll}px`);
+    $('.garden-tools').append($('#reset'));$('#reset').textContent='End round';
+  }
+  document.documentElement.classList.toggle('play-locked',locked);
+  document.body.classList.toggle('play-locked',locked);
+  for(const element of document.querySelectorAll('.site-top,.intro,.sidebar,main>footer'))element.inert=locked;
+  if(!locked){
+    resetHome.insertBefore($('#reset'),$('#control-note'));$('#reset').textContent='Reset round';
+    document.body.style.removeProperty('--page-top');window.scrollTo({top:savedScroll,behavior:'auto'});
+  }
+}
+// A non-passive fallback also blocks single-finger rubber-banding in mobile Safari.
+document.addEventListener('touchmove',event=>{
+  if(document.body.classList.contains('play-locked')&&event.touches.length===1&&event.cancelable)event.preventDefault();
+},{passive:false});
+window.addEventListener('resize',()=>setPlayLock(game.state==='playing'));
 const seconds=time=>(time/1000).toFixed(2);
 const announce=text=>{$('#announcements').textContent=text;};
 const source=(type,growth)=>`./assets/pikmin/${type}-${growth}.png`;
@@ -33,11 +55,12 @@ function renderUnit(id) {
   button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}.${game.mode==='timed'?` Worth ${POINTS[unit.growth]} points.`:''} ${hints[unit.growth]} Keyboard: Enter to feed.`);
 }
 function positionUnits() {
-  for(const unit of roster)buttons[unit.id].style.transform=`translate(${unit.x-22}px,${unit.y-29}px)`;
+  for(const unit of roster)buttons[unit.id].style.transform=`translate(${unit.x-22}px,${unit.y-unitHeight/2}px)`;
 }
 function renderRoster() {
   fieldWidth=units.clientWidth;fieldHeight=units.clientHeight;
-  roster=createRoster(fieldWidth,fieldHeight);buttons=[];
+  unitHeight=parseFloat(getComputedStyle(units).getPropertyValue('--pikmin-height'))||58;
+  roster=createRoster(fieldWidth,fieldHeight,Math.random,unitHeight);buttons=[];
   const fragment=document.createDocumentFragment();
   for(const unit of roster) {
     const button=document.createElement('button');button.type='button';button.className='pikmin';
@@ -125,7 +148,7 @@ function chomp() {
   nom=effect($('#chomp-word'),[{opacity:0,transform:'translateY(7px) rotate(9deg) scale(.8)'},{opacity:1,transform:'translateY(0) rotate(9deg) scale(1)',offset:.25},{opacity:1,offset:.65},{opacity:0,transform:'translateY(-8px) rotate(9deg) scale(.95)'}],{duration:380,easing:'ease-out'});
 }
 
-function resetRound(mode=game.mode) {
+function resetRound(mode=game.mode,playing=false) {
   cancelAnimationFrame(frame);frame=0;lastFrame=0;
   clearTimeout(deadlineTimer);deadlineTimer=0;cancelAnimationFrame(scoreFrame);scoreFrame=0;
   for(const pointerId of [...gestures.keys()])release({pointerId},true);
@@ -142,16 +165,16 @@ function resetRound(mode=game.mode) {
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
   $('#cycle-status').textContent=mode==='normal'?'Normal mode · states stay the same':`${modeNames[mode]} · growth changes every 3–8s`;
   $('#control-note').textContent=timed?'20 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 30 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock and Winged Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.';
-  renderRoster();renderProgress();setSelected(null);renderRecords();
+  setPlayLock(playing);renderRoster();renderProgress();setSelected(null);renderRecords();
 }
 function startRound(keyboard=false) {
   if(!assetsReady)return;
-  resetRound();game.start();
+  resetRound(game.mode,true);game.start();
   if(game.mode==='timed')deadlineTimer=setTimeout(()=>{if(game.expire()){renderProgress();finishRound();}},ROUND_LIMIT);
   for(const button of buttons)button.disabled=false;
   $('#mode-options').disabled=true;$('#start').hidden=true;$('#reset').hidden=false;world.classList.add('is-playing');
   $('#garden-label').textContent='HOLD. LINK. FLING.';
-  renderProgress();$('.scoreboard').scrollIntoView({block:'start',behavior:'auto'});
+  renderProgress();if(!document.body.classList.contains('play-locked'))$('.scoreboard').scrollIntoView({block:'start',behavior:'auto'});
   if(keyboard)buttons[0].focus({preventScroll:true});
   announce(`30 Pikmin. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'20-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 20 normal, 5 buds, 5 flowers.`);
   frame=requestAnimationFrame(tick);
@@ -161,6 +184,7 @@ function finishRound() {
   cancelAnimationFrame(frame);frame=0;clearTimeout(deadlineTimer);deadlineTimer=0;cancelGestures();
   flights.clear();$('#flights').replaceChildren();plant.classList.remove('is-open');
   for(const button of buttons)button.disabled=true;
+  setPlayLock(false);
   const timed=game.mode==='timed',timeout=game.endReason==='timeout';
   const result=addResult(records,game.mode,timed?game.score:game.elapsed);records=result.records;newRank=result.rank;
   storageAvailable=saveLeaderboard(storage,records)&&storageAvailable;
@@ -209,7 +233,7 @@ function tick(now) {
   }
   if(game.mode!=='normal')$('#cycle-timer').textContent=`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`;
   const ready=roster.filter(p=>game.units[p.id].status==='ready');
-  if(!reducedMotion.matches)walkRoster(ready,lastFrame?(now-lastFrame)/1000:0,fieldWidth,fieldHeight,frozen);
+  if(!reducedMotion.matches)walkRoster(ready,lastFrame?(now-lastFrame)/1000:0,fieldWidth,fieldHeight,frozen,Math.random,unitHeight);
   for(const unit of ready)buttons[unit.id].classList.toggle('is-paused',frozen.has(unit.id));
   lastFrame=now;positionUnits();
   const bounds=world.getBoundingClientRect(),mouth=$('#mouth-target').getBoundingClientRect();
@@ -317,14 +341,24 @@ window.addEventListener('keydown',event=>{
 $('#feed-selected').addEventListener('click',()=>{if(selected!==null)launch([selected],{kind:'accessible'});});
 $('#start').addEventListener('click',event=>startRound(event.detail===0));
 $('#again').addEventListener('click',event=>startRound(event.detail===0));
-$('#reset').addEventListener('click',()=>{resetRound();$('#start').focus({preventScroll:true});announce('Round reset. Timer and Pikmin are ready.');});
+$('#reset').addEventListener('click',()=>{
+  const wasLocked=document.body.classList.contains('play-locked');resetRound();
+  if(wasLocked)$('#mode-options').scrollIntoView({block:'center',behavior:'auto'});
+  $('#start').focus({preventScroll:true});announce('Round reset. Timer and Pikmin are ready.');
+});
 $('#change-mode').addEventListener('click',()=>{resetRound();$('#mode-options').scrollIntoView({block:'center',behavior:'auto'});$('#mode-options input:checked').focus({preventScroll:true});});
 $('#mode-options').addEventListener('change',event=>{if(game.state!=='playing')resetRound(event.target.value);});
 new ResizeObserver(()=>{
   const width=units.clientWidth,height=units.clientHeight;
   if(!fieldWidth||!fieldHeight||width===fieldWidth&&height===fieldHeight)return;
   cancelGestures();
-  for(const p of roster){p.x=clamp(p.x/fieldWidth*width,22,width-22);p.y=clamp(p.y/fieldHeight*height,29,height-29);}
+  unitHeight=parseFloat(getComputedStyle(units).getPropertyValue('--pikmin-height'))||58;
+  // Repack on phone rotation instead of compressing six rows into a short field.
+  const layout=document.body.classList.contains('play-locked')?createRoster(width,height,Math.random,unitHeight):null;
+  for(const p of roster){
+    p.x=layout?layout[p.id].x:clamp(p.x/fieldWidth*width,22,width-22);
+    p.y=layout?layout[p.id].y:clamp(p.y/fieldHeight*height,unitHeight/2,height-unitHeight/2);
+  }
   fieldWidth=width;fieldHeight=height;positionUnits();
 }).observe(units);
 resetRound();

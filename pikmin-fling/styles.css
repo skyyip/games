@@ -66,3 +66,51 @@ main{max-width:1200px;padding:0 24px;margin:auto}.intro{display:flex;align-items
   .score-total #score-gain{left:78px;font-size:14px}
 }
 @media(max-width:380px){.score-total{font-size:38px}.score-total #score-gain{left:70px;font-size:13px}.fling-modes span{padding:8px 6px}.fling-modes b{font-size:12px}.fling-modes small{font-size:9px}}
+
+/* Keep the entire phone garden in a fixed play view until reset or completion. */
+html.play-locked{height:100%;overflow:hidden;overscroll-behavior:none}
+body.play-locked{position:fixed;top:var(--page-top);left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none;touch-action:pinch-zoom}
+.play-locked .play-panel{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;width:100%;height:100%;height:100dvh;border:0;border-radius:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);touch-action:pinch-zoom}
+.play-locked .scoreboard{position:relative;flex:none;padding:8px 12px;gap:8px;box-shadow:none}
+.play-locked .scoreboard .eyebrow{font-size:8px}
+.play-locked .clock,.play-locked .score-total{font-size:32px;min-width:0;letter-spacing:-1.5px}
+.play-locked .clock>span,.play-locked .score-total>span{font-size:12px;margin-left:3px}
+.play-locked .scoreboard.is-timed{grid-template-columns:1.2fr .8fr 1fr}
+.play-locked .score-panel{padding-left:10px}
+.play-locked .scoreboard.is-timed .progress-wrap{grid-column:auto}
+.play-locked .progress-wrap>div,.play-locked .scoreboard.is-timed .progress-wrap>div{flex-wrap:wrap;justify-content:flex-end;gap:2px}
+.play-locked .progress-wrap>div>span{font-size:7px}
+.play-locked .progress-wrap strong{font-size:16px}
+.play-locked .progress-wrap small{font-size:9px}
+.play-locked progress{margin-top:5px;height:4px}
+.play-locked .score-total #score-gain{left:55px;top:3px;font-size:12px}
+.play-locked .growth-guide{flex:none;padding:7px 9px;gap:5px}
+.play-locked .growth-guide>div{gap:4px}
+.play-locked .growth-guide b{font-size:10px}
+.play-locked .growth-guide small{font-size:9px;line-height:1.2}
+.play-locked .guide-symbol{flex-basis:20px;height:24px}
+.play-locked .round-status{flex:none;min-height:0;padding:6px 12px;font-size:10px}
+.play-locked .world{flex:1;min-height:0;height:auto;touch-action:none;overscroll-behavior:none}
+.play-locked .garden-label{top:8px;left:12px;font-size:8px}
+.play-locked .plant-wrap{top:1px;width:84px;height:97px}
+.play-locked .chomp-word{right:-25px;top:5px;font-size:10px;padding:7px}
+.play-locked .pen{top:90px;bottom:8px;left:6px;right:6px;touch-action:none}
+.play-locked .units{inset:12px 6px;--pikmin-height:44px}
+.play-locked .chain-lines{inset:12px 6px;width:calc(100% - 12px);height:calc(100% - 24px)}
+.play-locked .pikmin{height:44px}
+.play-locked .pikmin img,.play-locked .flying-pikmin{width:calc(44px * var(--art-scale,1));height:calc(54px * var(--art-scale,1))}
+.play-locked .growth-badge{height:18px;min-width:18px;font-size:10px}
+.play-locked .garden-tools{flex:none;display:flex;padding:6px 12px 8px;gap:10px}
+.play-locked .garden-tools .feed-button,.play-locked .garden-tools #reset{flex:1;width:auto;min-height:44px;font-size:12px;padding:8px 10px}
+.play-locked #gesture-help{position:absolute;width:1px;height:1px;min-height:0;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.play-locked .keyboard-help{display:none}
+@media(max-height:480px) and (min-aspect-ratio:3/2){
+  .play-locked .scoreboard{padding:2px 12px}
+  .play-locked .garden-tools{padding:4px 8px}
+  .play-locked .growth-guide,.play-locked .round-status{display:none}
+  .play-locked .plant-wrap{top:50%;left:50px;transform:translate(-50%,-50%)}
+  .play-locked .pen{left:100px;top:6px}
+  .play-locked .units,.play-locked .chain-lines{inset:4px 6px}
+  .play-locked .chain-lines{height:calc(100% - 8px)}
+  .play-locked .garden-label{left:6px;top:6px;font-size:7px;max-width:85px}
+}

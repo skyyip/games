@@ -214,9 +214,9 @@ try{
   }
   await touch(protocol,'touchEnd',[]);await p.waitForTimeout(100);
   const scrollAfter=await p.evaluate(()=>scrollY);
-  assert.ok(scrollAfter>scrollBefore,JSON.stringify({scrollBefore,scrollAfter,blank}));
+  assert.equal(scrollAfter,scrollBefore,JSON.stringify({scrollBefore,scrollAfter,blank}));
   assert.notEqual(await p.evaluate(()=>getSelection().type),'Range');
-  pass('the blank fence still scrolls naturally with a finger without selecting the garden');
+  pass('the fixed mobile play view blocks scrolling when a finger starts in the blank fence');
 
   for(const width of [320,375,430,600,768,1024,1440]) {
     await p.setViewportSize({width,height:1000});await p.waitForTimeout(80);
