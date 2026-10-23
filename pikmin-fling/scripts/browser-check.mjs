@@ -58,13 +58,25 @@ try{
   assert.equal(nativeSelection.blocked,true);
   assert.equal(await page.locator('.keyboard-help').evaluate(el=>el.dispatchEvent(new Event('selectstart',{bubbles:true,cancelable:true}))),true);
   pass('the entire fence prevents native selection, ancestor tap highlighting, artwork dragging and long-press menus');
+  const sway=await page.locator('.plant-sway').evaluate(async el=>{
+    const animation=el.getAnimations()[0],mouth=document.querySelector('#mouth-target');
+    animation.pause();animation.currentTime=0;await new Promise(requestAnimationFrame);
+    const left=mouth.getBoundingClientRect();
+    animation.currentTime=3000;await new Promise(requestAnimationFrame);
+    const right=mouth.getBoundingClientRect();animation.play();
+    return {dx:right.x-left.x,inside:el.contains(mouth)};
+  });
+  assert.ok(Math.abs(sway.dx)>10);assert.equal(sway.inside,true);
+  pass('the cartoon plant sways slowly and its automatic-flight mouth target follows the sway');
+
 
   await page.locator('#start').click();assert.equal(await page.locator('#mode-options input').first().isDisabled(),true);
   const positions=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
   await page.waitForTimeout(250);
   const moving=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));assert.notDeepEqual(moving,positions);
   assert.equal(await page.locator('.pikmin img').first().evaluate(i=>getComputedStyle(i).animationName),'walking');
-  pass('Pikmin wander with a walking animation after the clock starts');
+  assert.equal(await page.locator('.walk-feet i').first().evaluate(el=>getComputedStyle(el).animationName),'footstep');
+  pass('Pikmin wander through the larger garden with body bobbing and alternating footsteps');
   let leaf=await stable(page,pikmin(page,'leaf').first());
   await leaf.click();await leaf.dblclick();assert.equal(await leaf.isDisabled(),false);
   await swipe(page,leaf,0,30,60);assert.equal(await leaf.isDisabled(),false);
@@ -79,8 +91,9 @@ try{
   pass('buds reject swipes and expired taps; two quick taps launch the same bud');
   const flower=await stable(page,pikmin(page,'flower').first());
   await swipe(page,flower);assert.equal(await flower.isDisabled(),false);
-  await swipe(page,flower,270);assert.equal(await flower.isDisabled(),true);
-  pass('flowers reject an immediate fling and launch after a brief stationary press');
+  await swipe(page,flower,700);assert.equal(await flower.isDisabled(),false);
+  await swipe(page,flower,1080);assert.equal(await flower.isDisabled(),true);
+  pass('flowers reject immediate/700ms flings and launch only after a full stationary second');
   const first=await stable(page,pikmin(page,'bud').first()),a=await centre(first);
   await page.mouse.move(a.x,a.y);await page.mouse.down();await page.waitForTimeout(560);
   assert.equal(await first.evaluate(b=>b.classList.contains('is-linked')),true);
@@ -148,7 +161,7 @@ try{
   pass('touch cancellation releases capture, restores the sprite and never throws');
   const tapBud=await stable(p,pikmin(p,'bud').first());await tapBud.tap();await tapBud.tap();assert.equal(await tapBud.isDisabled(),true);
   const touchFlower=await stable(p,pikmin(p,'flower').first()),f=await centre(touchFlower);
-  await touch(protocol,'touchStart',[f]);await p.waitForTimeout(270);await touch(protocol,'touchMove',[{...f,y:f.y-65}]);await touch(protocol,'touchEnd',[]);
+  await touch(protocol,'touchStart',[f]);await p.waitForTimeout(1080);await touch(protocol,'touchMove',[{...f,y:f.y-65}]);await touch(protocol,'touchEnd',[]);
   assert.equal(await touchFlower.isDisabled(),true);
   const l1=await stable(p,pikmin(p,'leaf').first()),l2id=await pikmin(p,'leaf').nth(1).getAttribute('data-id');
   const l2=p.locator(`.pikmin[data-id="${l2id}"]`),t1=await centre(l1,1),t2=await centre(l2,2),scroll=await p.evaluate(()=>scrollY);
@@ -196,6 +209,8 @@ try{
   const reduced=await setup({reducedMotion:'reduce',viewport:{width:320,height:568}},()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('denied')}});});
   await reduced.page.locator('#start').focus();await reduced.page.keyboard.press('Enter');
   assert.equal(await reduced.page.locator('.pikmin:focus').count(),1);
+  assert.equal(await reduced.page.locator('.plant-sway').evaluate(el=>el.getAnimations().length),0);
+  assert.equal(await reduced.page.locator('.walk-feet i').first().evaluate(el=>getComputedStyle(el).animationName),'none');
   const before=await reduced.page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
   await reduced.page.waitForTimeout(200);assert.deepEqual(await reduced.page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform)),before);
   await reduced.page.keyboard.press('ArrowUp');await reduced.page.waitForTimeout(80);

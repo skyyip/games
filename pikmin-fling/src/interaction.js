@@ -7,9 +7,9 @@ const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 export function createRoster(width,height,random=Math.random) {
   const columns=width>=500?6:5,rows=Math.ceil(30/columns);
   return Array.from({length:30},(_,id)=>{
-    const angle=random()*Math.PI*2,speed=9+random()*5;
+    const angle=random()*Math.PI*2,speed=18+random()*6;
     return {id,type:TYPES[Math.floor(random()*TYPES.length)],x:(id%columns+.5)*width/columns,
-      y:(Math.floor(id/columns)+.5)*height/rows,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,turn:1+random()*2};
+      y:(Math.floor(id/columns)+.5)*height/rows,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,turn:4+random()*4};
   });
 }
 
@@ -18,7 +18,7 @@ export function walkRoster(roster,dt,width,height,frozen=new Set(),random=Math.r
   for(const p of roster) {
     if(frozen.has(p.id))continue;
     p.turn-=dt;
-    if(p.turn<=0){const angle=random()*Math.PI*2,speed=9+random()*5;p.vx=Math.cos(angle)*speed;p.vy=Math.sin(angle)*speed;p.turn=1+random()*3;}
+    if(p.turn<=0){const angle=random()*Math.PI*2,speed=18+random()*6;p.vx=Math.cos(angle)*speed;p.vy=Math.sin(angle)*speed;p.turn=4+random()*4;}
     p.x+=p.vx*dt;p.y+=p.vy*dt;
     if(p.x<22||p.x>width-22)p.vx*=-1;
     if(p.y<29||p.y>height-29)p.vy*=-1;
@@ -33,7 +33,7 @@ export function walkRoster(roster,dt,width,height,frozen=new Set(),random=Math.r
     const am=frozen.has(a.id)?0:frozen.has(b.id)?1:.5,bm=frozen.has(b.id)?0:frozen.has(a.id)?1:.5;
     const sign=delta<0?-1:1;
     a[axis]-=sign*amount*am;b[axis]+=sign*amount*bm;
-    for(const p of [a,b])if(!frozen.has(p.id)){p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,29,height-29);}
+    for(const p of [a,b])if(!frozen.has(p.id)){p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,29,height-29);p.turn=Math.min(p.turn,.5);}
   }
 }
 
@@ -48,8 +48,14 @@ export class PointerGesture {
     this.held=0;this.moved=false;this.chaining=false;
   }
   get charged(){return this.held>=FLOWER_HOLD;}
+  get holdTarget(){return this.growth==='flower'?FLOWER_HOLD:CHAIN_HOLD;}
   update(now) {
-    if(!this.moved){this.held=Math.max(this.held,now-this.from.t);if(this.held>=CHAIN_HOLD)this.chaining=true;}
+    if(!this.moved){
+      this.held=Math.max(this.held,now-this.from.t);
+      if(this.held>=this.holdTarget)this.chaining=true;
+      // Keep a recent stationary anchor so the first move after a long hold is recognised.
+      this.samples=[{...this.last,t:now}];
+    }
   }
   move(point) {
     this.update(point.t);

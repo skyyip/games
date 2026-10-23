@@ -17,18 +17,18 @@ Open **http://localhost:5173/pikmin-fling/**. The server also serves the landing
 
 ## Play
 
-Start the game to start the clock and let the crowd wander inside the fence.
+Start the game to start the clock and let the crowd wander inside the larger fence. Characters take longer walking routes, turn when blocked, and alternate their feet while their bodies bob. Held, linked or focused characters pause.
 
 | Growth stage | Touch / mouse gesture |
 | --- | --- |
 | Normal / leaf ↗ | Swipe upward and release. |
 | Bud 2× | Tap the same Pikmin twice within 350ms. |
-| Flower ✿ | Hold still for at least 220ms, then swipe upward and release. |
-| Any stage: chain | Hold still for 500ms until the ring fills, drag through others of the **same stage**, then finish with an upward flick. |
+| Flower ✿ | Hold still for at least 1 second, then swipe upward and release. |
+| Any stage: chain | Hold still for 500ms (normal/bud) or 1 second (flower) until the thin ring fills, drag through others of the **same stage**, then finish with an upward flick. |
 
 Chains can mix character colours, but never growth stages. Tracing through a different stage leaves it unselected. The final flick uses the upward end of the gesture, so a sideways tracing path does not spoil the throw. Releasing without a flick cancels the chain. Multiple pointers may independently hold or fling different Pikmin.
 
-Every throw automatically follows a parabolic path into the mouth. The plant opens, the character disappears on arrival, and the plant bites. The **last arrival** stops the timer. Play again starts a fresh round; Reset round clears the timer, selections and in-flight characters without saving an unfinished score.
+Every throw automatically follows a parabolic path into the mouth. The cartoon plant sways gently above the rounded cream fence. Throws track the mouth as it moves. The plant opens, the character disappears on arrival, and the plant bites. The **last arrival** stops the timer. Play again starts a fresh round; Reset round clears the timer, selections and in-flight characters without saving an unfinished score.
 
 ### Challenge mode
 
@@ -44,7 +44,7 @@ Each group is sampled without replacement from the states at the start of the wa
 
 A tap selects and pauses a character; **Feed selected** is a single-pointer alternative to dragging and timed gestures. Keyboard: Tab to a character, then Enter, Space or Up Arrow to feed it. Focus advances to the next remaining character. These alternatives intentionally work for all three growth stages. Escape cancels a pointer chain. Pointer cancellation, tab hiding and loss of window focus also release active gestures.
 
-The 44×58px native buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. Only characters suppress touch scrolling; surrounding page content retains native scrolling. Native text/image selection, tap highlighting, artwork dragging and long-press menus are disabled throughout the fenced area, including its gesture container; blank fence margins still scroll and instructions outside the fence remain selectable. Reduced motion keeps the crowd stationary, disables walking/bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
+The 44×58px native buttons have visible focus, labels naming their growth stage, and distinct symbols as well as character artwork. Only characters suppress touch scrolling; surrounding page content retains native scrolling. Native text/image selection, tap highlighting, artwork dragging and long-press menus are disabled throughout the fenced area, including its gesture container; blank fence margins still scroll and instructions outside the fence remain selectable. Reduced motion keeps the crowd stationary, disables walking, footsteps, plant sway and bite effects, and substitutes an in-place fade for flight. Flight duration and timing stay the same.
 
 ## Structure
 

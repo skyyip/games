@@ -1,4 +1,4 @@
-import {FlingGame,GROWTH,CHAIN_HOLD} from './game.js';
+import {FlingGame,GROWTH} from './game.js';
 import {createRoster,walkRoster,TYPES,TYPE_NAMES,PointerGesture,DoubleTap,distanceToSegment,flightPoint} from './interaction.js';
 import {readLeaderboard,saveLeaderboard,addResult} from './leaderboard.js';
 import {animateChange,reducedMotion} from '../../grid-rush/src/playground-ui.js';
@@ -7,7 +7,7 @@ const $=selector=>document.querySelector(selector);
 const game=new FlingGame(),world=$('#world'),units=$('#units'),plant=$('#plant');
 const flights=new Map(),gestures=new Map(),effects=new Set(),taps=new DoubleTap();
 const growthNames={leaf:'Normal',bud:'Bud',flower:'Flower'};
-const hints={leaf:'Fling upward.',bud:'Double-tap to feed.',flower:'Hold still until the ring lights up, then fling upward.'};
+const hints={leaf:'Fling upward.',bud:'Double-tap to feed.',flower:'Hold still for 1 second until the ring fills, then fling upward.'};
 const symbols={leaf:'↗',bud:'2×',flower:'✿'};
 let storage;
 try{storage=window.localStorage;}catch{/* In-memory records still work. */}
@@ -23,7 +23,7 @@ const busy=id=>[...gestures.values()].some(g=>g.ids.includes(id));
 
 function renderUnit(id) {
   const button=buttons[id],unit=game.units[id];
-  button.dataset.growth=unit.growth;
+  button.dataset.growth=unit.growth;button.dataset.type=roster[id].type;
   button.querySelector('img').src=source(roster[id].type,unit.growth);
   button.querySelector('.growth-badge').textContent=symbols[unit.growth];
   button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}. ${hints[unit.growth]} Keyboard: Enter to feed.`);
@@ -42,7 +42,9 @@ function renderRoster() {
     const image=document.createElement('img');image.alt='';image.draggable=false;image.width=54;image.height=66;
     const badge=document.createElement('span');badge.className='growth-badge';badge.setAttribute('aria-hidden','true');
     const ring=document.createElement('span');ring.className='hold-ring';ring.setAttribute('aria-hidden','true');
-    button.append(image,badge,ring);buttons.push(button);fragment.append(button);renderUnit(unit.id);
+    const feet=document.createElement('span');feet.className='walk-feet';feet.setAttribute('aria-hidden','true');
+    feet.append(document.createElement('i'),document.createElement('i'));
+    button.append(feet,image,badge,ring);buttons.push(button);fragment.append(button);renderUnit(unit.id);
   }
   units.replaceChildren(fragment);positionUnits();
 }
@@ -105,7 +107,7 @@ function resetRound(mode=game.mode) {
   game.reset(mode);selected=null;newRank=null;cycle=0;plant.classList.remove('is-open');world.classList.remove('is-playing');
   $('#results').hidden=true;$('#mode-options').disabled=false;
   $('#start').hidden=false;$('#reset').hidden=true;
-  $('#gesture-help').textContent='Follow each growth stage. Hold still for 0.5s to start a same-stage chain.';
+  $('#gesture-help').textContent='Hold to link: 0.5s for normal/buds, 1s for flowers. Trace the same stage, then flick up.';
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
   $('#cycle-status').textContent=mode==='challenge'?'Challenge · growth changes every 3–8s':'Normal mode · states stay the same';
   renderRoster();renderProgress();setSelected(null);renderRecords();
@@ -140,16 +142,16 @@ function renderGestures(now) {
   const rect=units.getBoundingClientRect(),fragment=document.createDocumentFragment();
   $('#chains').setAttribute('viewBox',`0 0 ${fieldWidth} ${fieldHeight}`);
   for(const g of gestures.values()) {
-    const wasChain=g.chaining,wasCharged=g.charged;g.update(now);
-    g.button.style.setProperty('--hold',`${Math.min(1,g.held/CHAIN_HOLD)*360}deg`);
+    const wasChain=g.chaining;g.update(now);
+    g.button.style.setProperty('--hold',`${Math.min(1,g.held/g.holdTarget)*360}deg`);
     g.button.classList.toggle('is-charged',g.charged && g.growth==='flower');
     if(g.chaining) {
       for(const id of g.ids)buttons[id].classList.add('is-linked');
-      if(!wasChain){$('#gesture-help').textContent=`Chain ready. Trace more ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.`;try{navigator.vibrate?.(10);}catch{}}
+      if(!wasChain){$('#gesture-help').textContent=g.growth==='flower'?'Flower ready! Flick up, or trace other flowers to link.':`Chain ready. Trace more ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.`;try{navigator.vibrate?.(10);}catch{}}
       const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');
       line.setAttribute('points',[...g.ids.map(id=>`${roster[id].x},${roster[id].y}`),`${g.last.x-rect.x},${g.last.y-rect.y}`].join(' '));
       fragment.append(line);
-    }else if(!wasCharged && g.charged && g.growth==='flower')$('#gesture-help').textContent='Flower ready — fling up! Keep holding to start a chain.';
+    }
   }
   $('#chains').replaceChildren(fragment);
 }
@@ -167,7 +169,7 @@ function tick(now) {
   for(const unit of ready)buttons[unit.id].classList.toggle('is-paused',frozen.has(unit.id));
   lastFrame=now;positionUnits();
   const bounds=world.getBoundingClientRect(),mouth=$('#mouth-target').getBoundingClientRect();
-  const target={x:mouth.x-bounds.x,y:mouth.y-bounds.y};
+  const target={x:mouth.x+mouth.width/2-bounds.x,y:mouth.y+mouth.height/2-bounds.y};
   let arrivals=0;
   for(const [id,flight] of flights) {
     const t=Math.min(1,(now-flight.started)/480);

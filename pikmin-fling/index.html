@@ -35,44 +35,72 @@
       <div class="growth-guide" aria-label="Pikmin gestures">
         <div><span class="guide-symbol leaf-symbol" aria-hidden="true">↗</span><span><b>Normal · <output id="leaf-count" aria-live="off">20</output></b><small>Fling up</small></span></div>
         <div><span class="guide-symbol bud-symbol" aria-hidden="true">2×</span><span><b>Bud · <output id="bud-count" aria-live="off">5</output></b><small>Double-tap</small></span></div>
-        <div><span class="guide-symbol flower-symbol" aria-hidden="true">✿</span><span><b>Flower · <output id="flower-count" aria-live="off">5</output></b><small>Hold, then fling</small></span></div>
+        <div><span class="guide-symbol flower-symbol" aria-hidden="true">✿</span><span><b>Flower · <output id="flower-count" aria-live="off">5</output></b><small>Hold 1s, then fling</small></span></div>
       </div>
       <div class="round-status"><span id="cycle-status" role="status">Normal mode · states stay the same</span><span id="cycle-timer" aria-live="off"></span></div>
       <div class="world" id="world">
         <svg class="garden-scenery" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true"><path d="M0 150Q170 80 340 150T800 120V600H0Z" fill="#d7e6bf"/><path d="M0 195Q220 140 430 190T800 150V600H0Z" fill="#c7dca7"/><g fill="#fff" opacity=".65"><ellipse cx="115" cy="59" rx="43" ry="12"/><ellipse cx="139" cy="51" rx="22" ry="17"/><ellipse cx="654" cy="81" rx="42" ry="11"/><ellipse cx="633" cy="71" rx="22" ry="15"/></g></svg>
         <div class="plant-wrap" id="plant" aria-label="Hungry plant">
-          <svg class="plant-art" viewBox="0 0 200 230" aria-hidden="true">
-            <defs><linearGradient id="stem" gradientUnits="userSpaceOnUse" x1="85" x2="110" y1="0" y2="0"><stop stop-color="#2c743c"/><stop offset=".5" stop-color="#65a84d"/><stop offset="1" stop-color="#2c743c"/></linearGradient><radialGradient id="petal" cx=".35" cy=".2"><stop stop-color="#fc8267"/><stop offset=".6" stop-color="#dc493f"/><stop offset="1" stop-color="#ad2f32"/></radialGradient></defs>
-            <ellipse cx="100" cy="215" rx="61" ry="10" fill="#406c3330"/>
-            <path d="M100 201V112" stroke="url(#stem)" stroke-width="19" stroke-linecap="round"/>
-            <path d="M99 184C73 143 35 164 35 164s21 40 64 20ZM101 162c23-35 60-22 60-22s-18 40-60 22Z" fill="url(#stem)" stroke="#39773d" stroke-width="2"/>
-            <path d="m45 168 49 15M106 161l45-16" fill="none" stroke="#93bc67" stroke-width="2"/>
-            <g class="plant-head" id="plant-head">
-              <ellipse class="mouth-inside" cx="100" cy="75" rx="53" ry="34" fill="#472333"/>
-              <ellipse class="tongue" cx="100" cy="90" rx="25" ry="12" fill="#ef8c99"/>
-              <g class="jaw upper-jaw"><path d="M45 71C34 1 165 0 155 71Z" fill="url(#petal)" stroke="#a73432" stroke-width="3"/><g fill="#fff7dc"><ellipse cx="77" cy="28" rx="11" ry="8" transform="rotate(-22 77 28)"/><ellipse cx="123" cy="23" rx="9" ry="7" transform="rotate(22 123 23)"/><circle cx="143" cy="47" r="7"/><circle cx="57" cy="50" r="7"/></g><path d="M46 69Q100 54 154 69" fill="none" stroke="#fff7dc" stroke-width="10" stroke-linecap="round"/><path d="m65 67 7 13 7-15m20-3 7 15 7-14m17 2 7 13 7-10" fill="#fff7dc"/></g>
-              <g class="jaw lower-jaw"><path d="M47 79C48 130 150 129 153 79Z" fill="url(#petal)" stroke="#a73432" stroke-width="3"/><ellipse cx="77" cy="103" rx="9" ry="6" fill="#fff7dc"/><ellipse cx="127" cy="104" rx="8" ry="5" fill="#fff7dc"/><path d="M48 80Q100 93 152 80" fill="none" stroke="#fff7dc" stroke-width="10" stroke-linecap="round"/><path d="m69 84 7-12 7 14m24 1 7-13 7 11" fill="#fff7dc"/></g>
+          <svg class="plant-art" viewBox="0 0 200 230" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="100" cy="218" rx="58" ry="8" fill="#6b95642b"/>
+            <g class="plant-sway">
+              <path d="M100 198C110 163 92 137 100 109" fill="none" stroke="#477453" stroke-width="17"/>
+              <path d="M100 194C108 163 94 137 101 112" fill="none" stroke="#8acb7e" stroke-width="9"/>
+              <path d="M99 173C83 144 53 144 40 153c7 24 37 33 59 20Z" fill="#a2d98b" stroke="#477453" stroke-width="3.5"/>
+              <path d="M102 153c17-27 42-29 58-18-9 25-35 33-58 18Z" fill="#8fcf83" stroke="#477453" stroke-width="3.5"/>
+              <path d="m53 158 39 13m18-19 37-13" fill="none" stroke="#5b9c61" stroke-width="2.5"/>
+              <g class="plant-head" id="plant-head">
+                <ellipse class="mouth-inside" cx="100" cy="75" rx="53" ry="32" fill="#62394b" stroke="#925b58" stroke-width="3"/>
+                <ellipse class="tongue" cx="100" cy="91" rx="24" ry="10" fill="#f5a2b0"/>
+                <g class="jaw upper-jaw">
+                  <path d="M46 68C35-2 165-2 154 68Q100 83 46 68Z" fill="#ffaaa0" stroke="#a45f5a" stroke-width="3.5"/>
+                  <path d="M59 29q12-12 30-13" fill="none" stroke="#ffe2c5" stroke-width="7"/>
+                  <g fill="#fff2d2"><circle cx="130" cy="27" r="10"/><circle cx="145" cy="47" r="5"/><circle cx="55" cy="51" r="5"/></g>
+                  <g fill="#5d3f42"><ellipse cx="84" cy="49" rx="4.5" ry="6.5"/><ellipse cx="116" cy="49" rx="4.5" ry="6.5"/></g>
+                  <g fill="#fff9ee"><circle cx="85" cy="47" r="1.6"/><circle cx="117" cy="47" r="1.6"/></g>
+                  <g fill="#f28c95"><ellipse cx="70" cy="59" rx="8" ry="4"/><ellipse cx="130" cy="59" rx="8" ry="4"/></g>
+                  <path d="M46 68Q100 83 154 68" fill="none" stroke="#fff1ce" stroke-width="8"/>
+                  <path d="m68 73 4 8q1 2 3 0l4-6m42 0 4 7q1 2 3 0l4-9" fill="#fff1ce"/>
+                </g>
+                <g class="jaw lower-jaw">
+                  <path d="M47 79C49 126 151 126 153 79Q100 99 47 79Z" fill="#f99593" stroke="#a45f5a" stroke-width="3.5"/>
+                  <path d="M48 80Q100 99 152 80" fill="none" stroke="#fff1ce" stroke-width="8"/>
+                  <g fill="#fff2d2"><circle cx="72" cy="100" r="5"/><ellipse cx="127" cy="101" rx="6" ry="4"/></g>
+                </g>
+                <circle id="mouth-target" cx="100" cy="75" r="1" opacity="0"/>
+              </g>
             </g>
-            <path d="M63 205h74l-7 21H70Z" fill="#b47b4c" stroke="#93623d" stroke-width="2"/><rect x="59" y="196" width="82" height="12" rx="4" fill="#cb9462"/>
-          </svg><span id="mouth-target" aria-hidden="true"></span><span class="chomp-word" id="chomp-word" aria-hidden="true">NOM!</span>
+            <path d="M65 202h70l-7 20q-28 10-56 0Z" fill="#f5be91" stroke="#a47558" stroke-width="3.5"/>
+            <rect x="59" y="192" width="82" height="14" rx="7" fill="#ffdfb5" stroke="#a47558" stroke-width="3.5"/>
+            <path d="M94 212c-6-7-13 3 6 11 19-8 12-18 6-11l-6 5Z" fill="#df8d91"/>
+          </svg><span class="chomp-word" id="chomp-word" aria-hidden="true">NOM!</span>
         </div>
         <div class="garden-label" id="garden-label">THE LUNCH CROWD</div>
         <div class="pen" id="pen" role="group" aria-label="Fenced Pikmin area" aria-describedby="gesture-help">
-          <svg class="fence" viewBox="0 0 1000 370" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="pickets" width="45" height="42" patternUnits="userSpaceOnUse"><path d="M15 42V10l7-7 7 7v32" fill="#ddbd85" stroke="#a77c4e" stroke-width="2"/></pattern></defs><rect x="13" y="17" width="974" height="336" rx="10" fill="none" stroke="#a78559" stroke-width="9"/><path d="M14 36V338M986 36V338" stroke="#e4c895" stroke-width="12"/><g transform="scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g><g transform="translate(0 343) scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g><path d="M14 17H986M14 359H986" stroke="#b48b55" stroke-width="8"/></svg>
+          <svg class="fence" viewBox="0 0 1000 370" preserveAspectRatio="none" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">
+            <defs><pattern id="pickets" width="58" height="42" patternUnits="userSpaceOnUse"><rect x="18" y="3" width="23" height="38" rx="11.5" fill="#ffefd9" stroke="#b58c70" stroke-width="3"/><path d="M24 12v17" fill="none" stroke="#fffaf0" stroke-width="3"/></pattern></defs>
+            <rect x="13" y="17" width="974" height="336" rx="18" fill="none" stroke="#d6b58e" stroke-width="9"/>
+            <path d="M14 35V337M986 35V337" stroke="#ffe2bd" stroke-width="12"/>
+            <path d="M14 17H986M14 353H986" stroke="#b58c70" stroke-width="12"/>
+            <path d="M14 16H986M14 352H986" stroke="#ffe1b6" stroke-width="7"/>
+            <g transform="scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g>
+            <g transform="translate(0 334) scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g>
+            <g fill="#efb3ae" stroke="#b58c70" stroke-width="2"><circle cx="15" cy="17" r="9"/><circle cx="985" cy="17" r="9"/><circle cx="15" cy="353" r="9"/><circle cx="985" cy="353" r="9"/></g>
+          </svg>
           <div id="units" class="units"></div><svg id="chains" class="chain-lines" aria-hidden="true"></svg>
         </div>
         <div id="flights" class="flight-layer" aria-hidden="true"></div>
         <section id="results" class="results" aria-labelledby="result-title" hidden><span class="result-icon" aria-hidden="true">✓</span><p class="eyebrow" id="result-badge">CLEAN SWEEP</p><h2 id="result-title" tabindex="-1">Garden cleared.</h2><p class="final-time"><span id="final-time"></span><small>s</small></p><p id="result-note"></p><button class="primary-button" type="button" id="again">Play again <span aria-hidden="true">↗</span></button><button class="text-button" type="button" id="change-mode">Change game mode</button></section>
       </div>
-      <div class="garden-tools"><p id="gesture-help" role="status">Follow each growth stage. Hold still for 0.5s to start a same-stage chain.</p><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
+      <div class="garden-tools"><p id="gesture-help" role="status">Hold to link: 0.5s for normal/buds, 1s for flowers. Trace the same stage, then flick up.</p><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
       <p class="keyboard-help">Drag-free option: tap a Pikmin, then Feed selected. Keyboard: Tab to a Pikmin; Enter, Space or ↑ feeds it. Focused and selected Pikmin pause.</p>
     </section>
     <aside class="sidebar">
       <section class="control-card"><p class="eyebrow">30 PIKMIN. THREE WAYS TO PLAY.</p><h2>A growing<br>appetite.</h2><fieldset id="mode-options"><legend>Choose your mode</legend><div class="fling-modes"><label><input type="radio" name="mode" value="normal" checked><span><b>Normal</b><small>Find your rhythm</small></span></label><label><input type="radio" name="mode" value="challenge"><span><b>Challenge</b><small>Keep up with change</small></span></label></div></fieldset><button id="start" type="button" class="primary-button" disabled>Loading Pikmin…</button><button id="reset" type="button" class="secondary-button" hidden>Reset round</button><p class="control-note" id="control-note">Start with 20 normal, 5 buds and 5 flowers. Every round, a fresh colourful crowd.</p></section>
       <section class="records-card" aria-labelledby="records-title"><div class="records-heading"><h2 id="records-title">Your fastest three</h2><span id="records-count">NORMAL</span></div><ol id="records" aria-label="Fastest completion times"></ol><p id="storage-status">Saved on this device.</p></section>
       <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol>
-        <li><b>Read the growth stage.</b> Normal: fling up. Bud: double-tap. Flower: hold still for 0.22s, then fling up. Every throw finds the mouth.</li>
-        <li><b>Make a chain.</b> Hold any Pikmin still for 0.5s until its ring fills. Trace others of the same stage, then finish with an upward flick. Release without a flick to cancel.</li>
+        <li><b>Read the growth stage.</b> Normal: fling up. Bud: double-tap. Flower: hold still for 1s, then fling up. Every throw finds the mouth.</li>
+        <li><b>Make a chain.</b> Hold normal/bud Pikmin for 0.5s, or flowers for 1s, until the thin ring fills. Trace others of the same stage, then finish with an upward flick. Release without a flick to cancel.</li>
         <li><b>Watch them grow.</b> Challenge mode changes states every 3–8s: 1–5 buds bloom, 1–5 flowers return to normal, and 1–10 normal Pikmin become buds. Held, linked or flying Pikmin are protected.</li>
         <li><b>Clear all 30.</b> The last arrival stops the clock. Each mode keeps its own fastest three.</li>
       </ol></details>

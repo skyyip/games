@@ -27,15 +27,18 @@ test('30 random characters roam within the fence while held characters stay stil
   assert.ok(roster.every(p=>p.x>=22 && p.x<=278 && p.y>=29 && p.y<=381));
 });
 
-test('a stationary half-second hold enables chaining; flower charging requires holding before moving',()=>{
+test('normal/bud chains need half a second; flowers require a full stationary second before flinging or chaining',()=>{
   const begin={x:100,y:200,t:0};
   const flower=new PointerGesture(2,'flower',begin);
   flower.move({x:100,y:140,t:100});
-  assert.equal(flower.action({x:100,y:130,t:600}),null); // waiting after swiping is not a charge
+  assert.equal(flower.action({x:100,y:130,t:1200}),null); // waiting after swiping is not a charge
+  const early=new PointerGesture(2,'flower',begin);
+  early.update(999);assert.equal(early.charged,false);assert.equal(early.chaining,false);
+  early.move({x:100,y:150,t:999});assert.equal(early.action({x:100,y:130,t:999}),null);
   const charged=new PointerGesture(2,'flower',begin);
-  charged.update(220);assert.equal(charged.charged,true);
-  charged.move({x:100,y:150,t:280});
-  assert.deepEqual(charged.action({x:100,y:140,t:300}),{kind:'fling',held:280});
+  charged.update(1000);assert.equal(charged.charged,true);assert.equal(charged.chaining,true);
+  charged.move({x:100,y:150,t:1060});
+  assert.equal(charged.action({x:100,y:125,t:1080})?.kind,'chain');
   const chain=new PointerGesture(2,'bud',begin);
   chain.update(500);assert.equal(chain.chaining,true);
   assert.equal(chain.add(3,'leaf'),false);assert.equal(chain.add(4,'bud'),true);assert.equal(chain.add(4,'bud'),false);
@@ -62,4 +65,17 @@ test('a fast sideways chain trace followed immediately by an upward flick uses o
   chain.move({x:500,y:180,t:780});chain.move({x:500,y:140,t:810});
   assert.equal(chain.action({x:500,y:130,t:830})?.kind,'chain');
   assert.equal(chain.action({x:500,y:140,t:1200}),null); // releasing after a pause is not a flick
+});
+
+test('walking takes longer routes across the garden rather than only shuffling near the starting spot',()=>{
+  const walker=createRoster(800,600,()=>0)[0],start=walker.x;
+  for(let frame=0;frame<150;frame++)walkRoster([walker],.04,800,600,new Set(),()=>0);
+  assert.ok(walker.x-start>=100,'a clear six-second walk should cover at least 100px');
+  assert.ok(walker.x<=778 && walker.y>=29 && walker.y<=571);
+});
+
+test('a flower held for a full second accepts the first upward move even when touch input is coalesced',()=>{
+  const g=new PointerGesture(1,'flower',{x:100,y:200,t:0});
+  g.update(1050);g.move({x:100,y:135,t:1060});
+  assert.equal(g.action({x:100,y:135,t:1070})?.kind,'chain');
 });

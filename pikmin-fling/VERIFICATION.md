@@ -8,14 +8,14 @@ Verified with Node.js 24 and headless Chrome using the existing optional Playwri
 node --test grid-rush/tests/*.test.js grid-rush-in-order/tests/*.test.js line-up/tests/*.test.js pikmin-fling/tests/*.test.js
 ```
 
-**43 tests passed**, including 13 Pikmin Fling tests covering:
+**45 tests passed**, including 15 Pikmin Fling tests covering:
 
 - Fixed 30-character roster in both modes: 20 normal, 5 buds, 5 flowers.
 - Start/reset lifecycle, duplicate/invalid input, unique arrivals and final-arrival time freezing at full precision.
-- State-specific actions: upward fling, double tap, charged flower fling and homogeneous atomic chain throws.
+- State-specific actions: upward fling, double tap, a full 1-second flower charge and homogeneous atomic chain throws. Flower chains also require 1 second; normal/bud chains retain 500ms.
 - Challenge timing within 3–8 seconds, simultaneous state snapshots, 1–5 / 1–5 / 1–10 transition limits, available-count caps, protected interaction/flying states, no catch-up burst, reset and completion.
-- Roaming within field bounds while held characters stay still.
-- Charge/chain thresholds, rejected premature movement, same-stage membership, duplicate membership, expired/different-target taps and final upward flick after fast sideways tracing.
+- Longer roaming routes within the larger field while held characters stay still; a clear six-second walk covers over 100px.
+- Charge/chain thresholds, rejected premature movement, same-stage membership, duplicate membership, expired/different-target taps and final upward flick after fast sideways tracing. The first coalesced touch move after a long flower hold remains valid.
 - Parabolic flight geometry.
 - Separate mode rankings, fastest-three ordering/limits, full precision, ties and persistence.
 - Corrupted, unavailable and full storage, preserving the old count-based records.
@@ -30,12 +30,13 @@ PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
 node pikmin-fling/scripts/browser-check.mjs
 ```
 
-**28 checks passed**:
+**29 checks passed**:
 
 - Idle timer and inactive board; all current artwork loads with the correct stage distribution.
 - Native fence selection regression: a triple-click previously entered browser Range selection; it now stays unselected. The fence, delegated gesture container, SVG and artwork suppress selection/tap highlights; selection, drag and context-menu events are blocked only inside the fence.
-- Free walking and body animation after start.
-- Real mouse actions for normal, bud and flower rules, including rejected taps, wrong directions, expired double taps and premature flower flings.
+- The cartoon plant sways slowly; its SVG mouth target moves with the plant and is used by automatic flights.
+- Free walking, body bobbing and alternating footsteps after start in the larger garden.
+- Real mouse actions for normal, bud and flower rules, including rejected taps, wrong directions, expired double taps, immediate/700ms flower flings rejected and 1-second flower flings accepted.
 - Long-press same-stage chaining, incompatible-stage exclusion, visible chain lines and batch release by the final upward flick.
 - Escape cancellation when focus is outside the garden, without a phantom launch on release.
 - Final-arrival timing, completed records, replay and reset during flight.
@@ -45,7 +46,7 @@ node pikmin-fling/scripts/browser-check.mjs
 - Blank fence margins retain native finger scrolling without selecting the garden.
 - Tap-plus-Feed-selected and keyboard alternatives for all stages.
 - 320/375/430/600/768/1024/1440px layouts: no horizontal overflow, 44×58px character buttons and all roaming targets inside the fence. Measurements allow 0.01px for floating-point transform rounding.
-- Reduced motion: stationary crowd, no body animation and in-place fading flights. Keyboard completion still works with localStorage blocked.
+- Reduced motion: stationary crowd, no body/footstep/plant-sway animation and in-place fading flights. Keyboard completion still works with localStorage blocked.
 - Corrupt new storage recovers without deleting old records.
 - New modes and all nine growth sprites work offline, including a fresh offline tab.
 - All games navigation returns to the five-card landing page; no uncaught browser errors.

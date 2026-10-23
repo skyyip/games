@@ -33,8 +33,10 @@ test('state-specific gestures and same-state chains are enforced atomically',()=
   const leaf=ids('leaf'),bud=ids('bud'),flower=ids('flower');
   assert.equal(game.launch([leaf[0]],{kind:'double-tap'}),false);
   assert.equal(game.launch([bud[0]],{kind:'fling',held:900}),false);
-  assert.equal(game.launch([flower[0]],{kind:'fling',held:219}),false);
-  assert.equal(game.launch([flower[0]],{kind:'fling',held:220}),true);
+  assert.equal(game.launch([flower[0]],{kind:'fling',held:999}),false);
+  assert.equal(game.launch([flower[0]],{kind:'fling',held:1000}),true);
+  assert.equal(game.launch([flower[1],flower[2]],{kind:'chain',held:999}),false);
+  assert.equal(game.launch([flower[1],flower[2]],{kind:'chain',held:1000}),true);
   assert.equal(game.launch([bud[0]],{kind:'double-tap'}),true);
   assert.equal(game.launch([leaf[0]],{kind:'fling',held:0}),true);
   assert.equal(game.launch([bud[1],leaf[1]],{kind:'chain',held:600}),false);

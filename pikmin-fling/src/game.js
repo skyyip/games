@@ -1,6 +1,6 @@
 export const MODES=Object.freeze(['normal','challenge']);
 export const GROWTH=Object.freeze(['leaf','bud','flower']);
-export const FLOWER_HOLD=220,CHAIN_HOLD=500;
+export const FLOWER_HOLD=1000,CHAIN_HOLD=500;
 
 export class FlingGame {
   constructor({mode='normal',now=()=>performance.now(),random=Math.random}={}) {
@@ -44,7 +44,7 @@ export class FlingGame {
     if(this.state!=='playing'||!Array.isArray(ids)||!ids.length||new Set(ids).size!==ids.length||ids.some(id=>!Number.isInteger(id)||this.units[id]?.status!=='ready'))return false;
     const growth=this.units[ids[0]].growth;
     const valid=action.kind==='chain'
-      ? action.held>=CHAIN_HOLD && ids.every(id=>this.units[id].growth===growth)
+      ? action.held>=(growth==='flower'?FLOWER_HOLD:CHAIN_HOLD) && ids.every(id=>this.units[id].growth===growth)
       : ids.length===1 && (action.kind==='accessible' || (growth==='bud'
         ? action.kind==='double-tap'
         : action.kind==='fling' && (growth==='leaf'||action.held>=FLOWER_HOLD)));
