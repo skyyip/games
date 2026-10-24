@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {RoachGame,HOLES,ANT_MIN_LIFETIME,ANT_MAX_LIFETIME,ANT_DEPARTURE_GAP,MAX_ANTS,distanceToSegment,antFlick} from '../src/game.js';
-const setup=(duration=60)=>{let now=0;const game=new RoachGame({duration,random:()=>.2,now:()=>now});return {game,set:value=>{now=value;}};};
+import {RoachGame,HOLES,MAX_ANTS,MAX_MICE,distanceToSegment,antFlick} from '../src/game.js';
+const setup=(duration=120)=>{let now=0;const game=new RoachGame({duration,random:()=>.2,now:()=>now});return {game,set:value=>{now=value;}};};
 test('both durations start idle, then open all four holes with ground roaches and enforce an absolute deadline',()=>{
- for(const duration of [60,120]){
+ for(const duration of [120,180]){
   const {game,set}=setup(duration);set(9000);assert.equal(game.remaining,duration*1000);game.start();
   assert.equal(game.entities.size,4);assert.deepEqual([...game.entities.values()].map(e=>e.hole),[0,1,2,3]);
   assert.ok([...game.entities.values()].every(e=>e.mode==='ground'&&e.x===HOLES[e.hole].x&&e.y===HOLES[e.hole].y));
@@ -22,7 +22,7 @@ test('ground taps, size-specific flying swipes and mouse captures award exactly 
  assert.equal(game.swipe(smallFlying.id,28).points,3);
  assert.equal(game.tap(mouse.id),null);assert.equal(game.catchMouse(mouse.id,499,true),null);assert.equal(game.catchMouse(mouse.id,500,false),null);
  assert.equal(game.catchMouse(mouse.id,500,true).points,5);assert.equal(game.catchMouse(mouse.id,1000,true),null);
- assert.equal(game.score,15);assert.deepEqual(game.stats,{small:1,big:1,flying:2,mice:1,antsHit:0,antsFlicked:0});assert.equal(game.entities.size,0);
+ assert.equal(game.score,15);assert.deepEqual(game.stats,{small:1,big:1,flying:2,mice:1,antsHit:0,antsFlicked:0,sprayed:0,antsSprayed:0,trapped:0});assert.equal(game.entities.size,0);
 });
 test('big roaches require two taps on the same creature within 350ms; expired taps start a fresh pair',()=>{
  const {game,set}=setup();game.start();const [a,b]=[...game.entities.values()];a.size=b.size='big';
@@ -44,12 +44,12 @@ test('continuous spawns originate from the four holes, remain bounded, and avoid
  set(40000);let events=game.advance();assert.equal(events.spawned.filter(e=>e.type==='roach').length,1);
  assert.equal(events.spawned.filter(e=>e.type==='mouse').length,1);
  for(let now=41000;now<59000;now+=750){set(now);events=game.advance();for(const entity of events.spawned){assert.equal(entity.mode,'ground');assert.ok([0,1,2,3].includes(entity.hole));}}
- assert.ok([...game.entities.values()].filter(e=>e.type==='roach').length<=24);assert.ok([...game.entities.values()].filter(e=>e.type==='mouse').length<=2);
+ assert.ok([...game.entities.values()].filter(e=>e.type==='roach').length<=24);assert.ok([...game.entities.values()].filter(e=>e.type==='mouse').length<=MAX_MICE);
  assert.ok([...game.entities.values()].every(e=>e.x>=.055&&e.x<=.945&&e.y>=.065&&e.y<=.935));
 });
 test('mouse holes are shuffled bags: each corner appears once before the cycle repeats',()=>{
  const {game}=setup();game.start();
- for(let round=0;round<3;round++)assert.deepEqual(Array.from({length:4},()=>game.spawnMouse().hole).sort(),[0,1,2,3]);
+ for(let round=0;round<3;round++)assert.deepEqual(Array.from({length:4},()=>{const mouse=game.spawnMouse();game.entities.delete(mouse.id);return mouse.hole;}).sort(),[0,1,2,3]);
 });
 test('mice run faster than ground roaches, held movement pauses, and failed drops stay inside the room',()=>{
  const {game,set}=setup();game.start();game.entities.clear();const roach=game.spawnRoach(0),mouse=game.spawnMouse();
@@ -60,7 +60,7 @@ test('mice run faster than ground roaches, held movement pauses, and failed drop
  game.dropMouse(mouse.id,-20,30);assert.equal(mouse.x,.055);assert.equal(mouse.y,.935);
 });
 test('round reset clears scores, pending taps and population; stale scoring after the deadline is rejected',()=>{
- const {game,set}=setup();game.start();const roach=[...game.entities.values()][0];roach.size='big';game.tap(roach.id);set(60000);
+ const {game,set}=setup();game.start();const roach=[...game.entities.values()][0];roach.size='big';game.tap(roach.id);set(120000);
  assert.equal(game.tap(roach.id),null);assert.equal(game.state,'finished');game.reset(120);assert.equal(game.score,0);assert.equal(game.entities.size,0);assert.equal(game.remaining,120000);
  game.start();assert.equal(game.state,'playing');assert.equal(game.score,0);assert.equal(game.entities.size,4);assert.ok([...game.entities.values()].every(e=>e.lastTap===null));
 });
@@ -86,29 +86,24 @@ test('mouse movement is slower while remaining quicker than a ground roach',()=>
  assert.ok(mouse.x-.25>=.15&&mouse.x-.25<=.17);assert.ok(mouse.phase-phase<=8);
 });
 
-test('ants arrive individually after random gaps and depart on their own deadline even while held',()=>{
+test('ants arrive individually after random gaps and stay until a player removes them',()=>{
  const {game,set}=setup(120);game.start();set(11999);assert.equal(game.advance().spawned.some(e=>e.type==='ant'),false);
  set(18000);const ants=game.advance().spawned.filter(e=>e.type==='ant');assert.equal(ants.length,1);const ant=ants[0];
- assert.equal(ant.mode,'ground');assert.ok([0,1,2,3].includes(ant.hole));
- const next=game.nextAnt;assert.ok(next-18000>=2000&&next-18000<=8000);
- assert.ok(ant.expiresAt-18000>=ANT_MIN_LIFETIME&&ant.expiresAt-18000<=ANT_MAX_LIFETIME);
- set(next-1);assert.equal(game.advance().spawned.some(e=>e.type==='ant'),false);
- set(next);assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,1);
- set(ant.expiresAt-1);game.advance(new Set([ant.id]));assert.equal(game.entities.has(ant.id),true);
- set(ant.expiresAt);game.advance(new Set([ant.id]));assert.equal(game.entities.has(ant.id),false);assert.equal(game.score,0);
+ assert.equal(ant.mode,'ground');assert.ok([0,1,2,3].includes(ant.hole));const next=game.nextAnt;assert.ok(next-18000>=2000&&next-18000<=8000);
+ set(next-1);assert.equal(game.advance().spawned.some(e=>e.type==='ant'),false);set(next);assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,1);
+ set(119999);game.advance(new Set([ant.id]));assert.equal(game.entities.has(ant.id),true);assert.equal(game.score,0);
+ assert.equal(game.tap(ant.id).points,-3);assert.equal(game.entities.has(ant.id),false);
 });
-test('an accidental ant tap deducts one point exactly once, including below zero',()=>{
- const {game}=setup();game.start();const ant=game.spawnAnt();assert.equal(game.tap(ant.id).points,-1);
- assert.equal(game.score,-1);assert.equal(game.stats.antsHit,1);assert.equal(game.tap(ant.id),null);assert.equal(game.score,-1);
- const roach=game.spawnRoach(0);assert.equal(game.tap(roach.id).points,1);assert.equal(game.score,0);
+test('an accidental ant tap deducts three points exactly once, including below zero',()=>{
+ const {game}=setup();game.start();const ant=game.spawnAnt();assert.equal(game.tap(ant.id).points,-3);
+ assert.equal(game.score,-3);assert.equal(game.stats.antsHit,1);assert.equal(game.tap(ant.id),null);assert.equal(game.score,-3);
+ const roach=game.spawnRoach(0);assert.equal(game.tap(roach.id).points,1);assert.equal(game.score,-2);
 });
-test('only a fast ant flick removes it safely; expired, cancelled or late attempts cannot score',()=>{
- const {game,set}=setup();game.start();const ant=game.spawnAnt();
- assert.equal(game.swipe(ant.id,80),null);assert.equal(game.catchMouse(ant.id,1000,true),null);
- assert.equal(game.flickAnt(ant.id,27,1),null);assert.equal(game.flickAnt(ant.id,80,.1),null);
+test('only a fast flick removes an ant safely, including after a long stay; late attempts cannot score',()=>{
+ const {game,set}=setup();game.start();const ant=game.spawnAnt();assert.equal(game.swipe(ant.id,80),null);assert.equal(game.catchMouse(ant.id,1000,true),null);
+ assert.equal(game.flickAnt(ant.id,27,1),null);assert.equal(game.flickAnt(ant.id,80,.1),null);set(60000);game.advance(new Set([ant.id]));assert.equal(game.entities.has(ant.id),true);
  assert.equal(game.flickAnt(ant.id,80,.5).points,0);assert.equal(game.score,0);assert.equal(game.stats.antsFlicked,1);assert.equal(game.flickAnt(ant.id,80,.5),null);
- const expired=game.spawnAnt();set(expired.expiresAt);assert.equal(game.tap(expired.id),null);assert.equal(game.flickAnt(expired.id,80,1),null);
- const late=game.spawnAnt();set(60000);assert.equal(game.tap(late.id),null);assert.equal(game.flickAnt(late.id,80,1),null);assert.equal(game.score,0);
+ const late=game.spawnAnt();set(120000);assert.equal(game.tap(late.id),null);assert.equal(game.flickAnt(late.id,80,1),null);assert.equal(game.score,0);
 });
 test('flick detection accepts a fresh quick tail and rejects slow drags or a pause before release',()=>{
  const points=[{x:10,y:20,t:0},{x:40,y:20,t:60}];
@@ -116,24 +111,19 @@ test('flick detection accepts a fresh quick tail and rejects slow drags or a pau
  assert.equal(antFlick([{x:0,y:0,t:0},{x:10,y:0,t:100}],{x:15,y:0,t:140}),null);
 });
 
-test('individually spawned ants never exceed five and their departures are separated',()=>{
- const {game}=setup(120);game.start();const ants=Array.from({length:MAX_ANTS},()=>game.spawnAnt());
- assert.ok(ants.every(Boolean));assert.equal(game.spawnAnt(),null);
- const departures=ants.map(e=>e.expiresAt).sort((a,b)=>a-b);
- assert.ok(departures.every(t=>t>=ANT_MIN_LIFETIME&&t<=ANT_MAX_LIFETIME));
- assert.ok(departures.slice(1).every((t,i)=>t-departures[i]>=ANT_DEPARTURE_GAP));
- game.nextAnt=0;assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,0);
- game.entities.delete(ants[0].id);game.nextAnt=0;assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,1);
- assert.equal([...game.entities.values()].filter(e=>e.type==='ant').length,MAX_ANTS);
+test('persistent ants never exceed five and a removed ant opens a place for a later arrival',()=>{
+ const {game,set}=setup(120);game.start();const ants=Array.from({length:MAX_ANTS},()=>game.spawnAnt());assert.ok(ants.every(Boolean));assert.equal(game.spawnAnt(),null);
+ set(60000);assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,0);assert.ok(ants.every(ant=>game.entities.has(ant.id)));
+ game.tap(ants[0].id);game.nextAnt=60000;assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,1);assert.equal([...game.entities.values()].filter(e=>e.type==='ant').length,MAX_ANTS);
 });
-
-test('ant timing varies across random draws and background return never creates a synchronized swarm',()=>{
- const {game,set}=setup(120);let draw=.05;game.random=()=>draw;game.start();const early=game.nextAnt;
- draw=.95;game.start();assert.ok(game.nextAnt>early);
+test('random ant timing varies and background return adds at most one arrival without removing older ants',()=>{
+ const {game,set}=setup(120);let draw=.05;game.random=()=>draw;game.start();const early=game.nextAnt;draw=.95;game.start();assert.ok(game.nextAnt>early);
  const born=game.nextAnt;set(born);draw=.1;const first=game.advance().spawned.find(e=>e.type==='ant'),shortGap=game.nextAnt-born;
- set(game.nextAnt);draw=.9;const second=game.advance().spawned.find(e=>e.type==='ant');
- assert.ok(game.nextAnt-(born+shortGap)>shortGap);assert.ok(second.expiresAt-(born+shortGap)>first.expiresAt-born);
- assert.ok(Math.abs(first.expiresAt-second.expiresAt)>=ANT_DEPARTURE_GAP);
- set(90000);assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,1);
- assert.equal([...game.entities.values()].filter(e=>e.type==='ant').length,1);
+ set(game.nextAnt);draw=.9;game.advance();assert.ok(game.nextAnt-(born+shortGap)>shortGap);
+ set(90000);assert.equal(game.advance().spawned.filter(e=>e.type==='ant').length,1);assert.equal([...game.entities.values()].filter(e=>e.type==='ant').length,3);assert.equal(game.entities.has(first.id),true);
+});
+test('four mice may coexist, a fifth is blocked, and capture allows a later replacement',()=>{
+ const {game,set}=setup(120);game.start();for(const now of [7000,19000,31000,43000]){set(now);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,1);}
+ assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,MAX_MICE);assert.equal(game.spawnMouse(),null);set(55000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,0);
+ const mouse=[...game.entities.values()].find(e=>e.type==='mouse');assert.equal(game.catchMouse(mouse.id,500,true).points,5);set(67000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,1);assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,4);
 });

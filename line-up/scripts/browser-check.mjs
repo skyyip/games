@@ -245,8 +245,8 @@ try{
   const fresh=await offline.context.newPage();fresh.on('pageerror',e=>errors.push(e.message));await fresh.goto(base);assert.equal(await fresh.locator('#setup').isVisible(),true);
   pass('manifest/icons load and cached code supports a complete offline round and a fresh offline tab');
   await offline.context.setOffline(false);await offline.page.locator('.playground-home').click();
-  await offline.page.waitForURL(new URL('../',base).href);assert.equal(await offline.page.locator('.card').count(),7);
-  pass('All games returns to the seven-game landing page');await offline.context.close();
+  await offline.page.waitForURL(new URL('../',base).href);assert.equal(await offline.page.locator('.card').count(),8);
+  pass('All games returns to the eight-game landing page');await offline.context.close();
   assert.deepEqual(errors,[]);pass('no uncaught browser errors during setup, selection, results, replay or offline play');
   console.log(`\n${checks} Line Up browser checks passed. Screenshots: ${output}`);
 }finally{await browser.close();}

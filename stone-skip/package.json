@@ -1,0 +1,1 @@
+{"name":"stone-skip","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node ../grid-rush/scripts/serve.js","test":"node --test tests/*.test.js"},"engines":{"node":">=20"}}

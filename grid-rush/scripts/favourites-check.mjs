@@ -5,7 +5,7 @@ const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwrig
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PLAYGROUND_URL||'http://localhost:5173/';
 const output=process.env.PLAYGROUND_SCREENSHOTS||'/tmp/playground-favourites-qa';
-const ids=['grid-rush','grid-rush-in-order','tap-and-spill','line-up','pikmin-fling','just-a-sec','roach-rush'];
+const ids=['grid-rush','grid-rush-in-order','tap-and-spill','line-up','pikmin-fling','just-a-sec','roach-rush','stone-skip'];
 const errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init) {
@@ -25,12 +25,12 @@ try {
   await mkdir(output,{recursive:true});
   const {context,page}=await setup({viewport:{width:1440,height:1050}});
   assert.deepEqual(await order(page),ids);
-  assert.equal(await page.locator('.favourite-button').count(),7);
+  assert.equal(await page.locator('.favourite-button').count(),8);
   assert.equal(await page.locator('a .favourite-button').count(),0,'buttons must not be nested in links');
   assert.equal(await page.getByRole('button',{name:'Favourite: Grid Rush',exact:true}).getAttribute('aria-pressed'),'false');
   const initialFill=await star(page,'pikmin-fling').locator('.star-shape').evaluate(path=>getComputedStyle(path).fill);
   const initialGridTop=await page.locator('.grid').evaluate(grid=>grid.offsetTop);
-  pass('seven native star toggles have game-specific names, unselected states and independent game links');
+  pass('eight native star toggles have game-specific names, unselected states and independent game links');
 
   await star(page,'pikmin-fling').click();
   assert.equal(page.url(),base);assert.equal((await order(page))[0],'pikmin-fling');
@@ -48,12 +48,12 @@ try {
   pass('starring moves the card first, fills the star, animates the icon/rays/card and announces the change without navigating');
 
   await star(page,'line-up').click();await settled(page);
-  assert.deepEqual(await order(page),['line-up','pikmin-fling','grid-rush','grid-rush-in-order','tap-and-spill','just-a-sec','roach-rush']);
+  assert.deepEqual(await order(page),['line-up','pikmin-fling','grid-rush','grid-rush-in-order','tap-and-spill','just-a-sec','roach-rush','stone-skip']);
   await star(page,'pikmin-fling').click();
   assert.equal(await star(page,'pikmin-fling').getAttribute('aria-pressed'),'false');
   assert.ok(await star(page,'pikmin-fling').locator('svg').evaluate(icon=>icon.getAnimations().length)>0);
   await settled(page);
-  assert.deepEqual(await order(page),['line-up','grid-rush','grid-rush-in-order','tap-and-spill','just-a-sec','roach-rush','pikmin-fling']);
+  assert.deepEqual(await order(page),['line-up','grid-rush','grid-rush-in-order','tap-and-spill','just-a-sec','roach-rush','stone-skip','pikmin-fling']);
   assert.equal(await star(page,'line-up').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#favourite-announcement').textContent(),/removed from favourites and moved to the end/);
   pass('multiple favourites use most-recent-first order; unstarring animates, moves last and preserves other favourites');
@@ -69,7 +69,7 @@ try {
   assert.equal(await rapid.getAttribute('aria-pressed'),'false');
   assert.equal((await order(page)).at(-1),'grid-rush-in-order');
   assert.equal(await rapid.evaluate(button=>button===document.activeElement),true);
-  assert.equal(await page.locator('.game-card').count(),7);
+  assert.equal(await page.locator('.game-card').count(),8);
   // Native scroll offsets round fractional card positions to CSS pixels.
   await page.waitForFunction(()=>{const b=document.activeElement.getBoundingClientRect();return b.top>=-1&&b.bottom<=innerHeight+1;});
   pass('rapid keyboard toggles cancel previous animations, preserve focus, keep one copy of every card and reveal the focused control');

@@ -1,4 +1,7 @@
 /* Shared navigation and feedback. Board tracks and tile dimensions stay fixed. */
+/* Stop double-tap zoom on every page, including nested scrolling areas.
+   Zero specificity preserves each game's own touch-action:none gesture surface. */
+:where(html, body, body *) { touch-action:manipulation; }
 @view-transition { navigation:auto; }
 ::view-transition-old(root) { animation:page-out 160ms ease-out both; }
 ::view-transition-new(root) { animation:page-in 320ms cubic-bezier(.2,.7,.2,1) both; }

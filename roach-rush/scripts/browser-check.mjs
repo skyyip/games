@@ -31,7 +31,7 @@ async function freeze(page){await page.clock.install();await page.clock.pauseAt(
 const selector=(type='roach',mode='ground',size='small')=>`.critter[data-type="${type}"][data-mode="${mode}"][data-size="${size}"]:not(:disabled)`;
 const centre=async locator=>{const r=await locator.boundingBox();return {x:r.x+r.width/2,y:r.y+r.height/2};};
 async function stable(page,locator){const id=await locator.getAttribute('data-id'),target=page.locator(`.critter[data-id="${id}"]`);await target.focus();return target;}
-async function start(page,duration=60){
+async function start(page,duration=120){
  await page.locator(`input[value="${duration}"]`).check();await page.locator('#start').click();
  const distances=await page.locator('.critter').evaluateAll(els=>els.map((el,index)=>{
   const a=el.getBoundingClientRect(),b=document.querySelectorAll('.hole')[index].getBoundingClientRect();
@@ -51,7 +51,7 @@ try{
   const {context,page}=await setup({},language);await freeze(page);
   await boundedGuide(page);
   await cornerHoles(page);
-  assert.equal(await page.locator('.wall').count(),4);assert.equal(await page.locator('.hole').count(),4);assert.equal(await page.locator('#timer').textContent(),'1:00');
+  assert.equal(await page.locator('.wall').count(),4);assert.equal(await page.locator('.hole').count(),4);assert.equal(await page.locator('#timer').textContent(),'2:00');
   await start(page);assert.equal(await page.locator('.critter').count(),4);assert.equal(await page.locator('.critter[data-mode="flying"]').count(),0);
   const small=page.locator(selector()).first();await small.click();assert.equal(await page.locator('#score').textContent(),'1');
   await page.evaluate(()=>{window.__qaRandom=.8;});await page.clock.runFor(850);
@@ -71,14 +71,14 @@ try{
   await page.clock.runFor(10000);
   const active=page.locator('.critter[data-type="mouse"]').first();await active.focus();await page.keyboard.down('Space');await page.clock.runFor(500);await page.keyboard.up('Space');
   assert.equal(await page.locator('#cage').isDisabled(),false);const score=Number(await page.locator('#score').textContent());await page.keyboard.press('Enter');assert.equal(Number(await page.locator('#score').textContent()),score+5);
-  await page.clock.fastForward(61000);assert.equal(await page.locator('#result').isVisible(),true);assert.equal(await page.locator('#timer').textContent(),'0:00');assert.equal(await page.locator('.critter:not(:disabled)').count(),0);
+  await page.clock.fastForward(121000);assert.equal(await page.locator('#result').isVisible(),true);assert.equal(await page.locator('#timer').textContent(),'0:00');assert.equal(await page.locator('.critter:not(:disabled)').count(),0);
   assert.equal(Number(await page.locator('#final-score').textContent()),Number(await page.locator('#score').textContent()));
   await page.screenshot({path:`${output}/results-${language}.png`,fullPage:true});
-  await page.locator('#again').click();assert.equal(await page.locator('#score').textContent(),'0');assert.equal(await page.locator('.critter').count(),4);assert.equal(await page.locator('#timer').textContent(),'1:00');
+  await page.locator('#again').click();assert.equal(await page.locator('#score').textContent(),'0');assert.equal(await page.locator('.critter').count(),4);assert.equal(await page.locator('#timer').textContent(),'2:00');
   await page.locator('#end').click();assert.equal(await page.locator('#idle-note').isVisible(),true);
   await boundedGuide(page);
-  await page.locator('input[value="120"]').check();assert.equal(await page.locator('#timer').textContent(),'2:00');
-  await start(page,120);await page.clock.fastForward(61000);assert.equal(await page.locator('#result').isHidden(),true);await page.clock.fastForward(60000);assert.equal(await page.locator('#result').isVisible(),true);
+  await page.locator('input[value="180"]').check();assert.equal(await page.locator('#timer').textContent(),'3:00');
+  await start(page,180);await page.clock.fastForward(121000);assert.equal(await page.locator('#result').isHidden(),true);await page.clock.fastForward(60000);assert.equal(await page.locator('#result').isVisible(),true);
   await context.close();pass(`${language}: four walls/four holes, tap/double-tap expiry, flying swipe, 499/500ms mouse capture, failed drop, keyboard cage, deadlines and replay`);
  }
  const largeFly=await setup({},'zh-Hant',.8),lp=largeFly.page;await freeze(lp);await start(lp);
@@ -104,7 +104,7 @@ try{
  assert.equal(Number(await lp.locator('#score').textContent()),largeScore+4);assert.equal(await lp.locator(`.critter[data-id="${bigFlyId}"]`).count(),0);
  await largeFly.context.close();pass('large flying roaches award four points on a swipe; both wing hinges remain attached across their flap poses');
 
- const late=await setup();await freeze(late.page);await start(late.page);await late.page.clock.fastForward(59000);
+ const late=await setup();await freeze(late.page);await start(late.page);await late.page.clock.fastForward(119000);
  const heldMouse=await stable(late.page,late.page.locator('.critter[data-type="mouse"]').first()),heldAt=await centre(heldMouse);
  await late.page.mouse.move(heldAt.x,heldAt.y);await late.page.mouse.down();await late.page.clock.fastForward(1100);
  const dropAt=await centre(late.page.locator('#cage'));await late.page.mouse.move(dropAt.x,dropAt.y);await late.page.mouse.up();
@@ -137,12 +137,12 @@ try{
    assert.equal(await page.locator(`.critter[data-id="${flyId}"]`).count(),0);assert.ok(Number(await page.locator('#score').textContent())>=swipeScore+3);
   }
   await protocol.detach();
-  for(let round=0;round<2;round++){await page.clock.fastForward(61000);await page.locator('#again').click();assert.equal(await page.locator('#result').isHidden(),true);assert.equal(await page.locator('.critter').count(),4);}
+  for(let round=0;round<2;round++){await page.clock.fastForward(121000);await page.locator('#again').click();assert.equal(await page.locator('#result').isHidden(),true);assert.equal(await page.locator('.critter').count(),4);}
   await page.locator('#end').click();assert.equal(await page.locator('#mode-options').isDisabled(),false);
   await context.close();pass(`${width}x${height}: responsive room, visible cage, repeated timeout/replay and screen-lock cleanup${width===375?', real touch tap and mouse drag':''}`);
  }
  const offline=await setup({serviceWorkers:'allow'});await offline.page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
  await offline.context.setOffline(true);await offline.page.reload();await freeze(offline.page);await start(offline.page);await offline.page.locator(selector()).first().press('Enter');
- assert.equal(await offline.page.locator('#score').textContent(),'1');await offline.page.clock.fastForward(61000);assert.equal(await offline.page.locator('#final-score').textContent(),'1');await offline.context.close();pass('offline round supports sprites, controls, score and results');
+ assert.equal(await offline.page.locator('#score').textContent(),'1');await offline.page.clock.fastForward(121000);assert.equal(await offline.page.locator('#final-score').textContent(),'1');await offline.context.close();pass('offline round supports sprites, controls, score and results');
  assert.deepEqual(errors,[]);pass('no uncaught browser errors');console.log(`\n${checks} Roach Rush browser checks passed.`);
 }finally{await browser.close();}

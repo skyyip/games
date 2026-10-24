@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Roach Rush \u00b7 Sky\u2019s Playground",
-  "short_name": "Roach Rush",
-  "description": "A cute timed room arcade. Tap, double-tap, swipe and catch mice.",
+  "name": "殲滅小強，人人有責 · Your Playground.",
+  "short_name": "殲滅小強",
+  "description": "Two- or three-minute room patrols with three sprays and three mouse traps per round.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,19 +1,23 @@
 export const DOUBLE_TAP=350,MOUSE_HOLD=500,SWIPE_DISTANCE=28;
 export const FLYING_POINTS=Object.freeze({small:3,big:4});
-export const ANT_MIN_LIFETIME=4000,ANT_MAX_LIFETIME=12000,ANT_DEPARTURE_GAP=750,ANT_FLICK_SPEED=.25,MAX_ANTS=5;
+export const ANT_FLICK_SPEED=.25,MAX_ANTS=5,MAX_MICE=4;
+export const ANT_PENALTY=3,SPRAY_DELAY=220;
+export const DURATIONS=Object.freeze([120,180]),ITEM_USES=3;
 export const HOLES=Object.freeze([{x:.065,y:.09},{x:.065,y:.93},{x:.935,y:.93},{x:.935,y:.09}]);
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const angleDifference=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 export class RoachGame {
-  constructor({duration=60,random=Math.random,now=()=>performance.now()}={}){this.random=random;this.now=now;this.holes=HOLES;this.bounds={left:.055,right:.945,top:.065,bottom:.935};this.reset(duration);}
+  constructor({duration=120,random=Math.random,now=()=>performance.now()}={}){this.random=random;this.now=now;this.holes=HOLES;this.bounds={left:.055,right:.945,top:.065,bottom:.935};this.reset(duration);}
   setGeometry(holes){
     this.holes=holes.map(point=>({...point}));
     this.bounds={left:Math.min(...holes.map(p=>p.x)),right:Math.max(...holes.map(p=>p.x)),top:Math.min(...holes.map(p=>p.y)),bottom:Math.max(...holes.map(p=>p.y))};
   }
   reset(duration=this.duration){
-    if(![60,120].includes(duration))throw new RangeError('Choose 60 or 120 seconds.');
-    this.duration=duration;this.state='idle';this.entities=new Map();this.score=0;this.stats={small:0,big:0,flying:0,mice:0,antsHit:0,antsFlicked:0};this.id=0;this.startedAt=0;this.updatedAt=0;this.mouseHoles=[];this.spawnHole=0;
+    if(!DURATIONS.includes(duration))throw new RangeError('Choose 120 or 180 seconds.');
+    this.duration=duration;this.state='idle';this.entities=new Map();this.score=0;this.stats={small:0,big:0,flying:0,mice:0,antsHit:0,antsFlicked:0,sprayed:0,antsSprayed:0,trapped:0};this.id=0;this.startedAt=0;this.updatedAt=0;this.mouseHoles=[];this.spawnHole=0;this.spraysLeft=ITEM_USES;this.sprayClouds=[];this.trapsLeft=ITEM_USES;this.traps=new Map();this.trapId=0;
   }
+  get sprayUsed(){return this.spraysLeft===0;}
+  get sprayCloud(){return this.sprayClouds.at(-1)||null;}
   get remaining(){return this.state==='idle'?this.duration*1000:Math.max(0,this.duration*1000-(this.now()-this.startedAt));}
   start(){
     this.reset();this.state='playing';this.startedAt=this.updatedAt=this.now();
@@ -33,15 +37,10 @@ export class RoachGame {
   spawnAnt(hole=Math.floor(this.random()*HOLES.length)){
     const ants=[...this.entities.values()].filter(e=>e.type==='ant');
     if(ants.length>=MAX_ANTS)return null;
-    const now=this.now(),earliest=now+ANT_MIN_LIFETIME,latest=now+ANT_MAX_LIFETIME;
-    const desired=earliest+this.random()*(latest-earliest),departures=ants.map(e=>e.expiresAt).filter(t=>t>now);
-    // Keep independently random departures visibly apart, even when random durations collide.
-    const candidates=[desired,earliest,latest,...departures.flatMap(t=>[t-ANT_DEPARTURE_GAP,t+ANT_DEPARTURE_GAP])];
-    const expiresAt=candidates.filter(t=>t>=earliest&&t<=latest&&departures.every(other=>Math.abs(t-other)>=ANT_DEPARTURE_GAP))
-      .sort((a,b)=>Math.abs(a-desired)-Math.abs(b-desired))[0];
-    const ant=this.create('ant',hole);ant.expiresAt=expiresAt;ant.heading+=(ant.id%3-1)*.25;ant.desired=ant.heading;return ant;
+    const ant=this.create('ant',hole);ant.heading+=(ant.id%3-1)*.25;ant.desired=ant.heading;return ant;
   }
   spawnMouse(){
+    if([...this.entities.values()].filter(e=>e.type==='mouse').length>=MAX_MICE)return null;
     if(!this.mouseHoles.length){
       this.mouseHoles=HOLES.map((_,index)=>index);
       for(let i=this.mouseHoles.length-1;i>0;i--){const j=Math.floor(this.random()*(i+1));[this.mouseHoles[i],this.mouseHoles[j]]=[this.mouseHoles[j],this.mouseHoles[i]];}
@@ -49,24 +48,25 @@ export class RoachGame {
     return this.create('mouse',this.mouseHoles.pop());
   }
   advance(frozen=new Set()){
-    const events={spawned:[],changed:[],finished:this.expire()};
+    const events={spawned:[],changed:[],sprayed:[],trapped:[],sprayReleased:false,finished:this.expire()};
     if(this.state!=='playing')return events;
     const now=this.now(),dt=clamp((now-this.updatedAt)/1000,0,.05),{left,right,top,bottom}=this.bounds;this.updatedAt=now;
-    for(const entity of this.entities.values())if(entity.type==='ant'&&now>=entity.expiresAt)this.entities.delete(entity.id);
     if(now>=this.nextRoach){
       if([...this.entities.values()].filter(e=>e.type==='roach').length<24){events.spawned.push(this.spawnRoach(this.spawnHole));this.spawnHole=(this.spawnHole+1)%HOLES.length;}
       this.nextRoach=now+650+this.random()*400;
     }
     if(now>=this.nextMouse){
-      if([...this.entities.values()].filter(e=>e.type==='mouse').length<2)events.spawned.push(this.spawnMouse());
+      if([...this.entities.values()].filter(e=>e.type==='mouse').length<MAX_MICE)events.spawned.push(this.spawnMouse());
       this.nextMouse=now+7500+this.random()*4500;
     }
     if(now>=this.nextAnt){
       const ant=this.spawnAnt();if(ant)events.spawned.push(ant);
       this.nextAnt=now+2000+this.random()*6000;
     }
+    const mouseSteps=new Map();
     for(const entity of this.entities.values()){
       if(frozen.has(entity.id)||now<entity.dazedUntil)continue;
+      if(entity.type==='mouse')mouseSteps.set(entity.id,{x:entity.x,y:entity.y});
       if(entity.type==='roach'&&now>=entity.transitionAt){
         if(entity.mode==='flying'){entity.mode='ground';entity.transitionAt=now+2500+this.random()*4000;events.changed.push(entity.id);}
         else if(this.random()<.45){entity.mode='flying';entity.transitionAt=now+2600+this.random()*3000;events.changed.push(entity.id);}
@@ -83,6 +83,21 @@ export class RoachGame {
       }
       entity.phase+=dt*(entity.type==='mouse'?15:entity.type==='ant'?10:entity.mode==='flying'?25:12);
       entity.flight+=(Number(entity.mode==='flying')-entity.flight)*Math.min(1,dt*6);
+    }
+    for(const cloud of this.sprayClouds)if(!cloud.applied&&now>=cloud.releaseAt){
+      cloud.applied=true;events.sprayReleased=true;
+      for(const entity of [...this.entities.values()])if(['roach','ant'].includes(entity.type)&&((entity.x-cloud.x)/cloud.radiusX)**2+((entity.y-cloud.y)/cloud.radiusY)**2<=1){
+        const ant=entity.type==='ant';events.sprayed.push(this.award(entity,ant?'antsSprayed':'sprayed',ant?-ANT_PENALTY:1));
+      }
+    }
+    for(const trap of this.traps.values())if(trap.armed){
+      for(const mouse of this.entities.values())if(mouse.type==='mouse'&&!frozen.has(mouse.id)){
+        const from=mouseSteps.get(mouse.id)||mouse;
+        const normalize=p=>({x:(p.x-trap.x)/trap.radiusX,y:(p.y-trap.y)/trap.radiusY});
+        if(distanceToSegment({x:0,y:0},normalize(from),normalize(mouse))<=1){
+          trap.armed=false;this.traps.delete(trap.id);events.trapped.push({...this.award(mouse,'trapped',5),trapId:trap.id});break;
+        }
+      }
     }
     // Gentle separation between free ground creatures keeps touch targets reachable.
     const ground=[...this.entities.values()].filter(e=>e.mode==='ground');
@@ -101,7 +116,7 @@ export class RoachGame {
   }
   tap(id){
     if(!this.active())return null;const entity=this.entities.get(id);
-    if(entity?.type==='ant')return this.now()<entity.expiresAt?this.award(entity,'antsHit',-1):null;
+    if(entity?.type==='ant')return this.award(entity,'antsHit',-ANT_PENALTY);
     if(!entity||entity.type!=='roach'||entity.mode!=='ground')return null;
     if(entity.size==='small')return this.award(entity,'small',1);
     const now=this.now();
@@ -120,11 +135,20 @@ export class RoachGame {
   flickAnt(id,distance,speed){
     if(!this.active()||distance<SWIPE_DISTANCE||speed<ANT_FLICK_SPEED)return null;
     const entity=this.entities.get(id);
-    return entity?.type==='ant'&&this.now()<entity.expiresAt?this.award(entity,'antsFlicked',0):null;
+    return entity?.type==='ant'?this.award(entity,'antsFlicked',0):null;
+  }
+  useSpray(area){
+    if(!this.active()||this.sprayUsed||!validArea(area))return null;
+    this.spraysLeft--;const cloud={...area,releaseAt:this.now()+SPRAY_DELAY,applied:false};this.sprayClouds.push(cloud);return cloud;
+  }
+  placeTrap(area){
+    if(!this.active()||this.trapsLeft<=0||!validArea(area))return null;
+    const trap={...area,id:this.trapId++,armed:true};this.traps.set(trap.id,trap);this.trapsLeft--;return trap;
   }
   dropAnt(id,x,y){const entity=this.entities.get(id);if(entity?.type==='ant'){entity.x=clamp(x,this.bounds.left,this.bounds.right);entity.y=clamp(y,this.bounds.top,this.bounds.bottom);}}
   dropMouse(id,x,y){const entity=this.entities.get(id);if(entity?.type==='mouse'){entity.x=clamp(x,this.bounds.left,this.bounds.right);entity.y=clamp(y,this.bounds.top,this.bounds.bottom);}}
 }
+function validArea(area){return area&&['x','y','radiusX','radiusY'].every(k=>Number.isFinite(area[k]))&&area.x>=0&&area.x<=1&&area.y>=0&&area.y<=1&&area.radiusX>0&&area.radiusY>0&&area.radiusX<=1&&area.radiusY<=1;}
 export function distanceToSegment(point,a,b){
   const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);
   return Math.hypot(point.x-a.x-dx*t,point.y-a.y-dy*t);
