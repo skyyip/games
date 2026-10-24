@@ -5,13 +5,13 @@ const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwrig
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PIKMIN_FLING_URL||'http://localhost:5173/pikmin-fling/';
 const output=process.env.PIKMIN_FLING_SCREENSHOTS||'/tmp/pikmin-fling-qa';
-const key='pikmin-fling.records.v2',errors=[];let checks=0;
+const key='pikmin-fling.records.v3',errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
-async function setup(options={},init) {
+async function setup(options={},init=()=>{Math.random=()=>0;},initArg) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
   await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({contentType:'text/javascript',body:''}));
-  if(init)await context.addInitScript(init);
+  if(init)await context.addInitScript(init,initArg);
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
   const page=await context.newPage();await page.goto(base);await page.evaluate(()=>document.fonts.ready);
   await page.locator('#start:not(:disabled)').waitFor();return {context,page};
@@ -37,21 +37,20 @@ async function stored(page){return page.evaluate(key=>JSON.parse(localStorage.ge
 async function touch(protocol,type,points){await protocol.send('Input.dispatchTouchEvent',{type,touchPoints:points});}
 try{
   await mkdir(output,{recursive:true});
-  for(const [type,label,random] of [['ice','Ice',.55],['rock','Rock',.7],['winged','Winged',.9]]) {
-    const variant=await setup({viewport:{width:375,height:900},reducedMotion:'reduce'});
-    await variant.page.evaluate(value=>{Math.random=()=>value;},random);
+  for(const [type,label,random] of [['red','Red',.01],['yellow','Yellow',.16],['blue','Blue',.3],['ice','Ice',.45],['rock','Rock',.6],['winged','Winged',.75],['white','White',.9]]) {
+    const variant=await setup({viewport:{width:375,height:900},reducedMotion:'reduce'},value=>{Math.random=()=>value;},random);
     await variant.page.locator('#start').click();
     assert.equal(await variant.page.locator(`.pikmin[data-type="${type}"]`).count(),30);
     await variant.page.locator('#world').screenshot({path:`${output}/${type}-crowd-mobile.png`,animations:'disabled'});
     for(const growth of ['leaf','bud','flower']) {
       const unit=await stable(variant.page,pikmin(variant.page,growth).first());
       assert.match(await unit.getAttribute('aria-label'),new RegExp(`${label} .*Pikmin`));
-      assert.equal(await unit.locator('img').evaluate(img=>img.complete&&img.naturalWidth>0),true);
-      assert.ok((await unit.locator('img').getAttribute('src')).endsWith(`${type}-${growth}.png`));
+      assert.equal(await unit.locator('.pikmin-art').getAttribute('data-sprite'),type);
+      assert.equal(await unit.locator('.pikmin-art').getAttribute('data-stage'),growth);
       if(growth==='bud')await unit.dblclick();
-      else await swipe(variant.page,unit,growth==='flower'?1050:0);
+      else await swipe(variant.page,unit,growth==='flower'?650:0);
       assert.equal(await unit.isDisabled(),true,`${type} ${growth} should launch after its valid gesture`);
-      assert.equal(await variant.page.locator(`.flying-pikmin[src$="${type}-${growth}.png"]`).count(),1);
+      assert.equal(await variant.page.locator(`.flying-pikmin[data-sprite="${type}"][data-stage="${growth}"]`).count(),1);
       await variant.page.waitForTimeout(550);
     }
     assert.equal(await variant.page.locator('#fed').textContent(),'3');
@@ -65,7 +64,7 @@ try{
   await page.waitForTimeout(80);assert.equal(await page.locator('#timer').textContent(),'0.00');
   assert.equal(await page.locator('.pikmin').count(),30);assert.equal(await page.locator('.pikmin:not(:disabled)').count(),0);
   for(const [growth,count] of [['leaf',20],['bud',5],['flower',5]])assert.equal(await page.locator(`.pikmin[data-growth="${growth}"]`).count(),count);
-  assert.equal(await page.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth>0)),true);
+  assert.equal(await page.locator('.pikmin .pikmin-art').count(),30);
   await page.screenshot({path:`${output}/desktop-ready.png`,fullPage:true,animations:'disabled'});
   pass('idle board has 20 normal, 5 bud, 5 flower Pikmin, correct artwork and a stopped timer');
   await page.locator('#pen').scrollIntoViewIfNeeded();
@@ -73,7 +72,7 @@ try{
   await page.mouse.click(fenceBounds.x+4,fenceBounds.y+40,{clickCount:3});
   assert.notEqual(await page.evaluate(()=>getSelection().type),'Range','the browser must not select the fenced region');
   const nativeSelection=await page.locator('#pen').evaluate(pen=>({
-    styles:[pen,pen.querySelector('#units'),pen.querySelector('.fence'),pen.querySelector('.pikmin img')].map(el=>{
+    styles:[pen,pen.querySelector('#units'),pen.querySelector('.fence'),pen.querySelector('.pikmin .pikmin-art')].map(el=>{
       const style=getComputedStyle(el);return {select:style.userSelect,tap:style.webkitTapHighlightColor};
     }),
     blocked:['selectstart','dragstart','contextmenu'].every(type=>!pen.querySelector('.fence').dispatchEvent(new Event(type,{bubbles:true,cancelable:true})))
@@ -98,8 +97,8 @@ try{
   const positions=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
   await page.waitForTimeout(250);
   const moving=await page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));assert.notDeepEqual(moving,positions);
-  assert.equal(await page.locator('.pikmin img').first().evaluate(i=>getComputedStyle(i).animationName),'walking');
-  assert.equal(await page.locator('.walk-feet i').first().evaluate(el=>getComputedStyle(el).animationName),'footstep');
+  assert.equal(await page.locator('.pikmin .rig-leg').count(),60);
+  assert.equal(await page.locator('.pikmin .rig-arm').count(),60);
   pass('Pikmin wander through the larger garden with body bobbing and alternating footsteps');
   let leaf=await stable(page,pikmin(page,'leaf').first());
   await leaf.click();await leaf.dblclick();assert.equal(await leaf.isDisabled(),false);
@@ -115,9 +114,9 @@ try{
   pass('buds reject swipes and expired taps; two quick taps launch the same bud');
   const flower=await stable(page,pikmin(page,'flower').first());
   await swipe(page,flower);assert.equal(await flower.isDisabled(),false);
-  await swipe(page,flower,700);assert.equal(await flower.isDisabled(),false);
-  await swipe(page,flower,1080);assert.equal(await flower.isDisabled(),true);
-  pass('flowers reject immediate/700ms flings and launch only after a full stationary second');
+  await swipe(page,flower,350);assert.equal(await flower.isDisabled(),false);
+  await swipe(page,flower,650);assert.equal(await flower.isDisabled(),true);
+  pass('flowers reject immediate/350ms flings and launch after a stationary 0.6-second charge');
   const first=await stable(page,pikmin(page,'bud').first()),a=await centre(first);
   await page.mouse.move(a.x,a.y);await page.mouse.down();await page.waitForTimeout(240);
   assert.equal(await first.evaluate(b=>b.classList.contains('is-linked')),true);
@@ -181,7 +180,7 @@ try{
   const touchLeaf=await stable(p,pikmin(p,'leaf').first()),touchOrigin=await centre(touchLeaf);
   await touch(protocol,'touchStart',[touchOrigin]);await touch(protocol,'touchMove',[{...touchOrigin,y:touchOrigin.y-60}]);await touch(protocol,'touchCancel',[]);
   assert.equal(await p.locator('.flying-pikmin').count(),0);assert.equal(await p.locator('.is-held').count(),0);
-  assert.equal(await touchLeaf.locator('img').evaluate(el=>el.style.transform),'');
+  assert.equal(await touchLeaf.locator('.pikmin-art').evaluate(el=>el.style.transform),'');
   pass('touch cancellation releases capture, restores the sprite and never throws');
   const tapBud=await stable(p,pikmin(p,'bud').first());await tapBud.tap();await tapBud.tap();assert.equal(await tapBud.isDisabled(),true);
   const touchFlower=await stable(p,pikmin(p,'flower').first()),f=await centre(touchFlower);
@@ -212,7 +211,7 @@ try{
     await touch(protocol,'touchMove',[{...ca,x:cb.x,y:cb.y-70}]);await touch(protocol,'touchEnd',[]);
     assert.equal(await chainStart.isDisabled(),true);assert.equal(await chainTarget.isDisabled(),true);
     const count=await p.locator('.flying-pikmin').count();assert.ok(count>=2);
-    assert.equal(await p.locator('.flying-pikmin').evaluateAll((images,growth)=>images.every(image=>image.getAttribute('src').endsWith(`-${growth}.png`)),growth),true);
+    assert.equal(await p.locator('.flying-pikmin').evaluateAll((images,growth)=>images.every(image=>image.getAttribute('data-stage')===growth),growth),true);
     await p.waitForTimeout(550);assert.equal(Number(await p.locator('#fed').textContent()),fedBefore+count);
     assert.equal(await p.evaluate(()=>scrollY),scrollBefore);
     pass(`${growth}: a finger can short-press 240ms, drag-link, pause and flick the full matching chain into the mouth without scrolling`);
@@ -246,7 +245,7 @@ try{
   await reduced.page.locator('#start').focus();await reduced.page.keyboard.press('Enter');
   assert.equal(await reduced.page.locator('.pikmin:focus').count(),1);
   assert.equal(await reduced.page.locator('.plant-sway').evaluate(el=>el.getAnimations().length),0);
-  assert.equal(await reduced.page.locator('.walk-feet i').first().evaluate(el=>getComputedStyle(el).animationName),'none');
+  assert.equal(await reduced.page.locator('.pikmin').first().evaluate(el=>el.style.getPropertyValue('--stride')),'0deg');
   const before=await reduced.page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform));
   await reduced.page.waitForTimeout(200);assert.deepEqual(await reduced.page.locator('.pikmin').evaluateAll(items=>items.map(b=>b.style.transform)),before);
   await reduced.page.keyboard.press('ArrowUp');await reduced.page.waitForTimeout(80);
@@ -264,13 +263,13 @@ try{
   await offline.page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
   await offline.context.setOffline(true);await offline.page.reload();await offline.page.locator('#start:not(:disabled)').waitFor();
   const cachedArtwork=await offline.page.evaluate(async()=>{
-    const paths=['red','yellow','blue','ice','rock','winged'].flatMap(type=>['leaf','bud','flower'].map(growth=>`./assets/pikmin/${type}-${growth}.png`));
-    return Promise.all(paths.map(async path=>{const image=new Image();image.src=path;await image.decode();return image.naturalWidth>0;}));
+    const {createSprite}=await import('./src/sprites.js');
+    return ['red','yellow','blue','ice','rock','winged','white'].flatMap(type=>['leaf','bud','flower'].map(growth=>createSprite(type,growth).querySelectorAll('.rig-leg').length===2));
   });
-  assert.equal(cachedArtwork.length,18);assert.ok(cachedArtwork.every(Boolean));
+  assert.equal(cachedArtwork.length,21);assert.ok(cachedArtwork.every(Boolean));
   await offline.page.locator('input[value="challenge"]').check();await offline.page.locator('#start').click();await finishByKeyboard(offline.page);
   const fresh=await offline.context.newPage();await fresh.goto(base);await fresh.locator('#start:not(:disabled)').waitFor();
-  assert.equal(await fresh.locator('.pikmin img').evaluateAll(images=>images.every(i=>i.naturalWidth>0)),true);
+  assert.equal(await fresh.locator('.pikmin .pikmin-art').count(),30);
   pass('both modes and all growth artwork work offline after installation, including a fresh offline tab');
   await offline.context.setOffline(false);await offline.page.locator('.playground-home').click();await offline.page.waitForURL(new URL('../',base).href);
   assert.equal(await offline.page.locator('.card').count(),5);await offline.context.close();

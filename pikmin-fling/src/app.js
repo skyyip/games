@@ -1,14 +1,15 @@
-import {FlingGame,GROWTH,ROUND_LIMIT,POINTS} from './game.js';
-import {createRoster,walkRoster,TYPES,TYPE_NAMES,PointerGesture,DoubleTap,distanceToSegment,flightPoint} from './interaction.js';
+import {FlingGame,ROUND_LIMIT,POINTS} from './game.js';
+import {createRoster,walkRoster,TYPE_NAMES,PointerGesture,DoubleTap,distanceToSegment,flightPoint} from './interaction.js';
 import {readLeaderboard,saveLeaderboard,addResult} from './leaderboard.js';
 import {animateChange,reducedMotion} from '../../grid-rush/src/playground-ui.js';
+import {createSprite} from './sprites.js';
 
 const $=selector=>document.querySelector(selector);
 const game=new FlingGame(),world=$('#world'),units=$('#units'),plant=$('#plant');
 const flights=new Map(),gestures=new Map(),effects=new Set(),taps=new DoubleTap();
 const growthNames={leaf:'Normal',bud:'Bud',flower:'Flower'};
-const modeNames={normal:'Normal',challenge:'Challenge',timed:'20s Rush'};
-const hints={leaf:'Fling upward.',bud:'Double-tap to feed.',flower:'Hold still for 1 second until the ring fills, then fling upward.'};
+const modeNames={normal:'Normal',challenge:'Challenge',timed:'30s Rush'};
+const hints={leaf:'Fling upward.',bud:'Double-tap to feed.',flower:'Hold still for 0.6 seconds until the ring fills, then fling upward.'};
 const symbols={leaf:'↗',bud:'2×',flower:'✿'};
 let storage;
 try{storage=window.localStorage;}catch{/* In-memory records still work. */}
@@ -22,15 +23,18 @@ function setPlayLock(playing) {
   const locked=playing&&matchMedia('(max-width:760px), (pointer:coarse)').matches;
   if(locked===document.body.classList.contains('play-locked'))return;
   if(locked){
-    savedScroll=window.scrollY;document.body.style.setProperty('--page-top',`${-savedScroll}px`);
+    savedScroll=window.scrollY;
+    // Cancel result scrolling before entering a new viewport-sized play session.
+    window.scrollTo({top:savedScroll,behavior:'instant'});
     $('.garden-tools').append($('#reset'));$('#reset').textContent='End round';
   }
   document.documentElement.classList.toggle('play-locked',locked);
   document.body.classList.toggle('play-locked',locked);
   for(const element of document.querySelectorAll('.site-top,.intro,.sidebar,main>footer'))element.inert=locked;
+  if(locked){window.scrollTo({top:0,behavior:'instant'});$('.play-panel').scrollTop=0;world.scrollTop=0;}
   if(!locked){
     resetHome.insertBefore($('#reset'),$('#control-note'));$('#reset').textContent='Reset round';
-    document.body.style.removeProperty('--page-top');window.scrollTo({top:savedScroll,behavior:'auto'});
+    window.scrollTo({top:savedScroll,behavior:'instant'});
   }
 }
 // A non-passive fallback also blocks single-finger rubber-banding in mobile Safari.
@@ -40,7 +44,6 @@ document.addEventListener('touchmove',event=>{
 window.addEventListener('resize',()=>setPlayLock(game.state==='playing'));
 const seconds=time=>(time/1000).toFixed(2);
 const announce=text=>{$('#announcements').textContent=text;};
-const source=(type,growth)=>`./assets/pikmin/${type}-${growth}.png`;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const point=event=>({x:event.clientX,y:event.clientY,t:performance.now()});
 const busy=id=>[...gestures.values()].some(g=>g.ids.includes(id));
@@ -48,30 +51,39 @@ const busy=id=>[...gestures.values()].some(g=>g.ids.includes(id));
 function renderUnit(id) {
   const button=buttons[id],unit=game.units[id];
   button.dataset.growth=unit.growth;button.dataset.type=roster[id].type;
-  button.querySelector('img').src=source(roster[id].type,unit.growth);
-  // Compensate for the generous transparent padding in the Winged bud artwork.
-  button.querySelector('img').style.setProperty('--art-scale',roster[id].type==='winged'&&unit.growth==='bud'?1.6:1);
+  const previous=button.querySelector('.pikmin-art'),sprite=createSprite(unit.type,unit.growth);
+  if(previous)previous.replaceWith(sprite);else button.prepend(sprite);
   button.querySelector('.growth-badge').textContent=symbols[unit.growth];
   button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}.${game.mode==='timed'?` Worth ${POINTS[unit.growth]} points.`:''} ${hints[unit.growth]} Keyboard: Enter to feed.`);
 }
 function positionUnits() {
-  for(const unit of roster)buttons[unit.id].style.transform=`translate(${unit.x-22}px,${unit.y-unitHeight/2}px)`;
+  const now=performance.now()/1000;
+  for(const unit of roster){
+    const button=buttons[unit.id],moving=game.state==='playing'&&!reducedMotion.matches&&!button.classList.contains('is-paused')&&!button.classList.contains('is-held');
+    button.style.transform=`translate(${unit.x-22}px,${unit.y-unitHeight/2}px)`;
+    const flying=unit.type==='winged',phase=unit.gait??0;
+    button.style.setProperty('--stride',`${moving?Math.sin(phase)*(flying?4:14):0}deg`);
+    button.style.setProperty('--bob',`${moving?(flying?Math.sin(now*3+unit.id)*1.5:-Math.abs(Math.sin(phase))*.7):0}px`);
+    button.style.setProperty('--lift',`${flying?-6:0}px`);
+    button.style.setProperty('--flap',moving&&flying?String(.5+.5*Math.sin(now*30+unit.id)):'.5');
+    button.style.setProperty('--lean',`${moving?unit.vx/24*2:0}deg`);
+    button.style.setProperty('--look',`${unit.vx/24*1.2}px`);
+  }
 }
 function renderRoster() {
   fieldWidth=units.clientWidth;fieldHeight=units.clientHeight;
   unitHeight=parseFloat(getComputedStyle(units).getPropertyValue('--pikmin-height'))||58;
-  roster=createRoster(fieldWidth,fieldHeight,Math.random,unitHeight);buttons=[];
+  roster=createRoster(fieldWidth,fieldHeight,Math.random,unitHeight);
+  for(const unit of roster)unit.type=game.units[unit.id].type;
+  buttons=[];
   const fragment=document.createDocumentFragment();
   for(const unit of roster) {
     const button=document.createElement('button');button.type='button';button.className='pikmin';
     button.dataset.id=unit.id;button.disabled=game.state!=='playing';button.setAttribute('aria-pressed','false');
     button.style.setProperty('--walk-delay',`${-Math.random()*1000}ms`);
-    const image=document.createElement('img');image.alt='';image.draggable=false;image.width=54;image.height=66;
     const badge=document.createElement('span');badge.className='growth-badge';badge.setAttribute('aria-hidden','true');
     const ring=document.createElement('span');ring.className='hold-ring';ring.setAttribute('aria-hidden','true');
-    const feet=document.createElement('span');feet.className='walk-feet';feet.setAttribute('aria-hidden','true');
-    feet.append(document.createElement('i'),document.createElement('i'));
-    button.append(feet,image,badge,ring);buttons.push(button);fragment.append(button);renderUnit(unit.id);
+    button.append(badge,ring);buttons.push(button);fragment.append(button);renderUnit(unit.id);
   }
   units.replaceChildren(fragment);positionUnits();
 }
@@ -100,7 +112,7 @@ function renderRecords() {
     date.textContent=new Date(record.date).toLocaleDateString(document.documentElement.lang,{month:'short',day:'numeric'});
     row.append(rank,score,date);fragment.append(row);
   });
-  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Twenty seconds. Make every Pikmin count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
+  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Thirty seconds. Make every Pikmin count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
   $('#records').replaceChildren(fragment);$('#records-count').textContent=modeNames[game.mode].toUpperCase();
   $('#records-title').textContent=timed?'Your highest three':'Your fastest three';
   $('#records').setAttribute('aria-label',timed?'Highest total scores':'Fastest completion times');
@@ -159,12 +171,14 @@ function resetRound(mode=game.mode,playing=false) {
   $('#score').textContent='0';$('#score').setAttribute('aria-label','Score: 0 points');$('#score-gain').textContent='';
   $('#time-label').textContent=timed?'TIME LEFT':'YOUR TIME';$('#timer').setAttribute('aria-label',timed?'Seconds remaining':'Elapsed seconds');
   for(const label of document.querySelectorAll('.point-value'))label.hidden=!timed;
+  if($('#results').contains(document.activeElement))document.activeElement.blur();
   $('#results').hidden=true;$('#mode-options').disabled=false;
+  world.scrollTop=0;$('.play-panel').scrollTop=0;
   $('#start').hidden=false;$('#reset').hidden=true;
-  $('#gesture-help').textContent='Short press 0.2s, keep pressed and drag through the same stage, then flick up to feed the whole chain.';
+  $('#gesture-help').textContent='Short press 0.2s, keep pressed and drag through the same colour and stage, then flick up to feed the whole chain.';
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
   $('#cycle-status').textContent=mode==='normal'?'Normal mode · states stay the same':`${modeNames[mode]} · growth changes every 3–8s`;
-  $('#control-note').textContent=timed?'20 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 30 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock and Winged Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.';
+  $('#control-note').textContent=timed?'30 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 30 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock, Winged and White Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.';
   setPlayLock(playing);renderRoster();renderProgress();setSelected(null);renderRecords();
 }
 function startRound(keyboard=false) {
@@ -176,7 +190,7 @@ function startRound(keyboard=false) {
   $('#garden-label').textContent='HOLD. LINK. FLING.';
   renderProgress();if(!document.body.classList.contains('play-locked'))$('.scoreboard').scrollIntoView({block:'start',behavior:'auto'});
   if(keyboard)buttons[0].focus({preventScroll:true});
-  announce(`30 Pikmin. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'20-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 20 normal, 5 buds, 5 flowers.`);
+  announce(`30 Pikmin. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'30-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 20 normal, 5 buds, 5 flowers.`);
   frame=requestAnimationFrame(tick);
 }
 function finishRound() {
@@ -215,7 +229,7 @@ function renderGestures(now) {
     if(g.chaining) {
       for(const id of g.ids)buttons[id].classList.add('is-linked');
       if(!wasChain||g.growth==='flower'&&!wasCharged&&g.charged){
-        $('#gesture-help').textContent=g.growth==='flower'&&g.charged?'Flower charged. Flick up, or drag through more flowers to link.':`Link ready. Keep pressed and drag through more ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.${g.growth==='flower'?' A single flower needs a full 1-second hold.':''}`;
+        $('#gesture-help').textContent=g.growth==='flower'&&g.charged?'Flower charged. Flick up, or drag through flowers of the same colour to link.':`Link ready. Keep pressed and drag through more ${TYPE_NAMES[g.type]} ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.${g.growth==='flower'?' A single flower needs a full 0.6-second hold.':''}`;
         try{navigator.vibrate?.(10);}catch{}
       }
       const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');
@@ -265,12 +279,12 @@ function launch(ids,action,keyboard=false) {
   if(ids.some(busy)||!game.launch(ids,action))return false;
   const bounds=world.getBoundingClientRect();
   for(const id of ids) {
-    const button=buttons[id],imageBounds=button.querySelector('img').getBoundingClientRect();
+    const button=buttons[id],imageBounds=button.querySelector('.pikmin-art').getBoundingClientRect();
     const from={x:(imageBounds.x+imageBounds.width/2-bounds.x)/bounds.width,y:(imageBounds.y+imageBounds.height/2-bounds.y)/bounds.height};
-    const image=button.querySelector('img').cloneNode();image.className='flying-pikmin';
+    const image=button.querySelector('.pikmin-art').cloneNode(true);image.setAttribute('class','pikmin-art flying-pikmin');
     image.style.transform=`translate(${from.x*bounds.width}px,${from.y*bounds.height}px) translate(-50%,-50%)`;
     $('#flights').append(image);flights.set(id,{image,from,turn:from.x<.5?-45:45,started:performance.now()});
-    button.disabled=true;button.classList.add('is-gone');button.querySelector('img').style.transform='';
+    button.disabled=true;button.classList.add('is-gone');button.querySelector('.pikmin-art').style.transform='';
   }
   if(taps.pending && ids.includes(taps.pending.id))taps.clear();
   plant.classList.add('is-open');setSelected(null);
@@ -284,7 +298,7 @@ units.addEventListener('pointerdown',event=>{
   if(!button || game.state!=='playing' || event.button!==0 || button.disabled)return;
   const id=Number(button.dataset.id);if(busy(id))return;
   event.preventDefault();
-  const g=new PointerGesture(id,game.units[id].growth,point(event));g.button=button;g.previous=selected;
+  const g=new PointerGesture(id,game.units[id].growth,point(event),game.units[id].type);g.button=button;g.previous=selected;
   gestures.set(event.pointerId,g);button.setPointerCapture(event.pointerId);button.classList.add('is-held');
   setSelected(id);$('#gesture-help').textContent=hints[g.growth];
 });
@@ -295,14 +309,14 @@ units.addEventListener('pointermove',event=>{
     const rect=units.getBoundingClientRect();
     for(const unit of roster) {
       if(game.units[unit.id].status!=='ready'||busy(unit.id))continue;
-      if(distanceToSegment({x:rect.x+unit.x,y:rect.y+unit.y},previous,p)<=24 && g.add(unit.id,game.units[unit.id].growth)) {
+      if(distanceToSegment({x:rect.x+unit.x,y:rect.y+unit.y},previous,p)<=24 && g.add(unit.id,game.units[unit.id].growth,game.units[unit.id].type)) {
         buttons[unit.id].classList.add('is-linked');
-        $('#gesture-help').textContent=`${g.ids.length} linked. Keep tracing ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.`;
+        $('#gesture-help').textContent=`${g.ids.length} linked. Keep tracing ${TYPE_NAMES[g.type]} ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.`;
       }
     }
   }else{
     const dx=clamp(p.x-g.from.x,-35,35),dy=clamp(p.y-g.from.y,-48,20);
-    g.button.querySelector('img').style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) rotate(${dx*.25}deg) scale(1.08)`;
+    g.button.querySelector('.pikmin-art').style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) rotate(${dx*.25}deg) scale(1.08)`;
   }
 });
 function release(event,cancelled=false) {
@@ -317,10 +331,10 @@ function release(event,cancelled=false) {
     else $('#gesture-help').textContent='One more tap on this bud!';
   }else if(!launched && !cancelled){
     taps.clear();
-    $('#gesture-help').textContent=g.chaining&&(g.growth!=='flower'||g.ids.length>1)?'Chain released. Short press 0.2s, drag through matching Pikmin, then finish with an upward flick.':hints[g.growth];
+    $('#gesture-help').textContent=g.chaining&&(g.growth!=='flower'||g.ids.length>1)?'Chain released. Short press 0.2s, drag through the same colour and stage, then finish with an upward flick.':hints[g.growth];
     if(g.moved){try{navigator.vibrate?.(18);}catch{}}
   }
-  g.button.querySelector('img').style.transform='';
+  g.button.querySelector('.pikmin-art').style.transform='';
   if(cancelled){taps.clear();if(selected===g.ids[0])setSelected(g.previous);}
   else if(!launched)setSelected(g.ids[0]);
   $('#feed-selected').disabled=selected===null || game.state!=='playing' || busy(selected);
@@ -365,13 +379,7 @@ new ResizeObserver(()=>{
   fieldWidth=width;fieldHeight=height;positionUnits();
 }).observe(units);
 resetRound();
-Promise.all(TYPES.flatMap(type=>GROWTH.map(growth=>new Promise(resolve=>{
-  const image=new Image();image.onload=()=>resolve(true);image.onerror=()=>resolve(false);image.src=source(type,growth);
-})))).then(loaded=>{
-  assetsReady=loaded.every(Boolean);$('#start').disabled=!assetsReady;
-  $('#start').textContent=assetsReady?'Start game ↗':'Artwork unavailable';
-  if(!assetsReady)$('#control-note').textContent='Some Pikmin could not load. Refresh to try again.';
-});
+assetsReady=true;$('#start').disabled=false;$('#start').textContent='Start game ↗';
 if('serviceWorker' in navigator && window.isSecureContext)window.addEventListener('load',async()=>{
   try{await navigator.serviceWorker.register(new URL('../sw.js',import.meta.url));await navigator.serviceWorker.ready;$('#offline-status').textContent='Ready to play offline. Add Pikmin Fling to your home screen.';}
   catch{$('#offline-status').textContent='Online play is ready. Add Pikmin Fling to your home screen.';}

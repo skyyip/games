@@ -15,7 +15,7 @@ Source page: [The official home for Pikmin](https://pikmin.nintendo.com/).
 | `pikmin/rock.png` | https://pikmin.nintendo.com/_images/layouts/short-movies/hidden-pikmin/pikmin-rock.png |
 | `pikmin/winged.png` | https://pikmin.nintendo.com/_images/layouts/home/hidden-pikmin/pink-pikmin.png |
 
-The original images above are retained for the landing card and previous artwork. The current game uses 18 stage-specific variants, so the character itself shows the correct growth stage.
+The original images above are retained for the landing card and previous artwork. The previous renderer used the following 18 stage-specific variants; these original PNG files remain unchanged.
 
 | Local files | Official source pattern (`STAGE` = `leaf`, `bud`, `flower`) |
 | --- | --- |
@@ -23,7 +23,7 @@ The original images above are retained for the landing card and previous artwork
 | `pikmin/yellow-STAGE.png` | https://pikmin.nintendo.com/_images/hoverable-pikmin/pikmin-yellow-sit/pikmin-yellow-sit-STAGE.png |
 | `pikmin/blue-STAGE.png` | https://pikmin.nintendo.com/_images/hoverable-pikmin/pikmin-blue-fall/pikmin-blue-fall-STAGE.png |
 
-Characters load from local files during play. No external artwork server is required at runtime. The hungry plant and fence are drawn in the game’s own SVG markup.
+The retained images are local files. No external artwork server is required at runtime. The hungry plant and fence are drawn in the game’s own SVG markup.
 
 ## Additional types
 
@@ -41,4 +41,8 @@ Ice (light blue), Rock (black) and Winged (pink) Pikmin also have distinct leaf,
 | `pikmin/winged-bud.png` | https://www.pikminwiki.com/File:P4_Winged_Pikmin.png |
 | `pikmin/winged-flower.png` | Existing `pikmin/winged.png`: https://pikmin.nintendo.com/_images/layouts/home/hidden-pikmin/pink-pikmin.png |
 
-The Winged bud source has transparent padding, so the renderer scales it to keep the character legible in the garden and during flights. The original PNG remains intact.
+The Winged bud source has transparent padding. The original PNG remains intact.
+
+## Current articulated renderer
+
+The play field now uses local SVG markup in `src/sprites.js` for all seven types (including White) and all three growth stages. Separate arms, legs and pink wings support coordinated movement. These simplified fan-game drawings replace the static PNGs during play; the source images above remain unchanged for provenance and the landing card. No external artwork fetch is needed. Pikmin characters belong to Nintendo.

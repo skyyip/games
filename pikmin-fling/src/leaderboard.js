@@ -1,6 +1,7 @@
 import { MODES } from './game.js';
 
-export const STORAGE_KEY = 'pikmin-fling.records.v2';
+export const STORAGE_KEY = 'pikmin-fling.records.v3';
+export const LEGACY_STORAGE_KEY = 'pikmin-fling.records.v2';
 
 const emptyRecords = () => Object.fromEntries(MODES.map(mode => [mode, []]));
 const validRecord = (record, mode) => record !== null && typeof record === 'object' &&
@@ -11,15 +12,18 @@ const compare = mode => mode === 'timed' ? (a, b) => b.score - a.score : (a, b) 
 
 export function readLeaderboard(storage) {
   const records = emptyRecords();
-  let raw;
+  let raw,legacy=false;
   try {
     raw = storage?.getItem(STORAGE_KEY);
+    if(raw==null){raw=storage?.getItem(LEGACY_STORAGE_KEY);legacy=raw!=null;}
   } catch {
     return { records, available: false };
   }
   try {
     const parsed = JSON.parse(raw ?? 'null');
     for (const mode of MODES) {
+      // Keep 20-second scores intact in v2; they do not compete with 30-second rounds.
+      if(legacy&&mode==='timed')continue;
       if (!Array.isArray(parsed?.[mode])) continue;
       records[mode] = parsed[mode].filter(record => validRecord(record, mode))
         .map(record => mode === 'timed' ? { score: record.score, date: record.date } : { time: record.time, date: record.date })

@@ -5,7 +5,7 @@ const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwrig
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PIKMIN_FLING_URL||'http://localhost:5173/pikmin-fling/';
 const output=process.env.PIKMIN_FLING_SCREENSHOTS||'/tmp/pikmin-timed-qa';
-const key='pikmin-fling.records.v2',errors=[];let checks=0;
+const key='pikmin-fling.records.v3',errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init=()=>{Math.random=()=>0;}) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
@@ -26,13 +26,15 @@ try{
   await mkdir(output,{recursive:true});
   const {context,page}=await setup({viewport:{width:1440,height:1100}});
   await page.clock.install();
-  assert.equal(await page.locator('#timer').textContent(),'20.00');
+  // Browser automation between input steps must not consume the final 300ms.
+  await page.clock.pauseAt(new Date(Date.now()+1000));
+  assert.equal(await page.locator('#timer').textContent(),'30.00');
   assert.equal(await page.locator('#score').textContent(),'0');
   assert.equal(await page.locator('#records-title').textContent(),'Your highest three');
   assert.equal(await page.locator('#mode-options input').count(),3);
   assert.equal(await page.locator('.point-value:visible').count(),3);
-  await page.clock.fastForward(5000);assert.equal(await page.locator('#timer').textContent(),'20.00');
-  pass('20s Rush is an independent native mode with an idle 20.00 countdown, zero score and visible point rules');
+  await page.clock.fastForward(5000);assert.equal(await page.locator('#timer').textContent(),'30.00');
+  pass('30s Rush is an independent native mode with an idle 30.00 countdown, zero score and visible point rules');
   for(const width of [320,375,430,768,1440]){
     await page.setViewportSize({width,height:1000});
     const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,
@@ -56,23 +58,23 @@ try{
   await page.clock.fastForward(3100);
   assert.match(await page.locator('#cycle-status').textContent(),/Growth wave/);
   pass('the new timed mode runs recurring growth waves during its countdown');
-  await page.clock.fastForward(21000);
+  await page.clock.fastForward(31000);
   assert.equal(await page.locator('#timer').textContent(),'0.00');
   assert.equal(await page.locator('#result-title').textContent(),'Time’s up.');
   assert.equal(await page.locator('#final-time').textContent(),'6');assert.equal(await page.locator('#result-unit').textContent(),'pts');
   assert.equal(await page.locator('.pikmin:not(:disabled)').count(),0);
   assert.equal(await page.locator('.flying-pikmin,.is-held,.is-linked').count(),0);
   assert.deepEqual((await stored(page)).timed.map(r=>r.score),[6]);
-  await page.clock.fastForward(21000);assert.equal((await stored(page)).timed.length,1);
-  pass('20 seconds ends a partial round, freezes 0.00, disables all input and stores the final score exactly once');
+  await page.clock.fastForward(31000);assert.equal((await stored(page)).timed.length,1);
+  pass('30 seconds ends a partial round, freezes 0.00, disables all input and stores the final score exactly once');
 
   await page.locator('#again').click();assert.equal(await page.locator('#score').textContent(),'0');
-  await feed(page,'leaf');await page.locator('#reset').click();await page.clock.fastForward(21000);
-  assert.equal(await page.locator('#timer').textContent(),'20.00');assert.equal(await page.locator('#score').textContent(),'0');
+  await feed(page,'leaf');await page.locator('#reset').click();await page.clock.fastForward(31000);
+  assert.equal(await page.locator('#timer').textContent(),'30.00');assert.equal(await page.locator('#score').textContent(),'0');
   assert.equal(await page.locator('#results').isVisible(),false);assert.equal((await stored(page)).timed.length,1);
   pass('replay resets score and reset cancels a pending flight and the old deadline without saving an unfinished round');
 
-  await page.locator('#start').click();await page.clock.fastForward(18500);
+  await page.locator('#start').click();await page.clock.fastForward(28500);
   const flower=unit(page,'flower');await flower.focus();await flower.scrollIntoViewIfNeeded();
   const box=await flower.boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();
   await page.clock.runFor(1200);
@@ -92,7 +94,7 @@ try{
   assert.match(await page.locator('#result-badge').textContent(),/NEW PERSONAL BEST/);
   await page.screenshot({path:`${output}/timed-completed.png`,fullPage:true,animations:'disabled'});
   pass('clearing all 30 ends early at 45 points, completes the score animation and highlights a new highest score');
-  await page.locator('#again').click();await page.clock.fastForward(21000);
+  await page.locator('#again').click();await page.clock.fastForward(31000);
   assert.deepEqual((await stored(page)).timed.map(r=>r.score),[45,6,0]);assert.equal(await page.locator('.record.is-new').count(),0);
   await page.reload();await page.locator('#start:not(:disabled)').waitFor();await page.locator('input[value="timed"]').check();
   assert.deepEqual((await stored(page)).timed.map(r=>r.score),[45,6,0]);assert.equal(await page.locator('.record').count(),3);
@@ -130,7 +132,7 @@ try{
   await quiet.page.clock.install();await quiet.page.locator('#start').focus();await quiet.page.keyboard.press('Enter');
   await feed(quiet.page,'flower');await quiet.page.clock.runFor(550);
   assert.equal(await quiet.page.locator('#score').textContent(),'3');assert.equal(await quiet.page.locator('#score').evaluate(el=>el.getAnimations().length),0);
-  await quiet.page.clock.fastForward(21000);assert.equal(await quiet.page.locator('#final-time').textContent(),'3');
+  await quiet.page.clock.fastForward(31000);assert.equal(await quiet.page.locator('#final-time').textContent(),'3');
   assert.match(await quiet.page.locator('#storage-status').textContent(),/unavailable|無法/);assert.equal(await quiet.page.locator('.record').count(),1);
   await quiet.context.close();pass('reduced motion gives immediate readable scores and keyboard play still saves in-memory results with blocked storage');
 
@@ -138,7 +140,7 @@ try{
   await offline.page.evaluate(()=>navigator.serviceWorker.ready.then(()=>{}));await offline.context.setOffline(true);
   await offline.page.reload();await offline.page.locator('#start:not(:disabled)').waitFor();
   await offline.page.locator('input[value="timed"]').check();await offline.page.clock.install();await offline.page.locator('#start').click();
-  await feed(offline.page,'bud');await offline.page.clock.runFor(800);await offline.page.clock.fastForward(21000);
+  await feed(offline.page,'bud');await offline.page.clock.runFor(800);await offline.page.clock.fastForward(31000);
   assert.equal(await offline.page.locator('#final-time').textContent(),'2');assert.equal((await stored(offline.page)).timed[0].score,2);
   await offline.context.close();pass('the new countdown, scoring and score records work after an offline reload');
   assert.deepEqual(errors,[]);pass('no uncaught errors during timed play, deadline cancellation, replay, reduced motion or offline play');

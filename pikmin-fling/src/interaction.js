@@ -1,7 +1,6 @@
 import {FLOWER_HOLD,CHAIN_HOLD} from './game.js';
-
-export const TYPES=Object.freeze(['red','yellow','blue','ice','rock','winged']);
-export const TYPE_NAMES={red:'Red',yellow:'Yellow',blue:'Blue',ice:'Ice',rock:'Rock',winged:'Winged'};
+import { TYPES } from './characters.js';
+export { TYPES, TYPE_NAMES } from './characters.js';
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 
 export function createRoster(width,height,random=Math.random,unitHeight=58) {
@@ -11,7 +10,7 @@ export function createRoster(width,height,random=Math.random,unitHeight=58) {
   return Array.from({length:30},(_,id)=>{
     const angle=random()*Math.PI*2,speed=18+random()*6;
     return {id,type:TYPES[Math.floor(random()*TYPES.length)],x:(id%columns+.5)*width/columns,
-      y:(Math.floor(id/columns)+.5)*height/rows,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,turn:4+random()*4};
+      y:(Math.floor(id/columns)+.5)*height/rows,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,turn:4+random()*4,gait:random()*Math.PI*2};
   });
 }
 
@@ -23,6 +22,7 @@ export function walkRoster(roster,dt,width,height,frozen=new Set(),random=Math.r
     p.turn-=dt;
     if(p.turn<=0){const angle=random()*Math.PI*2,speed=18+random()*6;p.vx=Math.cos(angle)*speed;p.vy=Math.sin(angle)*speed;p.turn=4+random()*4;}
     p.x+=p.vx*dt;p.y+=p.vy*dt;
+    p.gait=(p.gait??0)+Math.hypot(p.vx,p.vy)*dt/8;
     if(p.x<22||p.x>width-22)p.vx*=-1;
     if(p.y<halfHeight||p.y>height-halfHeight)p.vy*=-1;
     p.x=clamp(p.x,22,width-22);p.y=clamp(p.y,halfHeight,height-halfHeight);
@@ -46,8 +46,8 @@ export function isUpwardSwipe(from,to) {
 }
 
 export class PointerGesture {
-  constructor(id,growth,from) {
-    this.ids=[id];this.growth=growth;this.from=from;this.last=from;this.samples=[from];
+  constructor(id,growth,from,type='red') {
+    this.ids=[id];this.growth=growth;this.type=type;this.from=from;this.last=from;this.samples=[from];
     this.held=0;this.moved=false;this.chaining=false;
   }
   get charged(){return this.held>=FLOWER_HOLD;}
@@ -69,8 +69,8 @@ export class PointerGesture {
     this.last=point;this.samples.push(point);
     this.samples=this.samples.filter(p=>point.t-p.t<=180);
   }
-  add(id,growth) {
-    if(!this.chaining||growth!==this.growth||this.ids.includes(id))return false;
+  add(id,growth,type='red') {
+    if(!this.chaining||growth!==this.growth||type!==this.type||this.ids.includes(id))return false;
     this.ids.push(id);return true;
   }
   isTap(point){return !this.moved && point.t-this.from.t<=280 && Math.hypot(point.x-this.from.x,point.y-this.from.y)<=10;}

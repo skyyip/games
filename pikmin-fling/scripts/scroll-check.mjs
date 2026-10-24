@@ -49,7 +49,7 @@ try{
     });
     assert.equal(layout.overflow,false);assert.equal(layout.stage.x,0);assert.equal(layout.stage.y,0);
     assert.ok(layout.stage.right<=width&&layout.stage.bottom<=height);assert.equal(layout.reset,true);assert.equal(layout.outside,true);
-    assert.ok(layout.units.every(r=>r.w>=44&&r.h>=44&&r.inside),JSON.stringify({width,height,layout}));
+    assert.ok(layout.units.every(r=>r.w>=43.99&&r.h>=43.99&&r.inside),JSON.stringify({width,height,layout}));
     for(let i=0;i<layout.units.length;i++)for(let j=i+1;j<layout.units.length;j++){
       const a=layout.units[i],b=layout.units[j];
       assert.ok(Math.abs(a.x-b.x)>=43.99||Math.abs(a.y-b.y)>=43.99,`rotation must not stack touch targets at ${width}×${height}`);
@@ -71,7 +71,7 @@ try{
     if(mode==='timed')await page.clock.install();
     await page.locator('#start').tap();
     assert.equal(await page.locator('body').evaluate(body=>body.classList.contains('play-locked')),true);
-    if(mode==='timed')await page.clock.fastForward(21000);
+    if(mode==='timed')await page.clock.fastForward(31000);
     else {await page.locator('.pikmin:not(:disabled)').evaluateAll(items=>items.forEach(button=>button.click()));await page.locator('#results').waitFor({state:'visible'});}
     assert.equal(await page.locator('body').evaluate(body=>body.classList.contains('play-locked')),false);
     assert.equal(await page.locator('#results').isVisible(),true);

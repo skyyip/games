@@ -1,6 +1,6 @@
 # Pikmin Fling verification
 
-Verified with Node.js 24 and headless Chrome using the existing optional Playwright installation. No dependency was added.
+Verified on 2026-10-24 with Node.js 24, system Chromium and the existing optional Playwright installation. No runtime or test dependency was added to the game.
 
 ## Core logic
 
@@ -8,22 +8,19 @@ Verified with Node.js 24 and headless Chrome using the existing optional Playwri
 node --test grid-rush/tests/*.test.js grid-rush-in-order/tests/*.test.js line-up/tests/*.test.js pikmin-fling/tests/*.test.js
 ```
 
-**61 tests passed**, including 24 Pikmin Fling tests covering:
+**69 repository tests passed**, including **29 Pikmin tests** covering:
 
-- Fixed 30-character roster in both modes: 20 normal, 5 buds, 5 flowers.
-- Random selection includes Red, Yellow, Blue, Ice, Rock and Winged Pikmin, with accessible type names.
-- Start/reset lifecycle, duplicate/invalid input, unique arrivals and final-arrival time freezing at full precision.
-- State-specific actions: upward fling, double tap, a full 1-second flower charge and homogeneous atomic chain throws. All same-stage groups arm after a 200ms short press; a single flower retains its 1-second charge.
-- Challenge timing within 3–8 seconds, simultaneous state snapshots, 1–5 / 1–5 / 1–10 transition limits, available-count caps, protected interaction/flying states, no catch-up burst, reset and completion.
-- Longer roaming routes within the larger field while held characters stay still; a clear six-second walk covers over 100px.
-- Charge/chain thresholds, rejected premature movement, same-stage membership, duplicate membership, expired/different-target taps and final upward flick after fast sideways tracing. The first coalesced touch move after a long flower hold remains valid.
-- Parabolic flight geometry.
-- Separate mode rankings, fastest-three ordering/limits, full precision, ties and persistence.
-- Corrupted, unavailable and full storage, preserving the old count-based records.
+- Thirty-character rosters with 20 leaves, five buds and five flowers; all seven types, including White.
+- A 30,000ms deadline enforced before launches, growth and arrivals, including delayed background updates; unique 1/2/3-point scoring and early completion.
+- Flower charging at the exact 599/600ms boundary, ordinary flings and double taps.
+- Chains armed after 200ms, requiring both matching colour and growth stage; incompatible groups reject atomically.
+- Coalesced touch input, fresh final flicks, duplicate membership rejection and expired gestures.
+- Protected recurring growth waves, bounded walking, distance-based gait and paused characters.
+- Separate rankings, validation and storage failures. v3 imports Normal/Challenge completion times from v2 while leaving old 20-second scores intact and separate from 30-second scores.
 
 ## Browser checks
 
-Run the local server, then supply an existing Playwright module:
+Start the local server, then run each suite with an existing Playwright module:
 
 ```sh
 GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
@@ -31,97 +28,32 @@ PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
 node pikmin-fling/scripts/browser-check.mjs
 ```
 
-**34 checks passed**:
+The original-mode suite passed **38 checks**:
 
-- Each new Ice, Rock and Winged type completes a round with distinct leaf/bud/flower sprites and labels, matching flight artwork, and the correct fling/double-tap/one-second-hold gestures.
-- Idle timer and inactive board; all current artwork loads with the correct stage distribution.
-- Native fence selection regression: a triple-click previously entered browser Range selection; it now stays unselected. The fence, delegated gesture container, SVG and artwork suppress selection/tap highlights; selection, drag and context-menu events are blocked only inside the fence.
-- The cartoon plant sways slowly; its SVG mouth target moves with the plant and is used by automatic flights.
-- Free walking, body bobbing and alternating footsteps after start in the larger garden.
-- Real mouse actions for normal, bud and flower rules, including rejected taps, wrong directions, expired double taps, immediate/700ms flower flings rejected and 1-second flower flings accepted.
-- Long-press same-stage chaining, incompatible-stage exclusion, visible chain lines and batch release by the final upward flick.
-- Escape cancellation when focus is outside the garden, without a phantom launch on release.
-- Final-arrival timing, completed records, replay and reset during flight.
-- Independent normal/challenge records after reload and fastest-three limits after repeated rounds.
-- Repeated challenge growth waves with deterministic time, simultaneous transitions, held-character protection and stopped updates after reset.
-- Chrome touch input: cancellation, double-tap buds, charged flower fling, two simultaneous normal flings without page scroll, and a complete finger-drawn chain.
-- Blank fence gestures cannot scroll the fixed phone play view. Native scrolling remains available before/after a round.
-- Tap-plus-Feed-selected and keyboard alternatives for all stages.
-- 320/375/430/600/768/1024/1440px layouts: no horizontal overflow, at least 44px character buttons and all roaming targets inside the fence. Measurements allow 0.01px for floating-point transform rounding.
-- Reduced motion: stationary crowd, no body/footstep/plant-sway animation and in-place fading flights. Keyboard completion still works with localStorage blocked.
-- Corrupt new storage recovers without deleting old records.
-- New modes and all 18 growth sprites decode offline, including a fresh offline tab.
-- All games navigation returns to the five-card landing page; no uncaught browser errors.
+- Each of seven character types completes a round with matching SVG leaf/bud/flower representations and flight clones.
+- Mouse, keyboard, touch, double tap, charged fling, same-stage chains, cancellation, multi-pointer input and Feed selected.
+- Challenge waves, records, reset during flight, repeated rounds and final-arrival timing.
+- Native selection protection, responsive layouts from 320 to 1440px, 44px targets, reduced motion and blocked/corrupt storage.
+- All 21 SVG type/stage combinations render offline, including a fresh offline tab; navigation and no uncaught browser errors.
 
-Analytics requests were stubbed during QA. Screenshots default to `/tmp/pikmin-fling-qa`; desktop/mobile gameplay, chaining, flight and completed results were visually inspected. Garden-only mobile captures also verify all three growth stages for Ice, Rock and Winged crowds; the Winged bud artwork’s transparent padding is compensated without changing the original image. Active gesture screenshots use viewport capture because full-page capture can resize the viewport and intentionally cancel the gesture.
+The screen-lock suite (`scripts/scroll-check.mjs`) passed **14 checks** for touch/wheel scrolling, rotation, full-viewport gardens at six portrait/landscape sizes, covered controls becoming inert, End round, completion and timeout restoring normal scrolling.
 
-The shared `grid-rush/scripts/ui-check.mjs` suite also passed **19 checks** across the landing page and all five games, including home navigation, supplied install icons, mobile two-column cards, touch feedback, reduced motion and no uncaught errors.
+The timed-mode suite (`scripts/timed-check.mjs`) passed **14 checks** for 30-second countdowns, scoring, growth waves, unfinished-flight cancellation, replay/reset, early clears, persistent rankings, touch input, reduced motion and offline play. Its deadline test pauses the test clock so automation latency cannot consume the intended final 300ms window.
 
-## Review
+The shared language suite (`grid-rush/scripts/language-check.mjs`) passed **16 checks**, including completed Normal/timed Pikmin rounds in Traditional Chinese and English, dynamic scores, records and offline language modules.
 
-Review found an Escape handler scoped too narrowly to the garden. A failing browser regression reproduced the issue before the handler was moved to `window`; the complete suite then passed. The fence selection fix extends native-selection protection from individual buttons to their enclosing delegated gesture area, with a failing-then-passing browser regression and an offline-cache version bump. A final local review checked rule coverage, native controls, labels/focus, gesture cancellation, reduced motion, record validation and scoped service-worker updates.
+The improvement suite (`scripts/improvements-check.mjs`) passed **7 checks**:
 
-Chrome touch emulation was tested. Physical phones, other browser engines, screen readers and native operating-system installation were not directly tested.
+- White characters render; ground characters have opposing arm/leg swings; only pink characters hover and flap wings.
+- Selected characters have no frame, non-flower selections have no charge ring, and different-colour characters cannot join a chain. Keyboard focus remains visible.
+- Exact 599ms rejection and 600ms flower launch with the countdown ring retained.
+- At 320×568, 375×812 and 812×375, three consecutive timeout/replay cycles and an early-clear/replay cycle preserve full viewport coverage and clear internal scroll positions.
+- No uncaught errors across these actions.
 
-## 20s Rush — 2026-10-23
+Replay screenshots in `/tmp/pikmin-improvements-qa` were visually inspected in portrait and landscape. The reported half-white frame was not reproduced in the initial Chromium baseline. The fix removes negative fixed-body positioning, cancels pending result scrolling, clears internal offsets, blurs hidden result controls and clips internal field overflow. Regression checks cover the suspected replay/scroll path; physical-device confirmation remains useful.
 
-**58 repository logic tests passed**, including **21 Pikmin tests**. Five new tests cover the 20-second deadline (including delayed/background updates), 1/2/3-point unique arrivals, late-input rejection, early completion, recurring protected growth waves, score reset, highest-three ordering, stable ties, validation and preserving existing completion-time records. These were added incrementally with failing-then-passing core cases.
+## Standalone preview
 
-The existing **32 Pikmin browser checks passed** for Normal/Challenge, mouse/keyboard/touch gestures, growth, reset, records, responsive layouts and offline play.
+The standalone `/workspace/games-preview/pikmin-fling.html` embeds local JavaScript, styles, fonts and icons. A browser check verified default Traditional Chinese instructions, white characters, timed play, early completion and Play again without uncaught errors. A mobile screenshot was visually inspected.
 
-The new `scripts/timed-check.mjs` suite passed **13 browser checks**:
-
-- Native third mode, idle 20.00 countdown, zero score, point guide and highest-score heading.
-- 320/375/430/768/1440px layouts, no horizontal overflow and at least 44px mode controls. Phone and desktop screenshots were visually inspected.
-- Individual normal/bud/flower arrivals add 1/2/3 points, animate the cumulative number and floating gain, and expose the actual score to assistive technology.
-- Recurring growth waves during timed play.
-- Partial-round timeout at 0.00, disabled input and one saved final record.
-- Replay resets score; reset cancels pending arrivals and the old deadline without saving.
-- Timeout while a flower is held and a character is flying: both are cancelled, release cannot throw, and unfinished arrivals score nothing.
-- Early clear of all 30 totals 45 points before any growth wave, freezes the countdown above zero and highlights the best result.
-- Highest-three cap, lower/tied fourth-score rejection, refresh persistence and switching back to original time-based modes.
-- Real Chrome touch input for an upward fling and double-tap bud in timed mode.
-- Reduced motion skips optional score effects, retains immediate scores and keyboard play, and works with blocked storage.
-- Offline reload supports timed play and score storage.
-- No uncaught browser errors. Analytics requests were stubbed during QA.
-
-Run the same local server, then:
-
-```sh
-GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
-PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
-node pikmin-fling/scripts/timed-check.mjs
-```
-
-Screenshots default to `/tmp/pikmin-timed-qa`. Review confirmed that scoring occurs on unique arrival, deadline enforcement precedes input and arrival processing, completed records save once, pending score effects cancel on reset/reduced motion, and the updated offline cache includes the new game code. Physical phones, other browser engines and screen readers were not directly tested.
-
-## Phone scroll lock — 2026-10-23
-
-A real Chrome touch regression reproduced the reported bug: a blank-fence upward swipe moved the playing page from **505px to 590px**. Only individual character buttons previously suppressed panning; missed touches still began native page scrolling. The same regression passed after adding a fixed mobile play view and page lock.
-
-**59 repository logic tests passed**, including a new compact-garden case verifying 30 non-overlapping initial 44px targets in short portrait/landscape fields and bounded roaming. The original **32 game browser checks** and **13 timed-mode checks** passed.
-
-The new `scripts/scroll-check.mjs` passed **14 checks**:
-
-- Upward blank-fence swipes, downward swipes, momentum and wheel input cannot move the playing page.
-- A real finger fling still feeds a character, native focus does not move the viewport and End round is reachable.
-- 320×568, 375×812, 430×932, 568×320, 812×375 and 768×1024 play views fit the garden and controls, retain 44px targets, avoid horizontal overflow and make covered page controls inert. Rotation repacks targets without stacking them. Portrait and landscape screenshots were visually inspected.
-- End round restores native finger scrolling, normal controls and the reset button’s original location.
-- Normal/Challenge completion and timed-mode timeout release the lock and allow mode changes.
-- No uncaught browser errors.
-
-```sh
-GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
-PIKMIN_FLING_URL=http://localhost:5173/pikmin-fling/ \
-node pikmin-fling/scripts/scroll-check.mjs
-```
-
-Review checked lock cleanup on reset/completion/timeout, focus with covered controls inert, single-touch cancellation, stable gesture coordinates, rotation without target overlap, unchanged growth/scoring and the offline cache bump. Screenshots default to `/tmp/pikmin-scroll-qa`. Chrome touch emulation was tested; physical iOS/Android devices and other browser engines were not directly exercised.
-
-## Short-press drag chains — 2026-10-23
-
-**61 repository logic tests passed**, including **24 Pikmin tests**. Failing-then-passing cases verify the 199/200ms boundary, matching-stage selection and duplicate rejection, atomic group validation, short flower groups versus a single flower’s 1-second charge, and a fresh one-move flick after pausing a drag. Stale flick velocity still expires.
-
-The updated full-game browser suite passed **34 checks**. Real Chrome touch input short-presses for 240ms, drags through matching normal/bud/flower characters, pauses, then delivers a single upward move and release. Each group flies into the mouth, every unique arrival counts once, incompatible growth stages stay unlinked and the phone page does not move. The mouse short-press case also verifies a matching bud group, ignored flowers and the visible chain. Original single-character gestures, gesture cancellation, completion, records, responsive layouts and offline play remain covered.
-
-The timed-mode suite passed **14 checks**, adding a real 240ms flower-chain throw and verifying that every arrival contributes three points. The screen-lock suite also passed its **14 checks**. Group readiness, help text and the game plan now use the same 200ms rule; the flower ring still reflects the original one-second solo charge. The offline cache was bumped for updated code and instructions.
+Analytics requests were stubbed during QA. Chrome touch emulation was tested; physical iOS/Android devices, other browser engines, screen readers and native installation were not directly tested.

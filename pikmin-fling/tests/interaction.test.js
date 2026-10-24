@@ -38,17 +38,17 @@ test('compact phone and landscape gardens fit 30 full 44px touch targets and kee
   }
 });
 
-test('random crowds can include Ice, Rock and Winged Pikmin alongside the original three types',()=>{
+test('random crowds can include all seven Pikmin types, including White',()=>{
   const seen=new Set();
-  for(const random of [.01,.2,.4,.55,.7,.9]) {
+  for(const random of [.01,.16,.3,.45,.6,.75,.9]) {
     const roster=createRoster(700,480,()=>random);
     assert.equal(roster.length,30);
     for(const unit of roster){seen.add(unit.type);assert.ok(TYPE_NAMES[unit.type]);}
   }
-  assert.deepEqual([...seen],['red','yellow','blue','ice','rock','winged']);
+  assert.deepEqual([...seen],['red','yellow','blue','ice','rock','winged','white']);
 });
 
-test('short press and drag links matching stages after 200ms, while a single flower still needs one second',()=>{
+test('short press and drag links matching stages after 200ms, while a single flower still needs 0.6 seconds',()=>{
   for(const growth of ['leaf','bud','flower']) {
     const g=new PointerGesture(0,growth,{x:100,y:200,t:0});
     g.update(199);assert.equal(g.chaining,false);assert.equal(g.add(1,growth),false);
@@ -70,12 +70,12 @@ test('single-flower charging, longer holds and chain flick detection keep their 
   flower.move({x:100,y:140,t:100});
   assert.equal(flower.action({x:100,y:130,t:1200}),null); // waiting after swiping is not a charge
   const early=new PointerGesture(2,'flower',begin);
-  early.update(999);assert.equal(early.charged,false);assert.equal(early.chaining,true);
-  early.move({x:100,y:150,t:999});assert.equal(early.action({x:100,y:130,t:999}),null);
+  early.update(599);assert.equal(early.charged,false);assert.equal(early.chaining,true);
+  early.move({x:100,y:150,t:599});assert.equal(early.action({x:100,y:130,t:599}),null);
   const charged=new PointerGesture(2,'flower',begin);
-  charged.update(1000);assert.equal(charged.charged,true);assert.equal(charged.chaining,true);
-  charged.move({x:100,y:150,t:1060});
-  assert.equal(charged.action({x:100,y:125,t:1080})?.kind,'chain');
+  charged.update(600);assert.equal(charged.charged,true);assert.equal(charged.chaining,true);
+  charged.move({x:100,y:150,t:660});
+  assert.equal(charged.action({x:100,y:125,t:680})?.kind,'chain');
   const chain=new PointerGesture(2,'bud',begin);
   chain.update(500);assert.equal(chain.chaining,true);
   assert.equal(chain.add(3,'leaf'),false);assert.equal(chain.add(4,'bud'),true);assert.equal(chain.add(4,'bud'),false);
@@ -119,8 +119,29 @@ test('walking takes longer routes across the garden rather than only shuffling n
   assert.ok(walker.x<=778 && walker.y>=29 && walker.y<=571);
 });
 
-test('a flower held for a full second accepts the first upward move even when touch input is coalesced',()=>{
+test('a flower held for 0.6 seconds accepts the first upward move even when touch input is coalesced',()=>{
   const g=new PointerGesture(1,'flower',{x:100,y:200,t:0});
-  g.update(1050);g.move({x:100,y:135,t:1060});
-  assert.equal(g.action({x:100,y:135,t:1070})?.kind,'chain');
+  g.update(650);g.move({x:100,y:135,t:660});
+  assert.equal(g.action({x:100,y:135,t:670})?.kind,'chain');
+});
+
+test('pointer chains filter colour as well as growth and keep the charge boundary at 600ms',()=>{
+ const gesture=new PointerGesture(0,'flower',{x:100,y:200,t:0},'white');
+ gesture.update(200);
+ assert.equal(gesture.add(1,'flower','red'),false);
+ assert.equal(gesture.add(2,'leaf','white'),false);
+ assert.equal(gesture.add(3,'flower','white'),true);
+ assert.deepEqual(gesture.ids,[0,3]);
+ const solo=new PointerGesture(0,'flower',{x:100,y:200,t:0},'white');
+ solo.update(599);assert.equal(solo.charged,false);
+ solo.update(600);assert.equal(solo.charged,true);
+});
+
+test('ground gait progresses with distance and pauses with a held character',()=>{
+ const unit=createRoster(500,500,()=>.1)[0],before=unit.gait;
+ walkRoster([unit],.04,500,500,new Set(),()=>.1);
+ assert.ok(unit.gait>before);
+ const paused=unit.gait;
+ walkRoster([unit],.04,500,500,new Set([unit.id]),()=>.1);
+ assert.equal(unit.gait,paused);
 });

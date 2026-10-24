@@ -1,7 +1,9 @@
+import { TYPES } from './characters.js';
+
 export const MODES=Object.freeze(['normal','challenge','timed']);
 export const GROWTH=Object.freeze(['leaf','bud','flower']);
-export const FLOWER_HOLD=1000,CHAIN_HOLD=200;
-export const ROUND_LIMIT=20000;
+export const FLOWER_HOLD=600,CHAIN_HOLD=200;
+export const ROUND_LIMIT=30000;
 export const POINTS=Object.freeze({leaf:1,bud:2,flower:3});
 
 export class FlingGame {
@@ -13,7 +15,7 @@ export class FlingGame {
     this.mode=mode;this.count=30;this.state='idle';this.score=0;
     const growth=[...Array(20).fill('leaf'),...Array(5).fill('bud'),...Array(5).fill('flower')];
     for(let i=growth.length-1;i>0;i--){const j=Math.floor(this.random()*(i+1));[growth[i],growth[j]]=[growth[j],growth[i]];}
-    this.units=growth.map(growth=>({growth,status:'ready'}));
+    this.units=growth.map(growth=>({growth,type:TYPES[Math.floor(this.random()*TYPES.length)],status:'ready'}));
     this.startedAt=0;this.finishedTime=0;this.nextChange=Infinity;this.endReason=null;
   }
   get progress(){return this.units.filter(unit=>unit.status==='eaten').length;}
@@ -54,7 +56,7 @@ export class FlingGame {
     if(this.state!=='playing'||!Array.isArray(ids)||!ids.length||new Set(ids).size!==ids.length||ids.some(id=>!Number.isInteger(id)||this.units[id]?.status!=='ready'))return false;
     const growth=this.units[ids[0]].growth;
     const valid=action.kind==='chain'
-      ? action.held>=CHAIN_HOLD && ids.every(id=>this.units[id].growth===growth) && (growth!=='flower'||ids.length>1||action.held>=FLOWER_HOLD)
+      ? action.held>=CHAIN_HOLD && ids.every(id=>this.units[id].growth===growth&&this.units[id].type===this.units[ids[0]].type) && (growth!=='flower'||ids.length>1||action.held>=FLOWER_HOLD)
       : ids.length===1 && (action.kind==='accessible' || (growth==='bud'
         ? action.kind==='double-tap'
         : action.kind==='fling' && (growth==='leaf'||action.held>=FLOWER_HOLD)));
