@@ -80,11 +80,11 @@ try {
       buttons:[...document.querySelectorAll('.favourite-button')].map(button=>{const r=button.getBoundingClientRect(),card=button.closest('.game-card').getBoundingClientRect(),icon=button.querySelector('svg').getBoundingClientRect(),badge=getComputedStyle(button,'::before');return {w:r.width,h:r.height,x:r.x-card.x,y:r.y-card.y,icon:icon.width,badge:parseFloat(badge.width)};}),
     }));
     assert.equal(layout.overflow,false);assert.equal(layout.columns,2);
-    assert.ok(layout.buttons.every(b=>b.w>=44&&b.h>=44&&b.x>=8&&b.x<=13&&b.y>=8&&b.y<=13));
-    assert.ok(layout.buttons.every(b=>b.icon===22&&b.badge===36),'compact stars and badges retain a larger touch target');
+    assert.ok(layout.buttons.every(b=>b.w===35&&b.h===35&&b.x>=8&&b.x<=13&&b.y>=8&&b.y<=13));
+    assert.ok(layout.buttons.every(b=>b.icon===18&&b.badge===27),'18px stars retain a 35px click target');
     if([375,1440].includes(width))await page.screenshot({path:`${output}/favourites-${width}.png`,fullPage:true,animations:'disabled'});
   }
-  pass('stars stay at the card’s top-left with 44px targets, two columns and no overflow on phone, tablet and desktop');
+  pass('stars stay at the card’s top-left with 35px targets, two columns and no overflow on phone, tablet and desktop');
   await page.locator('.game-card[data-game="line-up"] a.card').click();await page.waitForURL(new URL('line-up/',base).href);
   await page.locator('.playground-home').click();await page.waitForURL(base);await settled(page);
   assert.equal(await star(page,'line-up').getAttribute('aria-pressed'),'true');

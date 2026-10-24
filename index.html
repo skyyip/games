@@ -33,7 +33,7 @@ body{margin:0;min-height:100vh;background:var(--bg);color:#fff;font-family:ui-sa
 @keyframes float{to{transform:translate(6vmax,4vmax) scale(1.15)}}
 main{max-width:980px;margin:0 auto;padding:72px 22px 48px}
 .eyebrow{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:99px;background:var(--glass);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1}
-h1{margin:18px 0 12px;font-size:clamp(40px,8vw,76px);line-height:1.02;letter-spacing:-.03em;background:linear-gradient(120deg,#fff 20%,#a5b4fc 55%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{margin:0;white-space:nowrap;font-size:clamp(28px,5.3vw,64px);line-height:1.02;letter-spacing:-.03em;background:linear-gradient(120deg,#fff 20%,#a5b4fc 55%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lead{margin:0 0 44px;max-width:520px;color:#94a3b8;font-size:18px;line-height:1.5}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .card{position:relative;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;color:inherit;text-decoration:none;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .25s,border-color .25s,box-shadow .25s}
@@ -53,8 +53,9 @@ h2{margin:0 0 6px;font-size:24px;letter-spacing:-.01em}
 footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .playground-brand{display:flex;align-items:center;gap:14px;margin-bottom:24px}
-.playground-brand img{border-radius:16px;border:1px solid #ffffff24;box-shadow:0 8px 28px #0003}
-.playground-brand .eyebrow{background:none;border:0;padding:0;font-size:11px;letter-spacing:.12em}
+.playground-brand img{flex-shrink:0;width:72px;height:72px;border-radius:20px;border:1px solid #ffffff24;box-shadow:0 8px 28px #0003;animation:logo-bounce 1800ms ease-in-out infinite}
+@keyframes logo-bounce{0%,100%{transform:scale(1)}20%,60%{transform:scale(1.18)}40%,80%{transform:scale(.92)}}
+.playground-brand .eyebrow{background:none;border:0;padding:0;font-size:11px;letter-spacing:.12em;text-transform:none}
 .title-dot{color:#fda4af;-webkit-text-fill-color:#fda4af}
 .card{isolation:isolate;animation:card-arrive 480ms cubic-bezier(.2,.7,.2,1) backwards;}
 .card:nth-child(2){animation-delay:65ms}.card:nth-child(3){animation-delay:130ms}
@@ -68,9 +69,9 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 @keyframes card-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:640px){
   main{padding:32px 16px calc(28px + env(safe-area-inset-bottom))}
-  .playground-brand{gap:10px;margin-bottom:22px}.playground-brand img{width:44px;height:44px;border-radius:12px}
+  .playground-brand{gap:10px;margin-bottom:22px}.playground-brand img{width:52px;height:52px;border-radius:14px}
   .playground-brand .eyebrow{font-size:10px;letter-spacing:.08em}
-  h1{font-size:clamp(44px,11vw,68px);margin:0 0 18px;line-height:1.05}
+  h1{font-size:clamp(22px,6vw,34px);line-height:1.05}
   .lead{font-size:14px;line-height:1.65;margin-bottom:28px;max-width:340px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   .card{border-radius:18px;min-width:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:#ffffff0d}
@@ -92,9 +93,9 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 .game-card:focus-within{z-index:2}
 .favourites-hint{margin:-22px 0 22px;color:#b2bdd0;font-size:13px;line-height:1.6}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-.favourite-button{--star-bg:#0b1426e8;--star-border:#ffffff70;--star-shadow:0 3px 12px #0003;position:absolute;top:12px;left:12px;z-index:3;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:12px;background:transparent;color:#f8fafc;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:color 140ms}
+.favourite-button{--star-bg:#0b1426e8;--star-border:#ffffff70;--star-shadow:0 3px 12px #0003;position:absolute;top:12px;left:12px;z-index:3;display:grid;place-items:center;width:35px;height:35px;padding:0;border:0;border-radius:12px;background:transparent;color:#f8fafc;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:color 140ms}
 .favourite-button:before{content:'';position:absolute;inset:4px;box-sizing:border-box;border:1px solid var(--star-border);border-radius:10px;background:var(--star-bg);box-shadow:var(--star-shadow);pointer-events:none;transition:background 140ms,border-color 140ms,box-shadow 140ms}
-.favourite-button svg{position:relative;width:22px;height:22px;overflow:visible;transform-origin:center;transition:transform 100ms}
+.favourite-button svg{position:relative;width:18px;height:18px;overflow:visible;transform-origin:center;transition:transform 100ms}
 .favourite-button .star-shape{fill:transparent;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;transition:fill 140ms}
 .favourite-button .star-rays{opacity:0;fill:none;stroke:#fbbf24;stroke-width:2;stroke-linecap:round;transform-origin:16px 16px}
 .favourite-button[aria-pressed=true]{--star-bg:#fff3c7;--star-border:#fbbf24;--star-shadow:0 3px 14px #0003,0 0 0 2px #fbbf2426;color:#765100}
@@ -113,11 +114,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <main>
-  <header class="playground-brand"><img src="./grid-rush/assets/icons/icon-192.png" width="56" height="56" alt=""><span class="eyebrow">SMALL GAMES. GOOD TIMES.</span></header>
-  <h1>Sky’s<br>Playground<span class="title-dot">.</span></h1>
+  <header class="playground-brand"><img src="./grid-rush/assets/icons/icon-192.png" width="72" height="72" alt=""><h1>Your Playground<span class="title-dot">.</span></h1></header>
   <p class="lead">Made for a little break. Stay for another round.</p>
 
-  <p class="favourites-hint">Star a game to move it to the front.</p>
   <p id="favourite-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
   <section class="grid" aria-label="Games">
     <article class="game-card" data-game="grid-rush">
