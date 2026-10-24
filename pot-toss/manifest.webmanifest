@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "拋箭入尿壺 · Your Playground.",
+  "short_name": "拋箭入尿壺",
+  "description": "輕輕向上滑，讓普通箭和彩箭沿拋物線落進尿壺，挑戰兩分鐘與三分鐘的前三名。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f4ed",
+  "theme_color": "#f8f4ed",
+  "icons": [
+    {
+      "src": "../grid-rush/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../grid-rush/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

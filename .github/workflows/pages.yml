@@ -2,7 +2,7 @@ name: Deploy Grid Rush to Pages
 on:
   push:
     branches: [main]
-    paths: [index.html, grid-rush/**, grid-rush-in-order/**, tap-and-spill/**, line-up/**, pikmin-fling/**, just-a-sec/**, roach-rush/**, stone-skip/**, .github/workflows/pages.yml]
+    paths: [index.html, grid-rush/**, grid-rush-in-order/**, tap-and-spill/**, line-up/**, pikmin-fling/**, just-a-sec/**, roach-rush/**, stone-skip/**, balance-bridge/**, pot-toss/**, .github/workflows/pages.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
       url: ${{ steps.d.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir _site && cp -R index.html grid-rush grid-rush-in-order tap-and-spill line-up pikmin-fling just-a-sec roach-rush stone-skip _site/
+      - run: mkdir _site && cp -R index.html grid-rush grid-rush-in-order tap-and-spill line-up pikmin-fling just-a-sec roach-rush stone-skip balance-bridge pot-toss _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

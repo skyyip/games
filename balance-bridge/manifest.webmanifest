@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "火柴人走獨木橋 · Your Playground.",
+  "short_name": "走獨木橋",
+  "description": "傾斜手機保持平衡，陪小小火柴人走得更久。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f5ed",
+  "theme_color": "#f6f5ed",
+  "icons": [
+    {
+      "src": "../grid-rush/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../grid-rush/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
