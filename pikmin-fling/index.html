@@ -31,7 +31,7 @@
 <main id="app">
   <section class="intro"><div><p class="eyebrow">A LITTLE GARDEN CHAOS</p><h1>Ready, set, <br><em>feed.</em></h1></div><p>A colourful crowd. One hungry plant. <br>Read the leaves. Link your crowd. Make a clean sweep.</p></section>
   <div class="arena">
-    <section class="play-panel" aria-label="Pikmin garden">
+    <section class="play-panel" aria-label="Pikmin garden" data-badges-visible="false">
       <div class="scoreboard"><div><span class="eyebrow" id="time-label">YOUR TIME</span><div class="clock"><output id="timer" aria-label="Elapsed seconds" aria-live="off">0.00</output><span>s</span></div></div><div id="score-panel" class="score-panel" hidden><span class="eyebrow">YOUR SCORE</span><div class="score-total"><output id="score" aria-label="Score: 0 points" aria-live="off">0</output><span>pts</span><span id="score-gain" aria-hidden="true"></span></div></div><div class="progress-wrap"><div><span id="phase">READY TO FLING</span><strong><span id="fed">0</span><small> / <span id="total">30</span> fed</small></strong></div><progress id="progress" value="0" max="30" aria-label="Pikmin fed"></progress></div></div>
       <div class="growth-guide" aria-label="Pikmin gestures">
         <div><span class="guide-symbol leaf-symbol" aria-hidden="true">↗</span><span><b>Normal · <output id="leaf-count" aria-live="off">20</output></b><small>Fling up<span class="point-value" hidden> · 1 pt</span></small></span></div>
@@ -93,7 +93,7 @@
         <div id="flights" class="flight-layer" aria-hidden="true"></div>
         <section id="results" class="results" aria-labelledby="result-title" hidden><span class="result-icon" aria-hidden="true">✓</span><p class="eyebrow" id="result-badge">CLEAN SWEEP</p><h2 id="result-title" tabindex="-1">Garden cleared.</h2><p class="final-time"><span id="final-time"></span><small id="result-unit">s</small></p><p id="result-note"></p><button class="primary-button" type="button" id="again">Play again <span aria-hidden="true">↗</span></button><button class="text-button" type="button" id="change-mode">Change game mode</button></section>
       </div>
-      <div class="garden-tools"><p id="gesture-help" role="status">Short press 0.2s, keep pressed and drag through the same colour and stage, then flick up to feed the whole chain.</p><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
+      <div class="garden-tools"><p id="gesture-help" role="status">Short press 0.2s, keep pressed and drag through the same colour and stage, then flick up to feed the whole chain.</p><button class="feed-button badge-toggle" type="button" id="toggle-badges" aria-pressed="false" aria-controls="units">Show icons</button><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
       <p class="keyboard-help">Drag-free option: tap a Pikmin, then Feed selected. Keyboard: Tab to a Pikmin; Enter, Space or ↑ feeds it. Focused and selected Pikmin pause.</p>
     </section>
     <aside class="sidebar">

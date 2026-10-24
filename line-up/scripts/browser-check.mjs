@@ -8,9 +8,9 @@ const base=process.env.LINE_UP_URL||'http://localhost:5173/line-up/';
 const output=process.env.LINE_UP_SCREENSHOTS||'/tmp/line-up-qa';
 const errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
-async function setup(options={},kind=0,target=.36) {
+async function setup(options={},kind=0,target=.36,language='en') {
   const context=await browser.newContext({serviceWorkers:'block',...options});
-  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
+  await context.addInitScript(language => { try { localStorage.setItem('playground.language.v1', language); } catch { /* Storage-denial tests use the default language. */ } },language);
   await context.route('https://www.googletagmanager.com/**',route=>route.fulfill({contentType:'text/javascript',body:''}));
   await context.addInitScript(({kind,target,count})=>{
     let draw=0;const values=[target,(kind+.1)/count,.7,.6,.5];
@@ -212,7 +212,25 @@ try{
     await edge.context.close();
   }
 
-  const offline=await setup({serviceWorkers:'allow'},1);
+  for(const [kind,label] of [['rhombus','菱形'],['trapezoid','梯形'],['parallelogram','平行四邊形'],['pentagon','五邊形'],['hexagon','六邊形'],['octagon','八邊形'],['heart','心形'],['star','星形'],['crescent','月牙形']]) {
+    const zh=await setup({viewport:{width:375,height:812},isMobile:true,hasTouch:true,reducedMotion:'reduce'},SHAPES.indexOf(kind),.36,'zh-Hant');
+    const p=zh.page;
+    assert.equal(await p.locator('#edit-start .point-letter').textContent(),'S');
+    await p.locator('#start').tap();await p.locator('#ready').tap();
+    assert.equal(await p.locator('#shape-name').textContent(),`本局圖形：${label}`);
+    assert.ok(await p.locator('.shape-list').textContent().then(text=>text.includes(label)));
+    await choose(p,.1,.5);
+    assert.equal(await p.locator('#start-marker').textContent(),'S');
+    await p.locator('#other-side').tap();
+    const ratio=await p.evaluate(()=>document.querySelector('#line-selection').getTotalLength()/document.querySelector('#line-base').getTotalLength());
+    assert.ok(Math.abs(ratio-.6)<.0001);
+    assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    if(['heart','star','crescent'].includes(kind))await p.screenshot({path:`${output}/${kind}-chinese-mobile.png`,fullPage:true,animations:'disabled'});
+    await p.locator('#lock').tap();assert.equal(await p.locator('#handoff').isVisible(),true);
+    await zh.context.close();pass(`${kind}: Chinese name, literal S endpoint labels, complementary selection and mobile layout`);
+  }
+
+  const offline=await setup({serviceWorkers:'allow'},SHAPES.indexOf('crescent'));
   await offline.page.evaluate(async()=>{
     await navigator.serviceWorker.ready;
     if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));

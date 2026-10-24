@@ -5,6 +5,12 @@ import {animateChange,reducedMotion} from '../../grid-rush/src/playground-ui.js'
 import {createSprite} from './sprites.js';
 
 const $=selector=>document.querySelector(selector);
+$('#toggle-badges').addEventListener('click',()=>{
+  const visible=$('#toggle-badges').getAttribute('aria-pressed')!=='true';
+  $('.play-panel').dataset.badgesVisible=String(visible);
+  $('#toggle-badges').setAttribute('aria-pressed',String(visible));
+  $('#toggle-badges').textContent=visible?'Hide icons':'Show icons';
+});
 const game=new FlingGame(),world=$('#world'),units=$('#units'),plant=$('#plant');
 const flights=new Map(),gestures=new Map(),effects=new Set(),taps=new DoubleTap();
 const growthNames={leaf:'Normal',bud:'Bud',flower:'Flower'};

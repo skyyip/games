@@ -45,9 +45,9 @@
         <form id="player-form">
           <div class="count-control"><span>How many players?</span><div><button type="button" id="minus" aria-label="Remove a player">−</button><output id="player-count" aria-live="polite">2</output><button type="button" id="plus" aria-label="Add a player">+</button></div></div>
           <div id="rows" class="player-rows"></div>
-          <button type="submit" id="start" class="primary-button">Start round <span aria-hidden="true">↗</span></button>
+          <button type="button" id="start" class="primary-button">Start round <span aria-hidden="true">↗</span></button>
         </form>
-        <div class="shape-list" aria-label="Possible shapes"><span>Straight</span><span>Parabola</span><span>Wavy</span><span>Rounded bend</span><span>Circle</span><span>Square</span><span>Rectangle</span><span>Triangle</span><span>Oval</span><span>Irregular</span></div>
+        <div class="shape-list" aria-label="Possible shapes"><span>Straight</span><span>Parabola</span><span>Wavy</span><span>Rounded bend</span><span>Circle</span><span>Square</span><span>Rectangle</span><span>Triangle</span><span>Oval</span><span>Irregular</span><span>Rhombus</span><span>Trapezoid</span><span>Parallelogram</span><span>Pentagon</span><span>Hexagon</span><span>Octagon</span><span>Heart</span><span>Star</span><span>Crescent</span></div>
         <p class="footnote">The target and shape are picked at the start, then stay the same for every player.</p>
       </section>
       <section id="handoff" class="panel handoff-panel" aria-labelledby="handoff-title" hidden>
@@ -61,14 +61,14 @@
           <div class="line-topline"><span id="line-kind">YOUR LINE</span><span><i aria-hidden="true"></i> TAKE YOUR TIME</span></div>
           <div class="line-scene"><div class="path-stage" id="path-stage">
             <svg id="line-svg" viewBox="0 0 1000 420" role="img" aria-label="Select a portion of the line" aria-describedby="selection-help keyboard-help"><path id="line-base" class="path-base"/><path id="line-selection" class="path-selection"/><circle id="origin-cap" class="end-cap" r="5"/><circle id="finish-cap" class="end-cap" r="5"/></svg>
-            <button type="button" class="marker marker-start" id="start-marker" data-point="start" tabindex="-1" aria-label="Move start point" hidden><span aria-hidden="true">S</span></button>
+            <button type="button" class="marker marker-start" id="start-marker" data-point="start" tabindex="-1" aria-label="Move start point" hidden><span aria-hidden="true" translate="no">S</span></button>
             <button type="button" class="marker marker-end" id="end-marker" data-point="end" tabindex="-1" aria-label="Move end point" hidden><span aria-hidden="true">E</span></button>
           </div></div>
           <div class="line-bottomline"><span id="path-motto">FOLLOW THE LINE. TRUST YOUR EYE.</span><button type="button" id="clear" class="text-button">Clear selection <span aria-hidden="true">↺</span></button></div>
         </div>
         <div class="closed-controls" id="closed-controls" aria-label="Closed outline selection" hidden><button type="button" id="other-side" aria-pressed="false" disabled><span aria-hidden="true">⇄</span> Other side</button><button type="button" id="whole-outline">Whole outline</button></div>
         <div class="point-controls" aria-label="Adjust endpoints">
-          <div class="point-control" data-point="start"><button type="button" id="edit-start" aria-pressed="true"><span class="point-letter" aria-hidden="true">S</span> Start point <span aria-hidden="true">↔</span></button><input type="range" class="sr-only" id="start-point" min="0" max="100" step="0.1" value="0" tabindex="-1" aria-label="Start point position along the line"></div>
+          <div class="point-control" data-point="start"><button type="button" id="edit-start" aria-pressed="true"><span class="point-letter" aria-hidden="true" translate="no">S</span> Start point <span aria-hidden="true">↔</span></button><input type="range" class="sr-only" id="start-point" min="0" max="100" step="0.1" value="0" tabindex="-1" aria-label="Start point position along the line"></div>
           <div class="point-control" data-point="end"><button type="button" id="edit-end" aria-pressed="false"><span class="point-letter" aria-hidden="true">E</span> End point <span aria-hidden="true">↔</span></button><input type="range" class="sr-only" id="end-point" min="0" max="100" step="0.1" value="100" tabindex="-1" aria-label="End point position along the line"></div>
         </div>
         <p class="keyboard-help" id="keyboard-help">Select an endpoint to adjust it. Keyboard: arrow keys move; Shift + arrow moves finely. Home/End reach the line’s ends.</p>

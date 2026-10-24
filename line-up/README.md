@@ -24,7 +24,7 @@ The GitHub Pages deployment includes this folder at [skyyip.github.io/games/line
 ## How to play
 
 1. Choose 2–6 players and optionally edit their names.
-2. Start a round. It generates a target from 1% to 100% and one of ten shapes: straight, parabola, wavy, rounded bend, circle, square, rectangle, triangle, oval, or an irregular polygon. Everyone shares that target and shape.
+2. Start a round. It generates a target from 1% to 100% and one of nineteen shapes: straight, parabola, wavy, rounded bend, circle, square, rectangle, triangle, oval, irregular polygon, rhombus, trapezoid, parallelogram, pentagon, hexagon, octagon, heart, star, or crescent. Everyone shares that target and shape.
 3. Pass the device to the named player and press **I’m ready**.
 4. Drag a segment, or tap/click its two endpoints. A segment can start anywhere and run in either direction. Drag either marker to adjust it, or select **Start point** / **End point** before placing it. For a closed shape, the percentage measures its perimeter: use **Other side** to select the other arc between your points, including across the closing join. **Whole outline** selects the complete perimeter. The highlighted green path is the portion being guessed. **Clear selection** starts the guess again.
 5. Press **Lock my guess** and pass the device. Previous guesses are hidden. After the last player, results show each estimate and its error in percentage points.
@@ -43,6 +43,7 @@ manifest.webmanifest       Standalone app name and supplied cat icons
 sw.js                      Scoped offline app cache
 tests/                     Dependency-free Node tests
 scripts/browser-check.mjs   Optional browser, touch and offline verification
+scripts/start-check.mjs     Sandboxed preview start, touch and keyboard regression
 ```
 
 The state sequence is `setup → handoff → choosing → handoff … → results`. Another round creates a fresh target and path; changing players returns to setup. Duplicate or invalid submissions cannot consume a turn. A cancelled pointer gesture restores the previous selection.

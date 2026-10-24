@@ -71,3 +71,19 @@ test('either arc of a closed shape can be selected, including across the seam an
   near(selectionFraction(line,.1,.9,true),.8);
   assert.equal(segmentPath(line,.1,.9,true),segmentPath(line,.1,.9));
 });
+
+test('new polygon and concave outlines preserve measured lengths on both sides of the closing join', () => {
+  for(const kind of ['rhombus','trapezoid','parallelogram','pentagon','hexagon','octagon','heart','star','crescent']) {
+    assert.ok(SHAPES.includes(kind));
+    const line=createLine(kind,()=>.5);
+    assert.equal(line.closed,true);
+    assert.deepEqual(line.points[0],line.points.at(-1));
+    for(const otherSide of [false,true]) {
+      const points=[...segmentPath(line,.12,.75,otherSide).matchAll(/[ML]([^, ]+),([^ ]+)/g)]
+        .map(([,x,y])=>({x:Number(x),y:Number(y)}));
+      near(measureLine(points).total/line.total,otherSide?.37:.63);
+    }
+    near(selectionFraction(line,.4,.4,true),1);
+    near(selectionFraction(line,0,1,true),0);
+  }
+});

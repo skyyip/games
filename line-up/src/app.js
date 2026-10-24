@@ -212,7 +212,14 @@ $('#other-side').addEventListener('click',()=>{if(game.state==='choosing' && gam
 $('#whole-outline').addEventListener('click',()=>{if(game.state==='choosing' && game.line.closed && !gesture){draft.start=0;draft.end=1;draft.otherSide=false;renderSelection();announce('Whole outline selected.');}});
 $('#lock').addEventListener('click',()=>{if(!gesture && game.submit(draft.start,draft.end,draft.otherSide))showState();});
 $('#ready').addEventListener('click',()=>{if(game.beginTurn())showState();});
+$('#start').addEventListener('click',startRound);
 $('#player-form').addEventListener('submit',event=>{event.preventDefault();startRound();});
+// Embedded previews can run scripts while blocking native form submission.
+$('#player-form').addEventListener('keydown',event=>{
+  if(event.key==='Enter' && !event.isComposing && event.target.matches('input')) {
+    event.preventDefault();startRound();
+  }
+});
 $('#plus').addEventListener('click',()=>{if(names.length<6){names.push(playerName(names.length+1));renderPlayers();}});
 $('#minus').addEventListener('click',()=>{if(names.length>2){names.pop();renderPlayers();}});
 $('#again').addEventListener('click',startRound);

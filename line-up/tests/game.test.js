@@ -67,7 +67,7 @@ test('one random shape is shared for the whole round and a new round generates a
 
 test('closed shapes score the chosen arc and allow the whole outline without consuming invalid turns', () => {
   let draw=0;
-  const game=new LineGame(()=>draw++===0?.19:.45); // Target 20%, circle.
+  const game=new LineGame(()=>draw++===0?.19:(SHAPES.indexOf('circle')+.1)/SHAPES.length); // Target 20%, circle.
   game.start(['A','B']);assert.equal(game.line.kind,'circle');
   game.beginTurn();assert.equal(game.submit(0,1,true),false);
   assert.equal(game.submit(.1,.9,true),true);

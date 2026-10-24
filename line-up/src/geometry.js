@@ -1,6 +1,6 @@
-export const CLOSED_SHAPES = ['circle','square','rectangle','triangle','oval','irregular'];
+export const CLOSED_SHAPES = ['circle','square','rectangle','triangle','oval','irregular','rhombus','trapezoid','parallelogram','pentagon','hexagon','octagon','heart','star','crescent'];
 export const SHAPES = ['straight','parabola','wave','bend',...CLOSED_SHAPES];
-export const SHAPE_NAMES = { straight:'Straight', parabola:'Parabola', wave:'Wavy', bend:'Rounded bend', circle:'Circle', square:'Square', rectangle:'Rectangle', triangle:'Triangle', oval:'Oval', irregular:'Irregular' };
+export const SHAPE_NAMES = { straight:'Straight', parabola:'Parabola', wave:'Wavy', bend:'Rounded bend', circle:'Circle', square:'Square', rectangle:'Rectangle', triangle:'Triangle', oval:'Oval', irregular:'Irregular', rhombus:'Rhombus', trapezoid:'Trapezoid', parallelogram:'Parallelogram', pentagon:'Pentagon', hexagon:'Hexagon', octagon:'Octagon', heart:'Heart', star:'Star', crescent:'Crescent' };
 const clamp = value => Math.max(0,Math.min(1,value));
 const pathData = points => points.map((p,i)=>`${i?'L':'M'}${p.x},${p.y}`).join(' ');
 
@@ -104,6 +104,33 @@ export function createLine(kind, random=Math.random) {
   if(kind==='square') points=[{x:110,y:110},{x:590,y:110},{x:590,y:590},{x:110,y:590}];
   if(kind==='rectangle') points=[{x:80,y:180},{x:620,y:180},{x:620,y:520},{x:80,y:520}];
   if(kind==='triangle') points=[{x:350,y:90},{x:610,y:560},{x:90,y:560}];
+  if(kind==='rhombus') points=[{x:350,y:80},{x:570,y:350},{x:350,y:620},{x:130,y:350}];
+  if(kind==='trapezoid') points=[{x:180,y:150},{x:520,y:150},{x:620,y:550},{x:80,y:550}];
+  if(kind==='parallelogram') points=[{x:210,y:140},{x:620,y:140},{x:490,y:560},{x:80,y:560}];
+  if(['pentagon','hexagon','octagon','star'].includes(kind)) {
+    const count={pentagon:5,hexagon:6,octagon:8,star:10}[kind];
+    points=Array.from({length:count},(_,i)=>{
+      const angle=i/count*Math.PI*2-Math.PI/2+(kind==='octagon'?Math.PI/8:0);
+      const radius=kind==='star'&&i%2?115:260;
+      return {x:350+radius*Math.cos(angle),y:350+radius*Math.sin(angle)};
+    });
+  }
+  if(kind==='heart') points=Array.from({length:320},(_,i)=>{
+    const t=i/320*Math.PI*2;
+    return {x:350+240*Math.sin(t)**3,y:350-15*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))};
+  });
+  if(kind==='crescent') {
+    // Two circular arcs share their tips, giving one non-intersecting perimeter.
+    points=Array.from({length:241},(_,i)=>{
+      const angle=-Math.PI/3-i/240*Math.PI*4/3;
+      return {x:350+250*Math.cos(angle),y:350+250*Math.sin(angle)};
+    });
+    const tip=points.at(-1),radius=Math.hypot(tip.x-525,tip.y-350),start=Math.atan2(tip.y-350,tip.x-525);
+    for(let i=1;i<160;i++) {
+      const angle=start+i/160*(2*Math.PI-2*start);
+      points.push({x:525+radius*Math.cos(angle),y:350+radius*Math.sin(angle)});
+    }
+  }
   if(kind==='irregular') {
     const count=7+Math.floor(random()*4);
     points=Array.from({length:count},(_,i)=>{

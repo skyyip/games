@@ -57,3 +57,7 @@ Replay screenshots in `/tmp/pikmin-improvements-qa` were visually inspected in p
 The standalone `/workspace/games-preview/pikmin-fling.html` embeds local JavaScript, styles, fonts and icons. A browser check verified default Traditional Chinese instructions, white characters, timed play, early completion and Play again without uncaught errors. A mobile screenshot was visually inspected.
 
 Analytics requests were stubbed during QA. Chrome touch emulation was tested; physical iOS/Android devices, other browser engines, screen readers and native installation were not directly tested.
+
+## Corner icon visibility
+
+Browser checks passed in Chinese and English at 1440×1100, 320×568, 375×812 and 812×375. Each checked all three modes: icons start hidden, keyboard/touch controls show and hide all 30 badges, reset preserves the current choice, reload returns to hidden, and flower hold rings remain visible. All controls fit the viewport with at least 44px height. The 14 screen-lock regressions and the regenerated standalone preview (including its toggle, completion and replay) also passed.

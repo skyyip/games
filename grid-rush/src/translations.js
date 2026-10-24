@@ -593,5 +593,7 @@ export const messages = {
   "Flower charged. Flick up, or drag through flowers of the same colour to link.": "花朵已蓄力。向上甩動，或拖過同色花朵連結同伴。",
   "Chain released. Short press 0.2s, drag through the same colour and stage, then finish with an upward flick.": "連結已放開。短按 0.2 秒，拖過同色、同階段的同伴，最後向上甩動。",
   "Red, Yellow, Blue, Ice, Rock, Winged and White Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.": "紅、黃、藍、冰、岩石、羽和白皮克敏隨機混合。開始時有 20 隻葉子、5 隻花苞、5 隻花朵。",
-  "Short press any Pikmin for 0.2s until it highlights. Keep pressed and drag through others of the same colour and stage, then finish with an upward flick to feed them together. Release without a flick to cancel. A single flower still needs a full 0.6s hold.": "短按任何皮克敏 0.2 秒，保持按住並拖過同一顏色、同一階段的同伴，最後向上甩動一起餵食。直接放開即可取消；單隻花朵仍須按滿 0.6 秒。"
+  "Short press any Pikmin for 0.2s until it highlights. Keep pressed and drag through others of the same colour and stage, then finish with an upward flick to feed them together. Release without a flick to cancel. A single flower still needs a full 0.6s hold.": "短按任何皮克敏 0.2 秒，保持按住並拖過同一顏色、同一階段的同伴，最後向上甩動一起餵食。直接放開即可取消；單隻花朵仍須按滿 0.6 秒。",
+  "Show icons": "顯示圖示",
+  "Hide icons": "隱藏圖示"
 };
