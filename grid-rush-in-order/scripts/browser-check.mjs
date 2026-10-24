@@ -49,7 +49,8 @@ async function finish(page, method = 'click') {
 async function geometry(page) {
   return page.locator('#board').evaluate(board => [...board.children].map(tile => {
     const r = tile.getBoundingClientRect();
-    return { x: r.x, y: r.y, width: r.width, height: r.height };
+    // Focus and Playwright clicks can scroll the page; compare document positions.
+    return { x: r.x + scrollX, y: r.y + scrollY, width: r.width, height: r.height };
   }));
 }
 function stable(before, after) {
@@ -123,7 +124,7 @@ try {
 
   const saved = await page.evaluate(key => localStorage.getItem(key), key);
   const data = JSON.parse(saved);
-  assert.equal(Object.keys(data).length, 30);
+  assert.equal(Object.keys(data).length, 34);
   assert.equal(Object.values(data).filter(records => records.length === 1).length, 7);
   await page.evaluate(() => localStorage.setItem('grid-rush.records.v1', 'original-game-sentinel'));
   await page.reload();
@@ -295,7 +296,7 @@ try {
     }
   }
   const allRecords = await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
-  assert.equal(Object.keys(allRecords).length,30);
+  assert.equal(Object.keys(allRecords).length,34);
   assert.equal(Object.values(allRecords).filter(records=>records.length===1).length,28);
   assert.deepEqual(allRecords.alphanumeric,[]);
   assert.deepEqual(allRecords['alphanumeric-descending'],[]);

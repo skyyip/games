@@ -2061,8 +2061,8 @@ h2 {
 .board .tile.tile-color { background:var(--tile-color);color:var(--tile-ink);border:1px solid #293226; }
 .board .tile-color .tile-number { font-size:14px;padding:2px; }
 .board .tile.tile-color:not(:disabled):hover { background:var(--tile-color);box-shadow:inset 0 0 0 2px #ffffff70; }
-.board .tile.clicked { background:var(--tile-color,#c44d28);color:#fffaf1;opacity:.6;box-shadow:none; }
-.board .tile.tile-color.clicked { color:var(--tile-ink);opacity:.75; }
+.board .tile.clicked { background:var(--tile-color,#c44d28);color:#fffaf1;opacity:.55;box-shadow:none; }
+.board .tile.tile-color.clicked { color:var(--tile-ink);opacity:.7; }
 .board .tile-color:focus-visible { outline:3px solid var(--tile-ink);outline-offset:-4px; }
 .board .tile.clicked .tile-corner { display:none; }
 .board .tile-check { position:absolute;right:5px;top:5px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#182316; }
@@ -2089,3 +2089,18 @@ h2 {
   .board[data-size="6"] .tile-color .tile-number { font-size:10px; }
   .board-frame .result-overlay h2 { font-size:25px; }
 }
+
+/* Shape groups use the same left-to-right key and stable cells as colours. */
+.shape-icon { display:block;flex-shrink:0;width:28px;height:28px;fill:currentColor; }
+.color-key li[data-shape] { color:#293226; }
+.color-key li[data-shape] span { text-align:center;line-height:1.3;overflow-wrap:anywhere; }
+.next-cue strong.is-shape { display:flex;align-items:center;gap:6px;min-width:0;max-width:48%;font-family:inherit;text-align:left;color:#293226; }
+.next-cue strong.is-shape .shape-icon { width:32px;height:32px; }
+.next-cue strong.is-shape span { color:inherit;font:600 11px/1.3 'DM Sans',sans-serif;letter-spacing:0;overflow-wrap:anywhere; }
+.board .tile.tile-shape { background:#f5f7ef;color:#293226;border:1px solid #a8b19b;box-shadow:none; }
+.board .tile-shape .tile-number { position:absolute;inset:0;display:grid;place-items:center; }
+.board .tile-shape .shape-icon { width:74%;height:74%;max-width:56px;max-height:56px; }
+.board .tile-shape .tile-corner { display:none; }
+.board .tile.tile-shape:not(:disabled):hover { background:#e8eddd;box-shadow:inset 0 0 0 1px #59634d; }
+.board .tile.tile-shape.clicked { background:#f5f7ef;color:#293226;opacity:.6; }
+.board .tile-shape:focus-visible { outline:3px solid #285b89;outline-offset:-4px; }

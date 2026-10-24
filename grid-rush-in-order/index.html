@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f7f2">
-    <meta name="description" content="Order numbers from −999 to 999, letters, 26 mixed number-and-letter positions or random colours. Race the clock and beat your best.">
+    <meta name="description" content="Order numbers from −999 to 999, letters, mixed symbols, colours or shapes. Race the clock and beat your best.">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Grid Rush: In Order">
@@ -56,14 +56,14 @@
     <main id="game">
       <section class="intro" aria-labelledby="page-title">
         <div><p class="eyebrow"><span class="tiny-cross" aria-hidden="true">✳</span> A NEW TWIST. THE SAME RUSH.</p><h1 id="page-title">Find your <span>order.</span></h1></div>
-        <p class="intro-copy">Sharp eyes. Quick hands. One right sequence.<br> Find the next symbol or colour. Race your best.</p>
+        <p class="intro-copy">Sharp eyes. Quick hands. One right sequence.<br> Find the next symbol, colour or shape. Race your best.</p>
       </section>
 
       <div class="arena">
         <aside class="setup-panel" aria-label="Game setup and instructions">
           <p class="section-index">01 <span>/ THE CHALLENGE</span></p>
           <h2>Pick your sequence<span class="orange">.</span></h2>
-          <p class="panel-description">Numbers, letters, or a colour rush.</p>
+          <p class="panel-description">Numbers, letters, colours or shapes.</p>
           <fieldset id="mode-options" class="mode-options">
             <legend class="sr-only">Choose a sequence</legend>
             <label class="mode-option"><input type="radio" name="game-mode" value="numbers" checked><span><strong>123</strong><small>Numbers</small></span></label>
@@ -73,6 +73,7 @@
             <label class="mode-option"><input type="radio" name="game-mode" value="mixed"><span><strong>AbC</strong><small>Mixed case</small></span></label>
             <label class="mode-option"><input type="radio" name="game-mode" value="alphanumeric"><span><strong>1b3</strong><small>Letters + numbers</small></span></label>
             <label class="mode-option"><input type="radio" name="game-mode" value="colors"><span><strong class="colour-mode-mark" aria-hidden="true">● ● ●</strong><small>Colours</small></span></label>
+            <label class="mode-option"><input type="radio" name="game-mode" value="shapes"><span><strong aria-hidden="true">● ▲ ◆</strong><small>Shapes</small></span></label>
           </fieldset>
           <label class="order-control" id="order-control"><span>Play order</span><select id="sort-order" aria-describedby="mode-note"><option value="ascending">Smallest → largest</option><option value="descending">Largest → smallest</option></select></label>
           <p id="mode-note" class="mode-note">Find 1, then 2, then 3…</p>
@@ -84,8 +85,8 @@
           <details class="how-to-play" id="how-to-play" open>
             <summary id="instructions-title">THE GAME PLAN</summary>
             <ol>
-              <li><span class="step-number">1</span><span>Pick a sequence.<small>Numbers, letters, 26 mixed positions, or colours.</small></span></li>
-              <li><span class="step-number">2</span><span>Follow the order.<small>Pick ascending or descending. Colours follow a random key.</small></span></li>
+              <li><span class="step-number">1</span><span>Pick a sequence.<small>Numbers, letters, 26 mixed positions, colours or shapes.</small></span></li>
+              <li><span class="step-number">2</span><span>Follow the order.<small>Pick ascending or descending. Colours and shapes follow a random key.</small></span></li>
               <li><span class="step-number">3</span><span>Beat your best.<small>Cleared tiles stay visible with a tick. Wrong taps don’t count.</small></span></li>
             </ol>
           </details>

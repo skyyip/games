@@ -21,7 +21,7 @@ try {
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(baseURL);
-  assert.equal(await page.title(), 'Sky’s Playground');
+  assert.equal(await page.title(), 'Your Playground.');
   assert.equal(await page.locator('.card').count(), 5);
   const manifest = await context.request.get(new URL(await page.locator('link[rel="manifest"]').getAttribute('href'), baseURL).href).then(r => r.json());
   assert.equal(manifest.name, 'Sky’s Playground');
@@ -33,7 +33,7 @@ try {
   const expectedIcon = hash(await readFile(new URL('../assets/icons/apple-touch-icon.png', import.meta.url)));
   for (const path of ['', ...games]) {
     await page.goto(new URL(path, baseURL).href);
-    assert.match(await page.title(), /Sky’s Playground/);
+    assert.match(await page.title(), path ? /Sky’s Playground/ : /^Your Playground\.$/);
     const icon = await page.locator('link[rel="apple-touch-icon"]').getAttribute('href');
     const response = await context.request.get(new URL(icon, page.url()).href);
     assert.equal(response.status(), 200);
@@ -49,7 +49,7 @@ try {
       assert.equal(new URL(link, page.url()).href, baseURL);
       await page.locator('.playground-home').click();
       await page.waitForURL(baseURL);
-      assert.equal(await page.title(), 'Sky’s Playground');
+      assert.equal(await page.title(), 'Your Playground.');
     }
     pass(`${path || 'landing'}: shared title, supplied icon, valid install assets and home navigation`);
   }

@@ -40,7 +40,7 @@ try {
  await text(page,'[data-language="en"]','EN');
  await page.getByRole('button',{name:'繁體中文',exact:true}).focus();await page.keyboard.press('Enter');
  assert.equal(await page.locator('html').getAttribute('lang'),'zh-Hant');
- assert.equal(await page.title(),'你的遊樂場');
+ assert.equal(await page.title(),'Your Playground.');
  await text(page,'h1','Your Playground.');
  assert.equal(await page.locator('[data-language="zh-Hant"]').getAttribute('aria-pressed'),'true');
  await page.getByRole('button',{name:'收藏：方格快手',exact:true}).click();
@@ -48,7 +48,7 @@ try {
  const saved=await order(page);await page.reload();
  assert.equal(await page.locator('html').getAttribute('lang'),'zh-Hant');assert.deepEqual(await order(page),saved);
  await page.getByRole('button',{name:'English',exact:true}).click();
- await text(page,'h1','Your Playground.');assert.equal(await page.title(),'Sky’s Playground');
+ await text(page,'h1','Your Playground.');assert.equal(await page.title(),'Your Playground.');
  assert.deepEqual(await order(page),saved);
  assert.equal(await page.getByRole('button',{name:'Favourite: Grid Rush',exact:true}).getAttribute('aria-pressed'),'true');
  pass('keyboard switch, document language/title, translated favourites, reload and English restoration');

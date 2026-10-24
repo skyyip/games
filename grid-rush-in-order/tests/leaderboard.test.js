@@ -5,7 +5,7 @@ import { addResult, readLeaderboard, saveLeaderboard, STORAGE_KEY } from '../src
 const originalKeys = ['numbers-3', 'numbers-4', 'numbers-5', 'numbers-6', 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26',
   'number-range-3', 'number-range-4', 'number-range-5', 'number-range-6'];
 const empty = () => Object.fromEntries([
-  ...originalKeys, ...originalKeys.map(key => `${key}-descending`), 'colors-3', 'colors-4', 'colors-5', 'colors-6',
+  ...originalKeys, ...originalKeys.map(key => `${key}-descending`), 'colors-3', 'colors-4', 'colors-5', 'colors-6', 'shapes-3', 'shapes-4', 'shapes-5', 'shapes-6',
   'alphanumeric', 'alphanumeric-descending',
 ].map(key => [key, []]));
 

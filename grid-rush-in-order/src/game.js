@@ -1,11 +1,15 @@
+import { SHAPE_PALETTE, tileShape } from './shapes.js';
+
 export const GRID_SIZES = Object.freeze([3, 4, 5, 6]);
-export const GAME_MODES = Object.freeze(['numbers', 'number-range', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors']);
+export const GAME_MODES = Object.freeze(['numbers', 'number-range', 'lowercase', 'uppercase', 'mixed', 'alphanumeric', 'colors', 'shapes']);
+const groupedMode = mode => mode === 'colors' || mode === 'shapes';
 export const SORT_ORDERS = Object.freeze(['ascending', 'descending']);
 const BASE_RECORD_KEYS = [...GRID_SIZES.map(size => `numbers-${size}`), 'lowercase', 'uppercase', 'mixed', 'alphanumeric-26',
   ...GRID_SIZES.map(size => `number-range-${size}`)];
 export const RECORD_KEYS = Object.freeze([
   ...BASE_RECORD_KEYS, ...BASE_RECORD_KEYS.map(key => `${key}-descending`),
   ...GRID_SIZES.map(size => `colors-${size}`),
+  ...GRID_SIZES.map(size => `shapes-${size}`),
   // Retain old 62-symbol scores without comparing them to the new 26-position rounds.
   'alphanumeric', 'alphanumeric-descending',
 ]);
@@ -32,7 +36,7 @@ export function tileColor(value) {
   return COLOR_PALETTE.find(color => color.id === value.split(':')[1]) ?? null;
 }
 
-function sequenceFor(mode, size, random, colors) {
+function sequenceFor(mode, size, random, groups) {
   if (mode === 'numbers') {
     return Array.from({ length: size ** 2 }, (_, index) => String(index + 1));
   }
@@ -42,10 +46,10 @@ function sequenceFor(mode, size, random, colors) {
     const numbers = Array.from({ length: size ** 2 }, () => available.splice(Math.floor(random() * available.length), 1)[0]);
     return numbers.sort((a, b) => a - b).map(String);
   }
-  if (mode === 'colors') {
-    return colors.flatMap((color, rank) => {
+  if (groupedMode(mode)) {
+    return groups.flatMap((entry, rank) => {
       const group = [];
-      for (let index = rank; index < size ** 2; index += colors.length) group.push(`color:${color.id}:${index}`);
+      for (let index = rank; index < size ** 2; index += groups.length) group.push(`${mode === 'colors' ? 'color' : 'shape'}:${entry.id}:${index}`);
       return group;
     });
   }
@@ -83,6 +87,7 @@ export class OrderedGame {
   #sequence = [];
   #tiles = [];
   #colorOrder = [];
+  #shapeOrder = [];
   #clicked = new Set();
   #startedAt = 0;
   #finishedTime = 0;
@@ -99,15 +104,16 @@ export class OrderedGame {
   get mode() { return this.#mode; }
   get order() { return this.#order; }
   get colorOrder() { return [...this.#colorOrder]; }
+  get shapeOrder() { return [...this.#shapeOrder]; }
   get recordKey() {
-    const key = this.#mode === 'alphanumeric' ? 'alphanumeric-26' : ['numbers', 'number-range', 'colors'].includes(this.#mode) ? `${this.#mode}-${this.#size}` : this.#mode;
+    const key = this.#mode === 'alphanumeric' ? 'alphanumeric-26' : ['numbers', 'number-range', 'colors', 'shapes'].includes(this.#mode) ? `${this.#mode}-${this.#size}` : this.#mode;
     return this.#order === 'descending' ? `${key}-descending` : key;
   }
   get total() { return this.#sequence.length; }
   get state() { return this.#state; }
   get progress() { return this.#progress; }
   get next() {
-    if (this.#mode === 'colors') return this.#sequence.find(value => !this.#clicked.has(value)) ?? null;
+    if (groupedMode(this.#mode)) return this.#sequence.find(value => !this.#clicked.has(value)) ?? null;
     return this.#sequence[this.#progress] ?? null;
   }
   get tiles() { return [...this.#tiles]; }
@@ -120,17 +126,19 @@ export class OrderedGame {
     if (!GAME_MODES.includes(mode)) throw new RangeError('Unsupported game mode');
     if (!SORT_ORDERS.includes(order)) throw new RangeError('Unsupported sort order');
     this.#mode = mode;
-    this.#order = mode === 'colors' ? 'ascending' : order;
-    this.#size = ['numbers', 'number-range', 'colors'].includes(mode) ? size : 6;
+    this.#order = groupedMode(mode) ? 'ascending' : order;
+    this.#size = ['numbers', 'number-range', 'colors', 'shapes'].includes(mode) ? size : 6;
     this.#state = 'idle';
     this.#progress = 0;
     this.#clicked.clear();
     this.#colorOrder = [];
+    this.#shapeOrder = [];
     if (mode === 'colors') {
       const palette = COLOR_SETS[Math.floor(this.#random() * COLOR_SETS.length)];
       this.#colorOrder = shuffled(palette.map(id => COLOR_PALETTE.find(color => color.id === id)), this.#random);
     }
-    this.#sequence = sequenceFor(mode, this.#size, this.#random, this.#colorOrder);
+    if (mode === 'shapes') this.#shapeOrder = shuffled(SHAPE_PALETTE, this.#random).slice(0, 4);
+    this.#sequence = sequenceFor(mode, this.#size, this.#random, mode === 'shapes' ? this.#shapeOrder : this.#colorOrder);
     if (this.#order === 'descending') this.#sequence.reverse();
     this.#tiles = [...this.#sequence, ...Array(this.#size ** 2 - this.total).fill(null)];
     this.#startedAt = 0;
@@ -150,7 +158,8 @@ export class OrderedGame {
         index >= this.#tiles.length) return false;
     const value = this.#tiles[index];
     if (value === null || this.#clicked.has(value)) return false;
-    const correct = this.#mode === 'colors' ? tileColor(value).id === tileColor(this.next).id : value === this.next;
+    const groupFor = this.#mode === 'shapes' ? tileShape : tileColor;
+    const correct = groupedMode(this.#mode) ? groupFor(value).id === groupFor(this.next).id : value === this.next;
     if (!correct) return false;
     this.#clicked.add(value);
     this.#progress += 1;

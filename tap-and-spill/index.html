@@ -36,7 +36,6 @@ body{height:100dvh;display:flex;flex-direction:column;align-items:center;justify
 #who small{opacity:.7;font-size:12px}
 button{font:inherit;color:#fff;border:0;cursor:pointer}
 #who{margin-right:48px}
-#who{margin-right:48px}
 #mute{pointer-events:auto;width:40px;height:40px;border-radius:50%;background:#ffffff22;font-size:18px}
 #bottom{left:0;right:0;bottom:0;padding:0 18px calc(24px + env(safe-area-inset-bottom));text-align:center;pointer-events:none}
 .btn{display:block;width:100%;padding:16px;border-radius:16px;font-size:18px;font-weight:700;background:linear-gradient(#4dabf7,#1c7ed6);box-shadow:0 6px 0 #0b4a8f;pointer-events:auto}
@@ -81,6 +80,61 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.shake{transform:none}}
 .tap-footer{flex:0 0 var(--footer-height);width:100%;height:var(--footer-height);display:flex;align-items:center;justify-content:center;padding:4px 12px calc(4px + env(safe-area-inset-bottom));color:#b4c2d8}
 .tap-footer .site-copyright{font-size:10px;line-height:1.4}
+
+/* Keep controls and text outside the cartoon scene at every viewport size. */
+html,body{background:#e9eee3;color:#34483d}
+#app{--scene-top:calc(164px + env(safe-area-inset-top));--scene-bottom:calc(148px + env(safe-area-inset-bottom));background:linear-gradient(155deg,#e2eedc,#faf4df 66%,#f5e7ce);box-shadow:0 12px 60px #53644924}
+#cv{top:var(--scene-top);bottom:var(--scene-bottom);left:0;width:100%;height:calc(100% - var(--scene-top) - var(--scene-bottom))}
+#back{background:#fffdf5;color:#456455;border:2px solid #c6d7bd;box-shadow:0 3px 0 #bdcdb384}
+#back:hover{background:#eff7e7}
+#hud{top:calc(68px + env(safe-area-inset-top));left:14px;right:14px;height:88px;padding:8px;gap:8px;background:#fffdf5f2;border:2px solid #c6d7bd;border-radius:20px;box-shadow:0 4px 0 #bdcdb36b}
+#av{position:relative;width:40px;height:40px;border:3px solid #fffdf5;box-shadow:0 0 0 1px #c7d3ba}
+#av:before,.sw:after{content:'• •';position:absolute;inset:0;display:grid;place-items:center;color:#34483d;font:bold 14px/1 system-ui;pointer-events:none}
+#who{margin:0;align-self:center}
+#who b{font-size:15px;line-height:1.4;color:#34483d}
+#who small{min-height:30px;font-size:10.5px;line-height:1.4;color:#596e5c;opacity:1;overflow-wrap:anywhere}
+#mute{flex:none;width:48px;height:48px;min-width:48px;min-height:48px;padding:3px;background:#fff2c9;border:2px solid #8a9775;border-radius:16px;box-shadow:0 3px 0 #c7b98e;display:grid;place-items:center}
+#mute svg{width:36px;height:36px;overflow:visible}
+#mute .speaker-waves{fill:none;stroke:#5d8378;stroke-width:2.6;stroke-linecap:round}
+#mute .speaker-off{display:none;fill:none;stroke:#ad5872;stroke-width:3;stroke-linecap:round}
+#mute[aria-pressed=true]{background:#f5e8e7;box-shadow:0 2px 0 #d1b9b5}
+#mute[aria-pressed=true] .speaker-waves{display:none}
+#mute[aria-pressed=true] .speaker-off{display:inline}
+#mute:active{transform:translateY(2px);box-shadow:none}
+#bottom{padding:0 18px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+#hint{min-height:38px;margin:0;padding:5px 10px;background:#fffaf0ed;border:1px solid #d5dabc;border-radius:14px;color:#4c6655;font-size:13px;line-height:1.5;opacity:1}
+#tension{top:auto;bottom:calc(80px + env(safe-area-inset-bottom));left:20px;right:20px;padding:5px 10px;border:2px solid #e1b17b;border-radius:14px;background:#fff2d2;color:#93602e;font-size:14px;line-height:1.4;text-shadow:none}
+#tag{top:46%;left:16px;right:16px;padding:12px 8px;border:3px solid #fff5e1;border-radius:22px;background:#f7c4b5f2;color:#954b57;font-size:clamp(22px,6vw,34px);text-shadow:0 2px #fff4e6;box-shadow:0 5px 0 #ba8d7980}
+.panel{background:#f8f5eaf5;color:#34483d}
+.panel p.sub{color:#65785e;opacity:1}
+.panel h1{color:#456655;font-weight:800}
+.row input{background:#fffdf6;color:#34483d;border:2px solid #c6d7bd;border-radius:15px;box-shadow:0 3px 0 #dce5d2}
+.sw{position:relative;flex:none;border:3px solid #fffdf5;box-shadow:0 0 0 1px #b6c5a8}
+.count button{background:#fff0c9;color:#6d6b49;border:2px solid #d4c598;box-shadow:0 3px 0 #d4c598}
+.btn{background:#b9d9b2;color:#2d4a38;border:2px solid #78976d;border-radius:18px;box-shadow:0 4px 0 #8eae7f;font-weight:750}
+.btn:active{box-shadow:0 1px 0 #8eae7f}
+.btn.alt{background:#fff0cd;color:#6d6b49;border-color:#d4c598;box-shadow:0 3px 0 #d4c598}
+.btn:focus-visible,button:focus-visible,.row input:focus-visible{outline-color:#327f85}
+.res .bar{border:1px solid #ffffffa6}
+.tap-footer{color:#62745d}
+@media(max-height:650px){
+ #app{--scene-top:calc(140px + env(safe-area-inset-top));--scene-bottom:calc(120px + env(safe-area-inset-bottom))}
+ #hud{top:calc(60px + env(safe-area-inset-top));height:72px;padding:6px}
+ #who b{font-size:13px}#who small{font-size:10px;min-height:28px}
+ #av{width:36px;height:36px}
+ #mute{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:14px}#mute svg{width:32px;height:32px}
+ #hint{min-height:32px;padding:4px 8px;font-size:12px}
+ #bottom{padding-bottom:calc(8px + env(safe-area-inset-bottom));gap:6px}
+ #tension{bottom:calc(60px + env(safe-area-inset-bottom));font-size:12px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ #app{width:min(100vw,760px);height:calc(100dvh - var(--footer-height));--scene-top:8px;--scene-bottom:116px}
+ #cv{left:230px;width:calc(100% - 230px)}
+ #hud{left:14px;right:auto;width:202px;top:68px;height:auto;min-height:100px;gap:7px;padding:8px}
+ #av{display:none}#who b{font-size:13px}#who small{min-height:42px}
+ #bottom,#tension{left:230px}#tension{right:18px}
+ .panel{padding-top:68px}
+}
 </style>
 </head>
 <body>
@@ -90,13 +144,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <div id="app">
   <a id="back" class="playground-home" href="../" aria-label="Back to Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
-  <canvas id="cv"></canvas>
+  <canvas id="cv" role="img" aria-label="The cup is smiling."></canvas>
   <div id="vig"></div>
   <div id="touch"></div>
   <header id="hud" hidden>
-    <div id="av"></div>
+    <div id="av" aria-hidden="true"></div>
     <div id="who"><b id="whoName"></b><small id="mode"></small></div>
-    <button id="mute" aria-label="Sound effects">🔊</button>
+    <button id="mute" type="button" aria-label="Mute sound" aria-pressed="false">
+      <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <path d="M18 18 28 10Q32 8 32 13V35Q32 40 28 38L18 30Z" fill="#ffc48e" stroke="#796c53" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="7" y="17" width="13" height="15" rx="5" fill="#ffe49c" stroke="#796c53" stroke-width="2.5"/>
+        <circle cx="12" cy="22" r="1.5" fill="#6b7358"/><circle cx="16" cy="22" r="1.5" fill="#6b7358"/>
+        <path d="M12 26Q14 28 16 26" fill="none" stroke="#a46c56" stroke-width="1.5" stroke-linecap="round"/>
+        <g class="speaker-waves"><path d="M36 19Q41 24 36 29M40 13Q49 24 40 35"/></g>
+        <g class="speaker-off"><path d="m36 20 8 8m0-8-8 8"/></g>
+      </svg>
+    </button>
   </header>
   <div id="tension" hidden>Surface tension! Don’t add any more…</div>
   <div id="tag" hidden>Overflow! You lose!</div>
@@ -127,7 +190,7 @@ import { getLanguage } from '../grid-rush/src/language.js';
 'use strict';
 const playerName = number => getLanguage() === 'zh-Hant' ? `玩家 ${number}` : `Player ${number}`;
 const $ = s => document.querySelector(s);
-const W = 360, H = 640;
+const W = 360, H = 460;
 const MAX_RATE = 420;      // units/sec at fully open tap
 const MIN_POUR = 25;       // minimum units per turn...
 const MIN_TIME = 0.25;     // ...or minimum seconds of pouring
@@ -217,14 +280,17 @@ class InputHandler {
 class WaterSimulation {
   constructor(cv) {
     this.cv = cv; this.c = cv.getContext('2d');
-    this.T = 300; this.B = 560; this.XL = 100; this.XR = 260; this.BL = 120; this.BR = 240; this.NX = 180; this.NY = 105;
+    this.T = 190; this.B = 390; this.XL = 100; this.XR = 260; this.BL = 120; this.BR = 240; this.NX = 180; this.NY = 100;
     this.reset(); this.resize();
   }
   reset() { this.level = 0; this.opening = 0; this.lever = 0; this.leverVelocity = 0; this.flowing = false; this.amp = 0; this.ampVelocity = 0; this.parts = []; this.t = 0; this.spilling = false; this.spill = 0; this.gauge = false; }
   resize() {
     const r = this.cv.getBoundingClientRect(), d = devicePixelRatio || 1;
     this.cv.width = Math.round(r.width * d); this.cv.height = Math.round(r.height * d);
-    this.sx = this.cv.width / W; this.sy = this.cv.height / H;
+    // Fit the scene uniformly so a short viewport cannot squash the cup.
+    this.scale = Math.min(this.cv.width / W, this.cv.height / H);
+    this.offsetX = (this.cv.width - W * this.scale) / 2;
+    this.offsetY = (this.cv.height - H * this.scale) / 2;
   }
   get dome() { return this.level > 1 ? clamp((this.level - 1) / 0.10, 0, 1) * 16 : 0; }
   surf(x) {
@@ -267,23 +333,73 @@ class WaterSimulation {
       }
     }
   }
-  poly(c) { c.beginPath(); c.moveTo(this.XL, this.T); c.lineTo(this.BL, this.B); c.lineTo(this.BR, this.B); c.lineTo(this.XR, this.T); }
+  poly(c) {
+    const {XL,XR,BL,BR,T,B}=this;
+    c.beginPath();c.moveTo(XL+8,T);c.lineTo(XR-8,T);c.quadraticCurveTo(XR,T,XR,T+8);
+    c.lineTo(BR+3,B-10);c.quadraticCurveTo(BR,B,BR-8,B);c.lineTo(BL+8,B);
+    c.quadraticCurveTo(BL,B,BL-3,B-10);c.lineTo(XL,T+8);c.quadraticCurveTo(XL,T,XL+8,T);c.closePath();
+  }
+  drawFace(c) {
+    const B=this.B, expression=this.spilling?'crying':this.level>=.85?'worried':'happy';
+    if(this.cv.dataset.expression!==expression){
+      this.cv.dataset.expression=expression;
+      this.cv.setAttribute('aria-label',expression==='crying'?'The cup is crying. Water overflowed.':expression==='worried'?'The cup is worried. Almost full!':'The cup is smiling.');
+    }
+    c.save();c.lineCap='round';c.lineJoin='round';
+    c.fillStyle='#eea8a0a6';
+    for(const x of [149,211]){c.beginPath();c.ellipse(x,B-49,9,4.5,0,0,7);c.fill();}
+    if(expression==='crying'){
+      // Steady tears remain visible with reduced motion and do not affect water volume.
+      c.fillStyle='#57b8e8';
+      for(const x of [164,196]){
+        c.beginPath();c.roundRect(x-3.5,B-57,7,27,3.5);c.fill();
+        c.beginPath();c.ellipse(x,B-28,4.5,6,0,0,7);c.fill();
+        c.strokeStyle='#d4f4ff';c.lineWidth=1.5;c.beginPath();c.moveTo(x-1,B-54);c.lineTo(x-1,B-37);c.stroke();
+      }
+      c.strokeStyle='#405e59';c.lineWidth=3;
+      for(const x of [164,196]){c.beginPath();c.moveTo(x-6,B-59);c.quadraticCurveTo(x,B-66,x+6,B-59);c.stroke();}
+      c.fillStyle='#855568';c.beginPath();c.ellipse(180,B-42,8,10,0,0,7);c.fill();
+      c.strokeStyle='#405e59';c.lineWidth=2;c.stroke();
+      c.fillStyle='#f2b4b2';c.beginPath();c.ellipse(180,B-37,5,3,0,0,7);c.fill();
+    }else{
+      c.fillStyle='#405e59';
+      for(const x of [164,196]){c.beginPath();c.ellipse(x,B-58,3.5,expression==='worried'?5.5:5,0,0,7);c.fill();}
+      c.strokeStyle='#405e59';c.lineWidth=2.7;c.beginPath();
+      if(expression==='worried'){
+        c.moveTo(158,B-72);c.lineTo(169,B-77);c.moveTo(191,B-77);c.lineTo(202,B-72);
+        c.moveTo(174,B-40);c.quadraticCurveTo(180,B-48,186,B-40);c.stroke();
+        c.fillStyle='#57b8e8';c.beginPath();c.moveTo(215,B-77);c.quadraticCurveTo(206,B-65,215,B-64);c.quadraticCurveTo(224,B-65,215,B-77);c.fill();
+      }else{
+        c.moveTo(174,B-45);c.quadraticCurveTo(180,B-37,186,B-45);c.stroke();
+      }
+    }
+    c.restore();
+  }
   draw() {
     const c = this.c, { T, B, XL, XR, BL, BR, NX, NY } = this;
-    c.setTransform(this.sx, 0, 0, this.sy, 0, 0); c.clearRect(0, 0, W, H);
+    c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,this.cv.width,this.cv.height);
+    c.setTransform(this.scale,0,0,this.scale,this.offsetX,this.offsetY);
     // table + puddle
-    c.fillStyle = '#16264d'; c.fillRect(0, B, W, H - B);
+    c.fillStyle = '#efd9b3'; c.fillRect(0, B, W, H - B);
+    c.strokeStyle='#d3b992';c.lineWidth=3;c.beginPath();c.moveTo(0,B+1);c.lineTo(W,B+1);c.stroke();
+    c.fillStyle='#e0c298';for(let x=18;x<W;x+=32){c.beginPath();c.arc(x,B+40,2.5,0,7);c.fill();}
+    c.fillStyle='#c2b78a45';c.beginPath();c.ellipse(180,B+8,82,10,0,0,7);c.fill();
+    // Soft cloud puffs and twinkles keep the scene playful without distracting motion.
+    c.fillStyle='#fffdf1b3';
+    for(const [x,y] of [[55,120],[300,160]]){c.beginPath();c.ellipse(x,y,24,10,0,0,7);c.ellipse(x-8,y-5,13,12,0,0,7);c.ellipse(x+7,y-7,12,12,0,0,7);c.fill();}
+    c.strokeStyle='#d3b475';c.lineWidth=2.5;c.lineCap='round';
+    for(const [x,y] of [[78,74],[288,82]]){c.beginPath();c.moveTo(x-5,y);c.lineTo(x+5,y);c.moveTo(x,y-5);c.lineTo(x,y+5);c.stroke();}
     if (this.spill > 0) {
       c.fillStyle = 'rgba(110,198,255,.75)'; c.beginPath();
       c.ellipse(180, B + 16, Math.min(this.spill * 55, 190), Math.min(this.spill * 8, 22), 0, 0, 7); c.fill();
     }
     // cup back
-    this.poly(c); c.fillStyle = 'rgba(255,255,255,.08)'; c.fill();
+    this.poly(c); c.fillStyle = 'rgba(255,255,250,.78)'; c.fill();
     // water
     c.save();
     c.beginPath(); c.moveTo(XL, T - 40); c.lineTo(XR, T - 40); c.lineTo(XR, T); c.lineTo(BR, B); c.lineTo(BL, B); c.lineTo(XL, T); c.closePath(); c.clip();
     if (this.level > 0) {
-      const g = c.createLinearGradient(0, T, 0, B); g.addColorStop(0, '#7fd0ff'); g.addColorStop(1, '#1c6fc4');
+      const g = c.createLinearGradient(0, T, 0, B); g.addColorStop(0, '#a6e7ed'); g.addColorStop(1, '#60bfd9');
       c.beginPath(); c.moveTo(XL - 5, this.surf(XL - 5));
       for (let x = XL - 5; x <= XR + 5; x += 6) c.lineTo(x, this.surf(x));
       c.lineTo(XR + 5, B); c.lineTo(XL - 5, B); c.closePath();
@@ -293,15 +409,22 @@ class WaterSimulation {
     }
     c.restore();
     // glass
-    this.poly(c); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 4; c.lineJoin = 'round'; c.stroke();
-    c.beginPath(); c.moveTo(XL + 12, T + 14); c.lineTo(BL + 10, B - 20); c.strokeStyle = 'rgba(255,255,255,.25)'; c.lineWidth = 5; c.lineCap = 'round'; c.stroke();
-    // faucet
-    const fg = c.createLinearGradient(160, 0, 200, 0); fg.addColorStop(0, '#cfd8e6'); fg.addColorStop(.5, '#fff'); fg.addColorStop(1, '#8e9bb3');
-    c.fillStyle = fg; c.fillRect(168, -10, 24, 95);
-    c.beginPath(); c.roundRect(158, 82, 44, 24, 8); c.fill();
-    c.save(); c.translate(192, 45); c.rotate(-this.lever * 1.2);
-    c.fillStyle = '#ff6b6b'; c.beginPath(); c.roundRect(0, -4, 36, 8, 4); c.fill();
-    c.beginPath(); c.arc(38, 0, 7, 0, 7); c.fill(); c.restore();
+    this.poly(c); c.strokeStyle = '#607c76'; c.lineWidth = 3.5; c.lineJoin = 'round'; c.stroke();
+    c.beginPath(); c.moveTo(XL + 12, T + 14); c.lineTo(BL + 10, B - 20); c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 5; c.lineCap = 'round'; c.stroke();
+    // Rounded mint tap, peach handle and a little face above the spout.
+    c.lineJoin='round';c.lineWidth=3;c.strokeStyle='#668479';
+    c.fillStyle='#a9d6c5';c.beginPath();c.roundRect(102,38,40,26,12);c.fill();c.stroke();
+    c.beginPath();c.roundRect(169,58,22,39,9);c.fill();c.stroke();
+    c.fillStyle='#c0e4ce';c.beginPath();c.roundRect(127,27,103,42,18);c.fill();c.stroke();
+    c.strokeStyle='#effbed';c.lineWidth=4;c.beginPath();c.moveTo(143,35);c.lineTo(178,35);c.stroke();
+    c.fillStyle='#405e59';for(const x of [160,196]){c.beginPath();c.arc(x,48,2.7,0,7);c.fill();}
+    c.fillStyle='#f0b7a4';for(const x of [149,207]){c.beginPath();c.ellipse(x,55,6,3,0,0,7);c.fill();}
+    c.strokeStyle='#668479';c.lineWidth=2;c.beginPath();c.moveTo(173,55);c.quadraticCurveTo(178,61,183,55);c.stroke();
+    c.fillStyle='#ffdfac';c.strokeStyle='#9c8c68';c.lineWidth=2.5;c.beginPath();c.roundRect(163,88,34,12,6);c.fill();c.stroke();
+    c.fillStyle='#6b918a';c.beginPath();c.ellipse(NX,99,10,2.5,0,0,7);c.fill();
+    c.save();c.translate(224,42);c.rotate(-this.lever*1.05);
+    c.fillStyle='#f5b19e';c.strokeStyle='#a47e6b';c.lineWidth=2.5;c.beginPath();c.roundRect(-3,-5,31,10,5);c.fill();c.stroke();
+    c.fillStyle='#ffd3b3';c.beginPath();c.arc(30,0,9,0,7);c.fill();c.stroke();c.restore();
     // stream
     if (this.flowing && this.opening > 0.03) {
       const sy = this.surf(NX), o = this.opening, w = 1.5 + Math.pow(o, .8) * 13;
@@ -334,11 +457,13 @@ class WaterSimulation {
       }
     }
     // droplets
-    c.fillStyle = '#c4e8ff';
+    c.fillStyle = '#91d9e6';
     for (const p of this.parts) { c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); }
+    // The face is on the front of the glass, above the stream and splash effects.
+    this.drawFace(c);
     // tap-opening gauge
     if (this.gauge) {
-      c.fillStyle = 'rgba(255,255,255,.15)'; c.beginPath(); c.roundRect(334, 150, 10, 300, 5); c.fill();
+      c.fillStyle = '#b6cdb98c'; c.beginPath(); c.roundRect(334, 150, 10, 300, 5); c.fill();
       const h = 300 * this.opening; c.fillStyle = `hsl(${200 - this.opening * 200},90%,60%)`;
       c.beginPath(); c.roundRect(334, 450 - h, 10, Math.max(h, 0), 5); c.fill();
     }
@@ -476,7 +601,11 @@ $('#start').onclick = () => { audio.ensure(); newGame(); };
 $('#go').onclick = startTurn;
 $('#again').onclick = () => { audio.ensure(); newGame(); };
 $('#toSetup').onclick = () => { $('#result').hidden = true; $('#setup').hidden = false; $('#hud').hidden = $('#bottom').hidden = true; sm.state = 'SETUP'; sim.reset(); };
-$('#mute').onclick = e => { audio.setMuted(!audio.muted); e.currentTarget.textContent = audio.muted ? '🔇' : '🔊'; };
+$('#mute').onclick = e => {
+  audio.setMuted(!audio.muted);
+  e.currentTarget.setAttribute('aria-pressed',String(audio.muted));
+  e.currentTarget.setAttribute('aria-label',audio.muted?'Unmute sound':'Mute sound');
+};
 addEventListener('resize', () => sim.resize());
 renderSetup(); requestAnimationFrame(frame);
 </script>

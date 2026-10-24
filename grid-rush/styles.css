@@ -663,6 +663,7 @@ h2 {
   background:#eef1e9;
   box-shadow:inset 0 0 0 1px #e5e9de;
   color:#5c774c;
+  opacity:.85;
 }
 
 .tile.clicked .tile-corner {
