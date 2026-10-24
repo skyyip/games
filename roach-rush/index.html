@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TZ646NJ9');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f3eb">
+<meta name="description" content="A tiny room, a lively swarm. Tap, double-tap, swipe and catch mice in a cute timed arcade.">
+<meta name="apple-mobile-web-app-title" content="Roach Rush">
+<title>Roach Rush · Sky’s Playground</title>
+<link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="../grid-rush/playground-ui.css">
+<script src="../grid-rush/src/navigation.js"></script>
+<script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
+<script type="module" src="./src/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#app">Skip to game</a>
+<header class="site-top"><a class="brand" href="./" aria-label="Roach Rush home"><svg viewBox="0 0 34 36" aria-hidden="true"><ellipse cx="17" cy="22" rx="8" ry="11"/><path d="M17 15v17M12 13 6 3m16 10 6-10M9 19l-6-2m6 8-6 3m22-9 6-2m-6 8 6 3"/><circle cx="17" cy="12" r="6"/></svg><span>roach <b>rush</b><i>.</i></span></a><a class="playground-home" href="../" aria-label="All games"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a><span class="header-note">SMALL ROOM. BIG LITTLE CHAOS.</span></header>
+<main id="app"><section class="intro"><div><p class="eyebrow">THE TINY TROUBLE CLUB</p><h1>Not in<br><em>my room.</em></h1></div><p>A few uninvited guests.<br>A very satisfying clean-up.</p></section>
+<div class="arena"><section class="play-panel" aria-label="Four-wall arcade room">
+  <div class="scoreboard"><div><span class="eyebrow">TIME LEFT</span><div class="clock"><output id="timer" aria-label="Seconds remaining" aria-live="off">1:00</output></div></div><div class="score-panel"><span class="eyebrow">YOUR SCORE</span><div class="score-total"><output id="score" aria-label="Score: 0 points">0</output><small>pts</small></div></div><div class="best-panel"><span class="eyebrow">PERSONAL BEST</span><strong id="best">—</strong></div></div>
+  <div class="quick-guide" aria-label="Gesture scoring guide"><span><b>1</b><small>Tap</small></span><span><b>2</b><small>Double-tap</small></span><span><b>3–4</b><small>Swipe flying</small></span><span><b>5</b><small>Hold &amp; cage</small></span></div>
+  <div class="room" id="room" role="group" aria-label="Critters inside four walls" aria-describedby="gesture-help keyboard-help">
+    <div class="wall wall-back" aria-hidden="true"><span class="wall-sign">ROOM 03</span></div><div class="wall wall-left" aria-hidden="true"></div><div class="wall wall-right" aria-hidden="true"></div><div class="wall wall-front" aria-hidden="true"></div>
+    <div class="floor" id="floor"><div class="floor-detail detail-a" aria-hidden="true"></div><div class="floor-detail detail-b" aria-hidden="true"></div><div class="hole hole-0" data-hole="0" aria-hidden="true"></div><div class="hole hole-1" data-hole="1" aria-hidden="true"></div><div class="hole hole-2" data-hole="2" aria-hidden="true"></div><div class="hole hole-3" data-hole="3" aria-hidden="true"></div></div>
+    <button type="button" id="cage" class="cage" aria-label="Mouse cage. Drop a held mouse here." disabled><span class="cage-art"></span><span class="cage-label">MOUSE HOTEL</span></button>
+    <div class="entities" id="entities"></div><svg class="swipe-trail" id="swipe-trail" aria-hidden="true"><path/></svg><div class="effects" id="effects" aria-hidden="true"></div>
+    <div class="idle-note" id="idle-note"><span class="eyebrow">FOUR HOLES. ZERO INVITATIONS.</span><h2>A little trouble<br>is on its way.</h2><p>Choose your time. Let’s clear this room.</p></div>
+    <section id="result" class="result" aria-labelledby="result-title" hidden><div class="result-check" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m7 16 6 6 13-14"/></svg></div><p class="eyebrow">THE ROOM CAN REST.</p><h2 id="result-title" tabindex="-1">Time’s up!</h2><p class="result-score"><span id="final-score"></span><small>pts</small></p><p id="result-note"></p><div class="result-stats"><span><b id="stat-small">0</b><small>Small</small></span><span><b id="stat-big">0</b><small>Big</small></span><span><b id="stat-flying">0</b><small>Flying</small></span><span><b id="stat-mice">0</b><small>Mice</small></span></div><p id="ant-summary" class="ant-summary"></p><button type="button" class="primary-button" id="again">One more clean-up <span aria-hidden="true">↗</span></button><button type="button" class="text-button" id="change-time">Change round length</button></section>
+  </div>
+  <div class="garden-tools"><p id="gesture-help" role="status">Tap the small ones. Double-tap the big ones. Swipe the flying ones.</p><button type="button" class="end-button" id="end" hidden>End round</button></div><p class="keyboard-help" id="keyboard-help">Keyboard: Tab to a critter. Enter for roaches. Hold Space on a mouse, then Enter on the cage. Shift + Enter flicks an ant. Escape cancels.</p>
+</section><aside class="sidebar"><section class="control-card"><p class="eyebrow">01 / MAKE A LITTLE SPACE</p><h2>Ready to<br>room-ble?</h2><fieldset id="mode-options"><legend>Choose your round</legend><div class="duration-options"><label><input type="radio" name="duration" value="60" checked><span><b>1 minute</b><small>A quick clean</small></span></label><label><input type="radio" name="duration" value="120"><span><b>2 minutes</b><small>Double the chaos</small></span></label></div></fieldset><button type="button" class="primary-button" id="start">Let them out <span aria-hidden="true">↗</span></button><p class="control-note">Four corner holes. One busy room.<br>Keep the little visitors under control.</p></section>
+<section class="how-to-play"><p class="eyebrow">THE FIELD GUIDE</p><div class="guide-card"><span class="guide-art" data-guide="small" aria-hidden="true"></span><div><h3>Small &amp; speedy <b>+1</b></h3><p>One tap. One tiny victory.</p></div></div><div class="guide-card"><span class="guide-art" data-guide="big" aria-hidden="true"></span><div><h3>Big &amp; stubborn <b>+2</b></h3><p>Tap twice, quickly. The first tap makes it pause.</p></div></div><div class="guide-card"><span class="guide-art flying-guide" data-guide="flying" aria-hidden="true"></span><div><h3>Taking the scenic route <b>+3–4</b></h3><p>Swipe flying roaches: small +3, big +4. Taps won’t do.</p></div></div><div class="guide-card"><span class="guide-art" data-guide="mouse" aria-hidden="true"></span><div><h3>A very quick visitor <b>+5</b></h3><p>Hold still for 0.5s, then drag into the cage above.</p></div></div><div class="guide-card ant-guide"><span class="guide-art" data-guide="ant" aria-hidden="true"></span><div><h3>Ants are friends <b>−1</b></h3><p>Let it leave, or flick it out. Tapping loses a point.</p></div></div></section><p class="quiet-note">All cute. No creepy.<br>Just a little room for quick hands.</p></aside></div>
+<p class="sr-only" id="announcements" aria-live="polite" aria-atomic="true"></p><footer><span id="offline-status" role="status">A tiny room, wherever you are.</span><span class="site-copyright">© Copyright 2026 Sky Yip. All rights reserved.</span></footer></main><noscript><p class="noscript-note">Enable JavaScript to play Roach Rush.</p></noscript></body></html>

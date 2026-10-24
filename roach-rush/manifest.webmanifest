@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "Roach Rush \u00b7 Sky\u2019s Playground",
+  "short_name": "Roach Rush",
+  "description": "A cute timed room arcade. Tap, double-tap, swipe and catch mice.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3eb",
+  "theme_color": "#f6f3eb",
+  "icons": [
+    {
+      "src": "../grid-rush/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../grid-rush/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -272,7 +272,7 @@ try{
   assert.equal(await fresh.locator('.pikmin .pikmin-art').count(),30);
   pass('both modes and all growth artwork work offline after installation, including a fresh offline tab');
   await offline.context.setOffline(false);await offline.page.locator('.playground-home').click();await offline.page.waitForURL(new URL('../',base).href);
-  assert.equal(await offline.page.locator('.card').count(),5);await offline.context.close();
+  assert.equal(await offline.page.locator('.card').count(),7);await offline.context.close();
   assert.deepEqual(errors,[]);pass('All games navigation works and no uncaught browser errors occur');
   console.log(`\n${checks} Pikmin Fling browser checks passed. Screenshots: ${output}`);
 }finally{await browser.close();}

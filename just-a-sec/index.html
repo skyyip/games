@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TZ646NJ9');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f8f6f0">
+<meta name="description" content="One shared target. Hold for 1–20 seconds using only your inner clock. Closest player wins.">
+<meta name="apple-mobile-web-app-title" content="Just a Sec">
+<title>Just a Sec · Sky’s Playground</title>
+<link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="../grid-rush/playground-ui.css">
+<script src="../grid-rush/src/navigation.js"></script>
+<script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
+<script type="module" src="./src/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#app">Skip to game</a>
+<header class="site-top">
+  <a class="brand" href="./" aria-label="Just a Sec home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="11"/><path d="M16 11v7l4 2M12 2h8M25 6l3 3"/></svg><span>just a sec<span class="brand-dot">.</span></span></a>
+  <a class="playground-home" href="../" aria-label="All games"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
+  <span class="header-note">A LITTLE MOMENT. A CLOSE CALL.</span>
+</header>
+<main id="app" tabindex="-1">
+  <section class="intro"><div><p class="eyebrow"><svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M5 19 19 5"/></svg> THE INNER CLOCK CLUB</p><h1>Good timing.<br><em>No peeking.</em></h1></div><p>No clocks. Just a feeling.<br>One small moment to get just right.</p></section>
+  <div class="game-layout">
+    <section class="play-panel" aria-label="Time perception game">
+      <div class="stage-top"><span class="eyebrow" id="stage-label">MAKE A LITTLE TIME</span><button type="button" id="end-round" class="text-button" hidden>End round <span aria-hidden="true">↗</span></button><span class="edition" id="edition">01 / THE TIMING GAME</span></div>
+      <section id="welcome" class="scene welcome-scene" aria-labelledby="welcome-title">
+        <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-back"></div><div class="orbit orbit-front"></div><span class="float-note note-a">A little early?</span><span class="float-note note-b">Right on time.</span><div class="clock-face"><span class="clock-label">FEEL THE MOMENT</span><span class="clock-number">08<span>s</span></span><svg viewBox="0 0 56 22"><path d="M4 13q11 12 23 0t25 0"/></svg></div><span class="art-dot dot-a"></span><span class="art-dot dot-b"></span></div>
+        <h2 id="welcome-title">How good is<br>your inner clock?</h2><p>Pick your people. We’ll pick the seconds.</p><div class="mini-rule"><span>01</span><p>Hold to start. Let go to lock.</p></div>
+      </section>
+      <section id="handoff" class="scene" aria-labelledby="handoff-title" hidden>
+        <div class="player-stack" aria-hidden="true"><span class="stack-back"></span><span class="stack-mid"></span><span class="player-initial" id="monogram">1</span></div><p class="eyebrow">A MOMENT FOR</p><h2 id="handoff-title"><span id="next-player" translate="no"></span><span class="brand-dot">.</span></h2><p>Everyone gets the same target.<br>Keep your guess to yourself.</p><div class="target-chip"><span>Your target</span><b><span id="handoff-target">—</span><small>s</small></b></div><button type="button" class="primary-button" id="ready">I’m ready <span aria-hidden="true">↗</span></button>
+      </section>
+      <section id="play" class="scene play-scene" aria-labelledby="play-title" hidden>
+        <div class="turn-line"><span id="turn-count" class="eyebrow"></span><span class="turn-name" id="turn-name" translate="no"></span></div><h2 id="play-title">Make it <span id="target">—</span><span class="seconds-word"> seconds.</span></h2><p id="hold-help">Press and hold. Release when it feels right.</p>
+        <div class="hold-area"><div class="pad-orbit" aria-hidden="true"></div><button type="button" class="hold-pad" id="hold" aria-label="Hold to start timing; release to lock your guess" aria-describedby="hold-help keyboard-help"><span class="pad-surface"><svg class="fingerprint" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 39v-7a18 18 0 0 1 36 0v7M21 45V32a11 11 0 0 1 22 0v13M28 49V32a4 4 0 0 1 8 0v15M14 46l-2 6M21 51l-2 7M28 55l-1 5M36 53l2 7M43 51l3 5M50 45l3 5"/></svg><span id="pad-label">Hold to begin</span><span class="pad-small" id="pad-small">YOUR TIME STARTS WITH YOU</span></span></button></div>
+        <p id="keyboard-help" class="keyboard-help">Mouse or touch: hold the circle. Keyboard: hold Space or Enter.</p><p id="cancel-note" class="cancel-note" role="status"></p>
+      </section>
+      <section id="locked" class="scene locked-scene" aria-labelledby="locked-title" hidden><div class="lock-seal" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m12 24 8 8 16-17"/></svg></div><p class="eyebrow">A MOMENT, CAPTURED.</p><h2 id="locked-title">Guess locked.</h2><p>Your time stays secret<br>until everyone has had a turn.</p><div class="locked-receipt"><span id="locked-name" translate="no"></span><span class="receipt-status">LOCKED IN <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"/></svg></span></div><button type="button" class="primary-button" id="next">Pass the moment <span aria-hidden="true">↗</span></button></section>
+      <section id="result" class="scene results-scene" aria-labelledby="result-title" hidden><p class="eyebrow">THE CLOSEST MOMENT</p><svg class="winner-art" viewBox="0 0 64 64" aria-hidden="true"><path d="m32 7 7 15 17 2-12 12 3 17-15-8-15 8 3-17L8 24l17-2Z"/></svg><h2 id="result-title"></h2><p id="result-note"></p><div class="result-target"><span>The target was</span><strong id="result-target"></strong></div><ol class="standings" id="standings" aria-label="Results ranked by timing accuracy"></ol><button type="button" class="primary-button" id="again">Another moment <span aria-hidden="true">↗</span></button><button type="button" class="text-button" id="change-players">Change players</button></section>
+      <div class="round-tracker" id="round-tracker" aria-label="Player turns" hidden><div class="tracker-ink" aria-hidden="true"></div><ol id="turns"></ol></div>
+      <div class="stage-bottom"><span>Less counting. More feeling.</span><svg viewBox="0 0 42 16" aria-hidden="true"><path d="M2 8h35m-7-6 7 6-7 6"/></svg></div>
+    </section>
+    <aside class="sidebar">
+      <section class="setup-card" id="setup" aria-labelledby="setup-title"><p class="eyebrow">01 / GATHER YOUR PEOPLE</p><h2 id="setup-title">Better<br>by the second.</h2><p class="setup-copy">Two to six people. One shared moment.</p><div class="count-control"><span>Players</span><div><button type="button" id="minus" aria-label="Remove a player">−</button><output id="player-count">2</output><button type="button" id="plus" aria-label="Add a player">+</button></div></div><div class="player-rows" id="rows"></div><button type="button" id="start" class="primary-button">Find our moment <span aria-hidden="true">↗</span></button><p class="footnote">A random target from 1 to 20 seconds.<br>The closest guess wins.</p></section>
+      <section class="round-card" id="round-card" hidden><span class="eyebrow">ONE TARGET. ALL YOURS.</span><p class="round-target"><span id="side-target"></span><small>s</small></p><p>Same seconds. Different feelings.</p><div class="round-people" id="round-people"></div></section>
+      <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol><li><b>Share a target.</b><span>Each round draws one whole number from 1 to 20 seconds for everyone.</span></li><li><b>Feel it out.</b><span>Hold the circle to start. Let go when you think the target time has passed. No timer or progress clues.</span></li><li><b>Keep it secret.</b><span>Pass the device. Times stay hidden until everyone finishes. Closest wins; equal errors share the win.</span></li></ol></details><div class="quiet-note"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12 15V9a4 4 0 0 1 8 0v6M9 15h14v12H9z"/></svg><p>No sign-ups. No saved names.<br>Just a good sense of time.</p></div>
+    </aside>
+  </div>
+  <p id="announcements" class="sr-only" aria-live="polite" aria-atomic="true"></p><footer><span id="offline-status" role="status">A little time, wherever you are.</span><span class="site-copyright">© Copyright 2026 Sky Yip. All rights reserved.</span></footer>
+</main><noscript><p class="noscript-note">Enable JavaScript to play Just a Sec.</p></noscript>
+</body></html>
