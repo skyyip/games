@@ -12,7 +12,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1530">
 <meta name="apple-mobile-web-app-title" content="Tap &amp; Spill">
-<title>水滿則溢 Tap &amp; Spill · Sky’s Playground</title>
+<title>Tap &amp; Spill · Sky’s Playground</title>
 <link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -89,33 +89,33 @@ button{font:inherit;color:#fff;border:0;cursor:pointer}
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <div id="app">
-  <a id="back" class="playground-home" href="../" aria-label="回到 Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
+  <a id="back" class="playground-home" href="../" aria-label="Back to Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
   <canvas id="cv"></canvas>
   <div id="vig"></div>
   <div id="touch"></div>
   <header id="hud" hidden>
     <div id="av"></div>
     <div id="who"><b id="whoName"></b><small id="mode"></small></div>
-    <button id="mute" aria-label="音效">🔊</button>
+    <button id="mute" aria-label="Sound effects">🔊</button>
   </header>
-  <div id="tension" hidden>表面張力！別再加了…</div>
-  <div id="tag" hidden>溢出失敗！</div>
+  <div id="tension" hidden>Surface tension! Don’t add any more…</div>
+  <div id="tag" hidden>Overflow! You lose!</div>
   <div id="bottom" hidden><p id="hint" role="status" aria-live="polite"></p><button class="btn" id="go"></button></div>
 
   <section id="setup" class="panel">
-    <h1>💧 水滿則溢</h1>
-    <p class="sub">Tap &amp; Spill · 輪流注水，讓杯子溢出的人就輸了</p>
-    <div class="count"><button id="minus" aria-label="減少玩家">−</button><span id="cnt"></span><button id="plus" aria-label="增加玩家">+</button></div>
+    <h1>💧 Tap &amp; Spill</h1>
+    <p class="sub">Tap &amp; Spill · Take turns pouring. Whoever overflows the glass loses.</p>
+    <div class="count"><button id="minus" aria-label="Remove a player">−</button><span id="cnt"></span><button id="plus" aria-label="Add a player">+</button></div>
     <div id="rows" class="res"></div>
-    <button class="btn" id="start" style="margin-top:auto">開始遊戲</button>
+    <button class="btn" id="start" style="margin-top:auto">Start game</button>
   </section>
 
   <section id="result" class="panel" hidden>
     <h1 id="loser"></h1>
     <p class="sub" id="roundInfo"></p>
     <div id="stats" class="res"></div>
-    <button class="btn" id="again" style="margin-top:auto">再來一局</button>
-    <button class="btn alt" id="toSetup">修改玩家</button>
+    <button class="btn" id="again" style="margin-top:auto">Another game</button>
+    <button class="btn alt" id="toSetup">Edit players</button>
   </section>
 </div>
 <footer class="tap-footer"><p class="site-copyright">&copy; Copyright 2026 Sky Yip. All rights reserved.</p></footer>
@@ -123,7 +123,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script type="module">
 import { wrongFeedback, animateChange, reducedMotion } from '../grid-rush/src/playground-ui.js';
 import { springStep } from '../grid-rush/src/motion.js';
+import { getLanguage } from '../grid-rush/src/language.js';
 'use strict';
+const playerName = number => getLanguage() === 'zh-Hant' ? `玩家 ${number}` : `Player ${number}`;
 const $ = s => document.querySelector(s);
 const W = 360, H = 640;
 const MAX_RATE = 420;      // units/sec at fully open tap
@@ -370,7 +372,7 @@ class GameStateMachine {
 
 /* ---------- App glue ---------- */
 const audio = new AudioFx(), sm = new GameStateMachine(), sim = new WaterSimulation($('#cv'));
-let setupPlayers = Array.from({ length: 2 }, (_, i) => ({ name: '玩家' + (i + 1), color: COLORS[i] }));
+let setupPlayers = Array.from({ length: 2 }, (_, i) => ({ name: playerName(i + 1), color: COLORS[i] }));
 let beatAt = 0, vigPhase = 0, last = performance.now(), toastT = 0;
 
 const input = new InputHandler($('#touch'), {
@@ -380,7 +382,7 @@ const input = new InputHandler($('#touch'), {
     if (sm.state !== 'TURN') return;
     if (sm.endPour()) showHandoff();
     else {
-      hint('太短了！至少注水 ' + MIN_TIME + ' 秒或 ' + MIN_POUR + ' 單位，再按住一次');
+      hint(`Too short! Pour for at least ${MIN_TIME} seconds or ${MIN_POUR} units. Hold again to continue.`);
       wrongFeedback($('#hint'));
     }
   }
@@ -388,28 +390,28 @@ const input = new InputHandler($('#touch'), {
 
 function hint(t) { $('#hint').textContent = t; animateChange($('#hint')); }
 function renderSetup() {
-  $('#cnt').textContent = setupPlayers.length + ' 位玩家';
+  $('#cnt').textContent = setupPlayers.length + ' players';
   $('#rows').innerHTML = '';
   setupPlayers.forEach((p, i) => {
     const r = document.createElement('div'); r.className = 'row';
-    const sw = document.createElement('button'); sw.className = 'sw'; sw.style.background = p.color; sw.setAttribute('aria-label', '換顏色');
+    const sw = document.createElement('button'); sw.className = 'sw'; sw.style.background = p.color; sw.setAttribute('aria-label', 'Change colour');
     sw.onclick = () => { // next colour not used by anyone else
       const used = setupPlayers.map(q => q.color);
       for (let k = 1; k <= COLORS.length; k++) { const c = COLORS[(COLORS.indexOf(p.color) + k) % COLORS.length]; if (!used.includes(c)) { p.color = c; break; } }
       sw.style.background = p.color;
       animateChange(sw);
     };
-    const inp = document.createElement('input'); inp.value = p.name; inp.maxLength = 10; inp.setAttribute('aria-label', '玩家 ' + (i + 1) + ' 名稱'); inp.oninput = () => p.name = inp.value;
+    const inp = document.createElement('input'); inp.value = p.name; inp.maxLength = 10; inp.setAttribute('aria-label', 'Player ' + (i + 1) + ' name'); inp.oninput = () => p.name = inp.value;
     r.append(sw, inp); $('#rows').append(r);
   });
 }
 function resize(n) {
   n = clamp(n, 2, 6);
-  while (setupPlayers.length < n) { const i = setupPlayers.length; setupPlayers.push({ name: '玩家' + (i + 1), color: COLORS.find(c => !setupPlayers.some(p => p.color === c)) }); }
+  while (setupPlayers.length < n) { const i = setupPlayers.length; setupPlayers.push({ name: playerName(i + 1), color: COLORS.find(c => !setupPlayers.some(p => p.color === c)) }); }
   setupPlayers.length = n; renderSetup();
 }
 function newGame() {
-  sm.start(setupPlayers.map((p, i) => ({ name: p.name.trim() || '玩家' + (i + 1), color: p.color })));
+  sm.start(setupPlayers.map((p, i) => ({ name: p.name.trim() || playerName(i + 1), color: p.color })));
   sim.reset(); audio.flow(0);
   for (const s of ['#setup', '#result', '#tag', '#tension']) $(s).hidden = true;
   $('#hud').hidden = $('#bottom').hidden = false;
@@ -417,15 +419,15 @@ function newGame() {
 }
 function showHandoff() {
   const p = sm.cur;
-  $('#av').style.background = p.color; $('#whoName').textContent = '當前輪到：' + p.name;
+  $('#av').style.background = p.color; $('#whoName').textContent = 'Current turn: ' + p.name;
   $('#touch').classList.remove('on'); $('#go').hidden = false;
-  $('#go').textContent = `${p.name}：確認換人 / 開始注水`;
-  hint('把裝置交給 ' + p.name); $('#mode').textContent = '';
+  $('#go').textContent = `${p.name}: Confirm handoff / Start pouring`;
+  hint('Pass the device to ' + p.name); $('#mode').textContent = '';
 }
 function startTurn() {
   audio.ensure(); sm.beginTurn();
   $('#touch').classList.add('on'); $('#go').hidden = true;
-  hint('按住畫面注水，放開即換人');
+  hint('Hold the screen to pour. Release to pass the turn.');
 }
 function overflow() {
   input.end(); input.id = null;
@@ -438,8 +440,8 @@ function overflow() {
 }
 function showResult() {
   $('#tag').hidden = true; $('#hud').hidden = true;
-  $('#loser').innerHTML = `<span style="color:${sm.loser.color}">${esc(sm.loser.name)}</span> 溢出了！💦`;
-  $('#roundInfo').textContent = `本局共 ${sm.rounds} 輪 · 杯子容量 ${sm.capacity} 單位`;
+  $('#loser').innerHTML = `<span style="color:${sm.loser.color}">${esc(sm.loser.name)}</span> spilled the glass! 💦`;
+  $('#roundInfo').textContent = `${sm.rounds} rounds · Glass capacity ${sm.capacity} units`;
   const max = Math.max(...sm.players.map(p => p.total));
   $('#stats').innerHTML = sm.players.map(p => `<div><div class="n"><span>${p === sm.loser ? '💦 ' : ''}${esc(p.name)}</span><span>${Math.round(p.total)}</span></div><div class="bar" style="width:${Math.max(3, p.total / max * 100)}%;background:${p.color}"></div></div>`).join('');
   $('#result').hidden = false;
@@ -452,7 +454,7 @@ function frame(now) {
   if (sm.state === 'TURN' && input.active) {
     const target = input.read(now);
     sim.opening += (target - sim.opening) * Math.min(1, 14 * dt);
-    $('#mode').textContent = input.mode === 'pressure' ? '感壓模式：越用力水越大' : '相容模式：按越久／往下滑越大';
+    $('#mode').textContent = input.mode === 'pressure' ? 'Pressure mode: press harder for more water' : 'Standard mode: hold longer or slide down for more water';
     audio.flow(sim.opening);
     if (sm.pour(MAX_RATE * Math.pow(sim.opening, 1.5) * dt, dt)) { sim.level = sm.level; overflow(); }
   } else sim.opening += (0 - sim.opening) * Math.min(1, 10 * dt);

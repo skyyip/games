@@ -177,7 +177,7 @@ function renderLeaderboard() {
     const date = document.createElement('p');
     date.className = 'record-date';
     date.textContent = record
-      ? new Date(record.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      ? new Date(record.date).toLocaleDateString(document.documentElement.lang, { month: 'short', day: 'numeric', year: 'numeric' })
       : ['A spot for your fastest run', 'Room for another good one', 'Go on. Make it yours.'][index];
     detail.append(time, date);
     item.append(rank, detail);

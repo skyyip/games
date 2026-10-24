@@ -9,6 +9,7 @@ let checks = 0;
 const pass = message => { checks++; console.log(`PASS ${message}`); };
 const contextFor = async options => {
   const context = await browser.newContext({ serviceWorkers:'block',...options });
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
   context.on('page', page => page.on('pageerror', error => errors.push(error.message)));
   return context;

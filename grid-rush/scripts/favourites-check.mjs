@@ -10,6 +10,7 @@ const errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
   if(init)await context.addInitScript(init);
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
@@ -132,7 +133,7 @@ try {
     await star(fallback.page,'tap-and-spill').click();await settled(fallback.page);
     assert.equal((await order(fallback.page))[0],'tap-and-spill');
     assert.equal(await star(fallback.page,'tap-and-spill').getAttribute('aria-pressed'),'true');
-    if(mode!=='corrupt')assert.match(await fallback.page.locator('#favourite-announcement').textContent(),/Saved for this visit/);
+    if(mode!=='corrupt')assert.match(await fallback.page.locator('#favourite-announcement').textContent(),/Saved for this visit|本次瀏覽保留/);
     await fallback.context.close();pass(`${mode} storage does not prevent starring, reordering or game links`);
   }
   assert.deepEqual(errors,[]);pass('no uncaught errors during repeated toggles, navigation, touch or unavailable storage');

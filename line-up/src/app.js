@@ -1,12 +1,14 @@
 import { LineGame } from './game.js';
+import { getLanguage } from '../../grid-rush/src/language.js';
 import { pointAt, projectPoint, segmentPath, selectionFraction, SHAPE_NAMES } from './geometry.js';
 import { animateChange } from '../../grid-rush/src/playground-ui.js';
 
+const playerName = number => getLanguage() === 'zh-Hant' ? `玩家 ${number}` : `Player ${number}`;
 const $ = selector => document.querySelector(selector);
 const game = new LineGame();
 const stage = $('#path-stage');
 const panelIds = { setup:'setup', handoff:'handoff', choosing:'play', results:'result' };
-let names = ['Player 1','Player 2'];
+let names = [playerName(1),playerName(2)];
 let draft, gesture = null;
 const clamp = value => Math.max(0,Math.min(1,value));
 const format = value => value > 1e-9 && value < .01 ? '< 0.01' : value.toFixed(2);
@@ -113,7 +115,7 @@ function showState() {
 }
 
 function startRound() {
-  game.start(names);renderLine();showState();
+  game.start(names.map((name,index)=>name.trim()||playerName(index+1)));renderLine();showState();
 }
 
 function renderResults() {
@@ -211,7 +213,7 @@ $('#whole-outline').addEventListener('click',()=>{if(game.state==='choosing' && 
 $('#lock').addEventListener('click',()=>{if(!gesture && game.submit(draft.start,draft.end,draft.otherSide))showState();});
 $('#ready').addEventListener('click',()=>{if(game.beginTurn())showState();});
 $('#player-form').addEventListener('submit',event=>{event.preventDefault();startRound();});
-$('#plus').addEventListener('click',()=>{if(names.length<6){names.push(`Player ${names.length+1}`);renderPlayers();}});
+$('#plus').addEventListener('click',()=>{if(names.length<6){names.push(playerName(names.length+1));renderPlayers();}});
 $('#minus').addEventListener('click',()=>{if(names.length>2){names.pop();renderPlayers();}});
 $('#again').addEventListener('click',startRound);
 $('#change-players').addEventListener('click',()=>{game.reset();resetDraft();showState();$('#setup').scrollIntoView({block:'start',behavior:'auto'});$('#setup-title').focus({preventScroll:true});});

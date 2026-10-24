@@ -16,6 +16,7 @@ const silenceAnalytics = context => context.route('https://www.googletagmanager.
 await mkdir(output, { recursive: true });
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(context);
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
@@ -80,6 +81,7 @@ try {
   }
 
   const mobile = await browser.newContext({ viewport: { width:375,height:812 }, isMobile:true,hasTouch:true });
+  await mobile.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(mobile);
   await mobile.addInitScript(() => {
     window.haptics = [];
@@ -124,7 +126,7 @@ try {
   await protocol.send('Input.dispatchTouchEvent', { type:'touchStart',touchPoints:[{x:bounds.x+bounds.width/2,y:bounds.y+bounds.height/2}] });
   await touchPage.waitForTimeout(40);
   await protocol.send('Input.dispatchTouchEvent', { type:'touchEnd',touchPoints:[] });
-  assert.match(await touchPage.locator('#hint').textContent(), /太短了/);
+  assert.match(await touchPage.locator('#hint').textContent(), /Too short!/);
   assert.equal(await touchPage.evaluate(() => window.haptics.length), 1);
   assert.equal(await touchPage.locator('.playground-home').count(), 1);
   pass('Tap & Spill supports six mobile players and gives haptic feedback on an invalid short pour');
@@ -132,6 +134,7 @@ try {
   await mobile.close();
 
   const noHaptics = await browser.newContext({ reducedMotion:'reduce' });
+  await noHaptics.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(noHaptics);
   await noHaptics.addInitScript(() => Object.defineProperty(navigator,'vibrate',{value:undefined}));
   const quiet = await noHaptics.newPage();

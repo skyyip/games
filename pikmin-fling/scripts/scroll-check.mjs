@@ -16,6 +16,7 @@ async function swipe(page,protocol,point,dy=-100){
 try{
   await mkdir(output,{recursive:true});
   const context=await browser.newContext({viewport:{width:375,height:812},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
   const page=await context.newPage();await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.locator('#start').tap();

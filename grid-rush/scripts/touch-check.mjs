@@ -39,6 +39,7 @@ function assertStable(before, after) {
 
 try {
   const context = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**', route => route.fulfill({contentType:'text/javascript',body:''}));
   const page = await context.newPage();
   const errors = [];

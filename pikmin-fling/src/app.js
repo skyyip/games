@@ -97,7 +97,7 @@ function renderRecords() {
     const suffix=document.createElement('small');suffix.textContent=timed?'pts':'s';score.append(suffix);
     if(newRank===index+1){const badge=document.createElement('span');badge.className='record-new';badge.textContent='NEW RECORD';score.append(badge);}
     const date=document.createElement('time');date.className='record-date';date.dateTime=record.date;
-    date.textContent=new Date(record.date).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    date.textContent=new Date(record.date).toLocaleDateString(document.documentElement.lang,{month:'short',day:'numeric'});
     row.append(rank,score,date);fragment.append(row);
   });
   if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Twenty seconds. Make every Pikmin count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}

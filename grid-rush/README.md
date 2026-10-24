@@ -21,6 +21,30 @@ Open **http://localhost:5173/grid-rush/**. The same server also serves the landi
 npm test
 ```
 
+## English and Traditional Chinese
+
+Use **中 / EN** beside the landing-page logo and title to choose a language. The choice
+applies to all five games, including instructions, controls, results and accessible
+labels. Traditional Chinese is the default; a saved choice takes precedence. The browser remembers the preference under
+`playground.language.v1`; if storage is blocked or full, internal links carry the
+selection in `?lang=zh-Hant` or `?lang=en` instead. Player names, game symbols and
+stored scores retain their original values.
+
+Shared messages live in `src/translations.js`; `src/language.js` translates static
+markup and newly rendered text without replacing controls or changing game state.
+Keep player-name nodes excluded from translation. When adding messages, use named
+placeholders for changing values and `name` / `names` for literal player text.
+All four installable games cache both language files for offline play; bump their
+cache versions when updating shared translations or language behavior.
+
+With the server running, verify both languages, full game rounds, persistence and
+offline launches using:
+
+```sh
+GRID_RUSH_PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
+node scripts/language-check.mjs
+```
+
 ## Install as an app
 
 1. Run `npm start` and open **http://localhost:5173/grid-rush/** in Chrome, Edge, or Safari.

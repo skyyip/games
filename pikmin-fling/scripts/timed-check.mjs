@@ -9,6 +9,7 @@ const key='pikmin-fling.records.v2',errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init=()=>{Math.random=()=>0;}) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
   await context.addInitScript(init);
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
@@ -130,7 +131,7 @@ try{
   await feed(quiet.page,'flower');await quiet.page.clock.runFor(550);
   assert.equal(await quiet.page.locator('#score').textContent(),'3');assert.equal(await quiet.page.locator('#score').evaluate(el=>el.getAnimations().length),0);
   await quiet.page.clock.fastForward(21000);assert.equal(await quiet.page.locator('#final-time').textContent(),'3');
-  assert.match(await quiet.page.locator('#storage-status').textContent(),/unavailable/);assert.equal(await quiet.page.locator('.record').count(),1);
+  assert.match(await quiet.page.locator('#storage-status').textContent(),/unavailable|無法/);assert.equal(await quiet.page.locator('.record').count(),1);
   await quiet.context.close();pass('reduced motion gives immediate readable scores and keyboard play still saves in-memory results with blocked storage');
 
   const offline=await setup({serviceWorkers:'allow'});

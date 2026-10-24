@@ -1,3 +1,4 @@
+import './language.js';
 import { springStep, magneticOffset, resistedDrag, shouldDismiss } from './motion.js';
 
 export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');

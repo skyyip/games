@@ -59,6 +59,7 @@ function stable(before, after) {
 }
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(context);
   const page = await context.newPage();
   const errors = [];
@@ -348,6 +349,7 @@ try {
   }
 
   const mobile = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  await mobile.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(mobile);
   const touchPage = await mobile.newPage();
   await touchPage.addInitScript(()=>{Math.random=()=>0;});
@@ -409,12 +411,13 @@ try {
   pass('touch counts on contact, never resizes cells, finishes before release, and replays deliberately');
 
   const denied = await browser.newContext();
+  await denied.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(denied);
   await denied.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked', 'SecurityError'); } }));
   const deniedPage = await denied.newPage();
   deniedPage.on('pageerror', error => errors.push(error.message));
   await deniedPage.goto(baseURL);
-  assert.match(await deniedPage.locator('#storage-note').textContent(), /unavailable/);
+  assert.match(await deniedPage.locator('#storage-note').textContent(), /unavailable|無法/);
   await deniedPage.locator('#start').click();
   await finish(deniedPage);
   assert.equal(await deniedPage.locator('.record-empty').count(), 2);

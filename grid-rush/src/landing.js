@@ -78,4 +78,9 @@ function cancelAnimations() {
 reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)cancelAnimations();});
 window.addEventListener('resize',cancelMoves);
 window.addEventListener('pagehide',cancelAnimations);
+document.addEventListener('languagechange',()=>{
+  cancelAnimations();
+  document.querySelector('#favourite-announcement').textContent='';
+  render();
+});
 render();

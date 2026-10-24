@@ -14,6 +14,7 @@ const silenceAnalytics = context => context.route('https://www.googletagmanager.
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(context);
   const page = await context.newPage();
   const errors = [];
@@ -104,6 +105,7 @@ try {
 
   for (const width of [320, 375]) {
     const mobile = await browser.newContext({ viewport: { width, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+    await mobile.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
     await silenceAnalytics(mobile);
     const mobilePage = await mobile.newPage();
     mobilePage.on('pageerror', error => errors.push(error.message));
@@ -129,6 +131,7 @@ try {
   }
 
   const denied = await browser.newContext();
+  await denied.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await silenceAnalytics(denied);
   await denied.addInitScript(() => {
     Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked', 'SecurityError'); } });
@@ -136,7 +139,7 @@ try {
   const deniedPage = await denied.newPage();
   deniedPage.on('pageerror', error => errors.push(error.message));
   await deniedPage.goto(baseURL);
-  assert.match(await deniedPage.locator('#storage-note').textContent(), /unavailable/);
+  assert.match(await deniedPage.locator('#storage-note').textContent(), /unavailable|無法/);
   await deniedPage.locator('#start').click();
   for (let index = 0; index < 9; index += 1) await deniedPage.locator('.tile').nth(index).click();
   assert.equal(await deniedPage.locator('#result').isVisible(), true);

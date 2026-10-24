@@ -9,6 +9,7 @@ const key='pikmin-fling.records.v2',errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
+  await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({contentType:'text/javascript',body:''}));
   if(init)await context.addInitScript(init);
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
@@ -252,7 +253,7 @@ try{
   const flight=await reduced.page.locator('.flying-pikmin').evaluate(el=>({transform:el.style.transform,opacity:Number(el.style.opacity)}));
   await reduced.page.waitForTimeout(90);const later=await reduced.page.locator('.flying-pikmin').evaluate(el=>({transform:el.style.transform,opacity:Number(el.style.opacity)}));
   assert.equal(later.transform,flight.transform);assert.ok(later.opacity<flight.opacity);
-  await finishByKeyboard(reduced.page);assert.match(await reduced.page.locator('#storage-status').textContent(),/unavailable/);
+  await finishByKeyboard(reduced.page);assert.match(await reduced.page.locator('#storage-status').textContent(),/unavailable|無法/);
   assert.equal(await reduced.page.locator('.record').count(),1);await reduced.context.close();
   pass('reduced motion disables roaming/bobbing, fades flights, supports keyboard completion and works with blocked storage');
   const corrupt=await setup({},()=>{if(location.protocol.startsWith('http')){localStorage.setItem('pikmin-fling.records.v2','not JSON');localStorage.setItem('pikmin-fling.records.v1','old records');}});

@@ -9,6 +9,7 @@ const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'pl
 // installation is intentionally unavailable in incognito browser contexts.
 const profile = await mkdtemp(join(tmpdir(), 'grid-rush-pwa-'));
 const context = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true });
+await context.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
 await context.route('https://www.googletagmanager.com/**', route => route.fulfill({ contentType:'text/javascript', body:'' }));
 // Headless Chrome cannot complete the native installation UI. Exercise the
 // instructions fallback deterministically; installability is checked via CDP.
@@ -92,6 +93,7 @@ try {
   pass('a fresh tab can launch the cached app while the network is offline');
 
   const standalone = await browser.newContext();
+  await standalone.addInitScript(() => { try { localStorage.setItem('playground.language.v1', 'en'); } catch { /* Storage-denial tests use the default language. */ } });
   await standalone.route('https://www.googletagmanager.com/**', route => route.fulfill({ contentType:'text/javascript', body:'' }));
   await standalone.addInitScript(() => {
     const original = window.matchMedia.bind(window);

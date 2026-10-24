@@ -52,7 +52,12 @@ h2{margin:0 0 6px;font-size:24px;letter-spacing:-.01em}
 .card:hover .play i{transform:translateX(6px)}
 footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-.playground-brand{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.playground-brand{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;margin-bottom:24px}
+.language-switch{display:flex;justify-content:flex-end;gap:4px}
+.language-switch[hidden]{display:none}
+.language-switch button{min-width:26px;min-height:28px;padding:4px;border:1px solid var(--line);border-radius:7px;background:var(--glass);color:#cbd5e1;font:inherit;font-size:11px;cursor:pointer;touch-action:manipulation}
+.language-switch button[aria-pressed=true]{background:#a5b4fc26;border-color:#a5b4fc;color:#fff}
+.language-switch button:focus-visible{outline:3px solid #a5b4fc;outline-offset:3px}
 .playground-brand img{flex-shrink:0;width:72px;height:72px;border-radius:20px;border:1px solid #ffffff24;box-shadow:0 8px 28px #0003;animation:logo-bounce 1800ms ease-in-out infinite}
 @keyframes logo-bounce{0%,100%{transform:scale(1)}20%,60%{transform:scale(1.18)}40%,80%{transform:scale(.92)}}
 .playground-brand .eyebrow{background:none;border:0;padding:0;font-size:11px;letter-spacing:.12em;text-transform:none}
@@ -69,9 +74,9 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 @keyframes card-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:640px){
   main{padding:32px 16px calc(28px + env(safe-area-inset-bottom))}
-  .playground-brand{gap:10px;margin-bottom:22px}.playground-brand img{width:52px;height:52px;border-radius:14px}
+  .playground-brand{gap:8px;margin-bottom:22px}.playground-brand img{width:52px;height:52px;border-radius:14px}
   .playground-brand .eyebrow{font-size:10px;letter-spacing:.08em}
-  h1{font-size:clamp(22px,6vw,34px);line-height:1.05}
+  h1{font-size:clamp(17px,4.5vw,28px);line-height:1.05}
   .lead{font-size:14px;line-height:1.65;margin-bottom:28px;max-width:340px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   .card{border-radius:18px;min-width:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:#ffffff0d}
@@ -114,7 +119,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <main>
-  <header class="playground-brand"><img src="./grid-rush/assets/icons/icon-192.png" width="72" height="72" alt=""><h1>Your Playground<span class="title-dot">.</span></h1></header>
+  <header class="playground-brand">
+    <img src="./grid-rush/assets/icons/icon-192.png" width="72" height="72" alt="">
+    <h1 translate="no">Your Playground<span class="title-dot">.</span></h1>
+    <div class="language-switch" role="group" aria-label="Language / 語言" hidden>
+      <button type="button" data-language="zh-Hant" lang="zh-Hant" aria-label="繁體中文" aria-pressed="true">中</button>
+      <button type="button" data-language="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+    </div>
+  </header>
   <p class="lead">Made for a little break. Stay for another round.</p>
 
   <p id="favourite-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
@@ -150,14 +162,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </article>
 
     <article class="game-card" data-game="tap-and-spill">
-      <button class="favourite-button" type="button" aria-label="Favourite: 水滿則溢 Tap &amp; Spill" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <button class="favourite-button" type="button" aria-label="Favourite: Tap &amp; Spill" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="tap-and-spill/" style="--accent:#38bdf8;--art:linear-gradient(135deg,#0ea5e9,#4338ca)">
       <div class="art">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M20 12h56l-8 76H28z" fill="#ffffff2e" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M24 42c10-6 18 6 24 0s14-6 24 0l-4 46H28z" fill="#bae6fd"/></svg>
       </div>
       <div class="body">
         <div class="tags"><span>2–6 players</span><span>Pass &amp; play</span></div>
-        <h2>水滿則溢 Tap &amp; Spill</h2>
+        <h2>Tap &amp; Spill</h2>
         <p>Take turns filling the glass. Whoever makes it overflow loses.</p>
         <span class="play">Play now <i>→</i></span>
       </div>
