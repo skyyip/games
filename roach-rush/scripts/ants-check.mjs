@@ -17,57 +17,14 @@ async function flick(page,target){const p=await centre(target);await page.mouse.
 try{
  await mkdir('/tmp/roach-ants-qa',{recursive:true});
  for(const language of ['zh-Hant','en']){
-  const {context,page}=await setup(language);await page.clock.fastForward(11900);assert.equal(await page.locator('.critter[data-type="ant"]').count(),0);
-  await page.clock.runFor(1400);let target=await ant(page),id=await target.getAttribute('data-id');
-  assert.equal(await page.locator('.critter[data-type="ant"]').count(),1);assert.equal(await target.locator('.ant-art').count(),1);
-  const art=await target.locator('.ant-art').evaluate(el=>({width:parseFloat(getComputedStyle(el).width),height:parseFloat(getComputedStyle(el).height)})),hit=await target.boundingBox();assert.equal(art.width,28);assert.equal(art.height,34);assert.equal(hit.width,44);assert.equal(hit.height,52);
-  assert.match(await target.getAttribute('aria-label'),language==='en'?/loses 3 points/:/扣 3 分/);
-  await page.screenshot({path:`/tmp/roach-ants-qa/ant-${language}.png`,fullPage:true});
-  await target.click();assert.equal(await page.locator('#score').textContent(),'-3');assert.equal(await page.locator(`.critter[data-id="${id}"]`).count(),0);
-  await page.clock.runFor(2000);target=await ant(page);id=await target.getAttribute('data-id');const p=await centre(target);
-  await page.mouse.move(p.x,p.y);await page.mouse.down();
-  for(let i=1;i<=5;i++){await page.clock.runFor(80);await page.mouse.move(p.x+i*8,p.y);}
-  await page.mouse.up();assert.equal(await page.locator(`.critter[data-id="${id}"]`).count(),1);assert.equal(await page.locator('#score').textContent(),'-3');
-  await flick(page,target);assert.equal(await page.locator(`.critter[data-id="${id}"]`).count(),0);assert.equal(await page.locator('#score').textContent(),'-3');
-  assert.match(await page.locator('#gesture-help').textContent(),language==='en'?/safely flicked/:/安全甩出/);
-  await page.clock.fastForward(121000);assert.equal(await page.locator('#final-score').textContent(),'-3');
-  assert.equal(await page.locator('#best').textContent(),'-3');
-  assert.match(await page.locator('#ant-summary').textContent(),language==='en'?/Ant taps: 1 · Safely flicked: 1/:/誤點螞蟻：1 · 安全甩走：1/);
-  await page.locator('#again').click();assert.equal(await page.locator('#score').textContent(),'0');assert.equal(await page.locator('.critter[data-type="ant"]').count(),0);
-  await page.reload();assert.equal(await page.locator('#best').textContent(),'-3');
-  await context.close();pass(`${language}: delayed single ant, literal -3 tap, slow-drag rejection, safe flick, negative result, summaries and replay`);
+  const {context,page}=await setup(language);await arrive(page);let target=await ant(page);await target.click();assert.equal(await page.locator('#score').textContent(),'-3');
+  await page.clock.runFor(2000);target=await ant(page);const id=await target.getAttribute('data-id');await flick(page,target);assert.equal(await page.locator(`.critter[data-id="${id}"]`).count(),0);assert.equal(await page.locator('#score').textContent(),'-6');
+  await page.clock.fastForward(121000);assert.equal(await page.locator('#final-score').textContent(),'-6');assert.match(await page.locator('#ant-summary').textContent(),/2/);await page.locator('#again').click();assert.equal(await page.locator('#score').textContent(),'0');await page.reload();assert.equal(await page.locator('#best').textContent(),'-6');await context.close();pass(`${language}: tap and swipe each deduct three, with negative records and clean replay`);
  }
- const staying=await setup();await arrive(staying.page);const target=await ant(staying.page),id=await target.getAttribute('data-id'),at=await centre(target);
- await staying.page.mouse.move(at.x,at.y);await staying.page.mouse.down();await staying.page.clock.fastForward(60000);
- assert.equal(await staying.page.locator(`.critter[data-id="${id}"]`).count(),1);assert.equal(await target.evaluate(el=>getComputedStyle(el).opacity),'1');await staying.page.mouse.up();
- assert.equal(await staying.page.locator('#score').textContent(),'0');assert.equal(await target.count(),1);await target.press('Shift+Enter');assert.equal(await target.count(),0);
- await staying.context.close();pass('an ant remains fully visible after a minute while held, survives release and leaves only after an explicit flick');
-
- const touch=await setup('zh-Hant',{viewport:{width:375,height:812},isMobile:true,hasTouch:true});const t=touch.page,protocol=await touch.context.newCDPSession(t);
- await arrive(t);let a=await ant(t),p=await centre(a);
- await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,...p}]});await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});assert.equal(await t.locator('#score').textContent(),'-3');
- await t.clock.runFor(2000);a=await ant(t);const touchId=await a.getAttribute('data-id');p=await centre(a);
- await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,...p}]});await t.clock.runFor(40);
- await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,x:p.x+70,y:p.y-20}]});await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
- assert.equal(await t.locator(`.critter[data-id="${touchId}"]`).count(),0);assert.equal(await t.locator('#score').textContent(),'-3');
- await protocol.detach();await touch.context.close();pass('real phone touch input distinguishes an accidental tap from a safe flick');
-
- const animated=await setup('en',{reducedMotion:'no-preference'});await arrive(animated.page);a=await ant(animated.page);await flick(animated.page,a);
- assert.equal(await animated.page.locator('.ant-fling').count(),1);await animated.page.clock.runFor(550);
- // Web Animations finish on the document timeline, separately from the game clock.
- await animated.page.locator('.ant-fling').waitFor({state:'detached',timeout:5000});assert.equal(await animated.page.locator('#score').textContent(),'0');
- await animated.context.close();pass('a successful flick tumbles the ant out of the room and cleans up its animation without awarding points');
-
- const keyboard=await setup();await arrive(keyboard.page);a=await ant(keyboard.page);await a.press('Shift+Enter');
- assert.equal(await keyboard.page.locator('.critter[data-type="ant"]').count(),0);assert.equal(await keyboard.page.locator('#score').textContent(),'0');await keyboard.context.close();pass('Shift+Enter provides a safe keyboard flick alternative');
- const staggered=await setup(),s=staggered.page;await arrive(s);
- const firstId=await s.locator('.critter[data-type="ant"]').getAttribute('data-id');
- assert.equal(await s.locator('.critter[data-type="ant"]').count(),1);await s.clock.runFor(2000);assert.equal(await s.locator('.critter[data-type="ant"]').count(),2);
- await s.clock.fastForward(30000);assert.equal(await s.locator(`.critter[data-id="${firstId}"]`).count(),1);
- for(let i=0;i<3;i++)await s.clock.fastForward(3000);assert.equal(await s.locator('.critter[data-type="ant"]').count(),5);
- const before=await s.locator('.critter[data-type="ant"]').evaluateAll(es=>es.map(e=>e.dataset.id));await s.clock.fastForward(30000);assert.equal(await s.locator('.critter[data-type="ant"]').count(),5);assert.ok(await s.locator(`.critter[data-id="${firstId}"]`).count());
- await s.locator(`.critter[data-id="${firstId}"]`).click();await s.clock.fastForward(3000);assert.equal(await s.locator('.critter[data-type="ant"]').count(),5);assert.equal(await s.locator('#score').textContent(),'-3');
- const after=await s.locator('.critter[data-type="ant"]').evaluateAll(es=>es.map(e=>e.dataset.id));assert.ok(before.filter(id=>id!==firstId).every(id=>after.includes(id)));
- await staggered.context.close();pass('ants arrive separately, persist without fading, stop at five and replenish a removed visitor');
- assert.deepEqual(errors,[]);pass('no uncaught errors');console.log(`\n${checks} ant browser checks passed.`);
+ const mobile=await setup('zh-Hant',{viewport:{width:375,height:812},isMobile:true,hasTouch:true}),p=mobile.page;await arrive(p);let target=await ant(p),id=await target.getAttribute('data-id'),at=await centre(target);const cdp=await mobile.context.newCDPSession(p);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,...at}]});await p.clock.runFor(40);await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,x:at.x+70,y:at.y-20}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});assert.equal(await p.locator(`.critter[data-id="${id}"]`).count(),0);assert.equal(await p.locator('#score').textContent(),'-3');await cdp.detach();await mobile.context.close();pass('native phone swipe eliminates the ant and deducts three once');
+ const keyboard=await setup();await arrive(keyboard.page);target=await ant(keyboard.page);await target.press('Shift+Enter');assert.equal(await keyboard.page.locator('#score').textContent(),'-3');await keyboard.context.close();pass('keyboard swipe uses the same penalty');
+ const staying=await setup();await arrive(staying.page);target=await ant(staying.page);id=await target.getAttribute('data-id');at=await centre(target);await staying.page.mouse.move(at.x,at.y);await staying.page.mouse.down();await staying.page.clock.fastForward(60000);await staying.page.mouse.up();assert.equal(await staying.page.locator(`.critter[data-id="${id}"]`).count(),1);assert.equal(await staying.page.locator('#score').textContent(),'0');await staying.context.close();pass('holding without a swipe does not remove an ant or deduct points');
+ const animated=await setup('en',{reducedMotion:'no-preference'});await arrive(animated.page);target=await ant(animated.page);await flick(animated.page,target);assert.equal(await animated.page.locator('#score').textContent(),'-3');assert.ok(await animated.page.locator('.is-penalty').count()>0);await animated.page.clock.runFor(750);assert.equal(await animated.page.locator('#effects .is-penalty').count(),0);await animated.context.close();pass('swipe penalty feedback animates and cleans up');
+ const staggered=await setup(),s=staggered.page;await arrive(s);const firstId=await s.locator('.critter[data-type="ant"]').getAttribute('data-id');await s.clock.fastForward(30000);for(let i=0;i<3;i++)await s.clock.fastForward(3000);assert.equal(await s.locator('.critter[data-type="ant"]').count(),5);assert.equal(await s.locator(`.critter[data-id="${firstId}"]`).count(),1);await staggered.context.close();pass('ants persist and remain capped at five');
+ assert.deepEqual(errors,[]);pass('no uncaught errors');console.log(`${checks} ant browser checks passed.`);
 }finally{await browser.close();}

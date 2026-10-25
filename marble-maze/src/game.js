@@ -53,7 +53,7 @@ export class MazeGame {
       }
       if(this.pending&&this.elapsed>=this.pending.at){const route=[...this.level.routes[this.pending.route]].reverse();this.lastRoute=this.pending.route;this.bombs.push({id:++this.bombId,route,index:this.pending.route,progress:0,...routeAt(route,0),phase:0});this.pending=null;events.push('bomb');}
       const before={x:this.ball.x,y:this.ball.y};
-      this.ball.vx+=(this.input.x*11-this.ball.vx*3.2)*dt;this.ball.vy+=(this.input.y*11-this.ball.vy*3.2)*dt;
+      this.ball.vx+=(this.input.x*16.5-this.ball.vx*3.2)*dt;this.ball.vy+=(this.input.y*16.5-this.ball.vy*3.2)*dt;
       if(moveBall(this.ball,this.level.grid,dt))this.wallHits++;
       let collision=false;
       for(const bomb of this.bombs){const old={x:bomb.x,y:bomb.y};bomb.progress+=this.level.bombSpeed*dt;Object.assign(bomb,routeAt(bomb.route,bomb.progress));bomb.phase+=dt*7;

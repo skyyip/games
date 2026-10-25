@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {buildDeck,shuffleDeck,pokerHand,bigTwoHand,singleCard,compareKeys} from '../src/cards.js';import {PokerGame} from '../src/game.js';
+import {buildDeck,shuffleDeck,pokerHand,bigTwoHand,singleCard,compareKeys,describeHand} from '../src/cards.js';import {PokerGame} from '../src/game.js';
 const c=(rank,suit=0)=>({rank,suit,id:suit*13+rank-2}),compare=(a,b)=>compareKeys(pokerHand(a).key,pokerHand(b).key);
 test('a shuffled deck has all 52 unique cards, four suits and thirteen ranks',()=>{const deck=shuffleDeck(()=>.3);assert.equal(deck.length,52);assert.equal(new Set(deck.map(c=>c.id)).size,52);for(let suit=0;suit<4;suit++)assert.equal(deck.filter(c=>c.suit===suit).length,13);assert.deepEqual([...deck].sort((a,b)=>a.id-b.id),buildDeck());});
 test('all nine stud categories follow ordinary five-card poker order',()=>{
@@ -28,3 +28,5 @@ test('every mode supports uninterrupted alternating turns for two through six pl
   for(const mode of ['stud','big-two','single'])for(let count=2;count<=6;count++){const game=new PokerGame();game.start(Array.from({length:count},(_,i)=>`Player ${i+1}`),{mode});const picks=count*(mode==='single'?1:5);for(let id=0;id<picks;id++){assert.equal(game.state,'choosing');assert.equal(game.turn,id%count);assert.equal(game.pick(id),true);}assert.equal(game.state,'results');assert.equal(game.results.length,count);assert.ok(game.winners.length>=1);assert.ok(game.hands.every(h=>h.length===(mode==='single'?1:5)));assert.equal(game.pick(40),false);}
 });
 test('validation, literal names and reset are safe',()=>{const game=new PokerGame();assert.throws(()=>game.start(['A']),TypeError);assert.throws(()=>game.start(['A','B'],{mode:'other'}),RangeError);game.start(['<script>','B']);assert.equal(game.players[0],'<script>');assert.equal(game.pick(-1),false);game.reset();assert.equal(game.pick(0),false);assert.equal(game.used.size,0);});
+
+test('result descriptions identify matching ranks and wheel high cards without changing hand rankings',()=>{assert.equal(describeHand([c(12),c(12,1),c(14),c(9),c(3)]),'One pair: Q');assert.equal(describeHand([c(12),c(12,1),c(12,2),c(9),c(9,1)]),'Full house: Q over 9');assert.equal(describeHand([c(14),c(2,1),c(3,2),c(4,3),c(5)]),'Straight: 5 high');assert.equal(describeHand([c(12,3)],{mode:'single'}),'Single card: Q ♠');});

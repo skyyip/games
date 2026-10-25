@@ -9,3 +9,8 @@ for (const type of ['pageswap','pagereveal']) {
     if(matchMedia('(prefers-reduced-motion: reduce)').matches)viewTransition.skipTransition();
   });
 }
+
+// Keep both game clicks while suppressing the browser's double-click zoom action.
+document.addEventListener('dblclick',event=>{
+ if(!event.target.closest?.('input,textarea,[contenteditable="true"]'))event.preventDefault();
+},{passive:false});

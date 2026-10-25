@@ -7,3 +7,5 @@ Twelve unit tests cover the full 144-piece set and 42 faces, rank equivalence an
 The browser check exercises complete English and Traditional Chinese paired matches, both player winners, repeated tied pairs, retained target/used tiles, result comparisons for both players, random sudden-death order on replay, a single-copy Spring target, offline paired play, literal winner names and ribbons, draw suppression, and the renamed mode button’s scroll/focus behaviour with normal and reduced motion. Responsive checks keep all 144 tiles in one viewport at 320×568, 375×812, 430×932, 568×320, 812×375, 768×1024 and 1440×1050.
 
 Standalone/opaque sandbox checks cover both modes and replay. Chromium emulates touch; physical Safari hardware is not covered.
+
+Current table layout uses minimum 44×60px tap targets and vertical scrolling, replacing the earlier all-tiles-in-one-viewport layout. All seven viewport checks and the 19-gameplay-check suite pass. Bamboo marks now use red and green.

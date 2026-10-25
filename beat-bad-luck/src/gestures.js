@@ -21,7 +21,7 @@ export function strokeShape(stroke){
  return circle>.25?{gesture:'circle',progress:circle}:{gesture:'rub',progress:rub};
 }
 export function finishStroke(stroke,time){
- const shape=strokeShape(stroke);if(shape.progress>=1)return {gesture:shape.gesture};
+ const shape=strokeShape(stroke);if(shape.progress>=1)return {gesture:shape.gesture,strength:clamp(stroke.length/Math.max(100,time-stroke.time)/2+stroke.length/700)};
  const distance=Math.hypot(stroke.lastX-stroke.x,stroke.lastY-stroke.y);
  if(distance>=60)return {gesture:'heavy',strength:clamp(distance/230+distance/Math.max(40,time-stroke.time)/3)};
  if(distance<=24&&stroke.length<45)return {gesture:'tap'};

@@ -75,3 +75,5 @@ src/records.js             Validated top-three records and legacy migration
 See [VERIFICATION.md](./VERIFICATION.md) for validation results.
 
 On fixed phone play views, the spray/trap toolbar reserves 58 CSS pixels plus the bottom safe-area inset below its controls. This keeps drag starts away from the iPhone home gesture region. Both manual cage captures and trap captures now award six points; stored historical scores are retained.
+
+Ants now lose 3 points when swiped as well as tapped/sprayed. Both a swipe that starts on an ant and a flying-roach swipe that crosses an ant remove it once; the keyboard swipe has the same penalty.

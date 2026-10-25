@@ -89,8 +89,6 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 @keyframes incense-flutter{from{transform:rotate(-5deg) scale(.94,1)}to{transform:rotate(6deg) scale(1.04,.88)}}
 
 .gesture-controls{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;width:100%;max-width:360px}
-.toggle-controls{min-height:44px;min-width:150px;padding:7px 14px;border:1px solid #b8c49d77;border-radius:10px;background:#233e36;color:#efd8a1;font-size:10px;cursor:pointer}
-.toggle-controls:hover,.toggle-controls[aria-expanded=true]{border-color:var(--gold);background:#46583b}
 .gesture-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;max-width:none}
 .gesture-tools button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:50px;padding:5px 2px;font-size:9px}
 .gesture-tools button span{display:block;margin:0;font-size:18px;line-height:1}
@@ -103,3 +101,21 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
  .is-playing .hit-feedback{bottom:calc(var(--control-space) + 50px)}
 }
 @media(prefers-reduced-motion:reduce){.paper-teardrop,.incense-stick.is-lit:after{animation:none!important}.paper-cry-face .paper-teardrop{opacity:1;transform:none}}
+.paper-head{transform-origin:70px 70px}.paper-arm-left{transform-origin:49px 74px}.paper-arm-right{transform-origin:89px 74px}.paper-leg-left{transform-origin:53px 137px}.paper-leg-right{transform-origin:83px 137px}
+.paper-cry-mouth{transform-box:fill-box;transform-origin:center;transform:scaleY(calc(1 + var(--hit-strength,.2)*.45))}
+.paper-cry-face .paper-teardrop{animation-duration:calc(.7s - var(--hit-strength,.2)*.25s)}
+.paper-bit{position:absolute;left:50%;top:45%;width:10px;height:13px;background:#eddbac;clip-path:polygon(0 10%,70% 0,100% 40%,60% 65%,85% 100%,10% 85%);animation:paper-bit-fly .75s ease-out forwards}
+@keyframes paper-bit-fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--turn));opacity:0}}
+.impact-word{position:absolute;left:50%;top:44%;translate:-50% 0;padding:5px 12px;border:2px solid #f4dc9d;border-radius:12px;background:#a25a49;color:#fff0c3;font:500 22px var(--display);animation:impact-word-pop .7s ease-out forwards;white-space:nowrap}
+@keyframes impact-word-pop{0%{scale:.4;opacity:0}25%{scale:1.15;opacity:1}65%{scale:1;opacity:1}100%{translate:-50% -25px;opacity:0}}
+.tram{width:73px;height:92px;border:0;background:none;top:37%;opacity:.42;filter:drop-shadow(0 4px 0 #18392d66)}.tram svg{display:block;width:100%;height:100%;animation:tram-wobble .6s ease-in-out infinite alternate}
+@keyframes tram-wobble{to{transform:translateY(2px) rotate(2deg)}}
+/* Text always has its own opaque surface above the moving background. */
+.phase-panel .phase-instruction{position:relative;z-index:6;margin:0;padding:6px 9px;border:1px solid #b9c49d66;border-radius:8px;background:#1a3334;color:#fff0cf;font-size:11px;line-height:1.5;text-shadow:none;max-width:100%}
+.hit-feedback{position:relative;z-index:6;background:#193234;border:1px solid #b7bd8b66;border-radius:9px;padding:5px 10px;max-width:100%;color:#ffe1a0;font-size:14px;line-height:1.3;min-height:29px;text-align:center}
+.qte-call{z-index:8;pointer-events:none;background:#a94d3d;border:2px solid #f5dba0;color:#fff5d8;box-shadow:0 3px 0 #533d2e;font-size:12px;line-height:1.3}
+.is-fed .pork-piece{scale:1}.is-ready .tiger-mouth{transform:scale(1.85,1.65)}
+.gesture-controls{gap:0}.gesture-tools{display:grid}
+@media(max-height:650px){.is-playing .phase-panel .phase-instruction{font-size:9px;padding:4px 6px}.is-playing .hit-feedback{font-size:12px;min-height:25px;padding:4px 8px}}
+@media(max-height:450px) and (min-aspect-ratio:4/3){.is-playing .beat-panel,.is-playing .beat-panel:has(.gesture-tools:not([hidden])){--control-space:56px}.is-playing .beat-panel .phase-instruction{position:absolute;font-size:9px;max-width:160px;right:0}.is-playing .hit-feedback{position:absolute;max-width:155px;width:auto;right:0;font-size:12px}.is-playing .qte-call{font-size:10px;max-width:170px}}
+@media(prefers-reduced-motion:reduce){.paper-bit,.impact-word{display:none}.tram svg{animation:none}}

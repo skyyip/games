@@ -33,7 +33,7 @@ The landing language carries into the game, defaulting to Traditional Chinese. T
 
 See [VERIFICATION.md](./VERIFICATION.md). Optional browser QA: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright-module node scripts/browser-check.mjs`.
 
-The compact table measures available width and viewport height and chooses columns and tile dimensions that fit the complete set. Tiles are intentionally smaller than 44px to show all 144 pieces at once, as requested. Portrait and landscape layouts keep the target and current player visible. Resizing, rotation and font loading recalculate the layout.
+The table uses tiles at least 44px wide and 60px tall, with vertical scrolling for the full set. The target and current player stay above the scrollable deck. Resizing, rotation and font loading recalculate the columns. Bamboo pips use alternating red/green accents.
 
 Ivory faces have dark, saturated markings; jade backs display the website logo. The winner receives a gold name badge and trophy, with a short ribbon burst after the final tile reveal. Replay cancels pending celebration work. Reduced-motion preferences keep the static badge and trophy.
 

@@ -7,3 +7,5 @@ Ten Chromium/Playwright browser checks pass for full English/Traditional Chinese
 The full repository unit suite passes 255 tests, including the recent toy-car UI and mahjong matching model. Local standalone and opaque sandbox previews are separately checked for complete matches, Chinese rules and replay. Actual physical device browser testing is not covered.
 
 The latest checks cover immediate first picks and consecutive picks without a confirmation button, shared logo backs, literal winner names, trophy rendering, a 36-piece animated ribbon burst, replay cleanup and reduced motion.
+
+Ten gameplay checks pass with explicit matching-rank hand descriptions. A deterministic match verifies the result text includes a pair of queens alongside the five revealed faces.

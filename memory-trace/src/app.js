@@ -3,11 +3,12 @@ import {MemoryBoard} from './board.js';
 import {mountPlayers,literal,enableOffline} from '../../grid-rush/src/party-ui.js';
 import {translate} from '../../grid-rush/src/language.js';
 const $=q=>document.querySelector(q),game=new MemoryGame(),board=new MemoryBoard($('#board')),players=mountPlayers($('#players'));
+const drawingColors=['#c44357','#2869b0','#8c51ad','#c07b14','#2b8c82','#744930'];
 let strokes=[],pointer=null,current=null,frame=0,timer=0,review=0,cursor={x:.5,y:.5},keyboard=false,pen=false;
 const say=text=>{$('#announcements').textContent=text;};
 function paint(){
   const answer=game.state==='results'?game.answers[review]:null;
-  board.draw({target:['viewing','results'].includes(game.state)?game.shape.points:null,strokes:answer?.drawing??(game.state==='drawing'?strokes:[]),cursor:keyboard&&game.state==='drawing'?cursor:null,pen});
+  board.draw({target:['viewing','results'].includes(game.state)?game.shape.points:null,strokes:game.state==='results'?[]:(game.state==='drawing'?strokes:[]),layers:game.state==='results'?game.answers.map(a=>({color:drawingColors[a.index],strokes:a.drawing})):[],cursor:keyboard&&game.state==='drawing'?cursor:null,pen});
 }
 function buttons(){const ink=strokes.some(s=>s.length>1);$('#submit').disabled=!ink||pointer!==null;$('#undo').disabled=!strokes.length;$('#clear').disabled=!strokes.length;}
 function render(){
@@ -20,7 +21,7 @@ function render(){
   else literal($('#turn-name'),state==='results'?'':game.players[Math.min(game.turn,game.players.length-1)]);
   if(state==='handoff')literal($('#next-player'),game.players[game.turn]);
   $('#phase-label').textContent=state==='viewing'?'THREE SECONDS. TAKE IT IN.':state==='drawing'?'YOUR MEMORY, IN A LITTLE LINE':state==='results'?'THE MEMORIES ARE IN':'A LITTLE LOOK GOES A LONG WAY';
-  $('#board-help').textContent=state==='viewing'?'Look at the outline, its size and where it sits.':state==='drawing'?'Draw the outline where it was. Position and size count too.':state==='results'?'Green is the original. Coral is the remembered outline.':'Everyone gets the same shape, position and three-second look.';
+  $('#board-help').textContent=state==='viewing'?'Look at the outline, its size and where it sits.':state==='drawing'?'Draw the outline where it was. Position and size count too.':state==='results'?'The green original and every player’s coloured drawing are shown together.':'Everyone gets the same shape, position and three-second look.';
   if(state==='locked')$('#next').textContent=game.turn===game.players.length-1?'Reveal our memories ↗':'Pass to the next player';
   $('#board').setAttribute('aria-label',state==='viewing'?'A special outline. Remember its shape and position.':state==='results'?'Original and remembered outlines compared.':'Memory drawing board');buttons();paint();
 }
@@ -65,6 +66,8 @@ function results(){
   review=game.winners[0].index;$('#result-title').textContent=game.winners.length>1?'A lovely shared memory.':'A memory worth celebrating.';literal($('#winner-names'),game.winners.map(r=>r.name).join(' & '));
   $('#standings').replaceChildren(...game.results.map(result=>{const row=document.createElement('li');row.className=`standing${game.winners.includes(result)?' is-winner':''}`;const place=document.createElement('span');place.textContent=String(game.results.findIndex(r=>r.percent===result.percent)+1).padStart(2,'0');const person=document.createElement('div'),name=document.createElement('strong'),detail=document.createElement('small'),score=document.createElement('output');literal(name,result.name);detail.textContent='Outline overlap';score.textContent=`${result.percent.toFixed(1)}%`;person.append(name,detail);row.append(place,person,score);return row;}));
   $('#review-tabs').replaceChildren(...game.answers.map(answer=>{const button=document.createElement('button');button.type='button';literal(button,answer.name);button.setAttribute('aria-pressed',String(answer.index===review));button.addEventListener('click',()=>{review=answer.index;for(const el of $('#review-tabs').children)el.setAttribute('aria-pressed',String(el===button));paint();$('#stage').scrollIntoView({block:'center',behavior:'instant'});});return button;}));
+  $('#drawing-gallery').replaceChildren(...game.answers.map(answer=>{const figure=document.createElement('figure'),canvas=document.createElement('canvas'),caption=document.createElement('figcaption');figure.className='drawing-comparison';figure.style.setProperty('--drawing-color',drawingColors[answer.index]);canvas.width=canvas.height=280;canvas.style.width='100%';canvas.style.aspectRatio='1';canvas.setAttribute('role','img');canvas.setAttribute('aria-label',translate('Original and remembered outlines compared.')+' · '+answer.name);literal(caption,`${answer.name} · ${answer.percent.toFixed(1)}%`);figure.append(canvas,caption);const comparison=new MemoryBoard(canvas);comparison.size=280;comparison.draw({target:game.shape.points,strokes:answer.drawing,color:drawingColors[answer.index]});return figure;}));
+  for(const [i,button]of [...$('#review-tabs').children].entries())button.style.setProperty('--drawing-color',drawingColors[i]);
   say('All drawings are complete. Compare your overlap percentages.');
 }
 function setup(){stopTimers();freshInk();game.reset();render();$('#player-fields').disabled=false;$('#start').focus({preventScroll:true});}

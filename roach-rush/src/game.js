@@ -126,6 +126,7 @@ export class RoachGame {
   swipe(id,distance){
     if(!this.active()||distance<SWIPE_DISTANCE)return null;
     const entity=this.entities.get(id);
+    if(entity?.type==='ant')return this.award(entity,'antsHit',-ANT_PENALTY);
     return entity?.type==='roach'&&entity.mode==='flying'?this.award(entity,'flying',FLYING_POINTS[entity.size]):null;
   }
   catchMouse(id,held,inCage){

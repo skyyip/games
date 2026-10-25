@@ -36,3 +36,5 @@ Twelve optional Chromium/Playwright checks cover:
 Standalone and opaque `allow-scripts` previews complete full two-player poker games and replay with embedded assets and Chinese rules. Phone ready/result screenshots were inspected. The existing landing favourites suite also passes 14 checks for all fifteen cards.
 
 Motion tests dispatch synthetic acceleration readings; physical iPhone/Android permission prompts and motion hardware remain untested. The button path requires no motion permission.
+
+Twelve gameplay checks pass with six persistent 3D faces, red/blue pips and expanded hand names. Focused checks verify cube identity across animation updates, opposite faces summing to seven, all five result faces per player and explicit pair/triple values.

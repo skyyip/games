@@ -139,3 +139,5 @@ All 18 games use `src/victory.js` (loaded by `src/playground-ui.js`) and `victor
 Showing a result adds the gold badge, decorative trophy and a 36-piece ribbon burst. Hiding the result cancels pending animation and removes particles. Reduced motion keeps the static badge and trophy. Mahjong delays the burst until its final tile reveal has settled. Every offline game caches the shared module and stylesheet.
 
 Run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node grid-rush/scripts/victory-check.mjs` from the repository root for presentation integration checks across all 18 games, including cleanup, literal names, reduced motion and maze loss suppression. The individual game browser checks exercise their actual round logic.
+
+The October mobile polish keeps game slogans within two lines at 320px in both languages and suppresses browser double-click zoom while preserving game clicks and custom gesture surfaces. All 24 touch/title checks pass; the repository unit suite has 286 passing tests.

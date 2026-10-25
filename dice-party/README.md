@@ -50,3 +50,5 @@ The landing language preference defaults to Traditional Chinese. Instructions, a
 The scoped service worker precaches local game/shared party modules, CSS, language files, fonts and icons. Once Ready to play offline appears, offline reloads can complete full matches. Updates wait until existing game windows close; bump `CACHE_NAME` after editing cached assets. Opaque previews skip registration and still play with the button.
 
 Optional browser QA: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright-module node scripts/browser-check.mjs`. See [VERIFICATION.md](./VERIFICATION.md).
+
+Dice now use six persistent 3D faces with continuous tumble animation and physical opposite faces totalling seven. Faces 1/4 use red pips; the other faces use blue. Results include small face diagrams and matching values in hand descriptions.

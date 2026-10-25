@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {evaluateHand,compareKeys,DiceGame,randomDie} from '../src/game.js';
+import {evaluateHand,compareKeys,DiceGame,randomDie,describeDice} from '../src/game.js';
 import {ShakeDetector} from '../src/motion.js';
 const compare=(a,b)=>compareKeys(evaluateHand(a).key,evaluateHand(b).key);
 test('every one of the 7776 five-dice outcomes belongs to the correct poker category',()=>{
@@ -54,3 +54,5 @@ test('gravity-only devices calibrate rest before detecting a shake',()=>{
   const d=new ShakeDetector(),e=x=>({accelerationIncludingGravity:{x,y:0,z:9.8}});
   assert.equal(d.sample(e(0),0),false);assert.equal(d.sample(e(0),60),false);assert.equal(d.sample(e(16),120),false);assert.equal(d.sample(e(-16),180),true);
 });
+
+test('dice result descriptions include faces for pairs, triples, full houses and straights',()=>{assert.equal(describeDice([6,6,1,2,3]),'One pair: 6');assert.equal(describeDice([5,5,5,2,2]),'Full house: 5 over 2');assert.equal(describeDice([4,4,4,2,1]),'Three dice: 4');assert.equal(describeDice([6,5,4,3,2]),'Five-dice straight: 2–6');});

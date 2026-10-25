@@ -30,3 +30,8 @@
 .turn-banner .turn-index{background:var(--player-color);color:#fff}
 .history-entry strong::before{content:'';display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--player-color)}
 .final-tiles .target-tile[data-player]{border-color:var(--player-color);border-width:2px;border-bottom-width:3px}
+
+/* Larger tiles trade table scrolling for reliable finger-sized targets. */
+#deck.tile-grid{max-height:min(620px,65dvh);overflow-y:auto;overflow-x:hidden;gap:3px;overscroll-behavior:contain}
+#deck .mahjong-tile{min-width:44px;min-height:60px;font-size:16px}
+.table-scroll-hint{display:block!important}

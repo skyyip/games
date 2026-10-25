@@ -55,3 +55,5 @@ All arrow-key launch handlers, simulated keyboard input and keyboard gameplay in
 ## Front-facing orientation refinement
 
 The later direction update replaces the angled side view with a centred front view: symmetrical front tyres, a centred windscreen/face and a level axle aligned with the road. Tyres use scrolling tread marks rather than side-facing rotating spokes. Body roll is limited to a small suspension movement. The cover is regenerated from the same frontal SVG. Pointer-only input, effort expressions, the pastel road, streaks, dust and translated whoosh remain.
+
+Fifteen gameplay checks pass after hiding speed/effort/range numeric percentages while retaining the visual bars, distances and records.

@@ -100,7 +100,7 @@ test('an accidental ant tap deducts three points exactly once, including below z
  const roach=game.spawnRoach(0);assert.equal(game.tap(roach.id).points,1);assert.equal(game.score,-2);
 });
 test('only a fast flick removes an ant safely, including after a long stay; late attempts cannot score',()=>{
- const {game,set}=setup();game.start();const ant=game.spawnAnt();assert.equal(game.swipe(ant.id,80),null);assert.equal(game.catchMouse(ant.id,1000,true),null);
+ const {game,set}=setup();game.start();const ant=game.spawnAnt();assert.equal(game.swipe(ant.id,10),null);assert.equal(game.catchMouse(ant.id,1000,true),null);
  assert.equal(game.flickAnt(ant.id,27,1),null);assert.equal(game.flickAnt(ant.id,80,.1),null);set(60000);game.advance(new Set([ant.id]));assert.equal(game.entities.has(ant.id),true);
  assert.equal(game.flickAnt(ant.id,80,.5).points,0);assert.equal(game.score,0);assert.equal(game.stats.antsFlicked,1);assert.equal(game.flickAnt(ant.id,80,.5),null);
  const late=game.spawnAnt();set(120000);assert.equal(game.tap(late.id),null);assert.equal(game.flickAnt(late.id,80,1),null);assert.equal(game.score,0);
@@ -127,3 +127,5 @@ test('four mice may coexist, a fifth is blocked, and capture allows a later repl
  assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,MAX_MICE);assert.equal(game.spawnMouse(),null);set(55000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,0);
  const mouse=[...game.entities.values()].find(e=>e.type==='mouse');assert.equal(game.catchMouse(mouse.id,500,true).points,6);set(67000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,1);assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,4);
 });
+
+test('swiping an ant deducts three points once and never treats mice or grounded roaches as flying targets',()=>{const {game}=setup();game.start();const ant=game.spawnAnt();assert.equal(game.swipe(ant.id,10),null);assert.equal(game.swipe(ant.id,80).points,-3);assert.equal(game.score,-3);assert.equal(game.stats.antsHit,1);assert.equal(game.swipe(ant.id,80),null);assert.equal(game.score,-3);const roach=game.spawnRoach(0);assert.equal(game.swipe(roach.id,80),null);});

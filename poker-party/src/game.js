@@ -1,4 +1,4 @@
-import {shuffleDeck,pokerHand,bigTwoHand,singleCard,compareKeys} from './cards.js';
+import {shuffleDeck,pokerHand,bigTwoHand,singleCard,compareKeys,describeHand} from './cards.js';
 export const MODES=['stud','big-two','single'];
 export class PokerGame {
   constructor({random=Math.random}={}){this.random=random;this.reset();}
@@ -18,7 +18,7 @@ export class PokerGame {
   }
   get results(){
     if(this.state!=='results')return [];
-    return this.hands.map((cards,index)=>({index,name:this.players[index],cards:[...cards],...(this.mode==='single'?{nameOfHand:'Single-card duel',key:singleCard(cards[0],{twoHigh:this.twoHigh})}:this.mode==='stud'?{nameOfHand:pokerHand(cards).name,key:pokerHand(cards).key}:{nameOfHand:bigTwoHand(cards).name,key:bigTwoHand(cards).key})})).sort((a,b)=>compareKeys(b.key,a.key)||a.index-b.index);
+    return this.hands.map((cards,index)=>({index,name:this.players[index],cards:[...cards],detail:describeHand(cards,{mode:this.mode}),...(this.mode==='single'?{nameOfHand:'Single-card duel',key:singleCard(cards[0],{twoHigh:this.twoHigh})}:this.mode==='stud'?{nameOfHand:pokerHand(cards).name,key:pokerHand(cards).key}:{nameOfHand:bigTwoHand(cards).name,key:bigTwoHand(cards).key})})).sort((a,b)=>compareKeys(b.key,a.key)||a.index-b.index);
   }
   get winners(){const r=this.results;return r.filter(p=>compareKeys(p.key,r[0]?.key??[])===0);}
 }

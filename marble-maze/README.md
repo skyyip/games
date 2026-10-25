@@ -13,3 +13,5 @@ All movement uses fixed 120 Hz steps, inertia, damping, bounded diagonal control
 Keyboard: arrows or W/A/S/D roll, two separate Space presses shake, P pauses and Escape pauses or cancels preparation. Touch supports held direction buttons and a two-press shake button. Sensor access is optional in chat previews. Reduced motion removes decorative fog/ring/limb effects while retaining essential marble, bomb and fog state feedback.
 
 The page defaults to Traditional Chinese and inherits the landing language choice. It has a favourite-enabled landing card, scoped offline caching, local Canvas/SVG artwork and local fonts. Run `npm start` and `npm test` inside this directory; no build or dependency installation is needed. Physical phone hardware and native iOS permission sheets were not directly exercised; sensor paths were tested with synthetic readings and touch through Chromium's device protocol.
+
+Tilt acceleration is 50% stronger, with the existing fixed-step collision solver and damping retained. Raised wall gradients, marble shading and layered UI shadows add depth. Landscape results use a compact trophy layout so both actions stay reachable.

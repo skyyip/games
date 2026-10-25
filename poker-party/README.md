@@ -25,3 +25,5 @@ Revealed cards use dark ink and saturated red on ivory, without dimming selected
 Each player has a stable, distinct colour shared by revealed-card borders, numeric owner badges, the current-turn badge and the player’s hand. Card ownership also references the player’s literal name for assistive technology.
 
 “Change game mode” resets the table, focuses the card-mode dropdown and scrolls its labelled control into view. Reduced-motion preferences skip the smooth scroll.
+
+Result descriptions identify the matching ranks (for example, One pair: Q), both ranks in full houses/two pairs and the high card of straights, alongside the revealed card faces.

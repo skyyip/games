@@ -9,3 +9,5 @@ Real touch input completed a maze at 320×568, 375×812, 812×375 and 768×1024.
 A standalone phone preview embeds all artwork, scripts, styles and fonts. It is tested inside an opaque `sandbox="allow-scripts"` iframe without forms or storage access: default Chinese, five maze choices, a successful physical run, one visit-only record and a fresh replay.
 
 Shared integration passed **26 UI checks**, **14 favourites checks** and **18 touch/title checks** across the twelve-game site, including seven viewport widths and intentional pinch zoom remaining available. Physical iPhones, native permission sheets, other engines and assistive technology were not directly exercised. Sensor readings were simulated; real Chromium touch events used the device protocol.
+
+The faster rolling/depth polish passes all 18 browser checks, including five actual route completions, fog/shake/bombs, sensor fallback, 320/375px portrait, 812px landscape, records and a full offline run. The compact landscape trophy keeps both result actions visible.

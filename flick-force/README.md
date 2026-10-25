@@ -48,3 +48,5 @@ See [VERIFICATION.md](./VERIFICATION.md) for validation details.
 The game and landing illustration share `src/car.js`. Run `npm run build:cover` after changing the character. The generated `assets/flick-car-cover.svg` is local and used by the landing card.
 
 The smaller frontal car emits three staggered rear exhaust puffs while coasting. They expand and fade behind the vehicle, freeze on pause and disappear at rest or with reduced motion.
+
+The speed/effort/range progress bars remain visible, while their numeric percentages are hidden. Distance and records retain their metre values.

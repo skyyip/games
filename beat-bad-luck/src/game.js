@@ -3,7 +3,7 @@ export const PHASES=['incense','worry','beat','tiger','blessing'];
 export const DURATIONS={incense:8000,worry:7000,beat:45000,tiger:7000,blessing:5000};
 export const BEAT_INTERVAL=60000/108;
 export const QTE_STEPS=[{at:4500,type:'double'},{at:11000,type:'heavy'},{at:17500,type:'rub'},{at:23500,type:'circle'},{at:29000,type:'pinch'},{at:35500,type:'rub'},{at:41000,type:'circle'}];
-const SPECIALS={rub:{power:5,points:28},circle:{power:8,points:40},pinch:{power:9,points:46}};
+const SPECIALS={rub:{min:3,power:6,points:28},circle:{min:5,power:8,points:40},pinch:{min:6,power:9,points:46}};
 export class RitualGame{
   constructor({now=()=>performance.now(),random=Math.random}={}){this.now=now;this.random=random;this.reset();}
   reset(){this.phase='setup';this.phaseStarted=0;this.started=0;this.pausedAt=null;this.lit=new Set();this.blown=false;this.prepared=false;this.worry='';this.kind='work';this.weapon='flipflop';this.look=0;this.hits=0;this.heavy=0;this.specials={rub:0,circle:0,pinch:0};this.perfect=0;this.damage=0;this.combo=0;this.bestCombo=0;this.score=0;this.lastHit=-Infinity;this.strikes=new Map();this.qte=null;this.qteIndex=0;this.qteSuccess=0;this.fed=false;this.fedAt=null;this.blessed=false;this.blessedAt=null;this.result=null;this.transitions=[];}
@@ -22,7 +22,7 @@ export class RitualGame{
   blow(){if(this.phase!=='incense'||this.pausedAt!==null||(this.lit.size!==3||this.blown))return false;this.blown=true;return true;}
   nameWorry(text,kind=this.kind){if(this.phase!=='worry'||this.pausedAt!==null)return false;this.worry=String(text).trim().slice(0,64)||this.worry;this.kind=WORRIES.some(w=>w.id===kind)?kind:this.kind;return true;}
   confirm(){if(this.phase!=='worry'||this.pausedAt!==null||this.prepared)return false;this.prepared=true;return true;}
-  hit({heavy=false,strength=0,pointer='keyboard',gesture=heavy?'heavy':'tap'}={}){
+  hit({heavy=false,strength=.5,pointer='keyboard',gesture=heavy?'heavy':'tap'}={}){
     this.advance();if(this.phase!=='beat'||this.pausedAt!==null||!['tap','heavy','rub','circle','pinch'].includes(gesture))return null;
     heavy=gesture!=='tap';
     const now=this.now();if(now-(this.strikes.get(pointer)??-Infinity)<55)return null;
@@ -30,9 +30,10 @@ export class RitualGame{
     const distance=this.elapsed%BEAT_INTERVAL,perfect=Math.min(distance,BEAT_INTERVAL-distance)<=95;
     this.combo=now-this.lastHit<=800?this.combo+1:1;this.lastHit=now;this.bestCombo=Math.max(this.bestCombo,this.combo);
     const special=SPECIALS[gesture];
-    const power=special?.power??(heavy?3+Math.round(Math.max(0,Math.min(1,Number(strength)||0))*4):1);
+    const effort=Math.max(0,Math.min(1,Number(strength)||0));
+    const power=special?special.min+Math.round(effort*(special.power-special.min)):(heavy?3+Math.round(effort*4):1);
     const before=this.papers;this.damage+=power;this.hits++;if(heavy)this.heavy++;if(special)this.specials[gesture]++;if(perfect)this.perfect++;
-    const points=Math.round((special?.points??(heavy?18+power*2:10))*(perfect?1.5:1)+Math.min(this.combo,30)*.3);this.score+=points;
+    const points=Math.round((special?special.points+(power-special.min)*2:(heavy?18+power*2:10))*(perfect?1.5:1)+Math.min(this.combo,30)*.3);this.score+=points;
     let qteComplete=false;
     if(this.qte&&this.elapsed<=this.qte.ends){if(this.qte.type==='double'||(this.qte.type==='heavy'&&heavy)||this.qte.type===gesture)this.qte.progress++;if(this.qte.progress>=this.qte.required){this.score+=30;this.qteSuccess++;this.qte=null;qteComplete=true;}}
     return {perfect,power,points,paperCleared:this.papers>before,qteComplete,heavy,gesture,combo:this.combo};

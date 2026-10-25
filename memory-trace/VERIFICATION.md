@@ -22,3 +22,5 @@ Ten optional Chromium/Playwright checks pass:
 Both the embedded standalone preview and an opaque `allow-scripts` sandbox complete a full two-player game and replay with Chinese UI. Modules, fonts, CSS and icons are embedded. Isolated frames use their native three-second timer. Mobile view/drawing/results screenshots were inspected.
 
 The shared landing favourites suite passes 14 checks with all fifteen games. Tests emulate touch in Chromium; physical Safari/pen hardware is not covered.
+
+Ten gameplay checks pass after adding the all-player result gallery. A focused six-player match verifies six coloured drawings, six individual comparison canvases and the shared original outline.

@@ -81,10 +81,9 @@ try{
   for(const [width,height] of [[320,568],[375,812],[430,932],[568,320],[812,375],[768,1024],[1440,1050]]){
     const {context,page}=await setup({width,height,language:'zh-Hant'});await click(page,'#start');await page.waitForTimeout(100);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-    const fits=await page.locator('.mahjong-tile, #target').evaluateAll(elements=>elements.every(e=>{const r=e.getBoundingClientRect();return r.top>=-.5&&r.bottom<=innerHeight+.5&&r.left>=0&&r.right<=innerWidth+.5;}));
-    assert.equal(fits,true,'all 144 tiles must be visible without scrolling');
+    const sizes=await page.locator('.mahjong-tile').evaluateAll(elements=>elements.map(e=>e.getBoundingClientRect()));assert.ok(sizes.every(r=>r.width>=43.9&&r.height>=59.9),'every tile has a finger-sized target');
     assert.equal(await page.locator('.mahjong-tile').count(),143);
-    await context.close();pass(`${width}×${height}: revised pair instructions and all 144 tiles fit`);
+    await context.close();pass(`${width}×${height}: large tiles remain reachable in the scrolling table`);
   }
   {
     const {context,page}=await setup();await page.locator('#mode').selectOption('sudden');

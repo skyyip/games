@@ -15,7 +15,7 @@ export class MazeBoard {
     for(let y=0;y<level.size;y++)for(let x=0;x<level.size;x++){
       const xx=x*s,yy=y*s;
       if(level.grid[y][x]){c.fillStyle=(x+y)%2?'#ede6cf':'#f0ead6';c.fillRect(xx,yy,s,s);c.fillStyle='#d8ccae38';c.fillRect(xx+s*.15,yy+s*.77,s*.33,.6);}
-      else{c.fillStyle='#aebf98';c.fillRect(xx,yy+2,s,s);c.fillStyle='#c3d1ad';c.fillRect(xx,yy,s,s-2);if(level.grid[y+1]?.[x]){c.fillStyle='#96ab85';c.fillRect(xx,yy+s-3,s,3);}if(level.grid[y]?.[x+1]){c.fillStyle='#b0c29a';c.fillRect(xx+s-2,yy,2,s);}if(level.grid[y-1]?.[x]){c.fillStyle='#d5dfc0';c.fillRect(xx,yy,s,1.2);}}
+      else{c.shadowColor='#38573266';c.shadowBlur=4;c.shadowOffsetY=4;c.fillStyle='#789b73';c.fillRect(xx,yy+4,s,s);c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetY=0;const wall=c.createLinearGradient(xx,yy,xx+s,yy+s);wall.addColorStop(0,'#e3ebcd');wall.addColorStop(.5,'#bfd1a3');wall.addColorStop(1,'#96b582');c.fillStyle=wall;c.fillRect(xx,yy,s,s-3);if(level.grid[y+1]?.[x]){c.fillStyle='#96ab85';c.fillRect(xx,yy+s-3,s,3);}if(level.grid[y]?.[x+1]){c.fillStyle='#b0c29a';c.fillRect(xx+s-2,yy,2,s);}if(level.grid[y-1]?.[x]){c.fillStyle='#d5dfc0';c.fillRect(xx,yy,s,1.2);}}
     }
     const start={x:level.start.x*s,y:level.start.y*s},goal={x:level.goal.x*s,y:level.goal.y*s};
     this.circle(start.x,start.y,s*.32,'#d2e0cc','#97b299');this.circle(start.x,start.y,s*.11,'#9cbbaa');
@@ -34,7 +34,7 @@ export class MazeBoard {
     const ended=game.state==='ending'||game.state==='finished',win=game.outcome==='won',progress=ended?clamp(game.endElapsed/.9,0,1):0;
     if(!(ended&&!win&&progress>.1)){
       c.save();if(win&&ended){c.globalAlpha=1-progress;c.translate(x,y);c.scale(1-progress*.75,1-progress*.75);c.translate(-x,-y);}
-      this.circle(x+1.5,y+2.2,r*1.08,'#45685329');const glass=c.createRadialGradient(x-r*.35,y-r*.4,.1,x,y,r);glass.addColorStop(0,'#edf8d7');glass.addColorStop(.35,'#b8ded0');glass.addColorStop(.8,'#7cb29d');glass.addColorStop(1,'#609783');this.circle(x,y,r,glass,'#537f6c',Math.max(.8,s*.035));
+      this.circle(x+2.8,y+4,r*1.15,'#35563055');const glass=c.createRadialGradient(x-r*.35,y-r*.4,.1,x,y,r);glass.addColorStop(0,'#edf8d7');glass.addColorStop(.25,'#c1e9d3');glass.addColorStop(.62,'#74b5a3');glass.addColorStop(1,'#376f68');this.circle(x,y,r,glass,'#537f6c',Math.max(.8,s*.035));
       c.save();c.translate(x,y);c.rotate((ball.x+ball.y)*2);c.strokeStyle='#d7efccbb';c.lineWidth=Math.max(.7,r*.17);c.beginPath();c.arc(0,0,r*.65,-1.1,1.4);c.stroke();c.restore();this.circle(x-r*.3,y-r*.38,r*.22,'#fffde8');c.restore();
     }
     const clearAge=game.elapsed-game.clearedAt;

@@ -31,10 +31,15 @@ export class DiceGame {
   }
   advance(){
     if(this.state!=='rolling'||this.now()<this.until)return false;
-    const dice=this.pending;this.answers.push({index:this.turn,name:this.players[this.turn],dice:[...dice],total:dice.reduce((a,b)=>a+b,0),key:resultKey(dice,this.mode),hand:this.mode==='poker'?evaluateHand(dice).name:null});
+    const dice=this.pending;this.answers.push({index:this.turn,name:this.players[this.turn],dice:[...dice],total:dice.reduce((a,b)=>a+b,0),key:resultKey(dice,this.mode),hand:this.mode==='poker'?evaluateHand(dice).name:null,detail:this.mode==='poker'?describeDice(dice):null});
     this.pending=null;this.state='locked';return true;
   }
   next(){if(this.state!=='locked')return false;this.turn++;this.state=this.turn===this.players.length?'results':'handoff';return true;}
   get results(){return this.state==='results'?[...this.answers].sort((a,b)=>compareKeys(b.key,a.key)||a.index-b.index):[];}
   get winners(){const r=this.results;return r.filter(a=>compareKeys(a.key,r[0]?.key??[])===0);}
+}
+
+export function describeDice(dice){
+ const hand=evaluateHand(dice),groups=[...new Set(dice)].map(face=>({face,count:dice.filter(n=>n===face).length})).sort((a,b)=>b.count-a.count||b.face-a.face),a=groups[0].face,b=groups[1]?.face;
+ switch(hand.tier){case 2:return `One pair: ${a}`;case 3:return `Two pairs: ${a} and ${b}`;case 4:return `Three dice: ${a}`;case 5:return `Five-dice straight: ${Math.min(...dice)}–${Math.max(...dice)}`;case 6:return `Full house: ${a} over ${b}`;case 7:return `Four dice: ${a}`;case 8:return `Five dice: ${a}`;default:return `High die: ${a}`;}
 }

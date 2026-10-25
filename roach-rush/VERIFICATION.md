@@ -95,3 +95,5 @@ The model suite, three population checks, four cage checks and seven trap/invent
 ## Mouse tail alignment
 
 The tail now joins the centre rear of the body and swings around that same attachment point. Twelve rendered direction/gait poses and held-drag styling keep the root fixed; the pose sheet was visually inspected. All four cage browser checks passed again, covering hold/drag, successful six-point capture, a near miss and reset. Standalone Roach Rush previews were regenerated.
+
+Eight updated ant browser checks cover tap/swipe penalties in Chinese/English, a native phone swipe, keyboard parity, stationary holds, animated penalty cleanup, persistent five-ant population and negative records. A unit case verifies a swipe deducts only once.

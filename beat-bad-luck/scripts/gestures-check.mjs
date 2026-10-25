@@ -22,18 +22,18 @@ try{
   await touch('touchStart',[[1,cx,cy-35]]);await touch('touchMove',[[1,cx,cy+35]]);await touch('touchEnd',[]);await last('heavy');
   const before=await page.locator('#live-score').textContent();await touch('touchStart',[[1,cx,cy]]);await touch('touchMove',[[1,cx+20,cy+10]]);await touch('touchCancel',[]);await page.clock.runFor(100);assert.equal(await page.locator('#live-score').textContent(),before);assert.equal(await page.locator('#gesture-trail-path').getAttribute('d'),'');
   await touch('touchStart',[[1,cx,cy]]);await touch('touchMove',[[1,cx+20,cy]]);await click('#pause');await touch('touchEnd',[]);await page.clock.runFor(500);assert.equal(await page.locator('#live-score').textContent(),before);await click('#resume');
-  await click('#toggle-controls');for(const type of ['rub','circle','pinch']){await page.locator(`[data-gesture="${type}"]`).focus();await page.keyboard.press('Space');await last(type);}
+  for(const type of ['rub','circle','pinch']){await page.locator(`[data-gesture="${type}"]`).focus();await page.keyboard.press('Space');await last(type);}
   if(language==='zh-Hant')await page.screenshot({path:'/tmp/bbl-gestures/touch-moves.png'});
   await context.close();console.log(`PASS ${language}: native two-finger taps, rub, full circle, pinch once, heavy swipe, cancel, pause and keyboard alternatives`);
  }
  {
-  const {context,page,click}=await setup();await click('#toggle-controls');await page.clock.runFor(17550);assert.match(await page.locator('#qte-call').textContent(),/搓/);assert.equal(await page.locator('[data-gesture="rub"]').evaluate(e=>e.classList.contains('is-prompted')),true);
+  const {context,page,click}=await setup();await page.clock.runFor(17550);assert.match(await page.locator('#qte-call').textContent(),/搓/);assert.equal(await page.locator('[data-gesture="rub"]').evaluate(e=>e.classList.contains('is-prompted')),true);
   await click('[data-gesture="circle"]');await page.clock.runFor(80);assert.equal(await page.locator('#qte-call').isVisible(),true);await click('[data-gesture="rub"]');await page.clock.runFor(80);assert.equal(await page.locator('#qte-call').isVisible(),false);
   await page.clock.runFor(6000);assert.match(await page.locator('#qte-call').textContent(),/圓圈/);await click('[data-gesture="circle"]');await page.clock.runFor(5600);assert.match(await page.locator('#qte-call').textContent(),/夾擊/);await click('[data-gesture="pinch"]');await page.clock.runFor(80);assert.equal(await page.locator('#qte-call').isVisible(),false);
   await context.close();console.log('PASS gesture-specific rhythm prompts, matching button highlight and matching-move completion');
  }
  for(const [width,height]of [[320,568],[375,812],[430,932],[812,375],[768,1024],[1440,1050]]){
-  const {context,page,click}=await setup('zh-Hant',width,height,'no-preference');assert.equal(await page.locator('#gesture-tools').isVisible(),false);await click('#toggle-controls');await page.clock.runFor(220);
+  const {context,page,click}=await setup('zh-Hant',width,height,'no-preference');assert.equal(await page.locator('#gesture-tools').isVisible(),true);await page.clock.runFor(220);
   const layout=await page.evaluate(()=>{const zone=document.querySelector('#hit-zone'),r=zone.getBoundingClientRect(),tools=document.querySelector('.gesture-tools').getBoundingClientRect(),point=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {inside:zone.contains(point),hitHeight:r.height,fit:tools.top>=0&&tools.bottom<=innerHeight,overlap:tools.top<r.bottom-1,overflow:document.documentElement.scrollWidth>innerWidth,buttons:[...document.querySelectorAll('[data-gesture]')].map(e=>e.getBoundingClientRect().height)};});
   assert.equal(layout.inside,true,JSON.stringify(layout));assert.ok(layout.hitHeight>=80);assert.equal(layout.fit,true,JSON.stringify(layout));assert.equal(layout.overlap,false,JSON.stringify(layout));assert.equal(layout.overflow,false);assert.ok(layout.buttons.every(height=>height>=44));
   await page.screenshot({path:`/tmp/bbl-gestures/layout-${width}-${height}.png`});await context.close();console.log(`PASS ${width}×${height}: clear paper target, 44px alternatives and no overlap/overflow`);

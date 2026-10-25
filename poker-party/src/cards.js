@@ -26,3 +26,28 @@ export function bigTwoHand(cards){
   const key=[tier,...(straight?[unique[0],cards.find(c=>bigRank(c.rank)===unique[0]).suit]:tier===4?[groups[0].rank,...singles]:tier===3?groups.map(g=>g.rank):singles)];
   return {tier,name:['Unmade hand','Big Two straight','Flush','Full house','Four of a kind','Straight flush'][tier],key};
 }
+
+export function describeHand(cards,{mode='stud'}={}){
+ if(mode==='single')return `Single card: ${rankLabel(cards[0].rank)} ${SYMBOLS[cards[0].suit]}`;
+ const poker=pokerHand(cards),hand=mode==='big-two'?bigTwoHand(cards):poker;
+ const groups=poker.groups,label=rankLabel;
+ if(mode==='big-two'){
+  if(hand.tier===0)return `Unmade hand: ${[...cards].sort((a,b)=>bigRank(b.rank)-bigRank(a.rank)).map(c=>label(c.rank)).join(' · ')}`;
+  if(hand.tier===3)return `Full house: ${label(groups[0].rank)} over ${label(groups[1].rank)}`;
+  if(hand.tier===4)return `Four of a kind: ${label(groups[0].rank)}`;
+  const top=hand.key[1]===15?2:hand.key[1];
+  if(hand.tier===1||hand.tier===5)return `${hand.tier===5?'Straight flush':'Straight'}: ${label(top)} high`;
+  return `Flush: ${SYMBOLS[cards[0].suit]} · ${label([...cards].sort((a,b)=>bigRank(b.rank)-bigRank(a.rank))[0].rank)} high`;
+ }
+ switch(hand.tier){
+ case 2:return `One pair: ${label(groups[0].rank)}`;
+ case 3:return `Two pairs: ${label(groups[0].rank)} and ${label(groups[1].rank)}`;
+ case 4:return `Three of a kind: ${label(groups[0].rank)}`;
+ case 5:return `Straight: ${label(poker.straight)} high`;
+ case 6:return `Flush: ${SYMBOLS[cards[0].suit]} · ${label(Math.max(...cards.map(c=>c.rank)))} high`;
+ case 7:return `Full house: ${label(groups[0].rank)} over ${label(groups[1].rank)}`;
+ case 8:return `Four of a kind: ${label(groups[0].rank)}`;
+ case 9:return `Straight flush: ${label(poker.straight)} high`;
+ default:return `High card: ${label(groups[0].rank)}`;
+ }
+}

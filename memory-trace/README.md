@@ -37,3 +37,5 @@ The shared language preference defaults to Traditional Chinese and carries from 
 The scoped service worker precaches local modules, fonts, shared party/UI/language assets and icons. Wait for Ready to play offline before an offline reload. Updates wait for existing app windows to close. Bump `CACHE_NAME` when changing cached assets. Opaque previews skip offline registration and still support a full game.
 
 Optional browser QA: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright-module node scripts/browser-check.mjs`. See [VERIFICATION.md](./VERIFICATION.md).
+
+Results show the original green dashed outline and all player drawings in six distinct colours. Each player also gets a labelled side-by-side comparison canvas in the results gallery.

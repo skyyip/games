@@ -30,12 +30,11 @@ function fitTable(){
   const chrome=shell.offsetHeight-grid.offsetHeight;
   const margins=parseFloat(style.marginTop)+parseFloat(style.marginBottom);
   const height=Math.max(64,viewport-$('.target-row').offsetHeight-(matchMedia('(max-height:500px) and (min-aspect-ratio:4/3)').matches?34:44)-chrome-$('#status').offsetHeight-margins-12-gridPadding);
-  const gap=width<500?1:2,total=grid.children.length;let best={columns:13,size:0};
-  for(let columns=1;columns<=Math.min(32,total);columns++){
-    const rows=Math.ceil(total/columns),size=Math.min(40,(width-gap*(columns-1))/columns,(height-gap*(rows-1))/rows*.73);
-    if(size>best.size+.01||(Math.abs(size-best.size)<=.01&&total%columns===0&&total%best.columns!==0))best={columns,size};
-  }
-  const size=Math.max(2,best.size);
+  const gap=3,total=grid.children.length;
+  const columns=Math.max(1,Math.floor((width+gap)/(44+gap)));
+  const best={columns:Math.min(columns,total)};
+  const size=Math.min(56,(width-gap*(best.columns-1))/best.columns);
+
   grid.style.setProperty('--tile-columns',best.columns);grid.style.setProperty('--tile-w',`${size}px`);grid.style.setProperty('--tile-h',`${size/.73}px`);grid.style.setProperty('--tile-gap',`${gap}px`);
   grid.style.width=`${best.columns*size+(best.columns-1)*gap+gridPadding}px`;
 }

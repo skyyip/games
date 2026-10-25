@@ -38,7 +38,7 @@ try{
     await settle(page);const up=Number(await page.locator('#final-distance').textContent());assert.ok(up>10&&up<417);
     assert.equal((await stored(page)).records.length,1);assert.equal((await stored(page)).records[0].direction,'up');
     await page.clock.runFor(1000);assert.equal((await stored(page)).records.length,1);
-    for(const name of ['speed','force','range'])assert.match(await page.locator(`#${name}-value`).textContent(),/^\d+%$/);
+    for(const name of ['speed','force','range']){assert.match(await page.locator(`#${name}-value`).textContent(),/^\d+%$/);assert.equal(await page.locator(`#${name}-value`).isVisible(),false);}
     await page.screenshot({path:`/tmp/flick-force-qa/${language}-result.png`,fullPage:true});
     await page.locator('#again').evaluate(el=>el.click());await touchFlick(context,page,{direction:'down'});await settle(page);
     const down=Number(await page.locator('#final-distance').textContent());assert.ok(Math.abs(up-down)<.05,'same technique works both ways');
@@ -48,7 +48,7 @@ try{
       const leaked=await page.evaluate(()=>{const w=document.createTreeWalker(document.querySelector('main'),NodeFilter.SHOW_TEXT),found=[];while(w.nextNode()){const n=w.currentNode;if(!n.parentElement.closest('script,style,[translate="no"],.site-copyright')&&/[a-z]{3,}/i.test(n.textContent))found.push(n.textContent.trim());}return found;});
       assert.deepEqual(leaked,[],'Chinese game and prompts are translated');
     }
-    await context.close();pass(`${language}: real upward/downward touch flicks, coasting before results, metres, three metrics, single save and reload`);
+    await context.close();pass(`${language}: real upward/downward touch flicks, coasting before results, metres, hidden numeric metrics, single save and reload`);
   }
   {
     const {context,page}=await setup({touch:true});

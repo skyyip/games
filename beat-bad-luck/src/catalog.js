@@ -6,6 +6,8 @@ export const WORRIES=[
   {id:'teammates',label:'Unhelpful teammates',name:'The Teamwork Gremlin',icon:'screen'},
   {id:'kam-friends',label:'Awkward friends',name:'The Gossip Goblin',icon:'megaphone'},
   {id:'work-life',label:'Work-life imbalance!',name:'The Overtime Gremlin',icon:'screen'},
+  {id:'family',label:'Family friction',name:'The Family Fuss',icon:'house'},
+  {id:'love',label:'Love feeling unlucky',name:'The Love Worry',icon:'heart'},
   {id:'commute',label:'Another delayed train',name:'The Delay Monster',icon:'train'},
 ];
 export const WEAPONS=[

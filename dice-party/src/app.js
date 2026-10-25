@@ -13,9 +13,14 @@ function dieMarkup(value){
   return `<svg viewBox="0 0 64 64" aria-hidden="true">${positions[value].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5.3"/>`).join('')}</svg>`;
 }
 function dice(values){
-  const tray=$('#dice-tray');if(tray.children.length!==values.length)tray.replaceChildren(...values.map((_,i)=>{const el=document.createElement('div');el.className='die';el.style.setProperty('--die',i);el.style.setProperty('--rest',`${[-7,5,-3,8,-5][i]}deg`);el.setAttribute('role','img');return el;}));
-  values.forEach((value,i)=>{const el=tray.children[i];el.innerHTML=dieMarkup(value);el.setAttribute('aria-label',value==null?'Die not rolled':`Die ${i+1}: ${value}`);});
+ const tray=$('#dice-tray');if(tray.children.length!==values.length)tray.replaceChildren(...values.map((_,i)=>{const el=document.createElement('div');el.className='die';el.style.setProperty('--die',i);el.style.setProperty('--rest',`${[-7,5,-3,8,-5][i]}deg`);el.setAttribute('role','img');return el;}));
+ const names=['front','back','right','left','top','bottom'];
+ values.forEach((value,i)=>{const el=tray.children[i];let cube=el.querySelector('.die-cube');if(!cube){cube=document.createElement('span');cube.className='die-cube';for(const face of names){const side=document.createElement('span');side.dataset.side=face;cube.append(side);}el.replaceChildren(cube);}
+  const remaining=value==null?[]:[1,2,3,4,5,6].filter(n=>n!==value&&n!==7-value),side=remaining[0],top=remaining.find(n=>n!==side&&n!==7-side),faces=value==null?Array(6).fill(null):[value,7-value,side,7-side,top,7-top];
+  faces.forEach((n,j)=>{const face=cube.children[j];face.className=`die-face die-${names[j]} ${n===1||n===4?'pips-red':'pips-blue'}`;face.dataset.value=n??'';face.innerHTML=dieMarkup(n);});el.setAttribute('aria-label',value==null?'Die not rolled':`Die ${i+1}: ${value}`);
+ });
 }
+
 function motionNote(){
   $('#motion-status').textContent=motionState==='denied'?'Motion permission was not granted. The roll button works normally.':motionState==='unsupported'?'Phone motion is unavailable here. Use the roll button.':motionState==='silent'?'No motion readings arrived. The roll button is ready.':motionEnabled?'Shake the phone or tap the button. Both give the same fair roll.':'Use the roll button, or enable phone shake.';
   $('#enable-motion').hidden=motionEnabled||game.state!=='ready';
@@ -32,8 +37,8 @@ function render(){
   if(state==='handoff')literal($('#next-player'),game.players[game.turn]);
   $('#rule-label').textContent=modeNames[setup?$('#mode').value:game.mode];const count=setup?Number($('#count').value):game.count;$('#dice-count-label').textContent=count===1?'1 die':`${count} dice`;
   $('#dice-tray').classList.toggle('rolling',rolling&&!reducedMotion.matches);$('#dice-tray').classList.toggle('settled',locked&&!reducedMotion.matches);
-  const result=locked?game.answers.at(-1):null;dice(result?.dice??Array(count).fill(null));
-  $('#roll-total').textContent=result?String(result.total):'?';$('#roll-detail').textContent=rolling?'A little luck is tumbling…':result?.hand??(result?'That’s your roll. A lovely little chance.':'A little surprise is waiting.');
+  const result=locked?game.answers.at(-1):state==='results'?game.winners[0]:null;dice(result?.dice??Array(count).fill(null));
+  $('#roll-total').textContent=result?String(result.total):'?';$('#roll-detail').textContent=rolling?'A little luck is tumbling…':result?.detail??result?.hand??(result?'That’s your roll. A lovely little chance.':'A little surprise is waiting.');
   motionNote();
 }
 function stop(){cancelAnimationFrame(frame);clearTimeout(timer);clearTimeout(watchdog);frame=0;timer=0;watchdog=0;}
@@ -69,7 +74,7 @@ $('#enable-motion').addEventListener('click',()=>void motion());$('#roll').addEv
 $('#next').addEventListener('click',()=>{if(!game.next())return;detector.reset();if(game.state==='results')results();render();if(game.state==='results'){$('#result-title').focus({preventScroll:true});$('#results').scrollIntoView({block:'nearest',behavior:'instant'});}else $('#ready').focus({preventScroll:true});});
 function results(){
   $('#result-title').textContent=game.winners.length>1?'A lovely shared win.':'A lovely lucky roll.';literal($('#winner-names'),game.winners.map(r=>r.name).join(' & '));
-  $('#standings').replaceChildren(...game.results.map(result=>{const row=document.createElement('li');row.className=`standing${game.winners.includes(result)?' is-winner':''}`;const place=document.createElement('span');place.textContent=String(game.results.findIndex(r=>JSON.stringify(r.key)===JSON.stringify(result.key))+1).padStart(2,'0');const person=document.createElement('div'),name=document.createElement('strong'),detail=document.createElement('small'),pips=document.createElement('small'),score=document.createElement('output');literal(name,result.name);detail.textContent=result.hand??modeNames[game.mode];pips.className='mini-dice';pips.textContent=result.dice.join(' · ');pips.setAttribute('translate','no');score.textContent=String(result.total);person.append(name,detail,pips);row.append(place,person,score);return row;}));
+  $('#standings').replaceChildren(...game.results.map(result=>{const row=document.createElement('li');row.className=`standing${game.winners.includes(result)?' is-winner':''}`;const place=document.createElement('span');place.textContent=String(game.results.findIndex(r=>JSON.stringify(r.key)===JSON.stringify(result.key))+1).padStart(2,'0');const person=document.createElement('div'),name=document.createElement('strong'),detail=document.createElement('small'),pips=document.createElement('small'),score=document.createElement('output');literal(name,result.name);detail.textContent=result.detail??result.hand??modeNames[game.mode];pips.className='mini-dice';pips.innerHTML=result.dice.map(value=>`<span class="mini-result-die ${value===1||value===4?'pips-red':'pips-blue'}" role="img" aria-label="${value}">${dieMarkup(value)}</span>`).join('');pips.setAttribute('translate','no');score.textContent=String(result.total);person.append(name,detail,pips);row.append(place,person,score);return row;}));
   $('#tie-note').textContent=game.mode==='poker'?'Poker is ranked by hand type and tie-break dice, not by the displayed total.':'Totals decide this round. Equal totals share the win.';say('Everyone has rolled. The results are ready.');
 }
 function setup(){stop();game.reset();detector.reset();render();$('#start').focus({preventScroll:true});}

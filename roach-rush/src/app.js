@@ -1,4 +1,4 @@
-import {RoachGame,HOLES,MOUSE_HOLD,SWIPE_DISTANCE,ANT_PENALTY,DURATIONS,distanceToSegment,antFlick} from './game.js';
+import {RoachGame,HOLES,MOUSE_HOLD,SWIPE_DISTANCE,ANT_PENALTY,DURATIONS,distanceToSegment} from './game.js';
 import {sprite,cageMarkup,sprayMarkup,trapMarkup} from './sprites.js';
 import {readRecords,addRecord} from './records.js';
 import {animateChange,reducedMotion} from '../../grid-rush/src/playground-ui.js';
@@ -76,7 +76,7 @@ function setLock(playing){
   $('.play-panel').scrollTop=0;room.scrollTop=0;readLayout();
 }
 function describe(entity){
-  if(entity.type==='ant')return 'Ant friend. Tapping loses 3 points. Flick it out safely. Keyboard: Shift plus Enter to flick.';
+  if(entity.type==='ant')return 'Ant friend. Tapping loses 3 points. Swiping also loses 3 points. Keyboard: Shift plus Enter to flick.';
   if(entity.type==='mouse')return 'Mouse. Hold for 0.5 seconds, then drag to the cage for 6 points. Keyboard: hold Space, then activate the cage.';
   if(entity.mode==='flying')return entity.size==='big'?'Flying big roach. Swipe for 4 points. Keyboard: Enter.':'Flying small roach. Swipe for 3 points. Keyboard: Enter.';
   if(entity.size==='big')return performance.now()<entity.dazedUntil?'Big roach. Tap again for 2 points.':'Big crawling roach. Double-tap for 2 points. Keyboard: Enter twice.';
@@ -129,7 +129,7 @@ function positionEntities(){
 function spawnFeedback(entity){
   const hole=$(`[data-hole="${entity.hole}"]`);hole.classList.remove('is-spawning');void hole.offsetWidth;hole.classList.add('is-spawning');
   if(entity.type==='mouse'){hint('A mouse is out! Hold for 0.5s, then drag it into the cage.');announce('A mouse is out. Hold it, then drag to the cage for 6 points.');}
-  if(entity.type==='ant'){hint('An ant friend! Tap loses 3 points. Flick it out safely.');announce('An ant friend is visiting. Tapping loses three points.');}
+  if(entity.type==='ant'){hint('An ant friend! Tap loses 3 points. Swiping also loses 3 points.');announce('An ant friend is visiting. Tapping or swiping loses three points.');}
 }
 function celebrateCage(){
   const art=$('.cage-art'),from=getComputedStyle(art).transform,revision=++cageRevision;
@@ -202,7 +202,7 @@ function finish(){
   renderRecords();
   $('#final-score').textContent=game.score;$('#result-note').textContent=personalBest?'A new personal best. This room has met its match.':'A busy little room. A very good effort.';
   for(const kind of ['small','big','flying','mice'])$(`#stat-${kind}`).textContent=game.stats[kind];
-  $('#ant-summary').textContent=`Ant taps: ${game.stats.antsHit} · Safely flicked: ${game.stats.antsFlicked}`;
+  $('#ant-summary').textContent=`Ant taps or swipes: ${game.stats.antsHit}`;
   $('#spray-summary').textContent=`Sprayed roaches: ${game.stats.sprayed} · 1 point each`;
   $('#spray-ant-summary').hidden=game.stats.antsSprayed===0;$('#spray-ant-summary').textContent=`Ants sprayed: ${game.stats.antsSprayed} · −${game.stats.antsSprayed*ANT_PENALTY} points`;
   $('#trap-summary').textContent=`Trap catches: ${game.stats.trapped} · +${game.stats.trapped*6} points`;
@@ -267,8 +267,8 @@ room.addEventListener('pointermove',event=>{
   g.points.push(p);g.points=g.points.slice(-12);
   if(g.distance<SWIPE_DISTANCE)return;
   const hits=[];
-  for(const e of game.entities.values())if(e.type==='roach'&&e.mode==='flying'){
-    const at=positions.get(e.id),button=buttons.get(e.id),radius=button.offsetWidth*.42+5;
+  for(const e of game.entities.values())if(e.type==='ant'||(e.type==='roach'&&e.mode==='flying')){
+    const at=positions.get(e.id),button=buttons.get(e.id),radius=button.offsetWidth*(e.type==='ant'?.3:.42)+(e.type==='ant'?3:5);
     if(at&&g.points.slice(1).some((point,index)=>distanceToSegment(at,g.points[index],point)<=radius))hits.push(e.id);
   }
   for(const id of hits)apply(game.swipe(id,g.distance));
@@ -279,10 +279,9 @@ function release(event,cancelled=false){
   gestures.delete(event.pointerId);const p=point(event),entity=game.entities.get(g.id),held=p.t-g.started;
   if(!cancelled&&!g.cancelled&&game.state==='playing'){
     if(g.type==='ant'){
-      const flick=antFlick(g.points,p);
-      if(entity&&flick)apply(game.flickAnt(entity.id,flick.distance,flick.speed),flick);
+      if(entity&&g.distance>=SWIPE_DISTANCE)apply(game.swipe(entity.id,g.distance));
       else if(entity&&g.distance<12&&Math.hypot(p.x-g.from.x,p.y-g.from.y)<12&&held<=350)apply(game.tap(entity.id));
-      else if(entity){game.dropAnt(entity.id,(p.x-layout.x)/layout.width,(p.y-layout.y)/layout.height);hint('Flick a little faster to send the ant out safely.');}
+      else if(entity){game.dropAnt(entity.id,(p.x-layout.x)/layout.width,(p.y-layout.y)/layout.height);hint('Avoid the ants. Tapping, swiping or spraying loses 3 points.');}
     }else if(entity?.type==='mouse'){
       const result=game.catchMouse(entity.id,held,inCage(p));
       if(result)apply(result);else if(held>=MOUSE_HOLD){game.dropMouse(entity.id,(p.x-layout.x)/layout.width,(p.y-layout.y)/layout.height);hint('Almost! Drop the mouse inside the cage to score.');}
@@ -301,7 +300,7 @@ entities.addEventListener('keydown',event=>{
   const button=event.target.closest('.critter');if(!button||!['Enter','Space'].includes(event.code)||game.state!=='playing')return;
   event.preventDefault();if(event.repeat)return;const id=Number(button.dataset.id),entity=game.entities.get(id);if(!entity)return;
   if(entity.type==='ant'){
-    if(event.code==='Enter'&&event.shiftKey)apply(game.flickAnt(id,SWIPE_DISTANCE,.25),{dx:0,dy:-1});else apply(game.tap(id));
+    if(event.code==='Enter'&&event.shiftKey)apply(game.swipe(id,SWIPE_DISTANCE));else apply(game.tap(id));
   }else if(entity.type==='mouse'){
     if(event.code==='Space'&&!keyboardGrab){keyboardGrab={id,started:performance.now(),keyboard:true,charged:false,awaitingRelease:true};hint('Keep holding Space until the ring fills.');}
   }else apply(entity.mode==='flying'?game.swipe(id,SWIPE_DISTANCE):game.tap(id));
