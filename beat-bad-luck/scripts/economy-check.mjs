@@ -8,7 +8,7 @@ const errors=[];let checks=0;const pass=text=>{checks++;console.log(`PASS ${text
 async function setup(width=375,language='zh-Hant',motion='reduce'){
  const context=await browser.newContext({viewport:{width,height:width<700?812:1100},isMobile:width<700,hasTouch:width<700,reducedMotion:motion,serviceWorkers:'block'});
  await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
- await context.addInitScript(language=>{localStorage.setItem('playground.language.v1',language);if(!localStorage.getItem('beat-bad-luck.stall.v1'))localStorage.setItem('beat-bad-luck.stall.v1',JSON.stringify({version:1,coins:100000,merit:1000,owned:['flipflop'],equipped:'flipflop',decor:{},friends:[],records:[],lastSeen:Date.now()}));},language);
+ await context.addInitScript(language=>{localStorage.setItem('playground.language.v1',language);if(!localStorage.getItem('beat-bad-luck.stall.v1'))localStorage.setItem('beat-bad-luck.stall.v1',JSON.stringify({version:1,coins:300000,merit:1000,owned:['flipflop'],equipped:'flipflop',decor:{},friends:[],records:[],lastSeen:Date.now()}));},language);
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base,{waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();await page.evaluate(()=>document.fonts.ready);return {context,page};
 }
 const click=(p,s)=>p.locator(s).evaluate(e=>e.click());
@@ -28,18 +28,18 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.locator('.stall-showcase').scrollIntoViewIfNeeded();await page.locator('.stall-showcase').screenshot({path:`/tmp/bbl-economy-qa/stall-${width}.png`});
   await page.reload({waitUntil:'domcontentloaded'});await page.locator('[data-piece="amethyst"]').waitFor();assert.equal(await page.locator('.stall-piece').count(),9);assert.equal((await saved(page)).decor.amethyst,5);
-  await click(page,'#tab-kits');const text=await page.locator('#weapon-list').textContent();assert.ok(text.includes('×1.45')&&text.includes('×4.5'));assert.ok(!text.includes('{multiplier}'));if(language==='zh-Hant')assert.match(text,/解壓分數/);
+  await click(page,'#tab-kits');const text=await page.locator('#weapon-list').textContent();assert.ok(text.includes('×3.45')&&text.includes('×6.5'));assert.ok(!text.includes('{multiplier}'));if(language==='zh-Hant')assert.match(text,/解壓分數/);
   await context.close();pass(`${width}px ${language}: nine ordered incomes, instant props, three capped upgrades, nonoverlapping placement, 46.2/hr, reload and score labels`);
  }
  for(const language of ['zh-Hant','en']){
   const {context,page}=await setup(375,language);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
-  await click(page,'#tab-kits');await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,99955);
+  await click(page,'#tab-kits');await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,299755);
   await click(page,'#start');await click(page,'#pause');await click(page,'#quit');assert.ok((await saved(page)).owned.includes('paper'));
-  await beat(page);await click(page,'[data-gesture="tap"]');const first=await saved(page);assert.ok(!first.owned.includes('paper'));assert.equal(first.equipped,'flipflop');assert.equal(first.coins,99955);
-  await page.clock.runFor(80);await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);assert.ok(Number(await page.locator('#live-score').textContent())>30);assert.equal((await saved(page)).coins,99955);
+  await beat(page);await click(page,'[data-gesture="tap"]');const first=await saved(page);assert.ok(!first.owned.includes('paper'));assert.equal(first.equipped,'bare-hand');assert.equal(first.coins,299755);
+  await page.clock.runFor(80);await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);assert.ok(Number(await page.locator('#live-score').textContent())>30);assert.equal((await saved(page)).coins,299755);
   await page.clock.fastForward(45100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);
   const result=await saved(page);assert.equal(result.records[0].weapon,'paper');assert.ok(!result.owned.includes('paper'));
-  await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();assert.equal((await saved(page)).equipped,'flipflop');await click(page,'#tab-kits');const before=(await saved(page)).coins;await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,before-45);
+  await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();assert.equal((await saved(page)).equipped,'bare-hand');await click(page,'#tab-kits');const before=(await saved(page)).coins;await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,before-245);
   await context.close();pass(`${language}: no-hit cancellation preserves kit; first hit consumes once; bonus lasts for ritual; results/reload retain consumption; repurchase charges full price`);
  }
  assert.deepEqual(errors,[]);console.log(`${checks} economy browser scenarios passed with no page errors.`);

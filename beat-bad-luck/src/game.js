@@ -6,8 +6,8 @@ export const QTE_STEPS=[{at:4500,type:'double'},{at:11000,type:'heavy'},{at:1750
 const SPECIALS={rub:{min:3,power:6,points:28},circle:{min:5,power:8,points:40},pinch:{min:6,power:9,points:46}};
 export class RitualGame{
   constructor({now=()=>performance.now(),random=Math.random}={}){this.now=now;this.random=random;this.reset();}
-  reset(){this.phase='setup';this.phaseStarted=0;this.started=0;this.pausedAt=null;this.lit=new Set();this.blown=false;this.prepared=false;this.worry='';this.kind='work';this.weapon='flipflop';this.look=0;this.hits=0;this.heavy=0;this.specials={rub:0,circle:0,pinch:0};this.perfect=0;this.damage=0;this.combo=0;this.bestCombo=0;this.score=0;this.lastHit=-Infinity;this.strikes=new Map();this.qte=null;this.qteIndex=0;this.qteSuccess=0;this.fed=false;this.fedAt=null;this.blessed=false;this.blessedAt=null;this.result=null;this.transitions=[];}
-  start({worry='The eighth revision',kind='work',weapon='flipflop'}={}){
+  reset(){this.phase='setup';this.phaseStarted=0;this.started=0;this.pausedAt=null;this.lit=new Set();this.blown=false;this.prepared=false;this.worry='';this.kind='work';this.weapon='bare-hand';this.look=0;this.hits=0;this.heavy=0;this.specials={rub:0,circle:0,pinch:0};this.perfect=0;this.damage=0;this.combo=0;this.bestCombo=0;this.score=0;this.lastHit=-Infinity;this.strikes=new Map();this.qte=null;this.qteIndex=0;this.qteSuccess=0;this.fed=false;this.fedAt=null;this.blessed=false;this.blessedAt=null;this.result=null;this.transitions=[];}
+  start({worry='The eighth revision',kind='work',weapon='bare-hand'}={}){
     if(!WEAPONS.some(w=>w.id===weapon))throw new RangeError('Choose an available keepsake.');
     this.reset();this.worry=String(worry).trim().slice(0,64)||'The eighth revision';this.kind=WORRIES.some(w=>w.id===kind)?kind:'work';this.weapon=weapon;this.look=Math.min(2,Math.floor(this.random()*3));this.started=this.phaseStarted=this.now();this.phase='incense';
   }

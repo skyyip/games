@@ -25,3 +25,19 @@ test('an autoplay restriction preserves the on preference and can be retried on 
  let denied=true;class RestrictedContext extends Context{async resume(){if(denied)throw new Error('gesture required');this.state='running';}}
  const timers=setup(t,RestrictedContext),audio=new StallAudio();audio.ambience(true);assert.equal(await audio.unlock(),false);assert.equal(audio.enabled,true);assert.equal(timers.size,0);denied=false;assert.equal(await audio.unlock(),true);assert.ok(audio.rain);assert.equal(timers.size,1);audio.stop();
 });
+
+test('iPhone playback primes Web Audio and the silent media route synchronously, respecting mute and pause',async t=>{
+ const timers=setup(t);let active=true,played=0,started=0;const nav={userAgent:'iPhone',audioSession:{type:'auto'}},media=[];
+ class MobileContext extends Context{resume(){assert.equal(active,true);this.state='running';return Promise.resolve();}createBufferSource(){const node=super.createBufferSource();node.start=()=>{assert.equal(active,true);started++;};return node;}}
+ class Media{constructor(src){this.src=src;this.paused=true;media.push(this);}setAttribute(){}play(){assert.equal(active,true);this.paused=false;played++;return Promise.resolve();}pause(){this.paused=true;}}
+ window.navigator=nav;window.Audio=Media;window.AudioContext=MobileContext;const audio=new StallAudio();
+ const pending=audio.unlock();assert.ok(started>0);assert.equal(played,1);assert.equal(nav.audioSession.type,'playback');active=false;await pending;
+ assert.equal(audio.needsUnlock,false);assert.equal(media[0].loop,true);assert.equal(media[0].playsInline,true);const data=Buffer.from(media[0].src.split(',')[1],'base64');assert.equal(data.toString('ascii',0,4),'RIFF');assert.equal(data.readUInt32LE(40),8000);assert.ok([...data.subarray(44)].every(n=>n===128));
+ audio.setEnabled(false);assert.equal(media[0].paused,true);assert.equal(timers.size,0);audio.setEnabled(true);active=true;await audio.unlock();assert.equal(played,2);assert.equal(media.length,1);audio.stop();assert.equal(media[0].paused,true);
+});
+test('an interrupted or closed mobile context can recover on a later gesture without stale loops',async t=>{
+ const timers=setup(t);class Interruptible extends Context{addEventListener(name,handler){this.changed=handler;}}
+ window.AudioContext=Interruptible;const audio=new StallAudio();await audio.unlock();audio.ambience(true);const original=audio.context;assert.equal(timers.size,1);
+ original.state='interrupted';original.changed();assert.equal(audio.rain,null);assert.equal(timers.size,0);assert.equal(audio.needsUnlock,true);await audio.unlock();assert.equal(audio.context,original);assert.equal(timers.size,1);
+ original.state='closed';await audio.unlock();assert.notEqual(audio.context,original);assert.equal(timers.size,1);audio.stop();
+});

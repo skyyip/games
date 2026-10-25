@@ -11,34 +11,35 @@ export const WORRIES=[
   {id:'commute',label:'Another delayed train',name:'The Delay Monster',icon:'train'},
 ];
 export const WEAPONS=[
-  {id:'flipflop',name:'Blue-and-white flip-flop',merit:0,cost:0,tone:180},
-  {id:'paper',name:'Rolled-up newspaper',merit:40,cost:45,tone:260},
-  {id:'bag',name:'Red-white-blue bag',merit:80,cost:70,tone:130},
-  {id:'stool',name:'Folding metal stool',merit:140,cost:110,tone:620},
-  {id:'sword',name:'Peachwood sword',merit:220,cost:150,tone:360},
-  {id:'stamp',name:'Jujube-wood seal',merit:320,cost:200,tone:95},
-  {id:'mace',name:'Spiked mace',merit:360,cost:240,tone:120},
-  {id:'record',name:'Lucky vinyl record',merit:440,cost:260,tone:440},
-  {id:'pinwheel',name:'Lucky pinwheel',merit:500,cost:320,tone:540},
-  {id:'iron-hammer',name:'Big iron hammer',merit:400,cost:350,tone:85},
-  {id:'fortune-child',name:'Fortune-turning child',merit:550,cost:350,tone:760},
-  {id:'triple-trio',name:'Jockey Club 3T',merit:800,cost:600,tone:480},
-  {id:'marksix-snowball',name:'Mark Six Snowball',merit:1000,cost:1000,tone:880},
-  {id:'rebirth-paper',name:'Rebirth paper: Li Ka-shing’s son',merit:2000,cost:2000,tone:1040},
+  {id:'bare-hand',name:'Bare hands',merit:0,cost:0,tone:150,starter:true},
+  {id:'flipflop',name:'Blue-and-white flip-flop',merit:0,cost:200,tone:180},
+  {id:'paper',name:'Rolled-up newspaper',merit:40,cost:245,tone:260},
+  {id:'bag',name:'Red-white-blue bag',merit:80,cost:270,tone:130},
+  {id:'stool',name:'Folding metal stool',merit:140,cost:310,tone:620},
+  {id:'sword',name:'Peachwood sword',merit:220,cost:350,tone:360},
+  {id:'stamp',name:'Jujube-wood seal',merit:320,cost:400,tone:95},
+  {id:'mace',name:'Spiked mace',merit:360,cost:440,tone:120},
+  {id:'record',name:'Lucky vinyl record',merit:440,cost:460,tone:440},
+  {id:'pinwheel',name:'Lucky pinwheel',merit:500,cost:520,tone:540},
+  {id:'iron-hammer',name:'Big iron hammer',merit:400,cost:550,tone:85},
+  {id:'fortune-child',name:'Fortune-turning child',merit:550,cost:550,tone:760},
+  {id:'triple-trio',name:'Jockey Club 3T',merit:5000,cost:6000,multiplier:10,tone:480},
+  {id:'marksix-snowball',name:'Mark Six Snowball',merit:6000,cost:6500,multiplier:15,tone:880},
+  {id:'rebirth-paper',name:'Rebirth paper: Li Ka-shing’s son',merit:10000,cost:10000,multiplier:20,tone:1040},
 ];
-// Every extra oil spent adds 1% to whack and rhythm-bonus scores.
-export const weaponScoreMultiplier=id=>1+(WEAPONS.find(w=>w.id===id)?.cost??0)/100;
+// Ordinary kits add 1% per oil. The three premium kits use fixed configured bonuses.
+export const weaponScoreMultiplier=id=>{const weapon=WEAPONS.find(w=>w.id===id);return weapon?.multiplier??1+(weapon?.cost??0)/100;};
 export const MAX_DECOR_LEVEL=5;
 export const DECOR=[
-  {id:'radio',name:'Cassette radio',cost:190,rate:1},
-  {id:'neon',name:'Retro neon sign',cost:145,rate:2},
-  {id:'incense',name:'Incense stand',cost:155,rate:3},
-  {id:'cat',name:'Waving lucky cat',cost:165,rate:4},
-  {id:'tiger',name:'Guardian tiger',cost:210,rate:5},
-  {id:'aquarium',name:'Wealth-attracting feng shui aquarium',cost:240,rate:6},
-  {id:'three-stars',name:'Fu, Lu and Shou',cost:270,rate:7},
-  {id:'money-tree',name:'Lucky money tree',cost:300,rate:8},
-  {id:'amethyst',name:'Amethyst cluster',cost:340,rate:9},
+  {id:'radio',name:'Cassette radio',cost:1190,rate:1},
+  {id:'neon',name:'Retro neon sign',cost:1145,rate:2},
+  {id:'incense',name:'Incense stand',cost:1155,rate:3},
+  {id:'cat',name:'Waving lucky cat',cost:1165,rate:4},
+  {id:'tiger',name:'Guardian tiger',cost:1210,rate:5},
+  {id:'aquarium',name:'Wealth-attracting feng shui aquarium',cost:6240,rate:6},
+  {id:'three-stars',name:'Fu, Lu and Shou',cost:6270,rate:7},
+  {id:'money-tree',name:'Lucky money tree',cost:6300,rate:8},
+  {id:'amethyst',name:'Amethyst cluster',cost:6340,rate:9},
 ];
 // Level one earns the base rate; later levels add 0.1 each, without float drift.
 export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*.1)*10)/10:0;

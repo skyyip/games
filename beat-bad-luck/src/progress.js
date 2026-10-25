@@ -6,10 +6,10 @@ const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.dec
 export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
 export function repairCost(state,id,now=Date.now()){const item=DECOR.find(d=>d.id===id),health=decorDurability(state,id,now);return item&&health>0&&health<100?Math.max(1,Math.ceil(item.cost*state.decor[id]*.25*(1-health/100))):0;}
 export const STORAGE_KEY='beat-bad-luck.stall.v1';
-export function fresh(now=Date.now()){return {version:1,coins:0,merit:0,rituals:0,owned:['flipflop'],equipped:'flipflop',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],records:[],lastSeen:now,idleCarry:0,lastReceipt:null};}
+export function fresh(now=Date.now()){return {version:1,coins:0,merit:0,rituals:0,owned:['bare-hand'],equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],records:[],lastSeen:now,idleCarry:0,lastReceipt:null};}
 export function readProgress(raw,now=Date.now()){
   const state=fresh(now);try{const x=JSON.parse(raw);if(!x||x.version!==1)return state;
-    state.coins=cap(x.coins);state.merit=cap(x.merit);state.rituals=cap(x.rituals);state.owned=[...new Set(['flipflop',...(Array.isArray(x.owned)?x.owned:[]).filter(id=>WEAPONS.some(w=>w.id===id))])];state.equipped=state.owned.includes(x.equipped)?x.equipped:'flipflop';
+    state.coins=cap(x.coins);state.merit=cap(x.merit);state.rituals=cap(x.rituals);state.owned=[...new Set(['bare-hand',...(Array.isArray(x.owned)?x.owned:[]).filter(id=>WEAPONS.some(w=>w.id===id))])];state.equipped=state.owned.includes(x.equipped)?x.equipped:'bare-hand';
     state.lastSeen=Number.isFinite(x.lastSeen)?Math.max(0,x.lastSeen):now;
     for(const d of DECOR){state.decor[d.id]=cap(x.decor?.[d.id],MAX_DECOR_LEVEL);if(state.decor[d.id])state.decorExpires[d.id]=Number.isFinite(x.decorExpires?.[d.id])?Math.max(0,Math.min(Math.max(now,state.lastSeen)+DECOR_LIFETIME,x.decorExpires[d.id])):now+DECOR_LIFETIME;}
     state.friends=[...new Set((Array.isArray(x.friends)?x.friends:[]).filter(id=>FRIENDS.some(f=>f.id===id)))];
@@ -39,7 +39,7 @@ export function buyWeapon(state,id){
 export function consumeWeapon(state,id){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon||!state.owned.includes(id))return null;
   if(!weapon.cost)return state;
-  return {...state,owned:state.owned.filter(owned=>owned!==id),equipped:state.equipped===id?'flipflop':state.equipped};
+  return {...state,owned:state.owned.filter(owned=>owned!==id),equipped:state.equipped===id?'bare-hand':state.equipped};
 }
 export function upgrade(state,id,now=Date.now()){
  const d=DECOR.find(d=>d.id===id);if(!d)return null;const level=state.decor[id]??0,cost=d.cost*(level+1);

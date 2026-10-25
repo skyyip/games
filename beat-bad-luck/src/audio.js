@@ -1,13 +1,33 @@
 import {WEAPONS} from './catalog.js';
 export class StallAudio{
- constructor(){this.context=null;this.master=null;this.rain=null;this.enabled=true;this.voice=false;this.chimeAt=0;this.ambienceWanted=false;this.musicTimer=null;this.musicBar=0;this.sources=new Set();}
+ constructor(){this.context=null;this.master=null;this.rain=null;this.enabled=true;this.voice=false;this.chimeAt=0;this.ambienceWanted=false;this.musicTimer=null;this.musicBar=0;this.sources=new Set();this.primed=false;this.mobileBridge=null;}
+ get needsUnlock(){return !this.context||this.context.state!=='running'||Boolean(this.mobileBridge?.paused);}
+ preparePlayback(){
+  const nav=window.navigator??globalThis.navigator;
+  // Safari can otherwise route Web Audio through the silent/ambient channel.
+  try{if(nav?.audioSession)nav.audioSession.type='playback';}catch{}
+  const ios=/iP(hone|ad|od)/.test(nav?.userAgent??'')||(nav?.platform==='MacIntel'&&nav.maxTouchPoints>1);
+  if(!ios||typeof window.Audio!=='function'||this.mobileBridge)return;
+  try{
+   const bytes=new Uint8Array(8044),view=new DataView(bytes.buffer);const word=(offset,text)=>{for(let i=0;i<text.length;i++)bytes[offset+i]=text.charCodeAt(i);};
+   word(0,'RIFF');view.setUint32(4,8036,true);word(8,'WAVE');word(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,8000,true);view.setUint32(28,8000,true);view.setUint16(32,1,true);view.setUint16(34,8,true);word(36,'data');view.setUint32(40,8000,true);bytes.fill(128,44);
+   const bridge=new window.Audio('data:audio/wav;base64,'+btoa(String.fromCharCode(...bytes)));bridge.loop=true;bridge.preload='auto';bridge.playsInline=true;bridge.setAttribute('playsinline','');this.mobileBridge=bridge;
+  }catch{}
+ }
+ prime(){const c=this.context;if(this.primed&&c.state==='running')return;const source=this.track(c.createBufferSource());source.buffer=c.createBuffer(1,1,c.sampleRate);source.connect(this.master);source.start(0);source.stop(c.currentTime+1/c.sampleRate);this.primed=true;}
  async unlock(){
   try{
-   this.context??=new (window.AudioContext||window.webkitAudioContext)();
+   if(this.context?.state==='closed'){this.clearAmbience();this.clearNotes();this.context=null;this.master=null;this.primed=false;}
+   if(this.enabled)this.preparePlayback();
+   if(!this.context){this.context=new (window.AudioContext||window.webkitAudioContext)();this.context.addEventListener?.('statechange',()=>{if(this.context.state==='running'){this.syncGain();this.updateAmbience();}else{this.clearAmbience();this.clearNotes();}});}
    if(!this.master){this.master=this.context.createGain();this.master.gain.value=this.enabled?.34:0;const limiter=this.context.createDynamicsCompressor();limiter.threshold.value=-14;limiter.knee.value=12;limiter.ratio.value=8;limiter.attack.value=.004;limiter.release.value=.16;this.master.connect(limiter);limiter.connect(this.context.destination);this.limiter=limiter;}
-   await this.context.resume();this.syncGain();this.updateAmbience();return true;
+   // All activation-sensitive calls happen in the original touch/click stack.
+   const resumed=this.context.resume();if(this.enabled){this.prime();try{const playing=this.mobileBridge?.play();playing?.catch(()=>{});}catch{}}
+   await resumed;this.syncGain();this.updateAmbience();return this.context.state==='running';
   }catch{return false;}
  }
+ pauseBridge(){try{this.mobileBridge?.pause();}catch{}}
+
  syncGain(){if(this.master&&this.context){const gain=this.master.gain;gain.cancelScheduledValues(this.context.currentTime);gain.setValueAtTime(this.enabled?.34:0,this.context.currentTime);}}
  track(source){this.sources.add(source);source.onended=()=>this.sources.delete(source);return source;}
  clearNotes(){for(const source of this.sources){try{source.stop();}catch{}}this.sources.clear();}
@@ -36,6 +56,6 @@ export class StallAudio{
  }
 
  speak(text,language){if(!this.voice||!this.enabled||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang=language==='zh-Hant'?'zh-HK':'en-GB';const voices=speechSynthesis.getVoices();const voice=voices.find(v=>language==='zh-Hant'?/zh[-_]HK|yue/i.test(v.lang):/^en[-_]GB/i.test(v.lang));if(voice)utterance.voice=voice;utterance.rate=.95;utterance.pitch=1.04;speechSynthesis.speak(utterance);}catch{}}
- setEnabled(value){this.enabled=Boolean(value);this.syncGain();if(!this.enabled){this.clearNotes();try{speechSynthesis.cancel();}catch{}}this.updateAmbience();}
- stop(){this.ambience(false);this.clearNotes();try{speechSynthesis.cancel();}catch{}this.context?.suspend().catch(()=>{});}
+ setEnabled(value){this.enabled=Boolean(value);this.syncGain();if(!this.enabled){this.clearNotes();this.pauseBridge();try{speechSynthesis.cancel();}catch{}}this.updateAmbience();}
+ stop(){this.ambience(false);this.clearNotes();this.pauseBridge();try{speechSynthesis.cancel();}catch{}this.context?.suspend().catch(()=>{});}
 }
