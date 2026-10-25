@@ -2,7 +2,7 @@
 
 A two-player pass-and-play game with **alternating turns** and **sudden death**. All **144 tiles** are used, including flowers and seasons. One target opens at random; 143 face-down tiles remain on the table. Match by the user's shared rank system, rather than exact face or suit.
 
-Run `npm start` and open `http://localhost:5173/mahjong-match/`. `npm test` runs ten dependency-free tile/model tests. There is no build step or runtime package dependency.
+Run `npm start` and open `http://localhost:5173/mahjong-match/`. `npm test` runs twelve dependency-free tile/model tests. There is no build step or runtime package dependency.
 
 ## Rank equivalence
 
@@ -18,12 +18,14 @@ Numbered tiles, winds and dragons have four copies each. Each of the four season
 
 ## Two modes
 
-- **Alternating turns:** a same-rank reveal is safe and passes play to the opponent; a different rank loses immediately.
-- **Sudden death:** a different-rank reveal is safe and passes play to the opponent; revealing the target rank loses immediately, even if its face/suit differs.
+- **Alternating turns:** Player 1 reveals, then Player 2 reveals. Decide only after the complete pair. If exactly one player matches the fixed target rank, that player wins. Two matches or two misses start another pair, again with Player 1. Previously revealed tiles stay used; the target stays fixed. If a tied pair leaves fewer than two tiles, the match ends in a draw.
+- **Sudden death:** each new game or replay randomly chooses either player to start, with equal probability. A different rank passes to the other player; matching the target rank loses immediately, even when its face/suit differs. The draw order and current player are visible.
 
-Player 1 starts and can reveal immediately. Each safe reveal automatically starts the other player’s turn. A fatal first pick awards Player 2 the win. Used tiles and the target cannot be selected. The target/mode stay fixed throughout the round; the next round shuffles all 144 pieces and keeps the names and selected mode. No account, backend or long-term match history is used.
+No handoff confirmation is needed. Used tiles and the target cannot be selected. A fresh game shuffles all 144 pieces and keeps the names and mode. Paired games show the pair number during play and both player tiles beside the target at the end. Winners receive the shared trophy and ribbons; exhausted-table draws have no winner decoration.
 
-The table fits the target and all 143 other tiles into one playing viewport, with no scrolling inside the table. Revealed pieces remain visible, with an owner marker and a safe/fatal frame. The result compares target and last reveal, including both rank badges and an equals/not-equals sign. A short delay allows the reveal to settle before result focus moves. Reset cancels pending focus work.
+“Change game mode” returns to setup, focuses the mahjong-mode dropdown and scrolls its label and control into view. Reduced-motion preferences skip the smooth scroll. No account, backend or long-term match history is used.
+
+The table fits the target and all 143 other tiles into one playing viewport, with no scrolling inside the table. Revealed pieces remain visible, with an owner marker and a safe/fatal frame. Sudden-death results compare the target and fatal reveal with rank badges and an equals sign. Paired results compare the target with both named players’ tiles and show whether each matches. A short delay allows the reveal to settle before result focus moves. Reset cancels pending focus work.
 
 Every face is local HTML/SVG: traditional glyphs, circle marks, bamboo strokes, winds, dragons and indexed seasons/flowers. Physical glyphs remain authentic in either language; interface labels, accessible names, instructions and rank rules are bilingual. Names stay literal and are limited to 24 characters.
 

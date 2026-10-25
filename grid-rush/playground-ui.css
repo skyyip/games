@@ -160,3 +160,21 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
 /* Copyright stays on its own final line across the playground and game footers. */
 footer{flex-wrap:wrap}
 footer .site-copyright{flex:0 0 100%;order:10;width:100%;margin:0;font-size:11px;line-height:1.6;text-align:center}
+
+/* Give dropdown arrows consistent breathing room without changing native selection. */
+select:not([multiple]):not([size]),select:not([multiple])[size="1"]{
+  -webkit-appearance:none;
+  appearance:none;
+  padding-inline-end:42px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%234c6053' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position:right 16px center;
+  background-size:12px 8px;
+  background-repeat:no-repeat;
+}
+@media(forced-colors:active){
+  select:not([multiple]):not([size]),select:not([multiple])[size="1"]{
+    -webkit-appearance:menulist;
+    appearance:auto;
+    background-image:none;
+  }
+}

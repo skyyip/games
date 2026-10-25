@@ -10,7 +10,7 @@ function celebrate(panel){
   stop(panel);
   const name=panel.querySelector('[data-winner-name]');
   // Losing a maze is not a victory. Other solo games celebrate the completed run.
-  if(!name||panel.querySelector('.is-lost')){if(name)name.hidden=true;return;}
+  if(!name||panel.dataset.victoryOutcome==='draw'||panel.querySelector('.is-lost')){if(name)name.hidden=true;return;}
   name.hidden=false;
   if(!name.querySelector(':scope > .champion-icon')){
     const label=document.createElement('span'),icon=document.createElement('span');

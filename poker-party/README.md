@@ -20,4 +20,8 @@ See [VERIFICATION.md](./VERIFICATION.md). Optional browser checks: `GRID_RUSH_PL
 
 The compact table uses adaptive columns, tighter spacing and smaller face labels while keeping at least 44px card targets. Table height adapts to the viewport so more cards fit at once.
 
-Revealed cards use dark ink and saturated red on ivory, without dimming selected faces. Navy backs display the website logo. Winners, including shared winners, receive a gold name badge, trophy and a brief ribbon burst. Reduced-motion preferences keep the badge and trophy without animation.
+Revealed cards use dark ink and saturated red on ivory, without dimming selected faces. Soft blue backs display the website logo. The lighter sage table has wider horizontal margins and padding. Winners, including shared winners, receive a gold name badge, trophy and a brief ribbon burst. Reduced-motion preferences keep the badge and trophy without animation.
+
+Each player has a stable, distinct colour shared by revealed-card borders, numeric owner badges, the current-turn badge and the player’s hand. Card ownership also references the player’s literal name for assistive technology.
+
+“Change game mode” resets the table, focuses the card-mode dropdown and scrolls its labelled control into view. Reduced-motion preferences skip the smooth scroll.

@@ -134,7 +134,7 @@ node scripts/favourites-check.mjs
 
 ## Shared victory presentation
 
-All 17 games use `src/victory.js` (loaded by `src/playground-ui.js`) and `victory.css`. A result panel opts in with `data-victory` and has one `data-winner-name` label. Multiplayer apps populate that label using `textContent` with every winning name; solo games show the translated “You”. The maze’s failed result suppresses the winner treatment.
+All 17 games use `src/victory.js` (loaded by `src/playground-ui.js`) and `victory.css`. A result panel opts in with `data-victory` and has one `data-winner-name` label. Multiplayer apps populate that label using `textContent` with every winning name; solo games show the translated “You”. The maze’s failed result and result panels marked `data-victory-outcome="draw"` suppress the winner treatment.
 
 Showing a result adds the gold badge, decorative trophy and a 36-piece ribbon burst. Hiding the result cancels pending animation and removes particles. Reduced motion keeps the static badge and trophy. Mahjong delays the burst until its final tile reveal has settled. Every offline game caches the shared module and stylesheet.
 
