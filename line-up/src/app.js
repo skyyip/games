@@ -120,6 +120,7 @@ function startRound() {
 
 function renderResults() {
   const winners=game.winners,results=game.results,winning=new Set(winners.map(result=>result.index));
+  $('[data-winner-name]').textContent=winners.map(result=>result.name).join(' & ');
   $('#result-kicker').textContent=winners.length>1?'A SHARED VICTORY':'THE CLOSEST CALL';
   $('#result-title').textContent=`${winners.map(result=>result.name).join(' & ')} ${winners.length>1?'share the win!':'wins!'}`;
   $('#result-summary').textContent=winners[0].error<1e-9?`Spot on. Exactly ${game.target}% of the ${game.line.closed?'outline':'line'}. That’s a good eye.`:`Closest to ${game.target}%, with an error of ${format(winners[0].error)} percentage points. Nicely judged.`;

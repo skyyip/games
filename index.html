@@ -41,7 +41,7 @@ h1{margin:0;white-space:nowrap;font-family:'Fredoka',ui-rounded,sans-serif;font-
 .card:hover,.card:focus-visible{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 60px -20px var(--accent);outline:none}
 .art{height:190px;display:grid;place-items:center;background:var(--art)}
 .art svg{width:96px;height:96px;filter:drop-shadow(0 10px 18px #0006);transition:transform .35s}
-.pikmax-cover{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s}.card:hover .pikmax-cover,.card:focus-visible .pikmax-cover{transform:scale(1.035)}
+.flick-cover,.pikmax-cover{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s}.card:hover .flick-cover,.card:focus-visible .flick-cover,.card:hover .pikmax-cover,.card:focus-visible .pikmax-cover{transform:scale(1.035)}
 .card:hover .art svg{transform:scale(1.12) rotate(-4deg)}
 .body{padding:22px 24px 24px}
 .tags{display:flex;gap:8px;margin-bottom:12px}
@@ -259,6 +259,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a class="card" href="floating-balance/" style="--accent:#cdddc2;--art:linear-gradient(135deg,#e6edd4,#a5b99a)">
       <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><ellipse cx="48" cy="79" rx="27" ry="6" fill="#78917a22"/><path d="M14 50v7q34 25 68-2v-7" fill="#829c7e"/><ellipse cx="48" cy="49" rx="34" ry="19" fill="#b6cba2" stroke="#dce4b8" stroke-width="2"/><ellipse cx="48" cy="49" rx="13" ry="7" fill="none" stroke="#d6e2bd"/><circle cx="47" cy="36" r="9" fill="#d69b91" stroke="#af7777" stroke-width="1.5"/><circle cx="44" cy="33" r="2.5" fill="#fff0d9"/><path d="M8 24h15q8 0 6-6m42 7h12" stroke="#f8f5df" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Tilt &amp; balance</span></div><h2>Float &amp; Balance</h2><p>A floating board, a little marble, and a few surprises. How long can you stay balanced?</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="flick-force">
+      <button class="favourite-button" type="button" aria-label="Favourite: Flick Force" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="flick-force/" style="--accent:#efbea4;--art:linear-gradient(135deg,#e7e5c9,#a9c49a)">
+      <div class="art" aria-hidden="true"><img class="flick-cover" src="./flick-force/assets/flick-car-cover.svg" alt="" draggable="false"></div>
+      <div class="body"><div class="tags"><span>Solo</span><span>Flick &amp; glide</span></div><h2>Flick Force</h2><p>One swipe, a long way. Flick up or down and chase your three longest distances.</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="memory-trace">
+      <button class="favourite-button" type="button" aria-label="Favourite: Memory Trace" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="memory-trace/" style="--accent:#e9bda2;--art:linear-gradient(135deg,#ede2cb,#c5d2ad)">
+      <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><path d="M48 17C29 8 15 25 22 40C7 55 28 84 48 74C65 87 90 62 76 45C89 24 64 7 48 17Z" fill="#efc4ac" stroke="#b38d75" stroke-width="2"/><path d="M48 21v49m-20-39q18-10 17 8m22-9q-16-6-16 10M29 61q-12-17 11-13" fill="none" stroke="#c1957c" stroke-width="3" stroke-linecap="round"/><path d="m76 73 11-10m-9-7 12 5-9 9" fill="none" stroke="#f8f1d6" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="body"><div class="tags"><span>2–6 players</span><span>Look &amp; redraw</span></div><h2>Memory Trace</h2><p>Remember a curious shape for three seconds. Draw it back and compare your overlap.</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="dice-party">
+      <button class="favourite-button" type="button" aria-label="Favourite: Dice &amp; Delight" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="dice-party/" style="--accent:#d8c8e5;--art:linear-gradient(135deg,#e6dbce,#bacbac)">
+      <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><g transform="rotate(-12 48 48)"><rect x="17" y="17" width="64" height="64" rx="18" fill="#e5d2b8" stroke="#b7a18a" stroke-width="2"/><rect x="17" y="13" width="64" height="62" rx="18" fill="#fff4df" stroke="#c3af96" stroke-width="2"/><g fill="#7b7667"><circle cx="34" cy="30" r="5"/><circle cx="64" cy="30" r="5"/><circle cx="49" cy="44" r="5"/><circle cx="34" cy="59" r="5"/><circle cx="64" cy="59" r="5"/></g><path d="M26 24q5-6 15-6" fill="none" stroke="#fffdf4" stroke-width="4" stroke-linecap="round"/></g></svg></div>
+      <div class="body"><div class="tags"><span>2–6 players</span><span>Shake &amp; roll</span></div><h2>Dice &amp; Delight</h2><p>Shake, roll and pass it on. Choose high, low or five-dice poker for a little friendly luck.</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="poker-party">
+      <button class="favourite-button" type="button" aria-label="Favourite: Pocket Poker" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="poker-party/" style="--accent:#d6c0a6;--art:linear-gradient(135deg,#e8dfc7,#92b39a)">
+      <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><g transform="rotate(-12 38 48)"><rect x="14" y="15" width="43" height="65" rx="8" fill="#92a4b0" stroke="#fff5df" stroke-width="3"/><path d="M21 25h29v45H21Z" fill="none" stroke="#dce5df" stroke-width="1.5"/></g><g transform="rotate(10 60 48)"><rect x="38" y="15" width="43" height="65" rx="8" fill="#fff9e9" stroke="#c6bda8" stroke-width="2"/><path d="M60 32C48 43 46 52 55 53q5 0 5-4-1 10-6 12h13q-7-5-7-12 0 5 6 4 11-3-6-21Z" fill="#547360"/></g></svg></div>
+      <div class="body"><div class="tags"><span>2–6 players</span><span>Draw &amp; compare</span></div><h2>Pocket Poker</h2><p>A whole deck of little chances. Take turns drawing five-card hands or settle it with one card.</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="mahjong-match">
+      <button class="favourite-button" type="button" aria-label="Favourite: Mahjong Match" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="mahjong-match/" style="--accent:#c9dec5;--art:linear-gradient(135deg,#e4e7ce,#8eae99)">
+      <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><rect x="24" y="19" width="48" height="65" rx="9" fill="#73967f"/><rect x="24" y="12" width="48" height="65" rx="9" fill="#fff9df" stroke="#cfcbb4" stroke-width="2"/><path d="M42 26v33m12-33v33M34 35h28M35 53h27M35 44h27" fill="none" stroke="#b96f67" stroke-width="4" stroke-linecap="round"/><path d="m37 63 11-7 12 7" fill="none" stroke="#77917a" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="body"><div class="tags"><span>2 players</span><span>Tiles &amp; chance</span></div><h2>Mahjong Match</h2><p>One target rank, two ways to play. Match it to stay safe or dodge it in sudden death.</p><span class="play">Play now <i>→</i></span></div>
       </a>
     </article>
   </section>

@@ -1,0 +1,6 @@
+{
+  "id":"./", "name":"斗指力 · Your Playground.", "short_name":"斗指力",
+  "description":"向上或向下滑一次，看看指力能讓跑道滑出多少米，挑戰本機前三名。",
+  "start_url":"./", "scope":"./", "display":"standalone", "background_color":"#f6f4e9", "theme_color":"#f6f4e9",
+  "icons":[{"src":"../grid-rush/assets/icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"../grid-rush/assets/icons/icon-512.png","sizes":"512x512","type":"image/png"}]
+}

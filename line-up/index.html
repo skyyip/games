@@ -18,6 +18,7 @@
 <script src="../grid-rush/src/navigation.js"></script>
 <script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
 <script type="module" src="./src/app.js"></script>
+<link rel="stylesheet" href="../grid-rush/victory.css">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -74,8 +75,8 @@
         <p class="keyboard-help" id="keyboard-help">Select an endpoint to adjust it. Keyboard: arrow keys move; Shift + arrow moves finely. Home/End reach the line’s ends.</p>
         <button type="button" id="lock" class="primary-button" disabled>Lock my guess <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button><p class="footnote">Your exact length is revealed after everyone has locked a guess.</p>
       </section>
-      <section id="result" class="panel result-panel" aria-labelledby="result-title" hidden>
-        <p class="eyebrow section-index" id="result-kicker">THE CLOSEST CALL</p><svg class="winner-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 10h24v15a12 12 0 0 1-24 0V10Z M20 14H10v7a12 12 0 0 0 13 12M44 14h10v7a12 12 0 0 1-13 12M32 37v13M22 54h20M25 50h14"/></svg><h2 id="result-title"></h2><p class="panel-copy" id="result-summary"></p>
+      <section id="result" data-victory class="panel result-panel" aria-labelledby="result-title" hidden>
+        <p class="eyebrow section-index" id="result-kicker">THE CLOSEST CALL</p><svg class="winner-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 10h24v15a12 12 0 0 1-24 0V10Z M20 14H10v7a12 12 0 0 0 13 12M44 14h10v7a12 12 0 0 1-13 12M32 37v13M22 54h20M25 50h14"/></svg><h2 id="result-title"></h2><div data-winner-name translate="no"></div><p class="panel-copy" id="result-summary"></p>
         <div class="result-reference"><div><strong id="reference-label"></strong><span id="reference-kind"></span></div><svg id="result-preview" viewBox="0 0 1000 420" aria-hidden="true"><path class="path-base"/><path class="path-selection"/></svg><p>One way to make the target length. Your segment could start anywhere.</p></div>
         <div class="standings-heading"><h3>How everyone lined up</h3><span>SMALLEST ERROR FIRST</span></div><ol id="standings" aria-label="Round ranking"></ol><p class="footnote">Error is measured in percentage points. Full precision decides the ranking; equal errors share the win.</p>
         <button type="button" id="again" class="primary-button">Another round <span aria-hidden="true">↻</span></button><button type="button" id="change-players" class="secondary-button">Change players</button>

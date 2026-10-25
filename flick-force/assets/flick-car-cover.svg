@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="260" viewBox="0 0 480 260"><defs><linearGradient id="cover-bg" x2="1" y2="1"><stop stop-color="#f9e7dc"/><stop offset="1" stop-color="#e2eddf"/></linearGradient></defs><rect width="480" height="260" fill="url(#cover-bg)"/><path d="M150 0h180v260H150Z" fill="#d8e7dd"/><path d="M162 0v260M318 0v260" fill="none" stroke="#fff6df" stroke-width="3"/><path d="M240 0v260" stroke="#b4cbb8" stroke-width="2" stroke-dasharray="6 16"/><g fill="#e5b5b7"><circle cx="93" cy="69" r="18"/><circle cx="379" cy="191" r="16"/></g><g fill="#fff9e9"><circle cx="89" cy="64" r="7"/><circle cx="97" cy="64" r="7"/><circle cx="93" cy="73" r="7"/><circle cx="375" cy="187" r="6"/><circle cx="383" cy="187" r="6"/><circle cx="379" cy="195" r="6"/></g><g stroke="#fff9e9" stroke-width="4" stroke-linecap="round"><path d="M113 112v30m-13-22v13m270-45v31m13-18v31"/></g><svg x="112" y="3" width="256" height="244" class="otter-car" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" stroke-linecap="round" stroke-linejoin="round">
+<style>.car-face-effort,.car-headband,.car-sweat,.car-exhaust{display:none}</style><defs>
+ <linearGradient id="car-cream" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#fffbe6"/><stop offset="1" stop-color="#ead9b8"/></linearGradient>
+ <linearGradient id="car-roof" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#969e9d"/><stop offset="1" stop-color="#687477"/></linearGradient>
+ <linearGradient id="car-glass" x1="0" y1="0" x2=".6" y2="1"><stop stop-color="#d6e1df"/><stop offset="1" stop-color="#a2b4b5"/></linearGradient>
+ <linearGradient id="car-side" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#94a4a6"/><stop offset=".5" stop-color="#b9c5c1"/><stop offset="1" stop-color="#94a4a6"/></linearGradient>
+ <radialGradient id="car-cheek"><stop stop-color="#efa2b1" stop-opacity=".9"/><stop offset="1" stop-color="#efa2b1" stop-opacity=".3"/></radialGradient>
+ <clipPath id="car-tread"><rect x="-10" y="-21" width="20" height="42" rx="9"/></clipPath>
+</defs>
+<g class="car-exhaust" transform="translate(67 24)" fill="#c6ccc5" stroke="#a5b6ad" stroke-width="1">
+ <g class="exhaust-puff"><ellipse cy="2" rx="10" ry="6"/><circle cx="-5" cy="-2" r="5.5"/><circle cx="3" cy="-4" r="6.5"/></g>
+ <g class="exhaust-puff"><ellipse cy="2" rx="10" ry="6"/><circle cx="-5" cy="-2" r="5.5"/><circle cx="3" cy="-4" r="6.5"/></g>
+ <g class="exhaust-puff"><ellipse cy="2" rx="10" ry="6"/><circle cx="-5" cy="-2" r="5.5"/><circle cx="3" cy="-4" r="6.5"/></g>
+</g>
+<ellipse class="car-shadow" cx="110" cy="185" rx="81" ry="9" fill="#617d7126"/>
+<g class="car-wheel" transform="translate(39 159)"><rect x="-12" y="-24" width="24" height="48" rx="11" fill="#52635e"/><g clip-path="url(#car-tread)"><g class="wheel-spin"><path d="M-9-30H9M-9-20H9M-9-10H9M-9 0H9M-9 10H9M-9 20H9M-9 30H9" fill="none" stroke="#9cab9d" stroke-width="2.8"/></g></g><path d="M-8-14v27" stroke="#c3cbb438" stroke-width="2"/></g>
+<g class="car-wheel" transform="translate(181 159)"><rect x="-12" y="-24" width="24" height="48" rx="11" fill="#52635e"/><g clip-path="url(#car-tread)"><g class="wheel-spin"><path d="M-9-30H9M-9-20H9M-9-10H9M-9 0H9M-9 10H9M-9 20H9M-9 30H9" fill="none" stroke="#9cab9d" stroke-width="2.8"/></g></g><path d="M8-14v27" stroke="#c3cbb438" stroke-width="2"/></g>
+<g class="car-body">
+ <path d="M38 91 51 45Q58 20 82 18H138Q162 20 169 45L182 91Q203 110 199 146L190 170H30L21 146Q17 110 38 91Z" fill="url(#car-cream)" stroke="#b6ac95" stroke-width="2"/>
+ <path d="M30 105Q42 96 54 107V163L30 170Q17 142 30 105ZM190 105Q178 96 166 107V163L190 170Q203 142 190 105Z" fill="url(#car-side)"/>
+ <path d="M54 47Q59 29 82 25H138Q161 29 166 47Z" fill="url(#car-roof)" stroke="#6e7b7b" stroke-width="2"/>
+ <path d="M69 34q20-8 40-5m18 1 16 3" fill="none" stroke="#dce3d8" stroke-width="3" opacity=".65"/>
+ <path d="M112 38c-7-5-9-10-4-11 2 0 4 2 4 2s2-3 4-2c5 2 1 7-4 11Z" fill="#f8edd5"/>
+ <path d="M54 52Q57 45 67 45H153Q163 45 166 52L176 88Q175 97 166 98H54Q45 97 44 88Z" fill="url(#car-glass)" stroke="#fff1d3" stroke-width="6"/>
+ <path d="M63 78q18-21 36 0v16H63Zm58 0q18-21 36 0v16h-36Z" fill="#dedbc7" opacity=".55"/>
+ <path d="M59 58h41m-46 9-3 13m106-22 5 19" fill="none" stroke="#f7fff3" stroke-width="3.5" opacity=".6"/>
+ <path d="M110 49v44" stroke="#f0e8ce" stroke-width="3" opacity=".65"/>
+ <path d="M33 143Q45 127 56 144v22m131-23q-12-16-23 1v22" fill="none" stroke="#fff0cf" stroke-width="8"/>
+ <path d="M37 124Q35 99 61 94Q110 85 159 94Q185 99 183 124L180 143Q178 164 156 171Q110 183 64 171Q42 164 40 143Z" fill="url(#car-cream)" stroke="#bdaf91" stroke-width="1.8"/>
+ <path d="M54 107q15-10 29-9m49 0q19 0 32 9" fill="none" stroke="#fffdf0" stroke-width="3.5" opacity=".8"/>
+ <path d="M64 174q46 12 92 0" fill="none" stroke="#fcf0d2" stroke-width="8"/>
+ <g fill="#a6957b" opacity=".65"><ellipse cx="57" cy="119" rx="1.2" ry="2.2" transform="rotate(25 57 119)"/><ellipse cx="69" cy="106" rx="1" ry="2"/><ellipse cx="146" cy="106" rx="1" ry="2"/><ellipse cx="163" cy="119" rx="1.2" ry="2.2" transform="rotate(-25 163 119)"/><ellipse cx="175" cy="139" rx="1" ry="2"/><ellipse cx="45" cy="139" rx="1" ry="2"/></g>
+ <path d="m87 107 3-6 3 5 6 1-5 4 1 6-5-3-5 3 1-6-4-3Z" fill="#fff5cd" stroke="#8b7b63" stroke-width="1.3"/>
+ <g class="car-blush" fill="url(#car-cheek)"><ellipse cx="66" cy="145" rx="12" ry="7"/><ellipse cx="154" cy="145" rx="12" ry="7"/></g>
+ <g class="car-face-rest"><g class="car-blink"><ellipse cx="84" cy="128" rx="8" ry="9" fill="#4c514b"/><ellipse cx="136" cy="128" rx="8" ry="9" fill="#4c514b"/><g fill="#fffdf0"><ellipse cx="82" cy="125" rx="3.6" ry="2.6"/><ellipse cx="134" cy="125" rx="3.6" ry="2.6"/><circle cx="87" cy="132" r="1.3"/><circle cx="139" cy="132" r="1.3"/></g></g><path d="M106 139q4-3 8 0-1 5-4 5-3 0-4-5Z" fill="#685d4e"/><path d="M110 143q-5 8-11 2m11-2q5 8 11 2" fill="none" stroke="#685d4e" stroke-width="2"/></g>
+ <g class="car-face-effort"><path d="m75 117 13 5m44 0 13-5" fill="none" stroke="#695d50" stroke-width="2.4"/><path d="M76 128q8-7 16 1-1 10-8 9-8-1-8-10Zm52 1q8-8 16-1 0 9-8 10-7 1-8-9Z" fill="#4c514b"/><g fill="#fffbea"><ellipse cx="85" cy="128" rx="2.8" ry="2"/><ellipse cx="135" cy="128" rx="2.8" ry="2"/></g><path d="M107 141q3-3 6 0l-3 3Z" fill="#695d50"/><rect x="103" y="149" width="14" height="7" rx="3.5" fill="#fffdf1" stroke="#8b705a" stroke-width="1.5"/><path d="M110 150v5" stroke="#baa78c" stroke-width=".9"/><path d="m61 143-2 5m7-4-1 5m88-5 1 5m4-6 2 5" fill="none" stroke="#db8f98" stroke-width="1.3"/></g>
+ <g class="car-headband"><path d="M49 108Q110 90 171 108" fill="none" stroke="#e9a1a8" stroke-width="5"/><path class="car-ribbon" d="m170 104 14-2-4 5 7 5-16-3Z" fill="#eea9b2" stroke="#ce8c96" stroke-width=".8"/></g>
+ <g class="car-sweat"><path d="M160 112c-1 5-7 9-5 13 3 6 11 2 10-2-1-5-4-7-5-11Z" fill="#b1d9e3" stroke="#83b6c6" stroke-width="1"/><path d="m159 120-1 3" stroke="#f2ffff" stroke-width="1.5"/></g>
+</g></svg><g fill="#d6a8ae"><path d="m367 39 3-7 3 7 7 3-7 3-3 7-3-7-7-3Z"/><path d="m108 210 2-5 2 5 5 2-5 2-2 5-2-5-5-2Z"/></g></svg>

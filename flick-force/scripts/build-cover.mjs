@@ -1,0 +1,7 @@
+import {writeFile} from 'node:fs/promises';
+import {carMarkup} from '../src/car.js';
+const styles='<style>.car-face-effort,.car-headband,.car-sweat,.car-exhaust{display:none}</style>';
+const car=carMarkup.replace('<defs>',styles+'<defs>');
+const cover=`<svg xmlns="http://www.w3.org/2000/svg" width="480" height="260" viewBox="0 0 480 260"><defs><linearGradient id="cover-bg" x2="1" y2="1"><stop stop-color="#f9e7dc"/><stop offset="1" stop-color="#e2eddf"/></linearGradient></defs><rect width="480" height="260" fill="url(#cover-bg)"/><path d="M150 0h180v260H150Z" fill="#d8e7dd"/><path d="M162 0v260M318 0v260" fill="none" stroke="#fff6df" stroke-width="3"/><path d="M240 0v260" stroke="#b4cbb8" stroke-width="2" stroke-dasharray="6 16"/><g fill="#e5b5b7"><circle cx="93" cy="69" r="18"/><circle cx="379" cy="191" r="16"/></g><g fill="#fff9e9"><circle cx="89" cy="64" r="7"/><circle cx="97" cy="64" r="7"/><circle cx="93" cy="73" r="7"/><circle cx="375" cy="187" r="6"/><circle cx="383" cy="187" r="6"/><circle cx="379" cy="195" r="6"/></g><g stroke="#fff9e9" stroke-width="4" stroke-linecap="round"><path d="M113 112v30m-13-22v13m270-45v31m13-18v31"/></g>${car.replace('<svg ', '<svg x="112" y="3" width="256" height="244" ')}<g fill="#d6a8ae"><path d="m367 39 3-7 3 7 7 3-7 3-3 7-3-7-7-3Z"/><path d="m108 210 2-5 2 5 5 2-5 2-2 5-2-5-5-2Z"/></g></svg>\n`;
+await writeFile(new URL('../assets/flick-car-cover.svg',import.meta.url),cover);
+console.log('Flick Force cover rebuilt from the shared toy-car character.');

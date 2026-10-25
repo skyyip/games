@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "撲克牌 · Your Playground.",
+  "short_name": "撲克牌",
+  "description": "撲克牌：輪流揭牌的小遊戲。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f4ea",
+  "theme_color": "#f6f4ea",
+  "icons": [
+    {
+      "src": "../grid-rush/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../grid-rush/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

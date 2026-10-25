@@ -18,6 +18,7 @@
 <script src="../grid-rush/src/navigation.js"></script>
 <script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
 <script type="module" src="./src/app.js"></script>
+<link rel="stylesheet" href="../grid-rush/victory.css">
 </head>
 <body>
 <a class="skip-link" href="#app">Skip to game</a>
@@ -44,7 +45,7 @@
         <p id="keyboard-help" class="keyboard-help">Mouse or touch: hold the circle. Keyboard: hold Space or Enter.</p><p id="cancel-note" class="cancel-note" role="status"></p>
       </section>
       <section id="locked" class="scene locked-scene" aria-labelledby="locked-title" hidden><div class="lock-seal" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m12 24 8 8 16-17"/></svg></div><p class="eyebrow">A MOMENT, CAPTURED.</p><h2 id="locked-title">Guess locked.</h2><p>Your time stays secret<br>until everyone has had a turn.</p><div class="locked-receipt"><span id="locked-name" translate="no"></span><span class="receipt-status">LOCKED IN <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"/></svg></span></div><button type="button" class="primary-button" id="next">Pass the moment <span aria-hidden="true">↗</span></button></section>
-      <section id="result" class="scene results-scene" aria-labelledby="result-title" hidden><p class="eyebrow">THE CLOSEST MOMENT</p><svg class="winner-art" viewBox="0 0 64 64" aria-hidden="true"><path d="m32 7 7 15 17 2-12 12 3 17-15-8-15 8 3-17L8 24l17-2Z"/></svg><h2 id="result-title"></h2><p id="result-note"></p><div class="result-target"><span>The target was</span><strong id="result-target"></strong></div><ol class="standings" id="standings" aria-label="Results ranked by timing accuracy"></ol><button type="button" class="primary-button" id="again">Another moment <span aria-hidden="true">↗</span></button><button type="button" class="text-button" id="change-players">Change players</button></section>
+      <section id="result" data-victory class="scene results-scene" aria-labelledby="result-title" hidden><p class="eyebrow">THE CLOSEST MOMENT</p><svg class="winner-art" viewBox="0 0 64 64" aria-hidden="true"><path d="m32 7 7 15 17 2-12 12 3 17-15-8-15 8 3-17L8 24l17-2Z"/></svg><h2 id="result-title"></h2><div data-winner-name translate="no"></div><p id="result-note"></p><div class="result-target"><span>The target was</span><strong id="result-target"></strong></div><ol class="standings" id="standings" aria-label="Results ranked by timing accuracy"></ol><button type="button" class="primary-button" id="again">Another moment <span aria-hidden="true">↗</span></button><button type="button" class="text-button" id="change-players">Change players</button></section>
       <div class="round-tracker" id="round-tracker" aria-label="Player turns" hidden><div class="tracker-ink" aria-hidden="true"></div><ol id="turns"></ol></div>
       <div class="stage-bottom"><span>Less counting. More feeling.</span><svg viewBox="0 0 42 16" aria-hidden="true"><path d="M2 8h35m-7-6 7 6-7 6"/></svg></div>
     </section>

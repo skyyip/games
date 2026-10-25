@@ -25,7 +25,8 @@
     <script type="module" blocking="render" src="../grid-rush/src/playground-ui.js"></script>
     <script type="module" src="./src/app.js"></script>
     <script type="module" src="./src/pwa.js"></script>
-  </head>
+  <link rel="stylesheet" href="./victory.css">
+</head>
   <body>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TZ646NJ9"
@@ -87,11 +88,11 @@
             <div class="board-bottomline"><span id="progress-label">LET’S MAKE IT A QUICK ONE.</span><span class="progress-count"><span id="progress">0</span><span class="progress-divider">/</span><span id="total">9</span></span></div>
             <div class="progress-track" role="progressbar" aria-label="Tiles completed" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0"><div id="progress-fill"></div></div>
 
-            <div id="result" class="result-overlay" role="region" aria-labelledby="result-title" hidden>
+            <div id="result" data-victory class="result-overlay" role="region" aria-labelledby="result-title" hidden>
               <div class="result-decoration" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>
               <div class="result-icon"><svg class="icon" aria-hidden="true"><use href="#icon-trophy"/></svg></div>
               <p class="eyebrow" id="result-kicker">GRID CLEARED</p>
-              <h2 id="result-title">That was a rush.</h2>
+              <h2 id="result-title">That was a rush.</h2><div data-winner-name>You</div>
               <p class="result-time"><span id="result-time">0.00</span><span>s</span></p>
               <p class="result-message" id="result-message"></p>
               <button class="primary-button" id="play-again" type="button">Play Again <svg class="icon" aria-hidden="true"><use href="#icon-reset"/></svg></button>

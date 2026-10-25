@@ -136,6 +136,7 @@ html,body{background:#e9eee3;color:#34483d}
  .panel{padding-top:68px}
 }
 </style>
+<link rel="stylesheet" href="../grid-rush/victory.css">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -173,8 +174,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="btn" id="start" style="margin-top:auto">Start game</button>
   </section>
 
-  <section id="result" class="panel" hidden>
-    <h1 id="loser"></h1>
+  <section id="result" data-victory class="panel" hidden>
+    <h1 id="loser"></h1><div data-winner-name translate="no"></div>
     <p class="sub" id="roundInfo"></p>
     <div id="stats" class="res"></div>
     <button class="btn" id="again" style="margin-top:auto">Another game</button>
@@ -569,6 +570,8 @@ function showResult() {
   $('#roundInfo').textContent = `${sm.rounds} rounds · Glass capacity ${sm.capacity} units`;
   const max = Math.max(...sm.players.map(p => p.total));
   $('#stats').innerHTML = sm.players.map(p => `<div><div class="n"><span>${p === sm.loser ? '💦 ' : ''}${esc(p.name)}</span><span>${Math.round(p.total)}</span></div><div class="bar" style="width:${Math.max(3, p.total / max * 100)}%;background:${p.color}"></div></div>`).join('');
+  $('[data-winner-name]').textContent = sm.players.filter(p => p !== sm.loser).map(p => p.name).join(' & ');
+  for (const [index, row] of [...$('#stats').children].entries()) row.querySelector('.n > span').classList.toggle('winning-player', sm.players[index] !== sm.loser);
   $('#result').hidden = false;
   $('#again').focus({ preventScroll: true });
 }

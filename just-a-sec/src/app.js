@@ -37,6 +37,7 @@ function renderTracker() {
 }
 function renderResults() {
   const winners=game.winners;
+  $('[data-winner-name]').textContent=winners.map(result=>result.name).join(' & ');
   $('#result-title').textContent=`${winners.map(result=>result.name).join(' & ')} ${winners.length>1?'share the moment.':'has the best timing.'}`;
   $('#result-note').textContent=winners[0].error===0?'Right on the millisecond. What a feeling.':`Just ${seconds(winners[0].error)} seconds from the target. A good feeling, confirmed.`;
   const targetUnit=document.createElement('small');targetUnit.textContent='s';
