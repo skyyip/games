@@ -3,7 +3,7 @@ import { BASE_TYPES } from './characters.js';
 export const MODES=Object.freeze(['normal','challenge','timed']);
 export const GROWTH=Object.freeze(['leaf','bud','flower']);
 export const FLOWER_HOLD=600,CHAIN_HOLD=200;
-export const ROUND_LIMIT=30000;
+export const ROUND_LIMIT=35000;
 export const POINTS=Object.freeze({leaf:1,bud:2,flower:3});
 export const ROUND_COUNT=35,MAX_GLOW=3,MAX_SCORE=ROUND_COUNT*4;
 export const unitPoints=unit=>POINTS[unit.growth]+(unit.type==='glow'?1:0);
@@ -35,7 +35,7 @@ export class FlingGame {
     if(this.state!=='idle')return false;
     this.startedAt=this.now();this.state='playing';
     if(this.mode!=='normal')this.nextChange=this.startedAt+3000+this.random()*5000;
-    this.nextGlow=this.startedAt+4000+this.random()*4000;
+    if(this.mode==='timed')this.nextGlow=this.startedAt+4000+this.random()*4000;
     return true;
   }
   advance(protectedIds=new Set()) {
@@ -56,7 +56,7 @@ export class FlingGame {
       this.nextChange=now+3000+this.random()*5000;
     }
     const changed=changes.map(change=>change.id);
-    if(now>=this.nextGlow){
+    if(this.mode==='timed'&&now>=this.nextGlow){
       if(this.activeGlow<MAX_GLOW){
         const eligible=this.units.flatMap((u,id)=>u.status==='ready'&&u.type!=='glow'&&!protectedIds.has(id)&&!changed.includes(id)?[id]:[]);
         if(eligible.length){const id=eligible[Math.floor(this.random()*eligible.length)];this.units[id].type='glow';changed.push(id);}

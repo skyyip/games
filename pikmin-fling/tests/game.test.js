@@ -13,19 +13,19 @@ test('all three modes can start with purple characters and the 35-character grow
   }
 });
 
-test('30-second mode counts down from start and ends at the deadline, including after a background delay',()=>{
+test('35-second mode counts down from start and ends at the deadline, including after a background delay',()=>{
   let now=500;
   const game=new FlingGame({mode:'timed',now:()=>now});
-  assert.equal(game.remainingTime,30000);assert.equal(game.elapsed,0);
-  now=9000;assert.equal(game.remainingTime,30000);
-  game.start();now=38999;
+  assert.equal(game.remainingTime,35000);assert.equal(game.elapsed,0);
+  now=9000;assert.equal(game.remainingTime,35000);
+  game.start();now=43999;
   assert.equal(game.remainingTime,1);assert.equal(game.state,'playing');
   now=45000;game.advance();
   assert.equal(game.state,'completed');assert.equal(game.endReason,'timeout');
-  assert.equal(game.elapsed,30000);assert.equal(game.remainingTime,0);
+  assert.equal(game.elapsed,35000);assert.equal(game.remainingTime,0);
   assert.equal(game.launch([0],{kind:'accessible'}),false);assert.deepEqual(game.advance(),[]);
-  now+=50000;assert.equal(game.elapsed,30000);
-  game.reset();assert.equal(game.state,'idle');assert.equal(game.remainingTime,30000);
+  now+=50000;assert.equal(game.elapsed,35000);
+  game.reset();assert.equal(game.state,'idle');assert.equal(game.remainingTime,35000);
 });
 
 test('timed scores count each arrival once as 1/2/3 points and reject late arrivals and launches',()=>{
@@ -41,15 +41,26 @@ test('timed scores count each arrival once as 1/2/3 points and reject late arriv
   game.arrive(bud);assert.equal(game.score,3);
   game.arrive(flower);assert.equal(game.score,6);assert.equal(game.progress,3);
   const late=game.units.findIndex(unit=>unit.status==='ready');
-  now=29900;assert.equal(game.launch([late],{kind:'accessible'}),true);
-  now=30000;assert.equal(game.arrive(late),false);
+  now=34900;assert.equal(game.launch([late],{kind:'accessible'}),true);
+  now=35000;assert.equal(game.arrive(late),false);
   assert.equal(game.score,6);assert.equal(game.progress,3);assert.equal(game.state,'completed');
   assert.equal(game.launch([late],{kind:'accessible'}),false);
   game.reset();assert.equal(game.score,0);
   game.start();now+=500;
   for(let i=0;i<35;i++){game.launch([i],{kind:'accessible'});game.arrive(i);}
   assert.equal(game.score,50);assert.equal(game.state,'completed');assert.equal(game.endReason,'cleared');
-  assert.equal(game.elapsed,500);assert.equal(game.remainingTime,29500);
+  assert.equal(game.elapsed,500);assert.equal(game.remainingTime,34500);
+});
+
+test('timed play remains open after 30 seconds and rejects arrivals exactly at 35 seconds',()=>{
+  let now=0;const game=new FlingGame({mode:'timed',now:()=>now,random:()=>0});game.start();
+  now=30000;game.advance();assert.equal(game.state,'playing');assert.equal(game.remainingTime,5000);
+  game.units[0]={type:'glow',growth:'flower',status:'ready'};
+  game.units[1]={type:'red',growth:'leaf',status:'ready'};
+  assert.equal(game.launch([0],{kind:'accessible'}),true);
+  assert.equal(game.launch([1],{kind:'accessible'}),true);
+  now=34999;assert.equal(game.arrive(0),true);assert.equal(game.score,4);
+  now=35000;assert.equal(game.arrive(1),false);assert.equal(game.score,4);assert.equal(game.endReason,'timeout');
 });
 
 test('timed growth waves repeat within 3–8 seconds and score the changed stage, protecting flights and interactions',()=>{
@@ -69,7 +80,7 @@ test('timed growth waves repeat within 3–8 seconds and score the changed stage
   assert.equal(game.activeGlow,1);
   assert.ok(game.nextChange>13999&&game.nextChange<=14000);
   now=14000;assert.ok(game.advance().length>0);
-  now=30000;assert.deepEqual(game.advance(),[]);assert.equal(game.nextChange,Infinity);
+  now=35000;assert.deepEqual(game.advance(),[]);assert.equal(game.nextChange,Infinity);
   assert.equal(game.score,5);
 });
 
@@ -134,13 +145,13 @@ test('challenge changes a simultaneous snapshot every 3–8 seconds and protects
   assert.equal(game.units[leaf].growth,'leaf');assert.equal(game.units[bud].growth,'bud');
   assert.equal(game.nextChange,6000);assert.deepEqual(game.advance(),[]);
   random=.999999;now=6000;
-  assert.equal(game.advance().length,20); // 19 growth changes plus one glow arrival
-  assert.equal(game.activeGlow,1);
+  assert.equal(game.advance().length,19); // Challenge has growth changes, never Glow arrivals
+  assert.equal(game.activeGlow,0);
   assert.deepEqual(game.growthCounts,{leaf:20,bud:10,flower:4});
   assert.ok(game.nextChange>13999 && game.nextChange<=14000);
   now=99999;assert.ok(game.advance().length>0);assert.ok(game.nextChange>now); // no catch-up burst
-  game.reset('normal');game.start();now+=30000;assert.equal(game.advance().length,1);
-  assert.equal(game.nextChange,Infinity);assert.equal(game.activeGlow,1);
+  game.reset('normal');game.start();now+=35000;assert.equal(game.advance().length,0);
+  assert.equal(game.nextChange,Infinity);assert.equal(game.activeGlow,0);
   assert.deepEqual(game.growthCounts,{leaf:25,bud:5,flower:5});
 });
 

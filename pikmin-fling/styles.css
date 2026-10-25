@@ -110,9 +110,11 @@ body.play-locked{position:fixed;top:0;left:0;right:0;width:100%;overflow:hidden;
 
 /* Articulated vector sprites: ground steps share one distance-based gait phase. */
 .pikmin-art{overflow:visible;pointer-events:none}
-.pikmin-art[data-sprite=glow]{filter:drop-shadow(0 0 3px #cbff91) drop-shadow(0 2px 1px #345c3438)}
-.rig-glow-aura{animation:glow-breathe 2.4s ease-in-out infinite}
-@keyframes glow-breathe{0%,100%{opacity:.22}50%{opacity:.42}}
+.pikmin .pikmin-art[data-sprite=glow],.flying-pikmin[data-sprite=glow]{filter:drop-shadow(0 0 2px #cbff9155) drop-shadow(0 2px 1px #345c3422)}
+.rig-glow-aura{filter:blur(4px);animation:glow-breathe 3.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.halo-bloom{filter:blur(1.8px)}
+.pikmin.is-paused .rig-glow-aura,.pikmin.is-held .rig-glow-aura{animation-play-state:paused}
+@keyframes glow-breathe{0%,100%{opacity:.5;transform:scale(.97)}50%{opacity:.7;transform:scale(1.03)}}
 .rig-motion{transform:translateY(var(--lift,0px));transform-box:view-box}
 .rig-body,.rig-wings{transform:translate(var(--sway,0px),var(--bob,0px)) rotate(var(--lean,0deg));transform-origin:32px 64px;transform-box:view-box}
 .rig-leg,.rig-arm,.rig-wing,.rig-sprout{transform-box:view-box}

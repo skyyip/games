@@ -14,7 +14,7 @@ $('#toggle-badges').addEventListener('click',()=>{
 const game=new FlingGame(),world=$('#world'),units=$('#units'),plant=$('#plant');
 const flights=new Map(),gestures=new Map(),effects=new Set(),taps=new DoubleTap();
 const growthNames={leaf:'Normal',bud:'Bud',flower:'Flower'};
-const modeNames={normal:'Normal',challenge:'Challenge',timed:'30s Rush'};
+const modeNames={normal:'Normal',challenge:'Challenge',timed:'35s Rush'};
 const hints={leaf:'Fling upward.',bud:'Double-tap to feed.',flower:'Hold still for 0.6 seconds until the ring fills, then fling upward.'};
 const symbols={leaf:'↗',bud:'2×',flower:'✿'};
 let storage;
@@ -129,7 +129,7 @@ function renderRecords() {
     date.textContent=new Date(record.date).toLocaleDateString(document.documentElement.lang,{month:'short',day:'numeric'});
     row.append(rank,score,date);fragment.append(row);
   });
-  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Thirty seconds. Make every Pikmax count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
+  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Thirty-five seconds. Make every Pikmax count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
   $('#records').replaceChildren(fragment);$('#records-count').textContent=modeNames[game.mode].toUpperCase();
   $('#records-title').textContent=timed?'Your highest three':'Your fastest three';
   $('#records').setAttribute('aria-label',timed?'Highest total scores':'Fastest completion times');
@@ -189,6 +189,7 @@ function resetRound(mode=game.mode,playing=false) {
   $('#time-label').textContent=timed?'TIME LEFT':'YOUR TIME';$('#timer').setAttribute('aria-label',timed?'Seconds remaining':'Elapsed seconds');
   for(const label of document.querySelectorAll('.point-value'))label.hidden=!timed;
   $('#glow-points').hidden=!timed;
+  $('#glow-note').hidden=!timed;
   if($('#results').contains(document.activeElement))document.activeElement.blur();
   $('#results').hidden=true;$('#mode-options').disabled=false;
   world.scrollTop=0;$('.play-panel').scrollTop=0;
@@ -196,7 +197,7 @@ function resetRound(mode=game.mode,playing=false) {
   $('#gesture-help').textContent='Short press 0.2s, keep pressed and drag through the same colour and stage, then flick up to feed the whole chain.';
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
   $('#cycle-status').textContent=mode==='normal'?'Normal mode · states stay the same':`${modeNames[mode]} · growth changes every 3–8s`;
-  $('#control-note').textContent=timed?'30 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 35 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock, Winged, White and Purple Pikmax mix randomly. Start with 25 normal, 5 buds and 5 flowers.';
+  $('#control-note').textContent=timed?'35 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 35 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock, Winged, White and Purple Pikmax mix randomly. Start with 25 normal, 5 buds and 5 flowers.';
   setPlayLock(playing);renderRoster();renderProgress();setSelected(null);renderRecords();
 }
 function startRound(keyboard=false) {
@@ -209,7 +210,7 @@ function startRound(keyboard=false) {
   $('#garden-label').textContent='HOLD. LINK. FLING.';
   renderProgress();if(!document.body.classList.contains('play-locked'))$('.scoreboard').scrollIntoView({block:'start',behavior:'auto'});
   if(keyboard)buttons[0].focus({preventScroll:true});
-  announce(`35 Pikmax. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'30-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 25 normal, 5 buds, 5 flowers.`);
+  announce(`35 Pikmax. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'35-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 25 normal, 5 buds, 5 flowers.`);
   frame=requestAnimationFrame(tick);
 }
 function finishRound() {
@@ -267,7 +268,7 @@ function tick(now) {
     const newGlow=changed.filter(id=>game.units[id].type==='glow'&&roster[id].type!=='glow');
     for(const id of changed){renderUnit(id);effect(buttons[id].querySelector('.pikmin-art'),[{opacity:.4},{opacity:1}],{duration:400});}
     if(changed.length>newGlow.length){cycle++;$('#cycle-status').textContent=`Growth wave ${cycle} · ${changed.length-newGlow.length} changed`;}
-    if(newGlow.length)announce('A Glow Pikmax appeared. Glow types earn one extra point in 30s Rush.');
+    if(newGlow.length)announce('A Glow Pikmax appeared. Glow types earn one extra point in 35s Rush.');
   }
   if(game.mode!=='normal')$('#cycle-timer').textContent=`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`;
   const ready=roster.filter(p=>game.units[p.id].status==='ready');

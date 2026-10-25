@@ -113,3 +113,12 @@ All 27 variants were rendered and visually inspected. Purple wears two beaded br
 Six bilingual Glow scenarios pass all modes, the cap including feeding flights, correct scoring and replay with the new halo/tail artwork. Purple and blue phone checks retain their details on all three growth-stage flight clones. Eight grass tufts sit beyond the interactive field and inherit pointer-events: none. Grass/hover checks cover 320×568, 375×812 and 812×375. The 42 unit tests and seven-size fence clearance checks passed again.
 
 The static landing cover is generated from all nine current sprites using `node pikmin-fling/scripts/build-cover.mjs`; it loads at 480×260 and fits cards at 320, 375, 768 and 1440px. Fourteen favourites browser checks passed with the new image. Its game link and favourite ID retain their previous paths. Standalone landing/game previews were rebuilt.
+
+
+## Current update: 35-second Rush and grass borders
+
+This supersedes the earlier all-mode Glow and 30-second configuration. Only timed mode schedules Glow transformations; Normal and Challenge keep their eight base types. Rush runs for exactly 35,000ms, including launch/arrival deadline checks and background timeout handling. The three-Glow cap includes feeding flights. The v4 leaderboard imports only Normal/Challenge completion times from v3 (or v2), leaving the earlier 30/20-second scores untouched in their original keys.
+
+The surrounding Glow light now has two blurred, low-opacity layers and a slower 3.8-second breath. The thinner, tilted head halo has soft bloom and a brighter front arc. Held/focused characters pause the light animation, and reduced motion disables it. The landing cover is regenerated from the same artwork. Both side rails are replaced by layered grass borders and tiny flowers; top/bottom low wooden fences remain. Decorations accept no pointer events and stay outside the interactive field.
+
+Validation: 43 Node tests, six bilingual mode/Glow browser scenarios, 14 timed browser checks (including live play after 30 seconds, expiration at 35 seconds, touch scoring, replay, persistence and offline use), seven gesture/replay checks and the standalone embedded preview passed. Phone/landscape/tablet/desktop clearance checks exercise 216 edge poses per viewport and four seconds of walking. Existing earlier verification sections describe their historical configurations.

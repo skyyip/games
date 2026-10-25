@@ -1,7 +1,7 @@
 import { MODES,MAX_SCORE } from './game.js';
 
-export const STORAGE_KEY = 'pikmin-fling.records.v3';
-export const LEGACY_STORAGE_KEY = 'pikmin-fling.records.v2';
+export const STORAGE_KEY = 'pikmin-fling.records.v4';
+export const LEGACY_STORAGE_KEY = 'pikmin-fling.records.v3';
 
 const emptyRecords = () => Object.fromEntries(MODES.map(mode => [mode, []]));
 const validRecord = (record, mode) => record !== null && typeof record === 'object' &&
@@ -15,14 +15,14 @@ export function readLeaderboard(storage) {
   let raw,legacy=false;
   try {
     raw = storage?.getItem(STORAGE_KEY);
-    if(raw==null){raw=storage?.getItem(LEGACY_STORAGE_KEY);legacy=raw!=null;}
+    if(raw==null){raw=storage?.getItem(LEGACY_STORAGE_KEY)??storage?.getItem('pikmin-fling.records.v2');legacy=raw!=null;}
   } catch {
     return { records, available: false };
   }
   try {
     const parsed = JSON.parse(raw ?? 'null');
     for (const mode of MODES) {
-      // Keep 20-second scores intact in v2; they do not compete with 30-second rounds.
+      // Preserve old 20/30-second scores; only completion times migrate to 35-second rules.
       if(legacy&&mode==='timed')continue;
       if (!Array.isArray(parsed?.[mode])) continue;
       records[mode] = parsed[mode].filter(record => validRecord(record, mode))

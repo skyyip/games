@@ -20,7 +20,7 @@ function glowMarkup(growth,sprout){
   const [fill,outline]=colors.glow;
   const arms=['left','right'].map(side=>{const left=side==='left',x=left?26:38,tip=left?17:47;return `<g class="rig-arm rig-arm-${side}" style="transform-origin:${x}px 57px"><path d="M${x} 57Q${left?24:40} 63 ${tip} 68" fill="none" stroke="${outline}" stroke-width="3.8" stroke-linecap="round"/><path d="M${x} 57Q${left?24:40} 63 ${tip} 68" fill="none" stroke="${fill}" stroke-width="2.4" stroke-linecap="round"/><path d="M${tip} 68l${left?-3:3} 2m${left?3:-3}-2-1 4m1-4 2 3" fill="none" stroke="${outline}" stroke-width=".9" stroke-linecap="round"/></g>`;}).join('');
   return `<svg class="pikmin-art" viewBox="0 0 64 88" aria-hidden="true" focusable="false" data-sprite="glow" data-stage="${growth}">
-    <g class="rig-motion"><ellipse class="rig-glow-aura" cx="32" cy="47" rx="25" ry="31" fill="#d5ffa5" opacity=".32"/>
+    <g class="rig-motion"><g class="rig-glow-aura" fill="#d5ffa5" opacity=".6"><ellipse cx="32" cy="46" rx="23" ry="28" opacity=".28"/><ellipse cx="31" cy="45" rx="17" ry="22" opacity=".2"/></g>
       <g class="rig-body">${arms}
         <g class="rig-glow-tail"><path d="M27 68C26 78 32 84 43 78C37 79 36 74 36 69Z" fill="${fill}" stroke="${outline}" stroke-width="1.3" stroke-linejoin="round"/></g>
         <path d="M27 54C22 59 23 68 27 71C30 74 35 73 38 69C42 63 37 57 36 54Z" fill="${fill}" stroke="${outline}" stroke-width="1.5"/>
@@ -30,7 +30,7 @@ function glowMarkup(growth,sprout){
         <path d="M20 37Q23 30 29 28" fill="none" stroke="#f0ffd4" stroke-width="3" stroke-linecap="round" opacity=".55"/>
         <g class="rig-eyes"><ellipse cx="25" cy="41" rx="6.5" ry="7" fill="#3954df"/><ellipse cx="39" cy="41" rx="4.4" ry="4.9" fill="#3954df"/><g class="rig-pupils" fill="#84fff1"><ellipse cx="24" cy="40" rx="3.2" ry="3.7"/><circle cx="38" cy="40" r="1.2"/></g></g>
         <path d="M29 50Q32 52.5 35 50" fill="none" stroke="#629548" stroke-width="1.1" stroke-linecap="round"/>
-        <g class="rig-glow-halo"><ellipse cx="32" cy="20" rx="15" ry="4.5" fill="#fff2a2" opacity=".2"/><ellipse cx="32" cy="20" rx="13" ry="2.7" fill="none" stroke="#dfb540" stroke-width="2.6"/><ellipse cx="32" cy="20" rx="13" ry="2.7" fill="none" stroke="#fff3b1" stroke-width="1.1"/></g>
+        <g class="rig-glow-halo" transform="rotate(-7 32 20)"><ellipse class="halo-bloom" cx="32" cy="20" rx="13" ry="3" fill="none" stroke="#ffe8a1" stroke-width="3" opacity=".45"/><ellipse cx="32" cy="20" rx="12.5" ry="2.6" fill="none" stroke="#d6b65c" stroke-width="1.1" opacity=".55"/><path d="M19.5 20a12.5 2.6 0 0 0 25 0" fill="none" stroke="#ffe9a4" stroke-width="1.5" stroke-linecap="round"/></g>
         <g class="rig-sprout"><path d="${growth==='bud'?`M32 25V${10+7*CROWN_SCALE}`:'M32 25Q30 17 32 10'}" fill="none" stroke="#75b940" stroke-width="2.4" stroke-linecap="round"/><g class="rig-crown" transform="translate(32 10) scale(${CROWN_SCALE}) translate(-32 -10)">${sprout}</g></g>
       </g>
     </g>

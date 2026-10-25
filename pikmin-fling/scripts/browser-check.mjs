@@ -5,7 +5,7 @@ const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwrig
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PIKMIN_FLING_URL||'http://localhost:5173/pikmin-fling/';
 const output=process.env.PIKMIN_FLING_SCREENSHOTS||'/tmp/pikmin-fling-qa';
-const key='pikmin-fling.records.v3',errors=[];let checks=0;
+const key='pikmin-fling.records.v4',errors=[];let checks=0;
 const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function setup(options={},init=()=>{Math.random=()=>0;},initArg) {
   const context=await browser.newContext({serviceWorkers:'block',...options});
@@ -264,7 +264,7 @@ try{
   await offline.context.setOffline(true);await offline.page.reload();await offline.page.locator('#start:not(:disabled)').waitFor();
   const cachedArtwork=await offline.page.evaluate(async()=>{
     const {createSprite}=await import('./src/sprites.js');
-    return ['red','yellow','blue','ice','rock','winged','white','purple','glow'].flatMap(type=>['leaf','bud','flower'].map(growth=>createSprite(type,growth).querySelectorAll('.rig-leg').length===(type==='white'?3:2)));
+    return ['red','yellow','blue','ice','rock','winged','white','purple','glow'].flatMap(type=>['leaf','bud','flower'].map(growth=>createSprite(type,growth).querySelectorAll('.rig-leg').length===(type==='glow'?0:type==='white'?3:2)));
   });
   assert.equal(cachedArtwork.length,27);assert.ok(cachedArtwork.every(Boolean));
   await offline.page.locator('input[value="challenge"]').check();await offline.page.locator('#start').click();await finishByKeyboard(offline.page);

@@ -71,7 +71,7 @@ try{
     if(mode==='timed')await page.clock.install();
     await page.locator('#start').tap();
     assert.equal(await page.locator('body').evaluate(body=>body.classList.contains('play-locked')),true);
-    if(mode==='timed')await page.clock.fastForward(31000);
+    if(mode==='timed')await page.clock.fastForward(36000);
     else {await page.locator('.pikmin:not(:disabled)').evaluateAll(items=>items.forEach(button=>button.click()));await page.locator('#results').waitFor({state:'visible'});}
     assert.equal(await page.locator('body').evaluate(body=>body.classList.contains('play-locked')),false);
     assert.equal(await page.locator('#results').isVisible(),true);

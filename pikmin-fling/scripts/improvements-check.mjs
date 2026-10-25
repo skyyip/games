@@ -76,8 +76,8 @@ try{
   const replay=await setup({viewport:{width,height},isMobile:true,hasTouch:true});const p=replay.page;
   await p.locator('input[value="timed"]').check();await p.clock.install();await p.clock.pauseAt(new Date(Date.now()+1000));await p.locator('#start').tap();
   for(let round=0;round<3;round++){
-   await fullViewport(p);const remaining=Number(await p.locator('#timer').textContent());assert.ok(remaining>29.9&&remaining<=30);
-   await p.clock.fastForward(31000);await p.locator('#results').waitFor({state:'visible'});
+   await fullViewport(p);const remaining=Number(await p.locator('#timer').textContent());assert.ok(remaining>34.9&&remaining<=35);
+   await p.clock.fastForward(36000);await p.locator('#results').waitFor({state:'visible'});
    await p.locator('#again').tap();await p.clock.runFor(32);await fullViewport(p);
    if(round===2)await p.screenshot({path:`${output}/replay-${width}x${height}.png`,animations:'disabled'});
   }

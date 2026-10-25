@@ -1,21 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FlingGame,MODES,MAX_GLOW,unitPoints} from '../src/game.js';
+import {FlingGame,MODES,MAX_GLOW,ROUND_LIMIT,unitPoints} from '../src/game.js';
 import {addResult,readLeaderboard,saveLeaderboard} from '../src/leaderboard.js';
 
-test('Glow appears during every mode without changing the 35-character round',()=>{
+test('Glow appears only in timed mode and never changes the 35-character round',()=>{
   for(const mode of MODES){
     let now=0;const game=new FlingGame({mode,now:()=>now,random:()=>0});
     assert.equal(game.activeGlow,0);assert.deepEqual(game.advance(),[]);game.start();
-    assert.equal(game.nextGlow,4000);now=3999;game.advance();assert.equal(game.activeGlow,0);
-    now=4000;const changed=game.advance();assert.equal(game.activeGlow,1);
-    assert.ok(changed.some(id=>game.units[id].type==='glow'));
+    assert.equal(game.nextGlow,mode==='timed'?4000:Infinity);
+    now=3999;game.advance();assert.equal(game.activeGlow,0);
+    now=4000;const changed=game.advance();assert.equal(game.activeGlow,mode==='timed'?1:0);
+    assert.equal(changed.some(id=>game.units[id].type==='glow'),mode==='timed');
+    for(const time of [7000,20000,34000,60000]){
+      now=time;game.advance();
+      assert.ok(game.activeGlow<=MAX_GLOW);
+      if(mode!=='timed'){assert.equal(game.activeGlow,0);assert.equal(game.nextGlow,Infinity);}
+    }
     assert.equal(game.count,35);assert.equal(game.units.length,35);
+    game.reset(mode==='timed'?'challenge':'timed');game.start();now+=4000;game.advance();
+    assert.equal(game.activeGlow,mode==='timed'?0:1,'switching modes resets the Glow schedule');
   }
 });
 
 test('three-Glow cap includes flights; eating frees one slot for a later arrival',()=>{
-  let now=0;const game=new FlingGame({now:()=>now,random:()=>0});game.start();
+  let now=0;const game=new FlingGame({mode:'timed',now:()=>now,random:()=>0});game.start();
   now=4000;game.advance();const first=game.units.findIndex(u=>u.type==='glow');
   game.launch([first],{kind:'accessible'});
   for(const time of [7000,10000,13000]){now=time;game.advance();assert.ok(game.activeGlow<=MAX_GLOW);}
@@ -26,7 +34,8 @@ test('three-Glow cap includes flights; eating frees one slot for a later arrival
 });
 
 test('Glow never replaces interacting or flying characters, and waits when no candidate is free',()=>{
-  let now=0;const game=new FlingGame({now:()=>now,random:()=>0});game.start();
+  let now=0;const game=new FlingGame({mode:'timed',now:()=>now,random:()=>0});game.start();
+  game.nextChange=Infinity; // Isolate spawn eligibility from the separately tested growth waves.
   const protectedIds=new Set(game.units.map((_,id)=>id));
   now=4000;assert.deepEqual(game.advance(protectedIds),[]);assert.equal(game.activeGlow,0);
   protectedIds.delete(7);now=7000;assert.deepEqual(game.advance(protectedIds),[7]);
@@ -42,12 +51,12 @@ test('Glow stage scores are 2/3/4, count only once on arrival and never after th
   assert.equal(game.score,0);now=480;
   for(let id=0;id<3;id++){assert.equal(game.arrive(id),true);assert.equal(game.arrive(id),false);}
   assert.equal(game.score,9);assert.equal(unitPoints({type:'red',growth:'flower'}),3);
-  game.units[3]={type:'glow',growth:'flower',status:'ready'};now=29900;game.launch([3],{kind:'accessible'});
-  now=30000;assert.equal(game.arrive(3),false);assert.equal(game.score,9);
+  game.units[3]={type:'glow',growth:'flower',status:'ready'};now=ROUND_LIMIT-100;game.launch([3],{kind:'accessible'});
+  now=ROUND_LIMIT;assert.equal(game.arrive(3),false);assert.equal(game.score,9);
 });
 
 test('Glow chains still require the same type and growth stage and retain flower charging',()=>{
-  const game=new FlingGame({random:()=>0});game.start();
+  const game=new FlingGame({mode:'timed',random:()=>0});game.start();
   for(let id=0;id<4;id++)game.units[id]={type:id===2?'red':'glow',growth:id===3?'bud':'flower',status:'ready'};
   assert.equal(game.launch([0,2],{kind:'chain',held:200}),false);
   assert.equal(game.launch([0,3],{kind:'chain',held:200}),false);
@@ -56,7 +65,7 @@ test('Glow chains still require the same type and growth stage and retain flower
 });
 
 test('existing growth waves apply to Glow and never change a flying Glow stage',()=>{
-  let now=0;const game=new FlingGame({mode:'challenge',now:()=>now,random:()=>0});
+  let now=0;const game=new FlingGame({mode:'timed',now:()=>now,random:()=>0});
   for(const [id,growth] of ['bud','flower','leaf'].entries())game.units[id]={type:'glow',growth,status:'ready'};
   game.start();now=3000;game.advance();assert.deepEqual(game.units.slice(0,3).map(u=>u.growth),['flower','leaf','bud']);
   game.launch([0],{kind:'fling',held:600});now=6000;game.advance();
@@ -66,9 +75,9 @@ test('existing growth waves apply to Glow and never change a flying Glow stage',
 test('Glow timing varies, hidden-time updates spawn only one, and reset/completion stop spawning',()=>{
   const delays=[];
   for(const random of [0,.2,.7,.999]){
-    let now=0;const game=new FlingGame({now:()=>now,random:()=>random});game.start();
+    let now=0;const game=new FlingGame({mode:'timed',now:()=>now,random:()=>random});game.start();
     assert.ok(game.nextGlow>=4000&&game.nextGlow<8000);delays.push(game.nextGlow);
-    now=60000;game.advance();assert.equal(game.activeGlow,1);assert.ok(game.nextGlow>now);
+    now=20000;game.advance();assert.equal(game.activeGlow,1);assert.ok(game.nextGlow>now);
     assert.deepEqual(game.advance(),[]);game.reset();assert.equal(game.activeGlow,0);assert.equal(game.nextGlow,Infinity);
     game.start();for(let id=0;id<35;id++){game.launch([id],{kind:'accessible'});game.arrive(id);}
     assert.equal(game.nextGlow,Infinity);now+=60000;assert.deepEqual(game.advance(),[]);

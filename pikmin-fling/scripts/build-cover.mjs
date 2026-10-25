@@ -17,7 +17,7 @@ const figures=characters.map(([type,growth,x,y,width])=>{
 const cover=`<svg xmlns="http://www.w3.org/2000/svg" width="480" height="260" viewBox="0 0 480 260" fill="none" stroke-linecap="round" stroke-linejoin="round">
 <title>Pikmax garden</title>
 <defs><linearGradient id="garden" x2="0" y2="1"><stop stop-color="#e3f0cf"/><stop offset="1" stop-color="#bbd5aa"/></linearGradient></defs>
-<style>.pikmin-art{overflow:visible}.pikmin-art[data-sprite=glow]{filter:drop-shadow(0 0 4px #cbff91)}</style>
+<style>.pikmin-art{overflow:visible}.pikmin-art[data-sprite=glow]{filter:drop-shadow(0 0 2px #cbff9155)}.rig-glow-aura{filter:blur(4px)}.halo-bloom{filter:blur(1.8px)}</style>
 <path fill="url(#garden)" d="M0 0h480v260H0z"/>
 <circle cx="426" cy="38" r="22" fill="#fff2b8" opacity=".8"/>
 <path d="M0 104Q95 65 200 102T480 88V260H0Z" fill="#cde2b8"/>

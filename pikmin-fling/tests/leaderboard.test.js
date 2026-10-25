@@ -72,13 +72,15 @@ test('corrupt or unavailable storage never prevents a round or keeps invalid rec
   assert.equal(readLeaderboard(storage).records.challenge.length,0);
 });
 
-test('30-second scores use a separate version while preserving 20-second scores and migrating time records',()=>{
- const date='2026-10-24',old={normal:[{time:1000,date}],challenge:[{time:2000,date}],timed:[{score:80,date}]};
- const memory=new Map([['pikmin-fling.records.v2',JSON.stringify(old)]]);
- const storage={getItem:key=>memory.get(key),setItem:(key,value)=>memory.set(key,value)};
- const {records}=readLeaderboard(storage);
- assert.deepEqual(records.normal,old.normal);assert.deepEqual(records.challenge,old.challenge);assert.deepEqual(records.timed,[]);
- saveLeaderboard(storage,addResult(records,'timed',60,date).records);
- assert.deepEqual(JSON.parse(memory.get('pikmin-fling.records.v2')),old);
- assert.deepEqual(readLeaderboard(storage).records.timed,[{score:60,date}]);
+test('35-second scores preserve 20/30-second archives and migrate only completion times',()=>{
+ for(const legacyKey of ['pikmin-fling.records.v2','pikmin-fling.records.v3']){
+  const date='2026-10-24',old={normal:[{time:1000,date}],challenge:[{time:2000,date}],timed:[{score:80,date}]};
+  const memory=new Map([[legacyKey,JSON.stringify(old)]]);
+  const storage={getItem:key=>memory.get(key),setItem:(key,value)=>memory.set(key,value)};
+  const {records}=readLeaderboard(storage);
+  assert.deepEqual(records.normal,old.normal);assert.deepEqual(records.challenge,old.challenge);assert.deepEqual(records.timed,[]);
+  saveLeaderboard(storage,addResult(records,'timed',60,date).records);
+  assert.deepEqual(JSON.parse(memory.get(legacyKey)),old);
+  assert.deepEqual(readLeaderboard(storage).records.timed,[{score:60,date}]);
+ }
 });
