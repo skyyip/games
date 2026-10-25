@@ -3,7 +3,9 @@ import {buildTiles,tileName,tileMarkup,tileOrder} from './tiles.js';
 import {literal,enableOffline} from '../../grid-rush/src/party-ui.js';
 import {translate} from '../../grid-rush/src/language.js';
 const $=q=>document.querySelector(q),game=new MahjongGame();let focusTimer=0,layoutFrame=0;
-for(let i=0;i<2;i++)$(`#name-${i}`).value=translate(`Player ${i+1}`);
+const playerColors=['#3664ad','#ad3d57'];
+function markOwner(element,player){element.dataset.player=String(player+1);element.style.setProperty('--player-color',playerColors[player]);}
+for(let i=0;i<2;i++){const input=$(`#name-${i}`);input.value=translate(`Player ${i+1}`);markOwner(input.closest('.player-row'),i);}
 const say=s=>{$('#announcements').textContent=translate(s);};
 const modeNames={turns:'Alternating turns',sudden:'Sudden death'};
 function showTile(el,tile){el.innerHTML=tileMarkup(tile);el.setAttribute('aria-label',tileName(tile));el.removeAttribute('translate');}
@@ -12,12 +14,12 @@ function deck(){
   if(container.children.length!==143||container.dataset.round!==String(game.target?.id??'setup')){container.replaceChildren(...tiles.map((tile,index)=>{const button=document.createElement('button');button.type='button';button.className='mahjong-tile';button.dataset.id=tile.id;button.dataset.position=index+1;return button;}));container.dataset.round=String(game.target?.id??'setup');}
   for(const button of container.children){const id=Number(button.dataset.id),opened=game.opened.find(p=>p.tile.id===id);button.disabled=game.state!=='choosing'||Boolean(opened);
     if(opened&&!button.classList.contains('opened')){button.innerHTML=`<span class="tile-face">${tileMarkup(opened.tile)}</span><span class="owner-dot" aria-hidden="true">${opened.player+1}</span>`;button.classList.add('opened');button.setAttribute('aria-label',tileName(opened.tile));}
-    if(opened){button.classList.toggle('missed',opened.fatal);button.classList.toggle('matched',!opened.fatal);}
-    else if(!opened){button.innerHTML='<span class="tile-back" aria-hidden="true"><span class="back-logo"></span></span>';button.setAttribute('aria-label',`Hidden tile ${button.dataset.position}`);}
+    if(opened){markOwner(button,opened.player);button.setAttribute('aria-description',game.players[opened.player]);button.classList.toggle('missed',opened.fatal);button.classList.toggle('matched',!opened.fatal);}
+    else if(!opened){delete button.dataset.player;button.style.removeProperty('--player-color');button.removeAttribute('aria-description');button.innerHTML='<span class="tile-back" aria-hidden="true"><span class="back-logo"></span></span>';button.setAttribute('aria-label',`Hidden tile ${button.dataset.position}`);}
   }
 }
 function history(){
-  $('#history').replaceChildren(...game.opened.map(entry=>{const row=document.createElement('div');row.className='history-entry';const name=document.createElement('strong'),face=document.createElement('span');literal(name,game.players[entry.player]);face.textContent=tileName(entry.tile);if(game.mode==='turns'){const round=document.createElement('small');round.textContent=translate(`Round ${entry.round}`);name.append(round);}row.append(name,face);return row;}));
+  $('#history').replaceChildren(...game.opened.map(entry=>{const row=document.createElement('div');row.className='history-entry';markOwner(row,entry.player);const name=document.createElement('strong'),face=document.createElement('span');literal(name,game.players[entry.player]);face.textContent=tileName(entry.tile);if(game.mode==='turns'){const round=document.createElement('small');round.textContent=translate(`Round ${entry.round}`);name.append(round);}row.append(name,face);return row;}));
 }
 function fitTable(){
   layoutFrame=0;
@@ -47,7 +49,7 @@ function render(){
   literal($('#turn-name'),setup?translate('Mahjong Match'):game.state==='results'?'':game.players[game.turn]);
   $('#phase-label').textContent=game.state==='choosing'?'ONE LITTLE TILE. YOUR LITTLE TURN.':'A TABLE OF LITTLE POSSIBILITIES';
   if(game.target){showTile($('#target'),game.target);$('#target-name').textContent=tileName(game.target);$('#target-rank').textContent=`Tile rank ${tileOrder(game.target)}`;}else{$('#target').textContent='?';$('#target').setAttribute('aria-label','Target tile');$('#target-name').textContent='A random tile appears when you start.';$('#target-rank').textContent='—';}
-  if(game.state==='choosing'){literal($('#active-player'),game.players[game.turn]);$('#active-index').textContent=String(game.turn+1);}$('#remaining').textContent=`${game.remaining} tiles waiting`;
+  if(game.state==='choosing'){literal($('#active-player'),game.players[game.turn]);$('#active-index').textContent=String(game.turn+1);markOwner($('#turn-banner'),game.turn);}$('#remaining').textContent=`${game.remaining} tiles waiting`;
   $('#status').textContent=mode==='sudden'?(setup?'Choose a mode. Compare ranks, not suits.':game.state==='choosing'?'Choose a tile. Avoid the target rank.':'The target rank was revealed. The other player wins.'):setup?'Two players reveal once each. Exactly one match wins; equal outcomes start another round.':game.state==='results'?(game.outcome==='draw'?'The last pair tied. Too few tiles remain for another pair.':'Only the matching player wins this round.'):game.turn===1?(game.opened.at(-1).match?'First tile matches. Player 2 reveals next.':'First tile differs. Player 2 reveals next.'):game.round>1?`Same outcome. Round ${game.round}: Player 1 reveals first.`:'Round 1: Player 1 reveals first, then Player 2.';
   deck();history();queueLayout();
 }
@@ -64,12 +66,12 @@ function renderResults(){
   $('#result-title').textContent=draw?'A little shared draw.':'A lucky little match.';
   literal($('#winner-name'),draw?'':game.players[game.winner]);
   $('#result-note').textContent=draw?'The last pair tied. Too few tiles remain for another pair.':pair?'Only the matching player wins this round.':'The target rank was hit. The player who revealed it loses.';
-  showTile($('#result-target'),game.target);showTile($('#result-last'),last.tile);
+  showTile($('#result-target'),game.target);showTile($('#result-last'),last.tile);markOwner($('#result-last'),last.player);
   $('#result-target-rank').textContent=`Tile rank ${tileOrder(game.target)}`;$('#result-last-rank').textContent=`Tile rank ${tileOrder(last.tile)}`;
   $('#final-tiles').classList.toggle('is-pair',pair);$('#result-first-wrap').hidden=!pair;$('#result-compare').hidden=pair;
   $('#result-compare').textContent=last.match?'=':'≠';$('#result-last-outcome').hidden=!pair;
   if(pair){
-    const first=game.opened.at(-2);literal($('#result-first-name'),game.players[0]);literal($('#result-last-name'),game.players[1]);showTile($('#result-first'),first.tile);
+    const first=game.opened.at(-2);literal($('#result-first-name'),game.players[0]);literal($('#result-last-name'),game.players[1]);showTile($('#result-first'),first.tile);markOwner($('#result-first'),first.player);
     $('#result-first-rank').textContent=`Tile rank ${tileOrder(first.tile)}`;
     $('#result-first-outcome').textContent=first.match?'Matches target':'Different rank';$('#result-last-outcome').textContent=last.match?'Matches target':'Different rank';
   }else{$('#result-last-name').removeAttribute('translate');$('#result-last-name').textContent='Last revealed';}

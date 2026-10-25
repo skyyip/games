@@ -25,7 +25,7 @@ No handoff confirmation is needed. Used tiles and the target cannot be selected.
 
 “Change game mode” returns to setup, focuses the mahjong-mode dropdown and scrolls its label and control into view. Reduced-motion preferences skip the smooth scroll. No account, backend or long-term match history is used.
 
-The table fits the target and all 143 other tiles into one playing viewport, with no scrolling inside the table. Revealed pieces remain visible, with an owner marker and a safe/fatal frame. Sudden-death results compare the target and fatal reveal with rank badges and an equals sign. Paired results compare the target with both named players’ tiles and show whether each matches. A short delay allows the reveal to settle before result focus moves. Reset cancels pending focus work.
+The table fits the target and all 143 other tiles into one playing viewport, with no scrolling inside the table. Revealed pieces remain visible, with a blue (Player 1) or rose (Player 2) frame and a matching numeric owner marker. Sudden-death results compare the target and fatal reveal with rank badges and an equals sign. Paired results compare the target with both named players’ tiles and show whether each matches. A short delay allows the reveal to settle before result focus moves. Reset cancels pending focus work.
 
 Every face is local HTML/SVG: traditional glyphs, circle marks, bamboo strokes, winds, dragons and indexed seasons/flowers. Physical glyphs remain authentic in either language; interface labels, accessible names, instructions and rank rules are bilingual. Names stay literal and are limited to 24 characters.
 
@@ -36,3 +36,5 @@ See [VERIFICATION.md](./VERIFICATION.md). Optional browser QA: `GRID_RUSH_PLAYWR
 The compact table measures available width and viewport height and chooses columns and tile dimensions that fit the complete set. Tiles are intentionally smaller than 44px to show all 144 pieces at once, as requested. Portrait and landscape layouts keep the target and current player visible. Resizing, rotation and font loading recalculate the layout.
 
 Ivory faces have dark, saturated markings; jade backs display the website logo. The winner receives a gold name badge and trophy, with a short ribbon burst after the final tile reveal. Replay cancels pending celebration work. Reduced-motion preferences keep the static badge and trophy.
+
+Player identity colours also appear beside setup names, in the current-player badge and reveal history, and around the player tiles in results. They remain tied to the player when sudden death randomizes the starting order. Revealed tiles expose the owner name through `aria-description`; replay clears previous ownership.
