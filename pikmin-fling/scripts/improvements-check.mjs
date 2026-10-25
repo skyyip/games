@@ -31,7 +31,7 @@ try{
  assert.ok(await page.locator('.pikmin[data-type="white"]').count()>0);
  assert.equal(await page.locator('.pikmin:not([data-type="winged"]) .rig-wing').count(),0);
  assert.equal(await page.locator('.pikmin[data-type="winged"] .rig-wing').count(),2*await page.locator('.pikmin[data-type="winged"]').count());
- const ground=page.locator('.pikmin:not([data-type="winged"])').first(),pink=page.locator('.pikmin[data-type="winged"]').first();
+ const ground=page.locator('.pikmin:not([data-type="winged"]):not([data-type="glow"])').first(),pink=page.locator('.pikmin[data-type="winged"]').first();
  assert.equal(await ground.evaluate(el=>el.style.getPropertyValue('--lift')),'0px');
  assert.equal(await pink.evaluate(el=>el.style.getPropertyValue('--lift')),'-6px');
  const poses=[];
@@ -44,7 +44,7 @@ try{
  assert.ok(poses.some(p=>sine(p.leg)*sine(p.arm)<0));
  const wing1=await pink.locator('.rig-wing-left').evaluate(el=>getComputedStyle(el).transform);await page.waitForTimeout(80);
  assert.notEqual(await pink.locator('.rig-wing-left').evaluate(el=>getComputedStyle(el).transform),wing1);
- pass('white characters render, ground characters walk with opposing arms/legs, and only pink characters hover and flap');
+ pass('white characters render, ground base types walk with opposing arms/legs, and pink characters hover and flap');
 
  const groups=await page.locator('.pikmin[data-growth="leaf"]').evaluateAll(els=>Object.entries(Object.groupBy(els.map(el=>({id:el.dataset.id,type:el.dataset.type})),el=>el.type)));
  const [color,matches]=groups.find(([,els])=>els.length>=2),wrongId=groups.find(([type])=>type!==color)[1][0].id;

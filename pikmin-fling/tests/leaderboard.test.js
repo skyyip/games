@@ -22,12 +22,12 @@ test('timed mode keeps its highest three integer scores, stable ties and dates s
 
 test('timed record reads reject malformed scores while preserving existing normal and challenge records',()=>{
   const date='2026-10-23',normal=[{time:1234.56789,date}],challenge=[{time:2345.6789,date}];
-  const raw=JSON.stringify({normal,challenge,timed:[null,{score:-1,date},{score:91,date},{score:2.5,date},{score:'30',date},{score:30,date:'bad'},{time:30,date},{score:0,date},{score:90,date},{score:45,date},{score:20,date}]});
+  const raw=JSON.stringify({normal,challenge,timed:[null,{score:-1,date},{score:141,date},{score:2.5,date},{score:'30',date},{score:30,date:'bad'},{time:30,date},{score:0,date},{score:90,date},{score:45,date},{score:20,date}]});
   const {records}=readLeaderboard({getItem:()=>raw});
   assert.deepEqual(records.normal,normal);assert.deepEqual(records.challenge,challenge);
   assert.deepEqual(records.timed,[{score:90,date},{score:45,date},{score:20,date}]);
   assert.equal(addResult({...records,timed:[]},'timed',0,date).rank,1);
-  for(const invalid of [-1,91,1.5,Infinity,'3',null])assert.throws(()=>addResult(records,'timed',invalid,date),RangeError);
+  for(const invalid of [-1,141,1.5,Infinity,'3',null])assert.throws(()=>addResult(records,'timed',invalid,date),RangeError);
   assert.deepEqual(readLeaderboard({getItem:()=>JSON.stringify({normal,challenge})}).records.timed,[]);
 });
 

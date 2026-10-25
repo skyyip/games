@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Pikmin Fling · Sky’s Playground",
-  "short_name": "Pikmin Fling",
-  "description": "Fling every Pikmin into the hungry plant and beat your fastest three times.",
+  "name": "Pikmax Fling · Sky’s Playground",
+  "short_name": "Pikmax Fling",
+  "description": "Fling every Pikmax into the hungry plant and beat your fastest three times.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

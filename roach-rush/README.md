@@ -8,12 +8,12 @@ A cute solo arcade game inside a fixed four-wall room. Choose **2 minutes** or *
 | Big ground roach | Tap the same roach twice within 350ms | 2 |
 | Small flying roach | Swipe across it, at least 28px | 3 |
 | Big flying roach | Swipe across it, at least 28px | 4 |
-| Mouse | Hold still for 500ms, then drag into the upper cage | 5 |
+| Mouse | Hold still for 500ms, then drag into the upper cage | 6 |
 | Ant friend | Accidental tap | −3 |
 | Ant friend | Quick flick out | 0 |
 | Insect spray | Three area bursts per round, ground or flying roaches | 1 per roach |
 | Ant friend in spray | Eliminated by the same gas burst | −3 per ant |
-| Mouse trap | Three per round; each captures one mouse on contact | 5 per mouse |
+| Mouse trap | Three per round; each captures one mouse on contact | 6 per mouse |
 
 All creatures emerge from one of four unnumbered floor-corner holes. The holes sit 2px from the adjoining floor edges, and creature origins and movement bounds follow the actual responsive hole positions. Roaches always start on the ground and randomly take off, fly for a while and land again. Mice remain faster than ground roaches but now run about 25% slower than the original speed, appear periodically and use a shuffled four-hole cycle. Ant friends arrive individually from random holes: first after 12–18 seconds, then at independently random 2–8 second intervals. Ants stay until explicitly tapped, sprayed or safely flicked out, or until the round resets; they do not fade or automatically disappear. Background return never produces a catch-up group. Creature populations are bounded at 24 roaches, four mice and five ants to keep the room playable on phones; new visitors resume as space opens.
 
@@ -39,7 +39,7 @@ Ant artwork is 28×34px, smaller again, while the 44×52px touch target stays ea
 
 Each round supplies three insect-spray uses and three mouse traps. Drag it from the toolbar into the floor and release. A dashed circle previews the area and the current roach count. Ants in range add a coloured warning with their count and expected penalty. Gas expands, then applies one burst after 220ms: every ground or flying roach whose centre is inside the circle earns exactly one point, regardless of its normal value. Ants inside the same circle are also eliminated, deducting three points each. Roach gains and ant penalties combine into one net score, which may be negative. Previously eliminated ants do not count again; mice are unharmed. The radius is 28% of the smaller floor dimension, capped at 105px. An outside drop or cancelled drag does not consume a use; a valid empty spray does. Multiple fast releases retain independent gas bursts. The cloud fades after 1.1 seconds. Reset/replay clears all clouds and refills three uses; the absolute round deadline prevents late gas damage. Keyboard users activate either item with Enter, move its aiming marker with arrow keys, release with Enter or Space, and cancel with Escape.
 
-Mouse traps stay at the dropped floor position. Only mice trigger them; roaches and ants are unaffected. A moving mouse crossing a trap is caught for five points, and both the mouse and the triggered trap disappear together. One trap can capture only one mouse. Held mice are excluded until released, avoiding a catch at their old floor position. Mouse movement is checked along the frame segment so fast crossings cannot pass through a trap. The consumed trap is not refunded; unused traps remain on the floor until triggered or the round resets.
+Mouse traps stay at the dropped floor position. Only mice trigger them; roaches and ants are unaffected. A moving mouse crossing a trap is caught for six points, and both the mouse and the triggered trap disappear together. One trap can capture only one mouse. Held mice are excluded until released, avoiding a catch at their old floor position. Mouse movement is checked along the frame segment so fast crossings cannot pass through a trap. The consumed trap is not refunded; unused traps remain on the floor until triggered or the round resets.
 
 Keyboard alternatives: Tab focuses and pauses a creature. Enter taps a ground roach (twice for a big one) or hits a flying roach. On a mouse, hold Space for 0.5 seconds, release, then activate the focused cage with Enter or Space. On an ant, **Shift + Enter** flicks it safely; Enter alone is an accidental hit. Escape cancels.
 
@@ -73,3 +73,5 @@ src/records.js             Validated top-three records and legacy migration
 ```
 
 See [VERIFICATION.md](./VERIFICATION.md) for validation results.
+
+On fixed phone play views, the spray/trap toolbar reserves 58 CSS pixels plus the bottom safe-area inset below its controls. This keeps drag starts away from the iPhone home gesture region. Both manual cage captures and trap captures now award six points; stored historical scores are retained.

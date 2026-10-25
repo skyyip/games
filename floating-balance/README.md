@@ -1,0 +1,13 @@
+# 保持平衡力 · Float & Balance
+
+Keep a glass marble on a floating circle, square or triangle by tilting the phone in four directions. Leaving the board edge ends the round. Each shape independently stores its three longest completed survival times under `floating-balance.records.v1`.
+
+Eight valid orientation readings calibrate the comfortable holding angle. Portrait and landscape are supported. The board and marble use a fixed 120 Hz simulation with filtered board tilt, acceleration, inertia and damping. Circle distance, square bounds and triangle edge half-planes each include the marble footprint in the edge test. Diagonal input is normalised. The renderer projects the board, its thickness and the marble into a shaded scene above clouds.
+
+Wind adds a sustained tilt, earthquakes create oscillation and an impulse, and falling parcels alter momentum and weight the platform toward their landing position. Every disturbance has a warning. The parcel falls during its warning and lands when the impulse is applied. Events retain their own durations, may overlap in pairs, and become harder gradually. The timer freezes at the first edge crossing; a falling animation precedes saving the result exactly once.
+
+Phone mode requests orientation access from Start, then calibrates and counts down. Missing/declined/silent access offers touch/keyboard play. Orientation readings older than 650 ms pause play before an old held tilt can carry the marble off the board. Backgrounding, blur, rotation, manual pause and long interrupted frames also freeze the clock. Phone resume recalibrates. Abandoning a run does not save a score.
+
+Fallback controls are held direction buttons or Arrow keys/W/A/S/D. P pauses and Escape pauses or cancels preparation. The game remains playable without sensors or persistent storage; unavailable storage keeps records for the current visit. Traditional Chinese is the default, English follows the landing switch, and the scoped service worker supports offline play after an initial online visit. Reduced motion retains essential board/marble motion while reducing decorative movement.
+
+Run `npm start` and `npm test` here with Node.js 20 or newer. No build or runtime dependencies are required. Automated checks cover shape geometry, complete physical falls, two-minute corrective survival on every shape, hazards, impulses, timing, pause/reset and independent top threes. Browser checks exercise both languages, sensor fallback, real touch input, short/landscape layouts, storage failures and offline completion. Physical phones, native iOS prompts and other browser engines were not directly exercised.

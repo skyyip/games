@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PotGame,DURATIONS,STILL_TIME,makePath,potAt,throwVelocity,flightAt,descendingTime,gestureThrow,keyboardPower,readRecords,addRecord,topThree,RIM_HEIGHT,POT_DEPTH} from '../src/game.js';
+import {PotGame,DURATIONS,STILL_TIME,makePath,potAt,throwVelocity,flightAt,descendingTime,gestureThrow,keyboardPower,readRecords,addRecord,topThree,RIM_HEIGHT,POT_DEPTH,potDepthAt,VERTICAL_START} from '../src/game.js';
 const close=(a,b,e=1e-6)=>assert.ok(Math.abs(a-b)<e,`${a} ≈ ${b}`);
 const centre={power:.46,heading:0};
 function setup(){let time=0;const game=new PotGame({random:()=>.3,now:()=>time});game.start();return {game,set:t=>{time=t;},advance:t=>{time=t;return game.advance();}};}
@@ -36,7 +36,7 @@ test('rim and chamber-pot wall collisions bounce off instead of granting a score
 function targetThrow(game,started){
   let power=.46,heading=0;
   for(let iteration=0;iteration<12;iteration++){
-    const v=throwVelocity({power,heading}),t=descendingTime(v.vy),x=potAt(game.path,started+t);heading=Math.atan2(x,POT_DEPTH);const wanted=Math.hypot(x,POT_DEPTH);let lo=0,hi=1;
+    const v=throwVelocity({power,heading}),t=descendingTime(v.vy),x=potAt(game.path,started+t),depth=potDepthAt(game.path,started+t);heading=Math.atan2(x,depth);const wanted=Math.hypot(x,depth);let lo=0,hi=1;
     for(let i=0;i<35;i++){const p=(lo+hi)/2,vv=throwVelocity({power:p,heading:0}),end=flightAt(vv,descendingTime(vv.vy));if(end.z<wanted)lo=p;else hi=p;}power=(lo+hi)/2;
   }return {power,heading};
 }
@@ -70,4 +70,9 @@ test('each duration keeps its own top three, including zero scores and separate 
 });
 test('corrupt records and invalid dates cannot break result rendering',()=>{
   assert.deepEqual(topThree([null,{score:-1,at:0},{score:2.5,at:0},{score:2,at:NaN},{score:1,at:Number.MAX_SAFE_INTEGER},{score:3,at:1}]),[{score:3,at:1}]);for(const raw of ['bad','null','{}','{"version":2,"modes":{}}'])assert.deepEqual(readRecords(raw),{120:[],180:[]});assert.throws(()=>addRecord(readRecords(null),60,1,0));
+});
+
+test('the pot begins smooth vertical travel after twenty-four seconds and collisions use its future depth',()=>{
+ const {game,set,advance}=setup();for(let t=0;t<=24;t+=.5)close(potDepthAt(game.path,t),POT_DEPTH);assert.ok(Math.abs(potDepthAt(game.path,42)-POT_DEPTH)>.5);
+ game.path=[{at:0,x:0},{at:12,x:0},{at:200,x:0}];set(42000);game.advance();const options=targetThrow(game,42);game.launch(options);const hit=advance(45000)[0];assert.equal(hit.kind,'hit');close(hit.potDepth,potDepthAt(game.path,hit.at));assert.ok(Math.abs(hit.z-hit.potDepth)<.001);
 });

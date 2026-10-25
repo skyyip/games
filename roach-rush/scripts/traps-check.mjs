@@ -20,10 +20,10 @@ try{
     for(let use=0;use<3;use++){
       if(use)await page.clock.fastForward(9000);const mouse=page.locator('.critter[data-type=mouse]').first(),id=await mouse.getAttribute('data-id');
       const roaches=await page.locator('.critter[data-type=roach]').evaluateAll(es=>es.map(e=>e.dataset.id));await drop('trap',await centre(mouse));assert.equal(await page.locator('#trap-count').textContent(),`×${2-use}`);assert.equal(await page.locator('.mouse-trap').count(),1);
-      await page.clock.runFor(60);assert.equal(await page.locator(`.critter[data-id="${id}"]`).count(),0);assert.equal(await page.locator('#score').textContent(),String((use+1)*5));assert.equal(await page.locator('.mouse-trap').count(),0);
+      await page.clock.runFor(60);assert.equal(await page.locator(`.critter[data-id="${id}"]`).count(),0);assert.equal(await page.locator('#score').textContent(),String((use+1)*6));assert.equal(await page.locator('.mouse-trap').count(),0);
       for(const roach of roaches)assert.equal(await page.locator(`.critter[data-id="${roach}"]`).count(),1);
     }
-    assert.equal(await page.locator('#trap').isDisabled(),true);assert.equal(await page.locator('#spray-count').textContent(),'×3');await page.screenshot({path:`/tmp/roach-three-tools-qa/trap-catches-${mobile?'phone':'desktop'}.png`});pass(`${mobile?'real phone touch':'desktop drag'}: three traps place, catch one mouse each for +5, ignore roaches and exhaust only their own inventory`);
+    assert.equal(await page.locator('#trap').isDisabled(),true);assert.equal(await page.locator('#spray-count').textContent(),'×3');await page.screenshot({path:`/tmp/roach-three-tools-qa/trap-catches-${mobile?'phone':'desktop'}.png`});pass(`${mobile?'real phone touch':'desktop drag'}: three traps place, catch one mouse each for +6, ignore roaches and exhaust only their own inventory`);
     await page.locator('#end').evaluate(el=>el.click());await start();assert.equal(await page.locator('.mouse-trap').count(),0);assert.equal(await page.locator('#trap-count').textContent(),'×3');
     const targets=await page.locator('.critter[data-type=roach]').evaluateAll(es=>es.slice(0,3).map(e=>{const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};}));
     for(let i=0;i<3;i++){await drop('spray',targets[i]);assert.equal(await page.locator('#spray-count').textContent(),`×${2-i}`);assert.equal(await page.locator('.spray-cloud').count(),i+1);}

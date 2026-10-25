@@ -13,10 +13,11 @@ export class BridgeScene {
   attr(id,name,value){this.node(id).setAttribute(name,value);}
   draw(game,seconds,reduced=false){
     const walking=['playing','paused','falling','finished'].includes(game.state),phase=walking?game.phase:seconds*.8;
-    const active=game.state==='playing',event=game.event,t=event?game.elapsed-event.startedAt:0;
+    const active=game.state==='playing',events=game.events||[game.event].filter(Boolean),event=game.event,t=event?game.elapsed-event.startedAt:0;
+    const effect=id=>events.find(e=>e.id===id),age=id=>effect(id)?game.elapsed-effect(id).startedAt:0;
     const fall=clamp(game.fallElapsed/FALL_DURATION,0,1),angle=game.angle*180/Math.PI;
-    const jitter=active&&event&&!reduced?Math.sin(t*(18+event.level*4))*event.level*.3:0;
-    const bridgeJitter=active&&event?.id==='bridge'&&!reduced?Math.sin(t*28)*4:0;
+    const jitter=active&&!reduced?events.reduce((sum,e)=>sum+Math.sin((game.elapsed-e.startedAt)*(18+e.level*4))*e.level*.3,0):0;
+    const bridgeJitter=active&&effect('bridge')&&!reduced?Math.sin(age('bridge')*28)*4:0;
     this.attr('bridge-deck','transform',`translate(${bridgeJitter} 0)`);
     const x=450+(game.state==='falling'||game.state==='finished'?game.fallSide*(fall*170+fall*fall*35):0);
     const y=452+(game.state==='falling'||game.state==='finished'?fall*fall*330:!reduced&&walking?Math.sin(phase*2)*1.2:0);
@@ -36,21 +37,21 @@ export class BridgeScene {
     this.attr('brows','opacity',worried?'1':'0');this.attr('brows','d',worried?'M-11-153l7-3m8 0 7 3':'M-11-153h7m8 0h7');
     this.attr('walker-shadow','opacity',String(.2*(1-fall)));
     const move=walking?game.elapsed*.18:0;
-    this.planks.forEach((p,i)=>{const progress=((i/22+move)%1)**1.5,y=276+progress*374,half=11+(y-266)/384*19;p.setAttribute('d',`M${450-half} ${y}h${half*2}`);});
+    this.planks.forEach((p,i)=>{const progress=((i/22+move)%1)**1.5,y=276+progress*374,half=6+(y-266)/384*13;p.setAttribute('d',`M${450-half} ${y}h${half*2}`);});
     const parallax=reduced?0:game.angle*8;
     this.attr('mountains-back','transform',`translate(${-parallax*.25} 0)`);this.attr('mountains-front','transform',`translate(${-parallax*.6} 0)`);
     this.attr('far-clouds','transform',`translate(${reduced?0:Math.sin(seconds*.09)*8} 0)`);this.attr('foreground-clouds','transform',`translate(${-parallax} 0)`);
-    this.attr('wind-lines','opacity',event?.id==='wind'?String(Math.min(1,t*3)*.85):'0');
-    this.attr('wind-lines','transform',`translate(${reduced?0:Math.sin(t*3)*35} 0)`);
-    this.attr('thorns','opacity',event?.id==='thorns'?'1':'0');
-    this.attr('event-bird','opacity',event?.id==='bird'&&t<2?'1':'0');
-    this.attr('event-bird','transform',`translate(${260+t*155} ${164+Math.sin(t*3)*12})`);
-    this.attr('bird-wing','transform',`rotate(${reduced?0:Math.sin(t*24)*42} -4 0)`);
-    this.attr('bird-splat','opacity',event?.id==='bird'&&t>.85?'1':'0');
-    this.attr('head-roach','opacity',event?.id==='roach'?'1':'0');
-    const flying=event?.id==='roach'?Math.max(0,1-t/.85):0;
+    this.attr('wind-lines','opacity',effect('wind')?String(Math.min(1,age('wind')*3)*.85):'0');
+    this.attr('wind-lines','transform',`translate(${reduced?0:Math.sin(age('wind')*3)*35} 0)`);
+    this.attr('thorns','opacity',effect('thorns')?'1':'0');
+    this.attr('event-bird','opacity',effect('bird')&&age('bird')<2?'1':'0');
+    this.attr('event-bird','transform',`translate(${260+age('bird')*155} ${164+Math.sin(age('bird')*3)*12})`);
+    this.attr('bird-wing','transform',`rotate(${reduced?0:Math.sin(age('bird')*24)*42} -4 0)`);
+    this.attr('bird-splat','opacity',effect('bird')&&age('bird')>.85?'1':'0');
+    this.attr('head-roach','opacity',effect('roach')?'1':'0');
+    const flying=effect('roach')?Math.max(0,1-age('roach')/.85):0;
     this.attr('head-roach','transform',`translate(${5+flying*170} ${-193-flying*65}) rotate(${flying*20})`);
-    this.attr('roach-wing-left','transform',`rotate(${reduced?0:Math.sin(t*48)*(flying?45:12)} -3 -2)`);
-    this.attr('roach-wing-right','transform',`rotate(${reduced?0:-Math.sin(t*48)*(flying?45:12)} 3 -2)`);
+    this.attr('roach-wing-left','transform',`rotate(${reduced?0:Math.sin(age('roach')*48)*(flying?45:12)} -3 -2)`);
+    this.attr('roach-wing-right','transform',`rotate(${reduced?0:-Math.sin(age('roach')*48)*(flying?45:12)} 3 -2)`);
   }
 }

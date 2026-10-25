@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "波珠走迷宮 · Your Playground.",
+  "short_name": "波珠走迷宮",
+  "description": "傾斜手機，穿過五個各有三條路線的迷宮。甩動兩下散去霧霾，小心終點滾來的炸彈。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5ec",
+  "theme_color": "#f3f5ec",
+  "icons": [
+    {
+      "src": "../grid-rush/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../grid-rush/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

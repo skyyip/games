@@ -8,10 +8,10 @@ Validated with Node.js 24, system Chromium and the existing optional Playwright 
 node --test grid-rush/tests/*.test.js grid-rush-in-order/tests/*.test.js line-up/tests/*.test.js pikmin-fling/tests/*.test.js just-a-sec/tests/*.test.js roach-rush/tests/*.test.js stone-skip/tests/*.test.js
 ```
 
-**125 repository tests passed**, including thirty-three Roach Rush tests for:
+**184 repository tests passed**, including thirty-three Roach Rush tests for:
 
 - Both durations and the exact absolute deadline, with four initial ground spawns at the corner holes.
-- Unique 1/2/3/4/5-point scoring; small flying roaches score three and large flyers score four.
+- Unique 1/2/3/4/6-point scoring; small flying roaches score three and large flyers score four.
 - Big-roach identity and the 350/351ms double-tap boundary.
 - Ground → flying → ground cycles and protected held-creature states.
 - Continuous bounded spawning, no background catch-up burst and at most four mice.
@@ -80,10 +80,18 @@ Four dedicated browser checks passed for English mouse drag, Chinese mouse drag,
 
 ## Three-use tools, traps and 2/3-minute modes
 
-Seven new simulation tests cover active durations, three independent overlapping spray bursts without duplicate points, both inventories resetting to three, mouse-only trap capture for exactly five points, simultaneous mouse/trap removal, swept-path collision, held mice, overlapping traps and deadline rejection. The existing record tests now verify version-three migration: two-minute records remain active, one-minute records remain archived, and three-minute scores are independent.
+Seven new simulation tests cover active durations, three independent overlapping spray bursts without duplicate points, both inventories resetting to three, mouse-only trap capture for exactly six points, simultaneous mouse/trap removal, swept-path collision, held mice, overlapping traps and deadline rejection. The existing record tests now verify version-three migration: two-minute records remain active, one-minute records remain archived, and three-minute scores are independent.
 
-Seven additional browser checks passed using desktop mouse input and real phone touch. All three traps can be placed and each captures one mouse for five points; the mouse and triggered trap disappear together, and roaches survive. Three quick spray releases produce three independent clouds. Invalid drops and Escape preserve inventory. End round/replay clears traps and clouds and restores both counters to ×3. The three-minute mode stays active after two minutes and ends at its own deadline. The 11 core game browser checks, nine spray/records checks and four spray-ant checks also passed with the new durations, inventories and version-three storage.
+Seven additional browser checks passed using desktop mouse input and real phone touch. All three traps can be placed and each captures one mouse for six points; the mouse and triggered trap disappear together, and roaches survive. Three quick spray releases produce three independent clouds. Invalid drops and Escape preserve inventory. End round/replay clears traps and clouds and restores both counters to ×3. The three-minute mode stays active after two minutes and ends at its own deadline. The 11 core game browser checks, nine spray/records checks and four spray-ant checks also passed with the new durations, inventories and version-three storage.
 
 ## Four-mouse population and trap removal
 
-Three focused browser checks passed on desktop and with real phone touch: scheduled spawns reach four mice but never a fifth; a trap removes itself and its captured mouse in the same frame for exactly five points; the freed population slot refills without exceeding four. Trap inventory remains consumed. Screenshots confirm the smaller ant artwork retains its larger touch target and the four-mouse room stays within the phone viewport.
+Three focused browser checks passed on desktop and with real phone touch: scheduled spawns reach four mice but never a fifth; a trap removes itself and its captured mouse in the same frame for exactly six points; the freed population slot refills without exceeding four. Trap inventory remains consumed. Screenshots confirm the smaller ant artwork retains its larger touch target and the four-mouse room stays within the phone viewport.
+
+## Six-point mice and phone toolbar
+
+The model suite, three population checks, four cage checks and seven trap/inventory checks passed with six points for either capture method. Additional 375×812, 390×844 and 812×375 checks require both toolbar buttons to remain at least 58 CSS pixels above the viewport bottom; CSS adds the native bottom safe-area inset as well. The six-point quick guide is verified. Native iPhone system gestures were not directly exercised in Chromium.
+
+## Mouse tail alignment
+
+The tail now joins the centre rear of the body and swings around that same attachment point. Twelve rendered direction/gait poses and held-drag styling keep the root fixed; the pose sheet was visually inspected. All four cage browser checks passed again, covering hold/drag, successful six-point capture, a near miss and reset. Standalone Roach Rush previews were regenerated.

@@ -95,7 +95,7 @@ export class RoachGame {
         const from=mouseSteps.get(mouse.id)||mouse;
         const normalize=p=>({x:(p.x-trap.x)/trap.radiusX,y:(p.y-trap.y)/trap.radiusY});
         if(distanceToSegment({x:0,y:0},normalize(from),normalize(mouse))<=1){
-          trap.armed=false;this.traps.delete(trap.id);events.trapped.push({...this.award(mouse,'trapped',5),trapId:trap.id});break;
+          trap.armed=false;this.traps.delete(trap.id);events.trapped.push({...this.award(mouse,'trapped',6),trapId:trap.id});break;
         }
       }
     }
@@ -130,7 +130,7 @@ export class RoachGame {
   }
   catchMouse(id,held,inCage){
     if(!this.active()||held<MOUSE_HOLD||!inCage)return null;
-    const entity=this.entities.get(id);return entity?.type==='mouse'?this.award(entity,'mice',5):null;
+    const entity=this.entities.get(id);return entity?.type==='mouse'?this.award(entity,'mice',6):null;
   }
   flickAnt(id,distance,speed){
     if(!this.active()||distance<SWIPE_DISTANCE||speed<ANT_FLICK_SPEED)return null;

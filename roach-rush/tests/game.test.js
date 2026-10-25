@@ -12,7 +12,7 @@ test('both durations start idle, then open all four holes with ground roaches an
  }
  assert.throws(()=>new RoachGame({duration:30}),RangeError);
 });
-test('ground taps, size-specific flying swipes and mouse captures award exactly 1/2/3/4/5 once each',()=>{
+test('ground taps, size-specific flying swipes and mouse captures award exactly 1/2/3/4/6 once each',()=>{
  const {game,set}=setup();game.start();game.entities.clear();
  const small=game.spawnRoach(0),big=game.spawnRoach(1),flying=game.spawnRoach(2),smallFlying=game.spawnRoach(3),mouse=game.spawnMouse();
  big.size='big';flying.size='big';flying.mode=smallFlying.mode='flying';
@@ -21,8 +21,8 @@ test('ground taps, size-specific flying swipes and mouse captures award exactly 
  assert.equal(game.tap(flying.id),null);assert.equal(game.swipe(flying.id,27),null);assert.equal(game.swipe(flying.id,28).points,4);assert.equal(game.swipe(flying.id,100),null);
  assert.equal(game.swipe(smallFlying.id,28).points,3);
  assert.equal(game.tap(mouse.id),null);assert.equal(game.catchMouse(mouse.id,499,true),null);assert.equal(game.catchMouse(mouse.id,500,false),null);
- assert.equal(game.catchMouse(mouse.id,500,true).points,5);assert.equal(game.catchMouse(mouse.id,1000,true),null);
- assert.equal(game.score,15);assert.deepEqual(game.stats,{small:1,big:1,flying:2,mice:1,antsHit:0,antsFlicked:0,sprayed:0,antsSprayed:0,trapped:0});assert.equal(game.entities.size,0);
+ assert.equal(game.catchMouse(mouse.id,500,true).points,6);assert.equal(game.catchMouse(mouse.id,1000,true),null);
+ assert.equal(game.score,16);assert.deepEqual(game.stats,{small:1,big:1,flying:2,mice:1,antsHit:0,antsFlicked:0,sprayed:0,antsSprayed:0,trapped:0});assert.equal(game.entities.size,0);
 });
 test('big roaches require two taps on the same creature within 350ms; expired taps start a fresh pair',()=>{
  const {game,set}=setup();game.start();const [a,b]=[...game.entities.values()];a.size=b.size='big';
@@ -125,5 +125,5 @@ test('random ant timing varies and background return adds at most one arrival wi
 test('four mice may coexist, a fifth is blocked, and capture allows a later replacement',()=>{
  const {game,set}=setup(120);game.start();for(const now of [7000,19000,31000,43000]){set(now);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,1);}
  assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,MAX_MICE);assert.equal(game.spawnMouse(),null);set(55000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,0);
- const mouse=[...game.entities.values()].find(e=>e.type==='mouse');assert.equal(game.catchMouse(mouse.id,500,true).points,5);set(67000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,1);assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,4);
+ const mouse=[...game.entities.values()].find(e=>e.type==='mouse');assert.equal(game.catchMouse(mouse.id,500,true).points,6);set(67000);assert.equal(game.advance().spawned.filter(e=>e.type==='mouse').length,1);assert.equal([...game.entities.values()].filter(e=>e.type==='mouse').length,4);
 });

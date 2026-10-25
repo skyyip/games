@@ -1,5 +1,5 @@
 export const DURATIONS=Object.freeze([120,180]);
-export const GRAVITY=9.81,LAUNCH_HEIGHT=.7,RIM_HEIGHT=.85,POT_DEPTH=5.5,MOUTH_RADIUS=.43,STILL_TIME=12;
+export const GRAVITY=9.81,LAUNCH_HEIGHT=.7,RIM_HEIGHT=.85,POT_DEPTH=5.5,MOUTH_RADIUS=.43,STILL_TIME=12,VERTICAL_START=24;
 export const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const smooth=t=>t*t*(3-2*t);
 export function makePath(duration,random=Math.random){
@@ -12,6 +12,10 @@ export function potAt(path,seconds){
   if(!path?.length)return 0;
   for(let i=1;i<path.length;i++)if(seconds<=path[i].at){const a=path[i-1],b=path[i];return a.x+(b.x-a.x)*smooth(clamp((seconds-a.at)/(b.at-a.at)));}
   return path.at(-1).x;
+}
+export function potDepthAt(path,seconds){
+  if(path.length<3||seconds<=VERTICAL_START)return POT_DEPTH;
+  const t=seconds-VERTICAL_START;return POT_DEPTH+.65*smooth(clamp(t/4))*Math.sin(t*.27);
 }
 export function throwVelocity({power,heading=0}){
   if(!Number.isFinite(power)||!Number.isFinite(heading))throw new RangeError('Invalid throw.');
@@ -45,6 +49,7 @@ export class PotGame {
   start(duration=this.duration){this.reset(duration);this.path=makePath(duration,this.random);this.startedAt=this.now();this.state='playing';this.nextArrow();}
   get remaining(){return this.state==='idle'?this.duration:Math.max(0,this.duration-(this.now()-this.startedAt)/1000);}
   get potX(){return potAt(this.path,this.elapsed);}
+  get potDepth(){return potDepthAt(this.path,this.elapsed);}
   get ready(){return this.state==='playing'&&this.remaining>0&&!this.flight&&this.elapsed>=this.availableAt;}
   launch(options){
     if(!this.ready)return null;
@@ -56,8 +61,8 @@ export class PotGame {
   resolve(flight,kind,t,position,events){
     const at=flight.started+t;if(at>=this.duration)return;
     const points=kind==='hit'?(flight.type==='color'?2:1):0;
-    if(points){this.score+=points;this.stats[flight.type]++;this.landed.push({type:flight.type,x:position.x-potAt(this.path,at)});this.landed=this.landed.slice(-5);}else this.stats.misses++;
-    this.impact={...position,at,kind,points,type:flight.type,potX:potAt(this.path,at),flight:{...flight},t};
+    if(points){this.score+=points;this.stats[flight.type]++;this.landed.push({type:flight.type,x:position.x-potAt(this.path,at),z:position.z-potDepthAt(this.path,at)});this.landed=this.landed.slice(-5);}else this.stats.misses++;
+    this.impact={...position,at,kind,points,type:flight.type,potX:potAt(this.path,at),potDepth:potDepthAt(this.path,at),flight:{...flight},t};
     events.push(this.impact);this.flight=null;this.availableAt=at+(kind==='hit'?.36:.5);this.nextArrow();
   }
   advance(){
@@ -69,13 +74,13 @@ export class PotGame {
       while(this.flight&&f.lastT<limit-1e-9){
         const from=f.lastT,t=Math.min(limit,from+1/120),p=flightAt(f,t);
         if(mouth!==null&&from<mouth&&t>=mouth){
-          const hit=flightAt(f,mouth),dx=hit.x-potAt(this.path,f.started+mouth),distance=Math.hypot(dx,hit.z-POT_DEPTH);
+          const hit=flightAt(f,mouth),dx=hit.x-potAt(this.path,f.started+mouth),distance=Math.hypot(dx,hit.z-potDepthAt(this.path,f.started+mouth));
           if(distance<=MOUTH_RADIUS-.02){this.resolve(f,'hit',mouth,hit,events);break;}
           if(distance<=MOUTH_RADIUS+.13){this.resolve(f,'rim',mouth,hit,events);break;}
         }
-        const radius=.60-.08*(p.h/RIM_HEIGHT),distance=Math.hypot(p.x-potAt(this.path,f.started+t),p.z-POT_DEPTH);
+        const radius=.60-.08*(p.h/RIM_HEIGHT),distance=Math.hypot(p.x-potAt(this.path,f.started+t),p.z-potDepthAt(this.path,f.started+t));
         if(p.h>.1&&p.h<RIM_HEIGHT-.02&&distance<radius){this.resolve(f,'rim',t,p,events);break;}
-        if(p.h<=.000001){const dx=p.x-potAt(this.path,f.started+t),dz=p.z-POT_DEPTH;
+        if(p.h<=.000001){const dx=p.x-potAt(this.path,f.started+t),dz=p.z-potDepthAt(this.path,f.started+t);
           const kind=Math.abs(dz)>.65?(dz<0?'short':'far'):(dx<0?'left':'right');this.resolve(f,kind,t,p,events);break;
         }
         f.lastT=t;

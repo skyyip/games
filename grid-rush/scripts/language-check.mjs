@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PLAYGROUND_URL||'http://localhost:5173/';
-const routes=['grid-rush/','grid-rush-in-order/','line-up/','pikmin-fling/','tap-and-spill/','just-a-sec/','roach-rush/', 'stone-skip/','balance-bridge/','pot-toss/'];
+const routes=['grid-rush/','grid-rush-in-order/','line-up/','pikmin-fling/','tap-and-spill/','just-a-sec/','roach-rush/', 'stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/'];
 const errors=[];let checks=0;
 const pass=message=>{checks++;console.log(`PASS ${message}`);};
 const url=path=>new URL(path,base).href;
@@ -59,7 +59,7 @@ try {
   for(const width of [320,375,640,768,1440]) {
    await page.setViewportSize({width,height:900});
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-   assert.equal(await page.locator('.game-card').count(),10);
+   assert.equal(await page.locator('.game-card').count(),12);
    assert.ok(await page.locator('.playground-brand').evaluate(header=>{
     const rects=[...header.children].map(el=>el.getBoundingClientRect());
     const title=header.querySelector('h1');
@@ -118,13 +118,13 @@ try {
   for(const timed of [false,true]) {
    if(timed){await page.locator('#change-mode').click();await page.locator('input[value="timed"]').check();await text(page,'#time-label',zh?'剩餘時間':'TIME LEFT');}
    await page.locator('#start').click();
-   for(let i=0;i<30;i++)await page.locator('.pikmin').nth(i).press('Enter');
+   for(let i=0;i<35;i++)await page.locator('.pikmin').nth(i).press('Enter');
    await page.locator('#results').waitFor({state:'visible'});
    await text(page,'#result-title',zh?'花園已清空。':'Garden cleared.');
-   assert.match(await page.locator('#result-note').textContent(),zh?/皮克敏/:/Pikmin fed/);
+   assert.match(await page.locator('#result-note').textContent(),zh?/皮克鈍/:/Pikmax fed/);
    if(timed){assert.ok(Number(await page.locator('#final-time').textContent())>=45);await text(page,'#result-unit',zh?'分':'pts');}
   }
-  pass(`${language}: complete normal and timed Pikmin rounds, dynamic prompts, scores and records`);
+  pass(`${language}: complete normal and timed Pikmax rounds, dynamic prompts, scores and records`);
 
   await page.goto(url('tap-and-spill/'));if(!zh)await englishTap(page);
   await page.locator('#rows input').first().fill('Start Game');

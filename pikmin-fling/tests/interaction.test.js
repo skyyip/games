@@ -20,7 +20,7 @@ test('a parabolic flight starts at the released character and ends exactly insid
 
 test('30 random characters roam within the fence while held characters stay still',()=>{
   const roster=createRoster(300,410,()=>.25);
-  assert.equal(roster.length,30);assert.ok(roster.every(p=>TYPES.includes(p.type)));
+  assert.equal(roster.length,35);assert.ok(roster.every(p=>TYPES.includes(p.type)));
   const before={x:roster[0].x,y:roster[0].y};
   for(let i=0;i<500;i++)walkRoster(roster,.02,300,410,new Set([0]));
   assert.deepEqual({x:roster[0].x,y:roster[0].y},before);
@@ -28,24 +28,24 @@ test('30 random characters roam within the fence while held characters stay stil
 });
 
 test('compact phone and landscape gardens fit 30 full 44px touch targets and keep roaming inside their bounds',()=>{
-  for(const [width,height] of [[296,250],[444,184],[700,150]]) {
+  for(const [width,height] of [[283,266],[296,280],[444,184],[700,150]]) {
     const roster=createRoster(width,height,()=>0,44);
-    assert.equal(roster.length,30);
+    assert.equal(roster.length,35);
     assert.ok(roster.every(p=>p.x>=22&&p.x<=width-22&&p.y>=22&&p.y<=height-22));
-    for(let i=0;i<30;i++)for(let j=i+1;j<30;j++)assert.ok(Math.abs(roster[i].x-roster[j].x)>=44||Math.abs(roster[i].y-roster[j].y)>=44);
+    for(let i=0;i<35;i++)for(let j=i+1;j<35;j++)assert.ok(Math.abs(roster[i].x-roster[j].x)>=44||Math.abs(roster[i].y-roster[j].y)>=44);
     for(let i=0;i<100;i++)walkRoster(roster,.02,width,height,new Set(),()=>0,44);
     assert.ok(roster.every(p=>p.x>=22&&p.x<=width-22&&p.y>=22&&p.y<=height-22));
   }
 });
 
-test('random crowds can include all seven Pikmin types, including White',()=>{
+test('random crowds can include all eight base Pikmax types, including White',()=>{
   const seen=new Set();
-  for(const random of [.01,.16,.3,.45,.6,.75,.9]) {
+  for(const random of [.01,.16,.3,.45,.6,.68,.8,.95]) {
     const roster=createRoster(700,480,()=>random);
-    assert.equal(roster.length,30);
+    assert.equal(roster.length,35);
     for(const unit of roster){seen.add(unit.type);assert.ok(TYPE_NAMES[unit.type]);}
   }
-  assert.deepEqual([...seen],['red','yellow','blue','ice','rock','winged','white']);
+  assert.deepEqual([...seen],['red','yellow','blue','ice','rock','winged','white','purple']);
 });
 
 test('short press and drag links matching stages after 200ms, while a single flower still needs 0.6 seconds',()=>{
@@ -87,7 +87,7 @@ test('single-flower charging, longer holds and chain flick detection keep their 
   assert.equal(tap.isTap({x:102,y:202,t:600}),false);
 });
 
-test('double taps must hit the same Pikmin within the window; cancellation clears pending taps',()=>{
+test('double taps must hit the same Pikmax within the window; cancellation clears pending taps',()=>{
   const taps=new DoubleTap();
   assert.equal(taps.tap(2,100),false);assert.equal(taps.tap(3,150),false);
   assert.equal(taps.tap(3,400),true);assert.equal(taps.pending,null);

@@ -1,4 +1,4 @@
-import { MODES } from './game.js';
+import { MODES,MAX_SCORE } from './game.js';
 
 export const STORAGE_KEY = 'pikmin-fling.records.v3';
 export const LEGACY_STORAGE_KEY = 'pikmin-fling.records.v2';
@@ -6,7 +6,7 @@ export const LEGACY_STORAGE_KEY = 'pikmin-fling.records.v2';
 const emptyRecords = () => Object.fromEntries(MODES.map(mode => [mode, []]));
 const validRecord = (record, mode) => record !== null && typeof record === 'object' &&
   typeof record.date === 'string' && Number.isFinite(Date.parse(record.date)) &&
-  (mode === 'timed' ? Number.isInteger(record.score) && record.score >= 0 && record.score <= 90 :
+  (mode === 'timed' ? Number.isInteger(record.score) && record.score >= 0 && record.score <= MAX_SCORE :
     typeof record.time === 'number' && Number.isFinite(record.time) && record.time >= 0);
 const compare = mode => mode === 'timed' ? (a, b) => b.score - a.score : (a, b) => a.time - b.time;
 

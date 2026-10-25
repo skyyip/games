@@ -18,3 +18,7 @@ html.play-locked,body.play-locked{overflow:hidden;overscroll-behavior:none}body.
 body.play-locked.resting-view .balance-panel,body.play-locked.resting-view .controls{display:none}
 #pause svg{width:16px;height:16px;fill:currentColor;vertical-align:middle}
 .guide-icon svg{width:32px;height:32px}#event-icon svg{display:block;width:32px;height:32px}
+
+.active-events{position:absolute;top:102px;left:50%;transform:translateX(-50%);width:min(calc(100% - 28px),400px);display:flex;justify-content:center;gap:5px;flex-wrap:wrap;pointer-events:none}.active-events>span{display:flex;align-items:center;gap:6px;background:#fffbefeb;border:1px solid #d5c8a9;border-radius:20px;padding:5px 8px}.active-events b{font-size:9px;font-weight:500}.active-events small{font-size:8px;color:#ac795a}@media(max-height:500px) and (orientation:landscape){.active-events{top:135px}}
+
+@media(max-height:500px) and (orientation:landscape){.event-banner{left:10px;transform:none;width:220px;top:62px}.active-events{left:10px;transform:none;width:220px;top:124px;justify-content:flex-start}.active-events b{font-size:8px}}

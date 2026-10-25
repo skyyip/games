@@ -36,7 +36,7 @@ try{
   await page.waitForFunction(()=>document.querySelector('#fed').textContent==='1');
   assert.equal(await page.evaluate(()=>scrollY),before);
   assert.equal(await page.locator('.garden-tools #reset').isVisible(),true);
-  pass('an actual finger fling still feeds a Pikmin without focus scrolling and End round stays reachable');
+  pass('an actual finger fling still feeds a Pikmax without focus scrolling and End round stays reachable');
 
   for(const [width,height] of [[320,568],[375,812],[430,932],[568,320],[812,375],[768,1024]]){
     await page.setViewportSize({width,height});await page.waitForTimeout(100);

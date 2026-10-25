@@ -29,8 +29,8 @@ export class River {
     }
     const p=this.project(state.progress),scale=(1-state.progress*.67),radius=17*scale;
     c.save();c.globalAlpha=1-state.sink;this.ellipse(p.x,p.y,radius*1.3,radius*.3,'#446e6240');
-    c.translate(p.x,p.y-state.lift*h);c.rotate(plan.reduced?0:Math.sin(elapsed*.035)*.13);this.ellipse(0,0,radius*(result.settings.length/result.settings.width)**.2,radius*.54,'#f4e5c7','#6c8173');
-    c.lineWidth=1;c.strokeStyle='#b9b49b';c.beginPath();c.ellipse(0,0,radius*.68,radius*.3,plan.reduced?0:elapsed*.018*(result.settings.spin/75),0,Math.PI*1.7);c.stroke();
+    c.translate(p.x,p.y-state.lift*h);c.rotate(plan.reduced?0:Math.sin(elapsed*.035)*.13);this.ellipse(0,0,radius,radius*.54,'#f4e5c7','#6c8173');
+    c.lineWidth=1;c.strokeStyle='#b9b49b';c.beginPath();c.ellipse(0,0,radius*.68,radius*.3,plan.reduced?0:elapsed*.018,0,Math.PI*1.7);c.stroke();
     c.fillStyle='#fdf5db';this.ellipse(-radius*.32,-radius*.18,radius*.22,radius*.1,'#fff5dc');c.restore();
     if(state.sink>0){c.save();c.globalAlpha=1-state.sink*.8;this.ellipse(p.x,p.y,8+state.sink*23,2+state.sink*7,null,'#f7f1d4');c.restore();}
   }

@@ -7,7 +7,7 @@ A solo courtyard tossing game. Flick an arrow into a cute lavender chamber pot. 
 1. Start a round. An arrow appears at the throwing position.
 2. Swipe upward from the arrow and release while moving. Swipe direction controls left/right aim; swipe speed controls launch speed. A medium flick usually reaches the initially centred pot. The strength guide helps find that range.
 3. Adjust using the short/far/left/right/rim feedback. Aim for the opening: hitting the chamber pot's side or rim bounces off and earns nothing.
-4. The pot remains still for 12 seconds, then moves slowly left and right. Aim ahead to allow for the arrow's flight time.
+4. The pot remains still for 12 seconds, then moves slowly left and right. After 24 seconds it also moves slowly nearer and farther, appearing to move up and down on screen. Aim ahead to allow for the arrow's flight time.
 
 Both arrow types have identical physics. A shuffled four-arrow bag contains two of each type, with random ordering. The current type remains fixed while aiming; tapping, cancelling or holding cannot reroll it. The next arrow arrives after the current shot resolves and a short cooldown.
 
@@ -40,3 +40,5 @@ npm test
 ```
 
 Open `/pot-toss/`. See [VERIFICATION.md](./VERIFICATION.md) for automated checks and their limits.
+
+Depth motion eases in after 24 seconds, with a 0.65-world-metre range either side of the original depth. Both mouth and body collisions evaluate that depth at the exact impact time; rendered size changes with perspective. The pastel pot has a cream face, glossy round eyes, pink cheeks and tiny feet. Successful entry triggers a closed-eye smile for 1.1 seconds. A short, far, left, right or rim miss triggers worried brows, a frown and blue tears for 1.5 seconds, then restores the idle face. The latest resolved throw replaces the previous expression immediately. Reduced motion keeps the tears static.

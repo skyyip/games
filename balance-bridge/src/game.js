@@ -12,14 +12,16 @@ export const FALL_ANGLE=.94,WARNING_TIME=1.6,FALL_DURATION=1.25;
 // Time advances only through active simulation. Paused/background time never scores.
 export class BalanceGame {
   constructor({random=Math.random}={}){this.random=random;this.reset();}
-  reset(){this.state='idle';this.elapsed=0;this.angle=.006;this.velocity=0;this.input=0;this.target=0;this.accumulator=0;this.phase=0;this.drift=.012;this.nextDrift=.8;this.nextEvent=7;this.pending=null;this.event=null;this.eventCount=0;this.lastEvent=null;this.fallElapsed=0;this.fallSide=1;this.fallReason='Lost your balance.';}
+  reset(){this.state='idle';this.elapsed=0;this.angle=.006;this.velocity=0;this.input=0;this.target=0;this.accumulator=0;this.phase=0;this.drift=.012;this.nextDrift=.8;this.nextEvent=7;this.pending=null;this.events=[];this.eventCount=0;this.lastEvent=null;this.fallElapsed=0;this.fallSide=1;this.fallReason='Lost your balance.';}
+  get event(){return this.events.at(-1)||null;}
+  set event(value){this.events=value?[value]:[];}
   start(){this.reset();this.state='playing';return true;}
   pause(){if(this.state!=='playing')return false;this.state='paused';this.target=0;this.input=0;this.accumulator=0;return true;}
   resume(){if(this.state!=='paused')return false;this.state='playing';return true;}
-  abandon(){this.state='idle';this.pending=null;this.event=null;this.input=0;this.target=0;this.accumulator=0;}
+  abandon(){this.state='idle';this.pending=null;this.events=[];this.input=0;this.target=0;this.accumulator=0;}
   setInput(value){this.target=Number.isFinite(value)?clamp(value):0;}
   schedule(){
-    const pool=EVENTS.filter(e=>e.id!==this.lastEvent);
+    const pool=EVENTS.filter(e=>e.id!==this.lastEvent&&!this.events.some(active=>active.id===e.id));
     const definition=this.eventCount===0?EVENTS[0]:pool[Math.floor(clamp(this.random(),0,.999999)*pool.length)];
     this.pending={...definition,direction:this.random()<.5?-1:1,startsAt:this.elapsed+WARNING_TIME};
   }
@@ -37,20 +39,18 @@ export class BalanceGame {
       }
       this.elapsed+=dt;this.phase+=dt*7.6;
       if(this.elapsed>=this.nextDrift){this.drift=(this.random()-.5)*.15;this.nextDrift=this.elapsed+.7+this.random()*.7;}
-      if(!this.event&&!this.pending&&this.elapsed>=this.nextEvent){this.schedule();notices.push('warning');}
+      if(this.events.length<3&&!this.pending&&this.elapsed>=this.nextEvent){this.schedule();notices.push('warning');}
       if(this.pending&&this.elapsed>=this.pending.startsAt){
-        this.event={...this.pending,startedAt:this.elapsed};this.pending=null;this.lastEvent=this.event.id;this.eventCount++;
+        const added={...this.pending,startedAt:this.elapsed};this.events.push(added);this.pending=null;this.lastEvent=added.id;this.eventCount++;this.nextEvent=this.elapsed+.6+this.random()*.9;
         this.velocity+=this.event.direction*this.event.level*.045;notices.push('event');
       }
-      if(this.event&&this.elapsed-this.event.startedAt+1e-9>=this.event.duration){
-        this.event=null;this.nextEvent=this.elapsed+4+this.random()*5;notices.push('clear');
-      }
+      const before=this.events.length;this.events=this.events.filter(e=>this.elapsed-e.startedAt+1e-9<e.duration);if(this.events.length<before)notices.push('clear');
       const difficulty=1+Math.min(this.elapsed/150,.6);
       let disturbance=0;
-      if(this.event){
-        const t=this.elapsed-this.event.startedAt,l=this.event.level;
-        const envelope=Math.min(1,t*4+.2,this.event.duration-t+.15);
-        disturbance=envelope*(this.event.direction*l*.095+Math.sin(t*(7+l*1.7))*l*l*.018);
+      for(const event of this.events){
+        const t=this.elapsed-event.startedAt,l=event.level;
+        const envelope=Math.min(1,t*4+.2,event.duration-t+.15);
+        disturbance+=envelope*(event.direction*l*.095+Math.sin(t*(7+l*1.7))*l*l*.018);
       }
       this.input+=(this.target-this.input)*(1-Math.exp(-dt*11));
       const acceleration=Math.sin(this.angle)*1.9*difficulty-this.velocity*1.65+this.input*3.15

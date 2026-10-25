@@ -67,10 +67,10 @@ try{
   const before=Number(await page.locator('#score').textContent());
   const mouseId=await dragMouse(page,499,true);assert.equal(await page.locator(`.critter[data-id="${mouseId}"]`).count(),1);assert.equal(Number(await page.locator('#score').textContent()),before);
   await dragMouse(page,500,false);assert.equal(Number(await page.locator('#score').textContent()),before);
-  await dragMouse(page,500,true);assert.equal(Number(await page.locator('#score').textContent()),before+5);
+  await dragMouse(page,500,true);assert.equal(Number(await page.locator('#score').textContent()),before+6);
   await page.clock.runFor(10000);
   const active=page.locator('.critter[data-type="mouse"]').first();await active.focus();await page.keyboard.down('Space');await page.clock.runFor(500);await page.keyboard.up('Space');
-  assert.equal(await page.locator('#cage').isDisabled(),false);const score=Number(await page.locator('#score').textContent());await page.keyboard.press('Enter');assert.equal(Number(await page.locator('#score').textContent()),score+5);
+  assert.equal(await page.locator('#cage').isDisabled(),false);const score=Number(await page.locator('#score').textContent());await page.keyboard.press('Enter');assert.equal(Number(await page.locator('#score').textContent()),score+6);
   await page.clock.fastForward(121000);assert.equal(await page.locator('#result').isVisible(),true);assert.equal(await page.locator('#timer').textContent(),'0:00');assert.equal(await page.locator('.critter:not(:disabled)').count(),0);
   assert.equal(Number(await page.locator('#final-score').textContent()),Number(await page.locator('#score').textContent()));
   await page.screenshot({path:`${output}/results-${language}.png`,fullPage:true});
@@ -129,7 +129,7 @@ try{
    const mouse=await stable(page,page.locator('.critter[data-type="mouse"]').first()),m=await centre(mouse),c=await centre(page.locator('#cage')),before=Number(await page.locator('#score').textContent());
    await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,...m}]});await page.clock.runFor(500);
    await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,...c}]});await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-   assert.equal(Number(await page.locator('#score').textContent()),before+5);
+   assert.equal(Number(await page.locator('#score').textContent()),before+6);
    const flying=await stable(page,page.locator('.critter[data-mode="flying"]').first()),flyId=await flying.getAttribute('data-id'),f=await centre(flying),swipeScore=Number(await page.locator('#score').textContent());
    await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x:f.x-35,y:f.y}]});
    await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,x:f.x+35,y:f.y}]});

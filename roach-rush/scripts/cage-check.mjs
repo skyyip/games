@@ -25,7 +25,7 @@ try{
  const opened=await page.locator('.cage-door').evaluate(el=>getComputedStyle(el).transform);assert.ok(Math.abs(Number(opened.slice(7,-1).split(',')[0]))<.3);
  await page.screenshot({path:'/tmp/roach-cage-open.png'});
  pass('a charged mouse opens the door near the cage before entering the scoring area');
- await page.mouse.move(target.inside.x,target.inside.y);await page.mouse.up();assert.equal(await page.locator('#score').textContent(),'5');
+ await page.mouse.move(target.inside.x,target.inside.y);await page.mouse.up();assert.equal(await page.locator('#score').textContent(),'6');
  assert.equal(await page.locator('#cage').evaluate(el=>el.classList.contains('is-open')),true);
  const peak=await page.locator('.cage-art').evaluate(el=>{const a=el.getAnimations().find(a=>a.effect.getKeyframes().some(f=>String(f.transform).includes('1.16')));a.pause();a.currentTime=200;return getComputedStyle(el).transform;});
  assert.ok(Number(peak.slice(7,-1).split(',')[0])>1.1);assert.equal(await page.locator('#cage').evaluate(el=>el.classList.contains('is-open')),true);
@@ -33,7 +33,7 @@ try{
  await page.locator('.cage-art').evaluate(async el=>{const a=el.getAnimations().find(a=>a.playState==='paused');a.play();await a.finished;});
  await page.locator('#cage:not(.is-open)').waitFor();await page.locator('.cage-door').evaluate(async el=>{getComputedStyle(el).transform;await Promise.all(el.getAnimations().map(a=>a.finished));});
  const closed=await page.locator('.cage-door').evaluate(el=>getComputedStyle(el).transform);assert.ok(closed==='none'||Math.abs(Number(closed.slice(7,-1).split(',')[0])-1)<.01);
- assert.equal(await page.locator('#score').textContent(),'5');await context.close();pass('capture awards five once, expands and restores the cage, then closes the door');
+ assert.equal(await page.locator('#score').textContent(),'6');await context.close();pass('capture awards six once, expands and restores the cage, then closes the door');
  const failed=await setup(),p=failed.page,drop=await beginDrag(p);await p.mouse.move(drop.near.x,drop.near.y);await p.mouse.up();
  assert.equal(await p.locator('#score').textContent(),'0');assert.equal(await p.locator('#cage').evaluate(el=>el.classList.contains('is-open')),false);
  await p.locator('#end').evaluate(el=>el.click());assert.equal(await p.locator('#cage').evaluate(el=>el.classList.contains('is-open')),false);

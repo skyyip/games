@@ -7,9 +7,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f6f5ed">
-<meta name="description" content="Fling a colourful crowd of Pikmin into one very hungry plant. Race your best times or score big in 30s Rush.">
-<meta name="apple-mobile-web-app-title" content="Pikmin Fling">
-<title>Pikmin Fling · Sky’s Playground</title>
+<meta name="description" content="Fling a colourful crowd of Pikmax into one very hungry plant. Race your best times or score big in 30s Rush.">
+<meta name="apple-mobile-web-app-title" content="Pikmax Fling">
+<title>Pikmax Fling · Sky’s Playground</title>
 <link rel="icon" href="../grid-rush/assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../grid-rush/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -24,17 +24,17 @@
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TZ646NJ9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <header class="site-top">
-  <a class="brand" href="./" aria-label="Pikmin Fling home"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 31V15M16 19C3 20 3 7 3 7s13-1 13 12ZM16 15C16 2 29 3 29 3s1 13-13 12Z"/></svg><span>pikmin <b>fling</b><i>.</i></span></a>
+  <a class="brand" href="./" aria-label="Pikmax Fling home"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 31V15M16 19C3 20 3 7 3 7s13-1 13 12ZM16 15C16 2 29 3 29 3s1 13-13 12Z"/></svg><span>pikmax <b>fling</b><i>.</i></span></a>
   <a class="playground-home" href="../" aria-label="Back to Sky’s Playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>All games</span></a>
-  <span class="header-note">SMALL PIKMIN. BIG APPETITE.</span>
+  <span class="header-note">SMALL PIKMAX. BIG APPETITE.</span>
 </header>
 <main id="app">
   <section class="intro"><div><p class="eyebrow">A LITTLE GARDEN CHAOS</p><h1>Ready, set, <br><em>feed.</em></h1></div><p>A colourful crowd. One hungry plant. <br>Read the leaves. Link your crowd. Make a clean sweep.</p></section>
   <div class="arena">
-    <section class="play-panel" aria-label="Pikmin garden" data-badges-visible="false">
-      <div class="scoreboard"><div><span class="eyebrow" id="time-label">YOUR TIME</span><div class="clock"><output id="timer" aria-label="Elapsed seconds" aria-live="off">0.00</output><span>s</span></div></div><div id="score-panel" class="score-panel" hidden><span class="eyebrow">YOUR SCORE</span><div class="score-total"><output id="score" aria-label="Score: 0 points" aria-live="off">0</output><span>pts</span><span id="score-gain" aria-hidden="true"></span></div></div><div class="progress-wrap"><div><span id="phase">READY TO FLING</span><strong><span id="fed">0</span><small> / <span id="total">30</span> fed</small></strong></div><progress id="progress" value="0" max="30" aria-label="Pikmin fed"></progress></div></div>
-      <div class="growth-guide" aria-label="Pikmin gestures">
-        <div><span class="guide-symbol leaf-symbol" aria-hidden="true">↗</span><span><b>Normal · <output id="leaf-count" aria-live="off">20</output></b><small>Fling up<span class="point-value" hidden> · 1 pt</span></small></span></div>
+    <section class="play-panel" aria-label="Pikmax garden" data-badges-visible="false">
+      <div class="scoreboard"><div><span class="eyebrow" id="time-label">YOUR TIME</span><div class="clock"><output id="timer" aria-label="Elapsed seconds" aria-live="off">0.00</output><span>s</span></div></div><div id="score-panel" class="score-panel" hidden><span class="eyebrow">YOUR SCORE</span><div class="score-total"><output id="score" aria-label="Score: 0 points" aria-live="off">0</output><span>pts</span><span id="score-gain" aria-hidden="true"></span></div></div><div class="progress-wrap"><div><span id="phase">READY TO FLING</span><strong><span id="fed">0</span><small> / <span id="total">35</span> fed</small></strong></div><progress id="progress" value="0" max="30" aria-label="Pikmax fed"></progress></div></div>
+      <div class="growth-guide" aria-label="Pikmax gestures">
+        <div><span class="guide-symbol leaf-symbol" aria-hidden="true">↗</span><span><b>Normal · <output id="leaf-count" aria-live="off">25</output></b><small>Fling up<span class="point-value" hidden> · 1 pt</span></small></span></div>
         <div><span class="guide-symbol bud-symbol" aria-hidden="true">2×</span><span><b>Bud · <output id="bud-count" aria-live="off">5</output></b><small>Double-tap<span class="point-value" hidden> · 2 pts</span></small></span></div>
         <div><span class="guide-symbol flower-symbol" aria-hidden="true">✿</span><span><b>Flower · <output id="flower-count" aria-live="off">5</output></b><small>Hold 0.6s, then fling<span class="point-value" hidden> · 3 pts</span></small></span></div>
       </div>
@@ -77,16 +77,19 @@
           </svg><span class="chomp-word" id="chomp-word" aria-hidden="true">NOM!</span>
         </div>
         <div class="garden-label" id="garden-label">THE LUNCH CROWD</div>
-        <div class="pen" id="pen" role="group" aria-label="Fenced Pikmin area" aria-describedby="gesture-help">
+        <div class="pen" id="pen" role="group" aria-label="Fenced Pikmax area" aria-describedby="gesture-help">
           <svg class="fence" viewBox="0 0 1000 370" preserveAspectRatio="none" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">
             <defs><pattern id="pickets" width="58" height="42" patternUnits="userSpaceOnUse"><rect x="18" y="3" width="23" height="38" rx="11.5" fill="#ffefd9" stroke="#b58c70" stroke-width="3"/><path d="M24 12v17" fill="none" stroke="#fffaf0" stroke-width="3"/></pattern></defs>
-            <rect x="13" y="17" width="974" height="336" rx="18" fill="none" stroke="#d6b58e" stroke-width="9"/>
-            <path d="M14 35V337M986 35V337" stroke="#ffe2bd" stroke-width="12"/>
-            <path d="M14 17H986M14 353H986" stroke="#b58c70" stroke-width="12"/>
-            <path d="M14 16H986M14 352H986" stroke="#ffe1b6" stroke-width="7"/>
-            <g transform="scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g>
-            <g transform="translate(0 334) scale(1 .64)"><rect width="1000" height="42" fill="url(#pickets)"/></g>
-            <g fill="#efb3ae" stroke="#b58c70" stroke-width="2"><circle cx="15" cy="17" r="9"/><circle cx="985" cy="17" r="9"/><circle cx="15" cy="353" r="9"/><circle cx="985" cy="353" r="9"/></g>
+            <rect x="10" y="10" width="980" height="350" rx="10" fill="none" stroke="#d6b58e" stroke-width="6"/>
+            <path d="M10 20V350M990 20V350" stroke="#ffe2bd" stroke-width="7"/>
+            <path d="M10 10H990M10 360H990" stroke="#b58c70" stroke-width="7"/>
+            <path d="M10 9H990M10 359H990" stroke="#ffe1b6" stroke-width="4"/>
+            <g transform="scale(1 .4)"><rect width="1000" height="42" fill="url(#pickets)"/></g>
+            <g transform="translate(0 351) scale(1 .4)"><rect width="1000" height="42" fill="url(#pickets)"/></g>
+            <g fill="#efb3ae" stroke="#b58c70" stroke-width="1.5"><circle cx="10" cy="10" r="6"/><circle cx="990" cy="10" r="6"/><circle cx="10" cy="360" r="6"/><circle cx="990" cy="360" r="6"/></g>
+            <defs><g id="fence-grass-tuft"><ellipse cx="12" cy="1" rx="11" ry="2" fill="#8eaf7b" opacity=".4"/><path d="M12 0Q8-7 3-10M12 0Q13-10 10-15M12 0Q17-8 21-9" fill="none" stroke="#6b955e" stroke-width="2.2"/><path d="M12 0Q10-6 7-8M12 0Q16-5 18-5" fill="none" stroke="#a4c583" stroke-width="1.3"/></g></defs>
+            <g class="fence-grass fence-grass-left"><use href="#fence-grass-tuft" y="74"/><use href="#fence-grass-tuft" y="146"/><use href="#fence-grass-tuft" y="218"/><use href="#fence-grass-tuft" y="306"/></g>
+            <g class="fence-grass fence-grass-right" transform="translate(1000 0) scale(-1 1)"><use href="#fence-grass-tuft" y="74"/><use href="#fence-grass-tuft" y="146"/><use href="#fence-grass-tuft" y="218"/><use href="#fence-grass-tuft" y="306"/></g>
           </svg>
           <div id="units" class="units"></div><svg id="chains" class="chain-lines" aria-hidden="true"></svg>
         </div>
@@ -94,22 +97,22 @@
         <section id="results" class="results" aria-labelledby="result-title" hidden><span class="result-icon" aria-hidden="true">✓</span><p class="eyebrow" id="result-badge">CLEAN SWEEP</p><h2 id="result-title" tabindex="-1">Garden cleared.</h2><p class="final-time"><span id="final-time"></span><small id="result-unit">s</small></p><p id="result-note"></p><button class="primary-button" type="button" id="again">Play again <span aria-hidden="true">↗</span></button><button class="text-button" type="button" id="change-mode">Change game mode</button></section>
       </div>
       <div class="garden-tools"><p id="gesture-help" role="status">Short press 0.2s, keep pressed and drag through the same colour and stage, then flick up to feed the whole chain.</p><button class="feed-button badge-toggle" type="button" id="toggle-badges" aria-pressed="false" aria-controls="units">Show icons</button><button class="feed-button" type="button" id="feed-selected" disabled>Feed selected <span aria-hidden="true">↑</span></button></div>
-      <p class="keyboard-help">Drag-free option: tap a Pikmin, then Feed selected. Keyboard: Tab to a Pikmin; Enter, Space or ↑ feeds it. Focused and selected Pikmin pause.</p>
+      <p class="keyboard-help">Drag-free option: tap a Pikmax, then Feed selected. Keyboard: Tab to a Pikmax; Enter, Space or ↑ feeds it. Focused and selected Pikmax pause.</p>
     </section>
     <aside class="sidebar">
-      <section class="control-card"><p class="eyebrow">30 PIKMIN. THREE WAYS TO PLAY.</p><h2>A growing<br>appetite.</h2><fieldset id="mode-options"><legend>Choose your mode</legend><div class="fling-modes"><label><input type="radio" name="mode" value="normal" checked><span><b>Normal</b><small>Find your rhythm</small></span></label><label><input type="radio" name="mode" value="challenge"><span><b>Challenge</b><small>Keep up with change</small></span></label><label><input type="radio" name="mode" value="timed"><span><b>30s Rush</b><small>Race for points</small></span></label></div></fieldset><button id="start" type="button" class="primary-button" disabled>Loading Pikmin…</button><button id="reset" type="button" class="secondary-button" hidden>Reset round</button><p class="control-note" id="control-note">Red, Yellow, Blue, Ice, Rock, Winged and White Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.</p></section>
+      <section class="control-card"><p class="eyebrow">35 PIKMAX. THREE WAYS TO PLAY.</p><h2>A growing<br>appetite.</h2><fieldset id="mode-options"><legend>Choose your mode</legend><div class="fling-modes"><label><input type="radio" name="mode" value="normal" checked><span><b>Normal</b><small>Find your rhythm</small></span></label><label><input type="radio" name="mode" value="challenge"><span><b>Challenge</b><small>Keep up with change</small></span></label><label><input type="radio" name="mode" value="timed"><span><b>30s Rush</b><small>Race for points</small></span></label></div></fieldset><button id="start" type="button" class="primary-button" disabled>Loading Pikmax…</button><button id="reset" type="button" class="secondary-button" hidden>Reset round</button><p class="control-note" id="control-note">Red, Yellow, Blue, Ice, Rock, Winged, White and Purple Pikmax mix randomly. Start with 25 normal, 5 buds and 5 flowers.</p><p id="glow-note" class="control-note">Glow Pikmax float into every mode at random. Up to 3 can be present, including those in flight. Each round still has 35 Pikmax.</p><p id="glow-points" class="control-note" hidden>Glow bonus: leaf 2 pts · bud 3 pts · flower 4 pts.</p></section>
       <section class="records-card" aria-labelledby="records-title"><div class="records-heading"><h2 id="records-title">Your fastest three</h2><span id="records-count">NORMAL</span></div><ol id="records" aria-label="Fastest completion times"></ol><p id="storage-status">Saved on this device.</p></section>
       <details class="how-to-play" open><summary>THE GAME PLAN <span aria-hidden="true">+</span></summary><ol>
         <li><b>Read the growth stage.</b> Normal: fling up. Bud: double-tap. Flower: hold still for 0.6s, then fling up. Every throw finds the mouth.</li>
-        <li><b>Make a chain.</b> Short press any Pikmin for 0.2s until it highlights. Keep pressed and drag through others of the same colour and stage, then finish with an upward flick to feed them together. Release without a flick to cancel. A single flower still needs a full 0.6s hold.</li>
-        <li><b>Watch them grow.</b> Challenge and 30s Rush change states every 3–8s: 1–5 buds bloom, 1–5 flowers return to normal, and 1–10 normal Pikmin become buds. Held, linked or flying Pikmin are protected.</li>
-        <li><b>Choose your finish.</b> Normal and Challenge keep your fastest three clean-ups. In <b>30s Rush</b>, feed as many as you can before 30 seconds: normal = 1 point, bud = 2, flower = 3. Points count on arrival. Clear all 30 to finish early. Your highest three scores are saved separately.</li>
+        <li><b>Make a chain.</b> Short press any Pikmax for 0.2s until it highlights. Keep pressed and drag through others of the same colour and stage, then finish with an upward flick to feed them together. Release without a flick to cancel. A single flower still needs a full 0.6s hold.</li>
+        <li><b>Watch them grow.</b> Challenge and 30s Rush change states every 3–8s: 1–5 buds bloom, 1–5 flowers return to normal, and 1–10 normal Pikmax become buds. Held, linked or flying Pikmax are protected.</li>
+        <li><b>Choose your finish.</b> Normal and Challenge keep your fastest three clean-ups. In <b>30s Rush</b>, feed as many as you can before 30 seconds: normal = 1 point, bud = 2, flower = 3. Points count on arrival. Clear all 35 to finish early. Your highest three scores are saved separately.</li>
       </ol></details>
     </aside>
   </div>
-  <footer><span id="offline-status" role="status">Play here, or add Pikmin Fling to your home screen.</span><span>Pikmin artwork © Nintendo. <a href="https://pikmin.nintendo.com/" target="_blank" rel="noopener noreferrer">Character source</a> · Unofficial fan game.</span><p class="site-copyright">&copy; Copyright 2026 Sky Yip. All rights reserved.</p></footer>
+  <footer><span id="offline-status" role="status">Play here, or add Pikmax Fling to your home screen.</span><span>Original character artwork © Nintendo. <a href="https://pikmin.nintendo.com/" target="_blank" rel="noopener noreferrer">Character source</a> · Unofficial fan game.</span><p class="site-copyright">&copy; Copyright 2026 Sky Yip. All rights reserved.</p></footer>
 </main>
 <p id="announcements" class="sr-only" role="status" aria-live="polite"></p>
-<noscript><p class="noscript-note">Enable JavaScript to play Pikmin Fling.</p></noscript>
+<noscript><p class="noscript-note">Enable JavaScript to play Pikmax Fling.</p></noscript>
 </body>
 </html>

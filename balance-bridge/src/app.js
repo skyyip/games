@@ -86,8 +86,9 @@ function finish(){
   $('#result-cause').textContent=game.fallReason;$('#event-banner').hidden=true;render();animateChange($('.result-card'));$('#result-title').focus({preventScroll:true});announce(`Walk complete. ${formatTime(game.elapsed)}.`);
 }
 function banner(){
-  const event=game.event||game.pending,node=$('#event-banner');node.hidden=!event||ui!=='playing';if(!event)return;
-  const warning=!game.event;node.classList.toggle('is-warning',warning);node.dataset.level=String(event.level);
+  const stack=$('#active-events');stack.hidden=game.events.length<2||ui!=='playing';const signature=game.events.map(e=>e.id).join(',');if(stack.dataset.events!==signature){stack.dataset.events=signature;stack.replaceChildren();for(const e of game.events){const chip=document.createElement('span'),name=document.createElement('b'),level=document.createElement('small');name.textContent=e.name;level.textContent=`${e.level} / 5`;chip.append(name,level);stack.append(chip);}}
+  const event=game.pending||game.event,node=$('#event-banner');node.hidden=!event||ui!=='playing';if(!event)return;
+  const warning=Boolean(game.pending);node.classList.toggle('is-warning',warning);node.dataset.level=String(event.level);
   if($('#event-icon').dataset.event!==event.id){$('#event-icon').innerHTML=eventArt[event.id];$('#event-icon').dataset.event=event.id;}$('#event-name').textContent=warning?event.warning:event.name;
   const left=warning?Math.max(0,event.startsAt-game.elapsed):Math.max(0,event.duration-game.elapsed+event.startedAt);
   $('#event-detail').textContent=warning?'Get ready. Keep your corrections small.':event.description;
@@ -116,7 +117,7 @@ function tick(now){
       game.setInput(input());const notices=game.advance(dt);
       if(notices.includes('warning'))announce(game.pending.warning);
       if(notices.includes('event')){announce(game.event.description);try{navigator.vibrate?.(game.event.level*10);}catch{}}
-      if(notices.includes('clear'))announce('Steady again. Keep walking.');
+      if(notices.includes('clear')&&!game.events.length)announce('Steady again. Keep walking.');
       if(notices.includes('fall')){ui='falling';resetInput();render();announce('A little tumble. Your walk is complete.');}
       if(notices.includes('finished'))finish();
     }

@@ -8,9 +8,9 @@ Validated using Node.js 24 and system Chromium through the repository's existing
 node --test balance-bridge/tests/*.test.js
 ```
 
-All **14 game model tests passed**. The complete repository unit suite passed **139 tests** with the new game included. Coverage includes:
+All **14 game model tests passed**. The complete repository unit suite passed **184 tests** with the new game included. Coverage includes:
 
-- All five exact severity/duration pairs, warnings before impact, recovery gaps and no immediate repeated event.
+- All five exact severity/duration pairs, warnings before impact, overlapping events with independent expiry and no duplicate active event.
 - Correct left/right force, smooth release, identical fixed-step results at different display frame rates and finite bounded input.
 - Real loss of balance, frozen survival time during a fall and one completion event.
 - Two minutes of corrective input surviving repeated hazards, including levels four and five, without automatic stabilisation.
@@ -38,3 +38,7 @@ A standalone phone preview embeds every script, stylesheet, font and SVG. Its ch
 Integration checks passed: **23 shared UI**, **14 favourites**, and **15 touch/title** checks. All nine landing cards and their navigation/installation assets fit seven viewport widths. The new game prevents double-tap zoom while preserving intentional pinch zoom. The Pages workflow includes its directory and change trigger. Existing games' service worker versions were bumped for the expanded shared dictionary.
 
 Physical phone hardware, Safari's native permission sheet, other browser engines and assistive technology were not directly exercised. Sensor behaviour was verified with synthetic orientation events; real touch input was dispatched through Chromium's device protocol. Device records are local to the current browser and are not synced.
+
+## Overlapping events and bamboo scene
+
+The updated model suite and all fifteen gameplay browser checks passed. A focused rendering check displays wind, a bird splat and a head roach simultaneously, verifies the narrowed deck width and the shaded head, and captures the bamboo pole. The five original scene checks still pass.

@@ -45,11 +45,12 @@ try{
     if([375,1440].includes(width))await page.screenshot({path:`${output}/timed-ready-${width}.png`,fullPage:true,animations:'disabled'});
   }
   pass('countdown, score, three mode controls and point labels fit phone, tablet and desktop widths');
+  await page.evaluate(()=>{window.__scoreAnimations=0;const original=Element.prototype.animate;Element.prototype.animate=function(...args){if(this.id==='score')window.__scoreAnimations++;return original.apply(this,args);};});
   await page.locator('#start').click();
   for(const [growth,expected] of [['leaf',1],['bud',3],['flower',6]]){
     await feed(page,growth);await page.clock.runFor(500);
     assert.equal(await page.locator('#score').getAttribute('aria-label'),`Score: ${expected} points`);
-    assert.ok(await page.locator('#score').evaluate(el=>el.getAnimations().length)>0);
+    assert.equal(await page.evaluate(()=>window.__scoreAnimations),['leaf','bud','flower'].indexOf(growth)+1);
     assert.match(await page.locator('#score-gain').textContent(),/^\+[123]$/);
     await page.clock.runFor(300);assert.equal(await page.locator('#score').textContent(),String(expected));
   }
@@ -87,43 +88,44 @@ try{
 
   await page.locator('#again').click();await clear(page);
   assert.equal(await page.locator('#result-title').textContent(),'Garden cleared.');
-  assert.equal(await page.locator('#final-time').textContent(),'45');assert.equal(await page.locator('#score').textContent(),'45');
-  assert.ok(Number(await page.locator('#timer').textContent())>0);assert.equal(await page.locator('#fed').textContent(),'30');
-  assert.deepEqual((await stored(page)).timed.map(r=>r.score),[45,6,0]);
+  assert.equal(await page.locator('#final-time').textContent(),'50');assert.equal(await page.locator('#score').textContent(),'50');
+  assert.ok(Number(await page.locator('#timer').textContent())>0);assert.equal(await page.locator('#fed').textContent(),'35');
+  assert.deepEqual((await stored(page)).timed.map(r=>r.score),[50,6,0]);
   assert.equal(await page.locator('.record.is-new').count(),1);
   assert.match(await page.locator('#result-badge').textContent(),/NEW PERSONAL BEST/);
   await page.screenshot({path:`${output}/timed-completed.png`,fullPage:true,animations:'disabled'});
-  pass('clearing all 30 ends early at 45 points, completes the score animation and highlights a new highest score');
+  pass('clearing all 35 ends early at 50 points, completes the score animation and highlights a new highest score');
   await page.locator('#again').click();await page.clock.fastForward(31000);
-  assert.deepEqual((await stored(page)).timed.map(r=>r.score),[45,6,0]);assert.equal(await page.locator('.record.is-new').count(),0);
+  assert.deepEqual((await stored(page)).timed.map(r=>r.score),[50,6,0]);assert.equal(await page.locator('.record.is-new').count(),0);
   await page.reload();await page.locator('#start:not(:disabled)').waitFor();await page.locator('input[value="timed"]').check();
-  assert.deepEqual((await stored(page)).timed.map(r=>r.score),[45,6,0]);assert.equal(await page.locator('.record').count(),3);
+  assert.deepEqual((await stored(page)).timed.map(r=>r.score),[50,6,0]);assert.equal(await page.locator('.record').count(),3);
   await page.locator('input[value="normal"]').check();assert.equal(await page.locator('#score-panel').isVisible(),false);
   assert.equal(await page.locator('#timer').textContent(),'0.00');assert.equal(await page.locator('#records-title').textContent(),'Your fastest three');
   pass('only the highest three scores survive reload; lower/tied fourth results stay out and switching modes restores time records');
   await context.close();
 
   const touch=await setup({viewport:{width:375,height:900},isMobile:true,hasTouch:true},()=>{Math.random=()=>.9;});
-  const p=touch.page;await p.locator('#start').tap();
+  const p=touch.page;await p.clock.install();await p.clock.pauseAt(new Date(Date.now()+1000));await p.locator('#start').evaluate(el=>el.click());
   const leaf=unit(p,'leaf');await leaf.focus();await leaf.scrollIntoViewIfNeeded();const r=await leaf.boundingBox();
   const protocol=await touch.context.newCDPSession(p),origin={id:1,x:r.x+r.width/2,y:r.y+r.height/2};
   await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[origin]});
   await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...origin,y:origin.y-70}]});
   await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-  await p.waitForFunction(()=>document.querySelector('#score').textContent==='1');
-  const bud=unit(p,'bud');await bud.focus();await bud.tap();await bud.tap();
-  await p.waitForFunction(()=>document.querySelector('#score').textContent==='3');
+  await p.clock.runFor(850);assert.equal(await p.locator('#score').textContent(),'1');
+  const bud=unit(p,'bud');await bud.focus();await p.clock.runFor(32);const budBox=await bud.boundingBox(),budFinger={id:2,x:budBox.x+budBox.width/2,y:budBox.y+budBox.height/2};
+  for(let tap=0;tap<2;tap++){await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[budFinger]});await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});if(!tap)await p.clock.runFor(80);}
+  await p.clock.runFor(850);assert.equal(await p.locator('#score').textContent(),'3');
   pass('real finger input in timed mode scores an upward fling and a double-tap bud');
   const flowers=p.locator('.pikmin[data-growth="flower"]:not(:disabled)');
   const first=flowers.first(),second=flowers.nth(1);await first.focus();
   const a=await first.boundingBox(),b=await second.boundingBox(),finger={id:1,x:a.x+a.width/2,y:a.y+a.height/2};
-  await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[finger]});await p.waitForTimeout(240);
+  await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[finger]});await p.clock.runFor(240);
   await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...finger,x:b.x+b.width/2,y:b.y+b.height/2}]});
   await protocol.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...finger,x:b.x+b.width/2,y:b.y+b.height/2-65}]});
   await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   const flying=await p.locator('.flying-pikmin').count();assert.ok(flying>=2);
   const expected=3+flying*3;
-  await p.waitForFunction(expected=>document.querySelector('#score').textContent===String(expected),expected);
+  await p.clock.runFor(850);assert.equal(await p.locator('#score').textContent(),String(expected));
   assert.equal(await p.locator('#score').getAttribute('aria-label'),`Score: ${expected} points`);
   await protocol.detach();await touch.context.close();
   pass('a 240ms flower drag chain in timed mode scores every arrival at three points');

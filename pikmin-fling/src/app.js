@@ -1,5 +1,5 @@
-import {FlingGame,ROUND_LIMIT,POINTS} from './game.js';
-import {createRoster,walkRoster,TYPE_NAMES,PointerGesture,DoubleTap,distanceToSegment,flightPoint} from './interaction.js';
+import {FlingGame,ROUND_LIMIT,unitPoints} from './game.js';
+import {createRoster,walkRoster,walkingPose,TYPE_NAMES,PointerGesture,DoubleTap,distanceToSegment,flightPoint} from './interaction.js';
 import {readLeaderboard,saveLeaderboard,addResult} from './leaderboard.js';
 import {animateChange,reducedMotion} from '../../grid-rush/src/playground-ui.js';
 import {createSprite} from './sprites.js';
@@ -56,20 +56,31 @@ const busy=id=>[...gestures.values()].some(g=>g.ids.includes(id));
 
 function renderUnit(id) {
   const button=buttons[id],unit=game.units[id];
+  roster[id].type=unit.type;
   button.dataset.growth=unit.growth;button.dataset.type=roster[id].type;
   const previous=button.querySelector('.pikmin-art'),sprite=createSprite(unit.type,unit.growth);
   if(previous)previous.replaceWith(sprite);else button.prepend(sprite);
   button.querySelector('.growth-badge').textContent=symbols[unit.growth];
-  button.setAttribute('aria-label',`${TYPE_NAMES[roster[id].type]} ${growthNames[unit.growth]} Pikmin ${id+1}.${game.mode==='timed'?` Worth ${POINTS[unit.growth]} points.`:''} ${hints[unit.growth]} Keyboard: Enter to feed.`);
+  button.setAttribute('aria-label',`${TYPE_NAMES[unit.type]} ${growthNames[unit.growth]} Pikmax ${id+1}.${game.mode==='timed'?` Worth ${unitPoints(unit)} points.`:''} ${hints[unit.growth]} Keyboard: Enter to feed.`);
 }
 function positionUnits() {
   const now=performance.now()/1000;
   for(const unit of roster){
     const button=buttons[unit.id],moving=game.state==='playing'&&!reducedMotion.matches&&!button.classList.contains('is-paused')&&!button.classList.contains('is-held');
     button.style.transform=`translate(${unit.x-22}px,${unit.y-unitHeight/2}px)`;
-    const flying=unit.type==='winged',phase=unit.gait??0;
-    button.style.setProperty('--stride',`${moving?Math.sin(phase)*(flying?4:14):0}deg`);
-    button.style.setProperty('--bob',`${moving?(flying?Math.sin(now*3+unit.id)*1.5:-Math.abs(Math.sin(phase))*.7):0}px`);
+    const flying=unit.type==='winged'||unit.type==='glow',phase=unit.gait??0;
+    const pose=walkingPose(phase,unit.vx,unit.vy,moving,unit.type==='white');
+    const flutter=moving?Math.sin(phase)*4:0;
+    button.style.setProperty('--stride',`${flying?flutter:pose.feet[0].angle}deg`);
+    for(const [index,side] of ['left','right','middle'].entries()){
+      const foot=pose.feet[index];
+      if(index)button.style.setProperty(`--${side}-stride`,`${flying?-flutter:foot?.angle??0}deg`);
+      button.style.setProperty(`--${side}-foot-x`,`${!flying&&foot?foot.x:0}px`);
+      button.style.setProperty(`--${side}-foot-y`,`${!flying&&foot?foot.y:0}px`);
+    }
+    button.style.setProperty('--bob',`${moving?(flying?Math.sin(now*3+unit.id)*1.5:pose.bob):0}px`);
+    button.style.setProperty('--sway',`${flying?0:pose.sway}px`);
+    button.style.setProperty('--glow-tail-sway',`${moving?Math.sin(now*3.4+unit.id)*5:0}deg`);
     button.style.setProperty('--lift',`${flying?-6:0}px`);
     button.style.setProperty('--flap',moving&&flying?String(.5+.5*Math.sin(now*30+unit.id)):'.5');
     button.style.setProperty('--lean',`${moving?unit.vx/24*2:0}deg`);
@@ -118,7 +129,7 @@ function renderRecords() {
     date.textContent=new Date(record.date).toLocaleDateString(document.documentElement.lang,{month:'short',day:'numeric'});
     row.append(rank,score,date);fragment.append(row);
   });
-  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Thirty seconds. Make every Pikmin count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
+  if(!fragment.childNodes.length){const row=document.createElement('li');row.className='empty-records';row.textContent=timed?'Thirty seconds. Make every Pikmax count. Set your first score.':'A clean garden deserves a record. Set your first time.';fragment.append(row);}
   $('#records').replaceChildren(fragment);$('#records-count').textContent=modeNames[game.mode].toUpperCase();
   $('#records-title').textContent=timed?'Your highest three':'Your fastest three';
   $('#records').setAttribute('aria-label',timed?'Highest total scores':'Fastest completion times');
@@ -146,7 +157,7 @@ reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches){cancelEff
 function addScoreFeedback(points) {
   const output=$('#score'),target=game.score,from=Number(output.textContent),started=performance.now();
   output.setAttribute('aria-label',`Score: ${target} points`);
-  announce(`${game.progress} of 30 fed. ${target} points.`);
+  announce(`${game.progress} of 35 fed. ${target} points.`);
   cancelAnimationFrame(scoreFrame);scorePulse?.cancel();scoreGain?.cancel();
   if(reducedMotion.matches){output.textContent=target;return;}
   // Retarget from the visible number so simultaneous arrivals never run competing counters.
@@ -177,6 +188,7 @@ function resetRound(mode=game.mode,playing=false) {
   $('#score').textContent='0';$('#score').setAttribute('aria-label','Score: 0 points');$('#score-gain').textContent='';
   $('#time-label').textContent=timed?'TIME LEFT':'YOUR TIME';$('#timer').setAttribute('aria-label',timed?'Seconds remaining':'Elapsed seconds');
   for(const label of document.querySelectorAll('.point-value'))label.hidden=!timed;
+  $('#glow-points').hidden=!timed;
   if($('#results').contains(document.activeElement))document.activeElement.blur();
   $('#results').hidden=true;$('#mode-options').disabled=false;
   world.scrollTop=0;$('.play-panel').scrollTop=0;
@@ -184,19 +196,20 @@ function resetRound(mode=game.mode,playing=false) {
   $('#gesture-help').textContent='Short press 0.2s, keep pressed and drag through the same colour and stage, then flick up to feed the whole chain.';
   $('#garden-label').textContent='THE LUNCH CROWD';$('#cycle-timer').textContent='';
   $('#cycle-status').textContent=mode==='normal'?'Normal mode · states stay the same':`${modeNames[mode]} · growth changes every 3–8s`;
-  $('#control-note').textContent=timed?'30 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 30 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock, Winged and White Pikmin mix randomly. Start with 20 normal, 5 buds and 5 flowers.';
+  $('#control-note').textContent=timed?'30 seconds. Normal 1 pt · Bud 2 pts · Flower 3 pts. Score on arrival; clear all 35 to finish early. Growth changes every 3–8s.':'Red, Yellow, Blue, Ice, Rock, Winged, White and Purple Pikmax mix randomly. Start with 25 normal, 5 buds and 5 flowers.';
   setPlayLock(playing);renderRoster();renderProgress();setSelected(null);renderRecords();
 }
 function startRound(keyboard=false) {
   if(!assetsReady)return;
   resetRound(game.mode,true);game.start();
+  for(const unit of roster){unit.vx=0;unit.vy=0;}
   if(game.mode==='timed')deadlineTimer=setTimeout(()=>{if(game.expire()){renderProgress();finishRound();}},ROUND_LIMIT);
   for(const button of buttons)button.disabled=false;
   $('#mode-options').disabled=true;$('#start').hidden=true;$('#reset').hidden=false;world.classList.add('is-playing');
   $('#garden-label').textContent='HOLD. LINK. FLING.';
   renderProgress();if(!document.body.classList.contains('play-locked'))$('.scoreboard').scrollIntoView({block:'start',behavior:'auto'});
   if(keyboard)buttons[0].focus({preventScroll:true});
-  announce(`30 Pikmin. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'30-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 20 normal, 5 buds, 5 flowers.`);
+  announce(`35 Pikmax. ${modeNames[game.mode]} mode. ${game.mode==='timed'?'30-second countdown started. Normal 1 point, bud 2 points, flower 3 points.':'Timer started.'} 25 normal, 5 buds, 5 flowers.`);
   frame=requestAnimationFrame(tick);
 }
 function finishRound() {
@@ -211,7 +224,7 @@ function finishRound() {
   $('#final-time').textContent=timed?game.score:seconds(game.elapsed);$('#result-unit').textContent=timed?'pts':'s';
   $('#result-title').textContent=timeout?'Time’s up.':'Garden cleared.';
   $('#result-badge').textContent=result.personalBest?'NEW PERSONAL BEST!':newRank?`TOP THREE / #${newRank}`:timed?'NICE FEEDING!':'CLEAN SWEEP';
-  $('#result-note').textContent=timed?`${game.progress} of ${game.count} Pikmin fed in ${seconds(game.elapsed)}s. ${result.personalBest?'Your highest score yet.':newRank?'A new spot in your highest three.':'Every Pikmin counts. Try for a higher score!'}`:`All ${game.count} Pikmin fed. ${result.personalBest?'Your quickest clean-up yet.':newRank?'A new spot in your fastest three.':'One hungry plant, one very tidy garden.'}`;
+  $('#result-note').textContent=timed?`${game.progress} of ${game.count} Pikmax fed in ${seconds(game.elapsed)}s. ${result.personalBest?'Your highest score yet.':newRank?'A new spot in your highest three.':'Every Pikmax counts. Try for a higher score!'}`:`All ${game.count} Pikmax fed. ${result.personalBest?'Your quickest clean-up yet.':newRank?'A new spot in your fastest three.':'One hungry plant, one very tidy garden.'}`;
   $('#results').hidden=false;renderRecords();setSelected(null);
   $('#garden-label').textContent=timeout?'A LITTLE BREAK. A BIG APPETITE.':'ONE VERY HAPPY PLANT';
   world.classList.remove('is-playing');$('#cycle-timer').textContent='';
@@ -221,7 +234,7 @@ function finishRound() {
   }
   animateChange($('#results'));$('#result-title').focus({preventScroll:true});
   $('#results').scrollIntoView({block:'center',behavior:reducedMotion.matches?'auto':'smooth'});
-  announce(timed?`${timeout?'Time is up.':'Garden cleared.'} ${game.progress} of 30 fed. Final score ${game.score} points. ${$('#result-badge').textContent}`:`Garden cleared in ${seconds(game.elapsed)} seconds. ${$('#result-badge').textContent}`);
+  announce(timed?`${timeout?'Time is up.':'Garden cleared.'} ${game.progress} of 35 fed. Final score ${game.score} points. ${$('#result-badge').textContent}`:`Garden cleared in ${seconds(game.elapsed)} seconds. ${$('#result-badge').textContent}`);
 }
 
 function renderGestures(now) {
@@ -235,7 +248,7 @@ function renderGestures(now) {
     if(g.chaining) {
       for(const id of g.ids)buttons[id].classList.add('is-linked');
       if(!wasChain||g.growth==='flower'&&!wasCharged&&g.charged){
-        $('#gesture-help').textContent=g.growth==='flower'&&g.charged?'Flower charged. Flick up, or drag through flowers of the same colour to link.':`Link ready. Keep pressed and drag through more ${TYPE_NAMES[g.type]} ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.${g.growth==='flower'?' A single flower needs a full 0.6-second hold.':''}`;
+        $('#gesture-help').textContent=g.growth==='flower'&&g.charged?'Flower charged. Flick up, or drag through flowers of the same colour to link.':`Link ready. Keep pressed and drag through more ${TYPE_NAMES[g.type]} ${growthNames[g.growth].toLowerCase()} Pikmax, then flick up.${g.growth==='flower'?' A single flower needs a full 0.6-second hold.':''}`;
         try{navigator.vibrate?.(10);}catch{}
       }
       const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');
@@ -251,8 +264,10 @@ function tick(now) {
   const changed=game.advance(frozen);
   if(game.state==='completed'){renderProgress();finishRound();return;}
   if(changed.length){
-    cycle++;for(const id of changed){renderUnit(id);effect(buttons[id].querySelector('.growth-badge'),[{transform:'scale(.7)'},{transform:'scale(1.2)',offset:.6},{transform:'scale(1)'}],{duration:300});}
-    $('#cycle-status').textContent=`Growth wave ${cycle} · ${changed.length} changed`;
+    const newGlow=changed.filter(id=>game.units[id].type==='glow'&&roster[id].type!=='glow');
+    for(const id of changed){renderUnit(id);effect(buttons[id].querySelector('.pikmin-art'),[{opacity:.4},{opacity:1}],{duration:400});}
+    if(changed.length>newGlow.length){cycle++;$('#cycle-status').textContent=`Growth wave ${cycle} · ${changed.length-newGlow.length} changed`;}
+    if(newGlow.length)announce('A Glow Pikmax appeared. Glow types earn one extra point in 30s Rush.');
   }
   if(game.mode!=='normal')$('#cycle-timer').textContent=`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`;
   const ready=roster.filter(p=>game.units[p.id].status==='ready');
@@ -294,7 +309,7 @@ function launch(ids,action,keyboard=false) {
   }
   if(taps.pending && ids.includes(taps.pending.id))taps.clear();
   plant.classList.add('is-open');setSelected(null);
-  $('#gesture-help').textContent=ids.length>1?`${ids.length} ${growthNames[game.units[ids[0]].growth].toLowerCase()} Pikmin, one lovely fling!`:'On the way to lunch. Keep them flying!';
+  $('#gesture-help').textContent=ids.length>1?`${ids.length} ${growthNames[game.units[ids[0]].growth].toLowerCase()} Pikmax, one lovely fling!`:'On the way to lunch. Keep them flying!';
   if(keyboard){const next=buttons.find(b=>!b.disabled);(next||$('#reset')).focus({preventScroll:true});}
   return true;
 }
@@ -317,7 +332,7 @@ units.addEventListener('pointermove',event=>{
       if(game.units[unit.id].status!=='ready'||busy(unit.id))continue;
       if(distanceToSegment({x:rect.x+unit.x,y:rect.y+unit.y},previous,p)<=24 && g.add(unit.id,game.units[unit.id].growth,game.units[unit.id].type)) {
         buttons[unit.id].classList.add('is-linked');
-        $('#gesture-help').textContent=`${g.ids.length} linked. Keep tracing ${TYPE_NAMES[g.type]} ${growthNames[g.growth].toLowerCase()} Pikmin, then flick up.`;
+        $('#gesture-help').textContent=`${g.ids.length} linked. Keep tracing ${TYPE_NAMES[g.type]} ${growthNames[g.growth].toLowerCase()} Pikmax, then flick up.`;
       }
     }
   }else{
@@ -367,7 +382,7 @@ $('#again').addEventListener('click',event=>startRound(event.detail===0));
 $('#reset').addEventListener('click',()=>{
   const wasLocked=document.body.classList.contains('play-locked');resetRound();
   if(wasLocked)$('#mode-options').scrollIntoView({block:'center',behavior:'auto'});
-  $('#start').focus({preventScroll:true});announce('Round reset. Timer and Pikmin are ready.');
+  $('#start').focus({preventScroll:true});announce('Round reset. Timer and Pikmax are ready.');
 });
 $('#change-mode').addEventListener('click',()=>{resetRound();$('#mode-options').scrollIntoView({block:'center',behavior:'auto'});$('#mode-options input:checked').focus({preventScroll:true});});
 $('#mode-options').addEventListener('change',event=>{if(game.state!=='playing')resetRound(event.target.value);});
@@ -387,6 +402,6 @@ new ResizeObserver(()=>{
 resetRound();
 assetsReady=true;$('#start').disabled=false;$('#start').textContent='Start game ↗';
 if('serviceWorker' in navigator && window.isSecureContext)window.addEventListener('load',async()=>{
-  try{await navigator.serviceWorker.register(new URL('../sw.js',import.meta.url));await navigator.serviceWorker.ready;$('#offline-status').textContent='Ready to play offline. Add Pikmin Fling to your home screen.';}
-  catch{$('#offline-status').textContent='Online play is ready. Add Pikmin Fling to your home screen.';}
+  try{await navigator.serviceWorker.register(new URL('../sw.js',import.meta.url));await navigator.serviceWorker.ready;$('#offline-status').textContent='Ready to play offline. Add Pikmax Fling to your home screen.';}
+  catch{$('#offline-status').textContent='Online play is ready. Add Pikmax Fling to your home screen.';}
 });

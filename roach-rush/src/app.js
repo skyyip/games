@@ -50,7 +50,7 @@ function releaseTool(p){
   if(!onFloor(p)){hint('Drop the item inside the room. No use was consumed.');return;}
   if(kind==='trap'){
     const trap=game.placeTrap(trapArea(p));if(!trap){if(game.state==='finished')finish();return;}
-    renderTraps();renderScore();hint('Trap set. It catches one mouse for 5 points.');announce('Mouse trap placed. Only mice can trigger it.');return;
+    renderTraps();renderScore();hint('Trap set. It catches one mouse for 6 points.');announce('Mouse trap placed. Only mice can trigger it.');return;
   }
   const radius=sprayRadius(),cloud=game.useSpray({x:(p.x-layout.x)/layout.width,y:(p.y-layout.y)/layout.height,radiusX:radius/layout.width,radiusY:radius/layout.height});
   if(!cloud){if(game.state==='finished')finish();return;}
@@ -77,7 +77,7 @@ function setLock(playing){
 }
 function describe(entity){
   if(entity.type==='ant')return 'Ant friend. Tapping loses 3 points. Flick it out safely. Keyboard: Shift plus Enter to flick.';
-  if(entity.type==='mouse')return 'Mouse. Hold for 0.5 seconds, then drag to the cage for 5 points. Keyboard: hold Space, then activate the cage.';
+  if(entity.type==='mouse')return 'Mouse. Hold for 0.5 seconds, then drag to the cage for 6 points. Keyboard: hold Space, then activate the cage.';
   if(entity.mode==='flying')return entity.size==='big'?'Flying big roach. Swipe for 4 points. Keyboard: Enter.':'Flying small roach. Swipe for 3 points. Keyboard: Enter.';
   if(entity.size==='big')return performance.now()<entity.dazedUntil?'Big roach. Tap again for 2 points.':'Big crawling roach. Double-tap for 2 points. Keyboard: Enter twice.';
   return 'Small crawling roach. Tap for 1 point. Keyboard: Enter.';
@@ -128,7 +128,7 @@ function positionEntities(){
 }
 function spawnFeedback(entity){
   const hole=$(`[data-hole="${entity.hole}"]`);hole.classList.remove('is-spawning');void hole.offsetWidth;hole.classList.add('is-spawning');
-  if(entity.type==='mouse'){hint('A mouse is out! Hold for 0.5s, then drag it into the cage.');announce('A mouse is out. Hold it, then drag to the cage for 5 points.');}
+  if(entity.type==='mouse'){hint('A mouse is out! Hold for 0.5s, then drag it into the cage.');announce('A mouse is out. Hold it, then drag to the cage for 6 points.');}
   if(entity.type==='ant'){hint('An ant friend! Tap loses 3 points. Flick it out safely.');announce('An ant friend is visiting. Tapping loses three points.');}
 }
 function celebrateCage(){
@@ -158,8 +158,8 @@ function effect(result,fling){
     for(const className of ['critter-poof','score-pop']){const node=document.createElement('span');node.className=className+(result.points<0?' is-penalty':'');node.style.left=`${p.x-20}px`;node.style.top=`${p.y-20}px`;if(className==='score-pop')node.textContent=result.points<0?`−${Math.abs(result.points)}`:`+${result.points}`;$('#effects').append(node);setTimeout(()=>node.remove(),600);}
   }
   if(result.kind==='antsHit'){hint('That was an ant friend. −3 points.');announce('Ant tapped. Three points deducted.');}
-  if(result.kind==='trapped'){hint('A mouse triggered a trap. +5 points!');announce('Mouse caught by a trap. 5 points.');}
-  if(result.kind==='mice'){celebrateCage();hint('Safe in the cage. Nice catch! +5');announce('Mouse caught. 5 points.');}
+  if(result.kind==='trapped'){hint('A mouse triggered a trap. +6 points!');announce('Mouse caught by a trap. 6 points.');}
+  if(result.kind==='mice'){celebrateCage();hint('Safe in the cage. Nice catch! +6');announce('Mouse caught. 6 points.');}
   try{navigator.vibrate?.(['mice','trapped'].includes(result.kind)?[12,25,12]:8);}catch{}
 }
 function apply(result,fling){
@@ -205,7 +205,7 @@ function finish(){
   $('#ant-summary').textContent=`Ant taps: ${game.stats.antsHit} · Safely flicked: ${game.stats.antsFlicked}`;
   $('#spray-summary').textContent=`Sprayed roaches: ${game.stats.sprayed} · 1 point each`;
   $('#spray-ant-summary').hidden=game.stats.antsSprayed===0;$('#spray-ant-summary').textContent=`Ants sprayed: ${game.stats.antsSprayed} · −${game.stats.antsSprayed*ANT_PENALTY} points`;
-  $('#trap-summary').textContent=`Trap catches: ${game.stats.trapped} · +${game.stats.trapped*5} points`;
+  $('#trap-summary').textContent=`Trap catches: ${game.stats.trapped} · +${game.stats.trapped*6} points`;
   $('#result').hidden=false;$('#mode-options').disabled=false;$('#start').disabled=false;$('#end').hidden=true;
   hint('Room cleared for now. Play again for a fresh swarm.');renderScore();
   $('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'center',behavior:'instant'});announce(`Time is up. Final score ${game.score} points.`);
@@ -320,7 +320,7 @@ for(const kind of ['spray','trap']){
   tool.addEventListener('pointerdown',event=>{
     if(event.button!==0||!event.isPrimary||game.state!=='playing'||usesLeft(kind)===0||toolGesture)return;
     event.preventDefault();document.activeElement?.closest('.critter')?.blur();tool.focus({preventScroll:true});readLayout();
-    toolGesture={kind,id:event.pointerId,last:point(event)};tool.setPointerCapture(event.pointerId);tool.classList.add('is-dragging');hint(kind==='spray'?'Drag into the room. Roaches +1 each; ants −3 each.':'Drag the trap onto the floor. It catches one mouse for 5 points.');paintToolAim();
+    toolGesture={kind,id:event.pointerId,last:point(event)};tool.setPointerCapture(event.pointerId);tool.classList.add('is-dragging');hint(kind==='spray'?'Drag into the room. Roaches +1 each; ants −3 each.':'Drag the trap onto the floor. It catches one mouse for 6 points.');paintToolAim();
   });
   tool.addEventListener('pointermove',event=>{if(toolGesture?.kind===kind&&toolGesture?.id===event.pointerId){toolGesture.last=point(event);paintToolAim();}});
   tool.addEventListener('pointerup',event=>{if(toolGesture?.kind===kind&&toolGesture?.id===event.pointerId)releaseTool(point(event));});

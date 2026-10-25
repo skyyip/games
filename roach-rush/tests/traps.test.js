@@ -19,22 +19,22 @@ test('three traps can be placed, invalid drops cost nothing, and replay restores
   for(const x of [.2,.5,.8])assert.ok(game.placeTrap({...area,x}));assert.equal(game.trapsLeft,0);assert.equal(game.traps.size,3);assert.equal(game.placeTrap(area),null);
   game.useSpray(area);game.start();assert.equal(game.trapsLeft,3);assert.equal(game.spraysLeft,3);assert.equal(game.traps.size,0);assert.equal(game.sprayClouds.length,0);
 });
-test('a trap ignores roaches and ants, catches exactly one mouse for five points and then disappears',()=>{
+test('a trap ignores roaches and ants, catches exactly one mouse for six points and then disappears',()=>{
   const {game,set}=setup(),trap=game.placeTrap(area),roach=game.spawnRoach(0),ant=game.spawnAnt();Object.assign(roach,{x:.5,y:.5});Object.assign(ant,{x:.5,y:.5});
   const frozen=new Set([roach.id,ant.id]);set(16);assert.equal(game.advance(frozen).trapped.length,0);assert.equal(trap.armed,true);
-  const first=mouse(game);set(32);const events=game.advance(frozen);assert.equal(events.trapped.length,1);assert.equal(events.trapped[0].trapId,trap.id);assert.equal(game.score,5);assert.equal(game.stats.trapped,1);assert.equal(trap.armed,false);assert.equal(game.traps.has(trap.id),false);
+  const first=mouse(game);set(32);const events=game.advance(frozen);assert.equal(events.trapped.length,1);assert.equal(events.trapped[0].trapId,trap.id);assert.equal(game.score,6);assert.equal(game.stats.trapped,1);assert.equal(trap.armed,false);assert.equal(game.traps.has(trap.id),false);
   assert.equal(game.entities.has(first.id),false);assert.equal(game.catchMouse(first.id,1000,true),null);assert.equal(game.entities.has(roach.id),true);assert.equal(game.entities.has(ant.id),true);assert.equal(game.stats.antsHit,0);
-  const next=mouse(game);set(48);assert.equal(game.advance(frozen).trapped.length,0);assert.equal(game.entities.has(next.id),true);assert.equal(game.score,5);
+  const next=mouse(game);set(48);assert.equal(game.advance(frozen).trapped.length,0);assert.equal(game.entities.has(next.id),true);assert.equal(game.score,6);
 });
 test('fast mice crossing a small trap are caught even when both frame endpoints lie outside it',()=>{
   const {game,set}=setup(),m=mouse(game,.45,.5);game.placeTrap({...area,x:.458,radiusX:.002,radiusY:.02});set(50);
-  const events=game.advance();assert.equal(events.trapped.length,1);assert.equal(events.trapped[0].id,m.id);assert.equal(game.score,5);
+  const events=game.advance();assert.equal(events.trapped.length,1);assert.equal(events.trapped[0].id,m.id);assert.equal(game.score,6);
 });
 test('overlapping traps cannot award twice for one mouse, and a held mouse is not caught at its stale floor position',()=>{
   const {game,set}=setup(),m=mouse(game),first=game.placeTrap(area),second=game.placeTrap(area);
   set(16);assert.equal(game.advance(new Set([m.id])).trapped.length,0);assert.equal(first.armed,true);
-  set(32);assert.equal(game.advance().trapped.length,1);assert.equal(game.score,5);assert.equal(first.armed,false);assert.equal(game.traps.has(first.id),false);assert.equal(second.armed,true);
-  const another=mouse(game);set(48);assert.equal(game.advance().trapped[0].id,another.id);assert.equal(game.score,10);assert.equal(game.traps.size,0);
+  set(32);assert.equal(game.advance().trapped.length,1);assert.equal(game.score,6);assert.equal(first.armed,false);assert.equal(game.traps.has(first.id),false);assert.equal(second.armed,true);
+  const another=mouse(game);set(48);assert.equal(game.advance().trapped[0].id,another.id);assert.equal(game.score,12);assert.equal(game.traps.size,0);
 });
 test('trap capture and placement never score after the absolute deadline',()=>{
   const {game,set}=setup();mouse(game);set(119999);game.placeTrap(area);set(120000);const events=game.advance();assert.equal(events.finished,true);assert.equal(events.trapped.length,0);assert.equal(game.score,0);

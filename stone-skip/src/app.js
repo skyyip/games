@@ -1,11 +1,11 @@
-import {StoneGame,LIMITS,DEFAULTS,qualities,gesturePower,keyboardPower,flightPlan,flightAt,rankRecords,keepRecords,readRecords,clamp} from './game.js';
+import {StoneGame,LIMITS,DEFAULTS,WEIGHTS,qualities,motionQualities,gesturePower,keyboardPower,flightPlan,flightAt,rankRecords,keepRecords,readRecords,clamp} from './game.js';
 import {MotionPower} from './motion.js';
 import {River} from './river.js';
 import {reducedMotion,animateChange} from '../../grid-rush/src/playground-ui.js';
 
 const $=s=>document.querySelector(s),game=new StoneGame(),river=new River($('#water')),stone=$('#stone');
-const RECORD_KEY='stone-skip.records.v1',sourceLabels={gesture:'Swipe throw',motion:'Phone motion',keyboard:'Keyboard charge'};
-const labels={size:'Size',weight:'Weight',angle:'Angle',spin:'Spin',power:'Your throw'};
+const RECORD_KEY='stone-skip.records.v2',sourceLabels={gesture:'Swipe throw',motion:'Phone motion',keyboard:'Keyboard charge'};
+const labels={angle:'Release angle',power:'Your throw'};
 let records=[],storage,gesture=null,key=null,frame=0,elapsed=0,lastFrame=null,plan=null,seenContacts=0,savedScroll=0;
 let motionHandler=null,motionInterval=0,motionTimeout=0,motionRevision=0,sequence=0;
 try{storage=localStorage;records=readRecords(storage.getItem(RECORD_KEY));}catch{storage=null;$('#storage-note').textContent='Records last for this visit; device storage is unavailable.';}
@@ -16,8 +16,7 @@ function readSettings(){return Object.fromEntries(Object.keys(LIMITS).map(name=>
 function validSettings(){return Object.keys(LIMITS).every(name=>$(`#${name}-value`).validity.valid&&Number.isFinite($(`#${name}-value`).valueAsNumber));}
 function preview(){
   $('#start').disabled=!validSettings();if(!validSettings())return;
-  const values=readSettings(),q=qualities(values);$('#setup-score').textContent=`${(Object.values(q).reduce((a,b)=>a+b,0)*10).toFixed(1)} / 40`;
-  stone.style.setProperty('--stone-x',String(.7+values.length/20));stone.style.setProperty('--stone-y',String(.7+values.width/20));
+  const values=readSettings(),q=qualities(values);$('#setup-score').textContent=`${(q.angle*WEIGHTS.angle).toFixed(1)} / ${WEIGHTS.angle}`;
 }
 for(const [name,[min,max]] of Object.entries(LIMITS)){
   const range=$(`#${name}`),number=$(`#${name}-value`);
@@ -70,14 +69,23 @@ function finish(){
   const result=game.complete();if(!result)return;
   const id=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
   const record={...result,id,createdAt:Date.now()};records=keepRecords([...records,record]);
-  try{storage?.setItem(RECORD_KEY,JSON.stringify({version:1,records}));}catch{storage=null;$('#storage-note').textContent='Records last for this visit; device storage is unavailable.';}
+  try{storage?.setItem(RECORD_KEY,JSON.stringify({version:2,records}));}catch{storage=null;$('#storage-note').textContent='Records last for this visit; device storage is unavailable.';}
   const top=rankRecords(records),best=top.distance[0]?.id===id||top.bounces[0]?.id===id;
   $('#result-distance').textContent=result.distance.toFixed(1);$('#result-bounces').textContent=result.bounces;$('#result-score').textContent=`${result.score.toFixed(1)} / 100`;
   $('#result-source').textContent=sourceLabels[result.source];$('#result-power').textContent=`${Math.round(result.power*100)}% strength`;
+  const metrics=$('#motion-metrics');metrics.hidden=!result.motion;$('#motion-score-note').hidden=!result.motion;metrics.replaceChildren();
+  if(result.motion){
+    const q=motionQualities(result.motion);
+    for(const [key,label,unit,multiplier] of [['force','Throw force','m/s²',1],['speed','Throw speed','m/s',1],['amplitude','Swing range','cm',100]]){
+      const row=document.createElement('div'),name=document.createElement('dt'),value=document.createElement('dd'),points=document.createElement('span');
+      name.textContent=label;value.append(document.createTextNode(`${(result.motion[key]*multiplier).toFixed(1)} ${unit} · `));
+      points.textContent=`${(q[key]*WEIGHTS.power/3).toFixed(1)} pts`;value.append(points);row.append(name,value);metrics.append(row);
+    }
+  }
   $('#record-note').textContent=best?'A new river best. Beautifully done.':records.some(r=>r.id===id)?'One of your three best. A ripple worth keeping.':'A lovely little moment on the water.';
   $('#contributions').replaceChildren(...Object.entries(result.parts).map(([name,value])=>{
     const li=document.createElement('li'),label=document.createElement('span'),text=document.createElement('span'),weight=document.createElement('span'),points=document.createElement('b');
-    text.textContent=labels[name];weight.textContent=` · ${name==='power'?60:10}%`;label.append(text,weight);points.textContent=`${value.toFixed(1)} / ${name==='power'?60:10}`;li.append(label,points);return li;
+    text.textContent=labels[name];weight.textContent=` · ${WEIGHTS[name]}%`;label.append(text,weight);points.textContent=`${value.toFixed(1)} / ${WEIGHTS[name]}`;li.append(label,points);return li;
   }));
   showRecords();render();$('#result').scrollTop=0;$('#result-title').focus({preventScroll:true});
   help('The stone has settled. Ready for another ripple?');announce(`Your stone travelled ${result.distance.toFixed(1)} metres with ${result.bounces} bounces.`);
@@ -89,8 +97,8 @@ function animate(now){
   if(state.contacts!==seenContacts){seenContacts=state.contacts;$('#live-bounces').textContent=seenContacts;if(!reducedMotion.matches)animateChange($('#live-bounces'));}
   if(state.done){frame=0;finish();return;}frame=requestAnimationFrame(animate);
 }
-function launch(power,source){
-  if(!game.launch(power,source))return;
+function launch(power,source,motion=null){
+  if(!game.launch(power,source,motion))return;
   cancelInput();plan=flightPlan(game.result,{reduced:reducedMotion.matches});elapsed=0;lastFrame=null;seenContacts=0;$('#live-bounces').textContent='0';
   help('Watch your stone dance across the river.');announce('Stone released. Follow the bounces.');render();frame=requestAnimationFrame(animate);
 }
@@ -111,7 +119,7 @@ async function enableMotion(){
       strength(reading.power);
     };
     window.addEventListener('devicemotion',motionHandler);
-    motionInterval=setInterval(()=>{const power=meter.finish(performance.now());if(power!==null)launch(power,'motion');},40);
+    motionInterval=setInterval(()=>{const power=meter.finish(performance.now());if(power!==null)launch(power,'motion',meter.metrics);},40);
     motionTimeout=setTimeout(()=>{stopMotion();$('#charge').hidden=true;help('No throw detected. Try phone motion again, or use a swipe.');announce('No throw detected. Try again or switch to a swipe.');},8000);
     render();
   }catch(error){
@@ -132,9 +140,10 @@ function reset(){
 }
 $('#start').addEventListener('click',arm);$('#again').addEventListener('click',arm);$('#exit').addEventListener('click',reset);$('#change').addEventListener('click',reset);
 $('#enable-motion').addEventListener('click',enableMotion);
-$('#use-gesture').addEventListener('click',()=>{cancelInput();document.querySelector('input[name="mode"][value="gesture"]').checked=true;render();help('Swipe the stone up toward the river, then let go.');$('#input-note').textContent='Keyboard: hold Space or Enter to charge, then release.';stone.focus({preventScroll:true});});
+$('#use-gesture').addEventListener('click',()=>{cancelInput();document.querySelector('input[name="mode"][value="gesture"]').checked=true;modeHint();render();help('Swipe the stone up toward the river, then let go.');$('#input-note').textContent='Keyboard: hold Space or Enter to charge, then release.';stone.focus({preventScroll:true});});
 function modeHint(){
   const motion=mode()==='motion';$('#setup-note').textContent=motion?'Your phone measures the throw. Keep hold of it; never release the phone.':'Drag up and release. A faster swipe makes a stronger throw.';
+  $('#motion-scoring').hidden=!motion;
 }
 if(matchMedia('(pointer:coarse)').matches&&globalThis.DeviceMotionEvent)document.querySelector('input[name="mode"][value="motion"]').checked=true;
 $('#mode-options').addEventListener('change',modeHint);

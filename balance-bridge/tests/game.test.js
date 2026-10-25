@@ -25,10 +25,10 @@ test('no input eventually falls, survival time freezes immediately and completio
 test('countersteering survives repeated hazards without automatic stabilisation',()=>{
   for(const random of [.4,.99]){const g=new BalanceGame({random:()=>random});g.start();const seen=new Set();for(let i=0;i<120*120;i++){g.setInput(-g.angle*1.6-g.velocity*.85);g.advance(1/120);if(g.event)seen.add(g.event.level);}assert.equal(g.state,'playing');assert.ok(g.eventCount>=8);close(g.elapsed,120);if(random===.99)assert.ok(seen.has(4)&&seen.has(5));}
 });
-test('a warning precedes an event, its duration is exact and there is a recovery gap',()=>{
-  const g=new BalanceGame({random:()=>.5});g.start();advance(g,7.01,true);assert.ok(g.pending);assert.equal(g.pending.id,'wind');assert.equal(g.event,null);const at=g.pending.startsAt;
-  advance(g,WARNING_TIME,true);assert.equal(g.pending,null);assert.equal(g.event.id,'wind');const began=g.event.startedAt;assert.ok(began-at<1/120+.001);
-  advance(g,2.98,true);assert.ok(g.event);advance(g,.03,true);assert.equal(g.event,null);assert.ok(g.nextEvent>=began+3+4);assert.equal(g.pending,null);
+test('warnings precede impacts and overlapping hazards expire independently',()=>{
+  const g=new BalanceGame({random:()=>.5});g.start();advance(g,7.01,true);assert.equal(g.pending.id,'wind');const at=g.pending.startsAt;advance(g,WARNING_TIME,true);assert.equal(g.event.id,'wind');assert.ok(g.event.startedAt-at<1/120+.001);
+  advance(g,2.8,true);assert.ok(g.events.length>=2);const wind=g.events.find(e=>e.id==='wind');assert.ok(wind);advance(g,.4,true);assert.ok(!g.events.some(e=>e.id==='wind'));assert.ok(g.events.length>=1);
+  for(let i=0;i<80;i++){advance(g,.3,true);assert.ok(g.events.length<=3);assert.equal(new Set(g.events.map(e=>e.id)).size,g.events.length);}
 });
 test('every random hazard can occur, no immediate repeats and stronger hazards cause larger perturbations',()=>{
   const chosen=new Set(),velocities=[];

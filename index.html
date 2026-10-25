@@ -41,7 +41,7 @@ h1{margin:0;white-space:nowrap;font-family:'Fredoka',ui-rounded,sans-serif;font-
 .card:hover,.card:focus-visible{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 60px -20px var(--accent);outline:none}
 .art{height:190px;display:grid;place-items:center;background:var(--art)}
 .art svg{width:96px;height:96px;filter:drop-shadow(0 10px 18px #0006);transition:transform .35s}
-.pikmin-preview{display:flex;align-items:center;gap:8px}.pikmin-preview img{width:70px;height:130px;object-fit:contain;filter:drop-shadow(0 8px 9px #243c3555)}.pikmin-preview img:first-child{transform:rotate(-13deg)}.pikmin-preview img:last-child{transform:rotate(12deg)}
+.pikmax-cover{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s}.card:hover .pikmax-cover,.card:focus-visible .pikmax-cover{transform:scale(1.035)}
 .card:hover .art svg{transform:scale(1.12) rotate(-4deg)}
 .body{padding:22px 24px 24px}
 .tags{display:flex;gap:8px;margin-bottom:12px}
@@ -81,7 +81,7 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
   .lead{font-size:14px;line-height:1.65;margin-bottom:28px;max-width:340px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   .card{border-radius:18px;min-width:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:#ffffff0d}
-  .art{height:122px}.art svg{width:66px;height:66px}.pikmin-preview{gap:0}.pikmin-preview img{width:39px;height:88px}
+  .art{height:122px}.art svg{width:66px;height:66px}
   .body{padding:14px 12px 16px}.tags{gap:5px;flex-wrap:wrap;margin-bottom:10px}
   .tags span{font-size:10px;padding:3px 7px;line-height:1.4}
   h2{font-size:17px;line-height:1.22;overflow-wrap:anywhere;margin-bottom:9px}
@@ -192,10 +192,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </article>
 
     <article class="game-card" data-game="pikmin-fling">
-      <button class="favourite-button" type="button" aria-label="Favourite: Pikmin Fling" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <button class="favourite-button" type="button" aria-label="Favourite: Pikmax Fling" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="pikmin-fling/" style="--accent:#bef264;--art:linear-gradient(135deg,#b5d477,#648b40)">
-      <div class="art" aria-hidden="true"><div class="pikmin-preview"><img src="./pikmin-fling/assets/pikmin/yellow.png" alt="" draggable="false"><img src="./pikmin-fling/assets/pikmin/red.png" alt="" draggable="false"><img src="./pikmin-fling/assets/pikmin/blue.png" alt="" draggable="false"></div></div>
-      <div class="body"><div class="tags"><span>Solo</span><span>Fling &amp; swipe</span></div><h2>Pikmin Fling</h2><p>Fling a colourful crowd into one hungry plant. Clear the garden. Beat your best.</p><span class="play">Play now <i>→</i></span></div>
+      <div class="art" aria-hidden="true"><img class="pikmax-cover" src="./pikmin-fling/assets/pikmax-cover.svg" alt="" draggable="false"></div>
+      <div class="body"><div class="tags"><span>Solo</span><span>Fling &amp; swipe</span></div><h2>Pikmax Fling</h2><p>Fling a colourful crowd into one hungry plant. Clear the garden. Beat your best.</p><span class="play">Play now <i>→</i></span></div>
     </a>
     </article>
     <article class="game-card" data-game="just-a-sec">
@@ -245,6 +245,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a class="card" href="pot-toss/" style="--accent:#dcc8e2;--art:linear-gradient(135deg,#f0dcc7,#c6afcd)">
       <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><path d="M27 44q-10 39 21 39t21-39" fill="#c1a6ca" stroke="#9878a6" stroke-width="2"/><path d="M70 50q19-8 16 8-2 11-15 8" fill="none" stroke="#b292bf" stroke-width="6"/><ellipse cx="48" cy="44" rx="21" ry="6" fill="#d7bfe0" stroke="#aa89b7" stroke-width="2"/><ellipse cx="48" cy="44" rx="17" ry="3.5" fill="#8b7499"/><circle cx="42" cy="63" r="2" fill="#6e597b"/><circle cx="54" cy="63" r="2" fill="#6e597b"/><path d="M44 69q4 4 8 0" fill="none" stroke="#7e638c" stroke-width="1.5"/><path d="m54 9-9 34" stroke="#c49c6d" stroke-width="3" stroke-linecap="round"/><path d="m53 10-5 6 6 2m-4 0-5 6 6 2" fill="none" stroke="#b39ac9" stroke-width="2"/><path d="m79 22 3-6 3 6 6 3-6 3-3 6-3-6-6-3Z" fill="#f9f1d8"/></svg></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Aim &amp; flick</span></div><h2>Pot Luck</h2><p>A little flick, a lovely arc. Land bamboo and rainbow arrows in a wandering pot.</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="marble-maze">
+      <button class="favourite-button" type="button" aria-label="Favourite: Marble &amp; Mist" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="marble-maze/" style="--accent:#cdddc2;--art:linear-gradient(135deg,#e6edd4,#a5b99a)">
+      <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><rect x="12" y="12" width="72" height="72" rx="13" fill="#e9e4c9" stroke="#97af8d" stroke-width="3"/><path d="M35 13v31h26V27h22M13 63h24v20m25 0V63h21M35 44H13m48 0h22" stroke="#adc198" stroke-width="7" fill="none" stroke-linejoin="round"/><circle cx="35" cy="64" r="8" fill="#93c2b0" stroke="#6b9e88" stroke-width="2"/><circle cx="32" cy="61" r="2" fill="#eef7d7"/><circle cx="61" cy="25" r="5" fill="#d8b575"/></svg></div>
+      <div class="body"><div class="tags"><span>Solo</span><span>Tilt &amp; explore</span></div><h2>Marble &amp; Mist</h2><p>Five little mazes. Tilt your marble home, shake away the mist, and dodge rolling surprises.</p><span class="play">Play now <i>→</i></span></div>
+      </a>
+    </article>
+    <article class="game-card" data-game="floating-balance">
+      <button class="favourite-button" type="button" aria-label="Favourite: Float &amp; Balance" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
+      <a class="card" href="floating-balance/" style="--accent:#cdddc2;--art:linear-gradient(135deg,#e6edd4,#a5b99a)">
+      <div class="art"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><ellipse cx="48" cy="79" rx="27" ry="6" fill="#78917a22"/><path d="M14 50v7q34 25 68-2v-7" fill="#829c7e"/><ellipse cx="48" cy="49" rx="34" ry="19" fill="#b6cba2" stroke="#dce4b8" stroke-width="2"/><ellipse cx="48" cy="49" rx="13" ry="7" fill="none" stroke="#d6e2bd"/><circle cx="47" cy="36" r="9" fill="#d69b91" stroke="#af7777" stroke-width="1.5"/><circle cx="44" cy="33" r="2.5" fill="#fff0d9"/><path d="M8 24h15q8 0 6-6m42 7h12" stroke="#f8f5df" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="body"><div class="tags"><span>Solo</span><span>Tilt &amp; balance</span></div><h2>Float &amp; Balance</h2><p>A floating board, a little marble, and a few surprises. How long can you stay balanced?</p><span class="play">Play now <i>→</i></span></div>
       </a>
     </article>
   </section>

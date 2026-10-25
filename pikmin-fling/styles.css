@@ -110,20 +110,27 @@ body.play-locked{position:fixed;top:0;left:0;right:0;width:100%;overflow:hidden;
 
 /* Articulated vector sprites: ground steps share one distance-based gait phase. */
 .pikmin-art{overflow:visible;pointer-events:none}
+.pikmin-art[data-sprite=glow]{filter:drop-shadow(0 0 3px #cbff91) drop-shadow(0 2px 1px #345c3438)}
+.rig-glow-aura{animation:glow-breathe 2.4s ease-in-out infinite}
+@keyframes glow-breathe{0%,100%{opacity:.22}50%{opacity:.42}}
 .rig-motion{transform:translateY(var(--lift,0px));transform-box:view-box}
-.rig-body,.rig-wings{transform:translateY(var(--bob,0px)) rotate(var(--lean,0deg));transform-origin:32px 64px;transform-box:view-box}
+.rig-body,.rig-wings{transform:translate(var(--sway,0px),var(--bob,0px)) rotate(var(--lean,0deg));transform-origin:32px 64px;transform-box:view-box}
 .rig-leg,.rig-arm,.rig-wing,.rig-sprout{transform-box:view-box}
-.rig-leg-left{transform:rotate(var(--stride,0deg))}
-.rig-leg-right{transform:rotate(calc(-1 * var(--stride,0deg)))}
+.rig-leg-left{transform:translate(var(--left-foot-x,0px),var(--left-foot-y,0px)) rotate(var(--stride,0deg))}
+.rig-leg-right{transform:translate(var(--right-foot-x,0px),var(--right-foot-y,0px)) rotate(var(--right-stride,calc(-1 * var(--stride,0deg))))}
+.rig-leg-middle{transform:translate(var(--middle-foot-x,0px),var(--middle-foot-y,0px)) rotate(var(--middle-stride,0deg))}
 .rig-arm-left{transform:rotate(calc(-.65 * var(--stride,0deg)))}
 .rig-arm-right{transform:rotate(calc(.65 * var(--stride,0deg)))}
 .rig-pupils{transform:translateX(var(--look,0px))}
 .rig-sprout{transform-origin:32px 24px;transform:rotate(calc(-.18 * var(--stride,0deg)))}
+.pikmin-art[data-stage=bud] .rig-sprout{transform:none}
+.rig-tail{transform-box:view-box;transform-origin:43px 62px;transform:rotate(calc(-.3 * var(--stride,0deg)))}
+.rig-glow-tail{transform-box:view-box;transform-origin:32px 69px;transform:rotate(var(--glow-tail-sway,0deg))}
 .rig-wing-left{transform-origin:24px 46px;transform:rotate(calc(-8deg - 18deg * var(--flap,.5))) scaleX(calc(.55 + .45 * var(--flap,.5)))}
 .rig-wing-right{transform-origin:40px 46px;transform:rotate(calc(8deg + 18deg * var(--flap,.5))) scaleX(calc(.55 + .45 * var(--flap,.5)))}
-.pikmin[data-type=winged]::before{opacity:.5;filter:blur(1px)}
+.pikmin[data-type=winged]::before,.pikmin[data-type=glow]::before{opacity:.5;filter:blur(1px)}
 .flying-pikmin .rig-motion,.flying-pikmin .rig-body{transform:none}
-.flying-pikmin .rig-leg,.flying-pikmin .rig-arm,.flying-pikmin .rig-sprout{transform:none}
+.flying-pikmin .rig-leg,.flying-pikmin .rig-arm,.flying-pikmin .rig-sprout,.flying-pikmin .rig-tail,.flying-pikmin .rig-glow-tail{transform:none}
 
 /* Hide only the corner hints; character artwork and flower charge rings remain visible. */
 .play-panel[data-badges-visible=false] .growth-badge{display:none}
@@ -131,3 +138,24 @@ body.play-locked{position:fixed;top:0;left:0;right:0;width:100%;overflow:hidden;
 .garden-tools p{flex:1 1 240px}
 .badge-toggle[aria-pressed=true]{background:#dfebd7;border-color:#729165}
 .play-locked .garden-tools{flex-wrap:nowrap}
+
+/* Keep the whole animated silhouette inside the smaller fence, including crowns
+   and the winged characters' lift. Chain geometry shares the same field origin. */
+.pen{--field-side:calc(2% + 6px);--field-top:calc(5% + 16px);--field-bottom:calc(5% + 8px)}
+.pen .units,.pen .chain-lines{inset:var(--field-top) var(--field-side) var(--field-bottom)}
+.pen .chain-lines{width:calc(100% - 2 * var(--field-side));height:calc(100% - var(--field-top) - var(--field-bottom))}
+@media(max-height:640px) and (max-aspect-ratio:4/3){
+  .play-locked .growth-guide{display:none}
+  .play-locked .plant-wrap{width:68px;height:78px}
+  .play-locked .pen{top:70px}
+}
+@media(max-height:480px) and (min-aspect-ratio:3/2){
+  .play-locked .plant-wrap{left:42px;width:68px;height:78px}
+  .play-locked .pen{left:84px}
+  .play-locked .scoreboard .eyebrow{display:block;font-size:7px;line-height:1.3}
+  .play-locked .clock,.play-locked .score-total{font-size:24px}
+  .play-locked .garden-tools{padding:2px 8px}
+  .play-locked .pen{top:4px;bottom:4px}
+}
+
+.control-card #glow-note{grid-row:5}.control-card #glow-points{grid-row:6}

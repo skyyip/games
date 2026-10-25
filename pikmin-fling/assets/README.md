@@ -15,7 +15,7 @@ Source page: [The official home for Pikmin](https://pikmin.nintendo.com/).
 | `pikmin/rock.png` | https://pikmin.nintendo.com/_images/layouts/short-movies/hidden-pikmin/pikmin-rock.png |
 | `pikmin/winged.png` | https://pikmin.nintendo.com/_images/layouts/home/hidden-pikmin/pink-pikmin.png |
 
-The original images above are retained for the landing card and previous artwork. The previous renderer used the following 18 stage-specific variants; these original PNG files remain unchanged.
+The original images above are retained as references and previous artwork. The previous renderer used the following 18 stage-specific variants; these original PNG files remain unchanged.
 
 | Local files | Official source pattern (`STAGE` = `leaf`, `bud`, `flower`) |
 | --- | --- |
@@ -45,4 +45,8 @@ The Winged bud source has transparent padding. The original PNG remains intact.
 
 ## Current articulated renderer
 
-The play field now uses local SVG markup in `src/sprites.js` for all seven types (including White) and all three growth stages. Separate arms, legs and pink wings support coordinated movement. These simplified fan-game drawings replace the static PNGs during play; the source images above remain unchanged for provenance and the landing card. No external artwork fetch is needed. Pikmin characters belong to Nintendo.
+The play field now uses local SVG markup in `src/sprites.js` for all seven types (including White) and all three growth stages. Separate arms, legs and pink wings support coordinated movement. These simplified fan-game drawings replace the static PNGs during play; the source images above remain unchanged for provenance. No external artwork fetch is needed. Pikmin characters belong to Nintendo.
+
+The current local SVG renderer additionally includes Purple and Glow variants (nine types and 27 growth-stage combinations in total). These game drawings do not add or replace any of the original source PNGs listed above.
+
+The current landing card uses `pikmax-cover.svg`, generated from `src/sprites.js` by `scripts/build-cover.mjs`. It includes the current nine character types, purple wrist bracelets, slim blue body, and the floating Glow redesign with a head halo and two belly stripes.

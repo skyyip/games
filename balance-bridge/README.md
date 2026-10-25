@@ -28,7 +28,7 @@ Missing APIs, declined permission, no usable readings or an unresolved permissio
 | The bridge shakes | 4 / 5 | 4 s |
 | A flying roach lands on the head | 5 / 5 | 5 s |
 
-The first surprise is a gentle wind. Later events are random, never repeat immediately, and start only after a recovery gap. Every event has a 1.6-second warning. Increasing severity adds stronger impulses and continuous disturbances, as well as more visible body trembling. Wind moves leaves, birds fly overhead and leave a small splat, thorns appear underfoot, the bridge shakes, and the little roach flies in and settles on the head. The event banner shows severity and remaining time.
+The first surprise is a gentle wind. Later events are random, never repeat immediately, and may overlap, with up to three different active events at once. Every event has a 1.6-second warning. Increasing severity adds stronger impulses and continuous disturbances, as well as more visible body trembling. Wind moves leaves, birds fly overhead and leave a small splat, thorns appear underfoot, the bridge shakes, and the little roach flies in and settles on the head. The event banner shows severity and remaining time; separate chips list simultaneous hazards. Each event retains its own duration and its forces add to the others.
 
 ## Simulation and records
 
@@ -41,3 +41,5 @@ Pause, tab hiding and lost focus freeze active time and events. Resume uses anot
 Artwork is local SVG, with linked arm/pole movement, alternating bent legs, a nervous face near the limit, layered scenery and soft clouds. Reduced motion retains the essential body angle, feedback, elapsed time and event rules while removing decorative gait, trembling and scenery motion. The scoped service worker caches all game, language, font and icon files for offline play after an initial online visit.
 
 See [VERIFICATION.md](./VERIFICATION.md) for checks and their limits.
+
+The walker now has dimensional face shading, torso highlights and soft depth shadows. The pole is segmented bamboo, and the bridge deck narrows from 76 to 42 SVG units at its near end. Wind, birds, thorns, bridge movement and the roach are rendered independently so their visual effects can coexist.

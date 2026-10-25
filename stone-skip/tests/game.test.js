@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DEFAULTS,LIMITS,qualities,throwStone,flightPlan,flightAt,StoneGame,gesturePower,keyboardPower,rankRecords,keepRecords,readRecords} from '../src/game.js';
+import {DEFAULTS,LIMITS,qualities,motionPower,motionQualities,throwStone,flightPlan,flightAt,StoneGame,gesturePower,keyboardPower,rankRecords,keepRecords,readRecords} from '../src/game.js';
 import {MotionPower} from '../src/motion.js';
-const ideal={length:5.5,width:5.5,weight:55,angle:20,spin:100};
-test('initial stone settings use the minimum of every requested range',()=>{assert.deepEqual(DEFAULTS,{length:1,width:1,weight:10,angle:5,spin:50});assert.doesNotThrow(()=>throwStone(DEFAULTS,.5));});
+const ideal={angle:20};
+test('initial stone settings use the minimum of every requested range',()=>{assert.deepEqual(DEFAULTS,{angle:5});assert.doesNotThrow(()=>throwStone(DEFAULTS,.5));});
 test('the requested ranges are enforced without accepting missing, infinite or out-of-range settings',()=>{
   for(const [key,[min,max]] of Object.entries(LIMITS)){
     assert.doesNotThrow(()=>throwStone({...DEFAULTS,[key]:min},.5));assert.doesNotThrow(()=>throwStone({...DEFAULTS,[key]:max},.5));
@@ -11,19 +11,17 @@ test('the requested ranges are enforced without accepting missing, infinite or o
   }
   for(const power of [-.1,1.1,NaN,Infinity])assert.throws(()=>throwStone(DEFAULTS,power));
 });
-test('size, mass, angle and spin are exactly ten points each; player strength is exactly sixty',()=>{
-  const best=throwStone(ideal,1);assert.equal(best.score,100);assert.deepEqual(best.parts,{size:10,weight:10,angle:10,spin:10,power:60});
-  const quiet=throwStone(ideal,0);assert.equal(quiet.score,40);
-  for(const power of [.1,.5,.9])assert.ok(Math.abs(throwStone(ideal,power).score-(40+60*power))<.0001);
-  for(const [key,value,part] of [['length',1,'size'],['width',10,'size'],['weight',10,'weight'],['spin',50,'spin']]){
-    const result=throwStone({...ideal,[key]:value},1);assert.equal(result.parts[part],0);assert.equal(result.score,90);
-  }
+test('angle is exactly twenty points and measured strength is exactly eighty',()=>{
+  const best=throwStone(ideal,1);assert.equal(best.score,100);assert.deepEqual(best.parts,{angle:20,power:80});
+  assert.equal(throwStone(ideal,0).score,20);
+  for(const power of [.1,.5,.9])assert.ok(Math.abs(throwStone(ideal,power).score-(20+80*power))<.0001);
 });
-test('balanced dimensions and weight win their shares, twenty degrees is optimal, and faster spin helps',()=>{
-  const q=qualities(ideal);assert.equal(q.size,1);assert.equal(q.weight,1);assert.equal(q.angle,1);
-  assert.ok(qualities({...ideal,length:3,width:8}).size<1);assert.ok(qualities({...ideal,weight:80}).weight<1);
-  for(const angle of [5,19,21,90,100])assert.ok(qualities({...ideal,angle}).angle<q.angle);
-  assert.ok(throwStone({...ideal,spin:75},.5).score>throwStone({...ideal,spin:50},.5).score);
+test('twenty degrees is optimal and removed stone properties cannot affect a result',()=>{
+  assert.deepEqual(qualities(ideal),{angle:1});
+  for(const angle of [5,19,21,90,100])assert.ok(qualities({angle}).angle<1);
+  const a=throwStone({...ideal,length:1,width:1,weight:10,spin:50},.5);
+  const b=throwStone({...ideal,length:10,width:10,weight:100,spin:100},.5);
+  assert.deepEqual(a,b);assert.deepEqual(a.settings,{angle:20});
 });
 test('stronger valid throws monotonically improve finite distance and bounce count within game bounds',()=>{
   let previous={distance:0,bounces:0};
@@ -34,8 +32,8 @@ test('stronger valid throws monotonically improve finite distance and bounce cou
 });
 test('a throw snapshots settings, cannot be launched twice and reveals a result only after completion',()=>{
   const game=new StoneGame(),config={...DEFAULTS};assert.equal(game.launch(.5,'gesture'),false);assert.equal(game.complete(),null);
-  assert.equal(game.arm(config),true);config.length=10;assert.equal(game.config.length,1);
-  assert.equal(game.launch(.6,'fake'),false);assert.equal(game.launch(.6,'motion'),true);assert.equal(game.launch(1,'gesture'),false);
+  assert.equal(game.arm(config),true);config.angle=100;assert.equal(game.config.angle,5);
+  assert.equal(game.launch(.6,'fake'),false);assert.equal(game.launch(.6,'motion'),false);const metrics={force:16.2,speed:2.1,amplitude:.27};assert.equal(game.launch(.6,'motion',metrics),true);metrics.speed=0;assert.equal(game.result.motion.speed,2.1);assert.equal(game.launch(1,'gesture'),false);
   assert.equal(game.state,'animating');const result=game.complete();assert.equal(result.source,'motion');assert.equal(result.power,.6);
   assert.equal(game.complete(),null);assert.equal(game.arm(ideal),true);assert.equal(game.result,null);game.reset();assert.equal(game.state,'setup');
 });
@@ -65,10 +63,10 @@ test('distance and bounce records retain their own top three, deduplicate and su
   const rows=Array.from({length:8},(_,i)=>record(`throw-${i}`,i/10,i));rows.push(rows[7]);const top=rankRecords(rows);
   assert.equal(top.distance.length,3);assert.equal(top.bounces.length,3);assert.equal(top.distance[0].id,'throw-7');
   assert.ok(top.distance.every((r,i)=>!i||r.distance<=top.distance[i-1].distance));assert.ok(top.bounces.every((r,i)=>!i||r.bounces<=top.bounces[i-1].bounces));
-  const kept=keepRecords(rows);assert.ok(kept.length<=6);assert.deepEqual(readRecords(JSON.stringify({version:1,records:kept})),kept);
+  const kept=keepRecords(rows);assert.ok(kept.length<=6);assert.deepEqual(readRecords(JSON.stringify({version:2,records:kept})),kept);
 });
 test('malformed records, fabricated scores and unknown storage versions are ignored',()=>{
-  const good=record('ok',.5);const bad=[null,{}, {...good,id:'fake',distance:Infinity},{...good,id:'changed',score:100},{...good,id:'source',source:'invented'}];
+  const good=record('ok',.5);assert.deepEqual(readRecords(JSON.stringify({version:1,records:[good]})),[]);const bad=[null,{}, {...good,id:'fake',distance:Infinity},{...good,id:'changed',score:100},{...good,id:'source',source:'invented'}];
   assert.deepEqual(keepRecords([good,...bad]),[good]);for(const value of ['oops','null','{}','{"version":2,"records":[]}'])assert.deepEqual(readRecords(value),[]);
 });
 const reading=(x=0,y=0,z=0)=>({acceleration:{x,y,z}});
@@ -88,8 +86,34 @@ test('gravity-inclusive fallback removes a stationary gravity vector and recogni
   for(let t=550;t<=700;t+=50)meter.sample({acceleration:null,accelerationIncludingGravity:{x:20,y:0,z:9.81}},t);
   assert.ok(meter.finish(1100)>.5);
 });
-test('a stronger measured phone motion increases the sixty-percent contribution',()=>{
+test('a stronger measured phone motion increases the eighty-percent contribution',()=>{
   const measure=force=>{const meter=new MotionPower(0);calibrate(meter);for(let t=550;t<=700;t+=50)meter.sample(reading(force),t);return meter.finish(1100);};
-  const gentle=measure(8),strong=measure(25);assert.ok(strong>gentle);assert.equal(strong,1);
+  const gentle=measure(8),strong=measure(25);assert.ok(strong>gentle);assert.ok(strong>.9&&strong<=1);
   assert.ok(throwStone(ideal,strong).parts.power>throwStone(ideal,gentle).parts.power);
+});
+
+test('force, speed and swing range independently contribute equal shares of the eighty points',()=>{
+  const normalized={force:25,speed:3.5,amplitude:.45};assert.equal(motionPower(normalized),1);
+  for(const key of ['force','speed','amplitude']){
+    const low={...normalized,[key]:key==='force'?3:0};
+    assert.ok(Math.abs(motionPower(low)-2/3)<1e-10);
+    assert.ok(Math.abs(throwStone(ideal,1).parts.power-throwStone(ideal,motionPower(low)).parts.power-80/3)<1e-10);
+  }
+  for(const bad of [null,{}, {force:-1,speed:1,amplitude:.1},{force:15,speed:Infinity,amplitude:.1},{force:15,speed:1,amplitude:NaN}])assert.throws(()=>motionQualities(bad));
+});
+test('equal peak acceleration with a longer swing produces greater measured speed and range',()=>{
+  const measure=end=>{const m=new MotionPower(0);calibrate(m);for(let t=550;t<=end;t+=50)m.sample(reading(15),t);return {power:m.finish(1200),metrics:m.metrics};};
+  const short=measure(700),long=measure(950);
+  assert.equal(short.metrics.force,long.metrics.force);assert.ok(long.metrics.speed>short.metrics.speed);assert.ok(long.metrics.amplitude>short.metrics.amplitude);assert.ok(long.power>short.power);
+});
+test('gaps and duplicate timestamps cannot invent extra speed, swing range or a new sample',()=>{
+  const m=new MotionPower(0);calibrate(m);for(let t=550;t<=700;t+=50)m.sample(reading(15),t);
+  const before={...m.metrics};assert.equal(m.sample(reading(60),700),null);assert.deepEqual(m.metrics,before);
+  m.sample(reading(60),2000);assert.deepEqual(m.metrics,before);
+});
+test('phone-motion records retain the measured components and reject inconsistent composites',()=>{
+  const metrics={force:18,speed:2,amplitude:.3},power=motionPower(metrics),game=new StoneGame();game.arm(ideal);
+  assert.equal(game.launch(power,'motion',metrics),true);const r={...game.complete(),id:'motion',createdAt:1};
+  assert.deepEqual(keepRecords([r]),[r]);assert.deepEqual(keepRecords([{...r,motion:{...metrics,speed:0}}]),[]);
+  assert.deepEqual(keepRecords([{...r,motion:null}]),[]);
 });
