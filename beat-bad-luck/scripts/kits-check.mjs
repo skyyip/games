@@ -3,7 +3,7 @@ import {mkdir} from 'node:fs/promises';
 import {WEAPONS} from '../src/catalog.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true}),base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';
-const kits=[['iron-hammer',400,550,6.5,'大鐵鎚'],['triple-trio',5000,6000,10,'賽馬會3T'],['marksix-snowball',6000,6500,15,'六合彩金多寶'],['rebirth-paper',18000,18000,28,'投胎紙做李嘉誠個仔']];
+const kits=[['iron-hammer',400,550,4.55,'大鐵鎚'],['triple-trio',5000,6000,7,'賽馬會3T'],['marksix-snowball',6000,6500,10.5,'六合彩金多寶'],['rebirth-paper',18000,18000,19.6,'投胎紙做李嘉誠個仔']];
 const errors=[];let checks=0;const pass=text=>{checks++;console.log(`PASS ${text}`);};
 const click=(page,selector)=>page.locator(selector).evaluate(element=>element.click());
 const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')));

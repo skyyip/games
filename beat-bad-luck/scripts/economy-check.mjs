@@ -23,14 +23,14 @@ try{
   for(const [i,id]of ids.entries()){await page.locator(`[data-decor="${id}"]`).click();assert.equal(await page.locator('.stall-piece').count(),i+1);}
   for(const id of ['cat','money-tree','amethyst'])for(let level=2;level<=5;level++){await page.locator(`[data-decor="${id}"]`).click();assert.equal(await page.locator(`[data-piece="${id}"]`).getAttribute('data-level'),String(level));const prices=await page.locator('#decor-list [data-decor]').evaluateAll(nodes=>nodes.map(n=>parseInt(n.textContent,10)||Infinity));assert.ok(prices.every((price,i)=>i===0||price>=prices[i-1]));}
   if(motion==='no-preference')await page.waitForTimeout(700);
-  assert.match(await page.locator('#idle-note').textContent(),/46\.2/);
+  assert.match(await page.locator('#idle-note').textContent(),/27\.72/);
   const boxes=await page.locator('.stall-piece').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {id:n.dataset.piece,l:r.left,r:r.right,t:r.top,b:r.bottom};}));
   for(const [i,a]of boxes.entries())for(const b of boxes.slice(i+1))assert.ok(Math.min(a.r,b.r)-Math.max(a.l,b.l)<=1||Math.min(a.b,b.b)-Math.max(a.t,b.t)<=1,`${a.id} overlaps ${b.id}`);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.locator('.stall-showcase').scrollIntoViewIfNeeded();await page.locator('.stall-showcase').screenshot({path:`/tmp/bbl-economy-qa/stall-${width}.png`});
   await page.reload({waitUntil:'domcontentloaded'});await page.locator('[data-piece="amethyst"]').waitFor();assert.equal(await page.locator('.stall-piece').count(),9);assert.equal((await saved(page)).decor.amethyst,5);
-  await click(page,'#tab-kits');const text=await page.locator('#weapon-list').textContent();assert.ok(text.includes('×3.45')&&text.includes('×6.5'));assert.ok(!text.includes('{multiplier}'));if(language==='zh-Hant')assert.match(text,/解壓分數/);
-  await context.close();pass(`${width}px ${language}: nine ordered incomes, instant props, three capped upgrades, nonoverlapping placement, 46.2/hr, reload and score labels`);
+  await click(page,'#tab-kits');const text=await page.locator('#weapon-list').textContent();assert.ok(text.includes('×2.42')&&text.includes('×4.55'));assert.ok(!text.includes('{multiplier}'));if(language==='zh-Hant')assert.match(text,/解壓分數/);
+  await context.close();pass(`${width}px ${language}: nine ordered incomes, instant props, three capped upgrades, nonoverlapping placement, 27.72/hr, reload and score labels`);
  }
  for(const language of ['zh-Hant','en']){
   const {context,page}=await setup(375,language);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));

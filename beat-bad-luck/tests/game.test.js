@@ -28,5 +28,5 @@ test('higher oil prices give strictly higher scores for identical gestures and r
    g.advance(DURATIONS.beat);g.advance(DURATIONS.tiger);g.advance(DURATIONS.blessing);assert.equal(g.game.result.weapon,weapon.id);assert.equal(g.game.result.score,g.game.score);
   }
  }
- assert.equal(weaponScoreMultiplier('bare-hand'),1);assert.equal(weaponScoreMultiplier('fortune-child'),6.5);
+ assert.equal(weaponScoreMultiplier('bare-hand'),1);assert.equal(weaponScoreMultiplier('fortune-child'),4.55);
 });

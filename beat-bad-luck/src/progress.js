@@ -17,7 +17,7 @@ export function readProgress(raw,now=Date.now()){
     state.idleCarry=Number.isFinite(x.idleCarry)?Math.max(0,Math.min(.999999999,x.idleCarry)):0;state.lastReceipt=typeof x.lastReceipt==='string'?x.lastReceipt.slice(0,80):null;
   }catch{}return state;
 }
-export const idleRate=state=>Math.round(DECOR.reduce((total,d)=>total+decorHourlyRate(d,state.decor[d.id]??0),0)*10)/10;
+export const idleRate=state=>Math.round(DECOR.reduce((total,d)=>total+decorHourlyRate(d,state.decor[d.id]??0),0)*100)/100;
 export function collectIdle(state,now=Date.now()){
   const at=clock(state,now),end=Math.min(at,state.lastSeen+8*3600000),decor={...state.decor},decorExpires={...state.decorExpires},lost=[];let income=state.idleCarry;
   for(const item of DECOR){

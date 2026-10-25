@@ -21,7 +21,7 @@ test('all thirty new kits respect both gates, spend one use, repurchase and rest
 test('new props fill a coherent increasing bonus ladder without changing the three requested premium bonuses',()=>{
  const sorted=WEAPONS.filter(w=>!w.starter).sort((a,b)=>a.cost-b.cost);
  for(let i=1;i<sorted.length;i++){const a=sorted[i-1],b=sorted[i];if(a.cost===b.cost)assert.equal(weaponScoreMultiplier(a.id),weaponScoreMultiplier(b.id));else assert.ok(weaponScoreMultiplier(a.id)<weaponScoreMultiplier(b.id),`${a.id} → ${b.id}`);}
- assert.deepEqual(['triple-trio','marksix-snowball','rebirth-paper'].map(weaponScoreMultiplier),[10,15,28]);
+ assert.deepEqual(['triple-trio','marksix-snowball','rebirth-paper'].map(weaponScoreMultiplier),[7,10.5,19.6]);
 });
 test('eighteen new decorations migrate at zero while preserving existing money, inventory and ageing',()=>{
  assert.equal(decor.length,18);assert.equal(new Set(DECOR.map(d=>d.id)).size,DECOR.length);

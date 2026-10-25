@@ -1,6 +1,6 @@
 import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress} from './gestures.js';
 import {RitualGame,PHASES,BEAT_INTERVAL} from './game.js';
-import {WORRIES,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate} from './catalog.js';
+import {WORRIES,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
 import {STORAGE_KEY,readProgress,collectIdle,idleRate,buyWeapon,consumeWeapon,upgrade,decorDurability,repairCost,repairDecor,discardDecor,reward} from './progress.js';
 import {weaponArt,dollArt,tigerArt,porkArt,fongCostumeArt,decorArt,ghostArt} from './art.js';
 import {StallAudio} from './audio.js';
@@ -68,7 +68,9 @@ function renderDecorRows(){
   const row=document.createElement('div');row.className='decor-row';const icon=document.createElement('span');icon.className='decor-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML=decorArt(d.id);
   const level=state.decor[d.id],cost=d.cost*(level+1),button=document.createElement('button');button.type='button';button.dataset.decor=d.id;button.disabled=level>=MAX_DECOR_LEVEL||state.coins<cost;button.textContent=level>=MAX_DECOR_LEVEL?'Fully upgraded':`${cost} oil`;button.setAttribute('aria-label',`${itemName(d)} · ${translate(button.textContent)}`);
   button.addEventListener('click',()=>{settle();const next=upgrade(state,d.id);if(!next){renderStall();return;}state=next;save();renderStall();message('A little brighter. The neighbourhood says thanks.');audio.unlock().then(()=>audio.chime());$(`[data-decor="${d.id}"]`)?.focus({preventScroll:true});});
-  const info=rowText(itemName(d),`Level ${level} / ${MAX_DECOR_LEVEL} · ${decorHourlyRate(d,level)} oil per hour · Starts at ${d.rate}; +0.1 per upgrade`);
+  const income=translate(`Level ${level} / ${MAX_DECOR_LEVEL} · ${decorHourlyRate(d,level)} oil per hour`);
+  const growth=getLanguage()==='zh-Hant'?`首級 ${d.rate}，每升級 +${DECOR_LEVEL_RATE_BONUS}`:`Starts at ${d.rate}; +${DECOR_LEVEL_RATE_BONUS} per upgrade`;
+  const info=rowText(itemName(d),'');literal(info.querySelector('small'),`${income} · ${growth}`);
   if(level){
    const health=decorDurability(state,d.id),percent=Math.max(.1,Math.round(health*10)/10),label=document.createElement('span'),meter=document.createElement('meter');label.className='decor-health-label';literal(label,translate(`Durability ${percent}%`));meter.className='decor-durability';meter.min=0;meter.max=100;meter.low=25;meter.high=70;meter.optimum=100;meter.value=health;meter.setAttribute('aria-label',`${itemName(d)} · ${translate(`Durability ${percent}%`)}`);info.append(label,meter);
   }
