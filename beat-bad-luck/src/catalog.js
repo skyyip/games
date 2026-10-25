@@ -25,7 +25,7 @@ export const WEAPONS=[
   {id:'fortune-child',name:'Fortune-turning child',merit:550,cost:550,tone:760},
   {id:'triple-trio',name:'Jockey Club 3T',merit:5000,cost:6000,multiplier:10,tone:480},
   {id:'marksix-snowball',name:'Mark Six Snowball',merit:6000,cost:6500,multiplier:15,tone:880},
-  {id:'rebirth-paper',name:'Rebirth paper: Li Ka-shing’s son',merit:10000,cost:10000,multiplier:20,tone:1040},
+  {id:'rebirth-paper',name:'Rebirth paper: Li Ka-shing’s son',merit:18000,cost:18000,multiplier:28,tone:1040},
   {"id": "chalk-eraser", "name": "Chalkboard eraser", "nameZh": "粉筆刷", "merit": 0, "cost": 120, "multiplier": 2.2, "tone": 260, "expanded": true},
   {"id": "spanner", "name": "Spanner", "nameZh": "士巴拿", "merit": 20, "cost": 180, "multiplier": 2.8, "tone": 620, "expanded": true},
   {"id": "solar-torch", "name": "Solar-powered torch", "nameZh": "太陽能電筒", "merit": 600, "cost": 600, "multiplier": 6.6, "tone": 540, "expanded": true},

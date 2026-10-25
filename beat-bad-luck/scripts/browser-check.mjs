@@ -37,7 +37,7 @@ try{
   await page.screenshot({path:`/tmp/beat-bad-luck-qa/play-${width}x${height}.png`});await click(page,'#pause');await click(page,'#quit');assert.equal(await page.locator('#coins').textContent(),'0');await context.close();pass(`${width}×${height}: playable hit target, unobstructed fixed panel, no overflow and reward-free quit`);
  }
  {
-  const seed={version:1,coins:100000,merit:10000,owned:['flipflop'],equipped:'flipflop',decor:{neon:0,cat:0,radio:0,incense:0},friends:[],records:[],lastSeen:Date.now(),idleCarry:0};
+  const seed={version:1,coins:100000,merit:20000,owned:['flipflop'],equipped:'flipflop',decor:{neon:0,cat:0,radio:0,incense:0},friends:[],records:[],lastSeen:Date.now(),idleCarry:0};
   const {context,page}=await setup({seedState:seed});await click(page,'[data-decor="neon"]');assert.equal(await page.locator('#coins').textContent(),'98855');assert.equal(await page.locator('#play-panel').evaluate(e=>e.classList.contains('has-neon')),true);
   for(const id of ['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst'])await click(page,`[data-decor="${id}"]`);
   assert.equal(await page.locator('#stall-furnishings .stall-piece').count(),9);assert.equal(await page.locator('#stall-empty').isVisible(),false);

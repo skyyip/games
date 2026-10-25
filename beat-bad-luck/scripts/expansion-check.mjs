@@ -8,6 +8,7 @@ const errors=[],kits=WEAPONS.filter(w=>w.expanded),decor=DECOR.filter(d=>d.expan
 const click=(page,s)=>page.locator(s).evaluate(e=>e.click());
 const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')));
 const ordered=list=>[...list].sort((a,b)=>a.cost-b.cost||a.merit-b.merit).map(x=>x.id);
+const kitOrder=ordered(WEAPONS.filter(w=>!w.starter&&w.id!=='rebirth-paper'));kitOrder.splice(-1,0,'rebirth-paper');
 let checks=0;const pass=s=>{checks++;console.log(`PASS ${s}`);};
 try{
  await mkdir('/tmp/bbl-expansion-qa',{recursive:true});
@@ -31,7 +32,7 @@ try{
   assert.equal(new Set(await page.locator('#stall-extension svg').evaluateAll(nodes=>nodes.map(n=>n.innerHTML))).size,18);
   await page.locator('.stall-showcase').screenshot({path:`/tmp/bbl-expansion-qa/stall-${width}.png`});
   const first=decor[0];await page.locator(`[data-decor="${first.id}"]`).click();total+=first.cost*2;assert.equal(await page.locator(`[data-piece="${first.id}"]`).getAttribute('data-level'),'2');assert.equal(await page.locator('#stall-extension .stall-piece').count(),18);
-  await click(page,'#tab-kits');assert.deepEqual(await page.locator('[data-weapon]').evaluateAll(nodes=>nodes.map(n=>n.dataset.weapon)),ordered(WEAPONS.filter(w=>!w.starter)));
+  await click(page,'#tab-kits');assert.deepEqual(await page.locator('[data-weapon]').evaluateAll(nodes=>nodes.map(n=>n.dataset.weapon)),kitOrder);
   for(const kit of kits){
    const row=page.locator(`[data-weapon="${kit.id}"]`).locator('..');assert.equal(await row.locator('[data-collectible]').getAttribute('data-collectible'),kit.id);
    assert.equal(await row.locator('b').textContent(),language==='zh-Hant'?kit.nameZh:kit.name);assert.match(await row.textContent(),new RegExp(`×${weaponScoreMultiplier(kit.id)}`));

@@ -1,8 +1,8 @@
 # Stall and kit expansion
 
-All prices are fictional oil-money amounts. Existing catalogue values and saves stay intact. The 30 new kits follow a strictly increasing price/score ladder, with household props first, martial-arts and film novelties next, and rare treasures last. Merit unlocks a kit without being spent; oil buys one ritual use. The fixed 3T ×10, Mark Six ×15 and rebirth ×20 bonuses remain unchanged.
+All prices are fictional oil-money amounts. Existing catalogue values and saves stay intact. The 30 new kits follow a strictly increasing price/score ladder, with household props first, martial-arts and film novelties next, and rare treasures last. Merit unlocks a kit without being spent; oil buys one ritual use. The 3T ×10 and Mark Six ×15 bonuses remain unchanged. Rebirth paper is now the penultimate kit at 18,000 merit / 18,000 oil / ×28, between Lassie and the immunity token.
 
-## New kits (shop order)
+## New kits and rebirth-paper rebalance (shop order)
 
 | Kit | Merit | Oil | Score |
 |---|---:|---:|---:|
@@ -35,6 +35,7 @@ All prices are fictional oil-money amounts. Existing catalogue values and saves 
 | 紫青寶劍 | 12,500 | 12,500 | ×22 |
 | 金剛箍 | 14,000 | 14,000 | ×24 |
 | 神犬拉茜 | 16,000 | 16,000 | ×26 |
+| 投胎紙做李嘉誠個仔（原有法寶調整） | 18,000 | 18,000 | ×28 |
 | 免死金牌 | 20,000 | 20,000 | ×30 |
 
 ## New decorations (base-price order)

@@ -40,7 +40,7 @@ test('current decoration prices match the requested increases; fractional idle e
 
 test('four new kits use the requested gates and prices, consume once, and survive save/reload',async()=>{
  const {WEAPONS,weaponScoreMultiplier}=await import('../src/catalog.js');
- for(const [id,merit,cost,multiplier]of [['iron-hammer',400,550,6.5],['triple-trio',5000,6000,10],['marksix-snowball',6000,6500,15],['rebirth-paper',10000,10000,20]]){
+ for(const [id,merit,cost,multiplier]of [['iron-hammer',400,550,6.5],['triple-trio',5000,6000,10],['marksix-snowball',6000,6500,15],['rebirth-paper',18000,18000,28]]){
   const kit=WEAPONS.find(w=>w.id===id);assert.equal(kit.merit,merit);assert.equal(kit.cost,cost);assert.equal(weaponScoreMultiplier(id),multiplier);
   assert.equal(buyWeapon({...fresh(0),coins:cost,merit:merit-1},id),null);assert.equal(buyWeapon({...fresh(0),coins:cost-1,merit},id),null);
   const bought=buyWeapon({...fresh(0),coins:cost,merit},id);assert.equal(bought.coins,0);assert.equal(bought.merit,merit);assert.equal(readProgress(JSON.stringify(bought),0).equipped,id);
@@ -51,7 +51,7 @@ test('four new kits use the requested gates and prices, consume once, and surviv
 });
 
 test('every original kit costs 200 more while new players can always whack with bare hands',async()=>{
- const {WEAPONS,weaponScoreMultiplier}=await import('../src/catalog.js');assert.deepEqual(WEAPONS.filter(w=>!w.starter&&!w.expanded).map(w=>w.cost),[200,245,270,310,350,400,440,460,520,550,550,6000,6500,10000]);assert.equal(fresh(0).equipped,'bare-hand');assert.equal(weaponScoreMultiplier('bare-hand'),1);
+ const {WEAPONS,weaponScoreMultiplier}=await import('../src/catalog.js');assert.deepEqual(WEAPONS.filter(w=>!w.starter&&!w.expanded).map(w=>w.cost),[200,245,270,310,350,400,440,460,520,550,550,6000,6500,18000]);assert.equal(fresh(0).equipped,'bare-hand');assert.equal(weaponScoreMultiplier('bare-hand'),1);
  let state=buyWeapon({...fresh(0),coins:200},'flipflop');assert.equal(state.coins,0);state=consumeWeapon(state,'flipflop');assert.equal(state.equipped,'bare-hand');assert.ok(!state.owned.includes('flipflop'));assert.equal(buyWeapon(state,'flipflop'),null);assert.equal(buyWeapon(state,'bare-hand').coins,0);
  const old=readProgress(JSON.stringify({version:1,coins:0,owned:['flipflop'],equipped:'flipflop'}),0);assert.ok(old.owned.includes('flipflop'));assert.ok(old.owned.includes('bare-hand'));
 });
