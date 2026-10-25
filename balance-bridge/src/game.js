@@ -41,7 +41,10 @@ export class BalanceGame {
       if(this.elapsed>=this.nextDrift){this.drift=(this.random()-.5)*.15;this.nextDrift=this.elapsed+.7+this.random()*.7;}
       if(this.events.length<3&&!this.pending&&this.elapsed>=this.nextEvent){this.schedule();notices.push('warning');}
       if(this.pending&&this.elapsed>=this.pending.startsAt){
-        const added={...this.pending,startedAt:this.elapsed};this.events.push(added);this.pending=null;this.lastEvent=added.id;this.eventCount++;this.nextEvent=this.elapsed+.6+this.random()*.9;
+        const added={...this.pending,startedAt:this.elapsed};this.events.push(added);this.pending=null;this.lastEvent=added.id;this.eventCount++;
+        // Usually leave a breather after this event; only one in five chains early.
+        const chain=this.random()<.2;
+        this.nextEvent=this.elapsed+(chain?.5+this.random()*.6:added.duration+.8+this.random()*1.6);
         this.velocity+=this.event.direction*this.event.level*.045;notices.push('event');
       }
       const before=this.events.length;this.events=this.events.filter(e=>this.elapsed-e.startedAt+1e-9<e.duration);if(this.events.length<before)notices.push('clear');

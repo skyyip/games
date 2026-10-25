@@ -42,3 +42,5 @@ Physical phone hardware, Safari's native permission sheet, other browser engines
 ## Overlapping events and bamboo scene
 
 The updated model suite and all fifteen gameplay browser checks passed. A focused rendering check displays wind, a bird splat and a head roach simultaneously, verifies the narrowed deck width and the shaded head, and captures the bamboo pole. The five original scene checks still pass.
+
+- **Less frequent chains:** deterministic simulation checks cover the early-follow-up branch and a full minute of ordinary rolls without overlapping hazards. Independent expiry, three-event cap, warnings, pause and countersteering remain covered. Each event now has a 20% early-follow-up chance; other rolls wait for its duration plus a rest before the next warning.

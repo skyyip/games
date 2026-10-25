@@ -62,7 +62,7 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 .stall-three-stars svg{display:block;width:100%;height:auto}
 
 /* Damage accumulates throughout the round; scattering a worry never repairs it. */
-.paper-doll{filter:drop-shadow(2px 7px 0 #172d3255) brightness(calc(1 - var(--paper-wear,0)*.13))}
+.paper-doll{filter:drop-shadow(2px 7px 0 #172d3255) brightness(calc(1 - var(--paper-wear,0)*.06))}
 .paper-deep-crease{opacity:var(--paper-tear,0)}
 .paper-flap{opacity:var(--edge-loss,0)}
 .paper-edge-loss,.paper-punch{transform-box:fill-box;transform-origin:center;transform:scale(var(--edge-loss,0))}
@@ -119,3 +119,92 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 @media(max-height:650px){.is-playing .phase-panel .phase-instruction{font-size:9px;padding:4px 6px}.is-playing .hit-feedback{font-size:12px;min-height:25px;padding:4px 8px}}
 @media(max-height:450px) and (min-aspect-ratio:4/3){.is-playing .beat-panel,.is-playing .beat-panel:has(.gesture-tools:not([hidden])){--control-space:56px}.is-playing .beat-panel .phase-instruction{position:absolute;font-size:9px;max-width:160px;right:0}.is-playing .hit-feedback{position:absolute;max-width:155px;width:auto;right:0;font-size:12px}.is-playing .qte-call{font-size:10px;max-width:170px}}
 @media(prefers-reduced-motion:reduce){.paper-bit,.impact-word{display:none}.tram svg{animation:none}}
+
+/* A dedicated, unobscured shop window keeps every purchase visible. */
+.stall-showcase{margin:0 0 18px;border:1px solid #b6bc9166;border-radius:16px;overflow:hidden;background:#203b39;box-shadow:0 8px 18px #10292940}
+.stall-showcase figcaption{padding:12px 13px 9px;color:var(--gold);font-size:12px;font-weight:600}
+.stall-diorama{position:relative;aspect-ratio:.85;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 55% 24%,#e5bd6c22,transparent 66%),repeating-linear-gradient(0deg,transparent 0 38px,#d2d4aa0a 39px 40px),linear-gradient(110deg,#395450,#233d3b);border-block:1px solid #c3bd8d33}
+.stall-diorama::before{content:'';position:absolute;inset:0;border-inline:10px solid #19333088;box-shadow:inset 0 0 22px #102d2c66;pointer-events:none}
+.stall-diorama::after{content:'';position:absolute;inset:90% 0 0;background:linear-gradient(#a4825d,#785e46);z-index:-1;box-shadow:0 -4px 0 #d0aa73}
+.stall-shelf{position:absolute;left:5%;width:90%;height:9px;border-radius:3px;background:linear-gradient(#d9b77b 0 35%,#98724b 36%);box-shadow:0 7px 8px #10282377}
+.shelf-upper{top:40%}.shelf-middle{top:66%}.shelf-lower{top:91%}
+.stall-furnishings{list-style:none;margin:0;padding:0;position:absolute;inset:0}
+.stall-piece{position:absolute;filter:drop-shadow(0 4px 2px #10292980);transform-origin:50% 90%}
+.furnishing-art,.furnishing-art svg{display:block;width:100%;height:auto}
+.furnishing-art{transform-origin:50% 90%}
+.furnishing-level{position:absolute;bottom:0;right:0;min-width:17px;height:17px;display:grid;place-items:center;border:1px solid #eed7a4;border-radius:50%;background:#304d44;color:#ffe5b2;font-size:9px;line-height:1}
+.piece-neon{left:8%;top:3%;width:22%}.piece-neon .furnishing-art{filter:drop-shadow(0 0 6px #eead7a99)}
+.piece-three-stars{left:34%;bottom:60%;width:32%}
+.piece-incense{left:8%;bottom:34%;width:22%}
+.piece-cat{left:37%;bottom:34%;width:26%}
+.piece-radio{left:7%;bottom:9%;width:28%}
+.piece-tiger{left:36%;bottom:9%;width:28%}
+.piece-aquarium{right:5%;bottom:9%;width:28%}
+.stall-empty{position:absolute;top:22%;left:15%;right:15%;margin:0;padding:12px;border:1px dashed #d3c49388;border-radius:8px;background:#253d3be8;color:#dedac0;font-size:11px;text-align:center;transform:rotate(-3deg)}
+.stall-display-note{margin:0;padding:9px 12px;font-size:10px;line-height:1.7;color:#cbd5b9}
+.piece-radio::after{content:'♪';position:absolute;top:-12%;right:0;color:var(--gold);font-size:19px;animation:stall-radio-note 2.6s ease-out infinite;pointer-events:none}
+.piece-tiger::after{content:'z Z';position:absolute;right:1%;top:-5%;font-size:12px;letter-spacing:2px;color:#ecdebb;animation:stall-radio-note 3.6s ease-out infinite;pointer-events:none}
+.piece-incense .furnishing-art{animation:stall-incense-glow 3s ease-in-out infinite}
+.piece-cat .decor-cat-paw{transform-origin:30px 78px;animation:stall-cat-hello 3.8s ease-in-out infinite}
+.piece-aquarium .decor-fish{animation:stall-fish-bob 4s ease-in-out infinite}.piece-aquarium .decor-bubbles{animation:stall-bubbles-rise 3.5s ease-in-out infinite}.piece-tiger .decor-tiger-belly{transform-origin:65px 100px;animation:stall-tiger-breathe 3.6s ease-in-out infinite}
+.piece-three-stars .furnishing-art{animation:stall-stars-nod 6s ease-in-out infinite}
+@keyframes stall-radio-note{0%{opacity:0;translate:0 5px;rotate:-12deg}25%{opacity:1}100%{opacity:0;translate:6px -18px;rotate:14deg}}
+@keyframes stall-cat-hello{0%,65%,100%{transform:rotate(0)}72%{transform:rotate(-6deg)}80%{transform:rotate(5deg)}88%{transform:rotate(-4deg)}}
+@keyframes stall-fish-bob{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(-5px,-2px) rotate(-2deg)}}
+@keyframes stall-bubbles-rise{0%{opacity:.1;transform:translateY(5px)}45%{opacity:.9}100%{opacity:0;transform:translateY(-7px)}}
+@keyframes stall-tiger-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06,1.12)}}
+@keyframes stall-stars-nod{0%,75%,100%{transform:rotate(0)}83%{transform:rotate(-2deg)}91%{transform:rotate(2deg)}}
+@keyframes stall-incense-glow{0%,100%{filter:drop-shadow(0 -2px 2px #edba6233)}50%{filter:drop-shadow(0 -3px 4px #edba6266)}}
+/* The ritual backdrop uses the same illustrations as the stall display. */
+.stall-cat,.stall-radio,.stall-incense{position:absolute;padding:0;border:0;background:none;border-radius:0;width:58px;filter:drop-shadow(0 4px 2px #17323155)}
+.stall-cat{right:15px;bottom:23%;transform:rotate(6deg)}.stall-radio{left:14px;bottom:22%;width:64px}.stall-incense{left:16px;bottom:42%;width:52px}
+.stall-cat svg,.stall-radio svg,.stall-incense svg{display:block;width:100%;height:auto}
+@media(min-width:701px){.stall-showcase figcaption{font-size:11px}.stall-display-note{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.stall-piece::after,.stall-piece .furnishing-art,.stall-piece svg *{animation:none}}
+
+.piece-money-tree{right:5%;bottom:60%;width:27%}.piece-amethyst{right:5%;bottom:34%;width:27%}
+.piece-money-tree .decor-tree-crown{transform-origin:57px 70px;animation:stall-stars-nod 5s ease-in-out infinite}
+.piece-amethyst .decor-crystal-sparkle{animation:stall-crystal-shimmer 2.8s ease-in-out infinite}
+@keyframes stall-crystal-shimmer{0%,100%{opacity:.35}50%{opacity:1;filter:drop-shadow(0 0 3px #fff2d2)}}
+.stall-money-tree,.stall-amethyst{position:absolute;width:55px;filter:drop-shadow(0 4px 2px #17323155)}.stall-money-tree{left:12px;bottom:57%}.stall-amethyst{right:15px;bottom:50%}.stall-money-tree svg,.stall-amethyst svg{display:block;width:100%;height:auto}
+@media(prefers-reduced-motion:reduce){.piece-money-tree .decor-tree-crown,.piece-amethyst .decor-crystal-sparkle{animation:none}}
+
+/* Paper keeps its silhouette while staggered, fibrous tears and folded layers wear in. */
+.paper-head-pose{transform-origin:70px 68px;transform:translateY(var(--head-drop,0px)) rotate(var(--head-slump,0deg))}
+.paper-loose-corner{transform-origin:85px 124px;filter:drop-shadow(1px 2px 1px #3e342944)}
+.paper-doll.is-crying .paper-loose-corner{animation:paper-corner-flutter .38s ease-in-out infinite alternate}
+@keyframes paper-corner-flutter{from{transform:rotate(-5deg)}to{transform:rotate(12deg)}}
+#sound[aria-pressed=false]{background:#684b46;color:#ffe0ca;border-color:#d7a68b}
+
+/* Thirty-day furnishings: wear is visible, while controls remain crisp. */
+.decor-row{flex-wrap:wrap;align-items:flex-start}.decor-row>.decor-icon{margin-top:5px}.decor-row>button{align-self:center}
+.decor-row>.decor-controls{flex:0 0 100%;display:flex;justify-content:flex-end;gap:8px;padding-left:54px}
+.decor-controls button{min-height:44px;flex:1}.decor-controls [data-discard]{color:#edb6a5;background:#3e4540;border-color:#ad827866}
+.decor-row .decor-health-label{display:block;font-size:9px;color:#ead9ac;margin-top:7px}
+.decor-durability{display:block;appearance:none;-webkit-appearance:none;width:100%;height:7px;margin-top:4px;background:#122d2d;border:1px solid #8ea88d66;border-radius:8px;overflow:hidden}
+.decor-durability::-webkit-meter-bar{background:#122d2d;border:0;border-radius:8px}.decor-durability::-webkit-meter-optimum-value{background:#a8c58e;border-radius:8px}.decor-durability::-webkit-meter-suboptimum-value{background:#e6bd73;border-radius:8px}.decor-durability::-webkit-meter-even-less-good-value{background:#e69982;border-radius:8px}.decor-durability::-moz-meter-bar{background:#a8c58e;border-radius:8px}
+.decor-care-note{font-size:10px;line-height:1.8;padding:11px 12px;border:1px dashed #c5bd8b66;border-radius:10px;color:#d5d4b4;margin:10px 0 14px}
+.furnishing-art{position:relative}.furnishing-art>svg{filter:sepia(calc(var(--decor-wear,0)*.55)) saturate(calc(1 - var(--decor-wear,0)*.45)) brightness(calc(1 - var(--decor-wear,0)*.12))}
+.furnishing-art::after{content:'';position:absolute;inset:12% 10% 8%;pointer-events:none;opacity:calc(var(--decor-wear,0)*.9);background:radial-gradient(ellipse at 20% 25%,#d8d0ab 0 2px,transparent 3px),radial-gradient(ellipse at 70% 65%,#56645288 0 2px,transparent 3px),linear-gradient(31deg,transparent 47%,#e8d6aa88 48% 49%,#71614b77 50%,transparent 51%);border-radius:10px}
+.is-weathered .furnishing-art::after{box-shadow:inset 0 -4px 5px #4e4b3438}.is-fragile .furnishing-level{background:#75493c;border-color:#e7a082}.is-fragile .furnishing-art::after{border:1px dashed #c5b59677}
+.discard-dialog{width:min(360px,calc(100% - 32px));border:1px solid #c6bb8d;border-radius:19px;padding:23px;background:#243e3b;color:var(--cream);box-shadow:0 20px 60px #071d27aa}.discard-dialog::backdrop{background:#10272cd9;backdrop-filter:blur(5px)}.discard-dialog h2{font-size:24px;line-height:1.25}.discard-dialog p{font-size:12px;line-height:1.8}.discard-dialog>div{display:flex;gap:10px;margin-top:20px}.discard-dialog button{flex:1}
+
+/* Master Yip gently bobs, nods, and gives the yellow hat a little wobble. */
+.fong-logo{position:relative;display:block;aspect-ratio:8/9;isolation:isolate;transform-origin:50% 90%;animation:master-yip-greeting 5s ease-in-out infinite}
+.master-avatar{width:100%}.master-avatar .fong-costume{display:block}.fong-mage-hat{transform-origin:80px 64px;animation:master-yip-hat 5s ease-in-out infinite}.fong-mage-robe{transform-origin:80px 166px;animation:master-yip-robe 5s ease-in-out infinite}
+@keyframes master-yip-greeting{0%,55%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-3px) rotate(-3deg)}30%{transform:translateY(0) rotate(2deg)}42%{transform:translateY(-1px) rotate(-1deg)}}
+@keyframes master-yip-hat{0%,55%,100%{transform:rotate(0)}18%{transform:rotate(5deg)}32%{transform:rotate(-4deg)}44%{transform:rotate(2deg)}}
+@keyframes master-yip-robe{0%,55%,100%{transform:scaleX(1)}16%{transform:scaleX(1.04)}32%{transform:scaleX(.98)}}
+
+/* Harmless little ghosts drift past, peek out, and surprise themselves. */
+.ghost-parade{position:absolute;inset:0;pointer-events:none;visibility:hidden}.little-ghost{position:absolute;display:block;width:66px;opacity:0;filter:drop-shadow(0 5px 3px #132f3744);animation-play-state:paused!important}.little-ghost svg{display:block;width:100%;height:auto}
+.ghost-drift{top:34%;left:-80px;animation:ghost-drift 19s linear infinite}.ghost-peek{top:49%;right:1%;width:53px;animation:ghost-peek 14s ease-in-out infinite;animation-delay:-5s}.ghost-oops{top:24%;left:24%;width:45px;animation:ghost-oops 23s ease-in-out infinite;animation-delay:-11s}
+.play-panel[data-phase=beat] .ghost-parade{visibility:visible}.play-panel[data-phase=beat] .little-ghost{animation-play-state:running!important}
+@keyframes ghost-drift{0%,8%{opacity:0;transform:translate(0,0) rotate(-8deg)}12%{opacity:.75}30%{transform:translate(170px,-18px) rotate(7deg)}55%{transform:translate(340px,9px) rotate(-6deg)}78%{opacity:.75;transform:translate(550px,-12px) rotate(5deg)}88%,100%{opacity:0;transform:translate(780px,0) rotate(-4deg)}}
+@keyframes ghost-peek{0%,53%,100%{opacity:0;transform:translate(30px,20px) scale(.35)}59%{opacity:.85;transform:translate(-9px,-3px) scale(1.13) rotate(-12deg)}64%,73%{opacity:.75;transform:translate(0,0) scale(1) rotate(6deg)}80%{opacity:.6;transform:translate(3px,9px) scale(.88) rotate(-8deg)}88%{opacity:0;transform:translate(30px,30px) scale(.4)}}
+@keyframes ghost-oops{0%,68%,100%{opacity:0;transform:translateY(20px) scale(.2)}72%{opacity:.9;transform:translateY(-7px) scale(1.2) rotate(12deg)}77%{opacity:.75;transform:translateY(0) scale(.96) rotate(-8deg)}84%{opacity:.65;transform:translate(12px,-10px) scale(1) rotate(6deg)}91%{opacity:0;transform:translate(25px,-45px) scale(.6)}}
+@media(max-width:700px){.bbl-brand{font-size:clamp(13px,3.8vw,18px)}}
+@media(prefers-reduced-motion:reduce){.fong-logo,.fong-mage-hat,.fong-mage-robe,.little-ghost{animation:none!important}.play-panel[data-phase=beat] .ghost-drift{left:10%;opacity:.45}.ghost-peek,.ghost-oops{display:none}}
+
+.furnishing-condition{position:absolute;left:8%;bottom:2px;width:63%;height:4px;border:1px solid #d3d2ac88;border-radius:5px;overflow:hidden;background:#203b39}
+.furnishing-condition i{display:block;width:100%;height:100%;transform-origin:left;transform:scaleX(var(--decor-health,1));background:#b7cf96}.is-weathered .furnishing-condition i{background:#edc77e}.is-fragile .furnishing-condition i{background:#ef9d88}

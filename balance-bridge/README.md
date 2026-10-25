@@ -28,7 +28,7 @@ Missing APIs, declined permission, no usable readings or an unresolved permissio
 | The bridge shakes | 4 / 5 | 4 s |
 | A flying roach lands on the head | 5 / 5 | 5 s |
 
-The first surprise is a gentle wind. Later events are random, never repeat immediately, and may overlap, with up to three different active events at once. Every event has a 1.6-second warning. Increasing severity adds stronger impulses and continuous disturbances, as well as more visible body trembling. Wind moves leaves, birds fly overhead and leave a small splat, thorns appear underfoot, the bridge shakes, and the little roach flies in and settles on the head. The event banner shows severity and remaining time; separate chips list simultaneous hazards. Each event retains its own duration and its forces add to the others.
+The first surprise is a gentle wind. Later events are random and never repeat immediately. Each impact has a 20% chance to schedule an early follow-up; otherwise, its full duration is followed by a 0.8–2.4-second rest before the next warning. Up to three different events can still overlap, but chains are occasional. Every event has a 1.6-second warning. Increasing severity adds stronger impulses and continuous disturbances, as well as more visible body trembling. Wind moves leaves, birds fly overhead and leave a small splat, thorns appear underfoot, the bridge shakes, and the little roach flies in and settles on the head. The event banner shows severity and remaining time; separate chips list simultaneous hazards. Each event retains its own duration and its forces add to the others.
 
 ## Simulation and records
 

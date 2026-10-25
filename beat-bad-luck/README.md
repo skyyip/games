@@ -1,6 +1,6 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
-A solo, bilingual Hong Kong ritual game for the playground. Fong’s flyover stall turns everyday worries into cute paper gremlins, then ends with a kind fortune. Touch, two-finger play, mouse and accessible buttons work in the same browser game. The installable web app supports iOS/Android browsers, desktop, standalone previews and offline play.
+A solo, bilingual Hong Kong ritual game for the playground. Master Yip’s flyover stall turns everyday worries into cute paper gremlins, then ends with a kind fortune. Touch, two-finger play, mouse and accessible buttons work in the same browser game. The installable web app supports iOS/Android browsers, desktop, standalone previews and offline play.
 
 Run `npm start` and open `http://localhost:5173/beat-bad-luck/`. No build step or runtime dependencies are needed. `npm test` runs the 26 game/gesture/economy tests. `node scripts/build-cover.mjs` regenerates the local SVG cover from the in-game artwork.
 
@@ -18,14 +18,21 @@ Pausing freezes the model clock and inputs; hiding the page pauses too. Resuming
 
 ## Stall, keepsakes and friends
 
-- Ten equally powerful cosmetic kits: flip-flop, rolled newspaper, red-white-blue bag, folding stool, peachwood sword, jujube-wood seal, spiked mace, vinyl record, lucky pinwheel and fortune child. They have distinct synthesized strike timbres. Merit unlocks availability; oil money buys them, and re-equipping an owned kit is free.
-- Seven decorations with five levels each: cassette radio, neon sign, incense stand, lucky cat, guardian tiger, feng shui aquarium and Fu/Lu/Shou. Upgrade costs rise by level. Their passive hourly oil rates are 3/4/5/6/7/8/9 per level. Collection keeps fractional earnings, caps elapsed income at eight hours and prevents repeat collection or negative-clock payouts.
+- Fourteen kits with price-based score boosts: flip-flop, rolled newspaper, red-white-blue bag, folding stool, peachwood sword, jujube-wood seal, spiked mace, vinyl record, lucky pinwheel, big iron hammer, fortune-turning child, Jockey Club 3T, Mark Six Snowball and rebirth paper. They have distinct synthesized strike timbres. Merit unlocks availability. Each oil of purchase price adds 1% to relief points, including QTE bonuses: newspaper ×1.45 through rebirth paper ×21. Paid kits are single-ritual consumables, removed from inventory and saved on the first successful whack; their bonus lasts through that ritual. Replaying, quitting or reloading after that use requires repurchase. Cancelling before any hit preserves the unused kit. The free flip-flop remains available permanently.
+- Nine decorations with five levels each: cassette radio, neon sign, incense stand, lucky cat, guardian tiger, feng shui aquarium, Fu/Lu/Shou, lucky money tree and amethyst cluster. Each base purchase price is 100 oil higher than the previous pricing. Rows sort by the current purchase/upgrade price, with fully upgraded pieces last. First-level hourly oil rates are 1/2/3/4/5/6/7/8/9 for those pieces; each later level adds 0.1, so all nine at level five earn 48.6/hour. Collection keeps fractional earnings to nine decimal places, caps elapsed income at eight hours and prevents repeat collection or negative-clock payouts.
+- A dedicated stall diorama with miniature durability bars displays all purchased decorations immediately: wall-hung neon, a top shrine shelf for Fu/Lu/Shou and the money tree, a middle shelf for incense, the waving cat and a smiling amethyst cluster, and a lower shelf for the radio, sleepy tiger and aquarium. Level badges update in place; saved purchases return on reload. Brief placement bounces and small character animations respect reduced motion.
 - Three collectible benefactors: café waiter, minibus driver and thoughtful neighbour. A completed ritual has a 35% chance to reveal an uncollected friend; each friend increases future ritual oil money by 5%. Names and short stories appear in the collection.
 - The top three scores and inventory persist under `beat-bad-luck.stall.v1`. Corrupt saves fall back safely, unknown IDs are rejected, and unavailable storage falls back to this visit’s memory. A receipt and UI completion guard prevent double rewards.
 
+## Decoration care
+
+Each owned decoration starts with **30 real days** of durability, about 3.33% wear per day, including time away. Existing saves receive a fresh lifetime at migration; upgrades retain their expiry. Both the scene and shop show durability, with more dust/scuffs and a warning colour below 25%. The open page refreshes once a minute and settles again on return.
+
+Repair restores a full 30 days without changing level. Its oil price is `ceil(base price × level × 25% × fraction worn)`, minimum one oil once wear is visible; almost-new pieces do not need repair. At zero durability, the piece disappears, its level is cleared and income stops at the exact expiry instant. The usual eight-hour offline payout cap remains. Rebuying starts at level one. Discard opens a confirmation dialog and removes the piece without a refund; cancelling keeps it. All care state is local to the current device.
+
 ## Presentation and integration
 
-Local SVG artwork combines warm paper, concrete bridge beams, rainy skyline, a passing tram and a small neon sign. No remote images, music files, microphone uploads or backend are required. Soft rain, tram-like chimes, metronome and kit impacts use Web Audio synthesis. Optional device speech requests a Hong Kong Cantonese voice when available, or the device’s language fallback; these are not studio-recorded voiceovers or real location samples.
+Local SVG artwork combines warm paper, concrete bridge beams, rainy skyline, three playful little ghosts and a small neon sign. No remote images, music files, microphone uploads or backend are required. Soft rain, a quiet four-bar background melody, tram-like chimes, metronome and kit impacts use Web Audio synthesis. Sound defaults on and unlocks on the first pointer or keyboard gesture. Both sound controls stay in sync; muting stops scheduled notes and ambience, while pause/background suspends audio. Re-enabling sound on the welcome screen starts the background again without stacking loops. Optional device speech requests a Hong Kong Cantonese voice when available, or the device’s language fallback; these are not studio-recorded voiceovers or real location samples.
 
 Traditional Chinese is the playground default and English follows the existing language preference. The game is registered on the landing page, favourites, Pages deployment and shared winner celebration. Service-worker caches are scoped to this game and never remove another game’s cache.
 
@@ -37,16 +44,22 @@ See [VERIFICATION.md](./VERIFICATION.md). Browser QA uses the same optional Play
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/browser-check.mjs
 ```
 
-New keepsakes: spiked mace requires 360 merit and costs 240 oil; lucky pinwheel requires 500 merit and costs 320 oil; fortune child requires 550 merit and costs 350 oil. Merit is an unlock threshold; purchasing spends oil only.
+New keepsakes: spiked mace requires 360 merit and costs 240 oil; lucky pinwheel requires 500 merit and costs 320 oil; fortune-turning child requires 550 merit and costs 350 oil. Merit is an unlock threshold; purchasing spends oil only.
 
 Stall upgrades sort by hourly oil per level: cassette radio 3, neon sign 4, incense stand 5, lucky cat 6, guardian tiger 7, feng shui aquarium 8, Fu/Lu/Shou 9. Tiger/aquarium/Fu-Lu-Shou start at 110/140/170 oil and retain the five-level cap and base-cost × next-level pricing. Existing saves initialize new items at level zero.
 
 Gesture verification: `node scripts/gestures-check.mjs` exercises real Chromium touch input for ordinary two-finger taps, rubbing, circles, one-score pinches, cancellation/pause, keyboard alternatives, rhythm prompts and six viewport sizes. Pure geometry and score/QTE guards are covered by unit tests.
 
-Two shortcuts below the equipped kit select the Kits or Stall tab, focus the selected tab and scroll it into view. All seven upgrade rows have distinct local SVG icons alongside their names, rates and prices. Beat the Bad Luck is the first default landing card; saved player favourites still work.
+Two shortcuts below the equipped kit select the Kits or Stall tab, focus the selected tab and scroll it into view. All nine upgrade rows have distinct local SVG icons alongside their names, rates and prices. Beat the Bad Luck is the first default landing card; saved player favourites still work.
 
 Paper wear now combines elapsed whack time (45%) and cumulative score up to 1,800 (55%). It progresses from creases to cracks, folded edges, missing corners and punctures without resetting when every 50 damage scatters a worry. Pause freezes wear and a new ritual restores clean paper.
 
 On each hit the paper briefly switches to a crying face with tears, then returns to its calm expression. Lit incense now has a flame seated on the tip, a warm halo, ember and wispy smoke; blowing removes the flame while preserving the ember/smoke. Five-level upgrades retain existing saves and use the same base-cost × next-level pricing.
 
 Comic feedback now scales tool travel, paper squash, head/limb flailing, tears, torn scraps and synthesized boing sounds with hit power. Rub/circle speed and travel and pinch movement contribute to strength; buttons use a medium preset. Family/love worries join the presets. A smiling double-decker tram replaces the background text; instructions have opaque panels. The pork snack smiles and spins into a bouncing tiger with a synthesized chomp.
+
+Paper wear now layers staggered jagged edge losses, fine fibres, highlighted crumple folds, a loose curled corner and a tiny repair patch. The head sags with cumulative wear, while the crying face keeps a single comic paper tooth. Fresh paper has no damage overlays; pause freezes wear.
+
+New kits: 大鐵鎚 (400 merit / 350 oil), 賽馬會3T (800 / 600),六合彩金多寶 (1000 / 1000), and 投胎紙做李嘉誠個仔 (2000 / 2000). Their relief-score multipliers are ×4.5 / ×7 / ×11 / ×21. Each has distinct local SVG art and uses the existing single-ritual consumption. The fortune-child ID stays unchanged so owned kits and records use the new name 轉運童子 without losing progress.
+
+Master Yip (葉師傅) replaces the previous character name throughout the game and landing copy. The shared logo wears the yellow ritual hat and robe in both the welcome and dialogue portraits, with repeating nods and hat wobble. Reduced motion keeps it still. During whacking, three original SVG ghosts drift, peek and pop up behind the action without intercepting input; the old passing prop is removed.

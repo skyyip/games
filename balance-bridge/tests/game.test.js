@@ -26,9 +26,18 @@ test('countersteering survives repeated hazards without automatic stabilisation'
   for(const random of [.4,.99]){const g=new BalanceGame({random:()=>random});g.start();const seen=new Set();for(let i=0;i<120*120;i++){g.setInput(-g.angle*1.6-g.velocity*.85);g.advance(1/120);if(g.event)seen.add(g.event.level);}assert.equal(g.state,'playing');assert.ok(g.eventCount>=8);close(g.elapsed,120);if(random===.99)assert.ok(seen.has(4)&&seen.has(5));}
 });
 test('warnings precede impacts and overlapping hazards expire independently',()=>{
-  const g=new BalanceGame({random:()=>.5});g.start();advance(g,7.01,true);assert.equal(g.pending.id,'wind');const at=g.pending.startsAt;advance(g,WARNING_TIME,true);assert.equal(g.event.id,'wind');assert.ok(g.event.startedAt-at<1/120+.001);
+  const g=new BalanceGame({random:()=>.1});g.start();advance(g,7.01,true);assert.equal(g.pending.id,'wind');const at=g.pending.startsAt;advance(g,WARNING_TIME,true);assert.equal(g.event.id,'wind');assert.ok(g.event.startedAt-at<1/120+.001);
   advance(g,2.8,true);assert.ok(g.events.length>=2);const wind=g.events.find(e=>e.id==='wind');assert.ok(wind);advance(g,.4,true);assert.ok(!g.events.some(e=>e.id==='wind'));assert.ok(g.events.length>=1);
   for(let i=0;i<80;i++){advance(g,.3,true);assert.ok(g.events.length<=3);assert.equal(new Set(g.events.map(e=>e.id)).size,g.events.length);}
+});
+test('ordinary event rolls leave breathing room instead of overlapping hazards',()=>{
+  const g=new BalanceGame({random:()=>.5});g.start();let previousEnd=0,started=0;
+  for(let i=0;i<120*60;i++){
+    g.setInput(-g.angle*1.6-g.velocity*.85);const notices=g.advance(1/120);
+    assert.ok(g.events.length<=1);
+    if(notices.includes('event')){const event=g.event;if(started)assert.ok(event.startedAt>=previousEnd+WARNING_TIME+.8);previousEnd=event.startedAt+event.duration;started++;}
+  }
+  assert.equal(g.state,'playing');assert.ok(started>=6);
 });
 test('every random hazard can occur, no immediate repeats and stronger hazards cause larger perturbations',()=>{
   const chosen=new Set(),velocities=[];

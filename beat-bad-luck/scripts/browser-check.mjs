@@ -5,7 +5,7 @@ const errors=[];let checks=0;const pass=text=>{checks++;console.log(`PASS ${text
 const click=(p,s)=>p.locator(s).evaluate(e=>e.click());
 async function setup({language='en',width=375,height=812,offline=false,motion='reduce',seedState=null,init}={}){
  const context=await browser.newContext({viewport:{width,height},isMobile:width<900,hasTouch:width<900,reducedMotion:motion,serviceWorkers:offline?'allow':'block'});
- await context.addInitScript(({language,seedState})=>{try{localStorage.setItem('playground.language.v1',language);if(seedState)localStorage.setItem('beat-bad-luck.stall.v1',JSON.stringify(seedState));}catch{}Math.random=()=>.3;},{language,seedState});
+ await context.addInitScript(({language,seedState})=>{try{localStorage.setItem('playground.language.v1',language);if(seedState&&!localStorage.getItem('beat-bad-luck.stall.v1'))localStorage.setItem('beat-bad-luck.stall.v1',JSON.stringify(seedState));}catch{}Math.random=()=>.3;},{language,seedState});
  if(init)await context.addInitScript(init);await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.locator('#start').waitFor();await page.evaluate(()=>document.fonts.ready);return {context,page};
 }
@@ -37,14 +37,19 @@ try{
   await page.screenshot({path:`/tmp/beat-bad-luck-qa/play-${width}x${height}.png`});await click(page,'#pause');await click(page,'#quit');assert.equal(await page.locator('#coins').textContent(),'0');await context.close();pass(`${width}×${height}: playable hit target, unobstructed fixed panel, no overflow and reward-free quit`);
  }
  {
-  const seed={version:1,coins:2000,merit:1000,owned:['flipflop'],equipped:'flipflop',decor:{neon:0,cat:0,radio:0,incense:0},friends:[],records:[],lastSeen:Date.now(),idleCarry:0};
-  const {context,page}=await setup({seedState:seed});await click(page,'[data-decor="neon"]');assert.equal(await page.locator('#coins').textContent(),'1955');assert.equal(await page.locator('#play-panel').evaluate(e=>e.classList.contains('has-neon')),true);
-  await click(page,'#tab-kits');for(const id of ['paper','bag','stool','sword','stamp','mace','record','pinwheel','fortune-child','flipflop']){await click(page,`[data-weapon="${id}"]`);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')).equipped),id);}
-  await page.locator('#tab-kits').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('#tab-friends').getAttribute('aria-selected'),'true');assert.equal(await page.locator('#panel-friends').isVisible(),true);await context.close();pass('all ten kits buy/equip, decor upgrades, visible stall changes, currency accounting and keyboard tabs');
+  const seed={version:1,coins:10000,merit:2500,owned:['flipflop'],equipped:'flipflop',decor:{neon:0,cat:0,radio:0,incense:0},friends:[],records:[],lastSeen:Date.now(),idleCarry:0};
+  const {context,page}=await setup({seedState:seed});await click(page,'[data-decor="neon"]');assert.equal(await page.locator('#coins').textContent(),'9855');assert.equal(await page.locator('#play-panel').evaluate(e=>e.classList.contains('has-neon')),true);
+  for(const id of ['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst'])await click(page,`[data-decor="${id}"]`);
+  assert.equal(await page.locator('#stall-furnishings .stall-piece').count(),9);assert.equal(await page.locator('#stall-empty').isVisible(),false);
+  for(const id of ['neon','cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst']){assert.equal(await page.locator(`[data-piece="${id}"]`).getAttribute('data-level'),'1');assert.equal(await page.locator(`[data-piece="${id}"] svg`).count(),1);}
+  const pieceCount=await page.locator('.stall-piece').count();await click(page,'[data-decor="cat"]');assert.equal(await page.locator('[data-piece="cat"]').getAttribute('data-level'),'2');assert.equal(await page.locator('.stall-piece').count(),pieceCount);
+  await page.reload();assert.equal(await page.locator('.stall-piece').count(),9);assert.equal(await page.locator('[data-piece="cat"]').getAttribute('data-level'),'2');
+  await click(page,'#tab-kits');for(const id of ['paper','bag','stool','sword','stamp','mace','record','pinwheel','iron-hammer','fortune-child','triple-trio','marksix-snowball','rebirth-paper','flipflop']){await click(page,`[data-weapon="${id}"]`);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')).equipped),id);}
+  await page.locator('#tab-kits').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('#tab-friends').getAttribute('aria-selected'),'true');assert.equal(await page.locator('#panel-friends').isVisible(),true);await context.close();pass('all fourteen kits buy/equip, decor upgrades, visible stall changes, currency accounting and keyboard tabs');
  }
  {
   const now=Date.now(),seed={version:1,coins:0,merit:0,owned:['flipflop'],equipped:'flipflop',decor:{neon:1,cat:0,radio:0,incense:0},friends:[],records:[],lastSeen:now-12*3600000,idleCarry:0};
-  const {context,page}=await setup({seedState:seed});assert.equal(await page.locator('#coins').textContent(),'32');await page.reload();assert.equal(await page.locator('#coins').textContent(),'32');await context.close();pass('offline income caps at eight hours and does not pay twice on reload');
+  const {context,page}=await setup({seedState:seed});assert.equal(await page.locator('#coins').textContent(),'16');await page.reload();assert.equal(await page.locator('#coins').textContent(),'16');await context.close();pass('offline income caps at eight hours and does not pay twice on reload');
  }
  {
   const {context,page}=await setup({init:()=>{window.__micCalls=0;Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:()=>{window.__micCalls++;return Promise.reject(new DOMException('denied','NotAllowedError'));}}});}});await clock(page);await click(page,'#start');assert.equal(await page.evaluate(()=>window.__micCalls),0);await click(page,'#microphone');await page.clock.runFor(30);assert.equal(await page.evaluate(()=>window.__micCalls),1);assert.match(await page.locator('#mic-note').textContent(),/No microphone/);for(let i=0;i<3;i++)await click(page,`[data-stick="${i}"]`);await click(page,'#blow');await page.clock.runFor(2050);await phase(page,'worry');await context.close();pass('microphone is opt-in; denied permission keeps the normal button ritual playable');

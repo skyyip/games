@@ -1,4 +1,4 @@
-import {WORRIES,WEAPONS,FORTUNES} from './catalog.js';
+import {WORRIES,WEAPONS,FORTUNES,weaponScoreMultiplier} from './catalog.js';
 export const PHASES=['incense','worry','beat','tiger','blessing'];
 export const DURATIONS={incense:8000,worry:7000,beat:45000,tiger:7000,blessing:5000};
 export const BEAT_INTERVAL=60000/108;
@@ -33,9 +33,9 @@ export class RitualGame{
     const effort=Math.max(0,Math.min(1,Number(strength)||0));
     const power=special?special.min+Math.round(effort*(special.power-special.min)):(heavy?3+Math.round(effort*4):1);
     const before=this.papers;this.damage+=power;this.hits++;if(heavy)this.heavy++;if(special)this.specials[gesture]++;if(perfect)this.perfect++;
-    const points=Math.round((special?special.points+(power-special.min)*2:(heavy?18+power*2:10))*(perfect?1.5:1)+Math.min(this.combo,30)*.3);this.score+=points;
+    const basePoints=Math.round((special?special.points+(power-special.min)*2:(heavy?18+power*2:10))*(perfect?1.5:1)+Math.min(this.combo,30)*.3);const multiplier=weaponScoreMultiplier(this.weapon),points=Math.round(basePoints*multiplier);this.score+=points;
     let qteComplete=false;
-    if(this.qte&&this.elapsed<=this.qte.ends){if(this.qte.type==='double'||(this.qte.type==='heavy'&&heavy)||this.qte.type===gesture)this.qte.progress++;if(this.qte.progress>=this.qte.required){this.score+=30;this.qteSuccess++;this.qte=null;qteComplete=true;}}
+    if(this.qte&&this.elapsed<=this.qte.ends){if(this.qte.type==='double'||(this.qte.type==='heavy'&&heavy)||this.qte.type===gesture)this.qte.progress++;if(this.qte.progress>=this.qte.required){this.score+=Math.round(30*multiplier);this.qteSuccess++;this.qte=null;qteComplete=true;}}
     return {perfect,power,points,paperCleared:this.papers>before,qteComplete,heavy,gesture,combo:this.combo};
   }
   feed(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.fed)return false;this.fed=true;this.fedAt=this.elapsed;return true;}
