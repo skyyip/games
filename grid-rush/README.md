@@ -134,8 +134,8 @@ node scripts/favourites-check.mjs
 
 ## Shared victory presentation
 
-All 17 games use `src/victory.js` (loaded by `src/playground-ui.js`) and `victory.css`. A result panel opts in with `data-victory` and has one `data-winner-name` label. Multiplayer apps populate that label using `textContent` with every winning name; solo games show the translated “You”. The maze’s failed result and result panels marked `data-victory-outcome="draw"` suppress the winner treatment.
+All 18 games use `src/victory.js` (loaded by `src/playground-ui.js`) and `victory.css`. A result panel opts in with `data-victory` and has one `data-winner-name` label. Multiplayer apps populate that label using `textContent` with every winning name; solo games show the translated “You”. The maze’s failed result and result panels marked `data-victory-outcome="draw"` suppress the winner treatment.
 
 Showing a result adds the gold badge, decorative trophy and a 36-piece ribbon burst. Hiding the result cancels pending animation and removes particles. Reduced motion keeps the static badge and trophy. Mahjong delays the burst until its final tile reveal has settled. Every offline game caches the shared module and stylesheet.
 
-Run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node grid-rush/scripts/victory-check.mjs` from the repository root for presentation integration checks across all 17 games, including cleanup, literal names, reduced motion and maze loss suppression. The individual game browser checks exercise their actual round logic.
+Run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node grid-rush/scripts/victory-check.mjs` from the repository root for presentation integration checks across all 18 games, including cleanup, literal names, reduced motion and maze loss suppression. The individual game browser checks exercise their actual round logic.

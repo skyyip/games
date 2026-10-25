@@ -23,10 +23,10 @@
 .final-tiles.is-pair{display:grid;align-items:start;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.final-tiles.is-pair>div{min-width:0}.final-tiles.is-pair>div>span{overflow-wrap:anywhere;min-height:18px}.match-outcome{display:block;font-size:10px;line-height:1.5;margin-top:7px;color:#365e43}.history-entry strong small{display:block;font-size:9px;color:var(--muted);font-weight:400;margin-top:4px}
 
 /* Keep the same player identity colours as Pocket Poker, including after a tied pair. */
-#deck .mahjong-tile.opened{border-color:var(--player-color);outline:1px solid var(--player-color);outline-offset:0}
-#deck .mahjong-tile.opened .tile-face{box-shadow:inset 0 0 0 clamp(1px,calc(var(--tile-w)*.055),2px) var(--player-color)}
+#deck .mahjong-tile.opened{border-color:var(--player-color);outline:none}
+#deck .mahjong-tile.opened .tile-face{box-shadow:inset 0 0 0 clamp(.5px,calc(var(--tile-w)*.025),1px) var(--player-color)}
 #deck .mahjong-tile.opened .owner-dot{background:var(--player-color);color:#fff;border-color:#fffef5}
 .player-row>span{display:grid;place-items:center;width:24px;flex:0 0 24px;height:24px;border-radius:50%;background:var(--player-color);color:#fff;font:500 11px var(--display)}
 .turn-banner .turn-index{background:var(--player-color);color:#fff}
 .history-entry strong::before{content:'';display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--player-color)}
-.final-tiles .target-tile[data-player]{border-color:var(--player-color);border-width:3px;border-bottom-width:5px}
+.final-tiles .target-tile[data-player]{border-color:var(--player-color);border-width:2px;border-bottom-width:3px}

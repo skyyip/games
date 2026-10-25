@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PLAYGROUND_URL||'http://localhost:5173/';
-const routes=['grid-rush/','grid-rush-in-order/','line-up/','pikmin-fling/','tap-and-spill/','just-a-sec/','roach-rush/', 'stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/'];
+const routes=['grid-rush/','grid-rush-in-order/','line-up/','pikmin-fling/','tap-and-spill/','just-a-sec/','roach-rush/', 'stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/','beat-bad-luck/'];
 const errors=[];let checks=0;
 const pass=message=>{checks++;console.log(`PASS ${message}`);};
 const url=path=>new URL(path,base).href;
@@ -59,7 +59,7 @@ try {
   for(const width of [320,375,640,768,1440]) {
    await page.setViewportSize({width,height:900});
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-   assert.equal(await page.locator('.game-card').count(),17);
+   assert.equal(await page.locator('.game-card').count(),18);
    assert.ok(await page.locator('.playground-brand').evaluate(header=>{
     const rects=[...header.children].map(el=>el.getBoundingClientRect());
     const title=header.querySelector('h1');

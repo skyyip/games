@@ -7,7 +7,7 @@ const { chromium } = await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE || 'pl
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const baseURL = process.env.PLAYGROUND_URL || 'http://localhost:5173/';
 const output = process.env.PLAYGROUND_SCREENSHOTS || '/tmp/skys-playground-qa';
-const games = ['grid-rush/', 'grid-rush-in-order/', 'tap-and-spill/', 'line-up/', 'pikmin-fling/', 'just-a-sec/', 'roach-rush/', 'stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/'];
+const games = ['grid-rush/', 'grid-rush-in-order/', 'tap-and-spill/', 'line-up/', 'pikmin-fling/', 'just-a-sec/', 'roach-rush/', 'stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/','beat-bad-luck/'];
 const errors = [];
 let checks = 0;
 const pass = text => { checks += 1; console.log(`PASS ${text}`); };
@@ -22,18 +22,18 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(baseURL);
   assert.equal(await page.title(), 'Your Playground.');
-  assert.equal(await page.locator('.card').count(), 17);
+  assert.equal(await page.locator('.card').count(), 18);
   const manifest = await context.request.get(new URL(await page.locator('link[rel="manifest"]').getAttribute('href'), baseURL).href).then(r => r.json());
   assert.equal(manifest.name, 'Sky’s Playground');
   assert.equal(new URL(manifest.start_url, new URL('grid-rush/playground.webmanifest', baseURL)).href, baseURL);
   await page.locator('.card').evaluateAll(cards => Promise.all(cards.flatMap(card => card.getAnimations().map(animation => animation.finished))));
   await page.screenshot({ path: `${output}/landing-desktop.png`, fullPage: true, animations: 'disabled' });
-  pass('landing name, manifest and all seventeen games are present');
+  pass('landing name, manifest and all eighteen games are present');
 
   const expectedIcon = hash(await readFile(new URL('../assets/icons/apple-touch-icon.png', import.meta.url)));
   for (const path of ['', ...games]) {
     await page.goto(new URL(path, baseURL).href);
-    assert.match(await page.title(), path ? (['stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/'].includes(path) ? /^(?:Stone Skip|Little Balance|Pot Luck|Marble & Mist|Float & Balance|Flick Force|Memory Trace|Dice & Delight|Pocket Poker|Mahjong Match) · Your Playground\.$/ : /Sky’s Playground/) : /^Your Playground\.$/);
+    assert.match(await page.title(), path ? (['stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/','beat-bad-luck/'].includes(path) ? /^(?:Stone Skip|Little Balance|Pot Luck|Marble & Mist|Float & Balance|Flick Force|Memory Trace|Dice & Delight|Pocket Poker|Mahjong Match|Beat the Bad Luck) · Your Playground\.$/ : /Sky’s Playground/) : /^Your Playground\.$/);
     const icon = await page.locator('link[rel="apple-touch-icon"]').getAttribute('href');
     const response = await context.request.get(new URL(icon, page.url()).href);
     assert.equal(response.status(), 200);

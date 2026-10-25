@@ -3,7 +3,7 @@ import {mkdir} from 'node:fs/promises';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PLAYGROUND_URL||'http://localhost:5173/';
-const routes=['','grid-rush/','grid-rush-in-order/','tap-and-spill/','line-up/','pikmin-fling/','just-a-sec/','roach-rush/','stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/'];
+const routes=['','grid-rush/','grid-rush-in-order/','tap-and-spill/','line-up/','pikmin-fling/','just-a-sec/','roach-rush/','stone-skip/','balance-bridge/','pot-toss/','marble-maze/','floating-balance/','flick-force/','memory-trace/','dice-party/','poker-party/','mahjong-match/','beat-bad-luck/'];
 const errors=[];let checks=0;const pass=text=>{checks++;console.log(`PASS ${text}`);};
 async function tap(protocol,x,y){await protocol.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x,y}]});await protocol.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
 try{
