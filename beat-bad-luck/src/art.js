@@ -1,5 +1,7 @@
+import {extraWeaponArt,extraDecorArt} from './expansion-art.js';
 const wrap=(content,box='0 0 120 120')=>`<svg viewBox="${box}" aria-hidden="true" focusable="false">${content}</svg>`;
 export function weaponArt(id){
+ const expanded=extraWeaponArt(id);if(expanded)return wrap(expanded);
  const art={
  'bare-hand':`<path d="m33 70-12-15q-8-14 0-18 8-4 17 11l2 4-9-33q-3-13 6-14 9-2 12 13l7 24-1-31Q54-1 63 1q9 0 8 14l1 28 6-23q4-12 12-8 8 3 4 15l-5 25 6-9q8-10 14-5 7 5-1 16l-13 22q-3 20-19 32l-5 9-30-5 1-14q-8-11-9-28Z" fill="#efcc9f" stroke="#a67b56" stroke-width="3" stroke-linejoin="round"/><path d="m45 66 12 10m11-10 9-10m-22 25 17 1" fill="none" stroke="#cd9e77" stroke-width="2" stroke-linecap="round"/><path d="m45 96 29 6-3 13-31-6Z" fill="#90b1a4" stroke="#617f75" stroke-width="2"/><path d="m57 56 2 5 6 1-4 4 1 6-5-3-5 3 1-6-4-4 6-1Z" fill="#f7e8bf"/>`,
 
@@ -80,6 +82,7 @@ export const fongCostumeArt=()=>wrap(`
 `,'0 0 160 180');
 
 export function decorArt(id){
+ const expanded=extraDecorArt(id);if(expanded)return wrap(expanded);
  const art={
  'money-tree':`<path d="M57 86V36m0 32L31 49m26 10 27-22" fill="none" stroke="#92704b" stroke-width="7" stroke-linecap="round"/><g class="decor-tree-crown" stroke="#466e53" stroke-width="2"><ellipse cx="31" cy="43" rx="23" ry="17" fill="#88ad79" transform="rotate(20 31 43)"/><ellipse cx="81" cy="33" rx="23" ry="18" fill="#98bc83" transform="rotate(-18 81 33)"/><ellipse cx="55" cy="24" rx="24" ry="18" fill="#b1c98b"/><ellipse cx="77" cy="58" rx="21" ry="15" fill="#8eb781"/><g fill="#edc77e" stroke="#b68b43"><circle cx="30" cy="41" r="8"/><circle cx="59" cy="23" r="8"/><circle cx="83" cy="37" r="8"/><circle cx="77" cy="58" r="7"/></g><path d="M27 38h6v6h-6Zm29-18h6v6h-6Zm24 14h6v6h-6Z" fill="#739d71" stroke="none"/></g><path d="M29 80h58l-7 28H36Z" fill="#ce8771" stroke="#8f5c49" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="76" width="68" height="11" rx="5" fill="#e3aa85" stroke="#8f5c49" stroke-width="3"/><path d="m46 95 5-2m15 0 5 2m-18 4q6 6 12 0" fill="none" stroke="#805746" stroke-width="2.5" stroke-linecap="round"/><circle cx="41" cy="100" r="4" fill="#e8ae94"/><circle cx="75" cy="100" r="4" fill="#e8ae94"/>`,
  amethyst:`<ellipse cx="60" cy="104" rx="45" ry="8" fill="#947584"/><path d="M19 93 15 51 35 29 47 48 60 12 78 41 94 32 108 60 99 99 66 109 36 104Z" fill="#715675" stroke="#493f63" stroke-width="3" stroke-linejoin="round"/><path d="m25 88 2-31 11-13 12 19 13-30 12 27 16-9 9 16-9 25-25 9-31-3Z" fill="#d1b6e3" stroke="#e9d0e8" stroke-width="3" stroke-linejoin="round"/><path d="m37 83 1-30 12 10 13-30 5 38 23-20-14 35-11 15-16-8Z" fill="#a183be"/><path d="m38 53 5 23 7-13m13-30-6 43 11-5m23-20-9 24" fill="none" stroke="#efd8ef" stroke-width="2"/><path d="m49 83 5-2m15 0 5 2m-18 5q7 8 12 0" fill="none" stroke="#58456c" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="45" cy="89" rx="5" ry="3" fill="#e4aeca"/><ellipse cx="78" cy="88" rx="5" ry="3" fill="#e4aeca"/><g class="decor-crystal-sparkle" fill="#f7e8c4"><path d="m98 9 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/><path d="m14 25 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></g>`,

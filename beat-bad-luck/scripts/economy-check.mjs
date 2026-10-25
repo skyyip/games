@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
+import {DECOR} from '../src/catalog.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';
@@ -18,7 +19,7 @@ try{
  await mkdir('/tmp/bbl-economy-qa',{recursive:true});
  for(const [width,language,motion]of [[320,'zh-Hant','reduce'],[375,'zh-Hant','no-preference'],[1440,'en','reduce']]){
   const {context,page}=await setup(width,language,motion);
-  assert.deepEqual(await page.locator('[data-decor]').evaluateAll(nodes=>nodes.map(n=>n.dataset.decor)),ids);
+  assert.deepEqual(await page.locator('[data-decor]').evaluateAll(nodes=>nodes.map(n=>n.dataset.decor)),[...DECOR].sort((a,b)=>a.cost-b.cost).map(d=>d.id));
   for(const [i,id]of ids.entries()){await page.locator(`[data-decor="${id}"]`).click();assert.equal(await page.locator('.stall-piece').count(),i+1);}
   for(const id of ['cat','money-tree','amethyst'])for(let level=2;level<=5;level++){await page.locator(`[data-decor="${id}"]`).click();assert.equal(await page.locator(`[data-piece="${id}"]`).getAttribute('data-level'),String(level));const prices=await page.locator('#decor-list [data-decor]').evaluateAll(nodes=>nodes.map(n=>parseInt(n.textContent,10)||Infinity));assert.ok(prices.every((price,i)=>i===0||price>=prices[i-1]));}
   if(motion==='no-preference')await page.waitForTimeout(700);

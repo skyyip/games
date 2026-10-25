@@ -210,3 +210,11 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 .furnishing-condition i{display:block;width:100%;height:100%;transform-origin:left;transform:scaleX(var(--decor-health,1));background:#b7cf96}.is-weathered .furnishing-condition i{background:#edc77e}.is-fragile .furnishing-condition i{background:#ef9d88}
 
 .bare-hands-button{display:block;width:100%;min-height:36px;margin:-8px 0 6px;color:#d2c797}.bare-hands-button:disabled{opacity:.5}
+
+/* Newly collected curios live on extra shelves, leaving the original diorama intact. */
+.stall-extension{list-style:none;margin:0;padding:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 12px;background:linear-gradient(110deg,#395450,#233d3b);border-bottom:1px solid #c3bd8d33}
+.stall-extension[hidden]{display:none}
+.stall-extension .stall-piece{position:relative;inset:auto;width:100%;min-width:0;padding:0 4px 8px;border-bottom:7px solid #a68152;border-radius:3px;box-shadow:0 3px 0 #70573e;align-self:end}
+.stall-extension .stall-piece::after{content:attr(data-label);display:block;font-size:9px;line-height:1.4;text-align:center;color:#f1dfb5;min-height:2.8em;overflow-wrap:anywhere}
+.stall-extension .furnishing-level{right:1px;top:1px;bottom:auto}
+.kit-row>div,.decor-row>div{min-width:0}.kit-row b,.decor-row b{overflow-wrap:anywhere}

@@ -73,3 +73,11 @@ Current decoration base prices, ascending: neon **1145**, incense **1155**, cat 
 Mobile audio retries on touch endings, clicks and keys instead of discarding the first activation listener. Web Audio is primed synchronously within the gesture; supported Safari uses the playback audio session, and iOS additionally uses a local silent WAV media route. Mute/pause stop the route. Interrupted or closed contexts recover on a later gesture; waveform output, rather than only button labels, is checked in the browser tests.
 
 The three premium score multipliers are explicit overrides (3T ×10, Mark Six ×15, rebirth paper ×20), independent of their purchase price. All other kits retain their price-based bonus.
+
+## Expanded stall and prop collection
+
+The shop now contains **27 decorations and 44 paid kits**, plus the always-free bare-hand fallback. See [EXPANSION.md](./EXPANSION.md) for every new item’s exact Chinese name, merit gate, oil price, score multiplier and hourly income, in price order. Existing prices, inventory, levels and expiry dates are preserved when older saves gain the new entries.
+
+The eighteen new decorations appear immediately on a three-column extension below the original stall shelves. Each has a distinct local SVG, visible name, level badge, durability and the same upgrade/repair/discard rules. All twenty-seven at level five earn **181.3 oil/hour** before the unchanged eight-hour offline cap. Thirty new kits use their own artwork and sound pitch, explicit increasing score bonuses and the existing first-hit consumption rule. Shops sort by oil price; decoration rows sort by their next upgrade price. New bilingual names live inside this game’s catalogue so this update does not modify other games or shared language files.
+
+Run `node scripts/expansion-check.mjs` with the usual Playwright module environment variable for the complete purchase/layout/translation/one-use/offline scenarios.

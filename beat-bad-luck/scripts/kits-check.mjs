@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
+import {WEAPONS} from '../src/catalog.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true}),base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';
 const kits=[['iron-hammer',400,550,6.5,'大鐵鎚'],['triple-trio',5000,6000,10,'賽馬會3T'],['marksix-snowball',6000,6500,15,'六合彩金多寶'],['rebirth-paper',10000,10000,20,'投胎紙做李嘉誠個仔']];
@@ -18,7 +19,7 @@ try{
  for(const [width,language]of [[320,'zh-Hant'],[375,'zh-Hant'],[1440,'en']]){
   const {context,page}=await setup(width,language);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
   if(language==='zh-Hant'){assert.match(await page.locator('#equipped-name').textContent(),/轉運童子/);assert.match(await page.locator('#records').textContent(),/轉運童子/);assert.ok(!(await page.locator('#records').textContent()).includes('轉童子'));}
-  await click(page,'#tab-kits');assert.equal(await page.locator('[data-weapon]').count(),14);
+  await click(page,'#tab-kits');assert.equal(await page.locator('[data-weapon]').count(),WEAPONS.filter(w=>!w.starter).length);
   const distinct=new Set();for(const [id,merit,cost,multiplier,name]of kits){
    const row=page.locator(`[data-weapon="${id}"]`).locator('..');assert.ok((await row.textContent()).includes(`×${multiplier}`));distinct.add(await row.locator('svg').innerHTML());if(language==='zh-Hant')assert.ok((await row.textContent()).includes(name));assert.equal(await page.locator(`[data-weapon="${id}"]`).isDisabled(),false);
   }assert.equal(distinct.size,4);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

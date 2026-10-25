@@ -24,7 +24,7 @@ test('paid kits are spent once, repurchased at full price, and the free fallback
  assert.equal(consumeWeapon(used,'bare-hand'),used);assert.equal(consumeWeapon(used,'unknown'),null);assert.ok(bought.owned.includes('paper'));
 });
 test('nine decorations earn one through nine in list order and migrate old saves safely',async()=>{
- const {DECOR}=await import('../src/catalog.js');assert.deepEqual(DECOR.map(d=>d.rate),[1,2,3,4,5,6,7,8,9]);assert.deepEqual(DECOR.slice(-2).map(d=>d.id),['money-tree','amethyst']);
+ const {DECOR:allDecor}=await import('../src/catalog.js');const DECOR=allDecor.filter(d=>!d.expanded);assert.deepEqual(DECOR.map(d=>d.rate),[1,2,3,4,5,6,7,8,9]);assert.deepEqual(DECOR.slice(-2).map(d=>d.id),['money-tree','amethyst']);
  let state=readProgress(JSON.stringify({...fresh(0),coins:200000,decor:{cat:2}}),0);assert.equal(state.decor['money-tree'],0);assert.equal(state.decor.amethyst,0);assert.equal(state.decor.cat,2);
  for(const id of ['money-tree','amethyst'])for(let i=0;i<5;i++)state=upgrade(state,id);
  assert.equal(idleRate(state),21.9);assert.equal(state.coins,10400);assert.deepEqual(readProgress(JSON.stringify(state),0),state);
@@ -32,7 +32,7 @@ test('nine decorations earn one through nine in list order and migrate old saves
 });
 
 test('current decoration prices match the requested increases; fractional idle earnings accumulate without loss',async()=>{
- const {DECOR}=await import('../src/catalog.js');assert.deepEqual(DECOR.map(d=>d.cost),[1190,1145,1155,1165,1210,6240,6270,6300,6340]);
+ const {DECOR:allDecor}=await import('../src/catalog.js');const DECOR=allDecor.filter(d=>!d.expanded);assert.deepEqual(DECOR.map(d=>d.cost),[1190,1145,1155,1165,1210,6240,6270,6300,6340]);
  for(const level of [2,3,4,5]){const state={...fresh(0),decor:{neon:level}};assert.equal(idleRate(state),2+(level-1)*.1);let collected=collectIdle(state,3600000);assert.equal(collected.earned,2);assert.equal(collected.state.idleCarry,(level-1)/10);
  for(let hour=2;hour<=10;hour++)collected=collectIdle(collected.state,hour*3600000);
  assert.equal(collected.state.coins,20+level-1);assert.equal(collected.state.idleCarry,0);}
@@ -51,7 +51,7 @@ test('four new kits use the requested gates and prices, consume once, and surviv
 });
 
 test('every original kit costs 200 more while new players can always whack with bare hands',async()=>{
- const {WEAPONS,weaponScoreMultiplier}=await import('../src/catalog.js');assert.deepEqual(WEAPONS.filter(w=>!w.starter).map(w=>w.cost),[200,245,270,310,350,400,440,460,520,550,550,6000,6500,10000]);assert.equal(fresh(0).equipped,'bare-hand');assert.equal(weaponScoreMultiplier('bare-hand'),1);
+ const {WEAPONS,weaponScoreMultiplier}=await import('../src/catalog.js');assert.deepEqual(WEAPONS.filter(w=>!w.starter&&!w.expanded).map(w=>w.cost),[200,245,270,310,350,400,440,460,520,550,550,6000,6500,10000]);assert.equal(fresh(0).equipped,'bare-hand');assert.equal(weaponScoreMultiplier('bare-hand'),1);
  let state=buyWeapon({...fresh(0),coins:200},'flipflop');assert.equal(state.coins,0);state=consumeWeapon(state,'flipflop');assert.equal(state.equipped,'bare-hand');assert.ok(!state.owned.includes('flipflop'));assert.equal(buyWeapon(state,'flipflop'),null);assert.equal(buyWeapon(state,'bare-hand').coins,0);
  const old=readProgress(JSON.stringify({version:1,coins:0,owned:['flipflop'],equipped:'flipflop'}),0);assert.ok(old.owned.includes('flipflop'));assert.ok(old.owned.includes('bare-hand'));
 });
