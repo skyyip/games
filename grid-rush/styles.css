@@ -228,7 +228,7 @@ main {
 
 .eyebrow {
   font-family:var(--mono);
-  font-size:10px;
+  font-size:11px;
   font-weight:600;
   letter-spacing:1.6px;
   display:flex;
@@ -374,7 +374,7 @@ h2 {
 }
 
 .grid-option small {
-  font-size:10px;
+  font-size:11px;
   color:#636b59;
   margin-top:2px;
 }
@@ -417,7 +417,7 @@ h2 {
   display:flex;
   gap:7px;
   align-items:center;
-  font-size:10px;
+  font-size:11px;
   color:#636b59;
   margin-top:14px;
 }
@@ -751,7 +751,7 @@ h2 {
 
 .progress-count {
   font-family:var(--mono);
-  font-size:10px;
+  font-size:11px;
   font-weight:500;
 }
 
@@ -817,7 +817,7 @@ h2 {
 .board-hint {
   text-align:center;
   color:#636b59;
-  font-size:10px;
+  font-size:11px;
   line-height:1.7;
   margin-top:12px;
 }
@@ -904,7 +904,7 @@ h2 {
 
 .record-rank {
   font-family:var(--mono);
-  font-size:10px;
+  font-size:11px;
   width:23px;
   color:#636b59;
   flex-shrink:0;
@@ -931,7 +931,7 @@ h2 {
 }
 
 .record-date {
-  font-size:10px;
+  font-size:11px;
   color:#636b59;
   margin-top:5px;
 }
@@ -982,7 +982,7 @@ h2 {
 
 .records-caption {
   color:#636b59;
-  font-size:10px;
+  font-size:11px;
   line-height:1.6;
   margin-top:14px;
 }
@@ -1052,7 +1052,7 @@ h2 {
   display:flex;
   gap:8px;
   align-items:flex-start;
-  font-size:10px;
+  font-size:11px;
   line-height:1.8;
   color:#636b59;
   margin:18px 5px;
@@ -1079,7 +1079,7 @@ h2 {
   align-items:center;
   gap:10px;
   color:#636b59;
-  font-size:10px;
+  font-size:11px;
 }
 
 .bottom-strip .icon {
@@ -1116,7 +1116,7 @@ h2 {
 }
 
 .site-footer>span+span {
-  font-size:10px;
+  font-size:11px;
   color:#636b59;
 }
 
@@ -1205,7 +1205,7 @@ h2 {
 .text-button {
   background:none;
   border:0;
-  font-size:10px;
+  font-size:11px;
   color:#636b59;
   min-height:40px;
   margin-top:7px;
@@ -1316,7 +1316,7 @@ h2 {
   }
   .intro-copy {
     max-width:235px;
-    font-size:10px;
+    font-size:11px;
   }
   .header-motto {
     font-size:8px;
@@ -1359,7 +1359,7 @@ h2 {
     font-size:65px;
   }
   .panel-description {
-    font-size:10px;
+    font-size:11px;
   }
   .record-grid-label {
     font-size:7px;
@@ -1395,7 +1395,7 @@ h2 {
     padding:32px 0;
   }
   .intro-copy {
-    font-size:10px;
+    font-size:11px;
     max-width:210px;
   }
   .arena {
@@ -1445,7 +1445,7 @@ h2 {
     font-size:9px;
   }
   .personal-best-card>p {
-    font-size:10px;
+    font-size:11px;
   }
   .storage-note {
     grid-column:2;
@@ -1513,7 +1513,7 @@ h2 {
     height:8px;
   }
   nav {
-    font-size:10px;
+    font-size:11px;
     gap:21px;
   }
   main {
@@ -1537,7 +1537,7 @@ h2 {
     white-space:nowrap;
   }
   .intro-copy {
-    font-size:10px;
+    font-size:11px;
     max-width:none;
     line-height:1.7;
     padding:0;
@@ -1597,7 +1597,7 @@ h2 {
   .grid-option input:checked+.grid-option-content:after {
     top:9px;
     right:8px;
-    font-size:10px;
+    font-size:11px;
   }
   .size-note {
     font-size:9px;
@@ -1750,7 +1750,7 @@ h2 {
   }
   .result-message {
     margin:7px 0 17px;
-    font-size:10px;
+    font-size:11px;
   }
   .result-overlay .primary-button {
     min-height:45px;
@@ -1952,12 +1952,12 @@ h2 {
     letter-spacing:-.5px;
   }
   .install-banner p {
-    font-size:10px;
+    font-size:11px;
   }
   .install-banner .primary-button {
     padding:0 13px;
     gap:10px;
-    font-size:10px;
+    font-size:11px;
   }
   .install-dialog {
     padding:23px;

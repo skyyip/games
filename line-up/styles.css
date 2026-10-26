@@ -90,7 +90,7 @@ svg {
 }
 .header-note {
   margin-left:auto;
-  font:500 10px var(--mono);
+  font:500 11px var(--mono);
   letter-spacing:1.3px;
   color:var(--muted);
 }
@@ -107,7 +107,7 @@ main {
   padding:42px 0 38px;
 }
 .eyebrow {
-  font:600 10px var(--mono);
+  font:600 11px var(--mono);
   letter-spacing:1.35px;
   margin:0;
   line-height:1.6;
@@ -188,7 +188,7 @@ h1 em:after {
 }
 .shape-badge {
   display:inline-block;
-  font-size:10px;
+  font-size:11px;
   font-weight:600;
   line-height:1.5;
   padding:6px 9px;
@@ -217,7 +217,7 @@ h1 em:after {
   align-items:center;
   justify-content:space-between;
   cursor:pointer;
-  font:600 10px var(--mono);
+  font:600 11px var(--mono);
   letter-spacing:1px;
   list-style:none;
 }
@@ -391,7 +391,7 @@ h2 {
   display:flex;
   align-items:center;
   gap:7px;
-  font:500 10px var(--mono);
+  font:500 11px var(--mono);
   margin-bottom:7px;
   color:#566550;
 }
@@ -424,7 +424,7 @@ h2 {
   border-top:1px solid var(--border);
 }
 .shape-list span {
-  font-size:10px;
+  font-size:11px;
   padding:5px 9px;
   border:1px solid var(--border);
   border-radius:99px;
@@ -722,7 +722,7 @@ h2 {
   font:600 9px var(--mono);
 }
 .keyboard-help {
-  font-size:10px;
+  font-size:11px;
   color:var(--muted);
   line-height:1.65;
   margin:12px 0 19px;
@@ -765,7 +765,7 @@ h2 {
   font-size:12px;
 }
 .result-reference>div span {
-  font-size:10px;
+  font-size:11px;
   font-weight:400;
 }
 .result-reference svg {
@@ -776,7 +776,7 @@ h2 {
   margin:4px 0;
 }
 .result-reference p {
-  font-size:10px;
+  font-size:11px;
   color:#586a50;
   line-height:1.6;
   margin:4px 0;
@@ -831,7 +831,7 @@ h2 {
 }
 .result-person small {
   display:block;
-  font-size:10px;
+  font-size:11px;
   color:var(--muted);
   line-height:1.7;
   margin-top:4px;
@@ -865,7 +865,7 @@ h2 {
   border-top:1px solid var(--border);
   margin-top:39px;
   padding:23px 0 calc(27px + env(safe-area-inset-bottom));
-  font-size:10px;
+  font-size:11px;
   color:var(--muted);
   line-height:1.7;
 }
@@ -1052,7 +1052,7 @@ h2 {
     gap:0;
   }
   .text-button {
-    font-size:10px;
+    font-size:11px;
   }
   .point-control button {
     font-size:11px;
@@ -1063,7 +1063,7 @@ h2 {
     height:20px;
   }
   .keyboard-help {
-    font-size:10px;
+    font-size:11px;
   }
   .target-card .shape-badge {
     max-width:190px;

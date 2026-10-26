@@ -140,3 +140,15 @@ The native game link stays inside a separate card wrapper so the star never beco
 Rapid return navigation exposed a native page-transition promise rejection before the deferred module handler could run. Transition handlers now load in a small classic head script before the first rendering opportunity, and every offline game caches it. The favourites navigation check deliberately returns immediately, without a timing delay.
 
 The favourite icon now renders at **22px** inside a **36px** badge while its native button retains a **44px** touch target. The responsive favourites checks verify these dimensions at 320, 375, 768 and 1440px.
+
+## Site typography and mobile input focus — October 26, 2026
+
+All **286 explicit 10px font values across 25 published source files** now use 11px, including `font` shorthands and responsive size limits. Poker player-progress counters, which previously inherited a computed 10px from the browser's `small` styling, explicitly use 11px as well. Spacing, artwork dimensions and other font sizes were preserved. The 18 published offline caches were versioned so installed pages can receive the updated styles after existing windows close.
+
+The Beat the Bad Luck worry field uses **16px on coarse-pointer devices** to avoid iOS's small-input focus zoom; desktop remains 11px. The viewport still allows user-controlled zoom, with no `maximum-scale` or `user-scalable=no` restriction.
+
+Validation used the exact staged tree, excluding unrelated pending work. All **33 shared UI checks** passed across published pages at 320/375/430/600/768/1024/1440px. **312 before/after snapshots** covered the landing and 19 games, both languages, setup and active states at 320×568, 390×844, 812×375 and 1440×900, with no newly clipped text, page overflow or browser errors. **16 additional poker snapshots** confirmed the inherited-size correction without layout regressions. **12 input-focus checks** verified the touch/desktop sizes, editable text, stable scale and unobstructed layout. The 16px policy addresses Safari's focus-zoom trigger; physical iOS keyboard behaviour was not directly tested.
+
+Beat the Bad Luck also passed **90 event-layer layouts**, **10 purchase-receipt scenarios** including 98 catalogue transactions, and **five compact-preview checks** including complete play in a locked-storage opaque iframe. Representative phone screenshots were visually inspected. Review included live DOM, text-range and hit-target checks.
+
+All **39 expanded native kit recipes** at 320×568 and **48 signature-skill scenarios** also passed after the font increase, covering touch, keyboard alternatives, animation, portrait/landscape targets and complete ritual results.

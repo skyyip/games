@@ -115,7 +115,7 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
   .mode-options { grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:14px; gap:7px; }
   .mode-option>span { padding:10px 8px; min-height:68px; }
   .mode-option strong { font-size:19px; }
-  .mode-option small { font-size:10px; }
+  .mode-option small { font-size:11px; }
   .mode-option input:checked+span:after { top:5px; right:5px; font-size:9px; }
   .grid-options { gap:7px; margin-top:14px; }
   .grid-option-content { min-height:88px; padding:10px 8px; }
@@ -124,8 +124,8 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
   .mini-grid { width:20px; height:20px; margin-bottom:7px; }
   .mode-note,.size-note { font-size:11px; line-height:1.5; }
   .how-to-play { margin-top:12px; padding-top:8px; }
-  .how-to-play summary { font-size:10px; }
-  .how-to-play small { font-size:10px; }
+  .how-to-play summary { font-size:11px; }
+  .how-to-play small { font-size:11px; }
   .timer { font-size:62px; }
   .timer-block { padding-bottom:10px; }
   .next-cue { min-height:62px; padding:9px 12px; }

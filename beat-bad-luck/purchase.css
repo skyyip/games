@@ -16,7 +16,7 @@ body:has(.purchase-dialog[open]){overflow:hidden}
 .purchase-effect{display:inline-block;border:1px solid #c7c49488;background:#1b3631;color:#e4d9a6;padding:5px 10px;border-radius:9px;margin:0 0 9px;font-size:12px;line-height:1.45}
 .purchase-detail{font-size:12px;line-height:1.55;margin:0 0 7px;color:#f6e5bf;overflow-wrap:anywhere}
 .purchase-note{font-size:11px;line-height:1.5;margin:0 0 9px;color:#bfd2bc}
-.purchase-spent{font-size:10px;line-height:1.5;margin:0;padding-top:9px;border-top:1px dashed #b6bd8b66;color:#c7d0b7}
+.purchase-spent{font-size:11px;line-height:1.5;margin:0;padding-top:9px;border-top:1px dashed #b6bd8b66;color:#c7d0b7}
 .purchase-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .purchase-actions button{width:100%;min-height:44px;margin:0;padding:9px 7px;font-size:12px;line-height:1.4}
 .stall-piece.purchase-highlight{animation:purchase-placement 1.8s ease-out}
