@@ -41,3 +41,15 @@ html{scroll-padding-bottom:calc(125px + env(safe-area-inset-bottom))}
 /* Reserve room for enlarged captions on compact phones without shrinking type. */
 @media(max-height:700px){.is-playing .play-panel[data-phase=beat] .fong-bubble{height:46px;min-height:46px;flex-basis:46px}}
 @media(max-height:600px) and (max-aspect-ratio:1/1){.is-playing .ritual-top .bbl-kicker{display:none}}
+
+/* More moves stay in one fixed-height strip, leaving the paper and event slots steady. */
+.is-playing .beat-panel .gesture-tools{position:relative;display:flex;justify-content:flex-start;overflow-x:auto;overflow-y:hidden;gap:5px;scroll-snap-type:x proximity;scrollbar-width:none;touch-action:pan-x;height:48px;flex:none}
+.gesture-tools::-webkit-scrollbar{display:none}
+.is-playing .beat-panel .gesture-tools .gesture-hint{flex:0 0 76px;min-width:0;height:48px;min-height:48px;scroll-snap-align:center}
+.gesture-hint b{font:inherit;font-weight:400;line-height:1.2;white-space:normal;overflow-wrap:anywhere;text-align:center}
+.gesture-controls::after{content:'›';position:absolute;right:-3px;top:8px;z-index:1;color:#ffe2a1;background:#29443be8;border-radius:8px;padding:0 2px;font-size:20px;line-height:1;pointer-events:none}
+#gesture-charge{right:5px}#hit-zone.is-holding .paper-doll{scale:calc(1 - var(--hold-charge,0)*.12) calc(1 + var(--hold-charge,0)*.08);filter:drop-shadow(0 0 6px #f6ca7399)}
+@media(max-height:700px){.is-playing .beat-panel .gesture-tools,.is-playing .beat-panel .gesture-tools .gesture-hint{height:46px;min-height:46px}.is-playing .beat-panel .gesture-tools .gesture-hint{flex-basis:60px}}
+@media(prefers-reduced-motion:reduce){#hit-zone.is-holding .paper-doll{scale:none}}
+
+.event-order-tag{position:absolute;right:1px;bottom:1px;display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:#fff0b9;color:#243d31;font-size:12px;font-weight:700;pointer-events:none}.comic-event-prop[data-event-prop=minibus][data-next=true]{outline:2px solid #ffe2a0;outline-offset:-2px;background:#705e35}.comic-event-prop[data-event-prop=minibus][data-next=false]{opacity:.78}

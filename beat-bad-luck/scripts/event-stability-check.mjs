@@ -23,10 +23,10 @@ try{
   const advance=async target=>{await page.clock.fastForward(target-elapsed);elapsed=target;unchanged(before,await boxes(page),`${label} at ${target}ms`);};
   for(const time of [2000,4500,5500,9000,11800,12000])await advance(time);
   assert.equal(await page.locator('#event-banner').getAttribute('data-event'),event.id);await eventFits(page,label);
-  if(event.id==='tram'){for(let i=0;i<3;i++){await advance(12000+i*700);await click('#hit-zone');await page.clock.fastForward(20);elapsed+=20;unchanged(before,await boxes(page),label+' bell/progress');}}
-  else if(event.id==='rain'||event.id==='wind')await click(event.id==='rain'?'#rain-cover':'#wind-catch');
-  else if(event.id==='minibus'){for(let i=0;i<3;i++){await click(`[data-event-prop="minibus"][data-token="${i}"]`);unchanged(before,await boxes(page),label+' coin/progress');}}
-  else for(let i=0;i<EVENT_MOVES[event.id][1];i++){await click('#event-move');await page.clock.fastForward(80);elapsed+=80;unchanged(before,await boxes(page),label+' move/progress');}
+  if(event.id==='tram'){for(let i=0;i<4;i++){await advance(12000+i*700);await click('#hit-zone');await page.clock.fastForward(20);elapsed+=20;unchanged(before,await boxes(page),label+' bell/progress');}}
+  else if(event.id==='rain'||event.id==='wind')for(let i=0;i<(event.id==='rain'?3:2);i++){await click(event.id==='rain'?'#rain-cover':'#wind-catch');await page.clock.fastForward(350);elapsed+=350;unchanged(before,await boxes(page),label+' catch/shelter progress');}
+  else if(event.id==='minibus'){for(let i=0;i<3;i++){await click(`[data-event-prop="minibus"][data-next="true"]`);await page.clock.fastForward(220);elapsed+=220;unchanged(before,await boxes(page),label+' coin/progress');}}
+  else for(let i=0;i<EVENT_MOVES[event.id][1];i++){await click('#event-move');await page.clock.fastForward(220);elapsed+=220;unchanged(before,await boxes(page),label+' move/progress');}
   await page.clock.fastForward(20);elapsed+=20;assert.match(await page.locator('#event-label').textContent(),/事件處理好|Event handled/);unchanged(before,await boxes(page),label+' handled');await eventFits(page,label);
   for(const time of [14500,17400,17600,19500,25000,31900,32000,37400,49900,50000,55400,55800,59900]){await advance(time);if(await page.locator('#event-banner').isVisible())await eventFits(page,label);}
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);

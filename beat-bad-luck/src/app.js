@@ -6,7 +6,7 @@ import {createKitSkillsUI} from './kit-skills-ui.js';
 import {KIT_SKILLS} from './kit-skills.js';
 import {createNeighbourhoodUI} from './neighbourhood-ui.js';
 import {placedLayout} from './neighbourhood.js';
-import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress} from './gestures.js';
+import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress,spreadProgress,holdProgress} from './gestures.js';
 import {RitualGame,PHASES,BEAT_INTERVAL} from './game.js';
 import {WORRIES,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
 import {STORAGE_KEY,readProgress,collectIdle,idleRate,buyWeapon,weaponUses,consumeWeapon,upgrade,decorDurability,repairCost,repairDecor,discardDecor,reward} from './progress.js';
@@ -56,16 +56,20 @@ const purchaseUI=createPurchaseUI({getState:()=>state,itemName,onReveal:()=>{aud
 }});
 const say=text=>{$('#announcements').textContent=translate(text);};
 const vibrate=pattern=>{try{navigator.vibrate?.(pattern);}catch{}};
-const qteHints={double:'Two quick taps!',heavy:'Swipe for a heavy whack!',rub:'Rub back and forth!',circle:'Draw a full circle!',pinch:'Bring two fingers together!'};
+const gestureText=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
+const qteHints={double:['快速點拍兩次！','Two quick taps!'],heavy:['滑動重扣！','Swipe for a heavy whack!'],rub:['來回搓三次！','Rub back and forth!'],circle:['畫完整圓圈！','Draw a full circle!'],pinch:['雙指向內夾擊！','Bring two fingers together!'],clockwise:['順時針轉一圈！','Draw a clockwise circle!'],counterclockwise:['逆時針轉一圈！','Draw an anti-clockwise circle!'],hold:['長按 0.7 秒再放手！','Hold 0.7s, then release!'],spread:['雙指向外拉闊！','Spread two fingers apart!']};
 function feedback(text){literal($('#hit-feedback'),translate(text));}
 const literal=(element,text)=>{element.textContent=text;element.setAttribute('translate','no');};
 function renderRitualTiming(){
  const zh=getLanguage()==='zh-Hant';
  literal($('#kit-lifetime-note'),zh?'收費法寶每件可用兩次儀式；每局首次成功命中才扣一次，第二次後才破壞消失。未出手便離開不會扣次數。徒手永遠免費。':'Each paid kit lasts two rituals. The first successful hit spends one use per ritual; it breaks after the second use. Leaving without a hit costs no use. Bare hands are always free.');
  literal($('#ritual-duration'),zh?'每次儀式約 97–117 秒':'One ritual · about 97–117 seconds');
- literal($('#gesture-hint-note'),zh?'在紙人上點拍、滑動、搓揉、畫圈或雙指夾。下方圖示只作提示。':'Tap, swipe, rub, circle, or pinch on the paper. Icons are gesture hints.');
- $('#gesture-tools').setAttribute('aria-label',zh?'手勢提示':'Gesture hints');
- literal($('#whack-rule'),zh?'打小人 90 秒。單指或雙指點拍、滑動重扣、來回搓三次、畫完整圓圈，或雙指向內夾，都可以使出不同招式。跟着節奏提示可獲額外分數，下方五個圖示只作手勢提示。':'Whack for 90 seconds. Tap with one or two fingers, or swipe for a heavy whack. Rub back and forth with three direction changes, draw a full circle, or bring two fingers together for special moves. Follow the rhythm prompts for bonuses. The five icons are gesture hints only.');
+ literal($('#gesture-hint-note'),zh?'在紙人上操作：點拍、長按、滑動、順／逆畫圈、搓揉及雙指夾／拉。橫掃下方可查看提示。':'Use gestures on the paper. Swipe the hint strip to explore holds, both circle directions, rubbing, pinching and spreading.');
+ $('#gesture-tools').setAttribute('aria-label',zh?'手勢提示，可左右滑動查看':'Gesture hints; swipe sideways to explore');
+ const hintNames={tap:['點拍','Tap'],hold:['長按放手','Hold & release'],heavy:['滑動重扣','Swipe'],cw:['順時針','CW circle'],ccw:['逆時針','CCW circle'],rub:['來回搓','Rub'],pinch:['雙指夾','Pinch'],spread:['向外拉闊','Spread']};
+ for(const hint of document.querySelectorAll('#gesture-tools .gesture-hint'))literal(hint.querySelector('b'),hintNames[hint.dataset.direction||hint.dataset.gesture][zh?0:1]);
+ $('#hit-zone').setAttribute('aria-label',zh?'在紙人上點拍、滑動、畫圈、長按後放手，或雙指夾及拉闊；鍵盤可用空白鍵點拍':'Tap, swipe, circle, hold then release, pinch or spread on the paper; Space gives a keyboard tap');
+ literal($('#whack-rule'),zh?'打小人 90 秒。可單指／雙指點拍、滑動重扣、來回搓三次、順時針或逆時針畫一圈。長按至少 0.7 秒後放手可重壓，按至 1.6 秒力度最強；雙指向內夾或向外拉闊也有不同招式。跟着節奏提示可獲額外分數，下方圖示只作提示，可左右滑動查看。':'Whack for 90 seconds. Tap, swipe, rub with three direction changes, or draw a clockwise or anti-clockwise circle. Hold still for at least 0.7s and release for a press, strongest at 1.6s. Pinch two fingers in or spread them out. Follow rhythm prompts for bonuses. Swipe the hint strip to explore; its icons never activate a move.');
  literal($('#ritual-timing-note'),zh?'打小人階段為 90 秒，每局出現兩至三次突發事件。整套儀式約 97–117 秒，步驟到時會自然繼續。隨時可以暫停，切到其他頁面也會暫停；取消的儀式不會發放獎勵。':'Whack for 90 seconds, with two or three surprise events per round. Rituals last about 97–117 seconds. Steps gently move on when their time is up. Pause whenever you need; hiding the page pauses the ritual too. A cancelled ritual gives no rewards.');
 }
 function save(){try{if(storage){if(!syncProgress()){const raw=JSON.stringify(state);storage.setItem(STORAGE_KEY,raw);storedRaw=raw;}}}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';}
@@ -153,8 +157,9 @@ function lock(value){
  if(!value)window.scrollTo({top:savedScroll,behavior:'instant'});
 }
 function cancelGestures(){
+ const interrupted=gestures.size>0;
  neighbourhoodUI?.cancel();kitUI?.cancelPointer();
- for(const id of gestures.keys()){try{$('#hit-zone').releasePointerCapture(id);}catch{}}gestures.clear();pinch=null;clearGesturePreview();
+ for(const id of gestures.keys()){try{$('#hit-zone').releasePointerCapture(id);}catch{}}gestures.clear();pinch=null;clearGesturePreview();if(interrupted)feedback(gestureText('手勢已取消，重新出手。','Gesture cancelled. Start again.'));
  if(incenseGesture){try{$('#incense-zone').releasePointerCapture(incenseGesture.id);}catch{}incenseGesture=null;}
  if(porkGesture){try{$('#pork-piece').releasePointerCapture(porkGesture.id);}catch{}porkGesture=null;}
  $('#pork-piece').style.translate='';$('#striking-weapon').style.transform='';$('#paper-tiger').classList.remove('is-ready');
@@ -191,10 +196,11 @@ function tick(){
  if(game.phase==='beat'){
    $('#live-score').textContent=game.score;$('#live-combo').textContent=performance.now()-game.lastHit>800?0:game.combo;$('#live-papers').textContent=game.papers;
    paintPaperWear();neighbourhoodUI?.renderPlay();
+   if(gestures.size===1&&!pinch){const stroke=[...gestures.values()][0];if(!stroke.consumed&&!stroke.holdBlocked&&holdProgress(stroke,performance.now())>0&&performance.now()-stroke.time>=180)previewGesture(stroke);}
    const beat=Math.floor(game.elapsed/BEAT_INTERVAL);if(beat!==lastBeat){lastBeat=beat;if(!game.skill.busy(game.elapsed))audio.tone(420,.045,'triangle',.018);}
    const pulse=game.elapsed%BEAT_INTERVAL;$('#rhythm-pulse').style.setProperty('--beat-scale',1+Math.max(0,1-pulse/160)*.65);
-   $('#qte-call').hidden=!game.qte;if(game.qte){$('#qte-call').textContent=qteHints[game.qte.type];if(lastQte!==game.qteIndex){lastQte=game.qteIndex;say($('#qte-call').textContent);audio.tone(780,.12,'sine',.06);}}
-   for(const hint of document.querySelectorAll('[data-gesture]'))hint.classList.toggle('is-prompted',(game.qte?.type==='double'?'tap':game.qte?.type)===hint.dataset.gesture);
+   $('#qte-call').hidden=!game.qte;if(game.qte){literal($('#qte-call'),qteHints[game.qte.type][getLanguage()==='zh-Hant'?0:1]);if(lastQte!==game.qteIndex){lastQte=game.qteIndex;say($('#qte-call').textContent);audio.tone(780,.12,'sine',.06);}}
+   for(const hint of document.querySelectorAll('#gesture-tools [data-gesture]')){const type=game.qte?.type,match=type==='clockwise'?hint.dataset.direction==='cw':type==='counterclockwise'?hint.dataset.direction==='ccw':(type==='double'?'tap':type)===hint.dataset.gesture;hint.classList.toggle('is-prompted',match);if(match&&hint.dataset.promptIndex!==String(game.qteIndex)){hint.dataset.promptIndex=game.qteIndex;const strip=$('#gesture-tools');strip.scrollTo({left:hint.offsetLeft-(strip.clientWidth-hint.offsetWidth)/2,behavior:reduced.matches?'instant':'smooth'});}}
    const chant=Math.floor(game.elapsed/4000);if(chant!==lastChant){lastChant=chant;const line=CHANTS[chant%CHANTS.length];$('#fong-line').textContent=line;audio.speak(translate(line),getLanguage());if(chant===3){audio.tone(1050,.4,'sine',.045);audio.tone(790,.4,'sine',.03,.2);}}
  }
  kitUI?.render();
@@ -211,16 +217,26 @@ function whack(options){
  spendKitOnce();
  const force=.2+Math.min(1,hit.power/9)*.8;cryDuration=900+force*900;audio.hit(game.weapon,hit.heavy,hit.perfect,hit.power);vibrate(Math.round(7+force*30));
  const paper=$('#paper-doll');paper.classList.add('is-crying');paper.style.setProperty('--hit-strength',force);paper.dataset.impact=force.toFixed(3);
- const captions={tap:'Bonk!',heavy:'WHAM!',rub:'Scrub-a-dub!',circle:'Whoooosh!',pinch:'Squeeeze!'};
- feedback(`${translate(hit.qteComplete?'Lovely combo!':captions[hit.gesture])} · +${hit.points}`);$('#hit-zone').dataset.lastGesture=hit.gesture;paintPaperWear();neighbourhoodUI?.hitFeedback(hit);neighbourhoodUI?.renderPlay(true);kitUI?.normalHit(hit);kitUI?.render();
+ const captions={tap:'Bonk!',heavy:'WHAM!',rub:'Scrub-a-dub!',circle:hit.direction==='ccw'?gestureText('逆轉衰運！','Reverse the bad luck!'):gestureText('順轉收工！','Spin it away!'),pinch:'Squeeeze!',hold:gestureText('重壓！扁晒喇！','SQUASH! Flat-out relief!'),spread:gestureText('拉闊！心胸廣闊！','STRETCH! Room to breathe!')};
+ if(hit.gesture==='circle')audio.sweep(hit.direction==='ccw'?1000:450,hit.direction==='ccw'?450:1000,.16,.04);
+ if(hit.gesture==='hold'){audio.noise(.12,.08,350);vibrate([12,30,Math.round(15+force*20)]);}
+ if(hit.gesture==='spread')audio.sweep(250,700,.18,.04);
+ feedback(`${translate(hit.qteComplete?'Lovely combo!':captions[hit.gesture])} · +${hit.points}`);$('#hit-zone').dataset.lastGesture=hit.gesture;$('#hit-zone').dataset.lastDirection=hit.direction||'';paintPaperWear();neighbourhoodUI?.hitFeedback(hit);neighbourhoodUI?.renderPlay(true);kitUI?.normalHit(hit);kitUI?.render();
  if(!reduced.matches){
   paperAnimation?.cancel();shoeAnimation?.cancel();for(const animation of rigAnimations)animation.cancel();rigAnimations=[];
   const angle=8+force*27,travel=6+force*23,squash=1-force*.38;
   const moves={rub:[`translateX(${-travel}px) rotate(${-angle}deg)`,`translateX(${travel}px) rotate(${angle}deg)`,`translateX(${-travel*.6}px) rotate(${-angle*.5}deg)`],circle:[`rotate(${-angle}deg) scale(${1+force*.1},${squash})`,`rotate(${angle*1.4}deg) scale(${1-force*.15},${1+force*.2})`,`rotate(${-angle*.4}deg)`],pinch:[`scale(${1-force*.48},${1+force*.3})`,`scale(${1+force*.27},${1-force*.18})`,`scale(.96,1.04)`]};
+  const turn=hit.direction==='ccw'?-1:1;
+  moves.circle=[`rotate(${turn*angle}deg) scale(${1+force*.1},${squash})`,`rotate(${-turn*angle*1.4}deg) scale(${1-force*.15},${1+force*.2})`,`rotate(${turn*angle*.4}deg)`];
+  moves.hold=[`translateY(${travel*.5}px) scale(${1+force*.42},${1-force*.5})`,`translateY(${-travel*.3}px) scale(.85,${1+force*.24})`,`scale(1.06,.94)`];
+  moves.spread=[`scale(${1+force*.6},${1-force*.28}) rotate(-4deg)`,`scale(.8,1.2) rotate(4deg)`,`scale(1.07,.95)`];
   const middle=moves[hit.gesture]??[`translateY(${travel*.35}px) rotate(${-angle*.6}deg) scale(${1+force*.28},${squash})`,`translateY(${-travel*.3}px) rotate(${angle*.35}deg) scale(.93,1.12)`];
   paperAnimation=paper.animate([{transform:'none'},...middle.map(transform=>({transform})),{transform:'none'}],{duration:320+force*320,easing:'cubic-bezier(.2,.75,.3,1)'});
   const toolTravel=18+force*60,toolAngle=20+force*62;
   const toolMoves={tap:[`translate(-${toolTravel*.5}px,${toolTravel*.4}px) rotate(-${toolAngle}deg)`],heavy:[`translate(10px,-${toolTravel*.65}px) rotate(${toolAngle}deg)`,`translate(-${toolTravel}px,${toolTravel*.6}px) rotate(-${toolAngle}deg)`],rub:[`translate(-${toolTravel}px,15px) rotate(-${toolAngle}deg)`,`translate(${toolTravel*.2}px,25px) rotate(${toolAngle*.5}deg)`,`translate(-${toolTravel}px,15px) rotate(-${toolAngle}deg)`],circle:[`translate(-${toolTravel}px,-25px) rotate(-100deg)`,`translate(-${toolTravel}px,${toolTravel*.55}px) rotate(-230deg)`,`translate(10px,0) rotate(-360deg)`],pinch:[`translate(-${toolTravel}px,10px) rotate(-${toolAngle}deg)`,`translate(-${toolTravel*.5}px,10px) rotate(-15deg)`]};
+  toolMoves.circle=[`translate(${-turn*toolTravel}px,-25px) rotate(${turn*100}deg)`,`translate(${-turn*toolTravel}px,${toolTravel*.55}px) rotate(${turn*230}deg)`,`translate(10px,0) rotate(${turn*360}deg)`];
+  toolMoves.hold=[`translate(0,-${toolTravel*.8}px) rotate(15deg)`,`translate(-${toolTravel*.5}px,${toolTravel*.65}px) rotate(-55deg)`,`translate(-${toolTravel*.35}px,10px) rotate(-30deg)`];
+  toolMoves.spread=[`translate(-${toolTravel}px,5px) rotate(-${toolAngle}deg)`,`translate(${toolTravel*.4}px,5px) rotate(${toolAngle*.4}deg)`];
   shoeAnimation=$('#striking-weapon').animate([{transform:'rotate(-18deg)'},...toolMoves[hit.gesture].map(transform=>({transform})),{transform:'rotate(-18deg)'}],{duration:260+force*260,easing:'ease-out'});
   for(const [selector,sign]of [['.paper-arm-left',-1],['.paper-arm-right',1],['.paper-leg-left',1],['.paper-leg-right',-1],['.paper-head',-.4]]){const part=paper.querySelector(selector);if(part)rigAnimations.push(part.animate([{transform:'rotate(0)'},{transform:`rotate(${sign*(18+force*58)}deg)`,offset:.23},{transform:`rotate(${-sign*(10+force*34)}deg)`,offset:.6},{transform:'rotate(0)'}],{duration:400+force*360,easing:'ease-out'}));}
   $('#hit-feedback').animate([{backgroundColor:'#98603d',color:'#fff4ca'},{backgroundColor:'#193234',color:'#ffe1a0'}],{duration:300,easing:'ease-out'});
@@ -260,34 +276,42 @@ $('#incense-zone').addEventListener('pointerup',event=>{const gesture=incenseGes
 function blow(){if(!game.blow())return;$('#phase-incense').classList.add('is-blown');$('#blow').disabled=true;$('#fong-line').textContent='One slow breath. Let your shoulders settle.';stopMicrophone();audio.noise(.22,.05,700);}
 $('#blow').addEventListener('click',blow);$('#confirm-worry').addEventListener('click',()=>{if(game.confirm()){$('#fong-line').textContent='Written down. You can put it down now.';audio.tone(380,.15,'triangle',.08);}});
 function clearGesturePreview(){
- $('#hit-zone').classList.remove('is-gesturing');$('#gesture-trail-path').setAttribute('d','');$('#gesture-charge').style.setProperty('--charge','0%');$('#striking-weapon').style.transform='';
+ $('#hit-zone').classList.remove('is-gesturing','is-holding');$('#gesture-trail-path').setAttribute('d','');$('#gesture-charge').style.setProperty('--charge','0%');$('#hit-zone').style.setProperty('--hold-charge','0');$('#striking-weapon').style.transform='';
 }
 function previewGesture(stroke){
- const shape=strokeShape(stroke),rect=$('#hit-zone').getBoundingClientRect();
+ if(stroke.consumed)return;
+ const shape=strokeShape(stroke),rect=$('#hit-zone').getBoundingClientRect(),held=holdProgress(stroke,performance.now());
  if(!reduced.matches){const points=stroke.points.slice(-36);$('#gesture-trail-path').setAttribute('d',points.map((p,i)=>`${i?'L':'M'}${(p.x-rect.x)/rect.width*100},${(p.y-rect.y)/rect.height*100}`).join(' '));}
  let type=shape.gesture,progress=shape.progress;
- if(pinch){type='pinch';progress=pinch.progress;}
+ if(pinch){type=pinch.kind||'pinch';progress=pinch.progress;}
+ else if(held>0&&performance.now()-stroke.time>=180){type='hold';progress=held;}
  else if(progress===0){type='heavy';progress=Math.min(1,stroke.length/100);}
- $('#hit-zone').classList.add('is-gesturing');$('#gesture-charge').style.setProperty('--charge',`${progress*100}%`);$('#gesture-charge').textContent={heavy:'↓',rub:'↔',circle:'↻',pinch:'⇢⇠'}[type];
- if(progress>=1)feedback(type==='heavy'?'Release for a heavy whack.':type==='pinch'?'Pinch! A little less pressure.':'Ready! Lift your finger.');
- else if(type==='circle')feedback('Keep circling…');else if(type==='rub')feedback('Back and forth. Keep rubbing!');else if(type==='pinch')feedback('Bring two fingers together!');
+ $('#hit-zone').classList.add('is-gesturing');$('#hit-zone').classList.toggle('is-holding',type==='hold');$('#hit-zone').style.setProperty('--hold-charge',type==='hold'?progress:0);$('#gesture-charge').style.setProperty('--charge',`${progress*100}%`);$('#gesture-charge').textContent={heavy:'↓',rub:'↔',circle:shape.direction==='ccw'?'↺':'↻',pinch:'⇢⇠',spread:'⇠⇢',hold:'⏱'}[type];
+ let message='';
+ if(type==='hold')message=progress>=1?gestureText('儲好力！放手重壓！','Charged! Release to squash!'):gestureText(`長按蓄力…${Math.round(progress*100)}%`,`Hold to charge…${Math.round(progress*100)}%`);
+ else if(progress>=1)message=type==='pinch'?gestureText('雙指夾擊！','Pinch!'):type==='spread'?gestureText('向外拉闊！','Stretch!'):gestureText('準備好！放手！','Ready! Lift your finger.');
+ else if(type==='circle')message=shape.direction==='ccw'?gestureText('逆時針繼續轉…','Keep circling anti-clockwise…'):gestureText('順時針繼續轉…','Keep circling clockwise…');
+ else if(type==='rub')message=translate('Back and forth. Keep rubbing!');else if(type==='pinch')message=translate('Bring two fingers together!');else if(type==='spread')message=gestureText('雙指向外拉開…','Spread two fingers apart…');
+ if(message&&$('#hit-feedback').textContent!==message)feedback(message);
 }
 const zone=$('#hit-zone');
 zone.addEventListener('pointerdown',event=>{
- if(event.button!==0||game.phase!=='beat'||game.pausedAt!==null||gestures.size>=2)return;
+ if(event.button!==0||game.phase!=='beat'||game.pausedAt!==null||gestures.size>=2||game.skill.busy(game.elapsed))return;
  event.preventDefault();const stroke=beginStroke(event.clientX,event.clientY,performance.now());stroke.pointerType=event.pointerType;gestures.set(event.pointerId,stroke);zone.setPointerCapture(event.pointerId);
- if(gestures.size===2&&[...gestures.values()].every(g=>g.pointerType==='touch')){const ids=[...gestures.keys()],[a,b]=ids.map(id=>gestures.get(id));pinch={ids,initial:Math.hypot(a.lastX-b.lastX,a.lastY-b.lastY),progress:0,done:false,started:performance.now()};}
+ if(gestures.size===2&&[...gestures.values()].every(g=>g.pointerType==='touch')){const ids=[...gestures.keys()],[a,b]=ids.map(id=>gestures.get(id));a.holdBlocked=b.holdBlocked=true;pinch={ids,initial:Math.hypot(a.lastX-b.lastX,a.lastY-b.lastY),progress:0,kind:'pinch',moved:false,done:false,started:performance.now()};clearGesturePreview();}
 });
 zone.addEventListener('pointermove',event=>{
  const stroke=gestures.get(event.pointerId);if(!stroke||stroke.consumed)return;
  for(const sample of [...(event.getCoalescedEvents?.()??[]),event])moveStroke(stroke,sample.clientX,sample.clientY);
  const dx=event.clientX-stroke.x,dy=event.clientY-stroke.y;$('#striking-weapon').style.transform=`translate(${Math.max(-25,Math.min(25,dx*.12))}px,${Math.max(-25,Math.min(25,dy*.12))}px) rotate(${-18+Math.min(35,Math.abs(dy)*.12)}deg)`;
- if(pinch&&!pinch.done){const [a,b]=pinch.ids.map(id=>gestures.get(id));if(a&&b){pinch.progress=pinchProgress(pinch.initial,Math.hypot(a.lastX-b.lastX,a.lastY-b.lastY));if(pinch.progress>=1){pinch.done=true;a.consumed=b.consumed=true;whack({gesture:'pinch',strength:Math.min(1,.4+pinch.initial/220+pinch.progress/Math.max(1,(performance.now()-pinch.started)/140)),pointer:`pinch-${++gestureSerial}`});}}}
+ if(pinch&&!pinch.done){const [a,b]=pinch.ids.map(id=>gestures.get(id));if(a&&b){const gap=Math.hypot(a.lastX-b.lastX,a.lastY-b.lastY),outward=gap>pinch.initial;pinch.kind=outward?'spread':'pinch';pinch.progress=outward?spreadProgress(pinch.initial,gap):pinchProgress(pinch.initial,gap);pinch.moved ||= Math.abs(gap-pinch.initial)>=12||a.maxDrift>=20||b.maxDrift>=20;if(pinch.progress>=1){pinch.done=true;a.consumed=b.consumed=true;whack({gesture:pinch.kind,strength:Math.min(1,.4+pinch.initial/220+pinch.progress/Math.max(1,(performance.now()-pinch.started)/140)),pointer:`pair-${++gestureSerial}`});clearGesturePreview();return;}}}
  previewGesture(stroke);
 });
 zone.addEventListener('pointerup',event=>{
- const stroke=gestures.get(event.pointerId);if(!stroke)return;moveStroke(stroke,event.clientX,event.clientY);gestures.delete(event.pointerId);if(pinch?.ids.includes(event.pointerId))pinch=null;
- if(!stroke.consumed){const action=finishStroke(stroke,performance.now());if(action)whack({...action,pointer:event.pointerId});else feedback('Try a full circle or three back-and-forth strokes.');}
+ const stroke=gestures.get(event.pointerId);if(!stroke)return;moveStroke(stroke,event.clientX,event.clientY);
+ if(pinch?.ids.includes(event.pointerId)){if(pinch.moved&&!pinch.done){for(const id of pinch.ids){const other=gestures.get(id);if(other)other.consumed=true;}feedback(gestureText('雙指未完成，再夾／拉闊一次。','Pair unfinished. Pinch or spread again.'));}pinch=null;}
+ gestures.delete(event.pointerId);
+ if(!stroke.consumed){const action=finishStroke(stroke,performance.now());if(action)whack({...action,pointer:event.pointerId});else feedback(gestureText('畫滿一圈、長按 0.7 秒，或搓三次再放手。','Complete a circle, hold still 0.7s, or rub three times.'));}
  if(!gestures.size)clearGesturePreview();
 });
 function cancelPointer(event){const stroke=gestures.get(event.pointerId);if(!stroke)return;gestures.delete(event.pointerId);if(pinch?.ids.includes(event.pointerId)){for(const id of pinch.ids){const other=gestures.get(id);if(other)other.consumed=true;}pinch=null;}clearGesturePreview();}
@@ -324,7 +348,7 @@ function openShop(name){settle();renderStall();selectTab(name);$(`#tab-${name}`)
 for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>openShop(shortcut.dataset.shortcut));
 for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>{settle();renderStall();selectTab(button.dataset.tab);});button.addEventListener('keydown',event=>{const names=['stall','kits','friends'],index=names.indexOf(button.dataset.tab);let next;if(event.key==='ArrowRight')next=(index+1)%3;if(event.key==='ArrowLeft')next=(index+2)%3;if(event.key==='Home')next=0;if(event.key==='End')next=2;if(next!==undefined){event.preventDefault();selectTab(names[next],true);}});}
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',cancelGestures);reduced.addEventListener('change',()=>{paperAnimation?.cancel();shoeAnimation?.cancel();});
-neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:gesture=>whack({gesture,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onAccept:nextKind=>{kind=nextKind;$('#worry-input').value='';drawWorries();}});
+neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:(gesture,direction)=>whack({gesture,direction,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onAccept:nextKind=>{kind=nextKind;$('#worry-input').value='';drawWorries();}});
 kitUI=createKitSkillsUI({game,audio,announce:say,onScore:spendKitOnce,beforeActivate:()=>uxUI?.beforeActivate()??true});
 $('#open-journey').addEventListener('click',()=>uxUI?.openCollection());
 for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.innerHTML=fongCostumeArt();for(const id of illustratedDecor)$('#stall-'+id).innerHTML=decorArt(id);for(const ghost of document.querySelectorAll('[data-ghost]'))ghost.innerHTML=ghostArt(ghost.dataset.ghost);for(const master of document.querySelectorAll('[data-fong]')){const icon=$('.fong-logo').cloneNode(true);icon.className='fong-logo master-avatar';master.append(icon);}drawWorries();settle();renderStall();updateSound();enableOffline($('#offline-status'));
