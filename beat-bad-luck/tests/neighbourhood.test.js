@@ -4,6 +4,15 @@ import {RitualFlavour,EVENT_DURATION} from '../src/ritual-flavour.js';
 import {STORIES,freshNeighbourhood,acceptStory,finishNeighbourhood,placeDecoration,discoverScenes,availableScenes,personalFortune} from '../src/neighbourhood.js';
 import {fresh,readProgress,reward,buyWeapon,consumeWeapon} from '../src/progress.js';
 import {postcardSvg} from '../src/postcard.js';
+test('blind boxes and Mark Six have the advertised gesture weaknesses without phantom copies',()=>{
+ for(const [kind,move]of [['blind-box','rub'],['marksix','circle']]){
+  const flavour=new RitualFlavour(()=>.1);flavour.start(kind);
+  assert.equal(flavour.hit(0,'tap',false,20,1).weak,false);
+  const hit=flavour.hit(1000,move,false,20,1);assert.equal(hit.weak,true);assert.equal(hit.points,28);
+  for(let i=0;i<8;i++)flavour.hit(2000+i*100,move,false,20,1);
+  assert.deepEqual(flavour.view(3000).copies,[]);
+ }
+});
 function setup(kind='work',random=()=>.2){let at=0;const game=new RitualGame({now:()=>at,random});game.start({kind});at+=DURATIONS.incense;game.advance();at+=DURATIONS.worry;game.advance();return {game,step(ms){at+=ms;game.advance();}};}
 const complete={kind:'commute',weapon:'bare-hand',hits:12,score:900,papers:2,qte:1,perfect:12,maxPerfectStreak:10,moves:{tap:1,heavy:1,rub:1,circle:1,pinch:1},weaknessHits:4,copiesCleared:4,eventsWon:1,fed:true,blessed:true,wear:.8};
 test('copier emits bounded expiring targets, rewards a clear only once and heavy whacks clear copies',()=>{const g=setup();for(let i=0;i<4;i++){g.game.hit({pointer:i});g.step(60);}assert.equal(g.game.flavour.copies.length,1);const id=g.game.flavour.copies[0].id;assert.equal(g.game.interact('copy',id),12);assert.equal(g.game.interact('copy',id),0);assert.equal(g.game.flavour.copiesCleared,1);for(let i=0;i<4;i++){g.game.hit({pointer:i});g.step(60);}const hit=g.game.hit({gesture:'heavy',pointer:9});assert.equal(hit.copyCleared,true);assert.equal(g.game.flavour.copies.length,0);g.step(60);for(let i=0;i<12;i++){g.game.hit({pointer:i});g.step(60);}assert.ok(g.game.flavour.copies.length<=2);g.step(5000);assert.equal(g.game.flavour.view(g.game.elapsed).copies.length,0);});

@@ -1,5 +1,5 @@
 import {weaponArt,dollArt} from './art.js';
-import {currentKitStep,kitAimTarget,kitBeatCue,assistedKitStroke} from './kit-gestures.js';
+import {currentKitStep,kitAimTarget,kitBeatCue,assistedKitStroke,appendKitSample} from './kit-gestures.js';
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nest=(art,x,y,w,h)=>art.replace('<svg ',`<svg x="${x}" y="${y}" width="${w}" height="${h}" `);
 const props={
@@ -95,7 +95,7 @@ export function createExpandedKitUI({game,stage,act,local,announce}){
  },true);
  stage.addEventListener('pointermove',event=>{
   if(!pointers.has(event.pointerId)||!active())return;event.preventDefault();event.stopImmediatePropagation();const p=normalise(event),previous=pointers.get(event.pointerId);pointers.set(event.pointerId,{...p,element:previous.element});
-  if(pointers.size>1)return;if(samples.length<96)samples.push(p);else samples[samples.length-1]=p;const ink=canvas.querySelector('#expanded-ink');if(ink)ink.setAttribute('points',samples.map(t=>`${t.x*300},${t.y*220}`).join(' '));const cursor=canvas.querySelector('.expanded-cursor');cursor.hidden=false;cursor.style.left=`${p.x*100}%`;cursor.style.top=`${p.y*100}%`;if(step().type==='aim')act('gesture-move',p);
+  if(pointers.size>1)return;samples=appendKitSample(samples,p);const ink=canvas.querySelector('#expanded-ink');if(ink)ink.setAttribute('points',samples.map(t=>`${t.x*300},${t.y*220}`).join(' '));const cursor=canvas.querySelector('.expanded-cursor');cursor.hidden=false;cursor.style.left=`${p.x*100}%`;cursor.style.top=`${p.y*100}%`;if(step().type==='aim')act('gesture-move',p);
  },true);
  stage.addEventListener('pointerup',event=>{
   if(!pointers.has(event.pointerId)||!active())return;event.preventDefault();event.stopImmediatePropagation();const current=step(),p=normalise(event);

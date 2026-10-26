@@ -23,6 +23,22 @@ const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,
 try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}
 const itemName=item=>item.nameZh?(getLanguage()==='zh-Hant'?item.nameZh:item.name):translate(item.name);
 const worryLabel=worry=>worry.labelZh&&getLanguage()==='zh-Hant'?worry.labelZh:translate(worry.label);
+function showPurchaseShortfall(info,button,cost,merit,id){
+ const missingOil=Math.max(0,cost-state.coins),missingMerit=Math.max(0,merit-state.merit);if(!missingOil&&!missingMerit)return;
+ const zh=getLanguage()==='zh-Hant',parts=[];
+ if(missingMerit)parts.push(zh?`${missingMerit.toLocaleString()} 功德`:`${missingMerit.toLocaleString()} merit`);
+ if(missingOil)parts.push(zh?`${missingOil.toLocaleString()} 香油錢`:`${missingOil.toLocaleString()} oil`);
+ const hint=document.createElement('small');hint.id=id;hint.className='purchase-shortfall';literal(hint,(zh?'還欠 ':'Still need ')+parts.join(zh?'及 ':' and '));info.append(hint);button.setAttribute('aria-describedby',id);
+}
+function restoreShopFocus(attribute,id,reveal=false){
+ const control=$(`[data-${attribute}="${id}"]`)??$(`[data-decor="${id}"]`);if(!control)return;
+ let target=control;
+ if(control.disabled){
+  target=control.closest('.kit-row,.decor-row');if(!target)return;target.tabIndex=-1;target.dataset.restoreAction=attribute;target.dataset.restoreId=id;target.setAttribute('role','group');
+  const item=(attribute==='weapon'?WEAPONS:DECOR).find(item=>item.id===id);target.setAttribute('aria-label',`${itemName(item)} · ${translate(control.textContent)}`);
+ }
+ target.focus({preventScroll:true});if(reveal)target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+}
 const say=text=>{$('#announcements').textContent=translate(text);};
 const vibrate=pattern=>{try{navigator.vibrate?.(pattern);}catch{}};
 const qteHints={double:'Two quick taps!',heavy:'Swipe for a heavy whack!',rub:'Rub back and forth!',circle:'Draw a full circle!',pinch:'Bring two fingers together!'};
@@ -75,7 +91,7 @@ function renderStall(){
  renderDecorDisplay();
  $('#play-panel').classList.toggle('has-neon',state.decor.neon>0);$('#play-panel').classList.toggle('has-incense',state.decor.incense>0);for(const id of illustratedDecor)$('#stall-'+id).hidden=!state.decor[id];
  renderDecorRows();
- $('#weapon-list').replaceChildren(...shopWeapons.map(w=>{const row=document.createElement('div');row.className='kit-row';const icon=document.createElement('span');icon.className='kit-art';icon.setAttribute('aria-hidden','true');icon.innerHTML=weaponArt(w.id);const owned=state.owned.includes(w.id),equipped=state.equipped===w.id,button=document.createElement('button');button.type='button';button.dataset.weapon=w.id;button.disabled=equipped||(!owned&&(state.merit<w.merit||state.coins<w.cost));button.textContent=equipped?'In hand':owned?'Equip':`${w.cost} oil`;button.setAttribute('aria-label',`${itemName(w)} · ${translate(button.textContent)}`);button.addEventListener('click',()=>{settle();const next=buyWeapon(state,w.id);if(!next)return;state=next;save();renderStall();message(w.cost?'Your single-use kit is ready for one ritual.':'Your hands are ready.');audio.unlock().then(()=>audio.hit(w.id,false,false));$(`[data-weapon="${w.id}"]`)?.focus({preventScroll:true});});const detail=owned?(w.cost?'One ritual left':'Free to use every time'):`Needs ${w.merit} merit`;const text=rowText(itemName(w),'');literal(text.querySelector('small'),`${kitScoreLabel(w.id)} · ${translate(detail)}`);if(KIT_SKILLS[w.id]){const detail=document.createElement('small');detail.className='kit-shop-skill';literal(detail,(getLanguage()==='zh-Hant'?'招牌技：':'Signature: ')+KIT_SKILLS[w.id].name[getLanguage()==='zh-Hant'?0:1]);text.append(detail);}row.append(icon,text,button);return row;}));
+ $('#weapon-list').replaceChildren(...shopWeapons.map(w=>{const row=document.createElement('div');row.className='kit-row';const icon=document.createElement('span');icon.className='kit-art';icon.setAttribute('aria-hidden','true');icon.innerHTML=weaponArt(w.id);const owned=state.owned.includes(w.id),equipped=state.equipped===w.id,button=document.createElement('button');button.type='button';button.dataset.weapon=w.id;button.disabled=equipped||(!owned&&(state.merit<w.merit||state.coins<w.cost));button.textContent=equipped?'In hand':owned?'Equip':`${w.cost} oil`;button.setAttribute('aria-label',`${itemName(w)} · ${translate(button.textContent)}`);button.addEventListener('click',()=>{settle();const next=buyWeapon(state,w.id);if(!next)return;state=next;save();renderStall();message(w.cost?'Your single-use kit is ready for one ritual.':'Your hands are ready.');audio.unlock().then(()=>audio.hit(w.id,false,false));restoreShopFocus('weapon',w.id,true);});const detail=owned?(w.cost?'One ritual left':'Free to use every time'):`Needs ${w.merit} merit`;const text=rowText(itemName(w),'');literal(text.querySelector('small'),`${kitScoreLabel(w.id)} · ${translate(detail)}`);if(KIT_SKILLS[w.id]){const detail=document.createElement('small');detail.className='kit-shop-skill';literal(detail,(getLanguage()==='zh-Hant'?'招牌技：':'Signature: ')+KIT_SKILLS[w.id].name[getLanguage()==='zh-Hant'?0:1]);text.append(detail);}if(!owned)showPurchaseShortfall(text,button,w.cost,w.merit,`kit-reason-${w.id}`);row.append(icon,text,button);return row;}));
  $('#friend-list').replaceChildren(...FRIENDS.map(f=>{const row=document.createElement('div'),icon=document.createElement('span');const owned=state.friends.includes(f.id);row.className=`friend-row${owned?'':' is-locked'}`;icon.className='friend-icon';icon.textContent=owned?f.icon:'?';icon.setAttribute('aria-hidden','true');const text=rowText(owned?f.name:'A kind stranger',owned?'5% more ritual oil money':'Keep a little room for good company.');if(owned){const story=document.createElement('p');story.textContent=f.story;text.append(story);}row.append(icon,text);return row;}));
  $('#records').replaceChildren(...state.records.map((r,index)=>{const row=document.createElement('li'),place=document.createElement('span'),info=document.createElement('div'),name=document.createElement('b'),date=document.createElement('small'),score=document.createElement('output');row.className='record-row';place.textContent=String(index+1).padStart(2,'0');literal(name,itemName(WEAPONS.find(w=>w.id===r.weapon)));date.textContent=new Intl.DateTimeFormat(getLanguage(),{month:'short',day:'numeric'}).format(new Date(r.date));score.textContent=r.score;info.append(name,date);row.append(place,info,score);return row;}));
  neighbourhoodUI?.renderHome();kitUI?.renderHome(state.equipped);
@@ -85,10 +101,10 @@ function renderDecorRows(){
  $('#decor-list').replaceChildren(...[...DECOR].sort((a,b)=>decorPrice(a)-decorPrice(b)||a.cost-b.cost).map(d=>{
   const row=document.createElement('div');row.className='decor-row';const icon=document.createElement('span');icon.className='decor-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML=decorArt(d.id);
   const level=state.decor[d.id],cost=d.cost*(level+1),button=document.createElement('button');button.type='button';button.dataset.decor=d.id;button.disabled=level>=MAX_DECOR_LEVEL||state.coins<cost;button.textContent=level>=MAX_DECOR_LEVEL?'Fully upgraded':`${cost} oil`;button.setAttribute('aria-label',`${itemName(d)} · ${translate(button.textContent)}`);
-  button.addEventListener('click',()=>{settle();const next=upgrade(state,d.id);if(!next){renderStall();return;}state=next;save();renderStall();message('A little brighter. The neighbourhood says thanks.');audio.unlock().then(()=>audio.chime());$(`[data-decor="${d.id}"]`)?.focus({preventScroll:true});});
+  button.addEventListener('click',()=>{settle();const next=upgrade(state,d.id);if(!next){renderStall();return;}state=next;save();renderStall();message('A little brighter. The neighbourhood says thanks.');audio.unlock().then(()=>audio.chime());restoreShopFocus('decor',d.id,true);});
   const income=translate(`Level ${level} / ${MAX_DECOR_LEVEL} · ${decorHourlyRate(d,level)} oil per hour`);
   const growth=getLanguage()==='zh-Hant'?`首級 ${d.rate}，每升級 +${DECOR_LEVEL_RATE_BONUS}`:`Starts at ${d.rate}; +${DECOR_LEVEL_RATE_BONUS} per upgrade`;
-  const info=rowText(itemName(d),'');literal(info.querySelector('small'),`${income} · ${growth}`);
+  const info=rowText(itemName(d),'');literal(info.querySelector('small'),`${income} · ${growth}`);if(level<MAX_DECOR_LEVEL)showPurchaseShortfall(info,button,cost,0,`decor-reason-${d.id}`);
   if(level){
    const health=decorDurability(state,d.id),percent=Math.max(.1,Math.round(health*10)/10),label=document.createElement('span'),meter=document.createElement('meter');label.className='decor-health-label';literal(label,translate(`Durability ${percent}%`));meter.className='decor-durability';meter.min=0;meter.max=100;meter.low=25;meter.high=70;meter.optimum=100;meter.value=health;meter.setAttribute('aria-label',`${itemName(d)} · ${translate(`Durability ${percent}%`)}`);info.append(label,meter);
   }
@@ -96,7 +112,7 @@ function renderDecorRows(){
   if(level){
    const controls=document.createElement('div'),repair=document.createElement('button'),discard=document.createElement('button'),cost=repairCost(state,d.id);controls.className='decor-controls';repair.type=discard.type='button';repair.dataset.repair=d.id;discard.dataset.discard=d.id;
    const fresh=decorDurability(state,d.id)>=99.95;repair.textContent=fresh?'Good as new':`Repair · ${cost} oil`;repair.disabled=fresh||!cost||state.coins<cost;repair.setAttribute('aria-label',`${itemName(d)} · ${translate(repair.textContent)}`);discard.textContent='Discard';discard.setAttribute('aria-label',`${translate('Discard')} · ${itemName(d)}`);
-   repair.addEventListener('click',()=>{settle();const next=repairDecor(state,d.id);if(next){state=next;save();message('Good as new. Thirty more days of good company.');audio.unlock().then(()=>audio.chime());}renderStall();$(`[data-repair="${d.id}"]`)?.focus({preventScroll:true});});discard.addEventListener('click',()=>askDiscard(d.id));controls.append(repair,discard);row.append(controls);
+   repair.addEventListener('click',()=>{settle();const next=repairDecor(state,d.id);if(next){state=next;save();message('Good as new. Thirty more days of good company.');audio.unlock().then(()=>audio.chime());}renderStall();restoreShopFocus('repair',d.id,true);});discard.addEventListener('click',()=>askDiscard(d.id));controls.append(repair,discard);row.append(controls);
   }
   return row;
  }));
@@ -108,10 +124,10 @@ function askDiscard(id){
 $('#cancel-discard').addEventListener('click',()=>$('#discard-dialog').close());
 $('#discard-dialog').addEventListener('close',()=>{if(discardTarget)$(`[data-discard="${discardTarget}"]`)?.focus({preventScroll:true});discardTarget=null;});
 $('#confirm-discard').addEventListener('click',()=>{
- const id=discardTarget;settle();const next=discardDecor(state,id);if(next){state=next;save();message('Decoration discarded. A little space for something new.');}$('#discard-dialog').close();renderStall();$(`[data-decor="${id}"]`)?.focus({preventScroll:true});
+ const id=discardTarget;settle();const next=discardDecor(state,id);if(next){state=next;save();message('Decoration discarded. A little space for something new.');}$('#discard-dialog').close();renderStall();restoreShopFocus('decor',id,true);
 });
 // Real time keeps moving while the game is open; do not move keyboard focus.
-setInterval(()=>{if(document.hidden)return;const focused=document.activeElement,attribute=['decor','repair','discard'].find(name=>focused?.dataset?.[name]),id=attribute?focused.dataset[attribute]:null;settle();renderStall();if(id)$(`[data-${attribute}="${id}"]`)?.focus({preventScroll:true});},60000);
+setInterval(()=>{if(document.hidden)return;if(PHASES.includes(game.phase)){settle();return;}const focused=document.activeElement,attribute=['decor','repair','discard','weapon'].find(name=>focused?.dataset?.[name])??focused?.dataset?.restoreAction,id=attribute?(focused.dataset[attribute]??focused.dataset.restoreId):null;settle();renderStall();if(id)restoreShopFocus(attribute,id);},60000);
 function lock(value){
  if(value)savedScroll=scrollY;document.body.classList.toggle('is-playing',value);
  for(const selector of ['.bbl-skip','#site-header','#intro','#stall-dashboard','#story','#rules','.bbl-footer'])$(selector).inert=value;
@@ -193,11 +209,11 @@ function whack(options){
 
 function finish(){
  if(recorded||!game.result)return;recorded=true;cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.ambience(!document.hidden);try{speechSynthesis.cancel();}catch{}
- const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=!received.friend;if(received.friend)$('#friend-arrival').textContent=`A kind visitor: ${translate(received.friend.name)}`;}
+ settle();const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=!received.friend;if(received.friend)$('#friend-arrival').textContent=`A kind visitor: ${translate(received.friend.name)}`;}
  $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);kitUI?.result(game.result);
  $('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');
 }
-function backToStall(){cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);renderStall();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
+function backToStall(){cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
 function pause(){if(!PHASES.includes(game.phase))return;game.pause();cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}
 function resume(){if(!game.resume())return;$('#pause-overlay').hidden=true;$('#ritual-stage').inert=false;audio.unlock().then(()=>{if(game.pausedAt===null&&PHASES.includes(game.phase))audio.ambience(true);});$('#phase-title').focus({preventScroll:true});frame=requestAnimationFrame(tick);}
 function updateSound(){
@@ -211,7 +227,9 @@ function toggleSound(){audio.setEnabled(!audio.enabled);if(audio.enabled)unlockS
 function beginAudio(){if(audio.enabled&&!document.hidden&&game.pausedAt===null&&audio.needsUnlock)unlockSound();}
 for(const event of ['pointerup','touchend','click','keydown'])document.addEventListener(event,beginAudio,{capture:true,passive:true});
 
-$('#use-hands').addEventListener('click',()=>{state=buyWeapon(state,'bare-hand');save();renderStall();message('Your hands are ready.');});
+$('#use-hands').addEventListener('click',()=>{state=buyWeapon(state,'bare-hand');save();renderStall();$('#equipped-name').tabIndex=-1;$('#equipped-name').focus({preventScroll:true});message('Your hands are ready.');});
+$('#pause-overlay').addEventListener('keydown',event=>{if(event.key!=='Tab')return;const first=$('#resume'),last=$('#quit');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.repeat&&PHASES.includes(game.phase)){event.preventDefault();game.pausedAt===null?pause():resume();}});
 $('#start').addEventListener('click',start);$('#again').addEventListener('click',start);$('#to-stall').addEventListener('click',backToStall);$('#pause').addEventListener('click',pause);$('#resume').addEventListener('click',resume);$('#quit').addEventListener('click',backToStall);$('#sound').addEventListener('click',toggleSound);$('#sound-setup').addEventListener('click',toggleSound);
 function light(index){if(!game.light(index))return;document.querySelector(`[data-stick="${index}"]`).classList.add('is-lit');$('#blow').disabled=game.lit.size!==3;audio.noise(.07,.035,2500);vibrate(6);}
 for(const stick of document.querySelectorAll('[data-stick]'))stick.addEventListener('click',event=>{if(event.detail===0)light(Number(stick.dataset.stick));});
@@ -285,7 +303,7 @@ for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addE
  document.querySelector('.stall-tabs').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});
 });
 for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>{settle();renderStall();selectTab(button.dataset.tab);});button.addEventListener('keydown',event=>{const names=['stall','kits','friends'],index=names.indexOf(button.dataset.tab);let next;if(event.key==='ArrowRight')next=(index+1)%3;if(event.key==='ArrowLeft')next=(index+2)%3;if(event.key==='Home')next=0;if(event.key==='End')next=2;if(next!==undefined){event.preventDefault();selectTab(names[next],true);}});}
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();save();}else{settle();renderStall();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();save();});window.addEventListener('resize',cancelGestures);reduced.addEventListener('change',()=>{paperAnimation?.cancel();shoeAnimation?.cancel();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();save();}else{settle();if(!PHASES.includes(game.phase))renderStall();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();save();});window.addEventListener('resize',cancelGestures);reduced.addEventListener('change',()=>{paperAnimation?.cancel();shoeAnimation?.cancel();});
 neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:gesture=>whack({gesture,pointer:'comic-event-button'}),onExtraScore:()=>{const spent=consumeWeapon(state,game.weapon);if(spent){state=spent;save();}},onAccept:nextKind=>{kind=nextKind;$('#worry-input').value='';drawWorries();}});
 kitUI=createKitSkillsUI({game,audio,announce:say,onScore:()=>{const spent=consumeWeapon(state,game.weapon);if(spent){state=spent;save();}}});
 $('#open-journey').addEventListener('click',()=>{$('#neighbourhood-hub').open=true;$('#neighbourhood-hub').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});});

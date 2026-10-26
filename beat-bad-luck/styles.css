@@ -235,3 +235,5 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 @media(prefers-reduced-motion:reduce){.slipper-grin,.slipper-sweat{animation:none}}
 
 @media(max-width:700px){.ritual-top h2{font-size:17px;line-height:1.2;white-space:normal;text-overflow:clip}}
+
+.purchase-shortfall{display:block;color:#f0c6a2!important;font-size:10px;line-height:1.5;margin-top:4px}

@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {EXTRA_KITS} from '../src/kit-catalog.js';import {KitSkill,KIT_SKILLS,SKILL_CHARGE,SKILL_DURATION} from '../src/kit-skills.js';
-import {currentKitStep} from '../src/kit-gestures.js';import {WEAPONS,weaponScoreMultiplier} from '../src/catalog.js';import {RitualGame,DURATIONS} from '../src/game.js';
+import {currentKitStep,appendKitSample} from '../src/kit-gestures.js';import {WEAPONS,weaponScoreMultiplier} from '../src/catalog.js';import {RitualGame,DURATIONS} from '../src/game.js';
 const charge=s=>{for(let i=0;i<SKILL_CHARGE;i++)s.gain();return s;};
 function samples(step){if(step.type==='trace')return step.path;if(step.type==='drag')return [step.from,step.to];if(step.type==='rub')return Array.from({length:step.need+2},(_,i)=>[i%2?.82:.18,.45]);if(step.type==='circle')return Array.from({length:33},(_,i)=>{const a=(step.direction==='ccw'?-1:1)*Math.PI*2*i/32;return [.5+.3*Math.cos(a),.45+.3*Math.sin(a)];});return step.direction==='left'?[[.85,.45],[.15,.45]]:step.direction==='right'?[[.15,.45],[.85,.45]]:step.direction==='up'?[[.5,.85],[.5,.15]]:[[.5,.15],[.5,.85]];}
 function completeStep(s,time,dispatch=(type,input,at)=>s.action(type,input,at)){const a=s.active,step=currentKitStep(s.spec,a);let out;
@@ -38,6 +38,16 @@ test('aim needs continuous time on target, resets when outside and cannot use pa
 });
 test('beat cues reject immediate taps and wrong targets, then allow the next recurring cue',()=>{
  const s=charge(new KitSkill('triple-trio'));s.start(0,[]);assert.equal(s.action('choice',{index:2},10).ok,false);assert.equal(s.action('choice',{index:0},750).ok,false);assert.equal(s.action('choice',{index:2},1500).ok,true);assert.equal(s.active.progress,1);assert.equal(s.action('choice',{index:0},1500).ok,false);
+});
+test('long sampled circles retain their whole shape, bounded memory and captured origin',()=>{
+ const skill=charge(new KitSkill('spanner'));skill.start(0,[]);let time=0;
+ for(const direction of [1,-1]){
+  let points=[{x:.78,y:.45}];skill.action('gesture-begin',points[0],time);
+  for(let i=1;i<=480;i++){const angle=direction*i/480*Math.PI*2;points=appendKitSample(points,{x:.5+.28*Math.cos(angle),y:.45+.28*Math.sin(angle)});assert.ok(points.length<=96);}
+  assert.deepEqual(points[0],{x:.78,y:.45});time+=1400;
+  const result=skill.action('gesture-stroke',{points},time);assert.equal(result.ok,true);assert.equal(result.won,direction===-1);
+ }
+ assert.equal(skill.wins,1);
 });
 test('new recipes keep public-API multiplied bonuses, phase guards and clean replays',()=>{
  for(const id of ['bare-hand','spanner','rebirth-paper']){let now=0;const g=new RitualGame({now:()=>now,random:()=>.1});g.start({weapon:id});assert.equal(g.activateSkill(),false);now+=DURATIONS.incense;g.advance();now+=DURATIONS.worry;g.advance();for(let i=0;i<12;i++){g.hit();now+=80;}g.advance();assert.equal(g.activateSkill(),true);let time=g.elapsed;const before=g.score;

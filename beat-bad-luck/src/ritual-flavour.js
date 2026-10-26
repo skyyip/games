@@ -10,7 +10,7 @@ export const EVENTS=[
  {id:'blackout',name:['電箱罷工！畫圈一次，人力發電！','The fuse box quit! Circle once to generate power.'],icon:'💡'},
  {id:'minibus',name:['小巴散銀飛到太空！接住三個不同硬幣。','Minibus coins in orbit! Catch three different coins.'],icon:'🚐'},
  {id:'sneeze',name:['白虎打嗝！按住肉丸 0.7 秒，或重扣兩次。','Tiger hiccups! Hold the meatball 0.7s, or heavy-whack twice.'],icon:'🐯'}];
-const MOVES={noise:'heavy',sleep:'circle','kam-friends':'pinch',family:'rub',love:'tap',commute:'heavy'};
+const MOVES={noise:'heavy',sleep:'circle','kam-friends':'pinch',family:'rub',love:'tap',commute:'heavy','blind-box':'rub',marksix:'circle'};
 export const EVENT_MOVES={pigeon:['pinch',1],receipt:['rub',2],auntie:['pinch',2],blackout:['circle',1],sneeze:['heavy',2]};
 export class RitualFlavour{
  constructor(random=Math.random){this.random=random;this.start('work');}

@@ -1,6 +1,11 @@
 const point=value=>Array.isArray(value)?{x:value[0],y:value[1]}:value;
 const valid=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=-.15&&p.x<=1.15&&p.y>=-.15&&p.y<=1.15;
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+// Downsample the whole path instead of freezing its first 95 points.
+export function appendKitSample(samples,sample){
+ const next=samples.length<96?samples:samples.filter((_,i)=>i%2===0||i===samples.length-1);
+ next.push(sample);return next;
+}
 export function currentKitStep(spec,state){const step=spec.steps?.[state.progress];return step?.random?{...step,target:(state.extra.seed+state.progress)%3}:step;}
 export function kitAimTarget(state,elapsed){const t=elapsed-state.extra.stepAt;return {x:.5+.13*Math.sin(t/550),y:.42+.07*Math.cos(t/750)};}
 export function kitBeatCue(step,state,elapsed){const t=elapsed-state.extra.stepAt,period=step.period||700,index=Math.max(1,Math.round(t/period));return Math.abs(t-index*period)<=220;}

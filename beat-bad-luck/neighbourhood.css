@@ -106,3 +106,6 @@
 .beat-arena .hit-zone.is-sheltered::after{content:'☂';position:absolute;top:0;left:50%;translate:-50% 0;font-size:24px;color:#bcdccd;pointer-events:none;text-shadow:0 2px 0 #24473e}
 
 .beat-arena button:focus-visible{outline:3px solid #fff0ba;outline-offset:-4px}
+
+.stall-skit #toggle-skit-auto{min-height:44px;display:block;margin:0 auto;padding:6px 10px;font-size:11px;color:#f0d9a5;border:1px solid #b8be8a88;border-radius:8px}
+.stall-skit #toggle-skit-auto[aria-pressed=false]{background:#203b37;color:#c4d4bc}
