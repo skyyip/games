@@ -111,3 +111,20 @@ The stall header uses the playground face with a small horn, a right-side scar a
 During whacking, telemetry, event instructions, rhythm prompts, the arena, feedback and gesture buttons occupy separate layout areas. The character, paper copies, event targets and particles remain inside the arena, while event targets stay above decorative effects. Blackouts dim the arena without dimming instructions. The pause layer stays above the whole stage. Landscape uses a side panel for instructions and controls. Completed rain drags return the protected paper to the centre. Hit captions and points share the feedback row rather than stacking floating text over the paper.
 
 Run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/layout-check.mjs` from this directory against the development server for the 90-case event layout audit.
+
+### Six signature ritual kits
+
+The flying dagger, plunger nunchucks, beauty fist, solar torch, immunity token and blue-and-white flip-flop now have optional signature interactions. Twelve accepted ordinary hits fill the charge meter. A round allows two attempts, with eight active seconds of recovery after an attempt. Activation waits until a full six-second opening is available before the next bridge event or the round end; the original two/three-event schedule stays unchanged. Each interaction lasts up to five active seconds, followed by a short result pose. Success awards 50 base relief points multiplied by the equipped kit’s existing multiplier, exactly once. Missed or cancelled attempts award no bonus and charge no extra oil. Pausing freezes the timer and cancels any held pointer.
+
+| Kit | Signature operation | Comic finish |
+| --- | --- | --- |
+| 小李飛刀 | Three ordered paper targets at 0.9/1.8/2.7s, with ±250ms timing windows. | Three paper worries become a paper kebab. |
+| 馬桶塞雙截棍 | Hold the paper, pull at least 15% of the scene width in both directions, then release. Three equivalent buttons are available. | The stuck paper stretches and flies off with a pop. |
+| 還原靚靚拳 | Five separate makeover taps, followed by the mirror. | Lashes, blush, bow, wig and hearts appear; the increasingly crumpled paper admires itself. |
+| 太陽能電筒 | Move the torch to the left sunshine zone, accumulate 0.9s of actual daylight, then Shine. Clouds pass from 1.8–3s. | An uncharged torch gives two awkward flashes; a charged beam exposes the excuses. |
+| 免死金牌 | Drag the token aside, drag the stamp inside its dotted box, then repeat for its appeal. Equivalent buttons are available. | 今日唔批 followed by 都唔批. |
+| 藍白人字拖 | Alternate left/right/left/right on four 600ms cues, with ±240ms timing windows. | Both slippers clap the paper into a sandwich. |
+
+The six kits also have ordinary-hit accents. The shop and welcome show each signature, the feedback-row button shows charge/readiness, and results show successful attempts and bonus points. Signature instructions replace ordinary prompts during the interaction; all targets stay inside the arena. Pointer-up handles touch and mouse buttons immediately, while native keyboard clicks remain supported. Reduced-motion preferences remove optional motion. Prices, merit thresholds, one-use inventory, existing multipliers, the 60-second whacking duration and stall earnings are unchanged. Timed targets use their own synchronized cue tones while the ordinary metronome is silent. New scripts and CSS are included in offline cache version 38.
+
+Run `npm test`, `node scripts/kit-skills-check.mjs`, and `node scripts/layout-check.mjs` with the existing Playwright module environment variable and development server for verification.
