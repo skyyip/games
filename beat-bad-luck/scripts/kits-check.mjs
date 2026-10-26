@@ -1,3 +1,4 @@
+import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {WEAPONS} from '../src/catalog.js';
@@ -28,7 +29,7 @@ try{
    const before=(await saved(page)).coins;await click(page,`[data-weapon="${id}"]`);assert.equal((await saved(page)).coins,before-cost);assert.equal((await saved(page)).merit,20000);assert.equal((await saved(page)).equipped,id);
    await reachBeat(page);await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);assert.equal(Number(await page.locator('#live-score').textContent()),Math.round(15*multiplier));assert.ok(!(await saved(page)).owned.includes(id));assert.equal((await saved(page)).equipped,'bare-hand');assert.equal(await page.locator('#striking-weapon svg').count(),1);
    if(id==='rebirth-paper'){
-    await page.clock.fastForward(45100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,id);await click(page,'#to-stall');
+    await page.clock.fastForward(DURATIONS.beat+100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,id);await click(page,'#to-stall');
    }else{await click(page,'#pause');await click(page,'#quit');}
    await click(page,'#tab-kits');assert.equal(await page.locator(`[data-weapon="${id}"]`).isDisabled(),(await saved(page)).coins<cost);
   }

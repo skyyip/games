@@ -1,3 +1,4 @@
+import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {WEAPONS,DECOR,weaponScoreMultiplier} from '../src/catalog.js';
@@ -45,7 +46,7 @@ try{
   await page.reload();await page.locator('#start').waitFor();assert.equal(await page.locator('#stall-extension .stall-piece').count(),18);assert.equal((await saved(page)).decor[first.id],2);assert.equal((await saved(page)).equipped,'immunity-token');
   await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await click(page,'#start');for(let i=0;i<3;i++)await click(page,`[data-stick="${i}"]`);await click(page,'#blow');await page.clock.fastForward(2050);await click(page,'#confirm-worry');await page.clock.fastForward(2050);
   await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);assert.equal((await saved(page)).equipped,'bare-hand');assert.ok(!(await saved(page)).owned.includes('immunity-token'));assert.equal(await page.locator('#striking-weapon [data-collectible]').getAttribute('data-collectible'),'immunity-token');assert.ok(Number(await page.locator('#live-score').textContent())>=300);
-  await page.clock.fastForward(45100);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'tiger');await click(page,'#feed');await page.clock.fastForward(1600);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'blessing');await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,'immunity-token');
+  await page.clock.fastForward(DURATIONS.beat+100);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'tiger');await click(page,'#feed');await page.clock.fastForward(1600);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'blessing');await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,'immunity-token');
   await context.close();pass(`${width}px ${language}: all 48 additions, sorted prices, exact purchases, unique art, 27 nonoverlapping props, upgrades, translation switch, reload and one-use ×21 ritual`);
  }
  {

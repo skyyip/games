@@ -1,9 +1,29 @@
+import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';import {mkdir} from 'node:fs/promises';import {DECOR} from '../src/catalog.js';import {EVENTS} from '../src/ritual-flavour.js';import {SCENES,CHALLENGES} from '../src/neighbourhood.js';import {COMIC_FORTUNES} from '../src/fortune-catalog.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');const browser=await chromium.launch({headless:true}),base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';let count=0;const errors=[],pass=s=>{count++;console.log('PASS '+s);},click=(p,s)=>p.locator(s).evaluate(e=>e.click()),saved=p=>p.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')));
 async function setup({type='pigeon',lang='zh-Hant',width=375,height=812,seed=null,motion='reduce'}={}){const index=EVENTS.findIndex(e=>e.id===type),context=await browser.newContext({viewport:{width,height},reducedMotion:motion,hasTouch:width<900,isMobile:width<900,acceptDownloads:true,serviceWorkers:'block'});await context.addInitScript(({random,lang,seed})=>{Math.random=()=>random;localStorage.setItem('playground.language.v1',lang);if(!localStorage.getItem('beat-bad-luck.stall.v1'))localStorage.setItem('beat-bad-luck.stall.v1',JSON.stringify(seed??{version:1,coins:20000,merit:20000,owned:['iron-hammer'],equipped:'iron-hammer',decor:{},records:[],lastSeen:Date.now()}));},{random:(index+.1)/EVENTS.length,lang,seed});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));return {context,page};}
 async function beat(p){await click(p,'#start');for(let i=0;i<3;i++)await click(p,`[data-stick="${i}"]`);await click(p,'#blow');await p.clock.fastForward(2050);await click(p,'#confirm-worry');await p.clock.fastForward(2050);}
-async function finish(p){await p.clock.fastForward(45100);await click(p,'#feed');await p.clock.fastForward(1600);await click(p,'#bless');await p.clock.fastForward(1600);assert.equal(await p.locator('#result').isVisible(),true);}
+async function finish(p){await p.clock.fastForward(DURATIONS.beat+100);await click(p,'#feed');await p.clock.fastForward(1600);await click(p,'#bless');await p.clock.fastForward(1600);assert.equal(await p.locator('#result').isVisible(),true);}
 try{await mkdir('/tmp/bbl-comic-qa',{recursive:true});
+ for(const [type,lang,expected]of [['tram','zh-Hant',2],['minibus','en',3]]){
+  const {context,page}=await setup({type,lang});assert.match(await page.locator('#ritual-duration').textContent(),/67–87/);
+  assert.match(await page.locator('#ritual-timing-note').textContent(),lang==='en'?/two or three/:/兩至三次/);
+  await beat(page);assert.equal(await page.locator('#phase-clock').textContent(),'60');
+  const shown=[];let elapsed=0;
+  for(const time of [12000,32000,45000,50000,55400,59900,60100]){
+   await page.clock.fastForward(time-elapsed);elapsed=time;
+   if([12000,32000,50000].includes(time)){
+    const visible=await page.locator('#event-banner').isVisible();
+    assert.equal(visible,time<50000||expected===3);if(visible)shown.push(await page.locator('#event-banner').getAttribute('data-event'));
+   }
+   if(time===45000){assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');assert.equal(await page.locator('#phase-clock').textContent(),'15');}
+   if(time===55400)assert.equal(await page.locator('#event-banner').isVisible(),false);
+   if(time===59900){assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);elapsed+=20;assert.ok(Number(await page.locator('#live-score').textContent())>0);}
+  }
+  assert.equal(shown.length,expected);assert.equal(new Set(shown).size,expected);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'tiger');
+  await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).rituals,1);
+  await context.close();pass(`${lang}: sixty active seconds, exactly ${expected} distinct spaced events, last-second taps and one completed result`);
+ }
  for(const type of ['pigeon','receipt','auntie','blackout','minibus','sneeze']){const {context,page}=await setup({type});await beat(page);await page.clock.fastForward(12000);assert.equal(await page.locator('#event-banner').getAttribute('data-event'),type);await page.screenshot({path:`/tmp/bbl-comic-qa/${type}.png`});
   if(['pigeon','receipt'].includes(type)){const box=await page.locator('[data-event-prop]').boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+(type==='pigeon'?-65:0),box.y+box.height/2+(type==='receipt'?-65:0),{steps:6});await page.mouse.up();}
   else if(type==='auntie'){await click(page,'#event-move');assert.ok(!(await page.locator('#event-label').textContent()).includes('處理好'));await page.clock.runFor(80);await click(page,'#event-move');}

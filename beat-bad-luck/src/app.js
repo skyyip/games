@@ -25,6 +25,12 @@ const vibrate=pattern=>{try{navigator.vibrate?.(pattern);}catch{}};
 const qteHints={double:'Two quick taps!',heavy:'Swipe for a heavy whack!',rub:'Rub back and forth!',circle:'Draw a full circle!',pinch:'Bring two fingers together!'};
 function feedback(text){literal($('#hit-feedback'),translate(text));}
 const literal=(element,text)=>{element.textContent=text;element.setAttribute('translate','no');};
+function renderRitualTiming(){
+ const zh=getLanguage()==='zh-Hant';
+ literal($('#ritual-duration'),zh?'每次儀式約 67–87 秒':'One ritual · about 67–87 seconds');
+ literal($('#whack-rule'),zh?'打小人 60 秒。單指或雙指點拍、滑動重扣、來回搓三次、畫完整圓圈，或雙指向內夾，都可以使出不同招式。跟着節奏提示可獲額外分數，也可使用五款操作按鈕。':'Whack for 60 seconds. Tap with one or two fingers, or swipe for a heavy whack. Rub back and forth with three direction changes, draw a full circle, or bring two fingers together for special moves. Follow the rhythm prompts for bonuses. Use any of the five move buttons as well.');
+ literal($('#ritual-timing-note'),zh?'打小人階段為 60 秒，每局出現兩至三次突發事件。整套儀式約 67–87 秒，步驟到時會自然繼續。隨時可以暫停，切到其他頁面也會暫停；取消的儀式不會發放獎勵。':'Whack for 60 seconds, with two or three surprise events per round. Rituals last about 67–87 seconds. Steps gently move on when their time is up. Pause whenever you need; hiding the page pauses the ritual too. A cancelled ritual gives no rewards.');
+}
 function save(){try{storage?.setItem(STORAGE_KEY,JSON.stringify(state));}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';}
 function settle(){const idle=collectIdle(state);state=idle.state;if(idle.earned){$('#idle-welcome').hidden=false;$('#idle-welcome').textContent=`Your stall earned ${idle.earned} oil money while you were away.`;}if(idle.lost.length){$('#decor-loss-note').hidden=false;literal($('#decor-loss-note'),translate(`Worn-out decorations removed: ${idle.lost.map(id=>itemName(DECOR.find(d=>d.id===id))).join('、')}`));say('A decoration wore out. You can replace it in the stall.');}save();return idle;}
 function message(text){$('#shop-message').textContent=text;clearTimeout(shopTimer);shopTimer=setTimeout(()=>$('#shop-message').textContent='',4500);say(text);}
@@ -279,6 +285,7 @@ neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbou
 $('#open-journey').addEventListener('click',()=>{$('#neighbourhood-hub').open=true;$('#neighbourhood-hub').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});});
 for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.innerHTML=fongCostumeArt();for(const id of illustratedDecor)$('#stall-'+id).innerHTML=decorArt(id);for(const ghost of document.querySelectorAll('[data-ghost]'))ghost.innerHTML=ghostArt(ghost.dataset.ghost);for(const master of document.querySelectorAll('[data-fong]')){const icon=$('.fong-logo').cloneNode(true);icon.className='fong-logo master-avatar';master.append(icon);}drawWorries();settle();renderStall();updateSound();enableOffline($('#offline-status'));
 
-document.addEventListener('languagechange',renderStall);
+renderRitualTiming();
+document.addEventListener('languagechange',()=>{renderStall();renderRitualTiming();});
 
 $('#start').disabled=false;

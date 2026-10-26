@@ -1,3 +1,4 @@
+import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {DECOR} from '../src/catalog.js';
@@ -38,7 +39,7 @@ try{
   await click(page,'#start');await click(page,'#pause');await click(page,'#quit');assert.ok((await saved(page)).owned.includes('paper'));
   await beat(page);await click(page,'[data-gesture="tap"]');const first=await saved(page);assert.ok(!first.owned.includes('paper'));assert.equal(first.equipped,'bare-hand');assert.equal(first.coins,299755);
   await page.clock.runFor(80);await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);assert.ok(Number(await page.locator('#live-score').textContent())>30);assert.equal((await saved(page)).coins,299755);
-  await page.clock.fastForward(45100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);
+  await page.clock.fastForward(DURATIONS.beat+100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);
   const result=await saved(page);assert.equal(result.records[0].weapon,'paper');assert.ok(!result.owned.includes('paper'));
   await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();assert.equal((await saved(page)).equipped,'bare-hand');await click(page,'#tab-kits');const before=(await saved(page)).coins;await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,before-245);
   await context.close();pass(`${language}: no-hit cancellation preserves kit; first hit consumes once; bonus lasts for ritual; results/reload retain consumption; repurchase charges full price`);
