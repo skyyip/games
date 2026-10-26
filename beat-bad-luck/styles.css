@@ -218,3 +218,20 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 .stall-extension .stall-piece::after{content:attr(data-label);display:block;font-size:9px;line-height:1.4;text-align:center;color:#f1dfb5;min-height:2.8em;overflow-wrap:anywhere}
 .stall-extension .furnishing-level{right:1px;top:1px;bottom:auto}
 .kit-row>div,.decor-row>div{min-width:0}.kit-row b,.decor-row b{overflow-wrap:anywhere}
+
+/* The stall's own logo keeps the shared face, with its scar on the right. */
+.bbl-brand>.header-logo{position:relative;display:block;flex:0 0 49px;width:49px;height:47px;background:none;border:0;transform:none;border-radius:0}
+.header-logo>img{display:block;width:48px;height:48px;transform:scaleX(-1)}
+.header-horn{position:absolute;inset:0;width:48px;height:48px;pointer-events:none}
+.bbl-brand .fortune-seal{position:absolute;right:-3px;bottom:0;display:grid;place-items:center;width:18px;height:20px;border:1px solid #e5ad74;border-radius:3px;background:#ba5749;color:#ffe1a0;font:700 12px/1 system-ui;transform:rotate(180deg)}
+.fong-logo>img{transform:scaleX(-1)}
+.intro-note>.intro-slipper{display:block;width:60px;height:60px;margin-left:auto;line-height:0}
+.intro-slipper svg{display:block;width:100%;height:100%;overflow:visible}
+.slipper-grin{transform-origin:45px 72px;animation:slipper-giggle 3.4s ease-in-out infinite}
+.slipper-sweat{animation:slipper-sweat 3.4s ease-in-out infinite}
+@keyframes slipper-giggle{0%,60%,100%{transform:rotate(-5deg)}68%,84%{transform:rotate(8deg) translateY(-3px)}76%,92%{transform:rotate(-9deg)}}
+@keyframes slipper-sweat{0%,60%,100%{opacity:.5;translate:0 0}85%{opacity:1;translate:1px 5px}}
+@media(max-width:700px){.intro-note>.intro-slipper{width:46px;height:46px}}
+@media(prefers-reduced-motion:reduce){.slipper-grin,.slipper-sweat{animation:none}}
+
+@media(max-width:700px){.ritual-top h2{font-size:17px;line-height:1.2;white-space:normal;text-overflow:clip}}

@@ -131,6 +131,7 @@ function renderPhase(){
  $('#phase-title').textContent=phaseNames[game.phase];$('#fong-line').textContent=lines[game.phase];
  for(const item of document.querySelectorAll('.phase-panel'))item.hidden=item.id!==`phase-${game.phase}`;
  const index=PHASES.indexOf(game.phase);for(const item of document.querySelectorAll('[data-step]')){const i=PHASES.indexOf(item.dataset.step);item.classList.toggle('is-current',i===index);item.classList.toggle('is-done',i<index);if(i===index)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');}
+ (game.phase==='beat'?$('#beat-arena'):$('#phase-body')).append($('#effects'));
  if(game.phase==='incense'){for(const stick of document.querySelectorAll('[data-stick]'))stick.classList.remove('is-lit');$('#phase-incense').classList.remove('is-blown');$('#blow').disabled=true;$('#mic-note').textContent='The button works without a microphone.';}
  if(game.phase==='worry')literal($('#named-worry'),game.worry);
  if(game.phase==='beat'){$('#paper-doll').innerHTML=dollArt(game.kind,game.look);literal($('#doll-label'),game.worry);$('#striking-weapon').innerHTML=weaponArt(game.weapon);feedback('Find your rhythm.');$('#hit-zone').dataset.lastGesture='';paintPaperWear();}
@@ -167,7 +168,7 @@ function whack(options){
  const force=.2+Math.min(1,hit.power/9)*.8;cryDuration=900+force*900;audio.hit(game.weapon,hit.heavy,hit.perfect,hit.power);vibrate(Math.round(7+force*30));
  const paper=$('#paper-doll');paper.classList.add('is-crying');paper.style.setProperty('--hit-strength',force);paper.dataset.impact=force.toFixed(3);
  const captions={tap:'Bonk!',heavy:'WHAM!',rub:'Scrub-a-dub!',circle:'Whoooosh!',pinch:'Squeeeze!'};
- feedback(hit.qteComplete?'Lovely combo!':captions[hit.gesture]);$('#hit-zone').dataset.lastGesture=hit.gesture;paintPaperWear();neighbourhoodUI?.hitFeedback(hit);neighbourhoodUI?.renderPlay(true);
+ feedback(`${translate(hit.qteComplete?'Lovely combo!':captions[hit.gesture])} · +${hit.points}`);$('#hit-zone').dataset.lastGesture=hit.gesture;paintPaperWear();neighbourhoodUI?.hitFeedback(hit);neighbourhoodUI?.renderPlay(true);
  if(!reduced.matches){
   paperAnimation?.cancel();shoeAnimation?.cancel();for(const animation of rigAnimations)animation.cancel();rigAnimations=[];
   const angle=8+force*27,travel=6+force*23,squash=1-force*.38;
@@ -178,8 +179,7 @@ function whack(options){
   const toolMoves={tap:[`translate(-${toolTravel*.5}px,${toolTravel*.4}px) rotate(-${toolAngle}deg)`],heavy:[`translate(10px,-${toolTravel*.65}px) rotate(${toolAngle}deg)`,`translate(-${toolTravel}px,${toolTravel*.6}px) rotate(-${toolAngle}deg)`],rub:[`translate(-${toolTravel}px,15px) rotate(-${toolAngle}deg)`,`translate(${toolTravel*.2}px,25px) rotate(${toolAngle*.5}deg)`,`translate(-${toolTravel}px,15px) rotate(-${toolAngle}deg)`],circle:[`translate(-${toolTravel}px,-25px) rotate(-100deg)`,`translate(-${toolTravel}px,${toolTravel*.55}px) rotate(-230deg)`,`translate(10px,0) rotate(-360deg)`],pinch:[`translate(-${toolTravel}px,10px) rotate(-${toolAngle}deg)`,`translate(-${toolTravel*.5}px,10px) rotate(-15deg)`]};
   shoeAnimation=$('#striking-weapon').animate([{transform:'rotate(-18deg)'},...toolMoves[hit.gesture].map(transform=>({transform})),{transform:'rotate(-18deg)'}],{duration:260+force*260,easing:'ease-out'});
   for(const [selector,sign]of [['.paper-arm-left',-1],['.paper-arm-right',1],['.paper-leg-left',1],['.paper-leg-right',-1],['.paper-head',-.4]]){const part=paper.querySelector(selector);if(part)rigAnimations.push(part.animate([{transform:'rotate(0)'},{transform:`rotate(${sign*(18+force*58)}deg)`,offset:.23},{transform:`rotate(${-sign*(10+force*34)}deg)`,offset:.6},{transform:'rotate(0)'}],{duration:400+force*360,easing:'ease-out'}));}
-  const pop=document.createElement('span');pop.className='score-pop';pop.textContent=`+${hit.points}`;$('#effects').append(pop);setTimeout(()=>pop.remove(),650);
-  const word=document.createElement('span');word.className='impact-word';word.textContent=translate(captions[hit.gesture]);$('#effects').append(word);setTimeout(()=>word.remove(),700);
+  $('#hit-feedback').animate([{backgroundColor:'#98603d',color:'#fff4ca'},{backgroundColor:'#193234',color:'#ffe1a0'}],{duration:300,easing:'ease-out'});
   const count=Math.min(Math.round(3+force*11),Math.max(0,75-$('#effects').childElementCount));for(let i=0;i<count;i++){const bit=document.createElement('i');bit.className='paper-bit';bit.style.setProperty('--dx',`${Math.cos(i*2.4)*(30+force*100)}px`);bit.style.setProperty('--dy',`${Math.sin(i*2.4)*(30+force*75)-25}px`);bit.style.setProperty('--turn',`${i*53+force*220}deg`);$('#effects').append(bit);setTimeout(()=>bit.remove(),750);}
  }
  if(hit.paperCleared||hit.qteComplete){sparks(hit.paperCleared);audio.chime();if(hit.paperCleared)say('One paper worry scattered. A little room for good things.');}

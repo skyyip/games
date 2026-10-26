@@ -26,3 +26,78 @@
 .stall-skit[data-scene=emperor] #skit-cast [data-skit-actor=lassie]{margin-left:-92px;margin-right:23px}.stall-skit[data-scene=emperor] #skit-cast [data-skit-actor=lassie]::after{content:'♛';position:absolute;left:38%;top:-8%;font-size:29px;color:#f6d588;filter:drop-shadow(0 2px #8c6d43)}
 .stall-skit #next-skit-line{min-height:44px;font-size:11px;margin-right:8px;color:#e8d9ad}.comic-quote-book{border:1px dashed #b8aa7c;border-radius:12px;padding:11px;margin-bottom:14px}.comic-quote-book summary{font-size:11px;color:#efd08e;min-height:30px;cursor:pointer}.comic-quote-book ul{max-height:270px;overflow:auto;padding:0 4px 0 20px;margin:10px 0}.comic-quote-book li{font-size:11px;line-height:1.85;margin-bottom:12px;color:#d9dec0}
 .comic-event-prop.is-dragging{animation:none!important;transition:none;z-index:5;cursor:grabbing;filter:drop-shadow(0 8px 4px #102c2b99)}
+
+/* In play, prompts live in flow and every moving object stays in the arena. */
+.is-playing .beat-panel{isolation:isolate;gap:5px;padding:4px 0;justify-content:flex-start;--control-space:0px}
+.beat-telemetry{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;flex:0 0 auto;z-index:2}
+.beat-telemetry .beat-stats{position:static;flex:1;flex-direction:row;justify-content:space-evenly;gap:10px}
+.beat-telemetry .rhythm-rail{position:static;display:grid;grid-template-columns:9px auto;gap:3px 5px;flex:0 0 auto}
+.beat-telemetry .paper-condition{grid-column:1/-1;text-align:right}
+.is-playing .beat-panel .qte-call,.is-playing .beat-panel:has(.event-banner:not([hidden])) .qte-call{position:relative;inset:auto;transform:none;translate:none;flex:0 0 auto;align-self:center;margin:0;max-width:100%;white-space:normal;font-size:11px;padding:4px 10px;line-height:1.35;z-index:3}
+.is-playing .beat-panel .personality-hud{position:relative;inset:auto;width:100%;flex:0 0 auto;z-index:3}
+.is-playing .beat-panel:has(.event-banner:not([hidden])) .personality-hud>p{display:none}
+.is-playing .beat-panel .event-banner{margin:0;justify-content:space-between;gap:8px;padding:5px 8px;min-width:0;flex-wrap:nowrap;font-size:11px;line-height:1.45}
+#event-label{flex:1;min-width:0;overflow-wrap:anywhere}
+.event-banner>button{flex:0 0 auto;max-width:94px;font-size:10px;line-height:1.3;min-height:44px;padding:5px 7px}
+.beat-arena{position:relative;isolation:isolate;flex:1 1 0;width:100%;min-height:130px;overflow:hidden;border-radius:14px;background:radial-gradient(ellipse at center,#71908025,transparent 72%)}
+.is-playing .beat-panel .hit-zone{position:absolute;inset:0 auto 0 50%;translate:-50% 0;flex:none;width:min(58%,235px);height:100%;min-height:0;max-height:none;z-index:1}
+.beat-arena .flavour-playfield{position:absolute;inset:0;z-index:3;isolation:isolate}
+.beat-arena .effects{z-index:2}
+.beat-arena .copy-target{left:0;top:2px;width:55px;min-height:58px;max-height:65px;padding:2px;z-index:2;animation:none}
+.beat-arena .copy-target:nth-child(2){left:0;right:auto;top:auto;bottom:2px}
+.beat-arena .copy-target>span{width:28px;height:31px}
+.beat-arena .copy-target small{font-size:9px;line-height:1.2}
+.beat-arena .comic-event-prop{right:2px;left:auto;top:50%;translate:0 -50%;width:57px;height:67px;z-index:3}
+.beat-arena .comic-event-prop[data-event-prop=receipt]{height:78px;top:50%}
+.beat-arena .comic-event-prop[data-event-prop=minibus]{width:44px;height:44px;right:2px;left:auto;top:0;translate:none;animation:coin-wiggle 2s ease-in-out infinite}
+.beat-arena .comic-event-prop[data-event-prop=minibus][data-token="1"]{top:calc(50% - 22px);right:2px;left:auto}
+.beat-arena .comic-event-prop[data-event-prop=minibus][data-token="2"]{top:auto;bottom:0;right:2px;left:auto}
+.beat-arena .wind-catch{left:auto;right:2px;top:calc(50% - 32px);width:58px;height:64px;z-index:3;animation:arena-slipper 2.5s ease-in-out infinite alternate}
+.beat-arena .rain-awning{right:0;bottom:6px;width:62px;height:62px;font-size:51px}
+.beat-arena .pig-helmet{top:0;left:50%;font-size:34px}
+.beat-arena .pig-sleep,.beat-arena .pig-smirk{top:10%;right:23%;font-size:14px}
+.beat-arena .stock-track{inset:auto 18% 4%;height:65px}
+.is-playing .beat-panel .hit-feedback{position:relative;inset:auto;flex:0 0 auto;margin:0;max-width:100%;width:auto;font-size:12px;line-height:1.4;padding:4px 9px;min-height:26px;z-index:3;overflow-wrap:anywhere}
+.is-playing .beat-panel .gesture-controls{position:relative;inset:auto;translate:none;flex:0 0 auto;width:100%;max-width:none;z-index:3}
+.is-playing .beat-panel .gesture-tools{position:static;translate:none;width:100%;gap:5px}
+.is-playing .beat-panel .gesture-tools button{min-height:48px;font-size:10px;line-height:1.2}
+.is-playing .beat-panel>.phase-instruction{position:relative;inset:auto;flex:0 0 auto;max-width:100%;font-size:10px;line-height:1.4}
+@keyframes arena-slipper{from{transform:translateY(-16px) rotate(-12deg)}to{transform:translateY(16px) rotate(16deg)}}
+@keyframes coin-wiggle{0%,100%{rotate:-7deg}50%{rotate:7deg}}
+@media(max-height:700px){
+ .is-playing .beat-panel{gap:4px}
+ .is-playing .beat-panel>.phase-instruction{display:none}
+ .is-playing .beat-panel .event-banner{font-size:10px;padding:4px 6px}
+ .is-playing .beat-panel .qte-call,.is-playing .beat-panel:has(.event-banner:not([hidden])) .qte-call{font-size:10px;padding:3px 8px}
+ .is-playing .play-panel[data-phase=beat] .fong-bubble{min-height:34px;padding:3px 7px}
+ .is-playing .play-panel[data-phase=beat] .fong-bubble .fong-art{width:27px;flex-basis:27px}
+ .is-playing .play-panel[data-phase=beat] .fong-bubble p{font-size:10px;line-height:1.45}
+ .is-playing .beat-panel .gesture-tools button{min-height:46px;font-size:9px}
+}
+@media(max-height:450px) and (min-aspect-ratio:4/3){
+ .is-playing .beat-panel{display:grid;grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:auto minmax(0,1fr) auto auto;grid-template-areas:'telemetry hud' 'arena hud' 'arena qte' 'feedback controls';gap:5px 12px;padding:2px 0}
+ .beat-telemetry{grid-area:telemetry;gap:8px;align-self:start}
+ .is-playing .beat-panel .beat-stats b{font-size:18px}
+ .is-playing .beat-panel .personality-hud{grid-area:hud;align-self:start}
+ .is-playing .beat-panel .qte-call,.is-playing .beat-panel:has(.event-banner:not([hidden])) .qte-call{grid-area:qte;align-self:end;width:100%;text-align:center}
+ .beat-arena{grid-area:arena;min-height:110px;align-self:stretch}
+ .is-playing .beat-panel .hit-zone{width:min(55%,160px)}
+ .is-playing .beat-panel .hit-feedback{grid-area:feedback;align-self:center;justify-self:stretch}
+ .is-playing .beat-panel .gesture-controls{grid-area:controls;align-self:end}
+ .is-playing .beat-panel .personality-hud>p{font-size:10px}
+ .is-playing .beat-panel .event-banner{font-size:11px;flex-wrap:wrap}
+ .is-playing .beat-panel .event-banner>button{max-width:none}
+ .is-playing .beat-panel .gesture-tools{gap:3px}
+ .is-playing .beat-panel .gesture-tools button{font-size:8px}
+ .beat-arena .copy-target{width:46px;min-height:50px;max-height:55px}
+ .beat-arena .copy-target>span{width:24px;height:25px}
+ .beat-arena .comic-event-prop[data-event-prop=minibus][data-token="1"]{right:48px}
+}
+@media(prefers-reduced-motion:reduce){.beat-arena .wind-catch,.beat-arena .comic-event-prop{animation:none;rotate:0}.beat-arena .wind-catch{transform:none}}
+
+/* Shop signs are atmosphere, never a second layer of text behind the score. */
+.is-playing .play-panel[data-phase=beat] .neon-sign{visibility:hidden}
+
+.beat-arena .hit-zone.is-sheltered::after{content:'☂';position:absolute;top:0;left:50%;translate:-50% 0;font-size:24px;color:#bcdccd;pointer-events:none;text-shadow:0 2px 0 #24473e}
+
+.beat-arena button:focus-visible{outline:3px solid #fff0ba;outline-offset:-4px}
