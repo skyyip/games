@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WEAPONS,DECOR,weaponScoreMultiplier,decorHourlyRate} from '../src/catalog.js';
 import {fresh,readProgress,buyWeapon,consumeWeapon,reward,upgrade,collectIdle,repairDecor,repairCost,discardDecor,decorDurability,DECOR_LIFETIME} from '../src/progress.js';
-const kits=WEAPONS.filter(w=>w.expanded),decor=DECOR.filter(d=>d.expanded),DAY=86400000;
+const kits=WEAPONS.filter(w=>w.expanded),decor=DECOR.filter(d=>d.expanded&&!d.hidden),DAY=86400000;
 test('all thirty new kits respect both gates, last two uses, repurchase and restore their records',()=>{
  assert.equal(kits.length,30);assert.equal(new Set(WEAPONS.map(w=>w.id)).size,WEAPONS.length);
  for(const kit of kits){
@@ -19,7 +19,7 @@ test('all thirty new kits respect both gates, last two uses, repurchase and rest
  }
 });
 test('new props fill a coherent increasing bonus ladder without changing the three requested premium bonuses',()=>{
- const sorted=WEAPONS.filter(w=>!w.starter).sort((a,b)=>a.cost-b.cost);
+ const sorted=WEAPONS.filter(w=>!w.starter&&!w.hidden).sort((a,b)=>a.cost-b.cost);
  for(let i=1;i<sorted.length;i++){const a=sorted[i-1],b=sorted[i];if(a.cost===b.cost)assert.equal(weaponScoreMultiplier(a.id),weaponScoreMultiplier(b.id));else assert.ok(weaponScoreMultiplier(a.id)<weaponScoreMultiplier(b.id),`${a.id} → ${b.id}`);}
  assert.deepEqual(['triple-trio','marksix-snowball','rebirth-paper'].map(weaponScoreMultiplier),[7,10.5,19.6]);
 });

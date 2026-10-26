@@ -1,59 +1,27 @@
+import {skinArt} from './skins.js';
 import {weaponArt,decorArt} from './art.js';
 import {weaponScoreMultiplier,decorHourlyRate} from './catalog.js';
-import {KIT_SKILLS} from './kit-skills.js';
+import {comicDescription} from './ritual-rewards.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
-
 export function createPurchaseUI({getState,itemName,onReturn,onStart,onView,onReveal=()=>{}}){
- const dialog=document.querySelector('#purchase-dialog'),find=id=>dialog.querySelector('#'+id);
- let receipt=null,outsideDown=false,revealTimer=null,revealed=false;
- const reduced=matchMedia('(prefers-reduced-motion: reduce)');
- function reveal(){if(!dialog.open||!receipt||revealed)return;revealed=true;dialog.dataset.revealed='true';onReveal();}
- const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
- const put=(id,value)=>{find(id).textContent=value;};
- const number=value=>value.toLocaleString(getLanguage());
- function render(){
-  if(!receipt)return;const {kind,item,cost,level}=receipt,kit=kind==='weapon',upgrade=!kit&&level>1;
-  put('purchase-kicker',kit?local('法寶到手，衰氣退散！','New kit. Good vibes!'):upgrade?local('攤位升級，更旺場！','Stall upgraded. Looking good!'):local('新擺設，街坊都讚！','A new delight for your stall!'));
-  put('purchase-title',itemName(item));
-  put('purchase-effect',kit?local(`解壓分數 ×${weaponScoreMultiplier(item.id)}`,`Relief score ×${weaponScoreMultiplier(item.id)}`):local(`等級 ${level} · 每小時 ${decorHourlyRate(item,level)} 香油錢`,`Level ${level} · ${decorHourlyRate(item,level)} oil per hour`));
-  const skill=KIT_SKILLS[item.id];
-  put('purchase-detail',kit?(skill?local('招牌技：'+skill.name[0],'Signature: '+skill.name[1]):local('已經裝備好，隨時可以除厄！','Equipped and ready for your next ritual!')):upgrade?local('新等級已在攤位展示，生意更旺！','Your stall is already showing its new level!'):local('已經擺到你的攤位，街坊等緊圍觀！','Already placed in your stall. The neighbours approve!'));
-  put('purchase-note',kit?local('法寶已裝備，可用兩次儀式；每局首次命中扣一次。','Equipped for two rituals; one use is spent on each ritual’s first hit.'):local('想換位或修補，可以到攤位管理。','Arrange or repair it in your stall whenever you like.'));
-  put('purchase-spent',local(`花費 ${number(cost)} 香油錢 · 餘額 ${number(getState().coins)}`,`${number(cost)} oil spent · ${number(getState().coins)} remaining`));
-  put('purchase-action',kit?local('立即開始除厄','Start a ritual'):local('查看我的攤位','See it in my stall'));
-  put('purchase-continue',local('繼續逛逛','Keep browsing'));
-  find('purchase-close').setAttribute('aria-label',local('關閉購買成功提示','Close purchase celebration'));
+ const dialog=document.querySelector('#purchase-dialog'),find=id=>dialog.querySelector('#'+id);let receipt=null,committing=false,outside=false;
+ const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en,put=(id,text)=>find(id).textContent=text;
+ function render(){if(!receipt)return;const {kind,item,cost,level,pending}=receipt,kit=kind==='weapon',skin=kind==='skin';dialog.dataset.pending=String(pending);
+  put('purchase-kicker',pending?local('睇清楚先買，師傅唔催單！','Take a look. No pressure!'):local('到手喇！街坊笑到拍晒手！','It’s yours! The neighbours approve!'));
+  put('purchase-title',itemName(item));put('purchase-effect',skin?local('永久收藏 · 每局開始前可免費切換','Permanent collectible · switch freely before playing'):kit?local(`解壓分數 ×${weaponScoreMultiplier(item.id)} · 可用兩次儀式`,`Score ×${weaponScoreMultiplier(item.id)} · two ritual uses`):local(`等級 ${level} · 每小時 ${decorHourlyRate(item,level)} 香油錢`,`Level ${level} · ${decorHourlyRate(item,level)} oil/hour`));
+  put('purchase-detail',local(comicDescription(item),item.descriptionEn??'A Hong Kong comedy-inspired prop. Bad luck has just applied for annual leave.'));
+  put('purchase-note',pending?local('按「確認購買」才扣款；關閉或取消不會購買。折扣券在確認付款時才使用。','You pay only after Confirm purchase. Closing cancels; a coupon is used only on confirmation.'):local('已確認購買，物品已到手並選用。','Purchase confirmed. Your collectible is ready.'));
+  put('purchase-spent',pending?local(`實付 ${cost.toLocaleString()} 香油錢 · 現有 ${getState().coins.toLocaleString()}`,`${cost.toLocaleString()} oil · balance ${getState().coins.toLocaleString()}`):local(`已付 ${cost.toLocaleString()} 香油錢 · 餘額 ${getState().coins.toLocaleString()}`,`Paid ${cost.toLocaleString()} oil · ${getState().coins.toLocaleString()} left`));
+  put('purchase-action',pending?local('確認購買 ✓','Confirm purchase ✓'):(kit||skin)?local('開工除厄！','Start a ritual!'):local('睇吓我的攤位','See my stall'));
+  put('purchase-continue',pending?local('取消，繼續睇','Cancel and browse'):local('完成，繼續逛逛','Done, keep browsing'));find('purchase-close').setAttribute('aria-label',pending?local('取消購買並關閉','Cancel purchase and close'):local('關閉','Close'));
  }
- function finish(intent){
-  const current=receipt;if(!current)return;clearTimeout(revealTimer);receipt=null;outsideDown=false;
-  if(intent==='start')onStart();else if(intent==='view')onView(current.item.id);else onReturn(current.kind,current.item.id);
- }
- function dismiss(intent='browse'){
-  if(!dialog.open)return;dialog.close();finish(intent);
- }
- find('purchase-close').addEventListener('click',()=>dismiss());
- find('purchase-continue').addEventListener('click',()=>dismiss());
- find('purchase-action').addEventListener('click',()=>dismiss(receipt?.kind==='weapon'?'start':'view'));
- dialog.addEventListener('cancel',event=>{event.preventDefault();dismiss();});
- dialog.addEventListener('keydown',event=>{
-  if(event.key!=='Tab')return;const first=find('purchase-close'),last=find('purchase-continue');
-  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
-  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
- });
- // Also restore focus if the host closes a native dialog directly.
- dialog.addEventListener('close',()=>{if(!dialog.open)finish('browse');});
- const outside=event=>{const r=dialog.getBoundingClientRect();return event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom;};
- dialog.addEventListener('pointerdown',event=>{outsideDown=event.button===0&&event.target===dialog&&outside(event);});
- dialog.addEventListener('pointerup',event=>{const close=outsideDown&&event.target===dialog&&outside(event);outsideDown=false;if(close)dismiss();});
- dialog.addEventListener('pointercancel',()=>outsideDown=false);
- reduced.addEventListener('change',()=>{if(reduced.matches){clearTimeout(revealTimer);reveal();}});
- return {
-  get isOpen(){return dialog.open;},render,
-  show(kind,item,cost,level=0){
-   if(dialog.open||receipt)return false;
-   receipt={kind,item,cost,level};dialog.dataset.kind=kind;dialog.dataset.revealed='false';revealed=false;
-   find('purchase-art').innerHTML=kind==='weapon'?weaponArt(item.id):decorArt(item.id);
-   render();dialog.showModal();find('purchase-continue').focus({preventScroll:true});if(reduced.matches)reveal();else revealTimer=setTimeout(reveal,760);return true;
-  }
- };
+ function finish(){if(!receipt)return;const r=receipt;receipt=null;committing=false;onReturn(r.kind,r.item.id);}
+ function dismiss(){if(committing)return;dialog.close();finish();}
+ find('purchase-close').addEventListener('click',dismiss);find('purchase-continue').addEventListener('click',dismiss);
+ find('purchase-action').addEventListener('click',()=>{if(!receipt||committing||receipt.committedAt!==undefined&&performance.now()-receipt.committedAt<650)return;if(receipt.pending){committing=true;find('purchase-action').disabled=true;let ok=false;try{ok=receipt.commit();}finally{committing=false;find('purchase-action').disabled=false;}if(!ok){put('purchase-note',local('餘額、價格或進度已改變，未有扣款。請關閉後重新查看。','Your balance, price or progress changed. No purchase was made. Close and review it again.'));return;}receipt.pending=false;receipt.committedAt=performance.now();render();dialog.dataset.revealed='false';requestAnimationFrame(()=>{if(!receipt)return;dialog.dataset.revealed='true';onReveal();});find('purchase-continue').focus();}else{const r=receipt;receipt=null;dialog.close();['weapon','skin'].includes(r.kind)?onStart():onView(r.item.id);}});
+ dialog.addEventListener('cancel',e=>{e.preventDefault();dismiss();});dialog.addEventListener('close',finish);
+ dialog.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const first=find('purchase-close'),last=find('purchase-continue');if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
+ const isOutside=e=>{const r=dialog.getBoundingClientRect();return e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;};
+ dialog.addEventListener('pointerdown',e=>outside=e.button===0&&e.target===dialog&&isOutside(e));dialog.addEventListener('pointerup',e=>{if(outside&&e.target===dialog&&isOutside(e))dismiss();outside=false;});
+ return {get isOpen(){return dialog.open;},render,ask(kind,item,cost,level,commit){if(dialog.open)return false;receipt={kind,item,cost,level,pending:true,commit};dialog.dataset.revealed='true';find('purchase-art').innerHTML=kind==='skin'?skinArt(item.id):kind==='weapon'?weaponArt(item.id):decorArt(item.id);render();dialog.showModal();dialog.scrollTop=0;find('purchase-title').tabIndex=-1;find('purchase-title').focus({preventScroll:true});return true;}};
 }

@@ -88,7 +88,7 @@
  .kit-guidance{grid-area:hud;align-self:start}
  .beat-panel:has(.kit-stage:not([hidden])){grid-template-areas:'telemetry hud' 'arena hud' 'arena hud' 'arena feedback'}
  .kit-guidance p{font-size:12px;line-height:1.5}
- .kit-actions{left:4px;right:4px;gap:4px}.kit-actions .kit-target small{font-size:9.9px}
+ .kit-actions{left:4px;right:4px;gap:4px}.kit-actions .kit-target small{font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.kit-skill-button,.kit-actor,.kit-knife-echo,.kit-finish>span,#solar-drag{animation:none!important}.kit-cloud{transition:none}}
 
@@ -158,7 +158,7 @@
 @keyframes expanded-paper-fold{to{scale:.5 1.1;rotate:12deg}}
 @keyframes expanded-preen{35%{rotate:-7deg;scale:1.06}75%{rotate:8deg;scale:1.13}100%{rotate:-4deg;scale:1.05}}
 @keyframes expanded-bounce{40%{translate:0 -16px;scale:1.1 .9}75%{translate:0 4px;scale:.9 1.1}100%{translate:0 -3px}}
-@media(max-height:450px) and (min-aspect-ratio:4/3){.expanded-actions .kit-target small{font-size:9.9px}.expanded-choice{width:48px;height:56px}.expanded-choice>span{font-size:22px}.expanded-caption{font-size:9.9px}.expanded-meter{font-size:12.1px}}
+@media(max-height:450px) and (min-aspect-ratio:4/3){.expanded-actions .kit-target small{font-size:10px}.expanded-choice{width:48px;height:56px}.expanded-choice>span{font-size:22px}.expanded-caption{font-size:10px}.expanded-meter{font-size:12.1px}}
 @media(prefers-reduced-motion:reduce){.expanded-echo,.kit-stage.is-win .expanded-paper,.kit-stage.is-win .expanded-props{animation:none!important}.kit-stage.is-win[data-pose=flat] .expanded-paper{scale:1.15 .75}.kit-stage.is-win[data-pose=pudding] .expanded-paper{scale:1.2 .8}.kit-stage.is-win[data-pose=roll] .expanded-paper{scale:.5 1}}
 
 /* Charged kits remain visible while waiting for a safe event window. */

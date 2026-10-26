@@ -1,0 +1,1 @@
+{"name":"playground-site-builder","private":true,"type":"module","scripts":{"build":"node build-site.mjs"},"devDependencies":{"esbuild":"0.28.2"},"engines":{"node":">=20"}}

@@ -1,8 +1,8 @@
 // Updates activate after existing Stone Skip windows close, preserving active rounds.
-const CACHE_NAME='stone-skip-app-v19';
+const CACHE_NAME='stone-skip-app-v20';
 const BASE=new URL('./',self.location.href).href;
 const HOME=new URL('./index.html',self.location.href).href;
-const APP_FILES=['../grid-rush/victory.css','../grid-rush/src/victory.js','./','./index.html','./styles.css','./manifest.webmanifest','./src/app.js','./src/game.js','./src/motion.js','./src/river.js','../grid-rush/playground-ui.css','../grid-rush/src/playground-ui.js','../grid-rush/src/navigation.js','../grid-rush/src/motion.js','../grid-rush/src/language.js','../grid-rush/src/translations.js','../grid-rush/assets/fonts/DMSans.ttf','../grid-rush/assets/fonts/SpaceGrotesk.ttf','../grid-rush/assets/icons/favicon.png', '../grid-rush/assets/icons/icon-192.png','../grid-rush/assets/icons/icon-512.png','../grid-rush/assets/icons/apple-touch-icon.png'].map(path=>new URL(path,self.location.href).href);
+const APP_FILES=['../grid-rush/comic-chinese.css','../grid-rush/assets/fonts/Iansui.woff2','../grid-rush/src/site-updates.js','../grid-rush/victory.css','../grid-rush/src/victory.js','./','./index.html','./styles.css','./manifest.webmanifest','./src/app.js','./src/game.js','./src/motion.js','./src/river.js','../grid-rush/playground-ui.css','../grid-rush/src/playground-ui.js','../grid-rush/src/navigation.js','../grid-rush/src/motion.js','../grid-rush/src/language.js','../grid-rush/src/translations.js','../grid-rush/assets/fonts/DMSans.ttf','../grid-rush/assets/fonts/SpaceGrotesk.ttf','../grid-rush/assets/icons/favicon.png', '../grid-rush/assets/icons/icon-192.png','../grid-rush/assets/icons/icon-512.png','../grid-rush/assets/icons/apple-touch-icon.png'].map(path=>new URL(path,self.location.href).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_FILES.map(url=>new Request(url,{cache:'reload'}))))));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
   const names=await caches.keys();

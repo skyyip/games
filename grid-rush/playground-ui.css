@@ -116,11 +116,11 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
   .mode-option>span { padding:10px 8px; min-height:68px; }
   .mode-option strong { font-size:19px; }
   .mode-option small { font-size:12.1px; }
-  .mode-option input:checked+span:after { top:5px; right:5px; font-size:9.9px; }
+  .mode-option input:checked+span:after { top:5px; right:5px; font-size:10px; }
   .grid-options { gap:7px; margin-top:14px; }
   .grid-option-content { min-height:88px; padding:10px 8px; }
   .grid-option strong { font-size:16px; }
-  .grid-option small { font-size:9.9px; }
+  .grid-option small { font-size:10px; }
   .mini-grid { width:20px; height:20px; margin-bottom:7px; }
   .mode-note,.size-note { font-size:12.1px; line-height:1.5; }
   .how-to-play { margin-top:12px; padding-top:8px; }
@@ -142,11 +142,11 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
 }
 @media(max-width:360px) {
   .mode-option>span { padding:10px 6px; }
-  .mode-option small { font-size:9.9px; }
+  .mode-option small { font-size:10px; }
   .board-frame { padding:10px; }
   .board[data-size="6"] { gap:4px; }
   .board[data-size="6"] .tile { font-size:17px; }
-  .grid-option small { font-size:8.8px; }
+  .grid-option small { font-size:10px; }
 }
 @media(prefers-reduced-motion:reduce) {
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation:none!important; }

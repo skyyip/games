@@ -11,6 +11,7 @@ export function moveStroke(stroke,x,y){
 }
 export function strokeShape(stroke){
  const points=stroke.points,xs=points.map(p=>p.x),ys=points.map(p=>p.y),width=Math.max(...xs)-Math.min(...xs),height=Math.max(...ys)-Math.min(...ys);
+ const angular=angularShape(points,width,height);if(angular)return angular;
  const horizontal=width>=height;let direction=0,extreme=horizontal?points[0].x:points[0].y,reversals=0;
  for(const p of points){const value=horizontal?p.x:p.y,delta=value-extreme;if(!direction){if(Math.abs(delta)>=18){direction=Math.sign(delta);extreme=value;}}else if(delta*direction>0)extreme=value;else if(delta*direction<=-18){reversals++;direction=-direction;extreme=value;}}
  const cx=(Math.max(...xs)+Math.min(...xs))/2,cy=(Math.max(...ys)+Math.min(...ys))/2;
@@ -34,3 +35,7 @@ export function finishStroke(stroke,time){
 }
 export function pinchProgress(initial,current){return initial>=56?clamp((initial-current)/Math.max(28,initial*.32)):0;}
 export function spreadProgress(initial,current){return initial>=40?clamp((current-initial)/Math.max(32,initial*.38)):0;}
+// Two crossing diagonals form X; the first slash remains an ordinary swipe.
+export function diagonal(stroke){const dx=stroke.lastX-stroke.x,dy=stroke.lastY-stroke.y,d=Math.hypot(dx,dy);return d>=65&&Math.min(Math.abs(dx),Math.abs(dy))/Math.max(Math.abs(dx),Math.abs(dy))>=.4&&stroke.length<=d*1.25?{a:{x:stroke.x,y:stroke.y},b:{x:stroke.lastX,y:stroke.lastY}}:null;}
+export function crossingStrokes(a,b){if(!a||!b)return false;const rx=a.b.x-a.a.x,ry=a.b.y-a.a.y,sx=b.b.x-b.a.x,sy=b.b.y-b.a.y,cross=rx*sy-ry*sx;if(Math.abs(cross)<1200)return false;const qx=b.a.x-a.a.x,qy=b.a.y-a.a.y,t=(qx*sy-qy*sx)/cross,u=(qx*ry-qy*rx)/cross;return t>.15&&t<.85&&u>.15&&u<.85;}
+function angularShape(points,width,height){if(width<45||height<40||points.length<3)return null;const first=points[0],last=points.at(-1),bottom=points.reduce((a,b)=>b.y>a.y?b:a),sign=Math.sign(last.x-first.x);if(Math.abs(last.x-first.x)<width*.75||Math.abs(first.y-last.y)>height*.4||bottom.y-Math.max(first.y,last.y)<height*.75||sign*(bottom.x-first.x)<width*.2||sign*(last.x-bottom.x)<width*.2)return null;const i=points.indexOf(bottom);if(i<1||i===points.length-1)return null;const path=points.reduce((n,p,j)=>j?n+Math.hypot(p.x-points[j-1].x,p.y-points[j-1].y):0,0),direct=Math.hypot(bottom.x-first.x,bottom.y-first.y)+Math.hypot(last.x-bottom.x,last.y-bottom.y);return path<=direct*1.06?{gesture:'vee',progress:1}:null;}

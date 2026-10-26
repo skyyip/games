@@ -11,9 +11,9 @@ function completeStep(s,time,dispatch=(type,input,at)=>s.action(type,input,at)){
  return {out,time};
 }
 test('every catalogue item, including free hands, has a bilingual signature; new recipes differ beyond text and art',()=>{
- assert.deepEqual(Object.keys(KIT_SKILLS).sort(),WEAPONS.map(w=>w.id).sort());assert.equal(Object.keys(EXTRA_KITS).length,39);
+ assert.deepEqual(Object.keys(KIT_SKILLS).sort(),WEAPONS.map(w=>w.id).sort());assert.equal(Object.keys(EXTRA_KITS).length,54);
  const mechanics=[];for(const [id,spec]of Object.entries(EXTRA_KITS)){for(const pair of [spec.name,spec.hint,spec.win,spec.tag])assert.ok(pair.length===2&&pair.every(t=>typeof t==='string'&&t.length),id);assert.ok(spec.steps.length>=1&&spec.steps.length<=4);mechanics.push(JSON.stringify(spec.steps.map(({label,...rules})=>rules)));}
- assert.equal(new Set(mechanics).size,39);
+ assert.equal(new Set(mechanics).size,54);
 });
 for(const [id,spec]of Object.entries(EXTRA_KITS))test(`${id}: complete its real gesture recipe inside five seconds and award once`,()=>{
  const s=charge(new KitSkill(id));assert.equal(s.start(0,[]),true);let time=0;for(let i=0;i<spec.steps.length;i++){const done=completeStep(s,time);time=done.time;assert.equal(done.out.ok,true,`${id} step ${i}`);assert.equal(done.out.won,i===spec.steps.length-1);assert.equal(done.out.raw,i===spec.steps.length-1?50:0);}

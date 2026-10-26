@@ -1,17 +1,18 @@
+import {SKINS} from './skins.js';
 import {KitSkill} from './kit-skills.js';
 import {RitualFlavour} from './ritual-flavour.js';
 import {WORRIES,WEAPONS,FORTUNES,weaponScoreMultiplier} from './catalog.js';
-export const PHASES=['incense','worry','beat','tiger','blessing'];
-export const DURATIONS={incense:8000,worry:7000,beat:90000,tiger:7000,blessing:5000};
+export const PHASES=['incense','worry','beat','tiger','blessing','divination'];
+export const DURATIONS={incense:8000,worry:7000,beat:90000,tiger:0,blessing:0,divination:0};
 export const BEAT_INTERVAL=60000/108;
 export const QTE_STEPS=[{at:4500,type:'double'},{at:11000,type:'heavy'},{at:17500,type:'rub'},{at:23500,type:'circle'},{at:29000,type:'pinch'},{at:35500,type:'clockwise'},{at:41000,type:'counterclockwise'},{at:47500,type:'heavy'},{at:56500,type:'pinch'},{at:65000,type:'hold'},{at:73000,type:'spread'},{at:82000,type:'circle'},{at:87000,type:'heavy'}];
-const SPECIALS={rub:{min:3,power:6,points:28},circle:{min:5,power:8,points:40},pinch:{min:6,power:9,points:46},hold:{min:4,power:9,points:34},spread:{min:5,power:8,points:36}};
+const SPECIALS={cross:{min:6,power:10,points:44},vee:{min:5,power:9,points:38},rub:{min:3,power:6,points:28},circle:{min:5,power:8,points:40},pinch:{min:6,power:9,points:46},hold:{min:4,power:9,points:34},spread:{min:5,power:8,points:36}};
 export class RitualGame{
   constructor({now=()=>performance.now(),random=Math.random}={}){this.now=now;this.random=random;this.reset();}
-  reset(){this.phase='setup';this.phaseStarted=0;this.started=0;this.pausedAt=null;this.lit=new Set();this.blown=false;this.prepared=false;this.worry='';this.kind='work';this.weapon='bare-hand';this.look=0;this.hits=0;this.heavy=0;this.specials={rub:0,circle:0,pinch:0,hold:0,spread:0};this.rotations={cw:0,ccw:0};this.perfect=0;this.damage=0;this.combo=0;this.bestCombo=0;this.score=0;this.lastHit=-Infinity;this.strikes=new Map();this.qte=null;this.qteIndex=0;this.qteSuccess=0;this.fed=false;this.fedAt=null;this.blessed=false;this.blessedAt=null;this.result=null;this.transitions=[];this.flavour=new RitualFlavour(this.random);this.moves={tap:0,heavy:0,rub:0,circle:0,pinch:0,hold:0,spread:0};this.perfectStreak=0;this.maxPerfectStreak=0;this.commission='';this.skill=new KitSkill('');}
-  start({worry='The eighth revision',kind='work',weapon='bare-hand',commission=''}={}){
+  reset(){this.phase='setup';this.phaseStarted=0;this.started=0;this.pausedAt=null;this.lit=new Set();this.blown=false;this.prepared=false;this.worry='';this.kind='work';this.weapon='bare-hand';this.look=0;this.skin='paper';this.hits=0;this.heavy=0;this.specials={rub:0,circle:0,pinch:0,hold:0,spread:0,cross:0,vee:0};this.rotations={cw:0,ccw:0};this.perfect=0;this.damage=0;this.combo=0;this.bestCombo=0;this.score=0;this.lastHit=-Infinity;this.strikes=new Map();this.qte=null;this.qteIndex=0;this.qteSuccess=0;this.porkMode='plain';this.dipped=false;this.purification=0;this.grains='rice';this.blocks=null;this.rolls=0;this.finisherBank=0;this.finisher=null;this.finisherWins=0;this.fed=false;this.fedAt=null;this.blessed=false;this.blessedAt=null;this.result=null;this.transitions=[];this.flavour=new RitualFlavour(this.random);this.moves={tap:0,heavy:0,rub:0,circle:0,pinch:0,hold:0,spread:0,cross:0,vee:0};this.perfectStreak=0;this.maxPerfectStreak=0;this.commission='';this.skill=new KitSkill('');}
+  start({worry='The eighth revision',kind='work',weapon='bare-hand',commission='',skin='paper'}={}){
     if(!WEAPONS.some(w=>w.id===weapon))throw new RangeError('Choose an available keepsake.');
-    this.reset();this.worry=String(worry).trim().slice(0,64)||'The eighth revision';this.kind=WORRIES.some(w=>w.id===kind)?kind:'work';this.weapon=weapon;this.skill=new KitSkill(weapon);this.look=Math.min(2,Math.floor(this.random()*3));this.started=this.phaseStarted=this.now();this.phase='incense';this.commission=commission;this.flavour.start(this.kind);
+    this.reset();this.skin=SKINS.some(s=>s.id===skin)?skin:'paper';this.worry=String(worry).trim().slice(0,64)||'The eighth revision';this.kind=WORRIES.some(w=>w.id===kind)?kind:'work';this.weapon=weapon;this.skill=new KitSkill(weapon);this.look=Math.min(2,Math.floor(this.random()*3));this.porkMode=this.random()<.5?'blood':'plain';this.grains=this.random()<.5?'rice':'beans';this.started=this.phaseStarted=this.now();this.phase='incense';this.commission=commission;this.flavour.start(this.kind);
   }
   get clock(){return this.pausedAt??this.now();}
   get elapsed(){return Math.max(0,this.clock-this.phaseStarted);}
@@ -25,7 +26,7 @@ export class RitualGame{
   nameWorry(text,kind=this.kind){if(this.phase!=='worry'||this.pausedAt!==null)return false;this.worry=String(text).trim().slice(0,64)||this.worry;this.kind=WORRIES.some(w=>w.id===kind)?kind:this.kind;this.flavour.start(this.kind);return true;}
   confirm(){if(this.phase!=='worry'||this.pausedAt!==null||this.prepared)return false;this.prepared=true;return true;}
   hit({heavy=false,strength=.5,pointer='keyboard',gesture=heavy?'heavy':'tap',direction=null}={}){
-    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed)||!['tap','heavy','rub','circle','pinch','hold','spread'].includes(gesture))return null;
+    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed)||this.finisher?.active||!['tap','heavy','rub','circle','pinch','hold','spread','cross','vee'].includes(gesture))return null;
     heavy=gesture!=='tap';direction=gesture==='circle'&&['cw','ccw'].includes(direction)?direction:null;
     const now=this.now();if(now-(this.strikes.get(pointer)??-Infinity)<55)return null;
     this.skill.gain();this.strikes.set(pointer,now);if(this.strikes.size>32)this.strikes=new Map([[pointer,now]]);
@@ -41,24 +42,31 @@ export class RitualGame{
     return {perfect,power,points,...flavour,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
   }
   activateSkill(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&this.skill.start(this.elapsed,this.flavour.events,DURATIONS.beat);}
-  skillAction(type,input={}){this.advance();if(this.phase!=='beat'||this.pausedAt!==null)return {ok:false};const outcome=this.skill.action(type,input,this.elapsed);if(outcome.won){outcome.points=Math.round(outcome.raw*weaponScoreMultiplier(this.weapon));this.score+=outcome.points;this.skill.bonus+=outcome.points;}return outcome;}
+  skillAction(type,input={}){this.advance();if(this.phase!=='beat'||this.pausedAt!==null)return {ok:false};const outcome=this.skill.action(type,input,this.elapsed);if(outcome.won){this.finisherBank++;outcome.points=Math.round(outcome.raw*weaponScoreMultiplier(this.weapon));this.score+=outcome.points;this.skill.bonus+=outcome.points;}return outcome;}
   beginInteraction(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&this.flavour.beginHold(this.elapsed);}
   interact(action,id){this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed))return 0;const raw=this.flavour.resolve(action,id,this.elapsed),points=Math.round(raw*weaponScoreMultiplier(this.weapon));this.score+=points;return points;}
-  feed(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.fed)return false;this.fed=true;this.fedAt=this.elapsed;return true;}
-  bless(){this.advance();if(this.phase!=='blessing'||this.pausedAt!==null||this.blessed)return false;this.blessed=true;this.blessedAt=this.elapsed;return true;}
+  dip(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.porkMode!=='blood'||this.dipped)return false;this.dipped=true;return true;}
+  feed(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.fed||(this.porkMode==='blood'&&!this.dipped))return false;this.fed=true;this.fedAt=this.elapsed;return true;}
+  purify(step){this.advance();if(this.phase!=='blessing'||this.pausedAt!==null||step!==this.purification||step>2)return false;this.purification++;if(this.purification===3){this.blessed=true;this.blessedAt=this.elapsed;}return true;}
+  bless(){return this.purify(this.purification);}
+  throwBlocks(){this.advance();if(this.phase!=='divination'||this.pausedAt!==null||this.blocks?.rolling||this.blocks?.sacred)return false;const roll=this.random(),faces=roll<.25?[0,1]:roll<.5?[1,0]:roll<.75?[0,0]:[1,1];this.rolls++;this.blocks={faces,rolling:true,at:this.elapsed,sacred:false};return true;}
+  canFinisher(){const t=this.elapsed;return this.phase==='beat'&&this.pausedAt===null&&this.finisherBank>=2&&!this.skill.busy(t)&&!this.finisher?.active&&!this.flavour.events.some(e=>t<e.at+5400&&t+6500>e.at)&&DURATIONS.beat-t>=6500;}
+  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisherBank-=2;this.finisher={at:this.elapsed,step:0,active:true,won:false};return true;}
+  finisherAction(gesture){this.advance();const f=this.finisher;if(this.phase!=='beat'||this.pausedAt!==null||!f?.active||['heavy','circle','tap'][f.step]!==gesture)return false;f.step++;if(f.step===3){f.active=false;f.won=true;f.completedAt=this.elapsed;this.finisherWins++;this.score+=Math.round(250*weaponScoreMultiplier(this.weapon));}return true;}
   advance(){
     if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;
     if(this.phase==='beat'){
-      this.skill.advance(this.elapsed);
+      this.skill.advance(this.elapsed);if(this.finisher?.active&&this.elapsed-this.finisher.at>=6000)this.finisher.active=false;
       if(this.qte&&this.elapsed>this.qte.ends)this.qte=null;
       while(QTE_STEPS[this.qteIndex]&&this.elapsed>=QTE_STEPS[this.qteIndex].at){const {at,type}=QTE_STEPS[this.qteIndex++],window=SPECIALS[type]||['clockwise','counterclockwise'].includes(type)?3600:1600;if(this.elapsed<at+window)this.qte={type,progress:0,required:type==='double'?2:1,ends:at+window};}
     }
-    const done=this.elapsed>=DURATIONS[this.phase]||(this.phase==='incense'&&this.blown&&this.elapsed>=2000)||(this.phase==='worry'&&this.prepared&&this.elapsed>=2000)||(this.phase==='tiger'&&this.fed&&this.elapsed>=1500&&this.elapsed-this.fedAt>=450)||(this.phase==='blessing'&&this.blessed&&this.elapsed>=1500&&this.elapsed-this.blessedAt>=900);
+    if(this.phase==='divination'&&this.blocks?.rolling&&this.elapsed-this.blocks.at>=1200){this.blocks.rolling=false;this.blocks.sacred=this.blocks.faces[0]!==this.blocks.faces[1];if(this.blocks.sacred)this.blocks.completedAt=this.blocks.at+1200;}
+    const done=(this.phase==='tiger'?this.fed&&this.elapsed>=1500&&this.elapsed-this.fedAt>=450:this.phase==='divination'?this.blocks?.sacred&&this.elapsed-this.blocks.completedAt>=1200:this.phase==='blessing'?this.blessed&&this.elapsed-this.blessedAt>=900:this.elapsed>=DURATIONS[this.phase])||(this.phase==='incense'&&this.blown&&this.elapsed>=2000)||(this.phase==='worry'&&this.prepared&&this.elapsed>=2000)||(this.phase==='tiger'&&this.fed&&this.elapsed>=1500&&this.elapsed-this.fedAt>=450)||(this.phase==='blessing'&&this.blessed&&this.elapsed>=1500&&this.elapsed-this.blessedAt>=900);
     if(done){this.next();return true;}return false;
   }
   next(){
     const index=PHASES.indexOf(this.phase);if(index<0)return;
-    if(index===PHASES.length-1){this.phase='results';this.result={score:this.score,kitSkill:this.skill.snapshot(),kind:this.kind,commission:this.commission,moves:{...this.moves},rotations:{...this.rotations},maxPerfectStreak:this.maxPerfectStreak,wear:this.wear,...this.flavour.snapshot(),hits:this.hits,heavy:this.heavy,perfect:this.perfect,bestCombo:this.bestCombo,papers:this.papers,qte:this.qteSuccess,gestures:{...this.specials},fed:this.fed,blessed:this.blessed,weapon:this.weapon,seconds:(this.now()-this.started)/1000,fortune:FORTUNES[Math.min(FORTUNES.length-1,Math.floor(this.random()*FORTUNES.length))]};}
+    if(index===PHASES.length-1){this.phase='results';this.result={auspicious:true,skin:this.skin,rolls:this.rolls,finisherWins:this.finisherWins,score:this.score,kitSkill:this.skill.snapshot(),kind:this.kind,commission:this.commission,moves:{...this.moves},rotations:{...this.rotations},maxPerfectStreak:this.maxPerfectStreak,wear:this.wear,...this.flavour.snapshot(),hits:this.hits,heavy:this.heavy,perfect:this.perfect,bestCombo:this.bestCombo,papers:this.papers,qte:this.qteSuccess,gestures:{...this.specials},fed:this.fed,blessed:this.blessed,weapon:this.weapon,seconds:(this.now()-this.started)/1000,fortune:FORTUNES[Math.min(FORTUNES.length-1,Math.floor(this.random()*FORTUNES.length))]};}
     else{this.phase=PHASES[index+1];this.phaseStarted=this.now();}
     this.transitions.push(this.phase);
   }

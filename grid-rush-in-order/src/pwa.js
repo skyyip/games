@@ -38,7 +38,7 @@ installButton.addEventListener('click', async () => {
 if ('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register(new URL('../sw.js', import.meta.url), { updateViaCache: 'none' });
+      await navigator.serviceWorker.register(window.PLAYGROUND_RELEASE?new URL(window.PLAYGROUND_RELEASE.worker,new URL(window.PLAYGROUND_RELEASE.base,document.baseURI)):new URL('../sw.js', import.meta.url), { updateViaCache: 'none' });
       await navigator.serviceWorker.ready;
       offlineStatus.textContent = 'Ready to play offline. Your records stay on this device.';
     } catch {

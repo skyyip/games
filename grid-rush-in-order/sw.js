@@ -1,7 +1,7 @@
 // Bump the version whenever an app asset changes. An update waits until existing
 // app windows close, so it cannot replace a player's game during a round.
-const CACHE_NAME = 'grid-rush-in-order-app-v43';
-const APP_FILES = ['../grid-rush/victory.css','../grid-rush/src/victory.js',
+const CACHE_NAME = 'grid-rush-in-order-app-v44';
+const APP_FILES = ['../grid-rush/comic-chinese.css','../grid-rush/assets/fonts/Iansui.woff2','../grid-rush/src/site-updates.js','../grid-rush/victory.css','../grid-rush/src/victory.js',
   './',
   './index.html',
   './styles.css',

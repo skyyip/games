@@ -19,6 +19,6 @@ export function mountPlayers(root,onChange=()=>{}){
 export function literal(element,value){element.textContent=value;element.setAttribute('translate','no');}
 export async function enableOffline(message){
   try{if(!/^https?:$/.test(location.protocol)||self.origin==='null'||!('serviceWorker'in navigator))return;
-    await navigator.serviceWorker.register('./sw.js');await navigator.serviceWorker.ready;message.textContent='Ready to play offline';
+    await navigator.serviceWorker.register(window.PLAYGROUND_RELEASE?new URL(window.PLAYGROUND_RELEASE.worker,new URL(window.PLAYGROUND_RELEASE.base,document.baseURI)).href:'./sw.js',{updateViaCache:'none'});await navigator.serviceWorker.ready;message.textContent='Ready to play offline';
   }catch{/* Sandboxed previews and unsupported browsers can still play. */}
 }

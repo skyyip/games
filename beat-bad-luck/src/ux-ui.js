@@ -1,5 +1,5 @@
 import {WEAPONS,DECOR,MAX_DECOR_LEVEL,decorHourlyRate} from './catalog.js';
-import {weaponUses,decorDurability,repairCost} from './progress.js';
+import {weaponUses,decorDurability,repairCost,purchasePrice} from './progress.js';
 import {placedLayout} from './neighbourhood.js';
 import {weaponArt,decorArt} from './art.js';
 import {KIT_SKILLS} from './kit-skills.js';
@@ -45,8 +45,8 @@ export function createUX({game,audio,preferences,itemName,getState,isPersistent,
  }
  function renderFilters(){
   const s=getState(),query=$('#kit-search').value.trim().toLocaleLowerCase(),filter=$('#kit-filter').value||'all';let shown=0;
-  for(const row of $('#weapon-list').children){const id=row.querySelector('[data-weapon]').dataset.weapon,w=WEAPONS.find(w=>w.id===id),owned=s.owned.includes(id),affordable=!owned&&s.coins>=w.cost&&s.merit>=w.merit,haystack=[w.name,w.nameZh,translate(w.name),...(KIT_SKILLS[id]?.name??[])].join(' ').toLocaleLowerCase();row.hidden=!(haystack.includes(query)&&(filter==='all'||filter==='owned'&&owned||filter==='affordable'&&affordable));if(!row.hidden)shown++;}
-  put('kit-filter-count',`${shown} / 44 件法寶`,`${shown} / 44 kits`);$('#kit-empty').hidden=shown>0;$('#kit-empty p').textContent=local('暫時搵唔到，試下另一個字或清除篩選。','No matches. Try another word or clear the filters.');put('clear-kit-filter','清除篩選','Clear filters');
+  for(const row of $('#weapon-list').children){const id=row.querySelector('[data-weapon]').dataset.weapon,w=WEAPONS.find(w=>w.id===id),owned=s.owned.includes(id),affordable=!owned&&s.coins>=purchasePrice(s,w.cost)&&s.merit>=w.merit,haystack=[w.name,w.nameZh,translate(w.name),...(KIT_SKILLS[id]?.name??[])].join(' ').toLocaleLowerCase();row.hidden=!(haystack.includes(query)&&(filter==='all'||filter==='owned'&&owned||filter==='affordable'&&affordable));if(!row.hidden)shown++;}
+  put('kit-filter-count',`${shown} / ${$('#weapon-list').children.length} 件法寶`,`${shown} / ${$('#weapon-list').children.length} kits`);$('#kit-empty').hidden=shown>0;$('#kit-empty p').textContent=local('暫時搵唔到，試下另一個字或清除篩選。','No matches. Try another word or clear the filters.');put('clear-kit-filter','清除篩選','Clear filters');
  }
  $('#kit-search').addEventListener('input',renderFilters);$('#kit-filter').addEventListener('change',renderFilters);$('#clear-kit-filter').addEventListener('click',()=>{$('#kit-search').value='';$('#kit-filter').value='all';renderFilters();$('#kit-search').focus();});
  function renderShop(){const s=getState();put('shop-wallet',`香油錢 ${number(s.coins)} · 功德 ${number(s.merit)}（解鎖門檻，不扣除）`,`Oil ${number(s.coins)} · Merit ${number(s.merit)} (unlock requirement, not spent)`);put('kit-search-label','搜尋法寶名稱或招牌技','Search kit names or signatures');put('kit-filter-label','法寶篩選','Filter kits');$('#kit-search').placeholder=local('搜尋法寶','Search kits');const select=$('#kit-filter'),value=select.value||'all',labels=[['all','全部','All kits'],['owned','已擁有','Owned'],['affordable','可購買','Can buy']];if(select.dataset.lang!==getLanguage()){select.replaceChildren(...labels.map(([v,zh,en])=>new Option(local(zh,en),v)));select.value=value;select.dataset.lang=getLanguage();}renderFilters();}

@@ -1,3 +1,4 @@
+import {SKINS} from './skins.js';
 import {WORRIES} from './catalog.js';
 import {COMIC_FORTUNES} from './fortune-catalog.js';
 // Local-only stories, cosmetics and postcard keepsakes. No custom worry text is saved.
@@ -18,7 +19,7 @@ export const STORIES=[
 export const CHALLENGES=[
  {id:'rhythm',name:['橋底節奏王','Flyover rhythm royal'],detail:['連續 10 次完美節奏命中','Land 10 perfect whacks in a row'],stamp:'拍',look:'gold',lookName:['金光節奏邊框','Golden rhythm trim']},
  {id:'hands',name:['一掌收工','One palm, off duty'],detail:['用徒手完成一章街坊委託','Complete a commission chapter with bare hands'],stamp:'掌',look:'flower',lookName:['收工小花章','Off-duty flower badge']},
- {id:'five',name:['拖鞋宗師','Slipper grandmaster'],detail:['一局使用齊五種手勢','Use all five gestures in one ritual'],stamp:'勁',look:'raincoat',lookName:['平安小雨帽','Little peace rain hat']},
+ {id:'five',name:['拖鞋宗師','Slipper grandmaster'],detail:['一局任用五類手勢（順／逆圈算同類）','Use any five gesture types; both circle directions count as one'],stamp:'勁',look:'raincoat',lookName:['平安小雨帽','Little peace rain hat']},
 {"id": "combo-30", "name": ["手速快過改需求", "Faster than a revision"], "detail": ["一局達到 30 連擊", "Reach a 30-hit combo"], "stamp": "快", "look": "lightning", "lookName": ["加班雷電披風", "Overtime lightning cape"], "goal": "combo"},
 {"id": "copies-6", "name": ["影印機天敵", "Photocopier nemesis"], "detail": ["一局消除 6 張影印分身", "Clear 6 photocopies in one ritual"], "stamp": "碎", "look": "paper-crown", "lookName": ["影印紙皇冠", "Photocopy paper crown"], "goal": "copies"},
 {"id": "weak-12", "name": ["專篤笑穴", "Professional funny-bone finder"], "detail": ["一局命中弱點 12 次", "Land 12 weakness hits"], "stamp": "中", "look": "target", "lookName": ["笑穴雷達眼鏡", "Funny-bone radar glasses"], "goal": "weak"},
@@ -44,7 +45,22 @@ export const SCENES=[
 {"id": "crystal-taxi", "name": ["紫水晶的士跳錶", "The crystal’s metered taxi"], "needs": ["amethyst", "landscape-rock"], "actors": ["amethyst", "landscape-rock"], "line": ["假山戴住紫水晶兜客：過海要加香火附加費。", "The mountain wears a crystal taxi sign: incense surcharge across the harbour."], "beats": [["水晶：「去邊？」假山：「我郁唔到。」", "Crystal: “Where to?” Mountain: “I can’t move.”"], ["水晶：「咁收等候費。」", "Crystal: “Then it’s the waiting tariff.”"], ["兩件一齊原地漂移，個錶照跳。", "They drift on the spot. The meter keeps running."]], "motion": "drift"},
 {"id": "cream-attack", "name": ["奶油空襲雞翼機場", "Buttercream attacks wing airport"], "needs": ["butter-guillotine", "street-wings"], "actors": ["butter-guillotine", "street-wings"], "line": ["奶油血滴子起飛，雞翼當咗自己係戰鬥機。", "The buttercream guillotine launches. The wing thinks it’s a fighter jet."], "beats": [["雞翼：「塔台，准唔准加辣？」", "Wing: “Tower, cleared for extra chilli?”"], ["奶油：「准你加卡路里！」", "Buttercream: “Cleared for extra calories!”"], ["降落成功，變咗忌廉雞翼。", "Perfect landing. Cream-covered chicken wings."]], "motion": "launch"},
 {"id": "meatball-dj", "name": ["牛丸DJ彈到隔籬街", "Meatball DJ bounces next door"], "needs": ["radio", "beef-balls", "electric-banana"], "actors": ["radio", "beef-balls", "electric-banana"], "line": ["收音機播低音，牛丸逐粒彈到上天線。", "The radio drops the bass. Meatballs bounce onto the aerial."], "beats": [["香蕉：「今晚由我打碟！」", "Banana: “I’m spinning the tracks tonight!”"], ["牛丸：「你打碟，我彈碗！」", "Meatball: “You spin records. I bounce bowls!”"], ["收音機宣布：低音太彈牙，暫停播出。", "Radio: “Bass too chewy. Broadcasting suspended.”"]], "motion": "rave"}];
-const MOVES=['tap','heavy','rub','circle','pinch'],cap=(v,max)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
+STORIES.push(
+ {id:'kungfu-rent',name:['功夫街坊交租記','Kung-fu rent day'],icon:'🦁',gift:['靜音獅吼門牌','Silent-roar doorplate'],chapters:[
+ {kind:'noise',name:['包租婆低聲啲','Indoor-voice landlady'],text:['用重扣打走嘈音，擊中弱點 5 次。','Heavy-whack the noise weakness 5 times.'],goal:'weaknessHits',need:5},
+ {kind:'work-life',name:['拖鞋雲唔接 OT','No-overtime slipper cloud'],text:['用 3 種手勢命中 12 次。','Use 3 gestures in 12 hits.'],goal:'variety',need:3,hits:12},
+ {kind:'family',name:['一掌推開內耗','One palm, less stewing'],text:['完成 2 次橋底事件，再食餐安樂飯。','Handle 2 flyover events.'],goal:'eventsWon',need:2}]},
+ {id:'chef-dream',name:['食神茶記再開張','The comeback café'],icon:'🍚',gift:['會唱歌收工飯碗','Singing clock-off bowl'],chapters:[
+ {kind:'sleep',name:['西客話要走奶加奶','Milk, no milk, extra milk'],text:['命中 12 次，西客都變熟客。','Land 12 hits.'],goal:'hits',need:12},
+ {kind:'stocks',name:['鹹魚都有下午茶','Salted fish takes tea'],text:['趁跌市擊中弱點 8 次。','Hit the plunging-market weakness 8 times.'],goal:'weaknessHits',need:8},
+ {kind:'love',name:['黯然但唔好加班','Melancholy, without overtime'],text:['踩準拍子 8 次。','Land 8 perfect beats.'],goal:'perfect',need:8}]},
+ {id:'scholar-laugh',name:['才子點秋香唔點 OT','A scholar courts free time'],icon:'🌺',gift:['自動批假牡丹','Leave-approved peony'],chapters:[
+ {kind:'work',name:['九份文案一齊改','Nine revisions at once'],text:['清走 4 張影印分身。','Clear 4 photocopies.'],goal:'copiesCleared',need:4},
+ {kind:'teammates',name:['豬隊友扮才子','A teammate plays scholar'],text:['等佢偷笑，擊中弱點 6 次。','Catch 6 snickering weaknesses.'],goal:'weaknessHits',need:6},
+ {kind:'work-life',name:['文武雙全都要收工','Clock off with style'],text:['用 5 種手勢，命中 20 次。','Use 5 gestures across 20 hits.'],goal:'variety',need:5,hits:20}]}
+);
+export function commissionPay(chapter,finished=false,replay=false){const difficulty=({eventsWon:110,variety:85,weaknessHits:70,perfect:90,copiesCleared:75})[chapter?.goal]??40,multiplier=replay ? .6 : 1;return {oil:Math.round((difficulty+(chapter?.need??0)*5+(finished?80:0))*multiplier),merit:Math.round((difficulty*.5+(chapter?.need??0)*3+(finished?50:0))*multiplier)};}
+const MOVES=['tap','heavy','rub','circle','pinch','hold','spread','cross','vee'],cap=(v,max)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
 export const freshNeighbourhood=()=>({active:'',replay:false,chapters:Object.fromEntries(STORIES.map(s=>[s.id,0])),challenges:[],title:'',look:'',scenes:[],layout:[],companions:[],totals:{rituals:0,events:0,copies:0,perfect:0},recentFortunes:[],fortuneSeen:[],album:[]});
 export function readNeighbourhood(raw,{weapons=[],decor=[],owned=[],rituals=0}={}){
  const next=freshNeighbourhood();next.totals.rituals=cap(rituals,1000000);if(!raw||typeof raw!=='object'){if(owned.includes('lassie'))next.companions=['lassie'];return next;}
@@ -54,8 +70,8 @@ export function readNeighbourhood(raw,{weapons=[],decor=[],owned=[],rituals=0}={
  next.scenes=SCENES.filter(s=>Array.isArray(raw.scenes)&&raw.scenes.includes(s.id)).map(s=>s.id);next.companions=owned.includes('lassie')||(Array.isArray(raw.companions)&&raw.companions.includes('lassie'))?['lassie']:[];
  for(const key of Object.keys(next.totals))next.totals[key]=cap(raw.totals?.[key]??(key==='rituals'?rituals:0),1000000);
  const validFortunes=new Set(COMIC_FORTUNES.map(f=>f.id));next.recentFortunes=(Array.isArray(raw.recentFortunes)?raw.recentFortunes:[]).filter(id=>validFortunes.has(id)).slice(-16);next.fortuneSeen=[...new Set((Array.isArray(raw.fortuneSeen)?raw.fortuneSeen:[]).filter(id=>validFortunes.has(id)))];
- next.layout=[...new Set(Array.isArray(raw.layout)?raw.layout.filter(id=>decor.includes(id)):[])].slice(0,27);
- next.album=(Array.isArray(raw.album)?raw.album:[]).filter(e=>e&&typeof e.id==='string'&&weapons.includes(e.weapon)&&Number.isFinite(e.at)).slice(0,24).map(e=>({id:e.id.slice(0,80),kind:WORRIES.some(w=>w.id===e.kind)?e.kind:'work',weapon:e.weapon,score:cap(e.score,1000000),hits:cap(e.hits,1000000),perfect:cap(e.perfect,1000000),wear:Math.max(0,Math.min(1,Number(e.wear)||0)),move:MOVES.includes(e.move)?e.move:'tap',...(validFortunes.has(e.fortuneId)?{fortuneId:e.fortuneId}:{}),stamp:CHALLENGES.some(c=>c.id===e.stamp)?e.stamp:'',at:cap(e.at,8640000000000000)}));return next;
+ next.layout=[...new Set(Array.isArray(raw.layout)?raw.layout.filter(id=>decor.includes(id)):[])].slice(0,42);
+ next.album=(Array.isArray(raw.album)?raw.album:[]).filter(e=>e&&typeof e.id==='string'&&weapons.includes(e.weapon)&&Number.isFinite(e.at)).slice(0,24).map(e=>({id:e.id.slice(0,80),skin:SKINS.some(s=>s.id===e.skin)?e.skin:'paper',kind:WORRIES.some(w=>w.id===e.kind)?e.kind:'work',weapon:e.weapon,score:cap(e.score,1000000),hits:cap(e.hits,1000000),perfect:cap(e.perfect,1000000),wear:Math.max(0,Math.min(1,Number(e.wear)||0)),move:MOVES.includes(e.move)?e.move:'tap',...(validFortunes.has(e.fortuneId)?{fortuneId:e.fortuneId}:{}),stamp:CHALLENGES.some(c=>c.id===e.stamp)?e.stamp:'',at:cap(e.at,8640000000000000)}));return next;
 }
 export function acceptStory(state,id,{replay=false}={}){const story=STORIES.find(s=>s.id===id),done=story&&(state.chapters[id]??0)>=story.chapters.length;return story&&(!done||replay)?{...state,active:id,replay:Boolean(done)}:null;}
 export function storyGoal(chapter,result){const variety=MOVES.filter(m=>(result.moves?.[m]??0)>0).length;return chapter.goal==='variety'?variety>=chapter.need&&result.hits>=(chapter.hits??0):chapter.goal==='kindness'?result.hits>=chapter.need&&result.fed&&result.blessed:(result[chapter.goal]??0)>=chapter.need;}
@@ -64,10 +80,11 @@ export function finishNeighbourhood(state,result,{id,now}){
  const totals={rituals:cap((state.totals?.rituals??0)+1,1000000),events:cap((state.totals?.events??0)+(result.eventsWon??0),1000000),copies:cap((state.totals?.copies??0)+(result.copiesCleared??0),1000000),perfect:cap((state.totals?.perfect??0)+(result.perfect??0),1000000)};
  let next={...state,totals,chapters:{...state.chapters},challenges:[...state.challenges],album:[...state.album]};const story=STORIES.find(s=>s.id===state.active),chapter=story?.chapters[state.replay?story.chapters.length-1:state.chapters[story.id]??0];let completed=null;
  if(chapter&&result.commission===story.id&&result.kind===chapter.kind&&storyGoal(chapter,result)){if(!state.replay)next.chapters[story.id]++;completed={story:story.id,chapter:next.chapters[story.id],finished:next.chapters[story.id]===story.chapters.length,replay:state.replay};if(completed.finished){next.active='';next.replay=false;}}
- const earned=[];for(const challenge of CHALLENGES){const success=challenge.id==='rhythm'?result.maxPerfectStreak>=10:challenge.id==='hands'?Boolean(completed&&result.weapon==='bare-hand'):challenge.id==='five'?MOVES.every(m=>(result.moves?.[m]??0)>0):challenge.goal==='combo'?result.bestCombo>=30:challenge.goal==='copies'?result.copiesCleared>=6:challenge.goal==='weak'?result.weaknessHits>=12:challenge.goal==='events'?result.eventsWon>=2:challenge.goal==='taps'?result.hits>=25&&result.moves?.tap===result.hits:false;
+ const earned=[];for(const challenge of CHALLENGES){const success=challenge.id==='rhythm'?result.maxPerfectStreak>=10:challenge.id==='hands'?Boolean(completed&&result.weapon==='bare-hand'):challenge.id==='five'?MOVES.filter(m=>(result.moves?.[m]??0)>0).length>=5:challenge.goal==='combo'?result.bestCombo>=30:challenge.goal==='copies'?result.copiesCleared>=6:challenge.goal==='weak'?result.weaknessHits>=12:challenge.goal==='events'?result.eventsWon>=2:challenge.goal==='taps'?result.hits>=25&&result.moves?.tap===result.hits:false;
   const extra=challenge.goal==='heavy'?(result.moves?.heavy??0)>=8:challenge.goal==='circle'?(result.moves?.circle??0)>=6:challenge.goal==='pinch'?(result.moves?.pinch??0)>=5:challenge.goal==='care'?result.hits>=10&&result.eventsWon>=1&&result.fed&&result.blessed:challenge.goal==='rituals'?totals.rituals>=12:challenge.goal==='rescues'?totals.events>=10:challenge.goal==='scenes'?state.scenes.length>=6:false;if((success||extra)&&!next.challenges.includes(challenge.id)){next.challenges.push(challenge.id);earned.push(challenge.id);next.title ||=challenge.id;next.look ||=challenge.look;}}
+ next.challenges=CHALLENGES.filter(c=>next.challenges.includes(c.id)).map(c=>c.id);
  const move=MOVES.reduce((a,b)=>(result.moves?.[b]??0)>(result.moves?.[a]??0)?b:a,'tap');
- const entry={id,kind:result.kind??'work',weapon:result.weapon,score:result.score,hits:result.hits??0,perfect:result.perfect??0,wear:Math.max(0,Math.min(1,result.wear??0)),move,stamp:earned[0]??next.title,at:now};
+ const entry={id,skin:result.skin??'paper',kind:result.kind??'work',weapon:result.weapon,score:result.score,hits:result.hits??0,perfect:result.perfect??0,wear:Math.max(0,Math.min(1,result.wear??0)),move,stamp:earned[0]??next.title,at:now};
  const fortune=chooseFortune(entry,result,state.recentFortunes??[]);entry.fortuneId=fortune.id;next.recentFortunes=[...(state.recentFortunes??[]),fortune.id].slice(-16);next.fortuneSeen=[...new Set([...(state.fortuneSeen??[]),fortune.id])];
  if(!next.album.some(e=>e.id===id))next.album=[entry,...next.album].slice(0,24);return {state:next,completed,earned,entry};
 }

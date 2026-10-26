@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';import {mkdir,writeFile} from 'node:fs/p
 const base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';
 const browser=await chromium.launch({headless:true});const failures=[],errors=[];let cases=0;await mkdir('/tmp/bbl-layout-qa',{recursive:true});
 const types=['tram','rain','wind','pigeon','receipt','auntie','blackout','minibus','sneeze'];
-try{for(const [width,height]of [[320,568],[375,667],[390,844],[812,375],[1440,900]])for(const lang of ['zh-Hant','en']){
- const context=await browser.newContext({viewport:{width,height},isMobile:width<900,hasTouch:width<900,reducedMotion:'reduce',serviceWorkers:'block'});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+try{for(const [width,height]of (process.env.BBL_LAYOUT_SIZES?JSON.parse(process.env.BBL_LAYOUT_SIZES):[[320,568],[375,667],[390,844],[812,375],[1440,900]]))for(const lang of (process.env.BBL_LAYOUT_LANGS?.split(',')||['zh-Hant','en'])){
+ const context=await browser.newContext({viewport:{width,height},isMobile:width<900,hasTouch:width<900,reducedMotion:'reduce',serviceWorkers:'block'});await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  for(const [index,type]of types.entries()){
   await page.addInitScript(({random,lang})=>{Math.random=()=>random;localStorage.setItem('playground.language.v1',lang);},{random:(index+.1)/9,lang});
-  await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
+  await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.waitForTimeout(100);if(await page.locator('#ritual-loot-dialog[open]').count())await page.locator('#loot-close').click();await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
   const click=s=>page.locator(s).evaluate(e=>e.click());await click('#start');for(let i=0;i<3;i++)await click(`[data-stick="${i}"]`);await click('#blow');await page.clock.fastForward(2050);await click('#confirm-worry');await page.clock.fastForward(2050);await page.clock.fastForward(12020);
   for(let i=0;i<4;i++){await click('#hit-zone');await page.clock.runFor(60);}
   assert.equal(await page.locator('#event-banner').getAttribute('data-event'),type);

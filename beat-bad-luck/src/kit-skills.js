@@ -1,7 +1,7 @@
 import {EXTRA_KITS} from './kit-catalog.js';
 import {beginExpanded,advanceExpanded,actExpanded,cancelExpanded} from './kit-gestures.js';
 // Active ritual milliseconds drive skills, daylight and every input deadline.
-export const SKILL_CHARGE=12,SKILL_LIMIT=2,SKILL_DURATION=7000,SKILL_RESULT=650,SKILL_REST=8000,SKILL_BONUS=50;
+export const SKILL_CHARGE=12,SKILL_LIMIT=4,SKILL_DURATION=7000,SKILL_RESULT=650,SKILL_REST=8000,SKILL_BONUS=50;
 export const FIRST_SIX_KITS=['flying-dagger','plunger-nunchucks','beauty-fist','solar-torch','immunity-token','flipflop'];
 export const KIT_SKILLS={...EXTRA_KITS,
  'flying-dagger':{name:['三紙連環刀','Triple paper toss'],hint:['準星亮起時，依次點中三張紙。','Tap each paper in order when its ring lights up.'],win:['三紙串燒！最後改一次都冇用！','Triple paper kebab! No more final revisions!']},

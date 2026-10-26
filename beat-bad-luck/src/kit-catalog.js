@@ -1,3 +1,4 @@
+import {SECRET_WEAPONS} from './ritual-rewards.js';
 // Each recipe has its own ordered actions and comic scene; scoring stays shared.
 const swipe=(direction,zh,en)=>({type:'swipe',direction,label:[zh,en]});
 const turn=(direction,zh,en)=>({type:'circle',direction,label:[zh,en]});
@@ -51,3 +52,22 @@ export const EXTRA_KITS={
  lassie:kit(['拉茜假髮追逐賽','Lassie and the runaway wig'],['拉茜叼返個假髮，小人即刻跑返嚟認領！','Lassie fetched the wig. The gremlin came back immediately!'],['返嚟領取','FETCH!'], 'dog',[trace([[.18,.7],[.35,.3],[.65,.58],[.82,.25]],'沿腳印畫出拉茜追逐路線','Trace Lassie’s footprint route'),tap(2,'點右邊叫佢交返個假髮','Tap the right to return the wig')]),
  'rebirth-paper':kit(['投胎申請正本核對','Rebirth paperwork desk'],['想做李嘉誠個仔？請先交出世紙正本！','A billionaire dad? Original birth certificate, please!'],['正本呢','ORIGINAL COPY?'], 'crown',[drop([.18,.3],[.5,.52],'把投胎表拖入審批框','Drag the rebirth form into the review box'),tap(1,'點中間核對出世紙','Check the birth certificate in the middle'),drop([.82,.75],[.5,.52],'把印章拖到申請表','Drag the stamp onto the application')])
 };
+
+const secretRecipes=[
+ [turn('cw','順轉開咪','Circle clockwise'),tap(1,'點中笑聲','Tap the laughter')],
+ [turn('ccw','逆轉糖紙','Circle anti-clockwise'),hold(600,'按住糖紙再放手','Hold the wrapper then release')],
+ [swipe('up','托起雞髀','Flick the drumstick up'),swipe('down','啪一聲開飯','Flick down for dinner')],
+ [tap(0,'點左刀鞘','Tap the left sheath'),tap(2,'點右刀光','Tap the right blade'),swipe('up','向上出鞘','Unsheathe upward')],
+ [rub(3,'捽花三次','Rub three times'),turn('cw','順轉開花','Circle clockwise')],
+ [trace([[.2,.25],[.8,.25],[.5,.7]],'沿三點畫粉筆陣','Trace the three chalk points'),swipe('right','掃走功課','Swipe away the homework')],
+ [hold(650,'按住的士錶','Hold the meter'),swipe('left','衰運請落車','Flick left to drop off bad luck')],
+ [tap(0,'踏左雲','Tap the left cloud'),tap(2,'踏右雲','Tap the right cloud'),hold(500,'按住起飛','Hold, then take off')],
+ [swipe('left','扇左耳','Fan left'),swipe('right','扇右耳','Fan right'),turn('ccw','逆轉靜音','Circle to mute')],
+ [pinch('夾實椰殼','Pinch the coconut'),swipe('down','向下椰掌','Palm downward')],
+ [beat(0,650,'左燈亮時拍','Tap the left cue'),beat(2,650,'右燈亮時彈','Tap the right cue')],
+ [tap(1,'點月光暫停','Tap the moonlight pause'),hold(700,'按住收工鍵','Hold the off-duty key')],
+ [drop([.2,.25],[.78,.65],'把漏雨拖入遮底','Drag the rain under the umbrella'),swipe('up','向上抖水','Shake the water upward')],
+ [turn('cw','轉一圈開鑼','Circle to wind the gong'),swipe('down','落掌收工','Strike down to clock off')],
+ [trace([[.2,.65],[.5,.25],[.8,.65]],'沿星點畫飛拖路','Trace the cosmic slipper'),pinch('夾住太空衰運','Pinch the cosmic bad luck')]
+];
+for(const [i,item]of SECRET_WEAPONS.entries())EXTRA_KITS[item.id]=kit([item.nameZh+'絕招',item.name+' signature'],[item.description,item.descriptionEn],['殺青！','THAT’S A WRAP!'],i%2?'spin':'flat',secretRecipes[i]);

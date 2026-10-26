@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = process.env.PLAYGROUND_ROOT ? resolve(process.env.PLAYGROUND_ROOT) + sep : fileURLToPath(new URL('../../', import.meta.url));
 const port = Number(process.env.PORT || 5173);
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.woff2': 'font/woff2', '.ttf': 'font/ttf' };
 
@@ -17,7 +17,7 @@ const server = createServer(async (request, response) => {
       return;
     }
     const content = await readFile(path);
-    response.writeHead(200, { 'Content-Type': types[extname(path)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+    response.writeHead(200, { 'Content-Type': types[extname(path)] || 'application/octet-stream', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
     response.end(content);
   } catch {
     response.writeHead(404).end('Not found');

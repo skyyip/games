@@ -1,3 +1,4 @@
+import {SECRET_WEAPONS,SECRET_DECOR,PATRONS} from './ritual-rewards.js';
 export const WORRIES=[
   {id:'work',label:'Requirement revised N times',labelZh:'改咗N次嘅Requirement',name:'The Overtime Gremlin',icon:'screen'},
   {id:'noise',label:'Office gossip',name:'The Gossip Goblin',icon:'megaphone'},
@@ -13,6 +14,7 @@ export const WORRIES=[
   {id:'commute',label:'Another delayed train / bus',labelZh:'又誤點嘅地鐵/Bus',name:'The Delay Monster',icon:'train'},
 ];
 export const WEAPONS=[
+ ...SECRET_WEAPONS,
   {id:'bare-hand',name:'Bare hands',merit:0,cost:0,tone:150,starter:true},
   {id:'flipflop',name:'Blue-and-white flip-flop',merit:0,cost:200,multiplier:2.1,tone:180},
   {id:'paper',name:'Rolled-up newspaper',merit:40,cost:245,multiplier:2.42,tone:260},
@@ -64,6 +66,7 @@ export const WEAPONS=[
 export const weaponScoreMultiplier=id=>{const weapon=WEAPONS.find(w=>w.id===id);return weapon?.multiplier??1+(weapon?.cost??0)/100;};
 export const MAX_DECOR_LEVEL=5;
 export const DECOR=[
+ ...SECRET_DECOR,
   {id:'radio',name:'Cassette radio',cost:1190,rate:0.6},
   {id:'neon',name:'Retro neon sign',cost:1145,rate:1.2},
   {id:'incense',name:'Incense stand',cost:1155,rate:1.8},
@@ -95,11 +98,7 @@ export const DECOR=[
 // All hourly income, including the upgrade increment, is 40% below the previous balance.
 export const DECOR_LEVEL_RATE_BONUS=.06;
 export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*DECOR_LEVEL_RATE_BONUS)*100)/100:0;
-export const FRIENDS=[
-  {id:'waiter',name:'The Kind Café Waiter',story:'A warm milk tea appears before you even ask. Some kindness needs no reason.',icon:'☕'},
-  {id:'driver',name:'The Punctual Minibus Driver',story:'One seat left, just for you. Today, you get home before the soup goes cold.',icon:'🚐'},
-  {id:'neighbour',name:'The Thoughtful Neighbour',story:'An umbrella waits at your door. You do not have to weather every storm alone.',icon:'☂'},
-];
+export const FRIENDS=PATRONS;
 export const FORTUNES=[
   'You have done enough for today. Leave a little room for yourself.',
   'A late train is a pause, not a verdict on your day.',

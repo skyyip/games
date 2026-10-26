@@ -17,7 +17,7 @@ try{
  for(const [width,height]of [[320,568],[390,844],[812,375]])for(const lang of ['zh-Hant','en'])for(const [index,event]of EVENTS.entries()){
   const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'no-preference',serviceWorkers:'block'});
   await context.addInitScript(({random,lang})=>{Math.random=()=>random;localStorage.setItem('playground.language.v1',lang);},{random:(index+.1)/9,lang});
-  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.evaluate(()=>document.fonts.ready);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
+  await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.waitForTimeout(100);if(await page.locator('#ritual-loot-dialog[open]').count())await page.locator('#loot-close').click();await page.evaluate(()=>document.fonts.ready);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
   const click=s=>page.locator(s).evaluate(e=>e.click());await click('#start');for(let i=0;i<3;i++)await click(`[data-stick="${i}"]`);await click('#blow');await page.clock.fastForward(2050);await click('#confirm-worry');await page.clock.fastForward(2050);
   const before=await boxes(page),label=`${width} ${lang} ${event.id}`;let elapsed=0;
   const advance=async target=>{await page.clock.fastForward(target-elapsed);elapsed=target;unchanged(before,await boxes(page),`${label} at ${target}ms`);};

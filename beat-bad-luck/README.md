@@ -191,3 +191,17 @@ The paper now distinguishes clockwise and anti-clockwise circles, with opposite 
 Eight static hint icons sit in a single horizontally scrollable row. They do not trigger attacks. The current rhythm hint scrolls into view without moving the paper, event slot or other controls. Existing tap, swipe, rub, pinch and keyboard paper-tap input remain available; reduced motion keeps progress readable without the new squash animation.
 
 Run `node scripts/advanced-gestures-check.mjs` with the usual Playwright module environment variable for real pointer/touch direction, charge, cancellation, spread, event sequence and full-result coverage. `ADVANCED_ONLY_EVENTS=1 ADVANCED_EVENT_IDS=sneeze,rain` selects the capture-loss/precise-drag recheck.
+
+## Current ritual, collection and controls (2026-10-27)
+
+The ritual now has six stages: incense → name the worry → **90-second whacking** → feed the yellow paper tiger → three ordered purification actions → divination. Pork randomly requires a symbolic blood dip or a direct smear. Burn the battered worry and offering paper, scatter rice/beans, then burn the green horse paper. Purification and divination are untimed and pause-safe; a non-sacred cast can be retried. Only one flat and one curved block completes the ritual.
+
+Two successful manually launched signatures bank a finisher. Activate it yourself, then swipe, circle and tap within six active seconds. Four signature attempts fit around the existing two or three random events. The conclusion highlights a decorated 吉, earned titles, exact commission pay, any new patron and any rare gift. Fortune postcards include Hong Kong date/hour/minute and varied original Cantonese comedy comments.
+
+Daily login grants **20 oil / 30 merit** once per Hong Kong calendar day. There are **30 ritual-only secret collectibles**, a permanent discovery album, ten patrons with 1–5-star rarity and non-stacking strongest oil/merit bonuses or single-use discount coupons. See [COLLECTIONS.md](./COLLECTIONS.md) for drop odds, catalogues and commission rewards. Hidden kits still last two rituals; hidden decorations still age over 30 real days.
+
+All purchases open a comic preview **before spending**. Confirm rechecks the price, balance and upgrade level; closing/cancelling does not purchase or use a coupon. A separate reveal celebrates the confirmed item. This also applies to the **11 purchasable permanent worry looks** (80–720 oil), chosen before play. The free paper look remains available; cosmetics do not change personality, score or kit lifespan. Ownership and selection survive backup/reload.
+
+The three collection tabs use 14px labels. Both kits and decorations support bilingual search and All / Owned / Can buy filters with resettable empty states. Filter toolbars scroll normally. Step numbers and names share a horizontally scrollable row; smaller music/pause controls, single-line signature labels and removal of the redundant instruction box leave more room for the paper. The header has smiling cartoon navigation icons. All published games have a 10px floor for fixed small UI text; touch inputs retain 16px to prevent focus zoom.
+
+The static hint strip includes **V** and **X**. Draw V in one stroke; draw two crossing diagonals within 0.9 seconds for X. The first diagonal scores as a swipe, the crossing second one as X. Parallel strokes, partial Vs and semicircles do not qualify. Pause, pointer cancellation and resizing clear any pending stroke. Hints are descriptive and do not activate attacks.
