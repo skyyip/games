@@ -1,3 +1,4 @@
+import {freshNeighbourhood,readNeighbourhood,finishNeighbourhood} from './neighbourhood.js';
 import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorHourlyRate} from './catalog.js';
 const cap=(value,max=1000000)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
 export const DECOR_LIFETIME=30*24*3600000;
@@ -6,10 +7,11 @@ const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.dec
 export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
 export function repairCost(state,id,now=Date.now()){const item=DECOR.find(d=>d.id===id),health=decorDurability(state,id,now);return item&&health>0&&health<100?Math.max(1,Math.ceil(item.cost*state.decor[id]*.25*(1-health/100))):0;}
 export const STORAGE_KEY='beat-bad-luck.stall.v1';
-export function fresh(now=Date.now()){return {version:1,coins:0,merit:0,rituals:0,owned:['bare-hand'],equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],records:[],lastSeen:now,idleCarry:0,lastReceipt:null};}
+export function fresh(now=Date.now()){return {version:1,coins:0,merit:0,rituals:0,owned:['bare-hand'],equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
 export function readProgress(raw,now=Date.now()){
   const state=fresh(now);try{const x=JSON.parse(raw);if(!x||x.version!==1)return state;
     state.coins=cap(x.coins);state.merit=cap(x.merit);state.rituals=cap(x.rituals);state.owned=[...new Set(['bare-hand',...(Array.isArray(x.owned)?x.owned:[]).filter(id=>WEAPONS.some(w=>w.id===id))])];state.equipped=state.owned.includes(x.equipped)?x.equipped:'bare-hand';
+    state.neighbourhood=readNeighbourhood(x.neighbourhood,{weapons:WEAPONS.map(w=>w.id),decor:DECOR.map(d=>d.id),owned:state.owned});
     state.lastSeen=Number.isFinite(x.lastSeen)?Math.max(0,x.lastSeen):now;
     for(const d of DECOR){state.decor[d.id]=cap(x.decor?.[d.id],MAX_DECOR_LEVEL);if(state.decor[d.id])state.decorExpires[d.id]=Number.isFinite(x.decorExpires?.[d.id])?Math.max(0,Math.min(Math.max(now,state.lastSeen)+DECOR_LIFETIME,x.decorExpires[d.id])):now+DECOR_LIFETIME;}
     state.friends=[...new Set((Array.isArray(x.friends)?x.friends:[]).filter(id=>FRIENDS.some(f=>f.id===id)))];
@@ -33,7 +35,7 @@ export function buyWeapon(state,id){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon)return null;
   if(state.owned.includes(id))return {...state,equipped:id};
   if(state.coins<weapon.cost||state.merit<weapon.merit)return null;
-  return {...state,coins:state.coins-weapon.cost,owned:[...state.owned,id],equipped:id};
+  return {...state,neighbourhood:id==='lassie'?{...state.neighbourhood,companions:['lassie']}:state.neighbourhood,coins:state.coins-weapon.cost,owned:[...state.owned,id],equipped:id};
 }
 // An unused kit can be equipped freely; its first whack spends the whole ritual use.
 export function consumeWeapon(state,id){
@@ -60,5 +62,6 @@ export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   const merit=12+cap(result.papers)*6+cap(result.qte)*4;const available=FRIENDS.filter(f=>!state.friends.includes(f.id));let friend=null;
   if(available.length&&random()<.35)friend=available[Math.min(available.length-1,Math.floor(random()*available.length))];
   const records=[...state.records,{score:cap(result.score),hits:cap(result.hits),weapon:result.weapon,date:now}].sort((a,b)=>b.score-a.score||a.date-b.date).slice(0,3);
-  return {state:{...state,coins:cap(state.coins+earned),merit:cap(state.merit+merit),rituals:cap(state.rituals+1),friends:friend?[...state.friends,friend.id]:state.friends,records,lastReceipt:id},earned,merit,friend};
+  const journey=finishNeighbourhood(state.neighbourhood??freshNeighbourhood(),result,{id,now});
+  return {journey,state:{...state,neighbourhood:journey.state,coins:cap(state.coins+earned),merit:cap(state.merit+merit),rituals:cap(state.rituals+1),friends:friend?[...state.friends,friend.id]:state.friends,records,lastReceipt:id},earned,merit,friend};
 }
