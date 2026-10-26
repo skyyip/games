@@ -1,14 +1,14 @@
-.kit-preview{font-size:11px;line-height:1.65;padding:10px 12px;margin:0 0 10px;border:1px dashed #c8bb7c;border-radius:10px;color:#ead6a0;background:#25483f}
+.kit-preview{font-size:12.1px;line-height:1.65;padding:10px 12px;margin:0 0 10px;border:1px dashed #c8bb7c;border-radius:10px;color:#ead6a0;background:#25483f}
 .kit-shop-skill{color:#edce88!important}
 .beat-reaction{display:flex;gap:6px;align-items:stretch;flex:0 0 auto;width:100%;min-width:0;z-index:5}
 .is-playing .beat-panel .beat-reaction .hit-feedback{display:flex;flex:1;align-items:center;justify-content:center;min-width:0;width:auto}
-.kit-skill-button{flex:0 0 85px;min-height:44px;border:1px solid #d6be81;border-radius:9px;background:linear-gradient(90deg,#8c6b3b calc(var(--kit-fill,0)*100%),#25483f 0);color:#fff1c8;font-family:inherit;font-size:11px;font-weight:600;line-height:1.3;padding:5px;touch-action:manipulation}
+.kit-skill-button{flex:0 0 85px;min-height:44px;border:1px solid #d6be81;border-radius:9px;background:linear-gradient(90deg,#8c6b3b calc(var(--kit-fill,0)*100%),#25483f 0);color:#fff1c8;font-family:inherit;font-size:12.1px;font-weight:600;line-height:1.3;padding:5px;touch-action:manipulation}
 .kit-skill-button:disabled{color:#c4ccb0;border-color:#b8b38877;cursor:default}
 .kit-skill-button[data-ready=true]{box-shadow:inset 0 0 0 2px #f4d98b;animation:kit-ready 1.3s ease-in-out infinite}
 .kit-guidance{flex:0 0 auto;width:100%;padding:6px 8px;background:#594b36;border:1px solid #e7ca89;border-radius:9px;color:#fff0cb;z-index:5}
 .kit-guidance>div{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.kit-guidance b,.kit-guidance span{font-size:11px;line-height:1.3}
-.kit-guidance p{margin:3px 0 0;font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+.kit-guidance b,.kit-guidance span{font-size:12.1px;line-height:1.3}
+.kit-guidance p{margin:3px 0 0;font-size:12.1px;line-height:1.4;overflow-wrap:anywhere}
 .beat-panel:has(.kit-stage:not([hidden])) .personality-hud,.beat-panel:has(.kit-stage:not([hidden])) .qte-call,.beat-panel:has(.kit-stage:not([hidden])) .gesture-controls,.beat-panel:has(.kit-stage:not([hidden]))>.phase-instruction{display:none!important}
 .beat-arena[data-skill-busy=true]>.hit-zone,.beat-arena[data-skill-busy=true]>.flavour-playfield{visibility:hidden;pointer-events:none}
 .kit-stage{position:absolute;inset:0;z-index:6;isolation:isolate;border:1px solid #b5c19755;border-radius:14px;background:radial-gradient(ellipse at 50% 30%,#668e7555,transparent 70%),#25423ee8;overflow:hidden;touch-action:none}
@@ -16,7 +16,7 @@
 .kit-target{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:44px;min-height:44px;padding:4px;border:1px solid #c9bb82;border-radius:10px;background:#29483f;color:#fff0be;touch-action:none;font:inherit;cursor:pointer}
 .kit-target>span{display:block;pointer-events:none;font-size:19px;line-height:1}
 .kit-target svg{display:block;width:100%;height:100%;pointer-events:none}
-.kit-target small{display:block;font-size:11px;line-height:1.25;pointer-events:none;overflow-wrap:anywhere}
+.kit-target small{display:block;font-size:12.1px;line-height:1.25;pointer-events:none;overflow-wrap:anywhere}
 .kit-target[data-cue=true]{background:#806335;box-shadow:inset 0 0 0 3px #f9d991,0 0 12px #ecc97555}
 .kit-target[data-done=true]{opacity:.4;filter:grayscale(.5);transform:rotate(10deg) scale(.8)}
 .kit-target:focus-visible,.kit-actor:focus-visible,.kit-skill-button:focus-visible{outline:3px solid #fff1c0;outline-offset:-4px}
@@ -28,10 +28,10 @@
 .kit-actor>svg{display:block;width:100%;height:100%}
 .kit-actor button{touch-action:none}
 .kit-actions{position:absolute;left:4px;right:4px;bottom:4px;display:flex;gap:5px;min-height:44px;z-index:4}
-.kit-actions .kit-target{position:relative;flex:1;min-width:0;flex-direction:row;gap:5px;font-size:11px;min-height:44px}
+.kit-actions .kit-target{position:relative;flex:1;min-width:0;flex-direction:row;gap:5px;font-size:12.1px;min-height:44px}
 .kit-actions .kit-target>span{font-size:15px}
 .kit-actions .kit-target:disabled{opacity:.5}
-.kit-actions .kit-target small{font-size:11px}
+.kit-actions .kit-target small{font-size:12.1px}
 .kit-tether{position:absolute;inset:0 0 44px;width:100%;height:calc(100% - 44px);pointer-events:none}
 .kit-tether path{fill:none;stroke:#d9b781;stroke-width:3;stroke-dasharray:4 3}
 .kit-sucker{position:absolute;width:48px;height:55px;left:25%;top:40%;rotate:-20deg;pointer-events:none}
@@ -62,7 +62,7 @@
 .kit-stage[data-charged=true] #solar-drag{box-shadow:0 0 16px #f6da89}
 .kit-stage[data-flicker=true] #solar-drag{animation:kit-torch-flash .6s linear}
 .kit-stamp-zone{position:absolute;left:32%;top:25%;width:36%;height:40%;display:grid;place-items:center;border:2px dashed #ebc67c;border-radius:10px;pointer-events:none;background:#f7dd9c33;z-index:2}
-.kit-stamp-zone span{font-size:clamp(11px,2vw,16px);font-weight:700;text-align:center;color:#fff1bd;padding:5px}
+.kit-stamp-zone span{font-size:calc((clamp(11px,2vw,16px)) * 1.1);font-weight:700;text-align:center;color:#fff1bd;padding:5px}
 #immunity-card{left:50%;top:40%;translate:-50% -50%;width:70px;height:90px;z-index:3;background:#856a35}
 #immunity-card>span{width:48px;height:55px}
 #immunity-stamp{left:13%;top:65%;translate:-50% -50%;width:55px;height:66px;z-index:4}
@@ -82,13 +82,13 @@
 @keyframes kit-torch-flash{0%,45%,90%,100%{filter:brightness(.6)}20%,65%{filter:brightness(2)}}
 @keyframes kit-finish-pop{0%{scale:.4;rotate:-30deg}60%{scale:1.3;rotate:10deg}100%{scale:1;rotate:0}}
 @keyframes kit-knife-fly{to{translate:-125px 25px;rotate:-70deg;opacity:0}}
-@media(max-height:700px){.kit-guidance{padding:4px 6px}.kit-guidance p{font-size:11px}.kit-guidance b,.kit-guidance span{font-size:11px}.kit-skill-button{flex-basis:78px;font-size:11px}}
+@media(max-height:700px){.kit-guidance{padding:4px 6px}.kit-guidance p{font-size:12.1px}.kit-guidance b,.kit-guidance span{font-size:12.1px}.kit-skill-button{flex-basis:78px;font-size:12.1px}}
 @media(max-height:450px) and (min-aspect-ratio:4/3){
  .is-playing .beat-panel .beat-reaction{grid-area:feedback;align-self:center}
  .kit-guidance{grid-area:hud;align-self:start}
  .beat-panel:has(.kit-stage:not([hidden])){grid-template-areas:'telemetry hud' 'arena hud' 'arena hud' 'arena feedback'}
  .kit-guidance p{font-size:12px;line-height:1.5}
- .kit-actions{left:4px;right:4px;gap:4px}.kit-actions .kit-target small{font-size:9px}
+ .kit-actions{left:4px;right:4px;gap:4px}.kit-actions .kit-target small{font-size:9.9px}
 }
 @media(prefers-reduced-motion:reduce){.kit-skill-button,.kit-actor,.kit-knife-echo,.kit-finish>span,#solar-drag{animation:none!important}.kit-cloud{transition:none}}
 
@@ -122,15 +122,15 @@
 #expanded-canvas:focus-visible{outline:3px solid #f9e8b4;outline-offset:-4px}
 .expanded-art,.expanded-guide{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 .expanded-guide{z-index:2}.expanded-props{opacity:.85}.expanded-paper,.expanded-tool{transform-box:fill-box;transform-origin:50% 65%}
-.expanded-caption{position:absolute;left:50%;bottom:3px;translate:-50% 0;max-width:90%;padding:3px 8px;border-radius:8px;background:#1e3c39ed;border:1px solid #bbbc8a;color:#f0d69f;font-size:11px;line-height:1.3;z-index:3;pointer-events:none}
+.expanded-caption{position:absolute;left:50%;bottom:3px;translate:-50% 0;max-width:90%;padding:3px 8px;border-radius:8px;background:#1e3c39ed;border:1px solid #bbbc8a;color:#f0d69f;font-size:12.1px;line-height:1.3;z-index:3;pointer-events:none}
 .expanded-cursor{position:absolute;left:50%;top:45%;translate:-50% -50%;width:45px;height:49px;pointer-events:none;z-index:4;filter:drop-shadow(0 3px 0 #17383288)}
 .expanded-cursor svg{width:100%;height:100%}
 .expanded-choice{top:41%;translate:-50% -50%;width:56px;height:66px;z-index:3}
 .expanded-choice>span{font-size:25px;color:#e7cb8c}.expanded-choice[data-cue=true]{border-color:#fff0b6;filter:brightness(1.18)}
 .expanded-aim{position:absolute;translate:-50% -50%;display:grid;place-items:center;width:44px;height:44px;border:2px dashed #f2d488;border-radius:50%;background:#e2d6a133;font:28px/1 system-ui;z-index:3;pointer-events:none}
-.expanded-meter{position:absolute;right:7px;top:6px;padding:5px 7px;background:#233e39;border:1px solid #d8c68a;border-radius:8px;color:#f1d58c;font-size:11px;z-index:4;pointer-events:none}
+.expanded-meter{position:absolute;right:7px;top:6px;padding:5px 7px;background:#233e39;border:1px solid #d8c68a;border-radius:8px;color:#f1d58c;font-size:12.1px;z-index:4;pointer-events:none}
 .expanded-meter[data-ready=true]{background:#537a55;color:#fff4ce;border-color:#f0d58c}
-.expanded-actions .kit-target{padding:5px 7px}.expanded-actions .kit-target small{font-size:11px;line-height:1.3}
+.expanded-actions .kit-target{padding:5px 7px}.expanded-actions .kit-target small{font-size:12.1px;line-height:1.3}
 .expanded-passive{position:absolute;right:-3%;top:2%;width:33px;height:43px;pointer-events:none;filter:drop-shadow(1px 2px 0 #1b383466)}
 .expanded-passive svg{width:100%;height:100%}
 .expanded-echo{position:absolute;left:68%;top:8%;width:39px;height:48px;pointer-events:none;animation:expanded-echo .6s ease-out forwards}
@@ -158,7 +158,7 @@
 @keyframes expanded-paper-fold{to{scale:.5 1.1;rotate:12deg}}
 @keyframes expanded-preen{35%{rotate:-7deg;scale:1.06}75%{rotate:8deg;scale:1.13}100%{rotate:-4deg;scale:1.05}}
 @keyframes expanded-bounce{40%{translate:0 -16px;scale:1.1 .9}75%{translate:0 4px;scale:.9 1.1}100%{translate:0 -3px}}
-@media(max-height:450px) and (min-aspect-ratio:4/3){.expanded-actions .kit-target small{font-size:9px}.expanded-choice{width:48px;height:56px}.expanded-choice>span{font-size:22px}.expanded-caption{font-size:9px}.expanded-meter{font-size:11px}}
+@media(max-height:450px) and (min-aspect-ratio:4/3){.expanded-actions .kit-target small{font-size:9.9px}.expanded-choice{width:48px;height:56px}.expanded-choice>span{font-size:22px}.expanded-caption{font-size:9.9px}.expanded-meter{font-size:12.1px}}
 @media(prefers-reduced-motion:reduce){.expanded-echo,.kit-stage.is-win .expanded-paper,.kit-stage.is-win .expanded-props{animation:none!important}.kit-stage.is-win[data-pose=flat] .expanded-paper{scale:1.15 .75}.kit-stage.is-win[data-pose=pudding] .expanded-paper{scale:1.2 .8}.kit-stage.is-win[data-pose=roll] .expanded-paper{scale:.5 1}}
 
 /* Charged kits remain visible while waiting for a safe event window. */

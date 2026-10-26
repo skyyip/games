@@ -1,7 +1,7 @@
 export const WORRIES=[
-  {id:'work',label:'The eighth revision',name:'The Overtime Gremlin',icon:'screen'},
+  {id:'work',label:'Requirement revised N times',labelZh:'改咗N次嘅Requirement',name:'The Overtime Gremlin',icon:'screen'},
   {id:'noise',label:'Office gossip',name:'The Gossip Goblin',icon:'megaphone'},
-  {id:'sleep',label:'A restless night',name:'The Sleepless Cloud',icon:'cloud'},
+  {id:'sleep',label:'Difficult customers',labelZh:'遇到西客',name:'The Difficult Customer Cloud',icon:'cloud'},
   {id:'stocks',label:'Stocks letting you down',name:'The Stock Market Gremlin',icon:'chart'},
   {id:'teammates',label:'Unhelpful teammates',name:'The Teamwork Gremlin',icon:'screen'},
   {id:'kam-friends',label:'Awkward friends',name:'The Gossip Goblin',icon:'megaphone'},
@@ -10,7 +10,7 @@ export const WORRIES=[
   {id:'love',label:'Love feeling unlucky',name:'The Love Worry',icon:'heart'},
   {id:'blind-box',label:'Blind boxes never give me what I want',labelZh:'盲盒抽極都抽唔中',name:'The Delay Monster',icon:'screen'},
   {id:'marksix',label:'No luck with Mark Six',labelZh:'六合彩唔中',name:'The Stock Market Gremlin',icon:'chart'},
-  {id:'commute',label:'Another delayed train',name:'The Delay Monster',icon:'train'},
+  {id:'commute',label:'Another delayed train / bus',labelZh:'又誤點嘅地鐵/Bus',name:'The Delay Monster',icon:'train'},
 ];
 export const WEAPONS=[
   {id:'bare-hand',name:'Bare hands',merit:0,cost:0,tone:150,starter:true},

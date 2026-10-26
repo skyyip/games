@@ -16,7 +16,7 @@ let html=await replaceAsync(document,/<link rel="stylesheet" href="(\.\.?\/[^"]+
 html=html.replace(/<script\b[^>]*type="module"[^>]*src="[^"]+"[^>]*><\/script>/g,'');
 html=await replaceAsync(html,/<script\b[^>]*src="(\.\.?\/[^"]+)"[^>]*><\/script>/g,async m=>`<script>${(await readFile(resolve(root,m[1]),'utf8')).replace(/<\/script/gi,'<\\/script')}</script>`);
 html=await replaceAsync(html,/<img\b[^>]*>/g,async m=>replaceAsync(m[0],/src="(\.\.?\/[^"]+)"/g,async src=>`src="${await data(resolve(root,src[1].split('?')[0]))}"`));
-html=await replaceAsync(html,/<link rel="(?:icon|apple-touch-icon)"[^>]*>/g,async m=>replaceAsync(m[0],/href="(\.\.?\/[^"]+)"/g,async href=>`href="${await data(resolve(root,href[1]))}"`));
+html=await replaceAsync(html,/<link rel="(?:icon|apple-touch-icon)"[^>]*>/g,async m=>replaceAsync(m[0],/href="(\.\.?\/[^"]+)"/g,async href=>`href="${await data(resolve(root,href[1].split(/[?#]/)[0]))}"`));
 html=html.replace(/<link rel="manifest"[^>]*>/g,'').replace('href="../"','href="https://skyyip.github.io/games/"').replace('href="./"','href="https://skyyip.github.io/games/beat-bad-luck/"');
 const initialState="try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}";
 const seed={version:1,coins:999999,merit:999999,owned:WEAPONS.map(w=>w.id),equipped:'flipflop',decor:{},records:[]};

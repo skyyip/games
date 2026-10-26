@@ -1,3 +1,4 @@
+import {endRitual} from './interaction-helpers.mjs';
 import assert from 'node:assert/strict';
 import {paperGesture} from './paper-gesture.mjs';
 import {mkdir} from 'node:fs/promises';
@@ -33,7 +34,7 @@ try{
   await page.locator('#start').click();await ready(page);await page.locator('#pause').click();await page.waitForFunction(()=>window.__audio[0].state==='suspended');assert.equal((await audioState(page)).loops,0);
   await page.locator('#resume').click();await ready(page);await page.locator('#sound').click();assert.equal(await page.locator('#sound').textContent(),'🔇');assert.equal(await page.locator('#sound-setup').getAttribute('aria-pressed'),'false');assert.equal((await audioState(page)).gain,0);assert.equal((await audioState(page)).loops,0);
   await page.locator('#pause').click();await page.locator('#resume').click();await page.waitForTimeout(50);assert.equal((await audioState(page)).gain,0);assert.equal((await audioState(page)).loops,0);
-  await page.locator('#sound').click();await ready(page);await page.locator('#pause').click();await page.locator('#quit').click();await ready(page);assert.equal((await audioState(page)).loops,1);assert.equal((await audioState(page)).contexts,1);
+  await page.locator('#sound').click();await ready(page);await page.locator('#pause').click();await endRitual(page);await ready(page);assert.equal((await audioState(page)).loops,1);assert.equal((await audioState(page)).contexts,1);
   await context.close();pass(`${language}: default on, first-click mute race, native music, repeated toggles, synchronized icons, pause/resume and lobby return`);
  }
  {

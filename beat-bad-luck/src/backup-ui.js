@@ -1,7 +1,7 @@
 import {createBackup,parseBackup,BACKUP_LIMIT} from './backup.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersistent}){
- const $=s=>document.querySelector(s),dialog=$('#import-dialog'),file=$('#import-save-file');let pending=null,busy=false,opener=null;
+ const $=s=>document.querySelector(s),dialog=$('#import-dialog'),file=$('#import-save-file');let pending=null,busy=false,opener=null,requestedOpener=null;
  const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
  const put=(id,zh,en)=>{$(id).textContent=local(zh,en);};
  function render(){
@@ -21,7 +21,7 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
  $('#import-save').addEventListener('click',()=>{if(!isPlaying()&&!busy)file.click();});
  file.addEventListener('change',async()=>{
   const selected=file.files?.[0];file.value='';if(!selected||busy||isPlaying())return;busy=true;$('#import-save').disabled=true;
-  try{if(selected.size>BACKUP_LIMIT)throw new Error('size');const next=parseBackup(await selected.text());if(isPlaying())return;pending=next;opener=$('#import-save');render();dialog.showModal();$('#cancel-import').focus();}
+  try{if(selected.size>BACKUP_LIMIT)throw new Error('size');const next=parseBackup(await selected.text());if(isPlaying())return;pending=next;opener=requestedOpener??$('#import-save');requestedOpener=null;render();dialog.showModal();$('#cancel-import').focus();}
   catch{note('讀不到這份存檔。請選擇由本遊戲匯出的 JSON 存檔（最多 256 KB）；目前進度未改變。','Unable to read this save. Choose a JSON backup exported by this game (up to 256 KB). Your progress is unchanged.');}
   finally{busy=false;$('#import-save').disabled=false;}
  });
@@ -29,5 +29,5 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
  $('#confirm-import').addEventListener('click',()=>{if(!pending||isPlaying())return;const next=pending;pending=null;dialog.close();onImport(next);note(isPersistent()?'存檔已載入，繼續經營你的小攤！':'存檔已載入；目前無法永久儲存，離開前請再匯出備份。',isPersistent()?'Save loaded. Your stall is ready!':'Save loaded for this visit. Storage is unavailable; export again before leaving.');});
  dialog.addEventListener('close',()=>{pending=null;opener?.focus({preventScroll:true});});
  dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const first=$('#cancel-import'),last=$('#confirm-import');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
- render();return {render};
+ render();return {render,requestImport(from){if(isPlaying()||busy)return;requestedOpener=from;file.click();}};
 }

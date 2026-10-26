@@ -106,47 +106,47 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
   .site-header .brand { font-size:25px; }
   .site-header nav { grid-column:1/-1; justify-content:center; gap:28px; margin:0; font-size:12px; }
   .site-header nav a { display:inline-flex; align-items:center; min-height:36px; }
-  .playground-home { padding:0 12px; font-size:11px; }
+  .playground-home { padding:0 12px; font-size:12.1px; }
   main { padding:0 16px; }
   .intro { padding:24px 0; }
   .intro-copy { font-size:12px; line-height:1.65; margin-top:14px; }
   .arena { gap:22px; }
-  .setup-panel>.panel-description { display:block; margin:6px 0 0; font-size:11px; }
+  .setup-panel>.panel-description { display:block; margin:6px 0 0; font-size:12.1px; }
   .mode-options { grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:14px; gap:7px; }
   .mode-option>span { padding:10px 8px; min-height:68px; }
   .mode-option strong { font-size:19px; }
-  .mode-option small { font-size:11px; }
-  .mode-option input:checked+span:after { top:5px; right:5px; font-size:9px; }
+  .mode-option small { font-size:12.1px; }
+  .mode-option input:checked+span:after { top:5px; right:5px; font-size:9.9px; }
   .grid-options { gap:7px; margin-top:14px; }
   .grid-option-content { min-height:88px; padding:10px 8px; }
   .grid-option strong { font-size:16px; }
-  .grid-option small { font-size:9px; }
+  .grid-option small { font-size:9.9px; }
   .mini-grid { width:20px; height:20px; margin-bottom:7px; }
-  .mode-note,.size-note { font-size:11px; line-height:1.5; }
+  .mode-note,.size-note { font-size:12.1px; line-height:1.5; }
   .how-to-play { margin-top:12px; padding-top:8px; }
-  .how-to-play summary { font-size:11px; }
-  .how-to-play small { font-size:11px; }
+  .how-to-play summary { font-size:12.1px; }
+  .how-to-play small { font-size:12.1px; }
   .timer { font-size:62px; }
   .timer-block { padding-bottom:10px; }
   .next-cue { min-height:62px; padding:9px 12px; }
-  .next-cue p { font-size:11px; }
+  .next-cue p { font-size:12.1px; }
   .board-frame { padding:12px; }
   .board[data-size="6"] { gap:5px; }
   .board[data-size="6"] .tile { font-size:19px; }
-  .board-hint { font-size:11px; line-height:1.6; }
+  .board-hint { font-size:12.1px; line-height:1.6; }
   .start-button,.restart-button { min-height:48px; font-size:13px; }
-  .record-date,.storage-note,.records-caption { font-size:11px; line-height:1.6; }
+  .record-date,.storage-note,.records-caption { font-size:12.1px; line-height:1.6; }
   .install-banner { flex-wrap:wrap; }
-  .install-banner p { font-size:11px; }
+  .install-banner p { font-size:12.1px; }
   .site-footer { padding-bottom:calc(24px + env(safe-area-inset-bottom)); }
 }
 @media(max-width:360px) {
   .mode-option>span { padding:10px 6px; }
-  .mode-option small { font-size:9px; }
+  .mode-option small { font-size:9.9px; }
   .board-frame { padding:10px; }
   .board[data-size="6"] { gap:4px; }
   .board[data-size="6"] .tile { font-size:17px; }
-  .grid-option small { font-size:8px; }
+  .grid-option small { font-size:8.8px; }
 }
 @media(prefers-reduced-motion:reduce) {
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation:none!important; }
@@ -159,7 +159,7 @@ dialog.motion-sheet::backdrop { background:#17201788;backdrop-filter:blur(3px); 
 
 /* Copyright stays on its own final line across the playground and game footers. */
 footer{flex-wrap:wrap}
-footer .site-copyright{flex:0 0 100%;order:10;width:100%;margin:0;font-size:11px;line-height:1.6;text-align:center}
+footer .site-copyright{flex:0 0 100%;order:10;width:100%;margin:0;font-size:12.1px;line-height:1.6;text-align:center}
 
 /* Give dropdown arrows consistent breathing room without changing native selection. */
 select:not([multiple]):not([size]),select:not([multiple])[size="1"]{

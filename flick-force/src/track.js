@@ -33,7 +33,7 @@ export class Track {
         for(let k=0;k<Math.ceil((road-20)/10);k++)for(let row=0;row<2;row++)if((k+row)%2===0){c.fillStyle='#e8b6b2';c.fillRect(left+10+k*10,y-7+row*7,Math.min(10,right-10-(left+10+k*10)),7);}
       }else{
         c.strokeStyle='#fbf4dfb0';c.lineWidth=n%2===0?2:1;c.beginPath();c.moveTo(left+11,y);c.lineTo(right-11,y);c.stroke();
-        c.font=`500 ${w<400?10:12}px 'DM Sans',system-ui,sans-serif`;c.textAlign='center';c.fillStyle='#647951';c.fillText(`${Math.abs(metres)} m`,right+(w-road)*.2,y+4);
+        c.font=`500 ${w<400?11:12}px 'DM Sans',system-ui,sans-serif`;c.textAlign='center';c.fillStyle='#647951';c.fillText(`${Math.abs(metres)} m`,right+(w-road)*.2,y+4);
         if(n%4===0){c.fillStyle='#87a070';c.fillRect(left-17,y-18,2,22);c.beginPath();c.moveTo(left-15,y-18);c.lineTo(left-1,y-13);c.lineTo(left-15,y-8);c.fillStyle='#e5a7b1';c.fill();}
       }
     }

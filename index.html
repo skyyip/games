@@ -14,7 +14,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="description" content="Sky Playground — small games, good times. Play on your phone or desktop.">
 <meta name="apple-mobile-web-app-title" content="Sky Playground">
 <title translate="no">Your Playground.</title>
-<link rel="icon" href="./grid-rush/assets/icons/icon-192.png" type="image/png">
+<link rel="icon" href="./grid-rush/assets/icons/favicon.png?v=20261026" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="./grid-rush/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="./grid-rush/playground.webmanifest">
 <link rel="stylesheet" href="./grid-rush/playground-ui.css">
@@ -56,14 +56,14 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 .playground-brand{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;margin-bottom:24px}
 .language-switch{display:flex;justify-content:flex-end;gap:4px}
 .language-switch[hidden]{display:none}
-.language-switch button{min-width:26px;min-height:28px;padding:4px;border:1px solid var(--line);border-radius:7px;background:var(--glass);color:#cbd5e1;font:inherit;font-size:11px;cursor:pointer;touch-action:manipulation}
+.language-switch button{min-width:26px;min-height:28px;padding:4px;border:1px solid var(--line);border-radius:7px;background:var(--glass);color:#cbd5e1;font:inherit;font-size:12.1px;cursor:pointer;touch-action:manipulation}
 .language-switch button[aria-pressed=true]{background:#a5b4fc26;border-color:#a5b4fc;color:#fff}
 .language-switch button:focus-visible{outline:3px solid #a5b4fc;outline-offset:3px}
 .landing-logo{--logo-size:72px;position:relative;display:block;flex-shrink:0;width:var(--logo-size);height:var(--logo-size);font-size:var(--logo-size);animation:logo-bounce 1800ms ease-in-out infinite}
 .landing-logo img{display:block;width:100%;height:100%;border:0;border-radius:0;box-shadow:none;animation:none;transform:scaleX(-1);pointer-events:none}
 .landing-logo .header-horn{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 @keyframes logo-bounce{0%,100%{transform:scale(1)}20%,60%{transform:scale(1.18)}40%,80%{transform:scale(.92)}}
-.playground-brand .eyebrow{background:none;border:0;padding:0;font-size:11px;letter-spacing:.12em;text-transform:none}
+.playground-brand .eyebrow{background:none;border:0;padding:0;font-size:12.1px;letter-spacing:.12em;text-transform:none}
 .title-dot{color:#fda4af;-webkit-text-fill-color:#fda4af}
 .card{isolation:isolate;animation:card-arrive 480ms cubic-bezier(.2,.7,.2,1) backwards;}
 .card:nth-child(2){animation-delay:65ms}.card:nth-child(3){animation-delay:130ms}
@@ -78,21 +78,21 @@ footer{margin-top:56px;text-align:center;color:#94a3b8;font-size:13px}
 @media(max-width:640px){
   main{padding:32px 16px calc(28px + env(safe-area-inset-bottom))}
   .playground-brand{gap:8px;margin-bottom:22px}.landing-logo{--logo-size:52px}
-  .playground-brand .eyebrow{font-size:11px;letter-spacing:.08em}
+  .playground-brand .eyebrow{font-size:12.1px;letter-spacing:.08em}
   h1{font-size:clamp(17px,4.5vw,28px)}
   .lead{font-size:14px;line-height:1.65;margin-bottom:28px;max-width:340px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   .card{border-radius:18px;min-width:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:#ffffff0d}
   .art{height:122px}.art svg{width:66px;height:66px}
   .body{padding:14px 12px 16px}.tags{gap:5px;flex-wrap:wrap;margin-bottom:10px}
-  .tags span{font-size:11px;padding:3px 7px;line-height:1.4}
+  .tags span{font-size:12.1px;padding:3px 7px;line-height:1.4}
   h2{font-size:17px;line-height:1.22;overflow-wrap:anywhere;margin-bottom:9px}
   .body p{font-size:12px;line-height:1.55;margin-bottom:12px;color:#b2bdd0}
   .play{font-size:12px;gap:7px}.card:hover{transform:none}.card:active{transform:scale(.985)}
-  footer{margin-top:32px;font-size:11px;line-height:1.6;color:#94a3b8}
+  footer{margin-top:32px;font-size:12.1px;line-height:1.6;color:#94a3b8}
   .blob{filter:blur(65px);opacity:.3;animation:none}
 }
-@media(max-width:360px){.grid{gap:10px}.body{padding:12px 10px 14px}.art{height:108px}h2{font-size:16px}.tags span{font-size:9px;padding:3px 6px}}
+@media(max-width:360px){.grid{gap:10px}.body{padding:12px 10px 14px}.art{height:108px}h2{font-size:16px}.tags span{font-size:9.9px;padding:3px 6px}}
 
 /* Favourite controls are siblings of native game links. */
 .grid{overflow-anchor:none}

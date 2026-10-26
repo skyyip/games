@@ -159,7 +159,7 @@ svg.icon {
   display:block;
   color:var(--orange-dark);
   font-family:var(--mono);
-  font-size:8px;
+  font-size:8.8px;
   line-height:1;
   letter-spacing:2.5px;
   margin-top:2px;
@@ -212,7 +212,7 @@ nav span {
 
 .header-motto {
   font-family:var(--mono);
-  font-size:9px;
+  font-size:9.9px;
   font-weight:500;
   letter-spacing:1.2px;
   display:flex;
@@ -242,7 +242,7 @@ main {
 
 .eyebrow {
   font-family:var(--mono);
-  font-size:11px;
+  font-size:12.1px;
   font-weight:600;
   letter-spacing:1.6px;
   display:flex;
@@ -308,7 +308,7 @@ h1>span:after {
 .section-index {
   font-family:var(--mono);
   color:var(--orange-dark);
-  font-size:9px;
+  font-size:9.9px;
   letter-spacing:1px;
   margin-bottom:17px;
 }
@@ -327,7 +327,7 @@ h2 {
 }
 
 .panel-description {
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
   line-height:1.7;
   margin-top:7px;
@@ -383,7 +383,7 @@ h2 {
 
 .mode-option small {
   color:#636b59;
-  font-size:11px;
+  font-size:12.1px;
 }
 
 .mode-option input:checked+span {
@@ -398,7 +398,7 @@ h2 {
   top:9px;
   right:8px;
   color:var(--orange-dark);
-  font-size:11px;
+  font-size:12.1px;
 }
 
 .mode-option input:disabled+span {
@@ -408,7 +408,7 @@ h2 {
 
 .mode-note {
   color:#636b59;
-  font-size:11px;
+  font-size:12.1px;
   line-height:1.6;
   margin-top:12px;
 }
@@ -429,12 +429,12 @@ h2 {
 .next-cue span {
   font-family:var(--mono);
   color:#994022;
-  font-size:9px;
+  font-size:9.9px;
   letter-spacing:1.2px;
 }
 
 .next-cue p {
-  font-size:11px;
+  font-size:12.1px;
   line-height:1.5;
   color:#636b59;
   margin-top:3px;
@@ -508,7 +508,7 @@ h2 {
 }
 
 .grid-option small {
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
   margin-top:2px;
 }
@@ -551,7 +551,7 @@ h2 {
   display:flex;
   gap:7px;
   align-items:center;
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
   margin-top:14px;
 }
@@ -573,7 +573,7 @@ h2 {
 
 .how-to-play summary {
   font-family:var(--mono);
-  font-size:9px;
+  font-size:9.9px;
   font-weight:500;
   letter-spacing:1.4px;
 }
@@ -591,7 +591,7 @@ h2 {
   display:flex;
   gap:11px;
   align-items:flex-start;
-  font-size:11px;
+  font-size:12.1px;
   font-weight:600;
   line-height:1.5;
 }
@@ -604,14 +604,14 @@ h2 {
   width:22px;
   height:22px;
   border-radius:50%;
-  font-size:9px;
+  font-size:9.9px;
   flex-shrink:0;
   color:#636b59;
 }
 
 .how-to-play small {
   display:block;
-  font-size:9px;
+  font-size:9.9px;
   color:#636b59;
   font-weight:400;
   margin-top:2px;
@@ -624,7 +624,7 @@ h2 {
 
 .timer-label {
   font-family:var(--mono);
-  font-size:9px;
+  font-size:9.9px;
   letter-spacing:1.3px;
   display:flex;
   justify-content:center;
@@ -673,7 +673,7 @@ h2 {
   justify-content:space-between;
   align-items:center;
   font-family:var(--mono);
-  font-size:8px;
+  font-size:8.8px;
   letter-spacing:1px;
   color:#636b59;
   padding-bottom:13px;
@@ -683,7 +683,7 @@ h2 {
   display:flex;
   align-items:center;
   gap:5px;
-  font-size:7px;
+  font-size:7.7px;
   letter-spacing:.8px;
 }
 
@@ -745,7 +745,7 @@ h2 {
   left:10px;
   line-height:1;
   opacity:.52;
-  font-size:7px;
+  font-size:7.7px;
   font-weight:400;
   letter-spacing:.4px;
 }
@@ -813,14 +813,14 @@ h2 {
 
 .board-bottomline>span:first-child {
   font-family:var(--mono);
-  font-size:7px;
+  font-size:7.7px;
   letter-spacing:.7px;
   color:#636b59;
 }
 
 .progress-count {
   font-family:var(--mono);
-  font-size:11px;
+  font-size:12.1px;
   font-weight:500;
 }
 
@@ -886,7 +886,7 @@ h2 {
 .board-hint {
   text-align:center;
   color:#636b59;
-  font-size:11px;
+  font-size:12.1px;
   line-height:1.7;
   margin-top:12px;
 }
@@ -907,7 +907,7 @@ h2 {
   min-height:51px;
   margin-top:14px;
   color:#646d5b;
-  font-size:11px;
+  font-size:12.1px;
 }
 
 .restart-button:hover {
@@ -940,7 +940,7 @@ h2 {
   display:flex;
   justify-content:space-between;
   font-family:var(--mono);
-  font-size:8px;
+  font-size:8.8px;
   letter-spacing:.7px;
   margin-top:27px;
   padding-bottom:12px;
@@ -952,7 +952,7 @@ h2 {
 }
 
 .record-grid-label>span:last-child {
-  font-size:7px;
+  font-size:7.7px;
   color:#636b59;
 }
 
@@ -973,7 +973,7 @@ h2 {
 
 .record-rank {
   font-family:var(--mono);
-  font-size:11px;
+  font-size:12.1px;
   width:23px;
   color:#636b59;
   flex-shrink:0;
@@ -1000,7 +1000,7 @@ h2 {
 }
 
 .record-date {
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
   margin-top:5px;
 }
@@ -1036,7 +1036,7 @@ h2 {
 
 .new-record-badge {
   font-family:var(--mono);
-  font-size:7px;
+  font-size:7.7px;
   font-weight:600;
   letter-spacing:.4px;
   padding:4px 5px;
@@ -1051,7 +1051,7 @@ h2 {
 
 .records-caption {
   color:#636b59;
-  font-size:11px;
+  font-size:12.1px;
   line-height:1.6;
   margin-top:14px;
 }
@@ -1072,7 +1072,7 @@ h2 {
   gap:5px;
   color:#59634d;
   font-family:var(--mono);
-  font-size:8px;
+  font-size:8.8px;
   letter-spacing:1px;
   font-weight:500;
 }
@@ -1101,7 +1101,7 @@ h2 {
 }
 
 .personal-best-card>p {
-  font-size:9px;
+  font-size:9.9px;
   color:#5e6853;
   position:relative;
   z-index:1;
@@ -1121,7 +1121,7 @@ h2 {
   display:flex;
   gap:8px;
   align-items:flex-start;
-  font-size:11px;
+  font-size:12.1px;
   line-height:1.8;
   color:#636b59;
   margin:18px 5px;
@@ -1148,7 +1148,7 @@ h2 {
   align-items:center;
   gap:10px;
   color:#636b59;
-  font-size:11px;
+  font-size:12.1px;
 }
 
 .bottom-strip .icon {
@@ -1164,7 +1164,7 @@ h2 {
 
 .bottom-coordinates {
   font-family:var(--mono);
-  font-size:8px;
+  font-size:8.8px;
   color:#636b59;
   letter-spacing:1px;
 }
@@ -1180,12 +1180,12 @@ h2 {
   padding:24px 16px 26px;
   display:flex;
   justify-content:space-between;
-  font-size:9px;
+  font-size:9.9px;
   color:#636b59;
 }
 
 .site-footer>span+span {
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
 }
 
@@ -1230,7 +1230,7 @@ h2 {
 }
 
 .result-overlay .eyebrow {
-  font-size:8px;
+  font-size:8.8px;
   color:#ad502b;
   letter-spacing:1.2px;
 }
@@ -1258,7 +1258,7 @@ h2 {
 }
 
 .result-message {
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
   line-height:1.7;
   max-width:260px;
@@ -1274,7 +1274,7 @@ h2 {
 .text-button {
   background:none;
   border:0;
-  font-size:11px;
+  font-size:12.1px;
   color:#636b59;
   min-height:40px;
   margin-top:7px;
@@ -1354,7 +1354,7 @@ h2 {
     padding:0 30px;
   }
   .intro-copy {
-    font-size:11px;
+    font-size:12.1px;
   }
   .records-heading h2 {
     font-size:19px;
@@ -1385,10 +1385,10 @@ h2 {
   }
   .intro-copy {
     max-width:235px;
-    font-size:11px;
+    font-size:12.1px;
   }
   .header-motto {
-    font-size:8px;
+    font-size:8.8px;
     letter-spacing:.7px;
   }
   nav {
@@ -1403,7 +1403,7 @@ h2 {
     gap:8px;
   }
   .how-to-play small {
-    font-size:8px;
+    font-size:8.8px;
   }
   .records-heading h2 {
     font-size:18px;
@@ -1422,22 +1422,22 @@ h2 {
     border-radius:7px;
   }
   .board-bottomline>span:first-child {
-    font-size:6px;
+    font-size:6.6px;
   }
   .timer {
     font-size:65px;
   }
   .panel-description {
-    font-size:11px;
+    font-size:12.1px;
   }
   .record-grid-label {
-    font-size:7px;
+    font-size:7.7px;
   }
   .record-grid-label>span:last-child {
-    font-size:6px;
+    font-size:6.6px;
   }
   .best-card-label {
-    font-size:7px;
+    font-size:7.7px;
   }
   .personal-best-card {
     padding:16px 13px;
@@ -1446,7 +1446,7 @@ h2 {
     font-size:35px;
   }
   .storage-note {
-    font-size:9px;
+    font-size:9.9px;
   }
 }
 
@@ -1464,7 +1464,7 @@ h2 {
     padding:32px 0;
   }
   .intro-copy {
-    font-size:11px;
+    font-size:12.1px;
     max-width:210px;
   }
   .arena {
@@ -1511,16 +1511,16 @@ h2 {
     margin-top:14px;
   }
   .best-card-label {
-    font-size:9px;
+    font-size:9.9px;
   }
   .personal-best-card>p {
-    font-size:11px;
+    font-size:12.1px;
   }
   .storage-note {
     grid-column:2;
     grid-row:5/7;
     align-self:end;
-    font-size:9px;
+    font-size:9.9px;
     margin:0 5px 15px;
   }
   .records-caption {
@@ -1536,7 +1536,7 @@ h2 {
     margin-top:24px;
   }
   .board-hint {
-    font-size:9px;
+    font-size:9.9px;
   }
   .timer {
     font-size:69px;
@@ -1545,22 +1545,22 @@ h2 {
     font-size:46px;
   }
   .section-index {
-    font-size:8px;
+    font-size:8.8px;
   }
   .tile {
     font-size:28px;
   }
   .record-grid-label {
-    font-size:8px;
+    font-size:8.8px;
   }
   .record-grid-label>span:last-child {
-    font-size:7px;
+    font-size:7.7px;
   }
   .board-bottomline>span:first-child {
-    font-size:7px;
+    font-size:7.7px;
   }
   .bottom-coordinates {
-    font-size:7px;
+    font-size:7.7px;
   }
 }
 
@@ -1582,7 +1582,7 @@ h2 {
     height:8px;
   }
   nav {
-    font-size:11px;
+    font-size:12.1px;
     gap:21px;
   }
   main {
@@ -1593,7 +1593,7 @@ h2 {
     padding:30px 0 27px;
   }
   .intro .eyebrow {
-    font-size:8px;
+    font-size:8.8px;
     letter-spacing:1.2px;
   }
   .tiny-cross {
@@ -1606,7 +1606,7 @@ h2 {
     white-space:nowrap;
   }
   .intro-copy {
-    font-size:11px;
+    font-size:12.1px;
     max-width:none;
     line-height:1.7;
     padding:0;
@@ -1627,7 +1627,7 @@ h2 {
     padding-top:0;
   }
   .section-index {
-    font-size:7px;
+    font-size:7.7px;
     margin-bottom:8px;
   }
   h2 {
@@ -1639,7 +1639,7 @@ h2 {
   .setup-panel>.panel-description {
     display:inline-block;
     margin:0 0 0 8px;
-    font-size:9px;
+    font-size:9.9px;
   }
   .grid-options {
     grid-template-columns:repeat(4,minmax(0,1fr));
@@ -1661,15 +1661,15 @@ h2 {
     font-size:16px;
   }
   .grid-option small {
-    font-size:8px;
+    font-size:8.8px;
   }
   .grid-option input:checked+.grid-option-content:after {
     top:9px;
     right:8px;
-    font-size:11px;
+    font-size:12.1px;
   }
   .size-note {
-    font-size:9px;
+    font-size:9.9px;
     margin-top:10px;
   }
   .how-to-play {
@@ -1689,7 +1689,7 @@ h2 {
     padding-bottom:13px;
   }
   .timer-label {
-    font-size:8px;
+    font-size:8.8px;
   }
   .timer {
     font-size:69px;
@@ -1703,11 +1703,11 @@ h2 {
     padding:14px;
   }
   .board-topline {
-    font-size:7px;
+    font-size:7.7px;
     padding-bottom:12px;
   }
   .board-status {
-    font-size:6px;
+    font-size:6.6px;
   }
   .board {
     gap:8px;
@@ -1716,7 +1716,7 @@ h2 {
     font-size:27px;
   }
   .tile .tile-corner {
-    font-size:6px;
+    font-size:6.6px;
     top:9px;
     left:9px;
   }
@@ -1738,7 +1738,7 @@ h2 {
     min-height:51px;
   }
   .board-hint {
-    font-size:9px;
+    font-size:9.9px;
     margin-top:10px;
   }
   .records-panel {
@@ -1753,13 +1753,13 @@ h2 {
     display:block;
   }
   .records-panel>.panel-description {
-    font-size:11px;
+    font-size:12.1px;
   }
   .record-grid-label {
     margin-top:20px;
   }
   .record-grid-label>span:last-child {
-    font-size:7px;
+    font-size:7.7px;
   }
   .leaderboard li {
     padding:15px 2px;
@@ -1768,7 +1768,7 @@ h2 {
     font-size:25px;
   }
   .record-date {
-    font-size:9px;
+    font-size:9.9px;
   }
   .personal-best-card {
     min-height:0;
@@ -1781,7 +1781,7 @@ h2 {
   }
   .storage-note {
     margin:16px 4px 0;
-    font-size:9px;
+    font-size:9.9px;
   }
   .bottom-strip {
     max-width:430px;
@@ -1792,16 +1792,16 @@ h2 {
     display:none;
   }
   .bottom-strip>div {
-    font-size:9px;
+    font-size:9.9px;
     gap:8px;
   }
   .site-footer {
-    font-size:8px;
+    font-size:8.8px;
     padding:21px 20px 24px;
     gap:14px;
   }
   .site-footer>span+span {
-    font-size:8px;
+    font-size:8.8px;
   }
   .result-overlay {
     padding:18px;
@@ -1819,7 +1819,7 @@ h2 {
   }
   .result-message {
     margin:7px 0 17px;
-    font-size:11px;
+    font-size:12.1px;
   }
   .result-overlay .primary-button {
     min-height:45px;
@@ -1844,14 +1844,14 @@ h2 {
     gap:15px;
   }
   .setup-panel>.panel-description {
-    font-size:8px;
+    font-size:8.8px;
     margin-left:5px;
   }
   .grid-options {
     gap:6px;
   }
   .grid-option small {
-    font-size:6.5px;
+    font-size:7.15px;
   }
   .board-frame {
     padding:11px;
@@ -1863,7 +1863,7 @@ h2 {
     border-radius:5px;
   }
   .board-bottomline>span:first-child {
-    font-size:6px;
+    font-size:6.6px;
   }
   .result-icon {
     width:39px;
@@ -1945,7 +1945,7 @@ h2 {
 .install-banner p {
   margin-top:5px;
   color:#59634d;
-  font-size:11px;
+  font-size:12.1px;
   line-height:1.6;
 }
 
@@ -1999,7 +1999,7 @@ h2 {
   background:#e9eddf;
   border-radius:8px;
   margin-bottom:20px;
-  font-size:11px;
+  font-size:12.1px;
 }
 
 .install-dialog .primary-button {
@@ -2018,12 +2018,12 @@ h2 {
     letter-spacing:-.5px;
   }
   .install-banner p {
-    font-size:11px;
+    font-size:12.1px;
   }
   .install-banner .primary-button {
     padding:0 13px;
     gap:10px;
-    font-size:11px;
+    font-size:12.1px;
   }
   .install-dialog {
     padding:23px;
@@ -2040,7 +2040,7 @@ h2 {
 .setup-panel .mode-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .setup-panel .mode-option>span { min-height:76px; }
 .mode-option .colour-mode-mark { background:linear-gradient(90deg,#b83c39 32%,#087576 32% 66%,#265fb0 66%);background-clip:text;-webkit-background-clip:text;color:transparent;letter-spacing:-2px; }
-.order-control { display:flex;flex-direction:column;gap:7px;margin-top:16px;font-size:11px;font-weight:600;color:#454e3d; }
+.order-control { display:flex;flex-direction:column;gap:7px;margin-top:16px;font-size:12.1px;font-weight:600;color:#454e3d; }
 .order-control select { width:100%;min-height:44px;padding:9px 12px;border:1px solid #d5d9cd;border-radius:9px;background:#fffdf7;color:#292c27;font:500 12px 'DM Sans',sans-serif; }
 .order-control select:focus-visible { outline:3px solid #285b89;outline-offset:3px; }
 .order-control select:disabled { opacity:.6; }
@@ -2049,12 +2049,12 @@ h2 {
 /* Keep the colour cue readable throughout its shared movement animation. */
 .next-cue strong.is-color { min-width:74px;padding:9px;border:1px solid #293226;border-radius:8px;background:var(--cue-color);color:var(--cue-ink);font-size:18px;opacity:1!important; }
 .color-key { margin:0 0 12px;padding:12px;border:1px solid #e1e2d9;border-radius:11px;background:#fafbf7; }
-.color-key-heading { display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:8px;letter-spacing:.6px;color:#636b59; }
+.color-key-heading { display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:8.8px;letter-spacing:.6px;color:#636b59; }
 .color-key ol { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;list-style:none;margin:10px 0 0;padding:0; }
 .color-key li { position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 3px;border-radius:8px;box-shadow:inset 0 0 0 1px #e1e2d9;transition:opacity .15s,background .15s,box-shadow .15s; }
 .color-key li i { width:17px;height:17px;border:1px solid #293226;border-radius:50%; }
-.color-key li span { font-size:11px;font-weight:600; }
-.color-key li small { font:500 9px var(--mono);color:#636b59; }
+.color-key li span { font-size:12.1px;font-weight:600; }
+.color-key li small { font:500 9.9px var(--mono);color:#636b59; }
 .color-key li.is-current { background:#fff;box-shadow:inset 0 0 0 2px #454e3d; }
 .color-key li.is-cleared { opacity:.75; }
 .color-key li.is-cleared small:after { content:' ✓'; }
@@ -2084,9 +2084,9 @@ h2 {
 @media(max-width:600px) {
   .setup-panel .mode-options { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .setup-panel .mode-option>span { min-height:78px;padding:10px 8px; }
-  .setup-panel .mode-option small { font-size:11px;line-height:1.35; }
+  .setup-panel .mode-option small { font-size:12.1px;line-height:1.35; }
   .order-control { margin-top:13px; }
-  .board[data-size="6"] .tile-color .tile-number { font-size:11px; }
+  .board[data-size="6"] .tile-color .tile-number { font-size:12.1px; }
   .board-frame .result-overlay h2 { font-size:25px; }
 }
 
@@ -2096,7 +2096,7 @@ h2 {
 .color-key li[data-shape] span { text-align:center;line-height:1.3;overflow-wrap:anywhere; }
 .next-cue strong.is-shape { display:flex;align-items:center;gap:6px;min-width:0;max-width:48%;font-family:inherit;text-align:left;color:#293226; }
 .next-cue strong.is-shape .shape-icon { width:32px;height:32px; }
-.next-cue strong.is-shape span { color:inherit;font:600 11px/1.3 'DM Sans',sans-serif;letter-spacing:0;overflow-wrap:anywhere; }
+.next-cue strong.is-shape span { color:inherit;font:600 12.1px/1.3 'DM Sans',sans-serif;letter-spacing:0;overflow-wrap:anywhere; }
 .board .tile.tile-shape { background:#f5f7ef;color:#293226;border:1px solid #a8b19b;box-shadow:none; }
 .board .tile-shape .tile-number { position:absolute;inset:0;display:grid;place-items:center; }
 .board .tile-shape .shape-icon { width:74%;height:74%;max-width:56px;max-height:56px; }

@@ -1,3 +1,5 @@
+import {createUX} from './ux-ui.js';
+import {createPreferences} from './preferences.js';
 import {createBackupUI} from './backup-ui.js';
 import {createPurchaseUI} from './purchase-ui.js';
 import {createKitSkillsUI} from './kit-skills-ui.js';
@@ -12,14 +14,17 @@ import {weaponArt,dollArt,tigerArt,porkArt,fongCostumeArt,decorArt,ghostArt} fro
 import {StallAudio} from './audio.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 import {enableOffline} from '../../grid-rush/src/party-ui.js';
+const preferences=createPreferences();
 const $=selector=>document.querySelector(selector),game=new RitualGame(),audio=new StallAudio(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
+audio.setEnabled(preferences.value.sound);
+$('#voice').checked=preferences.value.voice;
 const phaseNames={incense:'Light a little incense',worry:'Give the worry a name',beat:'Whack the bad luck away',tiger:'Feed the white tiger',blessing:'Welcome good fortune'};
 const lines={incense:'Three little sticks. One slow breath. No need to rush.',worry:'Write it down. You do not have to carry it home.',beat:'Tap away the overtime. Leave room for a pineapple bun.',tiger:'Give the tiger a snack. Let the gossip stop here.',blessing:'Bad luck out. Good company in. Save some kindness for yourself.'};
 let storage=null,persistent=true,state,kind='work',frame=0,lastPhase='',lastChant=-1,lastBeat=-1,lastQte=0,receipt='',recorded=false,kitUseCommitted=false,savedScroll=0,paperAnimation=null,shoeAnimation=null,sequence=0,shopTimer=0;
 const illustratedDecor=new Set(['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst']);
 const shopWeapons=WEAPONS.filter(w=>!w.starter&&w.id!=='rebirth-paper').sort((a,b)=>a.cost-b.cost||a.merit-b.merit);
 shopWeapons.splice(-1,0,WEAPONS.find(w=>w.id==='rebirth-paper'));
-let neighbourhoodUI=null,kitUI=null;
+let neighbourhoodUI=null,kitUI=null,uxUI=null,returnToDecor=null;
 let rigAnimations=[],cryDuration=1100;
 const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,porkGesture=null,micRevision=0,micStream=null,micContext=null,micFrame=0;
 try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}
@@ -37,7 +42,7 @@ function showPurchaseShortfall(info,button,cost,merit,id){
  const hint=document.createElement('small');hint.id=id;hint.className='purchase-shortfall';literal(hint,(zh?'還欠 ':'Still need ')+parts.join(zh?'及 ':' and '));info.append(hint);button.setAttribute('aria-describedby',id);
 }
 function restoreShopFocus(attribute,id,reveal=false){
- const control=$(`[data-${attribute}="${id}"]`)??$(`[data-decor="${id}"]`);if(!control)return;
+ const control=$(`[data-${attribute}="${id}"]`)??$(`[data-decor="${id}"]`);if(!control)return;if(control.closest('.kit-row')?.hidden){$(game.phase==='results'?'#again':'#quick-start').focus({preventScroll:true});return;}
  let target=control;
  if(control.disabled){
   target=control.closest('.kit-row,.decor-row');if(!target)return;target.tabIndex=-1;target.dataset.restoreAction=attribute;target.dataset.restoreId=id;target.setAttribute('role','group');
@@ -45,8 +50,8 @@ function restoreShopFocus(attribute,id,reveal=false){
  }
  target.focus({preventScroll:true});if(reveal)target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
 }
-const purchaseUI=createPurchaseUI({getState:()=>state,itemName,onReveal:()=>{audio.chime();vibrate([12,25,18]);},onReturn:(kind,id)=>restoreShopFocus(kind==='weapon'?'weapon':'decor',id),onStart:()=>start(),onView:id=>{
- const piece=$(`[data-piece="${id}"]`),target=piece??$('#stall-showcase-title');target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});
+const purchaseUI=createPurchaseUI({getState:()=>state,itemName,onReveal:()=>{audio.chime();vibrate([12,25,18]);},onReturn:(kind,id)=>{if(returnToDecor&&kind==='decor'){const piece=returnToDecor;returnToDecor=null;uxUI?.openDecor(piece);}else restoreShopFocus(kind==='weapon'?'weapon':'decor',id);},onStart:()=>start(),onView:id=>{
+ returnToDecor=null;const piece=$(`[data-piece="${id}"]`),target=piece??$('#stall-showcase-title');target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});
  if(piece){piece.classList.remove('purchase-highlight');void piece.offsetWidth;piece.classList.add('purchase-highlight');setTimeout(()=>piece.classList.remove('purchase-highlight'),1900);}
 }});
 const say=text=>{$('#announcements').textContent=translate(text);};
@@ -79,11 +84,12 @@ function renderDecorDisplay(){
   const previous=Number(piece?.dataset.level)||0;
   if(!piece){
    piece=document.createElement('li');piece.className=`stall-piece piece-${decor.id}`;piece.dataset.piece=decor.id;
-   piece.innerHTML=`<span class="furnishing-art" aria-hidden="true">${decorArt(decor.id)}</span><span class="furnishing-condition" aria-hidden="true"><i></i></span><span class="furnishing-level" aria-hidden="true"></span><span class="sr-only" translate="no"></span>`;
+   piece.innerHTML=`<button type="button" class="piece-manage"><span class="furnishing-art" aria-hidden="true">${decorArt(decor.id)}</span><span class="furnishing-condition" aria-hidden="true"><i></i></span><span class="furnishing-level" aria-hidden="true"></span><span class="sr-only" translate="no"></span></button>`;
+   piece.addEventListener('click',()=>uxUI?.openDecor(decor.id));
    display.append(piece);
   }
   if(piece.parentElement!==display)display.append(piece);
-  piece.title=itemName(decor);piece.dataset.label=itemName(decor);piece.dataset.level=level;const health=decorDurability(state,decor.id);piece.style.setProperty('--decor-wear',1-health/100);piece.style.setProperty('--decor-health',health/100);piece.classList.toggle('is-weathered',health<70);piece.classList.toggle('is-fragile',health<25);piece.querySelector('.furnishing-level').textContent=level;
+  piece.querySelector('.piece-manage').setAttribute('aria-label',(getLanguage()==='zh-Hant'?'管理擺設：':'Manage decoration: ')+itemName(decor));piece.title=itemName(decor);piece.dataset.label=itemName(decor);piece.dataset.level=level;const health=decorDurability(state,decor.id);piece.style.setProperty('--decor-wear',1-health/100);piece.style.setProperty('--decor-health',health/100);piece.classList.toggle('is-weathered',health<70);piece.classList.toggle('is-fragile',health<25);piece.querySelector('.furnishing-level').textContent=level;
   literal(piece.querySelector('.sr-only'),`${itemName(decor)} · ${translate(`Level ${level} / ${MAX_DECOR_LEVEL} · ${decorHourlyRate(decor,level)} oil per hour`)} · ${translate(`Durability ${Math.max(.1,Math.round(health*10)/10)}%`)}`);
   if((previous&&level>previous)||(!previous&&displayReady)){
    if(!reduced.matches)piece.animate([{transform:'translateY(-12px) scale(.65) rotate(-9deg)',filter:'brightness(1.8)'},{transform:'translateY(2px) scale(1.12) rotate(4deg)'},{transform:'translateY(0) scale(1) rotate(0)',filter:'brightness(1)'}],{duration:650,easing:'cubic-bezier(.2,.8,.3,1)'});
@@ -106,6 +112,7 @@ function renderStall(){
  $('#friend-list').replaceChildren(...FRIENDS.map(f=>{const row=document.createElement('div'),icon=document.createElement('span');const owned=state.friends.includes(f.id);row.className=`friend-row${owned?'':' is-locked'}`;icon.className='friend-icon';icon.textContent=owned?f.icon:'?';icon.setAttribute('aria-hidden','true');const text=rowText(owned?f.name:'A kind stranger',owned?'5% more ritual oil money':'Keep a little room for good company.');if(owned){const story=document.createElement('p');story.textContent=f.story;text.append(story);}row.append(icon,text);return row;}));
  $('#records').replaceChildren(...state.records.map((r,index)=>{const row=document.createElement('li'),place=document.createElement('span'),info=document.createElement('div'),name=document.createElement('b'),date=document.createElement('small'),score=document.createElement('output');row.className='record-row';place.textContent=String(index+1).padStart(2,'0');literal(name,itemName(WEAPONS.find(w=>w.id===r.weapon)));date.textContent=new Intl.DateTimeFormat(getLanguage(),{month:'short',day:'numeric'}).format(new Date(r.date));score.textContent=r.score;info.append(name,date);row.append(place,info,score);return row;}));
  neighbourhoodUI?.renderHome();kitUI?.renderHome(state.equipped);
+ uxUI?.render();
  if(!state.records.length){const empty=document.createElement('li');empty.className='empty-record';empty.textContent='Your first lighter evening is waiting.';$('#records').append(empty);}save();
 }
 function renderDecorRows(){
@@ -117,23 +124,24 @@ function renderDecorRows(){
   const growth=getLanguage()==='zh-Hant'?`首級 ${d.rate}，每升級 +${DECOR_LEVEL_RATE_BONUS}`:`Starts at ${d.rate}; +${DECOR_LEVEL_RATE_BONUS} per upgrade`;
   const info=rowText(itemName(d),'');literal(info.querySelector('small'),`${income} · ${growth}`);if(level<MAX_DECOR_LEVEL)showPurchaseShortfall(info,button,cost,0,`decor-reason-${d.id}`);
   if(level){
-   const health=decorDurability(state,d.id),percent=Math.max(.1,Math.round(health*10)/10),label=document.createElement('span'),meter=document.createElement('meter');label.className='decor-health-label';literal(label,translate(`Durability ${percent}%`));meter.className='decor-durability';meter.min=0;meter.max=100;meter.low=25;meter.high=70;meter.optimum=100;meter.value=health;meter.setAttribute('aria-label',`${itemName(d)} · ${translate(`Durability ${percent}%`)}`);info.append(label,meter);
+   const health=decorDurability(state,d.id),percent=Math.max(.1,Math.round(health*10)/10),label=document.createElement('span'),meter=document.createElement('meter');label.className='decor-health-label';literal(label,translate(`Durability ${percent}%`)+(getLanguage()==='zh-Hant'?` · 約剩 ${Math.ceil(health*.3)} 天`:` · about ${Math.ceil(health*.3)} days left`));meter.className='decor-durability';meter.min=0;meter.max=100;meter.low=25;meter.high=70;meter.optimum=100;meter.value=health;meter.setAttribute('aria-label',`${itemName(d)} · ${translate(`Durability ${percent}%`)}`);info.append(label,meter);
   }
   row.append(icon,info,button);
   if(level){
    const controls=document.createElement('div'),repair=document.createElement('button'),discard=document.createElement('button'),cost=repairCost(state,d.id);controls.className='decor-controls';repair.type=discard.type='button';repair.dataset.repair=d.id;discard.dataset.discard=d.id;
    const fresh=decorDurability(state,d.id)>=99.95;repair.textContent=fresh?'Good as new':`Repair · ${cost} oil`;repair.disabled=fresh||!cost||state.coins<cost;repair.setAttribute('aria-label',`${itemName(d)} · ${translate(repair.textContent)}`);discard.textContent='Discard';discard.setAttribute('aria-label',`${translate('Discard')} · ${itemName(d)}`);
-   repair.addEventListener('click',()=>{settle();const next=repairDecor(state,d.id);if(next){state=next;save();message('Good as new. Thirty more days of good company.');audio.unlock().then(()=>audio.chime());}renderStall();restoreShopFocus('repair',d.id,true);});discard.addEventListener('click',()=>askDiscard(d.id));controls.append(repair,discard);row.append(controls);
+   repair.addEventListener('click',()=>repairItem(d.id));discard.addEventListener('click',()=>askDiscard(d.id));controls.append(repair,discard);row.append(controls);
   }
   return row;
  }));
 }
+function repairItem(id,{focus=true}={}){settle();const next=repairDecor(state,id);if(next){state=next;save();message('Good as new. Thirty more days of good company.');audio.unlock().then(()=>audio.chime());}renderStall();if(focus)restoreShopFocus('repair',id,true);return Boolean(next);}
 let discardTarget=null;
 function askDiscard(id){
  if(!state.decor[id])return;discardTarget=id;const decor=DECOR.find(d=>d.id===id);literal($('#discard-detail'),`${itemName(decor)} · ${translate(`Level ${state.decor[id]} / ${MAX_DECOR_LEVEL} · ${decorHourlyRate(decor,state.decor[id])} oil per hour`)}`);$('#discard-dialog').showModal();$('#cancel-discard').focus();
 }
 $('#cancel-discard').addEventListener('click',()=>$('#discard-dialog').close());
-$('#discard-dialog').addEventListener('close',()=>{if(discardTarget)$(`[data-discard="${discardTarget}"]`)?.focus({preventScroll:true});discardTarget=null;});
+$('#discard-dialog').addEventListener('close',()=>{if(returnToDecor){const id=returnToDecor;returnToDecor=null;if(!uxUI?.openDecor(id))$('#stall-showcase-title').focus({preventScroll:true});}else if(discardTarget)$(`[data-discard="${discardTarget}"]`)?.focus({preventScroll:true});discardTarget=null;});
 $('#confirm-discard').addEventListener('click',()=>{
  const id=discardTarget;settle();const next=discardDecor(state,id);if(next){state=next;save();message('Decoration discarded. A little space for something new.');}$('#discard-dialog').close();renderStall();restoreShopFocus('decor',id,true);
 });
@@ -225,26 +233,26 @@ function finish(){
  if(recorded||!game.result)return;recorded=true;cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.ambience(!document.hidden);try{speechSynthesis.cancel();}catch{}
  settle();const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=!received.friend;if(received.friend)$('#friend-arrival').textContent=`A kind visitor: ${translate(received.friend.name)}`;}
  $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);kitUI?.result(game.result);
- $('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');
+ uxUI?.showResult(kitUseCommitted);$('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');
 }
 function backToStall(){cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
-function pause(){if(!PHASES.includes(game.phase))return;game.pause();cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}
+function pause(){if(!PHASES.includes(game.phase))return;game.pause();cancelAnimationFrame(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;uxUI?.renderPause();$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}
 function resume(){if(!game.resume())return;$('#pause-overlay').hidden=true;$('#ritual-stage').inert=false;audio.unlock().then(()=>{if(game.pausedAt===null&&PHASES.includes(game.phase))audio.ambience(true);});$('#phase-title').focus({preventScroll:true});frame=requestAnimationFrame(tick);}
 function updateSound(){
  for(const id of ['sound','sound-setup'])$(`#${id}`).setAttribute('aria-pressed',String(audio.enabled));
- const label=audio.enabled?'Mute sound':'Unmute sound';$('#sound').setAttribute('aria-label',label);$('#sound').title=translate(label);$('#sound').textContent=audio.enabled?'♫':'🔇';$('#sound-setup').textContent=audio.enabled?'Sound on':'Sound off';
+ const label=audio.enabled?'Mute sound':'Unmute sound';$('#sound').setAttribute('aria-label',label);$('#sound').title=translate(label);$('#sound').textContent=audio.enabled?'♫':'🔇';$('#sound-setup').textContent=audio.enabled?'Sound on':'Sound off';uxUI?.render();
 }
 function unlockSound(){return audio.unlock().then(()=>{audio.ambience(!document.hidden&&game.pausedAt===null);updateSound();});}
-function toggleSound(){audio.setEnabled(!audio.enabled);if(audio.enabled)unlockSound();updateSound();}
+function toggleSound(){audio.setEnabled(!audio.enabled);preferences.update({sound:audio.enabled});if(audio.enabled)unlockSound();updateSound();}
 // Mobile Safari may reject pointer-down activation or interrupt audio after a call.
 // Keep retrying from real gesture endings instead of removing the first listener.
 function beginAudio(){if(audio.enabled&&!document.hidden&&game.pausedAt===null&&audio.needsUnlock)unlockSound();}
 for(const event of ['pointerup','touchend','click','keydown'])document.addEventListener(event,beginAudio,{capture:true,passive:true});
 
 $('#use-hands').addEventListener('click',()=>{settle();state=buyWeapon(state,'bare-hand');save();renderStall();$('#equipped-name').tabIndex=-1;$('#equipped-name').focus({preventScroll:true});message('Your hands are ready.');});
-$('#pause-overlay').addEventListener('keydown',event=>{if(event.key!=='Tab')return;const first=$('#resume'),last=$('#quit');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.repeat&&!purchaseUI.isOpen&&PHASES.includes(game.phase)){event.preventDefault();game.pausedAt===null?pause():resume();}});
-$('#start').addEventListener('click',start);$('#again').addEventListener('click',start);$('#to-stall').addEventListener('click',backToStall);$('#pause').addEventListener('click',pause);$('#resume').addEventListener('click',resume);$('#quit').addEventListener('click',backToStall);$('#sound').addEventListener('click',toggleSound);$('#sound-setup').addEventListener('click',toggleSound);
+$('#pause-overlay').addEventListener('keydown',event=>{if(event.key!=='Tab')return;const first=$('#pause-skill-help').hidden?$('#resume'):$('#pause-skill-help'),last=$('#quit');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.repeat&&!document.querySelector('dialog[open]')&&PHASES.includes(game.phase)){event.preventDefault();game.pausedAt===null?pause():resume();}});
+$('#start').addEventListener('click',start);$('#again').addEventListener('click',start);$('#to-stall').addEventListener('click',backToStall);$('#pause').addEventListener('click',pause);$('#resume').addEventListener('click',resume);$('#quit').addEventListener('click',()=>uxUI?.requestQuit());$('#sound').addEventListener('click',toggleSound);$('#sound-setup').addEventListener('click',toggleSound);
 function light(index){if(!game.light(index))return;document.querySelector(`[data-stick="${index}"]`).classList.add('is-lit');$('#blow').disabled=game.lit.size!==3;audio.noise(.07,.035,2500);vibrate(6);}
 for(const stick of document.querySelectorAll('[data-stick]'))stick.addEventListener('click',event=>{if(event.detail===0)light(Number(stick.dataset.stick));});
 $('#incense-zone').addEventListener('pointerdown',event=>{if(game.phase!=='incense'||event.button!==0||game.pausedAt!==null)return;event.preventDefault();const rect=event.currentTarget.getBoundingClientRect();incenseGesture={id:event.pointerId,x:event.clientX,y:event.clientY,index:Math.max(0,Math.min(2,Math.floor((event.clientX-rect.left)/rect.width*3)))};event.currentTarget.setPointerCapture(event.pointerId);});
@@ -312,15 +320,13 @@ $('#microphone').addEventListener('click',async()=>{
  }catch{stream?.getTracks().forEach(track=>track.stop());context?.close().catch(()=>{});if(revision===micRevision){stopMicrophone();$('#mic-note').textContent='No microphone today. Tap Blow gently instead.';}}
 });
 function selectTab(name,focus=false){for(const button of document.querySelectorAll('[data-tab]')){const active=button.dataset.tab===name;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;$(`#panel-${button.dataset.tab}`).hidden=!active;if(active&&focus)button.focus();}}
-for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>{
- settle();renderStall();selectTab(shortcut.dataset.shortcut);$(`#tab-${shortcut.dataset.shortcut}`).focus({preventScroll:true});
- document.querySelector('.stall-tabs').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});
-});
+function openShop(name){settle();renderStall();selectTab(name);$(`#tab-${name}`).focus({preventScroll:true});document.querySelector('.stall-tabs').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});}
+for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>openShop(shortcut.dataset.shortcut));
 for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>{settle();renderStall();selectTab(button.dataset.tab);});button.addEventListener('keydown',event=>{const names=['stall','kits','friends'],index=names.indexOf(button.dataset.tab);let next;if(event.key==='ArrowRight')next=(index+1)%3;if(event.key==='ArrowLeft')next=(index+2)%3;if(event.key==='Home')next=0;if(event.key==='End')next=2;if(next!==undefined){event.preventDefault();selectTab(names[next],true);}});}
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',cancelGestures);reduced.addEventListener('change',()=>{paperAnimation?.cancel();shoeAnimation?.cancel();});
 neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:gesture=>whack({gesture,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onAccept:nextKind=>{kind=nextKind;$('#worry-input').value='';drawWorries();}});
-kitUI=createKitSkillsUI({game,audio,announce:say,onScore:spendKitOnce});
-$('#open-journey').addEventListener('click',()=>{$('#neighbourhood-hub').open=true;$('#neighbourhood-hub').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});});
+kitUI=createKitSkillsUI({game,audio,announce:say,onScore:spendKitOnce,beforeActivate:()=>uxUI?.beforeActivate()??true});
+$('#open-journey').addEventListener('click',()=>uxUI?.openCollection());
 for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.innerHTML=fongCostumeArt();for(const id of illustratedDecor)$('#stall-'+id).innerHTML=decorArt(id);for(const ghost of document.querySelectorAll('[data-ghost]'))ghost.innerHTML=ghostArt(ghost.dataset.ghost);for(const master of document.querySelectorAll('[data-fong]')){const icon=$('.fong-logo').cloneNode(true);icon.className='fong-logo master-avatar';master.append(icon);}drawWorries();settle();renderStall();updateSound();enableOffline($('#offline-status'));
 
 renderRitualTiming();
@@ -330,4 +336,7 @@ const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();ren
 window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event.key!==STORAGE_KEY&&event.key!==null))return;if(syncProgress()){if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen){settle();renderStall();}purchaseUI.render();}});
 window.addEventListener('pageshow',event=>{if(event.persisted&&syncProgress()&&!PHASES.includes(game.phase)){settle();renderStall();}});
 document.addEventListener('languagechange',()=>backupUI.render());
-$('#start').disabled=false;
+uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{backToStall();$('#worry-input').value='';$('#worry-options [aria-pressed=true]').focus({preventScroll:true});$('.worry-field').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});},onShop:openShop,onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,activateSkill:()=>kitUI.activate(true,true)});
+$('#voice').addEventListener('change',()=>{audio.voice=$('#voice').checked;preferences.update({voice:audio.voice});uxUI.render();});
+document.addEventListener('languagechange',()=>uxUI.render());
+$('#start').disabled=false;$('#quick-start').disabled=false;uxUI.render();

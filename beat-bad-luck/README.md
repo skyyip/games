@@ -163,3 +163,23 @@ Twelve valid hits fill the signature meter. The kit icon glows until manually la
 Under the records, **Take your stall with you** exports a JSON backup and imports one after a balance/merit/record summary and explicit replacement choice. It includes inventory uses, decorations and their original expiry dates, merit, oil, top scores, commissions and collections. It excludes private worry text. Import replaces, never adds or merges balances; malformed/unrelated/oversized files are rejected. Back up the destination first if needed. Decoration age and the normal eight-hour idle cap continue across transfer.
 
 Same-origin contexts that share localStorage automatically read the latest progress on storage changes, returning to the app and before transactions. Background pages no longer write their old snapshot on exit. OS-isolated iOS browser/Home Screen stores cannot be automatically shared by a static GitHub Pages site; use export/import between them. No account or cloud-sync backend is provisioned. Standalone chat previews with blocked storage still work in memory; the demo resets on reload.
+
+## Faster ritual controls and guided play
+
+A fixed **開工！ / Let’s go!** bar keeps the equipped kit and wallet in reach before a ritual. Both start buttons use a little animated slipper and work stamp; reduced-motion players see a static icon. The bar hides during play/results/dialogs and while text entry is active, and waits for a focus-ending tap to finish before returning. Touch controls use 44px targets, and static gesture hints look like hints rather than buttons.
+
+The kit shop has bilingual name/signature search, All / Owned / Can buy filters, a clear-filter empty state and a sticky wallet/search toolbar. Merit is labelled as an unlock gate, not a currency being spent. Equipping an owned kit keeps an immediate start action available without another purchase dialog.
+
+On the first charged activation of each kit, an untimed illustrated guide **pauses the whole ritual**. Starting the skill resumes play and starts its seven seconds; dismissing the guide returns to ordinary whacks without spending an attempt or charge. Viewed guides are remembered on the device. Guides can also be opened from the welcome screen or pause screen, where current skill instructions remain available. Active skills show step progress, and event prompts show a deadline bar and progress in a fixed-height slot.
+
+Results put scores, paid-kit remaining uses/breakage and next-round actions before the fortune slip and postcard. “Play again · same worry” keeps the existing worry; “Choose another worry” returns to selection and clears custom text. Used-up kits offer rebuy/choose-another actions and explain the free-hand fallback. Leaving after scoring requires confirmation and explains both forfeited ritual rewards and nonrefundable kit use; leaving without scoring remains immediate.
+
+Click or keyboard-activate a furnishing to inspect its level, income, durability and approximate days remaining. Repair operates in this panel; upgrade reveals the purchase receipt and returns to the panel; discarding still requires confirmation. The layout category adds numbered slots with drag, two-click destination and keyboard controls alongside the original dropdowns. Story, title, layout, scene and fortune categories are separate panels with remembered selection and scroll offsets.
+
+The header gear opens sound/voice and import/export settings. First visits still default to sound on; later visits remember sound and voice choices. A prominent banner explains temporary-only progress when storage is blocked. Backups still replace rather than merge progress, and no cloud-sync backend is implied. English worry names now match the current Chinese concepts, including difficult customers, N revisions and delayed train/bus journeys. All additions stay inside this game and offline cache v47.
+
+## Small text and website favicon
+
+Across the published playground, fixed font sizes at or below 11px are 10% larger (for example 11px → 12.1px and 9px → 9.9px); the small responsive labels and canvas/SVG captions follow the same increase. Worry-choice labels in this game are explicitly **14px**. Touch text fields retain their 16px minimum to avoid iOS focus zoom. Compact ritual headers omit their redundant kicker and reserve a taller dialogue slot so the enlarged English captions remain separate from Master Yip’s speech.
+
+All published pages use `grid-rush/assets/icons/favicon.png`, a transparent 64px rendering of the current website face logo with its centred horn. The two legacy SVG favicon routes contain the same logo. Offline caches include the shared favicon, and the standalone preview builder embeds its query-versioned URL correctly.

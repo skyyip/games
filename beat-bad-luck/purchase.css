@@ -15,8 +15,8 @@ body:has(.purchase-dialog[open]){overflow:hidden}
 .purchase-content h2{font:500 23px/1.25 var(--display);margin:0 0 10px;overflow-wrap:anywhere}
 .purchase-effect{display:inline-block;border:1px solid #c7c49488;background:#1b3631;color:#e4d9a6;padding:5px 10px;border-radius:9px;margin:0 0 9px;font-size:12px;line-height:1.45}
 .purchase-detail{font-size:12px;line-height:1.55;margin:0 0 7px;color:#f6e5bf;overflow-wrap:anywhere}
-.purchase-note{font-size:11px;line-height:1.5;margin:0 0 9px;color:#bfd2bc}
-.purchase-spent{font-size:11px;line-height:1.5;margin:0;padding-top:9px;border-top:1px dashed #b6bd8b66;color:#c7d0b7}
+.purchase-note{font-size:12.1px;line-height:1.5;margin:0 0 9px;color:#bfd2bc}
+.purchase-spent{font-size:12.1px;line-height:1.5;margin:0;padding-top:9px;border-top:1px dashed #b6bd8b66;color:#c7d0b7}
 .purchase-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .purchase-actions button{width:100%;min-height:44px;margin:0;padding:9px 7px;font-size:12px;line-height:1.4}
 .stall-piece.purchase-highlight{animation:purchase-placement 1.8s ease-out}
@@ -25,8 +25,8 @@ body:has(.purchase-dialog[open]){overflow:hidden}
 @keyframes purchase-gift{0%{transform:translateY(12px) rotate(-14deg) scale(.45);opacity:0}60%{transform:translateY(-5px) rotate(5deg) scale(1.1);opacity:1}100%{transform:none}}
 @keyframes purchase-spark{0%{opacity:0;transform:rotate(var(--angle)) translateY(-25px) scale(.4)}25%{opacity:1}100%{opacity:0;transform:rotate(var(--angle)) translateY(-105px) rotate(90deg) scale(.7)}}
 @keyframes purchase-placement{0%,45%{box-shadow:0 0 0 3px #efce85,0 0 22px #efce8566}100%{box-shadow:none}}
-@media(max-width:350px){.purchase-content{padding:22px 16px 18px}.purchase-art{width:112px;height:112px}.purchase-art #purchase-art>svg{width:100px;height:100px}.purchase-content h2{font-size:20px}.purchase-kicker{font-size:11px}.purchase-actions{margin-top:12px}}
-@media(max-height:500px) and (min-aspect-ratio:4/3){.purchase-dialog{width:min(640px,calc(100vw - 32px))}.purchase-content{display:grid;grid-template-columns:126px minmax(0,1fr);column-gap:18px;padding:18px 22px}.purchase-art{grid-column:1;grid-row:1/7;align-self:center;margin:0;width:126px;height:126px}.purchase-kicker,.purchase-content h2,.purchase-effect,.purchase-detail,.purchase-note,.purchase-spent{grid-column:2}.purchase-kicker{margin:0 24px 5px 0;font-size:11px}.purchase-content h2{font-size:21px;margin-bottom:6px}.purchase-effect{justify-self:center;margin-bottom:6px;padding:3px 8px}.purchase-note{margin-bottom:5px}.purchase-spent{padding-top:5px}.purchase-actions{grid-column:1/-1;margin-top:12px}}
+@media(max-width:350px){.purchase-content{padding:22px 16px 18px}.purchase-art{width:112px;height:112px}.purchase-art #purchase-art>svg{width:100px;height:100px}.purchase-content h2{font-size:20px}.purchase-kicker{font-size:12.1px}.purchase-actions{margin-top:12px}}
+@media(max-height:500px) and (min-aspect-ratio:4/3){.purchase-dialog{width:min(640px,calc(100vw - 32px))}.purchase-content{display:grid;grid-template-columns:126px minmax(0,1fr);column-gap:18px;padding:18px 22px}.purchase-art{grid-column:1;grid-row:1/7;align-self:center;margin:0;width:126px;height:126px}.purchase-kicker,.purchase-content h2,.purchase-effect,.purchase-detail,.purchase-note,.purchase-spent{grid-column:2}.purchase-kicker{margin:0 24px 5px 0;font-size:12.1px}.purchase-content h2{font-size:21px;margin-bottom:6px}.purchase-effect{justify-self:center;margin-bottom:6px;padding:3px 8px}.purchase-note{margin-bottom:5px}.purchase-spent{padding-top:5px}.purchase-actions{grid-column:1/-1;margin-top:12px}}
 @media(prefers-reduced-motion:reduce){.purchase-dialog[open],.purchase-dialog::backdrop,.purchase-art #purchase-art>svg,.purchase-burst i,.stall-piece.purchase-highlight{animation:none}.stall-piece.purchase-highlight{outline:2px solid #efce85;outline-offset:2px}}
 
 #purchase-art{display:grid;place-items:center;width:100%;height:100%}

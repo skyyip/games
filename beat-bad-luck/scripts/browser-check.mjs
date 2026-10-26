@@ -1,3 +1,4 @@
+import {endRitual} from './interaction-helpers.mjs';
 import {buyAndContinue} from './purchase-helpers.mjs';
 import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';import {mkdir} from 'node:fs/promises';
@@ -36,7 +37,7 @@ try{
  for(const [width,height]of [[320,568],[375,812],[430,932],[812,375],[768,1024],[1440,1050]]){
   const {context,page}=await setup({width,height,language:'zh-Hant'});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await clock(page);await reachBeat(page);
   const layout=await page.evaluate(()=>{const zone=document.querySelector('#hit-zone'),r=zone.getBoundingClientRect(),panel=document.querySelector('#play-panel').getBoundingClientRect(),top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {hitVisible:r.top>=0&&r.bottom<=innerHeight,inside:zone.contains(top),panelFits:panel.top>=0&&panel.bottom<=innerHeight,overflow:document.documentElement.scrollWidth>innerWidth};});assert.equal(layout.hitVisible,true,JSON.stringify({width,height,layout}));assert.equal(layout.inside,true,JSON.stringify({width,height,layout}));assert.equal(layout.panelFits,true);assert.equal(layout.overflow,false);await heavy(page);
-  await page.screenshot({path:`/tmp/beat-bad-luck-qa/play-${width}x${height}.png`});await click(page,'#pause');await click(page,'#quit');assert.equal(await page.locator('#coins').textContent(),'0');await context.close();pass(`${width}×${height}: playable hit target, unobstructed fixed panel, no overflow and reward-free quit`);
+  await page.screenshot({path:`/tmp/beat-bad-luck-qa/play-${width}x${height}.png`});await click(page,'#pause');await endRitual(page);assert.equal(await page.locator('#coins').textContent(),'0');await context.close();pass(`${width}×${height}: playable hit target, unobstructed fixed panel, no overflow and reward-free quit`);
  }
  {
   const seed={version:1,coins:100000,merit:20000,owned:['flipflop'],equipped:'flipflop',decor:{neon:0,cat:0,radio:0,incense:0},friends:[],records:[],lastSeen:Date.now(),idleCarry:0};

@@ -1,3 +1,4 @@
+import {launchSkill} from './interaction-helpers.mjs';
 import {EXTRA_KITS} from '../src/kit-catalog.js';
 import {WEAPONS} from '../src/catalog.js';
 import assert from 'node:assert/strict';
@@ -27,7 +28,7 @@ try{
   const {context,page,frame,errors}=await open(demo,true,true),click=s=>frame.locator(s).evaluate(e=>e.click()),advance=ms=>frame.locator('body').evaluate((body,ms)=>window.previewAdvance(ms),ms);
   assert.equal(await frame.locator('#preview-kit-select option').count(),45);if(weapon!=='flipflop')await frame.locator('#preview-kit-select').selectOption(weapon);
   await click('#start');for(let i=0;i<3;i++)await click(`[data-stick="${i}"]`);await click('#blow');await advance(2050);await click('#confirm-worry');await advance(2050);
-  for(let i=0;i<12;i++){await click('#hit-zone');await advance(80);}await click('#kit-skill');assert.equal(await frame.locator('#kit-stage').isVisible(),true);assert.equal(await frame.locator('#preview-kit-select').isDisabled(),true);
+  for(let i=0;i<12;i++){await click('#hit-zone');await advance(80);}await launchSkill(frame,{native:false});assert.equal(await frame.locator('#kit-stage').isVisible(),true);assert.equal(await frame.locator('#preview-kit-select').isDisabled(),true);
   if(EXTRA_KITS[weapon])for(const step of EXTRA_KITS[weapon].steps){
    if(step.type==='beat')await advance(step.period);else await advance(120);
    if(['hold','aim'].includes(step.type)){await click('[data-expanded="begin"]');await advance(step.ms+80);await click('[data-expanded="release"]');}else await click('[data-expanded="assist"]');
