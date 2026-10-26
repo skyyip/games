@@ -60,7 +60,7 @@ try{
     pass(`${label}: leaf/bud/flower artwork and labels load, correct gestures launch matching sprites, and the round completes`);
   }
   const {context,page}=await setup({viewport:{width:1440,height:1100}});
-  assert.equal(await page.title(),'Pikmax Fling · Sky’s Playground');
+  assert.equal(await page.title(),'Pikmax Fling · Sky Playground');
   await page.waitForTimeout(80);assert.equal(await page.locator('#timer').textContent(),'0.00');
   assert.equal(await page.locator('.pikmin').count(),35);assert.equal(await page.locator('.pikmin:not(:disabled)').count(),0);
   for(const [growth,count] of [['leaf',25],['bud',5],['flower',5]])assert.equal(await page.locator(`.pikmin[data-growth="${growth}"]`).count(),count);

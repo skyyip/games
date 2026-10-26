@@ -1,5 +1,5 @@
 // Existing Bun Rush windows finish their round before the update activates.
-const CACHE_NAME='bun-rush-app-v1';
+const CACHE_NAME='bun-rush-app-v2';
 const BASE=new URL('./',self.location.href).href,HOME=new URL('./index.html',self.location.href).href;
 const APP_FILES=["./", "./index.html", "./styles.css", "./manifest.webmanifest", "./src/app.js", "./src/game.js", "./src/catalog.js", "./src/progress.js", "./src/art.js", "./src/audio.js", "./src/board.js", "./assets/cover.svg", "../beat-bad-luck/src/audio.js", "../beat-bad-luck/src/catalog.js", "../grid-rush/victory.css", "../grid-rush/src/victory.js", "../grid-rush/src/party-ui.js", "../grid-rush/playground-ui.css", "../grid-rush/src/playground-ui.js", "../grid-rush/src/navigation.js", "../grid-rush/src/motion.js", "../grid-rush/src/language.js", "../grid-rush/src/translations.js", "../grid-rush/assets/fonts/DMSans.ttf", "../grid-rush/assets/fonts/Fredoka.ttf", "../grid-rush/assets/icons/icon-192.png", "../grid-rush/assets/icons/icon-512.png", "../grid-rush/assets/icons/apple-touch-icon.png"].map(path=>new URL(path,self.location.href).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_FILES.map(url=>new Request(url,{cache:'reload'}))))));

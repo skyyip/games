@@ -53,7 +53,7 @@ try{
   await mkdir(output,{recursive:true});
   for(const [kind,label] of SHAPES.entries()){
     const {context,page}=await setup({viewport:{width:1440,height:1050}},kind);
-    assert.equal(await page.title(),'Line Up · Sky’s Playground');
+    assert.equal(await page.title(),'Line Up · Sky Playground');
     await page.locator('#player-0').fill('Alice');await page.locator('#player-1').fill('Bob');
     await page.locator('#start').click();assert.equal(await page.locator('#target').textContent(),'37');
     assert.match(await page.locator('#shape-name').textContent(),new RegExp(SHAPE_NAMES[label]));
@@ -236,7 +236,7 @@ try{
     if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));
   });
   const manifest=await offline.context.request.get(new URL('manifest.webmanifest',base).href).then(r=>r.json());
-  assert.equal(manifest.name,'Line Up · Sky’s Playground');
+  assert.equal(manifest.name,'Line Up · Sky Playground');
   for(const icon of manifest.icons)assert.equal((await offline.context.request.get(new URL(icon.src,base).href)).status(),200);
   await offline.context.setOffline(true);await offline.page.reload();
   await offline.page.locator('#start').click();

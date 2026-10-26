@@ -16,7 +16,7 @@ async function setup(options={},init) {
 }
 const text=async(page,selector,value)=>assert.equal((await page.locator(selector).innerText()).trim(),value);
 async function englishTap(page) {
- assert.equal(await page.title(),'Tap & Spill · Sky’s Playground');
+ assert.equal(await page.title(),'Tap & Spill · Sky Playground');
  const chinese=await page.evaluate(()=>{
   const found=[],walker=document.createTreeWalker(document.documentElement,NodeFilter.SHOW_TEXT);
   while(walker.nextNode()) {
