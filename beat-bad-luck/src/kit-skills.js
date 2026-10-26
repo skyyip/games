@@ -1,6 +1,9 @@
+import {EXTRA_KITS} from './kit-catalog.js';
+import {beginExpanded,advanceExpanded,actExpanded,cancelExpanded} from './kit-gestures.js';
 // Active ritual milliseconds drive skills, daylight and every input deadline.
 export const SKILL_CHARGE=12,SKILL_LIMIT=2,SKILL_DURATION=5000,SKILL_RESULT=650,SKILL_REST=8000,SKILL_BONUS=50;
-export const KIT_SKILLS={
+export const FIRST_SIX_KITS=['flying-dagger','plunger-nunchucks','beauty-fist','solar-torch','immunity-token','flipflop'];
+export const KIT_SKILLS={...EXTRA_KITS,
  'flying-dagger':{name:['三紙連環刀','Triple paper toss'],hint:['準星亮起時，依次點中三張紙。','Tap each paper in order when its ring lights up.'],win:['三紙串燒！最後改一次都冇用！','Triple paper kebab! No more final revisions!']},
  'plunger-nunchucks':{name:['吸實彈走','Suction slingshot'],hint:['按住紙人，左右拉過兩邊，再鬆手彈飛。','Hold the paper, pull left and right, then release.'],win:['啵！黐住都要收工！','POP! Even the plunger is clocking off!']},
  'beauty-fist':{name:['越打越自戀','Vanity makeover'],hint:['點拍五次化妝，再點鏡子，照走自戀怪。','Tap five times for a makeover, then tap the mirror.'],win:['靚到唔記得返工！塊紙都皺埋！','Too gorgeous to work! Still a very crumpled paper!']},
@@ -20,12 +23,12 @@ export class KitSkill{
   if(duration-elapsed<6000)return 'ending';
   if(events.some(e=>elapsed<e.at+5400&&elapsed+6000>e.at))return 'event';return 'ready';
  }
- start(elapsed,events,duration){if(this.availability(elapsed,events,duration)!=='ready')return false;this.attempts++;this.charge=0;this.last=null;this.active={at:elapsed,checked:elapsed,progress:0,held:false,left:0,right:0,pull:0,torchX:.76,chargeMs:0,tokenClear:false,stamps:0,lastInput:-Infinity,flashAt:-Infinity};return true;}
+ start(elapsed,events,duration){if(this.availability(elapsed,events,duration)!=='ready')return false;this.attempts++;this.charge=0;this.last=null;this.active={at:elapsed,checked:elapsed,progress:0,held:false,left:0,right:0,pull:0,torchX:.76,chargeMs:0,tokenClear:false,stamps:0,lastInput:-Infinity,flashAt:-Infinity};if(this.spec.steps)beginExpanded(this.active,elapsed,this.attempts);return true;}
  finish(elapsed,won){if(!this.active)return false;const state=this.active;this.last={at:elapsed,won,progress:state.progress,stamps:state.stamps};this.active=null;this.cooldown=elapsed+SKILL_REST;if(won)this.wins++;return true;}
- advance(elapsed){const a=this.active;if(!a)return;if(this.weapon==='solar-torch'&&a.torchX<=.4)a.chargeMs=Math.min(900,a.chargeMs+daylight(Math.max(0,a.checked-a.at),Math.min(SKILL_DURATION,elapsed-a.at)));a.checked=elapsed;if(elapsed>=a.at+SKILL_DURATION)this.finish(a.at+SKILL_DURATION,false);}
- cancelPointer(){if(this.active){this.active.held=false;this.active.left=0;this.active.right=0;this.active.pull=0;}}
+ advance(elapsed){const a=this.active;if(!a)return;if(this.spec.steps)advanceExpanded(this.spec,a,Math.min(elapsed,a.at+SKILL_DURATION));if(this.weapon==='solar-torch'&&a.torchX<=.4)a.chargeMs=Math.min(900,a.chargeMs+daylight(Math.max(0,a.checked-a.at),Math.min(SKILL_DURATION,elapsed-a.at)));a.checked=elapsed;if(elapsed>=a.at+SKILL_DURATION)this.finish(a.at+SKILL_DURATION,false);}
+ cancelPointer(){if(this.active){this.active.held=false;this.active.left=0;this.active.right=0;this.active.pull=0;cancelExpanded(this.active);}}
  action(type,input={},elapsed){
-  this.advance(elapsed);const a=this.active;if(!a)return {ok:false};const t=elapsed-a.at;let ok=false,won=false;
+  this.advance(elapsed);const a=this.active;if(!a)return {ok:false};if(this.spec.steps){const out=actExpanded(this.spec,a,type,input,elapsed);if(out.won)this.finish(elapsed,true);return {...out,raw:out.won?SKILL_BONUS:0};}const t=elapsed-a.at;let ok=false,won=false;
   if(this.weapon==='flying-dagger'&&type==='throw'&&elapsed-a.lastInput>=100){a.lastInput=elapsed;ok=input.index===a.progress&&Math.abs(t-(a.progress+1)*900)<=250;if(ok)won=++a.progress===3;}
   if(this.weapon==='flipflop'&&type==='slap'&&elapsed-a.lastInput>=100){a.lastInput=elapsed;ok=input.side===(a.progress%2?'right':'left')&&Math.abs(t-(a.progress+1)*600)<=240;if(ok)won=++a.progress===4;}
   if(this.weapon==='plunger-nunchucks'){

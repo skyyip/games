@@ -1,3 +1,5 @@
+import {EXTRA_KITS} from '../src/kit-catalog.js';
+import {WEAPONS} from '../src/catalog.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
@@ -18,14 +20,18 @@ async function open(html,locked=false,virtualClock=false){
 }
 try{
  // No rewritten clock or test helper is injected for the reported opening/start path.
- for(const [name,html]of [['regular',regular],['six-kit',demo]])for(const locked of [false,true]){
-  const {context,frame,errors}=await open(html,locked);assert.equal(await frame.locator('#kit-preview').isVisible(),name==='six-kit');await frame.locator('#start').click();await frame.locator('#play-panel[data-phase="incense"]').waitFor();assert.deepEqual(errors,[]);await context.close();checks++;console.log(`PASS real open and Start: ${name}; storage ${locked?'locked':'default'}; CSP forbids data scripts`);
+ for(const [name,html]of [['regular',regular],['all-kit',demo]])for(const locked of [false,true]){
+  const {context,frame,errors}=await open(html,locked);assert.equal(await frame.locator('#kit-preview').isVisible(),true);await frame.locator('#start').click();await frame.locator('#play-panel[data-phase="incense"]').waitFor();assert.deepEqual(errors,[]);await context.close();checks++;console.log(`PASS real open and Start: ${name}; storage ${locked?'locked':'default'}; CSP forbids data scripts`);
  }
- for(const weapon of ['flying-dagger','plunger-nunchucks','beauty-fist','solar-torch','immunity-token','flipflop']){
+ for(const weapon of process.env.PREVIEW_KIT_IDS?.split(',')||WEAPONS.map(w=>w.id)){
   const {context,page,frame,errors}=await open(demo,true,true),click=s=>frame.locator(s).evaluate(e=>e.click()),advance=ms=>frame.locator('body').evaluate((body,ms)=>window.previewAdvance(ms),ms);
-  if(weapon!=='flipflop')await click(`[data-weapon="${weapon}"]`);
+  assert.equal(await frame.locator('#preview-kit-select option').count(),45);if(weapon!=='flipflop')await frame.locator('#preview-kit-select').selectOption(weapon);
   await click('#start');for(let i=0;i<3;i++)await click(`[data-stick="${i}"]`);await click('#blow');await advance(2050);await click('#confirm-worry');await advance(2050);
-  for(let i=0;i<12;i++){await click('[data-gesture="tap"]');await advance(80);}await click('#kit-skill');assert.equal(await frame.locator('#kit-stage').isVisible(),true);
+  for(let i=0;i<12;i++){await click('[data-gesture="tap"]');await advance(80);}await click('#kit-skill');assert.equal(await frame.locator('#kit-stage').isVisible(),true);assert.equal(await frame.locator('#preview-kit-select').isDisabled(),true);
+  if(EXTRA_KITS[weapon])for(const step of EXTRA_KITS[weapon].steps){
+   if(step.type==='beat')await advance(step.period);else await advance(120);
+   if(['hold','aim'].includes(step.type)){await click('[data-expanded="begin"]');await advance(step.ms+80);await click('[data-expanded="release"]');}else await click('[data-expanded="assist"]');
+  }
   if(weapon==='flying-dagger')for(let i=0;i<3;i++){await advance(900);await click('#knife-'+i);}
   if(weapon==='plunger-nunchucks')for(const id of ['pull-left','pull-right','pull-release'])await click('#'+id);
   if(weapon==='beauty-fist'){for(let i=0;i<5;i++){await click('#makeup-tap');await advance(120);}await click('#makeup-mirror');}
@@ -34,7 +40,7 @@ try{
   if(weapon==='flipflop')for(const side of ['left','right','left','right']){await advance(600);await click('#slap-'+side);}
   assert.equal(await frame.locator('#kit-stage').evaluate(e=>e.classList.contains('is-win')),true,weapon);
   await advance(60100);await click('#feed');await advance(1600);await click('#bless');await advance(1600);
-  assert.equal(await frame.locator('#result').isVisible(),true);assert.match(await frame.locator('#kit-result').textContent(),/1\/1/);assert.ok(await frame.locator('#personal-postcard svg').count()>0);assert.deepEqual(errors,[]);await context.close();checks++;console.log('PASS locked opaque preview: complete '+weapon+' skill, ritual and fortune');
+  assert.equal(await frame.locator('#result').isVisible(),true);assert.match(await frame.locator('#kit-result').textContent(),/1\/1/);assert.ok(await frame.locator('#personal-postcard svg').count()>0);assert.deepEqual(errors,[]);await click('#to-stall');assert.equal(await frame.locator('#preview-kit-select').isDisabled(),false);await context.close();checks++;console.log('PASS locked opaque preview: complete '+weapon+' skill, ritual and fortune');
  }
  console.log(`${checks} compact preview compatibility checks passed.`);
 }finally{await browser.close();}

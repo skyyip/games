@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';import {mkdir} from 'node:fs/promises';
-import {KIT_SKILLS} from '../src/kit-skills.js';import {weaponScoreMultiplier} from '../src/catalog.js';
+import {KIT_SKILLS,FIRST_SIX_KITS} from '../src/kit-skills.js';import {weaponScoreMultiplier} from '../src/catalog.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright'),browser=await chromium.launch({headless:true});
 const base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';let cases=0;const errors=[];
 const click=(p,s)=>p.locator(s).evaluate(e=>e.click()),saved=p=>p.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')));
@@ -22,11 +22,11 @@ async function perform(p,weapon,native=true){const r=await p.locator('#kit-stage
  assert.equal(await p.locator('#kit-stage').getAttribute('class').then(c=>c.includes('is-win')),true,weapon);assert.ok((await p.locator('.kit-finish p').textContent()).length>8);
 }
 try{await mkdir('/tmp/bbl-skills-qa',{recursive:true});
- for(const [width,height]of [[320,568],[375,812],[812,375]])for(const lang of ['zh-Hant','en'])for(const weapon of Object.keys(KIT_SKILLS)){
+ for(const [width,height]of [[320,568],[375,812],[812,375]])for(const lang of ['zh-Hant','en'])for(const weapon of FIRST_SIX_KITS){
  const {context,page:p}=await setup(weapon,width,height,lang);assert.equal(await p.locator('#kit-preview').isVisible(),true);await beat(p);await charge(p);assert.equal((await saved(p)).equipped,'bare-hand');assert.ok(!(await saved(p)).owned.includes(weapon));await p.locator('#kit-skill').click();assert.equal(await p.locator('#kit-stage').isVisible(),true);await bounds(p);const clock=await p.locator('#kit-clock').textContent();await click(p,'#pause');await p.clock.fastForward(20000);assert.equal(await p.locator('#kit-clock').textContent(),clock);await click(p,'#resume');await perform(p,weapon,width!==375);await p.screenshot({path:`/tmp/bbl-skills-qa/${width}-${lang}-${weapon}.png`});await p.clock.fastForward(700);assert.equal(await p.locator('#kit-stage').isVisible(),false);await p.clock.fastForward(60100);await click(p,'#feed');await p.clock.fastForward(1600);await click(p,'#bless');await p.clock.fastForward(1600);assert.equal(await p.locator('#result').isVisible(),true);assert.match(await p.locator('#kit-result').textContent(),/1\/1/);assert.ok((await p.locator('#kit-result').textContent()).includes(String(Math.round(50*weaponScoreMultiplier(weapon)))));assert.equal((await saved(p)).rituals,1);await context.close();cases++;console.log(`PASS ${width} ${lang} ${weapon}: ${width===375?'button':'native'} skill, pause, layouts, consumption, result bonus`);
  }
  {const {context,page:p}=await setup('beauty-fist');await beat(p);await charge(p);await p.clock.fastForward(11000);assert.equal(await p.locator('#kit-skill').isDisabled(),true);assert.equal(await p.locator('#kit-stage').isVisible(),false);await p.clock.fastForward(6500);assert.equal(await p.locator('#kit-skill').getAttribute('data-ready'),'true');await context.close();console.log('PASS ready skill waits for the bridge event and becomes available afterward');cases++;}
- for(const weapon of Object.keys(KIT_SKILLS)){
+ for(const weapon of FIRST_SIX_KITS){
   const {context,page:p}=await setup(weapon,375,812,'en','no-preference');await beat(p);await charge(p);await p.locator('#kit-skill').click();await bounds(p);await perform(p,weapon,true);await context.close();cases++;console.log('PASS animated '+weapon);
  }
  for(const weapon of ['plunger-nunchucks','solar-torch','immunity-token']){

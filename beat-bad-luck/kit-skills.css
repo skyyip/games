@@ -115,3 +115,48 @@
 .kit-stage[data-progress="1"] .kit-sole ellipse:nth-of-type(2),.kit-stage[data-progress="1"] .kit-sole path:nth-of-type(2),.paper-doll[data-kit=flipflop]:not(.kit-right-print) .kit-passive ellipse:nth-of-type(2),.paper-doll[data-kit=flipflop]:not(.kit-right-print) .kit-passive path:nth-of-type(2){visibility:hidden}
 
 .beat-panel:has(.kit-stage:not([hidden])) .rhythm-rail{display:none}
+
+/* Every additional kit has a recipe, an illustrated prop scene and a paper pose. */
+.expanded-layer{position:absolute;inset:0}
+#expanded-canvas{position:absolute;inset:0 0 52px;display:block;width:100%;height:calc(100% - 52px);padding:0;border:0;border-radius:12px;background:transparent;touch-action:none;color:#f2d18a;cursor:crosshair;overflow:hidden}
+#expanded-canvas:focus-visible{outline:3px solid #f9e8b4;outline-offset:-4px}
+.expanded-art,.expanded-guide{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.expanded-guide{z-index:2}.expanded-props{opacity:.85}.expanded-paper,.expanded-tool{transform-box:fill-box;transform-origin:50% 65%}
+.expanded-caption{position:absolute;left:50%;bottom:3px;translate:-50% 0;max-width:90%;padding:3px 8px;border-radius:8px;background:#1e3c39ed;border:1px solid #bbbc8a;color:#f0d69f;font-size:10px;line-height:1.3;z-index:3;pointer-events:none}
+.expanded-cursor{position:absolute;left:50%;top:45%;translate:-50% -50%;width:45px;height:49px;pointer-events:none;z-index:4;filter:drop-shadow(0 3px 0 #17383288)}
+.expanded-cursor svg{width:100%;height:100%}
+.expanded-choice{top:41%;translate:-50% -50%;width:56px;height:66px;z-index:3}
+.expanded-choice>span{font-size:25px;color:#e7cb8c}.expanded-choice[data-cue=true]{border-color:#fff0b6;filter:brightness(1.18)}
+.expanded-aim{position:absolute;translate:-50% -50%;display:grid;place-items:center;width:44px;height:44px;border:2px dashed #f2d488;border-radius:50%;background:#e2d6a133;font:28px/1 system-ui;z-index:3;pointer-events:none}
+.expanded-meter{position:absolute;right:7px;top:6px;padding:5px 7px;background:#233e39;border:1px solid #d8c68a;border-radius:8px;color:#f1d58c;font-size:11px;z-index:4;pointer-events:none}
+.expanded-meter[data-ready=true]{background:#537a55;color:#fff4ce;border-color:#f0d58c}
+.expanded-actions .kit-target{padding:5px 7px}.expanded-actions .kit-target small{font-size:11px;line-height:1.3}
+.expanded-passive{position:absolute;right:-3%;top:2%;width:33px;height:43px;pointer-events:none;filter:drop-shadow(1px 2px 0 #1b383466)}
+.expanded-passive svg{width:100%;height:100%}
+.expanded-echo{position:absolute;left:68%;top:8%;width:39px;height:48px;pointer-events:none;animation:expanded-echo .6s ease-out forwards}
+.expanded-echo svg{width:100%;height:100%}
+.kit-stage.is-win[data-pose=flat] .expanded-paper{animation:expanded-flat .6s ease-out forwards}
+.kit-stage.is-win[data-pose=spin] .expanded-paper,.kit-stage.is-win[data-pose=orbit] .expanded-paper,.kit-stage.is-win[data-pose=flip] .expanded-paper{animation:expanded-spin .6s ease-out forwards}
+.kit-stage.is-win[data-pose=roll] .expanded-paper,.kit-stage.is-win[data-pose=bag] .expanded-paper{animation:expanded-roll .6s ease-in forwards}
+.kit-stage.is-win[data-pose=float] .expanded-paper,.kit-stage.is-win[data-pose=ufo] .expanded-paper{animation:expanded-lift .6s ease-in forwards}
+.kit-stage.is-win[data-pose=dance] .expanded-paper,.kit-stage.is-win[data-pose=race] .expanded-paper,.kit-stage.is-win[data-pose=dog] .expanded-paper{animation:expanded-run .6s ease-in-out forwards}
+.kit-stage.is-win[data-pose=pudding] .expanded-paper,.kit-stage.is-win[data-pose=cheeks] .expanded-paper{animation:expanded-jelly .6s ease-out forwards}
+.kit-stage.is-win[data-pose=sneeze] .expanded-paper,.kit-stage.is-win[data-pose=laugh] .expanded-paper{animation:expanded-laugh .6s ease-in-out forwards}
+.kit-stage.is-win[data-pose=slice] .expanded-paper,.kit-stage.is-win[data-pose=skewer] .expanded-paper{animation:expanded-paper-fold .6s ease-out forwards}
+.kit-stage.is-win[data-pose=stamp] .expanded-props,.kit-stage.is-win[data-pose=pins] .expanded-props,.kit-stage.is-win[data-pose=essay] .expanded-props{animation:kit-stamp-land .45s ease-out}
+.kit-stage.is-win[data-pose=shine] .expanded-paper,.kit-stage.is-win[data-pose=heart] .expanded-paper,.kit-stage.is-win[data-pose=crown] .expanded-paper,.kit-stage.is-win[data-pose=lottery] .expanded-paper{filter:brightness(1.35) drop-shadow(0 0 12px #f0d28f)}
+.kit-stage.is-win[data-pose=hair] .expanded-props,.kit-stage.is-win[data-pose=steam] .expanded-props,.kit-stage.is-win[data-pose=ring] .expanded-props{animation:expanded-preen .6s ease-in-out forwards}
+.kit-stage.is-win[data-pose=fish] .expanded-props,.kit-stage.is-win[data-pose=flags] .expanded-props,.kit-stage.is-win[data-pose=boxes] .expanded-props,.kit-stage.is-win[data-pose=gadgets] .expanded-props,.kit-stage.is-win[data-pose=bounce] .expanded-props{animation:expanded-bounce .6s ease-out forwards}
+@keyframes expanded-echo{to{translate:-35px -18px;rotate:30deg;opacity:0}}
+@keyframes expanded-flat{40%{scale:1.4 .35}75%{scale:.8 1.16}100%{scale:1.15 .75;rotate:-5deg}}
+@keyframes expanded-spin{to{rotate:350deg;scale:.75}}
+@keyframes expanded-roll{to{scale:.2 .85;translate:70px 15px;rotate:30deg;opacity:.5}}
+@keyframes expanded-lift{to{translate:0 -85px;scale:.25;rotate:12deg;opacity:.4}}
+@keyframes expanded-run{35%{translate:-20px 0;rotate:-15deg}70%{translate:25px -14px;rotate:15deg}100%{translate:-10px 0;rotate:-8deg}}
+@keyframes expanded-jelly{35%{scale:1.4 .55}70%{scale:.7 1.25}100%{scale:1.2 .75;rotate:180deg}}
+@keyframes expanded-laugh{25%,65%{rotate:14deg;translate:8px -8px}45%,85%{rotate:-14deg;translate:-8px 0}100%{rotate:6deg}}
+@keyframes expanded-paper-fold{to{scale:.5 1.1;rotate:12deg}}
+@keyframes expanded-preen{35%{rotate:-7deg;scale:1.06}75%{rotate:8deg;scale:1.13}100%{rotate:-4deg;scale:1.05}}
+@keyframes expanded-bounce{40%{translate:0 -16px;scale:1.1 .9}75%{translate:0 4px;scale:.9 1.1}100%{translate:0 -3px}}
+@media(max-height:450px) and (min-aspect-ratio:4/3){.expanded-actions .kit-target small{font-size:9px}.expanded-choice{width:48px;height:56px}.expanded-choice>span{font-size:22px}.expanded-caption{font-size:9px}.expanded-meter{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.expanded-echo,.kit-stage.is-win .expanded-paper,.kit-stage.is-win .expanded-props{animation:none!important}.kit-stage.is-win[data-pose=flat] .expanded-paper{scale:1.15 .75}.kit-stage.is-win[data-pose=pudding] .expanded-paper{scale:1.2 .8}.kit-stage.is-win[data-pose=roll] .expanded-paper{scale:.5 1}}
