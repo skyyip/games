@@ -128,3 +128,11 @@ The flying dagger, plunger nunchucks, beauty fist, solar torch, immunity token a
 The six kits also have ordinary-hit accents. The shop and welcome show each signature, the feedback-row button shows charge/readiness, and results show successful attempts and bonus points. Signature instructions replace ordinary prompts during the interaction; all targets stay inside the arena. Pointer-up handles touch and mouse buttons immediately, while native keyboard clicks remain supported. Reduced-motion preferences remove optional motion. Prices, merit thresholds, one-use inventory, existing multipliers, the 60-second whacking duration and stall earnings are unchanged. Timed targets use their own synchronized cue tones while the ordinary metronome is silent. New scripts and CSS are included in offline cache version 38.
 
 Run `npm test`, `node scripts/kit-skills-check.mjs`, and `node scripts/layout-check.mjs` with the existing Playwright module environment variable and development server for verification.
+
+### Compact chat previews
+
+Run `npm ci`, then `npm run preview -- /tmp/playground-previews` from this folder. The builder emits a regular preview, a six-kit visit-only preview and a fresh six-kit alias. Each is a self-contained HTML file with embedded art/fonts and one inline JavaScript bundle. Preview assets do not need nested data-URL modules or external script requests.
+
+The six-kit state is inserted only while building that variant. It never replaces or writes `window.localStorage`, so it also works when the preview host has locked browser storage. The deployed game and its saved progress are unaffected. The demo closes with no saved progress, and every reload restores its six kits.
+
+Run `npm run check:preview -- /tmp/playground-previews` with `GRID_RUSH_PLAYWRIGHT_MODULE` set when Playwright is supplied externally. The browser checks unmodified opening and a real Start click in an opaque sandbox, both normal and locked storage, and a CSP that disallows data-URL scripts. Virtual ritual time is used only for the subsequent six complete skill/fortune checks.
