@@ -1,6 +1,6 @@
 # Stall and kit expansion
 
-All prices are fictional oil-money amounts. The shop contains 44 paid kits and 27 decorations. Merit unlocks a kit without being spent; oil buys one ritual use. All paid-kit score multipliers have been reduced by approximately 30%, rounded to two decimal places. Prices, merit gates, inventory and existing records are unchanged. Free hands remain ×1. Rebirth paper stays penultimate, between Lassie and the immunity token.
+All prices are fictional oil-money amounts. The shop contains 44 paid kits and 27 decorations. Merit unlocks a kit without being spent; oil buys two ritual uses. All paid-kit score multipliers have been reduced by approximately 30%, rounded to two decimal places. Prices, merit gates, inventory and existing records are unchanged. Free hands remain ×1. Rebirth paper stays penultimate, between Lassie and the immunity token.
 
 ## All paid kits (shop order, current multipliers)
 

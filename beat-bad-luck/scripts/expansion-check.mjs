@@ -1,3 +1,4 @@
+import {buyAndContinue} from './purchase-helpers.mjs';
 import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
@@ -21,7 +22,7 @@ try{
   assert.deepEqual(await page.locator('[data-decor]').evaluateAll(nodes=>nodes.map(n=>n.dataset.decor)),ordered(DECOR));
   let total=0;
   for(const piece of DECOR){
-   await page.locator(`[data-decor="${piece.id}"]`).click();total+=piece.cost;
+   await buyAndContinue(page,`[data-decor="${piece.id}"]`);total+=piece.cost;
    assert.equal((await saved(page)).coins,1000000-total);assert.equal(await page.locator(`[data-piece="${piece.id}"] svg`).count(),1);
    const row=page.locator(`[data-decor="${piece.id}"]`).locator('..');assert.match(await row.locator('b').textContent(),new RegExp(piece.nameZh&&language==='zh-Hant'?piece.nameZh.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'):language==='en'?piece.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'):'.'));
   }
@@ -32,12 +33,12 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.equal(new Set(await page.locator('#stall-extension svg').evaluateAll(nodes=>nodes.map(n=>n.innerHTML))).size,18);
   await page.locator('.stall-showcase').screenshot({path:`/tmp/bbl-expansion-qa/stall-${width}.png`});
-  const first=decor[0];await page.locator(`[data-decor="${first.id}"]`).click();total+=first.cost*2;assert.equal(await page.locator(`[data-piece="${first.id}"]`).getAttribute('data-level'),'2');assert.equal(await page.locator('#stall-extension .stall-piece').count(),18);
+  const first=decor[0];await buyAndContinue(page,`[data-decor="${first.id}"]`);total+=first.cost*2;assert.equal(await page.locator(`[data-piece="${first.id}"]`).getAttribute('data-level'),'2');assert.equal(await page.locator('#stall-extension .stall-piece').count(),18);
   await click(page,'#tab-kits');assert.deepEqual(await page.locator('[data-weapon]').evaluateAll(nodes=>nodes.map(n=>n.dataset.weapon)),kitOrder);
   for(const kit of kits){
    const row=page.locator(`[data-weapon="${kit.id}"]`).locator('..');assert.equal(await row.locator('[data-collectible]').getAttribute('data-collectible'),kit.id);
    assert.equal(await row.locator('b').textContent(),language==='zh-Hant'?kit.nameZh:kit.name);assert.match(await row.textContent(),new RegExp(`×${weaponScoreMultiplier(kit.id)}`));
-   await page.locator(`[data-weapon="${kit.id}"]`).click();total+=kit.cost;assert.equal((await saved(page)).coins,1000000-total);assert.equal((await saved(page)).equipped,kit.id);
+   await buyAndContinue(page,`[data-weapon="${kit.id}"]`);total+=kit.cost;assert.equal((await saved(page)).coins,1000000-total);assert.equal((await saved(page)).equipped,kit.id);
   }
   assert.equal(new Set(await page.locator('#weapon-list [data-collectible]').evaluateAll(nodes=>nodes.map(n=>n.innerHTML))).size,30);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -45,9 +46,9 @@ try{
   await page.waitForTimeout(50);assert.equal(await page.locator('[data-weapon="lassie"]').locator('..').locator('b').textContent(),language==='zh-Hant'?'Wonder dog Lassie':'神犬拉茜');
   await page.reload();await page.locator('#start').waitFor();assert.equal(await page.locator('#stall-extension .stall-piece').count(),18);assert.equal((await saved(page)).decor[first.id],2);assert.equal((await saved(page)).equipped,'immunity-token');
   await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await click(page,'#start');for(let i=0;i<3;i++)await click(page,`[data-stick="${i}"]`);await click(page,'#blow');await page.clock.fastForward(2050);await click(page,'#confirm-worry');await page.clock.fastForward(2050);
-  await click(page,'#hit-zone');await page.clock.runFor(20);assert.equal((await saved(page)).equipped,'bare-hand');assert.ok(!(await saved(page)).owned.includes('immunity-token'));assert.equal(await page.locator('#striking-weapon [data-collectible]').getAttribute('data-collectible'),'immunity-token');assert.ok(Number(await page.locator('#live-score').textContent())>=300);
+  await click(page,'#hit-zone');await page.clock.runFor(20);assert.equal((await saved(page)).equipped,'immunity-token');assert.equal((await saved(page)).weaponUses['immunity-token'],1);assert.equal(await page.locator('#striking-weapon [data-collectible]').getAttribute('data-collectible'),'immunity-token');assert.ok(Number(await page.locator('#live-score').textContent())>=300);
   await page.clock.fastForward(DURATIONS.beat+100);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'tiger');await click(page,'#feed');await page.clock.fastForward(1600);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'blessing');await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,'immunity-token');
-  await context.close();pass(`${width}px ${language}: all 48 additions, sorted prices, exact purchases, unique art, 27 nonoverlapping props, upgrades, translation switch, reload and one-use ×21 ritual`);
+  await context.close();pass(`${width}px ${language}: all 48 additions, sorted prices, exact purchases, unique art, 27 nonoverlapping props, upgrades, translation switch, reload and two-use ×21 ritual`);
  }
  {
   const context=await browser.newContext({serviceWorkers:'allow',viewport:{width:375,height:812},reducedMotion:'reduce'});await context.addInitScript(()=>{if(!localStorage.getItem('beat-bad-luck.stall.v1'))localStorage.setItem('beat-bad-luck.stall.v1',JSON.stringify({version:1,coins:100000,merit:20000,owned:['immunity-token'],equipped:'immunity-token',decor:{'dragon-throne':1},lastSeen:Date.now()}));});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.evaluate(()=>navigator.serviceWorker.ready.then(()=>{}));await context.setOffline(true);await page.reload();await page.locator('[data-piece="dragon-throne"] [data-collectible]').waitFor();assert.equal(await page.locator('#equipped-art [data-collectible]').getAttribute('data-collectible'),'immunity-token');await context.close();pass('offline reload includes expanded catalogue, prop artwork and saved throne/token');

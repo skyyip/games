@@ -2,9 +2,9 @@ import {KitSkill} from './kit-skills.js';
 import {RitualFlavour} from './ritual-flavour.js';
 import {WORRIES,WEAPONS,FORTUNES,weaponScoreMultiplier} from './catalog.js';
 export const PHASES=['incense','worry','beat','tiger','blessing'];
-export const DURATIONS={incense:8000,worry:7000,beat:60000,tiger:7000,blessing:5000};
+export const DURATIONS={incense:8000,worry:7000,beat:90000,tiger:7000,blessing:5000};
 export const BEAT_INTERVAL=60000/108;
-export const QTE_STEPS=[{at:4500,type:'double'},{at:11000,type:'heavy'},{at:17500,type:'rub'},{at:23500,type:'circle'},{at:29000,type:'pinch'},{at:35500,type:'rub'},{at:41000,type:'circle'},{at:47500,type:'heavy'},{at:56500,type:'pinch'}];
+export const QTE_STEPS=[{at:4500,type:'double'},{at:11000,type:'heavy'},{at:17500,type:'rub'},{at:23500,type:'circle'},{at:29000,type:'pinch'},{at:35500,type:'rub'},{at:41000,type:'circle'},{at:47500,type:'heavy'},{at:56500,type:'pinch'},{at:65000,type:'double'},{at:73000,type:'rub'},{at:82000,type:'circle'},{at:87000,type:'heavy'}];
 const SPECIALS={rub:{min:3,power:6,points:28},circle:{min:5,power:8,points:40},pinch:{min:6,power:9,points:46}};
 export class RitualGame{
   constructor({now=()=>performance.now(),random=Math.random}={}){this.now=now;this.random=random;this.reset();}

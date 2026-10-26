@@ -7,10 +7,14 @@ const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.dec
 export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
 export function repairCost(state,id,now=Date.now()){const item=DECOR.find(d=>d.id===id),health=decorDurability(state,id,now);return item&&health>0&&health<100?Math.max(1,Math.ceil(item.cost*state.decor[id]*.25*(1-health/100))):0;}
 export const STORAGE_KEY='beat-bad-luck.stall.v1';
-export function fresh(now=Date.now()){return {version:1,coins:0,merit:0,rituals:0,owned:['bare-hand'],equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
+export const WEAPON_USES=2;
+export const weaponUses=(state,id)=>id==='bare-hand'?Infinity:state.owned.includes(id)?cap(state.weaponUses?.[id]??WEAPON_USES,WEAPON_USES):0;
+export function fresh(now=Date.now()){return {version:1,coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
 export function readProgress(raw,now=Date.now()){
   const state=fresh(now);try{const x=JSON.parse(raw);if(!x||x.version!==1)return state;
     state.coins=cap(x.coins);state.merit=cap(x.merit);state.rituals=cap(x.rituals);state.owned=[...new Set(['bare-hand',...(Array.isArray(x.owned)?x.owned:[]).filter(id=>WEAPONS.some(w=>w.id===id))])];state.equipped=state.owned.includes(x.equipped)?x.equipped:'bare-hand';
+    for(const id of state.owned.filter(id=>id!=='bare-hand')){const value=x.weaponUses?.[id];state.weaponUses[id]=Number.isFinite(value)?cap(value,WEAPON_USES):WEAPON_USES;}
+    state.owned=state.owned.filter(id=>id==='bare-hand'||state.weaponUses[id]>0);for(const id of Object.keys(state.weaponUses))if(!state.owned.includes(id))delete state.weaponUses[id];if(!state.owned.includes(state.equipped))state.equipped='bare-hand';
     state.neighbourhood=readNeighbourhood(x.neighbourhood,{weapons:WEAPONS.map(w=>w.id),decor:DECOR.map(d=>d.id),owned:state.owned,rituals:state.rituals});
     state.lastSeen=Number.isFinite(x.lastSeen)?Math.max(0,x.lastSeen):now;
     for(const d of DECOR){state.decor[d.id]=cap(x.decor?.[d.id],MAX_DECOR_LEVEL);if(state.decor[d.id])state.decorExpires[d.id]=Number.isFinite(x.decorExpires?.[d.id])?Math.max(0,Math.min(Math.max(now,state.lastSeen)+DECOR_LIFETIME,x.decorExpires[d.id])):now+DECOR_LIFETIME;}
@@ -35,13 +39,14 @@ export function buyWeapon(state,id){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon)return null;
   if(state.owned.includes(id))return {...state,equipped:id};
   if(state.coins<weapon.cost||state.merit<weapon.merit)return null;
-  return {...state,neighbourhood:id==='lassie'?{...state.neighbourhood,companions:['lassie']}:state.neighbourhood,coins:state.coins-weapon.cost,owned:[...state.owned,id],equipped:id};
+  return {...state,neighbourhood:id==='lassie'?{...state.neighbourhood,companions:['lassie']}:state.neighbourhood,coins:state.coins-weapon.cost,weaponUses:{...state.weaponUses,[id]:WEAPON_USES},owned:[...state.owned,id],equipped:id};
 }
-// An unused kit can be equipped freely; its first whack spends the whole ritual use.
+// Call once per ritual, on its first successful hit. Bare hands never wear out.
 export function consumeWeapon(state,id){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon||!state.owned.includes(id))return null;
   if(!weapon.cost)return state;
-  return {...state,owned:state.owned.filter(owned=>owned!==id),equipped:state.equipped===id?'bare-hand':state.equipped};
+  const remaining=weaponUses(state,id)-1,uses={...state.weaponUses};if(remaining)uses[id]=remaining;else delete uses[id];
+  return {...state,weaponUses:uses,owned:remaining?state.owned:state.owned.filter(owned=>owned!==id),equipped:!remaining&&state.equipped===id?'bare-hand':state.equipped};
 }
 export function upgrade(state,id,now=Date.now()){
  const d=DECOR.find(d=>d.id===id);if(!d)return null;const level=state.decor[id]??0,cost=d.cost*(level+1);

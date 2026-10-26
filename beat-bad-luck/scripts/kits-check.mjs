@@ -1,3 +1,4 @@
+import {buyAndContinue} from './purchase-helpers.mjs';
 import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
@@ -26,15 +27,16 @@ try{
   }assert.equal(distinct.size,4);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.locator('#weapon-list').screenshot({path:`/tmp/bbl-kits-qa/kits-${width}.png`});
   for(const [id,merit,cost,multiplier]of kits){
-   const before=(await saved(page)).coins;await click(page,`[data-weapon="${id}"]`);assert.equal((await saved(page)).coins,before-cost);assert.equal((await saved(page)).merit,20000);assert.equal((await saved(page)).equipped,id);
-   await reachBeat(page);await click(page,'#hit-zone');await page.clock.runFor(20);assert.equal(Number(await page.locator('#live-score').textContent()),Math.round(15*multiplier));assert.ok(!(await saved(page)).owned.includes(id));assert.equal((await saved(page)).equipped,'bare-hand');assert.equal(await page.locator('#striking-weapon svg').count(),1);
+   const before=(await saved(page)).coins;await buyAndContinue(page,`[data-weapon="${id}"]`);assert.equal((await saved(page)).coins,before-cost);assert.equal((await saved(page)).merit,20000);assert.equal((await saved(page)).equipped,id);
+   await reachBeat(page);await click(page,'#hit-zone');await page.clock.runFor(20);assert.equal(Number(await page.locator('#live-score').textContent()),Math.round(15*multiplier));assert.equal((await saved(page)).weaponUses[id],1);assert.equal((await saved(page)).equipped,id);assert.equal(await page.locator('#striking-weapon svg').count(),1);
+   await click(page,'#pause');await click(page,'#quit');await reachBeat(page);await click(page,'#hit-zone');assert.ok(!(await saved(page)).owned.includes(id));assert.equal((await saved(page)).equipped,'bare-hand');
    if(id==='rebirth-paper'){
     await page.clock.fastForward(DURATIONS.beat+100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,id);await click(page,'#to-stall');
    }else{await click(page,'#pause');await click(page,'#quit');}
    await click(page,'#tab-kits');assert.equal(await page.locator(`[data-weapon="${id}"]`).isDisabled(),(await saved(page)).coins<cost);
   }
   await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();assert.equal((await saved(page)).equipped,'bare-hand');assert.equal((await saved(page)).records[0].weapon,'rebirth-paper');for(const [id]of kits)assert.ok(!(await saved(page)).owned.includes(id));
-  await context.close();pass(`${width}px ${language}: four unique icons, exact prices, live multipliers, one-use consumption, rebuy controls, renamed old saves and result persistence`);
+  await context.close();pass(`${width}px ${language}: four unique icons, exact prices, live multipliers, two-use consumption, rebuy controls, renamed old saves and result persistence`);
  }
  {
   for(const [id,merit,cost]of kits){

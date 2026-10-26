@@ -1,4 +1,5 @@
 import {createExpandedKitUI} from './kit-expansion-ui.js';
+import {DURATIONS} from './game.js';
 import {KIT_SKILLS,SKILL_CHARGE,SKILL_LIMIT,SKILL_DURATION} from './kit-skills.js';
 import {dollArt,weaponArt} from './art.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
@@ -8,6 +9,7 @@ const sole=`<svg viewBox="0 0 140 160" aria-hidden="true"><g fill="none" stroke=
 const button=(id,label,body='',extra='')=>`<button type="button" id="${id}" class="kit-target" ${extra}><span aria-hidden="true">${body}</span><small translate="no">${label}</small></button>`;
 export function createKitSkillsUI({game,audio,onScore,announce}){
  let built='',drag=null,tap=null,launchTap=null,lastOutcome=null,lastBusy=false,lastReady=false,lastTone=-Infinity;
+ const launchIcon=document.createElement('span'),launchLabel=document.createElement('span');launchIcon.className='kit-launch-icon';launchIcon.setAttribute('aria-hidden','true');launchLabel.className='kit-launch-label';$('#kit-skill').replaceChildren(launchIcon,launchLabel);
  const stage=$('#kit-stage'),guidance=$('#kit-guidance'),launch=$('#kit-skill'),arena=$('#beat-arena');
  const local=(zh,en)=>text([zh,en]);
  const expansion=createExpandedKitUI({game,stage,act,local,announce});
@@ -33,13 +35,14 @@ if(out.won){onScore(out.points);audio.chime();try{navigator.vibrate?.([15,25,20]
   if(game.weapon==='solar-torch')audio.tone(game.elapsed%6000<3000?760:170,.06,'sine',.035);
   if(game.weapon==='immunity-token')audio.noise(.04,.07,600);
  }
- function renderHome(weapon){const spec=KIT_SKILLS[weapon],note=$('#kit-preview');put($('#kit-rules'),['標示「招牌技」的法寶，擊打 12 次即可儲滿。按「發動絕招」進行專屬操作，每局最多兩次；成功加 50 基礎解壓分，再套用法寶倍率。招式會等橋底事件完結才可發動，錯過時機也不會扣錢。','Kits marked Signature charge with 12 hits. Press Use skill for their special interaction, up to twice per round. Success awards 50 base relief points with your kit multiplier. Skills wait for bridge events; missed attempts never deduct oil.']);note.hidden=!spec;if(spec)put(note,[`招牌技：${spec.name[0]}。${spec.hint[0]}擊打 12 次儲滿，每局最多兩次。`,`Signature: ${spec.name[1]}. ${spec.hint[1]} Charge with 12 hits; up to twice per round.`]);}
+ function renderHome(weapon){const spec=KIT_SKILLS[weapon],note=$('#kit-preview');put($('#kit-rules'),['標示「招牌技」的法寶，擊打 12 次即可儲滿。法寶圖示發光後，按「發動絕招」進行 7 秒專屬操作，每局最多兩次；成功加 50 基礎解壓分，再套用法寶倍率。招式會等橋底事件完結才可發動，錯過時機也不會扣錢。','Kits marked Signature charge with 12 hits. When the kit icon glows, press Use skill for its 7-second interaction, up to twice per round. Success awards 50 base relief points with your kit multiplier. Skills wait for bridge events; missed attempts never deduct oil.']);note.hidden=!spec;if(spec)put(note,[`招牌技：${spec.name[0]}。${spec.hint[0]}擊打 12 次儲滿，每局最多兩次。`,`Signature: ${spec.name[1]}. ${spec.hint[1]} Charge with 12 hits; up to twice per round.`]);}
  function render(){
   const s=game.skill,playing=game.phase==='beat'&&!!s.spec,busy=playing&&s.busy(game.elapsed);launch.hidden=!playing;stage.hidden=!busy;guidance.hidden=!busy;arena.dataset.skillBusy=String(busy);arena.dataset.kit=playing?game.weapon:'';
   if(!playing){cancelPointer();built='';return;}
-  const availability=s.availability(game.elapsed,game.flavour.events),ready=availability==='ready';
-  launch.disabled=busy?!s.active:!ready;launch.dataset.ready=String(ready);launch.style.setProperty('--kit-fill',s.charge/SKILL_CHARGE);
-  put(launch,busy?(s.active?['返回點打','Back to whacks']:s.last?.won?['成功！','Success!']:['招式完畢','Finished']):s.attempts>=SKILL_LIMIT?['絕招用完','Skills used']:ready?['發動絕招','Use skill']:availability==='event'?['等事件完','After event']:availability==='rest'?['回氣中','Recharging']:availability==='ending'?['準備收工','Wrapping up']:[`絕招 ${s.charge}/${SKILL_CHARGE}`,`Skill ${s.charge}/${SKILL_CHARGE}`]);launch.setAttribute('aria-expanded',String(busy));launch.setAttribute('aria-label',text([`${s.spec.name[0]}，${launch.textContent}`,`${s.spec.name[1]}, ${launch.textContent}`]));
+  const availability=s.availability(game.elapsed,game.flavour.events,DURATIONS.beat),ready=availability==='ready';
+  if(launchIcon.dataset.kitIcon!==game.weapon){launchIcon.dataset.kitIcon=game.weapon;launchIcon.innerHTML=weaponArt(game.weapon);}
+  launch.dataset.charged=String(s.charge===SKILL_CHARGE&&s.attempts<SKILL_LIMIT);launch.disabled=busy?!s.active:!ready;launch.dataset.ready=String(ready);launch.style.setProperty('--kit-fill',s.charge/SKILL_CHARGE);
+  put(launchLabel,busy?(s.active?['返回點打','Back to whacks']:s.last?.won?['成功！','Success!']:['招式完畢','Finished']):s.attempts>=SKILL_LIMIT?['絕招用完','Skills used']:ready?['發動絕招','Use skill']:availability==='event'?['等事件完','After event']:availability==='rest'?['回氣中','Recharging']:availability==='ending'?['準備收工','Wrapping up']:[`絕招 ${s.charge}/${SKILL_CHARGE}`,`Skill ${s.charge}/${SKILL_CHARGE}`]);launch.setAttribute('aria-expanded',String(busy));launch.setAttribute('aria-label',text([`${s.spec.name[0]}，${launch.textContent}`,`${s.spec.name[1]}, ${launch.textContent}`]));
   if(ready&&!lastReady)announce(text(['法寶招牌技準備好，可以按發動絕招。','Signature skill ready. Press Use skill.']));lastReady=ready;
   if(!busy){if(lastBusy){if(stage.contains(document.activeElement))$('#hit-zone').focus({preventScroll:true});cancelPointer();}lastBusy=false;return;}
   lastBusy=true;const key=game.weapon+':'+s.attempts+':'+getLanguage();if(built!==key){cancelPointer();build();}

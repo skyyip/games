@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {WEAPONS,DECOR,weaponScoreMultiplier,decorHourlyRate} from '../src/catalog.js';
 import {fresh,readProgress,buyWeapon,consumeWeapon,reward,upgrade,collectIdle,repairDecor,repairCost,discardDecor,decorDurability,DECOR_LIFETIME} from '../src/progress.js';
 const kits=WEAPONS.filter(w=>w.expanded),decor=DECOR.filter(d=>d.expanded),DAY=86400000;
-test('all thirty new kits respect both gates, spend one use, repurchase and restore their records',()=>{
+test('all thirty new kits respect both gates, last two uses, repurchase and restore their records',()=>{
  assert.equal(kits.length,30);assert.equal(new Set(WEAPONS.map(w=>w.id)).size,WEAPONS.length);
  for(const kit of kits){
   const before={...fresh(0),coins:kit.cost,merit:kit.merit};
@@ -11,7 +11,7 @@ test('all thirty new kits respect both gates, spend one use, repurchase and rest
   if(kit.merit)assert.equal(buyWeapon({...before,merit:kit.merit-1},kit.id),null);
   const bought=buyWeapon(before,kit.id);assert.equal(bought.coins,0);assert.equal(bought.merit,kit.merit);
   assert.equal(readProgress(JSON.stringify(bought),0).equipped,kit.id);
-  const used=consumeWeapon(bought,kit.id);assert.equal(used.equipped,'bare-hand');assert.ok(!used.owned.includes(kit.id));assert.equal(consumeWeapon(used,kit.id),null);
+  const once=consumeWeapon(bought,kit.id);assert.equal(once.weaponUses[kit.id],1);assert.equal(once.equipped,kit.id);const used=consumeWeapon(once,kit.id);assert.equal(used.equipped,'bare-hand');assert.ok(!used.owned.includes(kit.id));assert.equal(consumeWeapon(used,kit.id),null);
   const again=buyWeapon({...used,coins:kit.cost},kit.id);assert.equal(again.coins,0);
   const result={score:Math.round(600*weaponScoreMultiplier(kit.id)),hits:40,papers:2,qte:1,weapon:kit.id,fed:true,blessed:true};
   const completed=reward(used,result,{id:kit.id,now:1,random:()=>1});assert.equal(readProgress(JSON.stringify(completed.state),1).records[0].weapon,kit.id);

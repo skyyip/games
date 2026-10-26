@@ -39,7 +39,7 @@ try{
   if(weapon==='immunity-token')for(let i=0;i<2;i++){await click('#token-aside');await click('#stamp-here');}
   if(weapon==='flipflop')for(const side of ['left','right','left','right']){await advance(600);await click('#slap-'+side);}
   assert.equal(await frame.locator('#kit-stage').evaluate(e=>e.classList.contains('is-win')),true,weapon);
-  await advance(60100);await click('#feed');await advance(1600);await click('#bless');await advance(1600);
+  await advance(90100);await click('#feed');await advance(1600);await click('#bless');await advance(1600);
   assert.equal(await frame.locator('#result').isVisible(),true);assert.match(await frame.locator('#kit-result').textContent(),/1\/1/);assert.ok(await frame.locator('#personal-postcard svg').count()>0);assert.deepEqual(errors,[]);await click('#to-stall');assert.equal(await frame.locator('#preview-kit-select').isDisabled(),false);await context.close();checks++;console.log('PASS locked opaque preview: complete '+weapon+' skill, ritual and fortune');
  }
  console.log(`${checks} compact preview compatibility checks passed.`);

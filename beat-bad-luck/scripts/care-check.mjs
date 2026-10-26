@@ -1,3 +1,4 @@
+import {buyAndContinue} from './purchase-helpers.mjs';
 import assert from 'node:assert/strict';
 import {paperGesture} from './paper-gesture.mjs';
 import {mkdir} from 'node:fs/promises';
@@ -25,7 +26,7 @@ try{
   await page.locator('[data-discard="cat"]').click();assert.equal(await page.locator('#discard-dialog').isVisible(),true);await page.locator('#cancel-discard').click();assert.equal((await saved(page)).decor.cat,1);
   await page.locator('[data-discard="cat"]').click();await page.locator('#confirm-discard').click();const discarded=await saved(page);assert.equal(discarded.coins,repaired.coins);assert.equal(discarded.decor.cat,0);assert.ok(!('cat'in discarded.decorExpires));assert.equal(await page.locator('[data-piece="cat"]').count(),0);
   await page.evaluate(()=>{window.__careNow+=120000;localStorage.setItem('bbl.qa.now',String(window.__careNow));document.dispatchEvent(new Event('visibilitychange'));});assert.equal((await saved(page)).decor['money-tree'],0);assert.equal(await page.locator('[data-piece="money-tree"]').count(),0);assert.equal(await page.locator('[data-repair="money-tree"]').count(),0);assert.equal(await page.locator('#decor-loss-note').isVisible(),true);
-  await page.locator('[data-decor="money-tree"]').click();const replacement=await saved(page);assert.equal(replacement.decor['money-tree'],1);assert.equal(replacement.decorExpires['money-tree'],replacement.lastSeen+30*DAY);
+  await buyAndContinue(page,'[data-decor="money-tree"]');const replacement=await saved(page);assert.equal(replacement.decor['money-tree'],1);assert.equal(replacement.decorExpires['money-tree'],replacement.lastSeen+30*DAY);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);if(language==='zh-Hant')assert.match(await page.locator('.bbl-brand').textContent(),/葉師傅除厄小攤/);assert.ok(!/芳姐|Fong/.test(await page.locator('body').textContent()));
   await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();const restored=await saved(page);assert.equal(restored.decor.neon,3);assert.equal(restored.decor.cat,0);assert.equal(restored.decorExpires.neon,repaired.decorExpires.neon);assert.equal(restored.decor['money-tree'],1);
   assert.equal(await page.locator('.master-avatar img').evaluate(e=>e.complete&&e.naturalWidth>0),true);assert.equal(await page.locator('.fong-logo').first().evaluate(e=>getComputedStyle(e).animationName),'none');

@@ -1,3 +1,4 @@
+import {buyAndContinue} from './purchase-helpers.mjs';
 import {DURATIONS} from '../src/game.js';
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
@@ -21,8 +22,8 @@ try{
  for(const [width,language,motion]of [[320,'zh-Hant','reduce'],[375,'zh-Hant','no-preference'],[1440,'en','reduce']]){
   const {context,page}=await setup(width,language,motion);
   assert.deepEqual(await page.locator('[data-decor]').evaluateAll(nodes=>nodes.map(n=>n.dataset.decor)),[...DECOR].sort((a,b)=>a.cost-b.cost).map(d=>d.id));
-  for(const [i,id]of ids.entries()){await page.locator(`[data-decor="${id}"]`).click();assert.equal(await page.locator('.stall-piece').count(),i+1);}
-  for(const id of ['cat','money-tree','amethyst'])for(let level=2;level<=5;level++){await page.locator(`[data-decor="${id}"]`).click();assert.equal(await page.locator(`[data-piece="${id}"]`).getAttribute('data-level'),String(level));const prices=await page.locator('#decor-list [data-decor]').evaluateAll(nodes=>nodes.map(n=>parseInt(n.textContent,10)||Infinity));assert.ok(prices.every((price,i)=>i===0||price>=prices[i-1]));}
+  for(const [i,id]of ids.entries()){await buyAndContinue(page,`[data-decor="${id}"]`);assert.equal(await page.locator('.stall-piece').count(),i+1);}
+  for(const id of ['cat','money-tree','amethyst'])for(let level=2;level<=5;level++){await buyAndContinue(page,`[data-decor="${id}"]`);assert.equal(await page.locator(`[data-piece="${id}"]`).getAttribute('data-level'),String(level));const prices=await page.locator('#decor-list [data-decor]').evaluateAll(nodes=>nodes.map(n=>parseInt(n.textContent,10)||Infinity));assert.ok(prices.every((price,i)=>i===0||price>=prices[i-1]));}
   if(motion==='no-preference')await page.waitForTimeout(700);
   assert.match(await page.locator('#idle-note').textContent(),/27\.72/);
   const boxes=await page.locator('.stall-piece').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {id:n.dataset.piece,l:r.left,r:r.right,t:r.top,b:r.bottom};}));
@@ -35,14 +36,14 @@ try{
  }
  for(const language of ['zh-Hant','en']){
   const {context,page}=await setup(375,language);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
-  await click(page,'#tab-kits');await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,299755);
+  await click(page,'#tab-kits');await buyAndContinue(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,299755);
   await click(page,'#start');await click(page,'#pause');await click(page,'#quit');assert.ok((await saved(page)).owned.includes('paper'));
-  await beat(page);await click(page,'#hit-zone');const first=await saved(page);assert.ok(!first.owned.includes('paper'));assert.equal(first.equipped,'bare-hand');assert.equal(first.coins,299755);
+  await beat(page);await click(page,'#hit-zone');const first=await saved(page);assert.ok(first.owned.includes('paper'));assert.equal(first.weaponUses.paper,1);assert.equal(first.equipped,'paper');assert.equal(first.coins,299755);
   await page.clock.runFor(80);await click(page,'#hit-zone');await page.clock.runFor(20);assert.ok(Number(await page.locator('#live-score').textContent())>30);assert.equal((await saved(page)).coins,299755);
   await page.clock.fastForward(DURATIONS.beat+100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);
-  const result=await saved(page);assert.equal(result.records[0].weapon,'paper');assert.ok(!result.owned.includes('paper'));
-  await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();assert.equal((await saved(page)).equipped,'bare-hand');await click(page,'#tab-kits');const before=(await saved(page)).coins;await click(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,before-245);
-  await context.close();pass(`${language}: no-hit cancellation preserves kit; first hit consumes once; bonus lasts for ritual; results/reload retain consumption; repurchase charges full price`);
+  const result=await saved(page);assert.equal(result.records[0].weapon,'paper');assert.equal(result.weaponUses.paper,1);
+  await page.reload({waitUntil:'domcontentloaded'});await page.locator('#start').waitFor();assert.equal((await saved(page)).equipped,'paper');assert.equal((await saved(page)).weaponUses.paper,1);await beat(page);await click(page,'#hit-zone');assert.ok(!(await saved(page)).owned.includes('paper'));assert.equal((await saved(page)).equipped,'bare-hand');await page.clock.fastForward(80);await click(page,'#hit-zone');await click(page,'#pause');await click(page,'#quit');await click(page,'#tab-kits');const before=(await saved(page)).coins;await buyAndContinue(page,'[data-weapon="paper"]');assert.equal((await saved(page)).coins,before-245);
+  await context.close();pass(`${language}: no-hit cancellation preserves kit; one use per ritual; first use survives completion/reload; second use breaks; repurchase charges full price`);
  }
  assert.deepEqual(errors,[]);console.log(`${checks} economy browser scenarios passed with no page errors.`);
 }finally{await browser.close();}

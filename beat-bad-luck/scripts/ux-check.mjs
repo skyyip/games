@@ -1,3 +1,4 @@
+import {buyAndContinue} from './purchase-helpers.mjs';
 import assert from 'node:assert/strict';
 import {DECOR} from '../src/catalog.js';
 import {idleRate} from '../src/progress.js';
@@ -44,15 +45,15 @@ try{
  }
  for(const lang of ['zh-Hant','en']){
   const {context,page}=await setup({lang});await click(page,'#tab-kits');await page.locator('[data-weapon="paper"]').focus();await page.clock.fastForward(60100);assert.equal(await page.evaluate(()=>document.activeElement.dataset.weapon),'paper');
-  await click(page,'[data-weapon="paper"]');assert.equal(await page.evaluate(()=>document.activeElement.dataset.restoreId),'paper');assert.equal(await page.locator('[data-weapon="paper"]').isDisabled(),true);await page.clock.fastForward(60100);assert.equal(await page.evaluate(()=>document.activeElement.dataset.restoreId),'paper');
-  await click(page,'#tab-stall');for(let i=0;i<5;i++)await click(page,'[data-decor="neon"]');assert.equal(await page.evaluate(()=>document.activeElement.dataset.restoreId),'neon');assert.equal(await page.locator('[data-decor="neon"]').isDisabled(),true);await domAudit(page);await context.close();pass(`${lang}: periodic refresh and completed purchases/upgrades preserve meaningful focus`);
+  await buyAndContinue(page,'[data-weapon="paper"]');assert.equal(await page.evaluate(()=>document.activeElement.dataset.restoreId),'paper');assert.equal(await page.locator('[data-weapon="paper"]').isDisabled(),true);await page.clock.fastForward(60100);assert.equal(await page.evaluate(()=>document.activeElement.dataset.restoreId),'paper');
+  await click(page,'#tab-stall');for(let i=0;i<5;i++)await buyAndContinue(page,'[data-decor="neon"]');assert.equal(await page.evaluate(()=>document.activeElement.dataset.restoreId),'neon');assert.equal(await page.locator('[data-decor="neon"]').isDisabled(),true);await domAudit(page);await context.close();pass(`${lang}: periodic refresh and completed purchases/upgrades preserve meaningful focus`);
  }
  for(const lang of ['zh-Hant','en']){
   const {context,page}=await setup({lang,seed:{coins:100,merit:10}});await click(page,'#tab-kits');assert.equal(await page.locator('[data-weapon="paper"]').isDisabled(),true);assert.match(await page.locator('#kit-reason-paper').textContent(),/30.*145/);assert.equal(await page.locator('[data-weapon="paper"]').getAttribute('aria-describedby'),'kit-reason-paper');await click(page,'#tab-stall');assert.match(await page.locator('#decor-reason-neon').textContent(),/1,045/);await domAudit(page);await context.close();pass(`${lang}: unaffordable kits and decorations explain exact deficits`);
  }
  {
   const decor=Object.fromEntries(DECOR.map(d=>[d.id,1])),{context,page}=await setup({seed:{coins:10000,decor}}),initial=await saved(page);await beat(page);
-  await page.locator('#weapon-list').evaluate(e=>{window.shopRebuilds=0;new MutationObserver(records=>window.shopRebuilds+=records.length).observe(e,{childList:true});});await page.clock.fastForward(56000);assert.equal(await page.evaluate(()=>window.shopRebuilds),0);await page.clock.fastForward(4100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);
+  await page.locator('#weapon-list').evaluate(e=>{window.shopRebuilds=0;new MutationObserver(records=>window.shopRebuilds+=records.length).observe(e,{childList:true});});await page.clock.fastForward(56000);assert.equal(await page.evaluate(()=>window.shopRebuilds),0);await page.clock.fastForward(34100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);
   const result=await saved(page),idle=Math.floor((result.lastSeen-initial.lastSeen)/3600000*idleRate(result));assert.equal(result.coins,10000+idle+30);await click(page,'#to-stall');assert.equal((await saved(page)).coins,result.coins);await domAudit(page);await context.close();pass('no hidden shop rebuild during play; idle income settles correctly once on return');
  }
  {

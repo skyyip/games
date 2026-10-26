@@ -1,7 +1,7 @@
 import {EXTRA_KITS} from './kit-catalog.js';
 import {beginExpanded,advanceExpanded,actExpanded,cancelExpanded} from './kit-gestures.js';
 // Active ritual milliseconds drive skills, daylight and every input deadline.
-export const SKILL_CHARGE=12,SKILL_LIMIT=2,SKILL_DURATION=5000,SKILL_RESULT=650,SKILL_REST=8000,SKILL_BONUS=50;
+export const SKILL_CHARGE=12,SKILL_LIMIT=2,SKILL_DURATION=7000,SKILL_RESULT=650,SKILL_REST=8000,SKILL_BONUS=50;
 export const FIRST_SIX_KITS=['flying-dagger','plunger-nunchucks','beauty-fist','solar-torch','immunity-token','flipflop'];
 export const KIT_SKILLS={...EXTRA_KITS,
  'flying-dagger':{name:['三紙連環刀','Triple paper toss'],hint:['準星亮起時，依次點中三張紙。','Tap each paper in order when its ring lights up.'],win:['三紙串燒！最後改一次都冇用！','Triple paper kebab! No more final revisions!']},
@@ -12,16 +12,16 @@ export const KIT_SKILLS={...EXTRA_KITS,
  flipflop:{name:['左右開工掌','Double slipper shift'],hint:['跟亮燈拍子，左、右、左、右交替點拍。','Follow the lit beat: left, right, left, right.'],win:['雙拖夾面！小人變夾心餅！','Double slipper sandwich! One flattened gremlin!']}
 };
 const clamp=x=>Math.max(0,Math.min(1,Number(x)||0));
-const daylight=(a,b)=>[[0,1800],[3000,5000]].reduce((sum,[lo,hi])=>sum+Math.max(0,Math.min(b,hi)-Math.max(a,lo)),0);
+const daylight=(a,b)=>[[0,1800],[3000,SKILL_DURATION]].reduce((sum,[lo,hi])=>sum+Math.max(0,Math.min(b,hi)-Math.max(a,lo)),0);
 export class KitSkill{
  constructor(weapon){this.weapon=weapon;this.spec=KIT_SKILLS[weapon]??null;this.charge=0;this.attempts=0;this.wins=0;this.bonus=0;this.active=null;this.last=null;this.cooldown=0;this.beauty=0;}
  gain(){if(this.spec&&this.attempts<SKILL_LIMIT)this.charge=Math.min(SKILL_CHARGE,this.charge+1);if(this.weapon==='beauty-fist')this.beauty=Math.min(5,this.beauty+.25);}
  busy(elapsed){return Boolean(this.active||(this.last&&elapsed<this.last.at+SKILL_RESULT));}
- availability(elapsed,events=[],duration=60000){
+ availability(elapsed,events=[],duration=90000){
   if(!this.spec||this.attempts>=SKILL_LIMIT)return 'spent';
   if(this.busy(elapsed))return 'busy';if(this.charge<SKILL_CHARGE)return 'charging';if(elapsed<this.cooldown)return 'rest';
-  if(duration-elapsed<6000)return 'ending';
-  if(events.some(e=>elapsed<e.at+5400&&elapsed+6000>e.at))return 'event';return 'ready';
+  if(duration-elapsed<SKILL_DURATION+SKILL_RESULT)return 'ending';
+  if(events.some(e=>elapsed<e.at+5400&&elapsed+SKILL_DURATION+SKILL_RESULT>e.at))return 'event';return 'ready';
  }
  start(elapsed,events,duration){if(this.availability(elapsed,events,duration)!=='ready')return false;this.attempts++;this.charge=0;this.last=null;this.active={at:elapsed,checked:elapsed,progress:0,held:false,left:0,right:0,pull:0,torchX:.76,chargeMs:0,tokenClear:false,stamps:0,lastInput:-Infinity,flashAt:-Infinity};if(this.spec.steps)beginExpanded(this.active,elapsed,this.attempts);return true;}
  finish(elapsed,won){if(!this.active)return false;const state=this.active;this.last={at:elapsed,won,progress:state.progress,stamps:state.stamps};this.active=null;this.cooldown=elapsed+SKILL_REST;if(won)this.wins++;return true;}
