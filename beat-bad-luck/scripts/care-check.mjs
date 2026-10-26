@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {paperGesture} from './paper-gesture.mjs';
 import {mkdir} from 'node:fs/promises';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true}),base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';
@@ -38,7 +39,7 @@ try{
   await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await click(page,'#start');for(let i=0;i<3;i++)await click(page,`[data-stick="${i}"]`);await click(page,'#blow');await page.clock.fastForward(2050);await click(page,'#confirm-worry');await page.clock.fastForward(2050);
   assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');assert.equal(await page.locator('[data-ghost] svg').count(),3);assert.equal(await page.locator('#tram-art').count(),0);assert.equal(await page.locator('.ghost-parade').evaluate(e=>getComputedStyle(e).visibility),'visible');assert.equal(await page.locator('.ghost-parade').evaluate(e=>getComputedStyle(e).pointerEvents),'none');
   for(const [selector,time]of [['.ghost-drift',5000],['.ghost-peek',9000],['.ghost-oops',17000]])await page.locator(selector).evaluate((element,time)=>{for(const animation of element.getAnimations()){animation.pause();animation.currentTime=time;}},time);
-  await page.screenshot({path:'/tmp/bbl-care-qa/ghosts-and-master.png'});await click(page,'[data-gesture="heavy"]');await page.clock.runFor(20);assert.ok(Number(await page.locator('#live-score').textContent())>0);
+  await page.screenshot({path:'/tmp/bbl-care-qa/ghosts-and-master.png'});await paperGesture(page,'heavy');await page.clock.runFor(20);assert.ok(Number(await page.locator('#live-score').textContent())>0);
   await context.close();pass('looping Master Yip logo/hat, three cute ghost animations replacing the old prop, unobstructed whacking');
  }
  assert.deepEqual(errors,[]);console.log(`${checks} durability and presentation browser scenarios passed.`);

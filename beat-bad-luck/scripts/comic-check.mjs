@@ -18,7 +18,7 @@ try{await mkdir('/tmp/bbl-comic-qa',{recursive:true});
    }
    if(time===45000){assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');assert.equal(await page.locator('#phase-clock').textContent(),'15');}
    if(time===55400)assert.equal(await page.locator('#event-banner').isVisible(),false);
-   if(time===59900){assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);elapsed+=20;assert.ok(Number(await page.locator('#live-score').textContent())>0);}
+   if(time===59900){assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');await click(page,'#hit-zone');await page.clock.runFor(20);elapsed+=20;assert.ok(Number(await page.locator('#live-score').textContent())>0);}
   }
   assert.equal(shown.length,expected);assert.equal(new Set(shown).size,expected);assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'tiger');
   await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).rituals,1);

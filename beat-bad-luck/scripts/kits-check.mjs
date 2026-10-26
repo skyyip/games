@@ -27,7 +27,7 @@ try{
   await page.locator('#weapon-list').screenshot({path:`/tmp/bbl-kits-qa/kits-${width}.png`});
   for(const [id,merit,cost,multiplier]of kits){
    const before=(await saved(page)).coins;await click(page,`[data-weapon="${id}"]`);assert.equal((await saved(page)).coins,before-cost);assert.equal((await saved(page)).merit,20000);assert.equal((await saved(page)).equipped,id);
-   await reachBeat(page);await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);assert.equal(Number(await page.locator('#live-score').textContent()),Math.round(15*multiplier));assert.ok(!(await saved(page)).owned.includes(id));assert.equal((await saved(page)).equipped,'bare-hand');assert.equal(await page.locator('#striking-weapon svg').count(),1);
+   await reachBeat(page);await click(page,'#hit-zone');await page.clock.runFor(20);assert.equal(Number(await page.locator('#live-score').textContent()),Math.round(15*multiplier));assert.ok(!(await saved(page)).owned.includes(id));assert.equal((await saved(page)).equipped,'bare-hand');assert.equal(await page.locator('#striking-weapon svg').count(),1);
    if(id==='rebirth-paper'){
     await page.clock.fastForward(DURATIONS.beat+100);await click(page,'#feed');await page.clock.fastForward(1600);await click(page,'#bless');await page.clock.fastForward(1600);assert.equal(await page.locator('#result').isVisible(),true);assert.equal((await saved(page)).records[0].weapon,id);await click(page,'#to-stall');
    }else{await click(page,'#pause');await click(page,'#quit');}

@@ -39,19 +39,19 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 
 /* Gesture hints stay outside the paper target; the trail never captures input. */
 .gesture-tools{display:flex;justify-content:center;gap:6px;flex:0 0 auto;width:100%;max-width:360px}
-.gesture-tools button{flex:1;min-width:0;min-height:44px;padding:6px 8px;border:1px solid #a8bc9766;border-radius:11px;background:#1b3533;color:#e4e3c3;font-size:10px;line-height:1.2;transition:transform .15s,background .2s,border-color .2s}
-.gesture-tools button span{display:inline-block;margin-right:4px;font-size:19px;vertical-align:middle;color:var(--gold)}
-.gesture-tools button:active{transform:scale(.95)}
-.gesture-tools button.is-prompted{border-color:var(--gold);background:#705c35;box-shadow:0 0 12px #edc77e33;color:#fff0cc}
+.gesture-tools .gesture-hint{cursor:default;user-select:none;touch-action:manipulation;flex:1;min-width:0;min-height:44px;padding:6px 8px;border:1px solid #a8bc9766;border-radius:11px;background:#1b3533;color:#e4e3c3;font-size:10px;line-height:1.2;transition:transform .15s,background .2s,border-color .2s}
+.gesture-tools .gesture-hint span{display:inline-block;margin-right:4px;font-size:19px;vertical-align:middle;color:var(--gold)}
+
+.gesture-tools .gesture-hint.is-prompted{border-color:var(--gold);background:#705c35;box-shadow:0 0 12px #edc77e33;color:#fff0cc}
 .gesture-trail{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none;opacity:.55}
 .gesture-trail path{fill:none;stroke:#f6d88f;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .gesture-charge{position:absolute;right:-12px;top:5px;display:grid;place-items:center;width:36px;height:36px;opacity:0;border-radius:50%;background:#1b3533e8;color:var(--gold);font-size:19px;pointer-events:none}
 .gesture-charge:before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(#f5cf80 var(--charge,0%),#d9e5bb33 0);padding:3px;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}
 .is-gesturing .gesture-charge{opacity:1}
 .beat-panel .phase-instruction{max-width:420px;text-align:center;line-height:1.5}
-@media(max-height:650px){.is-playing .beat-panel{gap:4px}.is-playing .beat-panel .hit-zone{min-height:96px}.gesture-tools{gap:5px}.gesture-tools button{padding:5px;font-size:9px}}
+@media(max-height:650px){.is-playing .beat-panel{gap:4px}.is-playing .beat-panel .hit-zone{min-height:96px}.gesture-tools{gap:5px}.gesture-tools .gesture-hint{padding:5px;font-size:9px}}
 @media(max-height:450px) and (min-aspect-ratio:4/3){.is-playing .beat-panel{padding-bottom:48px}.is-playing .beat-panel .hit-zone{min-height:80px;max-height:160px}.is-playing .gesture-tools{position:absolute;bottom:0;left:50%;translate:-50% 0;width:280px;max-width:100%}.is-playing .beat-panel .phase-instruction{bottom:50px;right:0;max-width:130px}.is-playing .hit-feedback{bottom:100px}.is-playing .qte-call{max-width:180px;white-space:normal}}
-@media(prefers-reduced-motion:reduce){.gesture-trail{display:none}.gesture-tools button{transition:none}}
+@media(prefers-reduced-motion:reduce){.gesture-trail{display:none}.gesture-tools .gesture-hint{transition:none}}
 
 .kit-shortcuts{display:flex;gap:8px;margin:-4px 0 17px}
 .kit-shortcuts button{display:flex;align-items:center;justify-content:space-between;gap:7px;flex:1;min-width:0;min-height:44px;padding:9px 11px;border:1px solid #c5c99a66;border-radius:10px;background:#203b35;color:#f0ddb0;font-size:11px;line-height:1.5;transition:background .2s,transform .15s}
@@ -90,8 +90,8 @@ main#app{view-transition-name:none}.play-panel{view-transition-name:bbl-stage}
 
 .gesture-controls{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;width:100%;max-width:360px}
 .gesture-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;max-width:none}
-.gesture-tools button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:50px;padding:5px 2px;font-size:9px}
-.gesture-tools button span{display:block;margin:0;font-size:18px;line-height:1}
+.gesture-tools .gesture-hint{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:50px;padding:5px 2px;font-size:9px}
+.gesture-tools .gesture-hint span{display:block;margin:0;font-size:18px;line-height:1}
 @media(max-height:450px) and (min-aspect-ratio:4/3){
  .is-playing .beat-panel{--control-space:48px;padding-bottom:var(--control-space)}
  .is-playing .beat-panel:has(.gesture-tools:not([hidden])){--control-space:104px}

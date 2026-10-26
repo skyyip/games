@@ -31,7 +31,9 @@ const literal=(element,text)=>{element.textContent=text;element.setAttribute('tr
 function renderRitualTiming(){
  const zh=getLanguage()==='zh-Hant';
  literal($('#ritual-duration'),zh?'每次儀式約 67–87 秒':'One ritual · about 67–87 seconds');
- literal($('#whack-rule'),zh?'打小人 60 秒。單指或雙指點拍、滑動重扣、來回搓三次、畫完整圓圈，或雙指向內夾，都可以使出不同招式。跟着節奏提示可獲額外分數，也可使用五款操作按鈕。':'Whack for 60 seconds. Tap with one or two fingers, or swipe for a heavy whack. Rub back and forth with three direction changes, draw a full circle, or bring two fingers together for special moves. Follow the rhythm prompts for bonuses. Use any of the five move buttons as well.');
+ literal($('#gesture-hint-note'),zh?'在紙人上點拍、滑動、搓揉、畫圈或雙指夾。下方圖示只作提示。':'Tap, swipe, rub, circle, or pinch on the paper. Icons are gesture hints.');
+ $('#gesture-tools').setAttribute('aria-label',zh?'手勢提示':'Gesture hints');
+ literal($('#whack-rule'),zh?'打小人 60 秒。單指或雙指點拍、滑動重扣、來回搓三次、畫完整圓圈，或雙指向內夾，都可以使出不同招式。跟着節奏提示可獲額外分數，下方五個圖示只作手勢提示。':'Whack for 60 seconds. Tap with one or two fingers, or swipe for a heavy whack. Rub back and forth with three direction changes, draw a full circle, or bring two fingers together for special moves. Follow the rhythm prompts for bonuses. The five icons are gesture hints only.');
  literal($('#ritual-timing-note'),zh?'打小人階段為 60 秒，每局出現兩至三次突發事件。整套儀式約 67–87 秒，步驟到時會自然繼續。隨時可以暫停，切到其他頁面也會暫停；取消的儀式不會發放獎勵。':'Whack for 60 seconds, with two or three surprise events per round. Rituals last about 67–87 seconds. Steps gently move on when their time is up. Pause whenever you need; hiding the page pauses the ritual too. A cancelled ritual gives no rewards.');
 }
 function save(){try{storage?.setItem(STORAGE_KEY,JSON.stringify(state));}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';}
@@ -157,7 +159,7 @@ function tick(){
    const beat=Math.floor(game.elapsed/BEAT_INTERVAL);if(beat!==lastBeat){lastBeat=beat;if(!game.skill.busy(game.elapsed))audio.tone(420,.045,'triangle',.018);}
    const pulse=game.elapsed%BEAT_INTERVAL;$('#rhythm-pulse').style.setProperty('--beat-scale',1+Math.max(0,1-pulse/160)*.65);
    $('#qte-call').hidden=!game.qte;if(game.qte){$('#qte-call').textContent=qteHints[game.qte.type];if(lastQte!==game.qteIndex){lastQte=game.qteIndex;say($('#qte-call').textContent);audio.tone(780,.12,'sine',.06);}}
-   for(const button of document.querySelectorAll('[data-gesture]'))button.classList.toggle('is-prompted',(game.qte?.type==='double'?'tap':game.qte?.type)===button.dataset.gesture);
+   for(const hint of document.querySelectorAll('[data-gesture]'))hint.classList.toggle('is-prompted',(game.qte?.type==='double'?'tap':game.qte?.type)===hint.dataset.gesture);
    const chant=Math.floor(game.elapsed/4000);if(chant!==lastChant){lastChant=chant;const line=CHANTS[chant%CHANTS.length];$('#fong-line').textContent=line;audio.speak(translate(line),getLanguage());if(chant===3){audio.tone(1050,.4,'sine',.045);audio.tone(790,.4,'sine',.03,.2);}}
  }
  kitUI?.render();
@@ -251,7 +253,6 @@ zone.addEventListener('pointerup',event=>{
 function cancelPointer(event){const stroke=gestures.get(event.pointerId);if(!stroke)return;gestures.delete(event.pointerId);if(pinch?.ids.includes(event.pointerId)){for(const id of pinch.ids){const other=gestures.get(id);if(other)other.consumed=true;}pinch=null;}clearGesturePreview();}
 zone.addEventListener('pointercancel',cancelPointer);zone.addEventListener('lostpointercapture',cancelPointer);
 zone.addEventListener('click',event=>{if(event.detail===0)whack({pointer:'keyboard'});});
-for(const button of document.querySelectorAll('[data-gesture]'))button.addEventListener('click',()=>whack({gesture:button.dataset.gesture,pointer:`button-${button.dataset.gesture}`}));
 
 function feed(){
  if(!game.feed())return;const piece=$('#pork-piece'),target=mouth(),r=piece.getBoundingClientRect();$('#phase-tiger').classList.add('is-fed');$('#fong-line').textContent='The white tiger has had enough gossip for today.';audio.chomp();vibrate([12,25,20]);

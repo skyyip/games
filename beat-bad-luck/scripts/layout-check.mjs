@@ -8,7 +8,7 @@ try{for(const [width,height]of [[320,568],[375,667],[390,844],[812,375],[1440,90
   await page.addInitScript(({random,lang})=>{Math.random=()=>random;localStorage.setItem('playground.language.v1',lang);},{random:(index+.1)/9,lang});
   await page.goto(base);await page.locator('#start:not(:disabled)').waitFor();await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
   const click=s=>page.locator(s).evaluate(e=>e.click());await click('#start');for(let i=0;i<3;i++)await click(`[data-stick="${i}"]`);await click('#blow');await page.clock.fastForward(2050);await click('#confirm-worry');await page.clock.fastForward(2050);await page.clock.fastForward(12020);
-  for(let i=0;i<4;i++){await click('[data-gesture="tap"]');await page.clock.runFor(60);}
+  for(let i=0;i<4;i++){await click('#hit-zone');await page.clock.runFor(60);}
   assert.equal(await page.locator('#event-banner').getAttribute('data-event'),type);
   const result=await page.evaluate(()=>{
    const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};

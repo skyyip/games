@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {paperGesture} from './paper-gesture.mjs';
 import {mkdir} from 'node:fs/promises';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true}),base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/';
@@ -46,10 +47,10 @@ try{
  }
  {
   const {context,page}=await setup('zh-Hant',320);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await click(page,'#start');for(let i=0;i<3;i++)await click(page,`[data-stick="${i}"]`);await click(page,'#blow');await page.clock.fastForward(2050);await click(page,'#confirm-worry');await page.clock.fastForward(2050);
-  const paper=page.locator('#paper-doll');await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-fresh.png'});await page.clock.fastForward(9000);await click(page,'[data-gesture="tap"]');await page.clock.runFor(20);await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-creased.png'});
-  for(let i=0;i<30;i++){await page.clock.runFor(70);await click(page,'[data-gesture="circle"]');}await page.clock.fastForward(17000);
+  const paper=page.locator('#paper-doll');await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-fresh.png'});await page.clock.fastForward(9000);await click(page,'#hit-zone');await page.clock.runFor(20);await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-creased.png'});
+  for(let i=0;i<30;i++){await page.clock.runFor(70);await paperGesture(page,'circle');}await page.clock.fastForward(17000);
   const before=await paper.evaluate(e=>Number(e.style.getPropertyValue('--paper-wear')));assert.ok(before>.7);assert.ok(await paper.locator('.paper-frayed-fibres').count());assert.ok(await paper.locator('.paper-patch').evaluate(e=>Number(getComputedStyle(e).opacity))>.5);assert.ok((await paper.locator('.paper-head-pose').evaluate(e=>getComputedStyle(e).transform))!=='none');await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-tattered.png'});
-  await click(page,'#pause');await page.clock.fastForward(10000);assert.equal(await paper.evaluate(e=>Number(e.style.getPropertyValue('--paper-wear'))),before);await click(page,'#resume');await page.clock.fastForward(13000);await click(page,'[data-gesture="heavy"]');await page.clock.runFor(20);await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-final-cry.png'});
+  await click(page,'#pause');await page.clock.fastForward(10000);assert.equal(await paper.evaluate(e=>Number(e.style.getPropertyValue('--paper-wear'))),before);await click(page,'#resume');await page.clock.fastForward(13000);await paperGesture(page,'heavy');await page.clock.runFor(20);await paper.screenshot({path:'/tmp/bbl-feedback-qa/paper-final-cry.png'});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await context.close();pass('320px paper: fresh/creased/tattered crying states, staggered rips, fibres, folded layers, sagging head, pause and no overflow');
  }
  assert.deepEqual(errors,[]);console.log(`${checks} audio and paper browser scenarios passed.`);
