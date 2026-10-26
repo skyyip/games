@@ -17,7 +17,7 @@ export class RitualGame{
   get remaining(){return Math.max(0,(DURATIONS[this.phase]??0)-this.elapsed);}
   get papers(){return Math.floor(this.damage/50);}
   get wear(){const elapsed=this.phase==='beat'?this.elapsed:['setup','incense','worry'].includes(this.phase)?0:DURATIONS.beat;return Math.min(1,Math.max(0,elapsed/DURATIONS.beat)*.45+Math.min(1,this.score/1800)*.55);}
-  pause(){if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;this.pausedAt=this.now();return true;}
+  pause(){if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;this.pausedAt=this.now();this.flavour.cancelHold();return true;}
   resume(){if(this.pausedAt===null)return false;const delta=this.now()-this.pausedAt;this.started+=delta;this.phaseStarted+=delta;if(Number.isFinite(this.lastHit))this.lastHit+=delta;for(const [id,t]of this.strikes)this.strikes.set(id,t+delta);this.pausedAt=null;return true;}
   light(index){if(this.phase!=='incense'||this.pausedAt!==null||!Number.isInteger(index)||index<0||index>2)return false;const fresh=!this.lit.has(index);this.lit.add(index);return fresh;}
   blow(){if(this.phase!=='incense'||this.pausedAt!==null||(this.lit.size!==3||this.blown))return false;this.blown=true;return true;}
@@ -39,6 +39,7 @@ export class RitualGame{
     if(this.qte&&this.elapsed<=this.qte.ends){if(this.qte.type==='double'||(this.qte.type==='heavy'&&heavy)||this.qte.type===gesture)this.qte.progress++;if(this.qte.progress>=this.qte.required){this.score+=Math.round(30*multiplier);this.qteSuccess++;this.qte=null;qteComplete=true;}}
     return {perfect,power,points,...flavour,paperCleared:this.papers>before,qteComplete,heavy,gesture,combo:this.combo};
   }
+  beginInteraction(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&this.flavour.beginHold(this.elapsed);}
   interact(action,id){this.advance();if(this.phase!=='beat'||this.pausedAt!==null)return 0;const raw=this.flavour.resolve(action,id,this.elapsed),points=Math.round(raw*weaponScoreMultiplier(this.weapon));this.score+=points;return points;}
   feed(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.fed)return false;this.fed=true;this.fedAt=this.elapsed;return true;}
   bless(){this.advance();if(this.phase!=='blessing'||this.pausedAt!==null||this.blessed)return false;this.blessed=true;this.blessedAt=this.elapsed;return true;}
