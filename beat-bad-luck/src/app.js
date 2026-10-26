@@ -22,6 +22,7 @@ let rigAnimations=[],cryDuration=1100;
 const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,porkGesture=null,micRevision=0,micStream=null,micContext=null,micFrame=0;
 try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}
 const itemName=item=>item.nameZh?(getLanguage()==='zh-Hant'?item.nameZh:item.name):translate(item.name);
+const worryLabel=worry=>worry.labelZh&&getLanguage()==='zh-Hant'?worry.labelZh:translate(worry.label);
 const say=text=>{$('#announcements').textContent=translate(text);};
 const vibrate=pattern=>{try{navigator.vibrate?.(pattern);}catch{}};
 const qteHints={double:'Two quick taps!',heavy:'Swipe for a heavy whack!',rub:'Rub back and forth!',circle:'Draw a full circle!',pinch:'Bring two fingers together!'};
@@ -37,7 +38,7 @@ function save(){try{storage?.setItem(STORAGE_KEY,JSON.stringify(state));}catch{p
 function settle(){const idle=collectIdle(state);state=idle.state;if(idle.earned){$('#idle-welcome').hidden=false;$('#idle-welcome').textContent=`Your stall earned ${idle.earned} oil money while you were away.`;}if(idle.lost.length){$('#decor-loss-note').hidden=false;literal($('#decor-loss-note'),translate(`Worn-out decorations removed: ${idle.lost.map(id=>itemName(DECOR.find(d=>d.id===id))).join('、')}`));say('A decoration wore out. You can replace it in the stall.');}save();return idle;}
 function message(text){$('#shop-message').textContent=text;clearTimeout(shopTimer);shopTimer=setTimeout(()=>$('#shop-message').textContent='',4500);say(text);}
 function drawWorries(){
- $('#worry-options').replaceChildren(...WORRIES.map(w=>{const button=document.createElement('button');button.type='button';button.className='worry-option';button.dataset.worry=w.id;button.textContent=w.label;button.setAttribute('aria-pressed',String(kind===w.id));button.addEventListener('click',()=>{kind=w.id;$('#worry-input').value='';for(const item of $('#worry-options').children)item.setAttribute('aria-pressed',String(item===button));});return button;}));
+ $('#worry-options').replaceChildren(...WORRIES.map(w=>{const button=document.createElement('button');button.type='button';button.className='worry-option';button.dataset.worry=w.id;literal(button,worryLabel(w));button.setAttribute('aria-pressed',String(kind===w.id));button.addEventListener('click',()=>{kind=w.id;$('#worry-input').value='';for(const item of $('#worry-options').children)item.setAttribute('aria-pressed',String(item===button));});return button;}));
 }
 function rowText(title,detail){const div=document.createElement('div'),name=document.createElement('b'),small=document.createElement('small');literal(name,translate(title));small.textContent=detail;div.append(name,small);return div;}
 function renderDecorDisplay(){
@@ -123,7 +124,7 @@ function cancelGestures(){
 }
 function start(){
  if(PHASES.includes(game.phase))return;settle();recorded=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
- const preset=WORRIES.find(w=>w.id===kind);game.start({kind,worry:$('#worry-input').value.trim()||translate(preset.label),weapon:state.equipped,commission:state.neighbourhood.active});neighbourhoodUI?.reset();kitUI?.reset();
+ const preset=WORRIES.find(w=>w.id===kind);game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:state.neighbourhood.active});neighbourhoodUI?.reset();kitUI?.reset();
  lastPhase='';lastChant=-1;lastBeat=-1;lastQte=0;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
  audio.voice=$('#voice').checked;unlockSound();renderPhase();cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);
 }
@@ -290,6 +291,6 @@ $('#open-journey').addEventListener('click',()=>{$('#neighbourhood-hub').open=tr
 for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.innerHTML=fongCostumeArt();for(const id of illustratedDecor)$('#stall-'+id).innerHTML=decorArt(id);for(const ghost of document.querySelectorAll('[data-ghost]'))ghost.innerHTML=ghostArt(ghost.dataset.ghost);for(const master of document.querySelectorAll('[data-fong]')){const icon=$('.fong-logo').cloneNode(true);icon.className='fong-logo master-avatar';master.append(icon);}drawWorries();settle();renderStall();updateSound();enableOffline($('#offline-status'));
 
 renderRitualTiming();
-document.addEventListener('languagechange',()=>{renderStall();renderRitualTiming();kitUI?.render();});
+document.addEventListener('languagechange',()=>{drawWorries();renderStall();renderRitualTiming();kitUI?.render();});
 
 $('#start').disabled=false;

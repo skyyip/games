@@ -8,6 +8,8 @@ export const WORRIES=[
   {id:'work-life',label:'Work-life imbalance!',name:'The Overtime Gremlin',icon:'screen'},
   {id:'family',label:'Family friction',name:'The Family Fuss',icon:'house'},
   {id:'love',label:'Love feeling unlucky',name:'The Love Worry',icon:'heart'},
+  {id:'blind-box',label:'Blind boxes never give me what I want',labelZh:'盲盒抽極都抽唔中',name:'The Delay Monster',icon:'screen'},
+  {id:'marksix',label:'No luck with Mark Six',labelZh:'六合彩唔中',name:'The Stock Market Gremlin',icon:'chart'},
   {id:'commute',label:'Another delayed train',name:'The Delay Monster',icon:'train'},
 ];
 export const WEAPONS=[
