@@ -21,3 +21,10 @@
 @media(max-width:360px){.skin-grid{gap:7px}.skin-card svg{height:75px}.shop-tools{grid-template-columns:minmax(0,1fr) 100px;gap:14px}.beat-reaction .hit-feedback{font-size:10px}.kit-skill-button{padding-inline:5px}}
 .beat-telemetry .rhythm-rail{width:76px;min-width:76px;max-width:76px}.beat-telemetry .paper-condition{display:block;min-width:0;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:0}.beat-telemetry .beat-stats{min-width:0}.beat-telemetry .rhythm-rail>span{min-width:0;white-space:nowrap}
 .beat-telemetry .beat-stats small{white-space:nowrap}
+/* Smaller utility controls and more breathing room between ritual stages. */
+.is-playing .ritual-stage .ritual-top .icon-button{display:grid;place-items:center;flex:0 0 30px;width:30px;min-width:30px;height:30px;min-height:30px;padding:0;font-size:16px;line-height:1}
+.is-playing .ritual-stage .step-track{column-gap:16px}
+.is-playing .ritual-stage .step-track li{column-gap:6px}
+.bbl-header .playground-home>span{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;line-height:0}
+.bbl-header .playground-home>span svg{display:block}
+@media(max-width:700px){.bbl-header .playground-home{gap:0}}

@@ -1,0 +1,26 @@
+# GoDaddy Linux / cPanel (Apache) cache policy.
+# Stable URLs must be checked again; only content-hashed assets are immutable.
+<IfModule mod_headers.c>
+  <FilesMatch "(?i)\.(?:html?|js|css|json|webmanifest|png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|wav|mp3)$">
+    Header onsuccess unset Cache-Control
+    Header always set Cache-Control "no-cache, no-store, must-revalidate"
+    Header onsuccess unset Pragma
+    Header always set Pragma "no-cache"
+    Header onsuccess unset Expires
+    Header always set Expires "0"
+  </FilesMatch>
+
+  <FilesMatch "(?i)-[a-z0-9]{8,}\.(?:js|css|png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|wav|mp3)$">
+    Header onsuccess unset Cache-Control
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+    Header onsuccess unset Pragma
+    Header always unset Pragma
+    Header onsuccess unset Expires
+    Header always unset Expires
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType font/woff2 .woff2
+</IfModule>

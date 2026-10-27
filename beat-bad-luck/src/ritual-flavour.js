@@ -1,3 +1,4 @@
+import {WORRIES} from './catalog.js';
 // Active ritual time drives every deadline; pauses cannot extend a held gesture.
 export const EVENT_DURATION=5400,TRAM_BEAT=700,HICCUP_HOLD_MS=1100;
 export const EVENTS=[
@@ -10,7 +11,7 @@ export const EVENTS=[
  {id:'blackout',name:['先順時針，再逆時針畫圈發電！', 'Circle clockwise, then anti-clockwise!'],icon:'💡'},
  {id:'minibus',name:['按亮圈數字順序接三個硬幣，錯咗重接！', 'Catch the numbered coins in order; mistakes reset!'],icon:'🚐'},
  {id:'sneeze',name:['穩按肉丸 1.1 秒，或重扣三次！', 'Hold steady 1.1s, or heavy-whack three times!'],icon:'🐯'}];
-const MOVES={noise:'heavy',sleep:'circle','kam-friends':'pinch',family:'rub',love:'tap',commute:'heavy','blind-box':'rub',marksix:'circle'};
+const MOVES={...Object.fromEntries(WORRIES.filter(w=>w.weakness).map(w=>[w.id,w.weakness])),noise:'heavy',sleep:'circle','kam-friends':'pinch',family:'rub',love:'tap',commute:'heavy','blind-box':'rub',marksix:'circle'};
 export const EVENT_MOVES={pigeon:['pinch',2],receipt:['rub',3],auntie:['pinch',3],blackout:['circle',2],sneeze:['heavy',3]};
 export const EVENT_SEQUENCES={pigeon:[{gesture:'pinch'},{gesture:'spread'}],auntie:[{gesture:'pinch'},{gesture:'spread'},{gesture:'pinch'}],blackout:[{gesture:'circle',direction:'cw'},{gesture:'circle',direction:'ccw'}]};
 export function eventGoal(event){return ({tram:4,rain:3,wind:2,minibus:3})[event?.type]??EVENT_MOVES[event?.type]?.[1]??1;}

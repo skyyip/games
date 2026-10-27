@@ -205,3 +205,13 @@ All purchases open a comic preview **before spending**. Confirm rechecks the pri
 The three collection tabs use 14px labels. Both kits and decorations support bilingual search and All / Owned / Can buy filters with resettable empty states. Filter toolbars scroll normally. Step numbers and names share a horizontally scrollable row; smaller music/pause controls, single-line signature labels and removal of the redundant instruction box leave more room for the paper. The header has smiling cartoon navigation icons. All published games have a 10px floor for fixed small UI text; touch inputs retain 16px to prevent focus zoom.
 
 The static hint strip includes **V** and **X**. Draw V in one stroke; draw two crossing diagonals within 0.9 seconds for X. The first diagonal scores as a swipe, the crossing second one as X. Parallel strokes, partial Vs and semicircles do not qualify. Pause, pointer cancellation and resizing clear any pending stroke. Hints are descriptive and do not activate attacks.
+
+## Grouped worry selector
+
+The worry picker is a native, labelled dropdown with **35 choices in eight groups**: work/careers, studies/exams, money/business, relationships/family, shopping/draws/games, transport, health/everyday life and general bad luck. Existing worry IDs, stories and personality rules remain compatible. The 23 new choices have matching gesture hints and weakness bonuses; they use existing paper art styles and the selected collectible look.
+
+Both option and group labels are bilingual. Language redraws preserve the selected preset and any typed private thought. Choosing another preset clears the old custom text, as before; returning through “Choose another worry” focuses the selector. On touch devices its text is 16px to avoid iOS focus zoom. Custom thoughts remain literal and are never written into saved fortunes.
+
+`node scripts/worry-select-check.mjs` checks all 35 model/result/save paths and four phone/desktop profiles, including all options/groups, bilingual labels, touch sizing, complete new-worry rituals and result-to-selector keyboard focus.
+
+The active ritual's music/pause buttons are 30×30px; step items have a 16px gap and retain horizontal scrolling. The header's cartoon return icon is centred in its icon slot, including the icon-only mobile button.

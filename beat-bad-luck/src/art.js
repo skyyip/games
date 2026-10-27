@@ -1,3 +1,4 @@
+import {WORRIES} from './catalog.js';
 import {skinArt} from './skins.js';
 import {SECRET_WEAPONS,SECRET_DECOR} from './ritual-rewards.js';
 import {extraWeaponArt,extraDecorArt} from './expansion-art.js';
@@ -27,6 +28,7 @@ export function weaponArt(id){const secret=SECRET_WEAPONS.find(i=>i.id===id);if(
 let dollArtSerial=0;
 export function dollArt(kind='work',look=0,skin='paper'){
  if(skin!=='paper')return skinArt(skin);
+ const worry=WORRIES.find(w=>w.id===kind);if(worry?.weakness)kind=({screen:'work',megaphone:'noise',chart:'stocks',house:'family',heart:'love',train:'commute',cloud:'sleep'})[worry.icon]??'sleep';
  const heads={
  house:'<path d="m25 33 45-28 45 28" fill="#d6a182" stroke="#865e4f" stroke-width="4" stroke-linejoin="round"/><rect x="34" y="30" width="72" height="47" rx="8" fill="#dec5a0" stroke="#865e4f" stroke-width="4"/><path class="paper-neutral-face" style="display:var(--neutral-display,inline)" d="m50 46 10-4m20 0 10 4m-28 16q8-5 16 0" fill="none" stroke="#6d6150" stroke-width="3" stroke-linecap="round"/>',
  heart:'<path d="M70 77Q17 50 28 24 40 3 70 24 100 3 112 24q11 26-42 53Z" fill="#dca0a5" stroke="#996776" stroke-width="4"/><path class="paper-neutral-face" style="display:var(--neutral-display,inline)" d="m48 39 11-3m22 0 11 3M61 58q9-7 18 0" fill="none" stroke="#805966" stroke-width="3" stroke-linecap="round"/>',

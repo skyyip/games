@@ -12,7 +12,7 @@ import {createNeighbourhoodUI} from './neighbourhood-ui.js';
 import {placedLayout} from './neighbourhood.js';
 import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress,spreadProgress,holdProgress,diagonal,crossingStrokes} from './gestures.js';
 import {RitualGame,PHASES,BEAT_INTERVAL} from './game.js';
-import {WORRIES,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
+import {WORRIES,WORRY_GROUPS,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
 import {STORAGE_KEY,readProgress,collectIdle,idleRate,buyWeapon,weaponUses,consumeWeapon,upgrade,decorDurability,repairCost,repairDecor,discardDecor,reward,purchasePrice,dailyReward,buySkin} from './progress.js';
 import {weaponArt,dollArt,tigerArt,porkArt,fongCostumeArt,decorArt,ghostArt} from './art.js';
 import {StallAudio} from './audio.js';
@@ -79,8 +79,12 @@ function save(){try{if(storage){if(!syncProgress()){const raw=JSON.stringify(sta
 function settle(){syncProgress();const idle=collectIdle(state);state=idle.state;if(idle.earned){$('#idle-welcome').hidden=false;$('#idle-welcome').textContent=`Your stall earned ${idle.earned} oil money while you were away.`;}if(idle.lost.length){$('#decor-loss-note').hidden=false;literal($('#decor-loss-note'),translate(`Worn-out decorations removed: ${idle.lost.map(id=>itemName(DECOR.find(d=>d.id===id))).join('、')}`));say('A decoration wore out. You can replace it in the stall.');}save();return idle;}
 function message(text){$('#shop-message').textContent=text;clearTimeout(shopTimer);shopTimer=setTimeout(()=>$('#shop-message').textContent='',4500);say(text);}
 function drawWorries(){
- $('#worry-options').replaceChildren(...WORRIES.map(w=>{const button=document.createElement('button');button.type='button';button.className='worry-option';button.dataset.worry=w.id;literal(button,worryLabel(w));button.setAttribute('aria-pressed',String(kind===w.id));button.addEventListener('click',()=>{kind=w.id;$('#worry-input').value='';for(const item of $('#worry-options').children)item.setAttribute('aria-pressed',String(item===button));});return button;}));
+ const select=$('#worry-select'),zh=getLanguage()==='zh-Hant';
+ select.replaceChildren(...WORRY_GROUPS.map(group=>{const options=document.createElement('optgroup');options.label=zh?group.labelZh:group.label;options.dataset.group=group.id;
+  for(const worry of WORRIES.filter(w=>w.group===group.id)){const option=new Option(worryLabel(worry),worry.id);option.dataset.worry=worry.id;options.append(option);}return options;}));
+ select.value=kind;
 }
+$('#worry-select').addEventListener('change',event=>{const id=event.target.value;if(WORRIES.some(w=>w.id===id)){kind=id;$('#worry-input').value='';}});
 function rowText(title,detail){const div=document.createElement('div'),name=document.createElement('b'),small=document.createElement('small');literal(name,translate(title));small.textContent=detail;div.append(name,small);return div;}
 function renderDecorDisplay(){
  for(const decor of DECOR){
@@ -366,7 +370,7 @@ const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();ren
 window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event.key!==STORAGE_KEY&&event.key!==null))return;if(syncProgress()){if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen){settle();renderStall();}purchaseUI.render();}});
 window.addEventListener('pageshow',event=>{if(event.persisted&&syncProgress()&&!PHASES.includes(game.phase)){settle();renderStall();}});
 document.addEventListener('languagechange',()=>backupUI.render());
-uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{backToStall();$('#worry-input').value='';$('#worry-options [aria-pressed=true]').focus({preventScroll:true});$('.worry-field').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});},onShop:openShop,onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,activateSkill:()=>kitUI.activate(true,true)});
+uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{backToStall();$('#worry-input').value='';$('#worry-select').focus({preventScroll:true});$('.worry-field').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});},onShop:openShop,onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,activateSkill:()=>kitUI.activate(true,true)});
 $('#voice').addEventListener('change',()=>{audio.voice=$('#voice').checked;preferences.update({voice:audio.voice});uxUI.render();});
 document.addEventListener('languagechange',()=>uxUI.render());
 $('#start').disabled=false;$('#quick-start').disabled=false;uxUI.render();

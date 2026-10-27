@@ -42,7 +42,7 @@ try{
   assert.equal(await page.locator('#kit-stage').evaluate(e=>e.classList.contains('is-win')),true);await context.close();pass(`${width} ${lang}: 240-sample clockwise/anticlockwise native circles complete the kit`);
  }
  for(const lang of ['zh-Hant','en'])for(const [kind,gesture]of [['blind-box','rub'],['marksix','circle']]){
-  const {context,page}=await setup({lang});await click(page,`[data-worry="${kind}"]`);await beat(page);const hint=await page.locator('#personality-hint').textContent();assert.ok(!/Copier|影印/.test(hint));assert.match(hint,gesture==='rub'?/搓|Rub/:/畫圈|Circle/);await page.clock.fastForward(1000);await paperGesture(page,gesture);assert.match(await page.locator('#hit-feedback').textContent(),/弱點命中|Weakness hit/);assert.equal(await page.locator('[data-copy]').count(),0);await context.close();pass(`${lang} ${kind}: truthful hint and matching native weakness bonus`);
+  const {context,page}=await setup({lang});await page.locator('#worry-select').selectOption(kind);await beat(page);const hint=await page.locator('#personality-hint').textContent();assert.ok(!/Copier|影印/.test(hint));assert.match(hint,gesture==='rub'?/搓|Rub/:/畫圈|Circle/);await page.clock.fastForward(1000);await paperGesture(page,gesture);assert.match(await page.locator('#hit-feedback').textContent(),/弱點命中|Weakness hit/);assert.equal(await page.locator('[data-copy]').count(),0);await context.close();pass(`${lang} ${kind}: truthful hint and matching native weakness bonus`);
  }
  for(const lang of ['zh-Hant','en']){
   const {context,page}=await setup({lang});await click(page,'#tab-kits');await page.locator('[data-weapon="paper"]').focus();await page.clock.fastForward(60100);assert.equal(await page.evaluate(()=>document.activeElement.dataset.weapon),'paper');
