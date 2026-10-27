@@ -377,7 +377,7 @@ $('#voice').addEventListener('change',()=>{audio.voice=$('#voice').checked;prefe
 document.addEventListener('languagechange',()=>uxUI.render());
 $('#start').disabled=false;$('#quick-start').disabled=false;uxUI.render();
 
-ritualUI=createRitualUI({game,audio,getState:()=>state,refresh:renderStall,announce:say,cancelOrdinary:cancelGestures,claimDaily:async()=>{const claim=()=>{if(game.phase!=='setup')return null;syncProgress();const next=dailyReward(state);if(!next)return null;state=next;save();return next;};try{if(navigator.locks?.request)return await navigator.locks.request('beat-bad-luck-daily',claim);}catch{}return claim();}});
+ritualUI=createRitualUI({game,audio,getState:()=>state,refresh:renderStall,announce:say,cancelOrdinary:cancelGestures,pause,resume,claimDaily:async()=>{const claim=()=>{if(game.phase!=='setup')return null;syncProgress();const next=dailyReward(state);if(!next)return null;state=next;save();return next;};try{if(navigator.locks?.request)return await navigator.locks.request('beat-bad-luck-daily',claim);}catch{}return claim();}});
 ritualUI.render();ritualUI.daily();
 
 playControls=createPlayControls({game,getState:()=>state,itemName,requestBuy,onSelect:id=>{settle();if(!state.ownedSkins.includes(id))return;state=buySkin(state,id);save();renderStall();}});playControls.render();

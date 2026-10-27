@@ -4,6 +4,8 @@ import {RitualFlavour} from './ritual-flavour.js';
 import {WORRIES,WEAPONS,FORTUNES,weaponScoreMultiplier} from './catalog.js';
 export const PHASES=['incense','worry','beat','tiger','blessing','divination'];
 export const DURATIONS={incense:8000,worry:7000,beat:90000,tiger:0,blessing:0,divination:0};
+export const FINISHER_DURATION=6000,FINISHER_BUFFER=500;
+export const FINISHER_STEPS=['heavy','circle','tap'];
 export const BEAT_INTERVAL=60000/108;
 export const QTE_STEPS=[{at:4500,type:'double'},{at:11000,type:'heavy'},{at:17500,type:'rub'},{at:23500,type:'circle'},{at:29000,type:'pinch'},{at:35500,type:'clockwise'},{at:41000,type:'counterclockwise'},{at:47500,type:'heavy'},{at:56500,type:'pinch'},{at:65000,type:'hold'},{at:73000,type:'spread'},{at:82000,type:'circle'},{at:87000,type:'heavy'}];
 const SPECIALS={cross:{min:6,power:10,points:44},vee:{min:5,power:9,points:38},rub:{min:3,power:6,points:28},circle:{min:5,power:8,points:40},pinch:{min:6,power:9,points:46},hold:{min:4,power:9,points:34},spread:{min:5,power:8,points:36}};
@@ -14,6 +16,7 @@ export class RitualGame{
     if(!WEAPONS.some(w=>w.id===weapon))throw new RangeError('Choose an available keepsake.');
     this.reset();this.skin=SKINS.some(s=>s.id===skin)?skin:'plain';this.worry=String(worry).trim().slice(0,64)||'The eighth revision';this.kind=WORRIES.some(w=>w.id===kind)?kind:'work';this.weapon=weapon;this.skill=new KitSkill(weapon);this.look=Math.min(2,Math.floor(this.random()*3));this.porkMode=this.random()<.5?'blood':'plain';this.grains=this.random()<.5?'rice':'beans';this.started=this.phaseStarted=this.now();this.phase='incense';this.commission=commission;this.flavour.start(this.kind);
   }
+  get finisherBusy(){return Boolean(this.finisher?.active||this.finisher?.won&&this.elapsed-this.finisher.completedAt<850);}
   get scoreMultiplier(){return weaponScoreMultiplier(this.weapon)*skinScoreMultiplier(this.skin);}
   get clock(){return this.pausedAt??this.now();}
   get elapsed(){return Math.max(0,this.clock-this.phaseStarted);}
@@ -27,7 +30,7 @@ export class RitualGame{
   nameWorry(text,kind=this.kind){if(this.phase!=='worry'||this.pausedAt!==null)return false;this.worry=String(text).trim().slice(0,64)||this.worry;this.kind=WORRIES.some(w=>w.id===kind)?kind:this.kind;this.flavour.start(this.kind);return true;}
   confirm(){if(this.phase!=='worry'||this.pausedAt!==null||this.prepared)return false;this.prepared=true;return true;}
   hit({heavy=false,strength=.5,pointer='keyboard',gesture=heavy?'heavy':'tap',direction=null}={}){
-    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed)||this.finisher?.active||!['tap','heavy','rub','circle','pinch','hold','spread','cross','vee'].includes(gesture))return null;
+    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed)||this.finisherBusy||!['tap','heavy','rub','circle','pinch','hold','spread','cross','vee'].includes(gesture))return null;
     heavy=gesture!=='tap';direction=gesture==='circle'&&['cw','ccw'].includes(direction)?direction:null;
     const now=this.now();if(now-(this.strikes.get(pointer)??-Infinity)<55)return null;
     this.skill.gain();this.strikes.set(pointer,now);if(this.strikes.size>32)this.strikes=new Map([[pointer,now]]);
@@ -42,23 +45,24 @@ export class RitualGame{
     if(this.qte&&this.elapsed<=this.qte.ends){if(this.qte.type==='double'||(this.qte.type==='heavy'&&heavy)||this.qte.type===gesture||(this.qte.type==='clockwise'&&direction==='cw')||(this.qte.type==='counterclockwise'&&direction==='ccw'))this.qte.progress++;if(this.qte.progress>=this.qte.required){this.score+=Math.round(30*multiplier);this.qteSuccess++;this.qte=null;qteComplete=true;}}
     return {perfect,power,points,...flavour,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
   }
-  activateSkill(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&this.skill.start(this.elapsed,this.flavour.events,DURATIONS.beat);}
-  skillAction(type,input={}){this.advance();if(this.phase!=='beat'||this.pausedAt!==null)return {ok:false};const outcome=this.skill.action(type,input,this.elapsed);if(outcome.won){this.finisherBank++;outcome.points=Math.round(outcome.raw*this.scoreMultiplier);this.score+=outcome.points;this.skill.bonus+=outcome.points;}return outcome;}
+  activateSkill(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&!this.finisherBusy&&this.skill.start(this.elapsed,this.flavour.events,DURATIONS.beat);}
+  skillAction(type,input={}){this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.finisherBusy)return {ok:false};const outcome=this.skill.action(type,input,this.elapsed);if(outcome.won){this.finisherBank++;outcome.points=Math.round(outcome.raw*this.scoreMultiplier);this.score+=outcome.points;this.skill.bonus+=outcome.points;}return outcome;}
   beginInteraction(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&this.flavour.beginHold(this.elapsed);}
-  interact(action,id){this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed))return 0;const raw=this.flavour.resolve(action,id,this.elapsed),points=Math.round(raw*this.scoreMultiplier);this.score+=points;return points;}
+  interact(action,id){this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed)||this.finisherBusy)return 0;const raw=this.flavour.resolve(action,id,this.elapsed),points=Math.round(raw*this.scoreMultiplier);this.score+=points;return points;}
   dip(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.porkMode!=='blood'||this.dipped)return false;this.dipped=true;return true;}
   smearTiger(distance){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.fed||(this.porkMode==='blood'&&!this.dipped)||!Number.isFinite(distance)||distance<=0)return false;this.tigerSmear=Math.min(1,this.tigerSmear+Math.min(60,distance)/100);return true;}
   feed(){this.advance();if(this.phase!=='tiger'||this.pausedAt!==null||this.fed||(this.porkMode==='blood'&&!this.dipped))return false;this.fed=true;this.tigerSmear=1;this.fedAt=this.elapsed;return true;}
   purify(step){this.advance();if(this.phase!=='blessing'||this.pausedAt!==null||step!==this.purification||step>2)return false;this.purification++;if(this.purification===3){this.blessed=true;this.blessedAt=this.elapsed;}return true;}
   bless(){return this.purify(this.purification);}
   throwBlocks(){this.advance();if(this.phase!=='divination'||this.pausedAt!==null||this.blocks?.rolling||this.blocks?.sacred)return false;const roll=this.random(),faces=roll<.25?[0,1]:roll<.5?[1,0]:roll<.75?[0,0]:[1,1];this.rolls++;this.blocks={faces,rolling:true,at:this.elapsed,sacred:false};return true;}
-  canFinisher(){const t=this.elapsed;return this.phase==='beat'&&this.pausedAt===null&&this.finisherBank>=2&&!this.skill.busy(t)&&!this.finisher?.active&&!this.flavour.events.some(e=>t<e.at+5400&&t+6500>e.at)&&DURATIONS.beat-t>=6500;}
-  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisherBank-=2;this.finisher={at:this.elapsed,step:0,active:true,won:false};return true;}
-  finisherAction(gesture){this.advance();const f=this.finisher;if(this.phase!=='beat'||this.pausedAt!==null||!f?.active||['heavy','circle','tap'][f.step]!==gesture)return false;f.step++;if(f.step===3){f.active=false;f.won=true;f.completedAt=this.elapsed;this.finisherWins++;this.score+=Math.round(250*this.scoreMultiplier);}return true;}
+  finisherAvailability(){const t=this.elapsed;if(this.phase!=='beat')return 'phase';if(this.pausedAt!==null)return 'paused';if(this.finisherBusy)return 'active';if(this.finisherBank<2)return 'charge';if(this.skill.busy(t))return 'skill';if(DURATIONS.beat-t<FINISHER_DURATION+FINISHER_BUFFER)return 'ending';if(this.flavour.events.some(e=>t<e.at+5400&&t+FINISHER_DURATION+FINISHER_BUFFER>e.at))return 'event';return 'ready';}
+  canFinisher(){return this.finisherAvailability()==='ready';}
+  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisherBank-=2;this.finisher={at:this.elapsed,step:0,active:true,won:false,expired:false};return true;}
+  finisherAction(gesture,{direction=null}={}){this.advance();const f=this.finisher;if(this.phase!=='beat'||this.pausedAt!==null||!f?.active||FINISHER_STEPS[f.step]!==gesture||(gesture==='heavy'&&direction!==null&&direction!=='up'))return false;f.step++;if(f.step===FINISHER_STEPS.length){f.active=false;f.won=true;f.completedAt=this.elapsed;this.finisherWins++;this.score+=Math.round(250*this.scoreMultiplier);}return true;}
   advance(){
     if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;
     if(this.phase==='beat'){
-      this.skill.advance(this.elapsed);if(this.finisher?.active&&this.elapsed-this.finisher.at>=6000)this.finisher.active=false;
+      this.skill.advance(this.elapsed);if(this.finisher?.active&&this.elapsed-this.finisher.at>=FINISHER_DURATION){this.finisher.active=false;this.finisher.expired=true;this.finisher.completedAt=this.elapsed;}
       if(this.qte&&this.elapsed>this.qte.ends)this.qte=null;
       while(QTE_STEPS[this.qteIndex]&&this.elapsed>=QTE_STEPS[this.qteIndex].at){const {at,type}=QTE_STEPS[this.qteIndex++],window=SPECIALS[type]||['clockwise','counterclockwise'].includes(type)?3600:1600;if(this.elapsed<at+window)this.qte={type,progress:0,required:type==='double'?2:1,ends:at+window};}
     }
