@@ -1,0 +1,17 @@
+/* Each screen-comedy paper has its own prop reaction, without moving the arena or HUD. */
+.character-table,.character-bouquet,.character-teacup,.character-magnifier,.character-water,.character-contract,.character-moustache{transform-box:fill-box;transform-origin:center;transition:transform .3s ease-out}
+.paper-doll.is-crying .character-table{animation:character-table-flip .55s cubic-bezier(.2,.8,.3,1)}
+.paper-doll.is-crying .character-bouquet,.paper-doll.is-crying .character-teacup{animation:character-prop-wobble .48s ease-in-out}
+.paper-doll.is-crying .character-magnifier,.paper-doll.is-crying .character-water,.paper-doll.is-crying .character-contract{animation:character-prop-hop .5s ease-out}
+.paper-doll.is-crying .character-moustache{animation:character-whiskers .42s ease-in-out}
+.paper-doll[data-comedy-act=wrap] .character-bouquet{transform:rotate(22deg) translateY(5px)}
+.paper-doll[data-comedy-act=wrap] .character-glasses{transform:translate(5px,7px) rotate(8deg);transform-origin:center}
+.paper-doll[data-comedy-act=wrap] .character-beard{transform:translate(6px,4px) rotate(12deg);transform-origin:center}
+@keyframes character-table-flip{0%,100%{transform:rotate(0)}35%{transform:translateY(-5px) rotate(-14deg)}65%{transform:rotate(9deg)}}
+@keyframes character-prop-wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-15deg)}65%{transform:rotate(12deg)}}
+@keyframes character-prop-hop{0%,100%{transform:translateY(0)}35%{transform:translateY(-7px) rotate(9deg)}70%{transform:rotate(-5deg)}}
+@keyframes character-whiskers{0%,100%{transform:scale(1)}35%{transform:scale(1.15,.8)}70%{transform:scale(.95,1.12)}}
+@media(prefers-reduced-motion:reduce){.character-table,.character-bouquet,.character-teacup,.character-magnifier,.character-water,.character-contract,.character-moustache{transition:none}.paper-doll.is-crying .character-table,.paper-doll.is-crying .character-bouquet,.paper-doll.is-crying .character-teacup,.paper-doll.is-crying .character-magnifier,.paper-doll.is-crying .character-water,.paper-doll.is-crying .character-contract,.paper-doll.is-crying .character-moustache{animation:none}}
+/* The gold selected border sits on a dark card: retain readable names, uses and bonuses. */
+.skin-card[aria-pressed=true]{color:#fff4d4}
+.skin-card[aria-pressed=true] .skin-bonus{color:#ffe08c}
