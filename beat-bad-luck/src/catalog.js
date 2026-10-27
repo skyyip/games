@@ -130,6 +130,8 @@ export const DECOR=[
   {"id": "dragon-throne", "name": "Hall of Supreme Harmony dragon throne", "nameZh": "故宫太和殿龍椅", "cost": 16000, "rate": 16.8, "expanded": true},
 ];
 DECOR.push({id:'clockoff-seal',name:'Automatic clock-off seal',nameZh:'自動準時收工印',cost:8800,rate:3.6,unlockStory:'bridge-appeal',description:'牛丸老闆御賜：個印自己識睇鐘，五點九已經瞓低等收工。',descriptionEn:'Gifted by the meatball boss. This seal stamps leave before the clock asks.'});
+// Decoration base prices are 300 oil lower; levels and income stay intact.
+for(const decor of DECOR)decor.cost=Math.max(0,decor.cost-300);
 // All hourly income, including the upgrade increment, is 40% below the previous balance.
 export const DECOR_LEVEL_RATE_BONUS=.06;
 export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*DECOR_LEVEL_RATE_BONUS)*100)/100:0;

@@ -1,6 +1,6 @@
 # Simplified comedy ritual acceptance · 2026-10-27
 
-- `npm test`: **120 passed**, zero failures. Retired signature-recipe tests now exercise the unified system; economy, durability, gestures, save migration, privacy, backup and audio coverage remain.
+- `npm test`: **124 passed**, zero failures. Retired signature-recipe tests now exercise the unified system; economy, durability, gestures, save migration, privacy, backup and audio coverage remain.
 - Full browser rituals: **320×568 Traditional Chinese**, **390×844 English**, **812×375 Traditional Chinese / reduced motion**, **1440×900 English**. Tested source and hashed production output.
 - Real hits charge the 2/3/4 meter, launch two automatic shows, and spend inventory once. Early optional taps are harmless; a lit-window tap awards once. User pause and the cinematic retain time/combo. Bare hands, the 3000-tool comb, beauty mirror and fire wheels work through results and reload.
 - Event appearance/completion keeps the paper target geometry unchanged. The event control stays still while its artwork moves. When explicitly enabled, exactly one random event appears; a patron cameo follows the first successful rescue when owned.
@@ -9,7 +9,9 @@
 - The three-act papers, helmeted-cat chase and meatball enthronement were visually inspected. Beauty’s payoff smiles at its mirror; blades show three papers. Titles, captions and optional controls fit in portrait and landscape.
 - The appeal story advances despite missed bonus goals. The first final chapter grants a visible clock-off seal with a thirty-day lifetime; reload preserves it. Unit tests reject duplicate receipts and replay gifts, verify shop unlocking, replacement and old-save migration, and whitelist forty ending IDs.
 - Buying a new paper requires confirmation; cancellation leaves ownership unchanged. Confirmed paper use decrements once after a scored ritual.
-- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v65 and includes all new modules/styles.
+- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v66 and includes all new modules/styles.
+
+Stall refresh: all decoration base costs decrease by 300; every paid paper multiplier increases by 0.3, while free plain paper remains ×1. New native touch/mouse and keyboard checks cover direct stall ordering, saved order/reload, price/coupon calculations, smaller art, stable detail typography, animated open/close/Escape and purchase hand-offs, highlighted titles/selection, intermediate wallet count values and all six requested chants through full rituals. The old layout tab migrates to Stories while decoration order is retained.
 
 Hint-row follow-up: restored five read-only gesture labels below the paper. Four portrait/landscape/desktop layouts verify all five are visible on one row, tapping them awards no score or charge, and they stay clear of the arena and Master dialogue. The narrow finisher meter uses separate label/count lines to prevent vertical text.
 
@@ -29,6 +31,7 @@ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-comedy-check
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-interactions-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/event-optin-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/gesture-hints-check.mjs
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/stall-refresh-check.mjs
 ```
 
 Set `BEAT_BAD_LUCK_URL` for the production server. Browser checks use Chromium mobile emulation; physical iOS/Android hardware was not available. No preview export or deployment is part of this change.

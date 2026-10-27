@@ -34,7 +34,7 @@ Long-press/release, outward two-finger spreading, X and V are not scoring gestur
 
 Requirement/work-life worries emit at most two expiring copies. Stocks reward hitting during the plunge. The pig teammate cycles helmet → pretend nap → snicker; the snicker is its weakness. Other presets retain their gesture-specific optional bonuses.
 
-Three new paid, ten-use papers have three comic acts (swagger → pleading → undignified wrap): 九品甩鍋官 (6,200 oil, ×1.6), 假扮高人的老細 (6,800, ×1.65), 永遠未準備好的龍套 (7,400, ×1.7). Existing paper prices and bonuses are unchanged.
+Three new paid, ten-use papers have three comic acts (swagger → pleading → undignified wrap): 九品甩鍋官 (6,200 oil, ×1.9), 假扮高人的老細 (6,800, ×1.95), 永遠未準備好的龍套 (7,400, ×2). All fifteen paid paper multipliers have increased by 0.3; unlimited free plain paper stays at ×1; existing paper prices and remaining uses are preserved.
 
 The three-chapter **橋底申訴處・牛丸係老闆** story follows a missing meatball, an unreliable witness and a meatball boss on the throne. A completed ritual advances one accepted chapter even if its optional target is missed. Completion pays 60% of the listed maximum; meeting the matching worry/skill target pays the full amount. Replays retain the existing reduced pay. The final first completion places the **自動準時收工印** in the stall, with normal durability and repair. Replays never duplicate this gift; its shop entry unlocks after the story for later replacement/upgrading.
 
@@ -46,21 +46,23 @@ Fortunes retain the existing 84 bilingual quotes and Cantonese Master comments. 
 
 ## Inventory and stall
 
-Paid kits last **three scored rituals**; paid papers last **ten**. The first scoring action commits one use of each, once per ritual. Leaving before scoring preserves inventory; leaving after scoring does not refund it. The current ritual retains its configured multiplier even on the final use. Free hands and plain paper are unlimited ×1 fallbacks.
+Paid kits last **three scored rituals**; paid papers last **ten**. The first scoring action commits one use of each, once per ritual. Leaving before scoring preserves inventory; leaving after scoring does not refund it. The current ritual retains its configured multiplier even on the final use. Free hands remain an unlimited ×1 kit; free plain paper is unlimited ×1. Kit and paper multipliers multiply together.
 
 Purchases show a comic confirmation before any deduction, then an animated reveal. Closing or cancelling before confirmation spends nothing. Merit is an unlock threshold and is not deducted. Coupons apply once on successful purchase. Shops have bilingual search and All / Owned / Can buy filters; story-locked props cannot be purchased or shown as affordable.
 
-Decorations appear immediately in the stall and have five levels and **30 real days** of durability. Upgrades preserve expiry; repair restores 30 days for `ceil(base price × level × 25% × fraction worn)`. Zero durability removes the item and stops income at its expiry. Discarding gives no refund. Hourly rates retain the previous reduction and +0.06 per extra level. Offline income caps at eight hours and preserves fractional oil.
+Every decoration base price is 300 oil lower, including care values for hidden pieces; income and existing levels are unchanged. Decorations appear immediately in a rearrangeable three-column stall shelf. Drag the ⠿ handle on touch, or drag a piece with a mouse; arrow keys on a handle also reorder. Order is saved and continues to drive scene discovery. The separate neighbourhood layout tab/dropdowns are removed. Icons use 80% of their prior scale. Decorations have five levels and **30 real days** of durability. Upgrades preserve expiry; repair restores 30 days for `ceil(base price × level × 25% × fraction worn)`. Zero durability removes the item and stops income at its expiry. Discarding gives no refund. Hourly rates retain the previous reduction and +0.06 per extra level. Offline income caps at eight hours and preserves fractional oil.
 
 Eleven patrons span five rarities. Their strongest oil and merit buffs are capped at 5% per category; coupons are one-use 5–15% discounts. Thirty hidden props/kits remain a 6% post-ritual drop. Daily login awards 20 oil and 30 merit once per Hong Kong day. Receipts prevent duplicate awards.
 
 The top three scores, balances, expiry, inventory, stories, titles and collections use `beat-bad-luck.stall.v1`. Existing saves migrate without resetting owned counters or story progress. Invalid IDs are discarded. Storage failures use memory for that visit; the backup/import UI supports user-controlled transfer. Browser and installed versions share the same origin’s storage where the browser permits it.
 
+The sanctuary wallet has prominent oil/merit totals with 650 ms counting animations; reduced motion shows final values immediately. Dock, shop and detail numbers have contrasting emphasis. Home titles glow and shine slowly, selected paper cards have a gold border, and title controls use consistent 14px text. Decoration details use 90% of their former text sizes, a prominent close control, title-first focus and 260/180 ms open/close motion. The dialog remains modal during closing; purchase/discard hand-offs await completion.
+
 ## Audio, language and updates
 
-Traditional Chinese is the default; English follows the playground preference. Master’s spoken/bottom dialogue remains Cantonese. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
+Traditional Chinese is the default; English follows the playground preference. During whacking, Master randomly cycles through the six requested Cantonese villain-hitting lines, without repeats within a six-line bag or at bag boundaries. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v65** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v66** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -70,6 +72,7 @@ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-comedy-check
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-interactions-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/event-optin-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/gesture-hints-check.mjs
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/stall-refresh-check.mjs
 ```
 
 The current browser acceptance test covers four Chinese/English portrait/landscape/desktop profiles, a reduced-motion profile, real ordinary hits, two finishers, optional timing, pause, stable event geometry, the patron cameo, one-tap feeding/blessing, automatic block retry, the final story gift, inventory accounting and reload. Set `BEAT_BAD_LUCK_URL` to run the same test against a hashed production build. The interaction check additionally exercises all nine native event controls, purchase cancellation/confirmation and manual blood dipping/smearing with one bonus. The opt-in check completes event-free and event-enabled rituals, verifies story progression with events off, and reloads both saved choices in Chinese and English mobile layouts. Historical signature/event browser scripts document retired mechanics; use the current check above for this version.

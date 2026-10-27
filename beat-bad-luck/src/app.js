@@ -1,3 +1,5 @@
+import {countNumber,numberText} from './stall-polish.js';
+import {createStallLayout} from './stall-layout.js';
 import {polishCollections} from './collection-polish.js';
 import {createPlayControls} from './play-controls.js';
 import {SKINS} from './skins.js';
@@ -7,13 +9,13 @@ import {createUX} from './ux-ui.js';
 import {createPreferences} from './preferences.js';
 import {createBackupUI} from './backup-ui.js';
 import {createPurchaseUI} from './purchase-ui.js';
-import {ultimateShow,PAPER_ACTS} from './comedy-content.js';
+import {ultimateShow,createChantPicker} from './comedy-content.js';
 import {extraKingArt} from './slapstick-art.js';
 import {createNeighbourhoodUI} from './neighbourhood-ui.js';
-import {placedLayout} from './neighbourhood.js';
+import {placedLayout,placeDecoration} from './neighbourhood.js';
 import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress} from './gestures.js';
 import {RitualGame,PHASES,BEAT_INTERVAL} from './game.js';
-import {WORRIES,WORRY_GROUPS,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
+import {WORRIES,WORRY_GROUPS,WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
 import {STORAGE_KEY,readProgress,collectIdle,idleRate,buyWeapon,weaponUses,consumeWeapon,upgrade,decorDurability,repairCost,repairDecor,discardDecor,reward,purchasePrice,dailyReward,decorUnlocked,buySkin,consumeSkin,skinUses} from './progress.js';
 import {weaponArt,dollArt,tigerArt,porkArt,fongCostumeArt,decorArt,ghostArt} from './art.js';
 import {StallAudio} from './audio.js';
@@ -30,8 +32,9 @@ let storage=null,persistent=true,state,kind='work',frame=0,lastPhase='',lastChan
 const illustratedDecor=new Set(['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst']);
 const shopWeapons=WEAPONS.filter(w=>!w.starter&&!w.hidden&&w.id!=='rebirth-paper').sort((a,b)=>a.cost-b.cost||a.merit-b.merit);
 shopWeapons.splice(-1,0,WEAPONS.find(w=>w.id==='rebirth-paper'));
-let neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,returnToDecor=null;
+let stallLayoutUI=null,neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,returnToDecor=null;
 let rigAnimations=[],cryDuration=1100;
+let pickChant=createChantPicker();
 const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,porkGesture=null,micRevision=0,micStream=null,micContext=null,micFrame=0;
 try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}
 let storedRaw=null;try{storedRaw=storage?.getItem(STORAGE_KEY)??null;}catch{}
@@ -65,7 +68,7 @@ const vibrate=pattern=>{try{navigator.vibrate?.(pattern);}catch{}};
 const gestureText=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
 const qteHints={double:['快速點拍兩次！','Two quick taps!'],heavy:['滑動重扣！','Swipe for a heavy whack!'],rub:['來回搓三次！','Rub back and forth!'],circle:['畫完整圓圈！','Draw a full circle!'],pinch:['雙指向內夾擊！','Bring two fingers together!']};
 function feedback(text){literal($('#hit-feedback'),translate(text));}
-const literal=(element,text)=>{element.textContent=text;element.setAttribute('translate','no');};
+const literal=(element,text)=>numberText(element,text);
 function renderRitualTiming(){
  const zh=getLanguage()==='zh-Hant';
  $('#random-events').checked=preferences.value.randomEvents;literal($('#random-events-label'),zh?'隨機挑戰事件':'Random challenge events');literal($('#random-events-help'),zh?'預設關閉。開啟後每局加入一次橋底事件，可挑戰額外加分與稱號；關閉也可完成儀式和故事。':'Off by default. Enable one event per ritual for optional bonus points and titles. You can finish rituals and stories with events off.');
@@ -91,15 +94,15 @@ $('#worry-select').addEventListener('change',event=>{const id=event.target.value
 function rowText(title,detail){const div=document.createElement('div'),name=document.createElement('b'),small=document.createElement('small');literal(name,translate(title));small.textContent=detail;div.append(name,small);return div;}
 function renderDecorDisplay(){
  for(const decor of DECOR){
-  const display=$(decor.expanded||state.neighbourhood.layout.length?'#stall-extension':'#stall-furnishings');
+  const display=$('#stall-extension');
   const level=state.decor[decor.id]??0;let piece=document.querySelector(`[data-piece="${decor.id}"]`);
   if(!level){if(piece&&!piece.dataset.removing){if(reduced.matches)piece.remove();else{piece.dataset.removing='true';piece.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'translateY(8px) scale(.65) rotate(10deg)'}],{duration:350,fill:'forwards'}).finished.then(()=>piece.remove()).catch(()=>{});}}continue;}
   if(piece?.dataset.removing){piece.remove();piece=null;}
   const previous=Number(piece?.dataset.level)||0;
   if(!piece){
    piece=document.createElement('li');piece.className=`stall-piece piece-${decor.id}`;piece.dataset.piece=decor.id;
-   piece.innerHTML=`<button type="button" class="piece-manage"><span class="furnishing-art" aria-hidden="true">${decorArt(decor.id)}</span><span class="furnishing-condition" aria-hidden="true"><i></i></span><span class="furnishing-level" aria-hidden="true"></span><span class="sr-only" translate="no"></span></button>`;
-   piece.addEventListener('click',()=>uxUI?.openDecor(decor.id));
+   piece.innerHTML=`<button type="button" class="piece-manage"><span class="furnishing-art" aria-hidden="true">${decorArt(decor.id)}</span><span class="furnishing-condition" aria-hidden="true"><i></i></span><span class="furnishing-level" aria-hidden="true"></span><span class="sr-only" translate="no"></span></button><button type="button" class="piece-drag-handle" title="Drag to rearrange" aria-label="Rearrange">⠿</button>`;
+   piece.addEventListener('click',event=>{if(!event.target.closest('.piece-drag-handle'))uxUI?.openDecor(decor.id);});
    display.append(piece);
   }
   if(piece.parentElement!==display)display.append(piece);
@@ -109,16 +112,14 @@ function renderDecorDisplay(){
    if(!reduced.matches)piece.animate([{transform:'translateY(-12px) scale(.65) rotate(-9deg)',filter:'brightness(1.8)'},{transform:'translateY(2px) scale(1.12) rotate(4deg)'},{transform:'translateY(0) scale(1) rotate(0)',filter:'brightness(1)'}],{duration:650,easing:'cubic-bezier(.2,.8,.3,1)'});
   }
  }
- $('#stall-diorama').hidden=state.neighbourhood.layout.length>0;
- if(state.neighbourhood.layout.length)for(const id of placedLayout(state.neighbourhood,state.decor)){const piece=$(`#stall-extension [data-piece="${id}"]`);if(piece)$('#stall-extension').append(piece);}
- $('#stall-empty').hidden=DECOR.some(d=>!d.expanded&&state.decor[d.id]>0);$('#stall-extension').hidden=!DECOR.some(d=>(d.expanded||state.neighbourhood.layout.length)&&state.decor[d.id]>0);displayReady=true;
+ const owned=placedLayout(state.neighbourhood,state.decor);$('#stall-diorama').hidden=owned.length>0;for(const id of owned){const piece=$(`#stall-extension [data-piece="${id}"]`);if(piece)$('#stall-extension').append(piece);}$('#stall-empty').hidden=owned.length>0;$('#stall-extension').hidden=!owned.length;displayReady=true;stallLayoutUI?.render();
 }
 let displayReady=false;
 const decorPrice=d=>(state.decor[d.id]??0)>=MAX_DECOR_LEVEL?Infinity:purchasePrice(state,d.cost*((state.decor[d.id]??0)+1));
 function requestBuy(kind,item){if(purchaseUI.isOpen||PHASES.includes(game.phase))return;settle();const level=kind==='decor'?(state.decor[item.id]??0)+1:0,base=item.cost*(kind==='decor'?level:1),cost=purchasePrice(state,base);purchaseUI.ask(kind,item,cost,level,()=>{settle();if(PHASES.includes(game.phase)||purchasePrice(state,base)!==cost||(kind==='decor'&&(state.decor[item.id]??0)+1!==level))return false;const next=kind==='skin'?buySkin(state,item.id):kind==='weapon'?buyWeapon(state,item.id):upgrade(state,item.id);if(!next)return false;state=next;save();renderStall();return true;});}
 const kitScoreLabel=id=>translate(`Relief score ×${weaponScoreMultiplier(id)}`);
 function renderStall(){
- $('#use-hands').disabled=state.equipped==='bare-hand';$('#coins').textContent=state.coins;$('#merit').textContent=state.merit;$('#idle-note').textContent=`Your stall earns ${idleRate(state)} oil money per hour.`;
+ $('#use-hands').disabled=state.equipped==='bare-hand';countNumber($('#coins'),state.coins);countNumber($('#merit'),state.merit);numberText($('#idle-note'),translate(`Your stall earns ${idleRate(state)} oil money per hour.`));
  const kit=WEAPONS.find(w=>w.id===state.equipped);$('#equipped-art').innerHTML=weaponArt(kit.id);literal($('#equipped-name'),`${itemName(kit)} · ${kitScoreLabel(kit.id)}${kit.cost?(getLanguage()==='zh-Hant'?` · 餘 ${weaponUses(state,kit.id)} 次`:` · ${weaponUses(state,kit.id)} uses left`):''}`);
  renderDecorDisplay();
  $('#play-panel').classList.toggle('has-neon',state.decor.neon>0);$('#play-panel').classList.toggle('has-incense',state.decor.incense>0);for(const id of illustratedDecor)$('#stall-'+id).hidden=!state.decor[id];
@@ -179,7 +180,7 @@ function cancelGestures(){
 function start(){
  if(PHASES.includes(game.phase))return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
  const preset=WORRIES.find(w=>w.id===kind);game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preferences.value.randomEvents});neighbourhoodUI?.reset();
- lastPhase='';lastChant=-1;lastBeat=-1;lastQte=0;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
+ lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;lastQte=0;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
  audio.voice=$('#voice').checked;unlockSound();renderPhase();cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);
 }
 function renderPhase(){
@@ -213,7 +214,7 @@ function tick(){
    const pulse=game.elapsed%BEAT_INTERVAL;$('#rhythm-pulse').style.setProperty('--beat-scale',1+Math.max(0,1-pulse/160)*.65);
    $('#qte-call').hidden=!game.qte;if(game.qte){literal($('#qte-call'),qteHints[game.qte.type][getLanguage()==='zh-Hant'?0:1]);if(lastQte!==game.qteIndex){lastQte=game.qteIndex;say($('#qte-call').textContent);audio.tone(780,.12,'sine',.06);}}
    for(const hint of document.querySelectorAll('#gesture-tools [data-gesture]')){const type=game.qte?.type,match=(type==='double'?'tap':type)===hint.dataset.gesture;hint.classList.toggle('is-prompted',match);if(match&&hint.dataset.promptIndex!==String(game.qteIndex)){hint.dataset.promptIndex=game.qteIndex;const strip=$('#gesture-tools');strip.scrollTo({left:hint.offsetLeft-(strip.clientWidth-hint.offsetWidth)/2,behavior:reduced.matches?'instant':'smooth'});}}
-   const chant=Math.floor(game.elapsed/4000);if(chant!==lastChant){lastChant=chant;const paperAct=game.wear<.25?0:game.wear<.7?1:2;const line=PAPER_ACTS[game.skin]?.[paperAct]?.[0]??(game.kind==='work'&&chant%4===1?'今次真係最後一次……呢句都係暫定。':['拍走加班，留返個胃食菠蘿包！','是非走開，貴人入嚟！','拍走心塞，膊頭即刻輕晒！','煩惱今日收工，你都早啲休息！'][chant%4]);$('#fong-line').textContent=line;audio.speak(line,'zh-Hant');if(chant===3){audio.tone(1050,.4,'sine',.045);audio.tone(790,.4,'sine',.03,.2);}}
+   const chant=Math.floor(game.elapsed/4000);if(chant!==lastChant){lastChant=chant;const line=pickChant();$('#fong-line').textContent=line;audio.speak(line,'zh-Hant');if(chant===3){audio.tone(1050,.4,'sine',.045);audio.tone(790,.4,'sine',.03,.2);}}
  }
  ritualUI?.render();
  frame=requestAnimationFrame(tick);
@@ -367,6 +368,7 @@ window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event
 window.addEventListener('pageshow',event=>{if(event.persisted&&syncProgress()&&!PHASES.includes(game.phase)){settle();renderStall();}});
 document.addEventListener('languagechange',()=>backupUI.render());
 uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{backToStall();$('#worry-input').value='';$('#worry-select').focus({preventScroll:true});$('.worry-field').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});},onShop:openShop,onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,openUltimateGuide:()=>ritualUI?.openFinisherGuide()});
+stallLayoutUI=createStallLayout({getState:()=>state,itemName,canEdit:()=>!PHASES.includes(game.phase)&&!document.querySelector('dialog[open]'),onMove:(id,index)=>{const next=placeDecoration(state.neighbourhood,state.decor,id,index);if(next){state={...state,neighbourhood:next};save();renderStall();}}});
 $('#random-events').addEventListener('change',()=>{preferences.update({randomEvents:$('#random-events').checked});renderRitualTiming();});
 $('#voice').addEventListener('change',()=>{audio.voice=$('#voice').checked;preferences.update({voice:audio.voice});uxUI.render();});
 document.addEventListener('languagechange',()=>uxUI.render());

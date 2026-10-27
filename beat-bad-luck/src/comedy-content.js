@@ -32,3 +32,6 @@ export const PAPER_ACTS={
  'fake-master':[['我識晒，只係未諗到點做！','I know everything. Just not how to do it!'],['師傅饒命！條假鬚係借返嚟！','Mercy! The mighty beard is borrowed!'],['高人變矮凳，鬍鬚自己提出離職。','The grand master becomes a footstool. His beard resigns.']],
  'unready-extra':[['我 ready！等我搵返份劇本先。','Ready! Just let me find the script.'],['可唔可以再排練一次投降？','Could I rehearse that surrender once more?'],['終於準備好，原來已經殺青。','Finally ready. Turns out the shoot is over.']]
 };
+
+export const RITUAL_CHANTS=['打你個小人頭，等你有氣都冇碇唞','打你個小人面，等你有面都冇處見','打你個小人眼，等你有眼睇唔見','打你個小人手，等你成世冇出頭','打你個小人腳，等你好人當賊辦，無鞋挽屐走','打你個小人心，等你好心變成歹心'];
+export function createChantPicker(random=Math.random){let bag=[],last='';return ()=>{if(!bag.length){bag=[...RITUAL_CHANTS];for(let i=bag.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]];}if(bag[0]===last)[bag[0],bag[1]]=[bag[1],bag[0]];}last=bag.shift();return last;};}

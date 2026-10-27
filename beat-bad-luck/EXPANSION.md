@@ -1,6 +1,6 @@
 # Stall and kit expansion
 
-All prices are fictional oil-money amounts. The shop contains 44 paid kits and 27 decorations. Merit unlocks a kit without being spent; oil buys two ritual uses. All paid-kit score multipliers have been reduced by approximately 30%, rounded to two decimal places. Prices, merit gates, inventory and existing records are unchanged. Free hands remain ×1. Rebirth paper stays penultimate, between Lassie and the immunity token.
+All prices are fictional oil-money amounts. The shop contains 44 paid kits and 28 regular decorations. Merit unlocks a kit without being spent; oil buys three ritual uses. All paid-kit score multipliers have been reduced by approximately 30%, rounded to two decimal places. Prices, merit gates, inventory and existing records are unchanged. Free hands remain ×1. Rebirth paper stays penultimate, between Lassie and the immunity token.
 
 ## All paid kits (shop order, current multipliers)
 
@@ -53,34 +53,36 @@ All prices are fictional oil-money amounts. The shop contains 44 paid kits and 2
 
 ## All decorations (base-price order, current income)
 
-Food starts at street-snack prices; larger displays, intricate paper crafts and rare furniture cost more. All hourly income is 40% below its previous amount, including every upgrade increment (now +0.06/hour). Prices and existing levels stay unchanged. Upgrades cost base × next level, durability lasts 30 real days, and offline collection remains capped at eight hours. Newly bought pieces appear on the stall shelves immediately.
+Food starts at street-snack prices; larger displays, intricate paper crafts and rare furniture cost more. All hourly income is 40% below its previous amount, including every upgrade increment (now +0.06/hour). Every decoration base price is 300 oil lower; existing levels and income stay unchanged. Upgrades cost base × next level, durability lasts 30 real days, and offline collection remains capped at eight hours. Newly bought pieces appear on the stall shelves immediately.
 
 | Decoration | Base oil | Level-one oil/hour |
 |---|---:|---:|
-| 瀨尿牛丸 | 650 | 0.6 |
-| 路邊燒雞翼 | 750 | 0.72 |
-| 甜在心饅頭 | 900 | 0.90 |
-| 濟公牌雞屎忽 | 980 | 0.96 |
-| 武狀元蘇乞兒狗飯 | 1,050 | 1.08 |
-| 復古霓虹燈招牌 | 1,145 | 1.2 |
-| 線香台 | 1,155 | 1.8 |
-| 招財貓 | 1,165 | 2.4 |
-| 老式卡式收音機 | 1,190 | 0.6 |
-| 鎮宅老虎 | 1,210 | 3.0 |
-| 誠實豆沙包 | 1,350 | 1.44 |
-| 慚愧棒棒糖 | 1,450 | 1.56 |
-| 黯然銷魂飯 | 1,600 | 1.8 |
-| 奶油血滴子 | 1,800 | 2.04 |
-| 遥控电流香蕉 | 2,100 | 2.4 |
-| 開運銅錢 | 2,400 | 2.76 |
-| 紙紮公仔 | 2,800 | 3.24 |
-| 八卦陣 | 4,200 | 4.8 |
-| 金牌鴻運乳豬 | 5,200 | 6.0 |
-| 風水吸財魚缸 | 6,240 | 3.6 |
-| 福祿壽三星 | 6,270 | 4.2 |
-| 招財樹 | 6,300 | 4.8 |
-| 紫水晶 | 6,340 | 5.4 |
-| 紙紮iPhone DUO | 7,200 | 7.8 |
-| 風水假山 | 8,500 | 9.6 |
-| 花之戀壽司x1000 | 9,800 | 10.8 |
-| 故宫太和殿龍椅 | 16,000 | 16.8 |
+| 瀨尿牛丸 | 350 | 0.6 |
+| 路邊燒雞翼 | 450 | 0.72 |
+| 甜在心饅頭 | 600 | 0.90 |
+| 濟公牌雞屎忽 | 680 | 0.96 |
+| 武狀元蘇乞兒狗飯 | 750 | 1.08 |
+| 復古霓虹燈招牌 | 845 | 1.2 |
+| 線香台 | 855 | 1.8 |
+| 招財貓 | 865 | 2.4 |
+| 老式卡式收音機 | 890 | 0.6 |
+| 鎮宅老虎 | 910 | 3.0 |
+| 誠實豆沙包 | 1,050 | 1.44 |
+| 慚愧棒棒糖 | 1,150 | 1.56 |
+| 黯然銷魂飯 | 1,300 | 1.8 |
+| 奶油血滴子 | 1,500 | 2.04 |
+| 遥控电流香蕉 | 1,800 | 2.4 |
+| 開運銅錢 | 2,100 | 2.76 |
+| 紙紮公仔 | 2,500 | 3.24 |
+| 八卦陣 | 3,900 | 4.8 |
+| 金牌鴻運乳豬 | 4,900 | 6.0 |
+| 風水吸財魚缸 | 5,940 | 3.6 |
+| 福祿壽三星 | 5,970 | 4.2 |
+| 招財樹 | 6,000 | 4.8 |
+| 紫水晶 | 6,040 | 5.4 |
+| 紙紮iPhone DUO | 6,900 | 7.8 |
+| 風水假山 | 8,200 | 9.6 |
+| 花之戀壽司x1000 | 9,500 | 10.8 |
+| 故宫太和殿龍椅 | 15,700 | 16.8 |
+
+The story-gift automatic clock-off seal is unlocked by the appeal story: 8,500 base oil, 3.6 oil/hour at level one.

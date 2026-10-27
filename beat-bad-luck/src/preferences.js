@@ -1,6 +1,6 @@
 import {WEAPONS} from './catalog.js';
 export const PREFERENCES_KEY='beat-bad-luck.preferences.v1';
-const sections=['stories','challenges','layout','scenes','album'];
+const sections=['stories','challenges','scenes','album'];
 export function readPreferences(raw){
  const p={sound:true,voice:false,randomEvents:false,learned:[],section:'stories',positions:{}};
  try{const x=JSON.parse(raw);if(!x||x.version!==1)return p;if(typeof x.sound==='boolean')p.sound=x.sound;if(typeof x.voice==='boolean')p.voice=x.voice;if(typeof x.randomEvents==='boolean')p.randomEvents=x.randomEvents;

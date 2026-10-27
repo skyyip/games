@@ -19,8 +19,9 @@ SKINS.push(...[
  ['unready-extra','永遠未準備好的龍套','The never-ready extra',7400,'#bdb1df','extra',1.7,'我 ready！等我搵返個人、件衫同份劇本先。']
 ].map(([id,nameZh,name,cost,color,shape,multiplier,description])=>({id,nameZh,name,cost,color,shape,multiplier,description,descriptionEn:'A three-act comic paper: swagger, pleading, then a very undignified wrap.',merit:0})));
 SKINS.unshift({id:'plain',nameZh:'免費素紙',name:'Free plain paper',cost:0,color:'#f4dfaa',shape:'paper',description:'素紙唔收錢，拍走心塞一樣得！',descriptionEn:'Always available. No score bonus and no wear.',merit:0,multiplier:1,starter:true});
+for(const skin of SKINS)if(!skin.starter)skin.multiplier=Math.round((skin.multiplier+.3)*100)/100;
 export const SKIN_USES=10;
-export const skinScoreMultiplier=id=>SKINS.find(s=>s.id===id)?.multiplier??1;
+export const skinScoreMultiplier=id=>SKINS.find(s=>s.id===id)?.multiplier??SKINS[0].multiplier;
 export function skinArt(id){const s=SKINS.find(s=>s.id===id)??SKINS[0],c=s.color,t=s.shape;
  const ears=t==='rabbit'?'<ellipse cx="49" cy="25" rx="11" ry="23"/><ellipse cx="91" cy="25" rx="11" ry="23"/><path d="M49 11v25m42-25v25" stroke="#edb9c5" stroke-width="7"/>':t==='panda'?'<circle cx="39" cy="38" r="15" fill="#44464f"/><circle cx="101" cy="38" r="15" fill="#44464f"/>':['dog','wolf'].includes(t)?'<path d="M42 36Q12 25 20 76q15 17 28-18m50-22q30-11 22 40-15 17-28-18" fill="'+(t==='dog'?'#ba8648':'#7b818e')+'"/>':t==='pig'?'<path d="m37 42-8-24 27 16m29 0 26-16-8 26"/>':t==='ape'?'<circle cx="30" cy="60" r="16"/><circle cx="110" cy="60" r="16"/>':'';
  const costume=t==='magistrate'?'<g class="comedy-hat"><path d="M30 35h80L96 18H44Z" fill="#344d61"/><path d="m30 28-22 1m102-1 22 1" stroke="#344d61" stroke-width="9"/><circle cx="70" cy="25" r="6" fill="#f6d483"/></g>':t==='fake-master'?'<path d="M33 38q40-42 75 0" fill="#ddbc72"/><path class="comedy-beard" d="M46 83q24 54 48-1l-12 6-12-5-12 5Z" fill="#eee9d5"/>':t==='extra'?'<g class="comedy-hat"><path d="M32 35q38-30 76 0l13 9H28Z" fill="#806caa"/></g><path d="M50 108h40v24H50Z" fill="#fff1ce"/><path d="m55 114 28 0m-28 7h22" stroke="#a27d79" stroke-width="2"/>':'';

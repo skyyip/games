@@ -18,12 +18,12 @@ test('offline payouts stop exactly at expiry, then remove the item once',()=>{
  const again=collectIdle(collected.state,10*3600000);assert.equal(again.earned,0);assert.deepEqual(again.lost,[]);assert.equal(state.decor.neon,1);
 });
 test('repairs price proportional wear and level, require funds, restore thirty days and retain levels',()=>{
- const original=furnished('neon',3),state=collectIdle(original,15*DAY).state,cost=repairCost(state,'neon',15*DAY);assert.equal(cost,430);assert.ok(repairCost(original,'neon',27*DAY)>cost);
+ const original=furnished('neon',3),state=collectIdle(original,15*DAY).state,cost=repairCost(state,'neon',15*DAY);assert.equal(cost,317);assert.ok(repairCost(original,'neon',27*DAY)>cost);
  assert.equal(repairDecor({...state,coins:cost-1},'neon',15*DAY),null);const repaired=repairDecor(state,'neon',15*DAY);assert.equal(repaired.coins,state.coins-cost);assert.equal(repaired.decor.neon,3);assert.equal(repaired.decorExpires.neon,45*DAY);assert.equal(decorDurability(repaired,'neon',15*DAY),100);assert.equal(repairCost(repaired,'neon',15*DAY),0);assert.equal(repairDecor(repaired,'neon',15*DAY),null);assert.equal(repairDecor(original,'neon',30*DAY),null);assert.equal(repairDecor(original,'fake',DAY),null);assert.equal(original.decorExpires.neon,30*DAY);
 });
 test('upgrades preserve remaining lifetime; expired items must be removed before replacement',()=>{
  const state=furnished(),upgraded=upgrade(state,'neon',10*DAY);assert.equal(upgraded.decor.neon,2);assert.equal(upgraded.decorExpires.neon,state.decorExpires.neon);close(decorDurability(upgraded,'neon',10*DAY),66+2/3);
- assert.equal(upgrade(state,'neon',31*DAY),null);const expired=collectIdle(state,31*DAY).state,replaced=upgrade(expired,'neon',31*DAY);assert.equal(replaced.decor.neon,1);assert.equal(replaced.decorExpires.neon,61*DAY);assert.equal(replaced.coins,expired.coins-1145);
+ assert.equal(upgrade(state,'neon',31*DAY),null);const expired=collectIdle(state,31*DAY).state,replaced=upgrade(expired,'neon',31*DAY);assert.equal(replaced.decor.neon,1);assert.equal(replaced.decorExpires.neon,61*DAY);assert.equal(replaced.coins,expired.coins-845);
 });
 test('discarding removes levels and durability without refund and prevents future income',()=>{
  const state=collectIdle(furnished('cat',4),DAY).state,discarded=discardDecor(state,'cat');assert.equal(discarded.coins,state.coins);assert.equal(discarded.decor.cat,0);assert.equal(discarded.decorExpires.cat,undefined);assert.equal(collectIdle(discarded,2*DAY).earned,0);assert.equal(discardDecor(discarded,'cat'),null);assert.equal(discardDecor(state,'fake'),null);assert.equal(upgrade(discarded,'cat',DAY).decor.cat,1);assert.equal(state.decor.cat,4);
