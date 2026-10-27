@@ -30,7 +30,7 @@ Long-press/release, outward two-finger spreading, X and V are not scoring gestur
 
 ## Surprises and recurring comedy
 
-Exactly **one random bridge event** appears at 18 active seconds and lasts 5.4 seconds. One tap or swipe resolves an event; an accessible tap on its fixed control is equivalent. Completed and expired events never pay again. The event caption has reserved space, and only artwork moves inside its stable touch target.
+**Random challenge events are off by default**, including for older saves. The checkbox immediately above Start remembers the player’s choice. When enabled, exactly **one random bridge event** appears at 18 active seconds and lasts 5.4 seconds. The choice is captured when a ritual starts and survives the naming step. Turning it off leaves all ritual steps and story progression available; event bonuses and event-related titles require opting in. One tap or swipe resolves an event; an accessible tap on its fixed control is equivalent. Completed and expired events never pay again. The event caption has reserved space, and only artwork moves inside its stable touch target.
 
 Requirement/work-life worries emit at most two expiring copies. Stocks reward hitting during the plunge. The pig teammate cycles helmet → pretend nap → snicker; the snicker is its weakness. Other presets retain their gesture-specific optional bonuses.
 
@@ -60,7 +60,7 @@ The top three scores, balances, expiry, inventory, stories, titles and collectio
 
 Traditional Chinese is the default; English follows the playground preference. Master’s spoken/bottom dialogue remains Cantonese. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v63** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v64** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -68,6 +68,7 @@ Offline cache **v63** includes the new content, art and presentation. Existing w
 npm test
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-comedy-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-interactions-check.mjs
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/event-optin-check.mjs
 ```
 
-The current browser acceptance test covers four Chinese/English portrait/landscape/desktop profiles, a reduced-motion profile, real ordinary hits, two finishers, optional timing, pause, stable event geometry, the patron cameo, one-tap feeding/blessing, automatic block retry, the final story gift, inventory accounting and reload. Set `BEAT_BAD_LUCK_URL` to run the same test against a hashed production build. The interaction check additionally exercises all nine native event controls, purchase cancellation/confirmation and manual blood dipping/smearing with one bonus. Historical signature/event browser scripts document retired mechanics; use the current check above for this version.
+The current browser acceptance test covers four Chinese/English portrait/landscape/desktop profiles, a reduced-motion profile, real ordinary hits, two finishers, optional timing, pause, stable event geometry, the patron cameo, one-tap feeding/blessing, automatic block retry, the final story gift, inventory accounting and reload. Set `BEAT_BAD_LUCK_URL` to run the same test against a hashed production build. The interaction check additionally exercises all nine native event controls, purchase cancellation/confirmation and manual blood dipping/smearing with one bonus. The opt-in check completes event-free and event-enabled rituals, verifies story progression with events off, and reloads both saved choices in Chinese and English mobile layouts. Historical signature/event browser scripts document retired mechanics; use the current check above for this version.

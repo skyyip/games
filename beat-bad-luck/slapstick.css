@@ -100,3 +100,7 @@
 .unified-finisher[data-family=sun] .ultimate-cast::before{content:'☁';position:absolute;right:0;top:0;font-size:60px;color:#858ca4}
 .unified-finisher[data-family=sun][data-act=action] .ultimate-movie-tool{opacity:.35;filter:brightness(.6)}.unified-finisher[data-family=sun][data-act=payoff] .ultimate-cast::before{content:'☀';color:#fff0ac;filter:drop-shadow(0 0 13px #fff4ab)}
 @media(prefers-reduced-motion:reduce){.runaway-ball,.ultimate-blade-papers span,.meatball-court .furnishing-art{animation:none!important}}
+
+/* A visible, remembered pre-ritual choice; native checkbox keeps the entire label tappable. */
+.random-events-option{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:10px;min-height:60px;margin:12px 0;padding:12px;border:1px solid #a2b59a;border-radius:13px;background:#29453e;color:#f2dfb7;cursor:pointer;text-align:left}
+.random-events-option input{width:22px;height:22px;margin:0;accent-color:#efcd83;cursor:pointer}.random-events-option b{display:block;font-size:14px;line-height:1.4}.random-events-option small{display:block;margin-top:4px;font-size:11px;line-height:1.65;color:#d4dfc7}.random-events-option:has(input:checked){border-color:#f0ce83;background:#3c5546}.random-events-option:focus-within{outline:3px solid #f0ce83;outline-offset:3px}
