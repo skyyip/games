@@ -9,7 +9,9 @@
 - The three-act papers, helmeted-cat chase and meatball enthronement were visually inspected. Beauty’s payoff smiles at its mirror; blades show three papers. Titles, captions and optional controls fit in portrait and landscape.
 - The appeal story advances despite missed bonus goals. The first final chapter grants a visible clock-off seal with a thirty-day lifetime; reload preserves it. Unit tests reject duplicate receipts and replay gifts, verify shop unlocking, replacement and old-save migration, and whitelist forty ending IDs.
 - Buying a new paper requires confirmation; cancellation leaves ownership unchanged. Confirmed paper use decrements once after a scored ritual.
-- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v60 and includes all new modules/styles.
+- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v61 and includes all new modules/styles.
+
+Gesture follow-up: long-press/release no longer scores or charges, and its hint is removed. Both circle directions share one hint and the same rhythm prompts. Former hold weaknesses/prompts now use supported swipes/rubbing. Unit and native browser checks cover both changes.
 
 Commands:
 

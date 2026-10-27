@@ -19,4 +19,4 @@ test('one full combo meter launches directly without completed signatures',()=>{
 
 test('colourful keepsakes include Hong Kong hours/minutes and at least twenty original Cantonese master comments',()=>{assert.ok(MASTER_COMMENTS.length>=20);const svg=postcardSvg({id:'test',weapon:'bare-hand',kind:'work',score:100,perfect:0,wear:.5,at:Date.parse('2026-10-26T16:23:00Z')});assert.match(svg,/00:23/);assert.match(svg,/#ee8cb2/);});
 
-test('hold and pinch gestures count towards five-type collection and commission goals',()=>{const r={...result,kind:'work',moves:{tap:1,heavy:1,circle:1,hold:1,pinch:1},wear:.3};assert.equal(storyGoal({goal:'variety',need:5,hits:5},r),true);assert.ok(finishNeighbourhood(freshNeighbourhood(),r,{id:'new-types',now:0}).earned.includes('five'));});
+test('rub and pinch gestures count towards five-type collection and commission goals',()=>{const r={...result,kind:'work',moves:{tap:1,heavy:1,circle:1,rub:1,pinch:1},wear:.3};assert.equal(storyGoal({goal:'variety',need:5,hits:5},r),true);assert.ok(finishNeighbourhood(freshNeighbourhood(),r,{id:'new-types',now:0}).earned.includes('five'));});

@@ -6,7 +6,7 @@ A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. 
 
 1. **Incense:** light three sticks and blow, using the button or an optional local microphone. No recording is saved or uploaded. The button remains available if microphone access fails.
 2. **Name the worry:** choose a grouped preset or enter a private, literal worry of at most 64 characters. Custom words are never inserted as HTML or saved in records.
-3. **Whack for 90 active seconds:** tap, swipe or hold the paper. Circles, rubbing, pinching, weaknesses and 108 BPM rhythm bonuses are optional. The primary goal is to finish the ritual; a neighbour commission adds a story to that goal. The main HUD shows time, relief score, combo and the finisher meter.
+3. **Whack for 90 active seconds:** tap or swipe the paper. Circles in either direction (one gesture), rubbing, pinching, weaknesses and 108 BPM rhythm bonuses are optional. The primary goal is to finish the ritual; a neighbour commission adds a story to that goal. The main HUD shows time, relief score, combo and the finisher meter.
 4. **Feed the tiger:** one tap automatically dips the pork if needed and feeds the yellow paper tiger. Manual dipping and smearing are optional; at least half a coating gives `round(20 × kit × paper multiplier)` once. Close drag releases feed the tiger too.
 5. **Resolve and bless:** one confirmation burns the worry and offering paper, scatters rice or beans and burns the green-horse paper in one short animated sequence.
 6. **Sacred blocks:** cast once. A non-sacred result triggers a funny automatic retry with one flat and one curved block. No repeated button pressing is needed.
@@ -26,7 +26,7 @@ The old kit-signature recipes and separate three-step finisher are retired from 
 
 Ten illustrated families retain each equipped tool’s artwork: palms/slippers, triple blades, spinning wheels, heavy bonks, application-denied stamps, suction slingshots, solar light, makeover mirrors, the 3000-tool fan and Lassie. The 3000 tools collapse into a plastic comb and a voluntary surrender; the beauty paper refuses to leave its mirror. The guide is available from home and pause, without spending charge.
 
-Outward two-finger spreading, X and V are not scoring gestures. Two separated fingers can still pinch inward. Pointer cancellation, lost capture, pause and resize discard unfinished gestures. A 55 ms per-pointer guard prevents duplicate hits; independent fingers can tap separately. Holds start at 0.7 seconds and reach full strength at 1.6 seconds.
+Long-press/release, outward two-finger spreading, X and V are not scoring gestures. Two separated fingers can still pinch inward. Pointer cancellation, lost capture, pause and resize discard unfinished gestures. A 55 ms per-pointer guard prevents duplicate hits; independent fingers can tap separately. Stationary presses lasting 0.7 seconds or longer do not score on release; short taps still work.
 
 ## Surprises and recurring comedy
 
@@ -60,7 +60,7 @@ The top three scores, balances, expiry, inventory, stories, titles and collectio
 
 Traditional Chinese is the default; English follows the playground preference. Master’s spoken/bottom dialogue remains Cantonese. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v60** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v61** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 

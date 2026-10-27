@@ -1,6 +1,6 @@
 // Pointer geometry is independent of scoring and supports mouse, pen and touch.
 const clamp=value=>Math.max(0,Math.min(1,value));
-export const HOLD_MS=700,HOLD_DRIFT=14;
+export const TAP_MAX_MS=700;
 export function beginStroke(x,y,time=0){return {x,y,time,lastX:x,lastY:y,length:0,maxDrift:0,points:[{x,y}],consumed:false};}
 export function moveStroke(stroke,x,y){
  stroke.maxDrift=Math.max(stroke.maxDrift,Math.hypot(x-stroke.x,y-stroke.y));
@@ -23,13 +23,11 @@ export function strokeShape(stroke){
  if(rub>=1)return {gesture:'rub',progress:1};
  return circle>.25?{gesture:'circle',direction:turn,progress:circle}:{gesture:'rub',progress:rub};
 }
-export function holdProgress(stroke,time){return !stroke.holdBlocked&&stroke.maxDrift<=HOLD_DRIFT?clamp((time-stroke.time)/HOLD_MS):0;}
 export function finishStroke(stroke,time){
  const shape=strokeShape(stroke);if(shape.progress>=1)return {gesture:shape.gesture,...(shape.gesture==='circle'?{direction:shape.direction}:{}),strength:clamp(stroke.length/Math.max(100,time-stroke.time)/2+stroke.length/700)};
- if(holdProgress(stroke,time)>=1)return {gesture:'hold',strength:clamp(.35+(time-stroke.time-HOLD_MS)/900)};
  const distance=Math.hypot(stroke.lastX-stroke.x,stroke.lastY-stroke.y);
  if(distance>=60)return {gesture:'heavy',strength:clamp(distance/230+distance/Math.max(40,time-stroke.time)/3)};
- if(distance<=24&&stroke.length<45&&time-stroke.time<HOLD_MS)return {gesture:'tap'};
+ if(distance<=24&&stroke.length<45&&time-stroke.time<TAP_MAX_MS)return {gesture:'tap'};
  return null;
 }
 export function pinchProgress(initial,current){return initial>=56?clamp((initial-current)/Math.max(28,initial*.32)):0;}
