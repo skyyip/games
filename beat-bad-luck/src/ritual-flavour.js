@@ -1,5 +1,5 @@
 import {WORRIES} from './catalog.js';
-// Two surprises per ritual, each resolved by one ordinary action.
+// One random surprise per ritual, resolved by one ordinary action.
 export const EVENT_DURATION=5400,TRAM_BEAT=700,HICCUP_HOLD_MS=700;
 export const EVENTS=[
  {id:'tram',name:['叮叮偷走張收工票，拍一下拎返！','Tram stole your clock-off ticket. Tap to reclaim it!'],icon:'🔔',gesture:'tap'},
@@ -19,7 +19,7 @@ export const eventGoal=()=>1;
 export const eventStep=event=>({gesture:EVENT_MOVES[event?.type]?.[0]??'tap'});
 export class RitualFlavour{
  constructor(random=Math.random){this.random=random;this.start('work');}
- start(kind){this.kind=kind;this.copies=[];this.copySerial=0;this.successfulHits=0;this.weaknessHits=0;this.copiesCleared=0;this.lastGesture='';this.eventsWon=0;const bag=EVENTS.map(e=>e.id);this.events=[18000,58000].map((at,id)=>({id,type:bag.splice(Math.min(bag.length-1,Math.floor(this.random()*bag.length)),1)[0],at,won:false,hits:0,claimed:[],lastAction:-Infinity,mistakes:0,holdAt:null}));}
+ start(kind){this.kind=kind;this.copies=[];this.copySerial=0;this.successfulHits=0;this.weaknessHits=0;this.copiesCleared=0;this.lastGesture='';this.eventsWon=0;const bag=EVENTS.map(e=>e.id);this.events=[18000].map((at,id)=>({id,type:bag.splice(Math.min(bag.length-1,Math.floor(this.random()*bag.length)),1)[0],at,won:false,hits:0,claimed:[],lastAction:-Infinity,mistakes:0,holdAt:null}));}
  eventAt(elapsed){return this.events.find(e=>elapsed>=e.at&&elapsed<e.at+EVENT_DURATION)??null;}
  view(elapsed){this.copies=this.copies.filter(c=>c.until>elapsed);let mood='ordinary';if(this.kind==='teammates'){const time=elapsed%5000;mood=time<1800?'helmet':time<3400?'sleeping':'snickering';}else if(this.kind==='stocks')mood=elapsed%6000>=2500&&elapsed%6000<4800?'falling':'rising';else if(this.kind==='work'||this.kind==='work-life')mood='copying';return {kind:this.kind,mood,copies:this.copies,event:this.eventAt(elapsed)};}
  win(event){if(event.won)return false;event.won=true;event.hits=1;event.holdAt=null;this.eventsWon++;return true;}

@@ -30,7 +30,7 @@ Long-press/release, outward two-finger spreading, X and V are not scoring gestur
 
 ## Surprises and recurring comedy
 
-Exactly **two distinct bridge events** appear at 18 and 58 active seconds, each lasting 5.4 seconds. One tap or swipe resolves an event; an accessible tap on its fixed control is equivalent. Completed and expired events never pay again. The event caption has reserved space, and only artwork moves inside its stable touch target.
+Exactly **one random bridge event** appears at 18 active seconds and lasts 5.4 seconds. One tap or swipe resolves an event; an accessible tap on its fixed control is equivalent. Completed and expired events never pay again. The event caption has reserved space, and only artwork moves inside its stable touch target.
 
 Requirement/work-life worries emit at most two expiring copies. Stocks reward hitting during the plunge. The pig teammate cycles helmet → pretend nap → snicker; the snicker is its weakness. Other presets retain their gesture-specific optional bonuses.
 
@@ -60,7 +60,7 @@ The top three scores, balances, expiry, inventory, stories, titles and collectio
 
 Traditional Chinese is the default; English follows the playground preference. Master’s spoken/bottom dialogue remains Cantonese. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v61** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v62** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
