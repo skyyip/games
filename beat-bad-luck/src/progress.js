@@ -53,8 +53,9 @@ export function consumeWeapon(state,id){
   const remaining=weaponUses(state,id)-1,uses={...state.weaponUses};if(remaining)uses[id]=remaining;else delete uses[id];
   return {...state,weaponUses:uses,owned:remaining?state.owned:state.owned.filter(owned=>owned!==id),equipped:!remaining&&state.equipped===id?'bare-hand':state.equipped};
 }
+export const decorUnlocked=(state,item)=>!item.unlockStory||(state.neighbourhood?.chapters?.[item.unlockStory]??0)>=(STORIES.find(s=>s.id===item.unlockStory)?.chapters.length??Infinity);
 export function upgrade(state,id,now=Date.now()){
- const d=DECOR.find(d=>d.id===id);if(!d)return null;if(d.hidden)return null;const level=state.decor[id]??0,cost=purchasePrice(state,d.cost*(level+1));
+ const d=DECOR.find(d=>d.id===id);if(!d)return null;if(d.hidden||!decorUnlocked(state,d))return null;const level=state.decor[id]??0,cost=purchasePrice(state,d.cost*(level+1));
  if(level>=MAX_DECOR_LEVEL||state.coins<cost||(level&&decorDurability(state,id,now)<=0))return null;
  return {...useCoupon(state),coins:state.coins-cost,decor:{...state.decor,[id]:level+1},decorExpires:{...state.decorExpires,[id]:level?expiry(state,id,now):clock(state,now)+DECOR_LIFETIME}};
 }
@@ -73,10 +74,11 @@ export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   if(available.length&&random()<.35)friend=weightedPatron(available,random);
   const records=[...state.records,{score:cap(result.score),hits:cap(result.hits),weapon:result.weapon,date:now}].sort((a,b)=>b.score-a.score||a.date-b.date).slice(0,3);
   const journey=finishNeighbourhood(state.neighbourhood??freshNeighbourhood(),result,{id,now});
-  const completion=journey.completed,chapter=completion?STORIES.find(s=>s.id===completion.story)?.chapters[completion.chapter-1]:null,story=completion?commissionPay(chapter,completion.finished,completion.replay):{oil:0,merit:0};
+  const completion=journey.completed,chapter=completion?STORIES.find(s=>s.id===completion.story)?.chapters[completion.chapter-1]:null,story=completion?commissionPay(chapter,completion.finished,completion.replay,completion.bonusMet):{oil:0,merit:0};
   let next={...state,neighbourhood:journey.state,coins:cap(state.coins+earned+story.oil),merit:cap(state.merit+merit+story.merit),rituals:cap(state.rituals+1),friends:friend?[...state.friends,friend.id]:state.friends,coupons:friend?.discount?[...(state.coupons??[]),{patron:friend.id,discount:friend.discount,uses:1}]:state.coupons??[],records,lastReceipt:id};
+  const gift=completion?.finished&&!completion.replay?STORIES.find(s=>s.id===completion.story)?.decorGift:null;if(gift&&!state.decor[gift])next={...next,decor:{...next.decor,[gift]:1},decorExpires:{...next.decorExpires,[gift]:now+DECOR_LIFETIME}};
   let secret=null;if(random()<.06){const pool=[...SECRET_WEAPONS,...SECRET_DECOR],unseen=pool.filter(i=>!(state.discovered??[]).includes(i.id)),choices=unseen.length?unseen:pool;secret=choices[Math.min(choices.length-1,Math.floor(random()*choices.length))];next={...next,discovered:[...new Set([...(state.discovered??[]),secret.id])]};if(SECRET_WEAPONS.includes(secret))next={...next,owned:[...new Set([...next.owned,secret.id])],weaponUses:{...next.weaponUses,[secret.id]:WEAPON_USES}};else next={...next,decor:{...next.decor,[secret.id]:Math.min(MAX_DECOR_LEVEL,(next.decor[secret.id]??0)+1)},decorExpires:{...next.decorExpires,[secret.id]:next.decorExpires[secret.id]??now+DECOR_LIFETIME}};}
-  return {journey,state:next,earned:earned+story.oil,merit:merit+story.merit,story,friend,secret,buffs};
+  return {journey,gift,state:next,earned:earned+story.oil,merit:merit+story.merit,story,friend,secret,buffs};
 }
 export const purchasePrice=(state,base)=>Math.ceil(base*(1-patronBuffs(state).discount));
 function useCoupon(state){const coupons=[...(state.coupons??[])],best=coupons.reduce((a,c)=>!a||c.discount>a.discount?c:a,null);return best?{...state,coupons:coupons.filter(c=>c!==best)}:state;}

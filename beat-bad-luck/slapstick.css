@@ -1,0 +1,102 @@
+#phase-beat{position:relative}
+/* One cinematic finisher and four clear pieces of gameplay information. */
+#phase-beat .beat-stats>span:has(#live-papers),#phase-beat .rhythm-rail,#phase-beat .bpm-note,#phase-beat .qte-call,#phase-beat .gesture-controls,#kit-skill,#kit-stage,#kit-guidance{display:none!important}
+#phase-beat .beat-telemetry{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-shrink:0}
+#phase-beat .beat-stats{position:static;display:flex;flex-direction:row;gap:24px;align-items:center;flex:0 0 auto}
+#phase-beat .beat-stats b{font-size:25px}#phase-beat .beat-stats small{font-size:11px}
+.ultimate-hud{display:flex;align-items:center;gap:9px;flex:1 1 200px;min-width:0}
+.ultimate-meter{flex:1;min-width:70px;display:grid;grid-template-columns:1fr auto;gap:2px 6px;color:#f6deb0;font-size:11px;line-height:1.3}
+.ultimate-meter progress{grid-column:1/-1;width:100%;height:13px;accent-color:#f0c66f}.ultimate-meter small{grid-column:2;grid-row:1;white-space:nowrap;font-size:10px}
+#finisher-launch{flex:0 0 99px;min-width:95px;min-height:44px;padding:6px;border:2px solid #a3bca2;background:#314b43;color:#e3d7b7;font-size:12px;line-height:1.3;border-radius:11px}
+#finisher-launch[data-ready=true]{border-color:#ffe6a1;background:#eac97f;color:#574648;box-shadow:0 0 13px #ffdc7c66;animation:unified-ready 1.5s ease-in-out infinite}
+#finisher-launch:disabled{opacity:.7;cursor:default}#finisher-launch[data-ready=true]:disabled{opacity:1}
+#phase-beat .personality-hud{height:62px;min-height:62px;flex-basis:62px;position:relative;inset:auto;width:100%}
+#phase-beat .personality-hud>p{font-size:12px;line-height:1.45;background:#27493f}
+#phase-beat .event-banner{height:60px;min-height:60px;overflow:hidden;gap:7px;align-items:center}
+#phase-beat .event-banner #event-label{font-size:12px;line-height:1.4}
+#phase-beat .event-banner #event-status{font-size:10px;white-space:nowrap}
+#phase-beat .beat-arena{min-height:150px;flex:1 1 0}
+#phase-beat .beat-reaction{height:35px!important;min-height:35px;flex:0 0 35px!important;width:100%}
+#phase-beat .hit-feedback{height:35px!important;min-height:35px;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1.4;white-space:normal}
+#phase-beat .beat-arena .hit-zone{inset:20px auto 7px 50%;height:calc(100% - 27px);width:min(57%,245px)}
+.is-playing .master-equipped-title{display:none!important}.is-playing .play-panel .fong-bubble:has(.master-equipped-title:not([hidden])){height:56px;min-height:56px;flex-basis:56px}.is-playing .master-portrait-play:has(.master-equipped-title:not([hidden])){flex-basis:38px}
+/* The optional nice tap never holds up the automatic show. */
+#finisher-stage.unified-finisher{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:none;grid-template-rows:auto minmax(80px,1fr) 2.8em 44px 1.5em;align-items:stretch;gap:5px;padding:10px;justify-items:center;justify-content:stretch;align-content:stretch;background:radial-gradient(ellipse at 50% 35%,#fff0b8,#bc83a2 75%,#6d6a9d);color:#63445d;overflow:hidden;border:3px solid #ffe5aa}
+.unified-finisher h3{margin:0;font:500 18px/1.25 Iansui,'Fredoka',sans-serif;color:#694660;text-align:center;min-height:1.25em;width:100%}
+.ultimate-cast{position:relative;width:100%;height:100%;min-height:80px;isolation:isolate;pointer-events:none}
+.ultimate-movie-paper{position:absolute;left:20%;top:2%;height:95%;width:55%;transform-origin:50% 80%;--cry-display:inline;--neutral-display:none}
+.ultimate-movie-paper svg,.ultimate-movie-tool svg,.ultimate-payoff-prop svg{display:block;width:100%;height:100%;overflow:visible}
+.ultimate-movie-tool{position:absolute;right:0;top:7%;width:38%;height:65%;transform-origin:75% 75%}
+.ultimate-payoff-prop{position:absolute;right:7%;bottom:0;width:34%;height:65%;opacity:0;transform-origin:center}
+.ultimate-payoff-prop b{font-size:clamp(35px,8vw,72px)}
+.ultimate-movie-puff{position:absolute;left:12%;top:20%;font-size:40px;font-style:normal;color:#fff2bf;pointer-events:none}
+.ultimate-tools-fan{position:absolute;inset:0;pointer-events:none;opacity:0}.ultimate-tools-fan i{position:absolute;left:50%;top:45%;font-style:normal;font-size:26px;transform:rotate(calc(var(--tool)*30deg)) translateX(74px) rotate(calc(var(--tool)*-30deg))}
+#ultimate-punchline{width:100%;height:2.8em;min-height:2.8em;margin:0;padding:3px 6px;font-size:12px;line-height:1.4;text-align:center;background:#fff5d3;border:1px solid #b98991;border-radius:10px;overflow:hidden}
+#ultimate-nice{min-height:44px;max-width:100%;padding:5px 14px;background:#e8dfcb;color:#66546b;border:2px solid #947b9c;font-size:13px;line-height:1.3;border-radius:12px;box-shadow:none}
+#ultimate-nice[data-ready=true]{background:#ffe19b;border-color:#fff9db;box-shadow:0 0 0 5px #ffeaa077,0 0 20px #fff1b8;color:#6c4b5e;transform:scale(1.04)}
+#ultimate-nice:disabled{opacity:1;background:#c2dcc6}#ultimate-nice-note{font-size:10px;line-height:1.5;text-align:center;min-height:1.5em}
+/* Model-clock sampled animation: a paused negative delay also freezes browser artwork. */
+.ultimate-movie-paper{animation:movie-paper 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
+.ultimate-movie-tool{animation:movie-tool 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
+.ultimate-movie-puff{animation:movie-puff 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
+.unified-finisher[data-family=spin] .ultimate-movie-tool{animation-name:movie-spin}
+.unified-finisher[data-family=blade] .ultimate-movie-tool{animation-name:movie-blade}
+.unified-finisher[data-family=suction] .ultimate-movie-paper{animation-name:movie-suction}
+.unified-finisher[data-family=beauty] .ultimate-movie-paper{animation-name:movie-vanity;filter:drop-shadow(0 0 8px #ffcde8)}
+.unified-finisher[data-family=gadget] .ultimate-tools-fan{animation:movie-fan 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
+.unified-finisher[data-act=payoff] .ultimate-payoff-prop{opacity:1}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-tool{opacity:0}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-paper .paper-arm-left{rotate:40deg;transform-origin:44px 105px}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-paper .paper-arm-right{rotate:-40deg;transform-origin:96px 105px}
+.unified-finisher[data-family=beauty] .ultimate-payoff-prop{right:10%;height:80%}.unified-finisher[data-family=sun] .ultimate-cast{background:radial-gradient(circle at 70% 10%,#fff5b6bb,transparent 65%)}
+@keyframes movie-paper{0%{transform:scale(.8) rotate(-4deg)}20%{transform:scale(1) rotate(3deg)}32%{transform:scale(1.2,.65) rotate(-12deg)}43%{transform:scale(.8,1.2) rotate(10deg)}57%{transform:scale(1.22,.7) rotate(-9deg)}70%{transform:scale(.9,1.12) rotate(7deg)}100%{transform:scale(.9,.82) rotate(-5deg)}}
+@keyframes movie-tool{0%{transform:translate(20px,-10px) rotate(30deg) scale(.5);opacity:0}18%{transform:translate(0,0) rotate(0) scale(1);opacity:1}33%{transform:translate(-45px,15px) rotate(-55deg)}42%{transform:translate(0,-10px) rotate(15deg)}56%{transform:translate(-45px,15px) rotate(-65deg)}70%,100%{transform:translate(10px,-10px) rotate(15deg)}}
+@keyframes movie-spin{0%{transform:scale(.4);opacity:0}20%{transform:scale(1);opacity:1}70%{transform:translateX(-70px) rotate(720deg) scale(1.3)}100%{transform:translateX(0) rotate(1080deg) scale(.7)}}
+@keyframes movie-blade{0%{transform:translateX(70px);opacity:0}18%{opacity:1}30%{transform:translateX(-75px) rotate(-30deg)}40%{transform:translateX(50px)}52%{transform:translateX(-75px) rotate(-35deg)}62%{transform:translateX(50px)}73%{transform:translateX(-80px) rotate(-40deg)}100%{transform:translateX(5px) rotate(10deg)}}
+@keyframes movie-suction{0%,20%{transform:scale(1)}35%{transform:translateX(-35px) scale(1.3,.8)}52%{transform:translateX(35px) scale(.8,1.2)}70%{transform:translateY(-25px) rotate(35deg) scale(.7)}100%{transform:translateY(10px) rotate(-5deg) scale(.9)}}
+@keyframes movie-vanity{0%{transform:scale(.8)}25%{transform:rotate(-7deg)}45%{transform:rotate(7deg)}65%{transform:scale(1.12)}80%,100%{transform:translateX(-10px) rotate(8deg) scale(1.05)}}
+@keyframes movie-fan{0%,10%{opacity:0;transform:scale(.1) rotate(-30deg)}30%,60%{opacity:1;transform:scale(1) rotate(5deg)}74%,100%{opacity:0;transform:scale(.1) rotate(80deg)}}
+@keyframes movie-puff{0%,20%{opacity:0;transform:scale(.1)}35%{opacity:1;transform:scale(1.5) rotate(20deg)}60%{transform:scale(.6) rotate(70deg)}100%{opacity:0;transform:scale(2) rotate(100deg)}}
+@keyframes unified-ready{50%{box-shadow:0 0 19px #ffe59899}}
+/* Single action props have clear touch targets and one short cue. */
+#event-props .simple-event{top:50%;right:3px;left:auto;bottom:auto;translate:0 -50%;width:65px;height:79px;max-height:90%;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:2px;place-items:center;overflow:hidden;animation:none}
+.simple-event>span,.simple-event>svg{animation:comic-prop-bob 1.8s ease-in-out infinite}.simple-event>span{font-size:32px}.simple-event svg{width:100%;height:100%;min-height:0}.simple-event small{font-size:10px;line-height:1.3;color:#fff0bd;background:#294940;border-radius:4px;padding:2px 3px}
+/* New paper casts have three distinct performances. */
+.paper-doll[data-comedy-act=swagger] .comedy-hat{transform-origin:center;animation:comic-hat-wobble 2s ease-in-out infinite}
+.paper-doll[data-comedy-act=pleading]{--cry-display:inline;--neutral-display:none}
+.paper-doll[data-comedy-act=pleading] .paper-arm-left{transform:rotate(22deg);transform-origin:44px 107px}.paper-doll[data-comedy-act=pleading] .paper-arm-right{transform:rotate(-22deg);transform-origin:96px 107px}
+.paper-doll[data-comedy-act=wrap] .comedy-hat{transform:translate(13px,20px) rotate(28deg);transform-origin:center}.paper-doll[data-comedy-act=wrap] .comedy-beard{transform:translate(15px,18px) rotate(22deg);transform-origin:center}.paper-doll[data-comedy-act=wrap] .paper-leg-left{transform:rotate(10deg);transform-origin:center}
+@keyframes comic-hat-wobble{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(-7deg)}90%{transform:rotate(5deg)}}
+.extra-king-cameo{position:absolute;right:3px;bottom:0;width:68px;height:100px;pointer-events:none;z-index:4;animation:extra-trip 1.7s ease-out both}.extra-king-cameo svg{width:100%;height:100%}.extra-king-cameo i{position:absolute;top:10px;left:2px;color:#fff0b7;font-size:22px;font-style:normal}
+.extra-king-hat{transform-origin:60px 30px;animation:extra-hat 2.8s ease-in-out infinite}.loot-card:has(.extra-king-hat){background:linear-gradient(135deg,#594c6b,#284b40)}.friend-icon svg{width:100%;height:100%}
+@keyframes extra-trip{0%{transform:translateX(70px) rotate(20deg)}30%{transform:translateX(0) rotate(-14deg)}60%{transform:translateX(-9px) rotate(15deg)}100%{transform:translateX(0) rotate(0)}}
+@keyframes extra-hat{0%,15%,100%{transform:translate(0,0) rotate(0)}40%{transform:translate(22px,17px) rotate(30deg)}70%{transform:translate(-7px,10px) rotate(-15deg)}}
+.clockoff-stamp{transform-origin:60px 80px;animation:clockoff-seal 3.6s ease-in-out infinite}
+@keyframes clockoff-seal{0%,45%,100%{transform:translateY(0)}55%{transform:translateY(-12px) rotate(-5deg)}65%{transform:translateY(8px)}76%{transform:translateY(-3px)}}
+/* The royal meatball callbacks use actual owned props, not another resource. */
+.chase-helmet{position:absolute;left:30%;top:-8%;font-style:normal;font-size:28px;filter:drop-shadow(0 2px 0 #263f36)}
+#stall-skit[data-scene=meatball-coronation] [data-skit-actor]{position:relative;transform-origin:50% 85%}
+#stall-skit[data-scene=meatball-coronation][data-act="0"] [data-skit-actor=cat]{animation:cat-chase 1.2s ease-in-out infinite}
+#stall-skit[data-scene=meatball-coronation][data-act="2"] [data-skit-actor=cat],.meatball-court .stall-piece:not([data-piece=beef-balls]):not([data-piece=dragon-throne]) .furnishing-art{animation:royal-bow 1.8s ease-in-out infinite}
+@keyframes ball-escape{0%,100%{transform:translate(0,0) rotate(-8deg)}50%{transform:translate(35px,-18px) rotate(15deg)}}
+@keyframes cat-chase{0%,100%{transform:translate(-14px,0) rotate(-8deg)}50%{transform:translate(18px,5px) rotate(10deg)}}
+@keyframes royal-bow{0%,100%{transform:rotate(0)}50%{transform:rotate(22deg) translateY(4px)}}
+.comic-ending-book{padding:10px;margin:12px 0;border:1px solid #e6c67f;border-radius:12px;background:#294b42;color:#f4dfaf}.comic-ending-book summary{cursor:pointer}.comic-ending-book li{margin:9px 0;font-size:12px;line-height:1.65}
+.ritual-stage[inert] .extra-king-cameo,.ritual-stage[inert] .extra-king-hat,.ritual-stage[inert] .comedy-hat{animation-play-state:paused!important}
+@media(max-height:650px){#phase-beat .beat-stats b{font-size:22px}#phase-beat .beat-arena{min-height:120px}#phase-beat .beat-telemetry{gap:5px}.ultimate-hud{flex-basis:170px}#phase-beat .personality-hud{height:58px;min-height:58px;flex-basis:58px}#phase-beat .event-banner{height:56px;min-height:56px}.is-playing .play-panel .fong-bubble:has(.master-equipped-title:not([hidden])){height:50px;min-height:50px;flex-basis:50px}.unified-finisher h3{font-size:16px}}
+@media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{display:grid;grid-template-columns:minmax(0,1fr) 225px;grid-template-rows:54px minmax(0,1fr) 34px;grid-template-areas:'telemetry telemetry' 'arena hud' 'arena feedback';gap:5px 12px}#phase-beat .beat-telemetry{grid-area:telemetry;flex-wrap:nowrap}#phase-beat .beat-stats{gap:25px}#phase-beat .ultimate-hud{max-width:340px;flex-basis:240px}#phase-beat .personality-hud{grid-area:hud;height:100%;min-height:0;flex-basis:auto}#phase-beat .beat-arena{grid-area:arena;min-height:110px}#phase-beat .beat-reaction{grid-area:feedback}#phase-beat .event-banner{height:90px;min-height:90px;align-self:center}#phase-beat .event-banner #event-label{font-size:12px}.is-playing .play-panel .fong-bubble:has(.master-equipped-title:not([hidden])){height:42px;min-height:42px;flex-basis:42px}#finisher-stage.unified-finisher{grid-template-columns:minmax(0,1fr) minmax(140px,43%);grid-template-rows:32px minmax(34px,1fr) 42px 15px;gap:2px 8px;padding:6px}#finisher-title{grid-column:1/-1;font-size:15px}.ultimate-cast{grid-column:1;grid-row:2/5;min-height:65px}#ultimate-punchline{grid-column:2;grid-row:2;align-self:center;font-size:11px;padding:3px}#ultimate-nice{grid-column:2;grid-row:3;font-size:11px;padding:3px 5px;min-height:40px}#ultimate-nice-note{grid-column:2;grid-row:4;font-size:10px;line-height:1.3}.ultimate-tools-fan i{font-size:18px;transform:rotate(calc(var(--tool)*30deg)) translateX(40px) rotate(calc(var(--tool)*-30deg))}}
+@media(prefers-reduced-motion:reduce){#finisher-launch[data-ready=true],.ultimate-cast *, .simple-event>svg,.simple-event>span,.extra-king-cameo,.extra-king-hat,.clockoff-stamp,.paper-doll .comedy-hat,.meatball-court .furnishing-art,#stall-skit[data-scene=meatball-coronation] [data-skit-actor]{animation:none!important;transform:none}.ultimate-movie-tool,.ultimate-movie-paper{opacity:1}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-tool{opacity:0}.ultimate-tools-fan{opacity:0}.unified-finisher[data-act=setup][data-family=gadget] .ultimate-tools-fan{opacity:1}#ultimate-nice[data-ready=true]{transform:none}}
+/* Repeat callbacks are acted out by the props themselves. */
+#stall-skit[data-scene=meatball-coronation] [data-skit-actor=beef-balls]{animation:none;transform:none}
+#stall-skit[data-scene=meatball-coronation] svg{overflow:visible}
+#stall-skit[data-scene=meatball-coronation][data-act="0"] .runaway-ball{animation:ball-escape 1.2s ease-in-out infinite;transform-origin:60px 75px}
+#stall-skit[data-scene=meatball-coronation][data-act="1"] .runaway-ball{transform:translate(10px,-6px) rotate(-10deg);transform-origin:60px 75px}
+.royal-meatball-on-throne{display:none;position:absolute;left:23%;top:1%;width:54%;height:68%;z-index:3}
+#stall-skit[data-scene=meatball-coronation][data-act="2"] .royal-meatball-on-throne{display:block}
+#stall-skit[data-scene=meatball-coronation][data-act="2"] [data-skit-actor=beef-balls] .runaway-ball{visibility:hidden}
+.meatball-court .stall-piece:not([data-piece=dragon-throne]) .furnishing-art{animation:royal-bow 1.8s ease-in-out infinite}
+.unified-finisher[data-family=beauty][data-act=payoff] .ultimate-movie-paper{--cry-display:none;--neutral-display:inline}
+.unified-finisher[data-family=beauty][data-act=payoff] .ultimate-movie-paper::after{content:'✨ 💖';position:absolute;left:5%;top:7%;font-size:22px}
+.ultimate-blade-papers{position:absolute;inset:0;display:none;pointer-events:none}
+.unified-finisher[data-family=blade] .ultimate-blade-papers{display:block}.unified-finisher[data-family=blade] .ultimate-movie-paper{left:32%;width:36%}
+.ultimate-blade-papers span{position:absolute;top:6%;height:87%;width:36%;left:0;animation:movie-paper 2700ms linear both paused;animation-delay:var(--movie-at,0ms);--cry-display:inline;--neutral-display:none}.ultimate-blade-papers span+span{left:auto;right:0}.ultimate-blade-papers svg{width:100%;height:100%}
+.unified-finisher[data-family=sun] .ultimate-cast::before{content:'☁';position:absolute;right:0;top:0;font-size:60px;color:#858ca4}
+.unified-finisher[data-family=sun][data-act=action] .ultimate-movie-tool{opacity:.35;filter:brightness(.6)}.unified-finisher[data-family=sun][data-act=payoff] .ultimate-cast::before{content:'☀';color:#fff0ac;filter:drop-shadow(0 0 13px #fff4ab)}
+@media(prefers-reduced-motion:reduce){.runaway-ball,.ultimate-blade-papers span,.meatball-court .furnishing-art{animation:none!important}}

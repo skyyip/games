@@ -1,3 +1,4 @@
+import {PATRONS} from '../src/ritual-rewards.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {fresh,readProgress,collectIdle,idleRate,buyWeapon,weaponUses,consumeWeapon,upgrade as upgradeAtTime,reward} from '../src/progress.js';
 const upgrade=(state,id)=>upgradeAtTime(state,id,0);
@@ -12,7 +13,7 @@ test('oil-money purchases respect merit gates, affordability and free bare-hand 
 test('decor costs rise per level, cap at five, and income rises by hundredths',()=>{let s={...fresh(0),coins:30000};for(const level of [1,2,3,4,5]){const before=s.coins;s=upgrade(s,'neon');assert.equal(s.decor.neon,level);assert.equal(before-s.coins,1145*level);assert.equal(idleRate(s),Math.round((1.2+(level-1)*.06)*100)/100);}assert.equal(upgrade(s,'neon'),null);assert.equal(upgrade(fresh(0),'cat'),null);assert.equal(upgrade(s,'fake'),null);});
 test('idle earnings cap at eight hours, keep fractions, never pay twice and tolerate backwards clocks',()=>{const s={...fresh(0),decor:{neon:1,cat:0,radio:0,incense:0}};const half=collectIdle(s,900000);assert.equal(half.earned,0);assert.equal(half.state.idleCarry,.3);const hour=collectIdle(half.state,3600000);assert.equal(hour.earned,1);assert.equal(collectIdle(hour.state,3600000).earned,0);assert.equal(collectIdle(s,20*3600000).earned,9);const backward=collectIdle(hour.state,0);assert.equal(backward.earned,0);assert.equal(backward.state.lastSeen,3600000);});
 test('completed rituals give one receipt, merit, positive income and no stored private worry text',()=>{const s=fresh(0),r=reward(s,{...result,worry:'private thought'},{id:'first',now:100,random:()=>.9});assert.equal(r.earned,40);assert.equal(r.merit,28);assert.equal(r.state.rituals,1);assert.equal(r.state.records[0].score,600);assert.ok(!JSON.stringify(r.state).includes('private thought'));assert.equal(reward(r.state,result,{id:'first'}),null);assert.equal(reward(s,{score:-1},{id:'bad'}),null);assert.equal(s.coins,0);});
-test('patrons are unique, have weighted rarity and apply bounded best-category buffs',()=>{let s=fresh(0);for(let i=0;i<10;i++){const r=reward(s,result,{id:`ritual-${i}`,now:i,random:()=>0});assert.ok(r.friend);s=r.state;}assert.equal(new Set(s.friends).size,10);const r=reward(s,result,{id:'all',random:()=>0});assert.equal(r.friend,null);assert.equal(r.earned,42);assert.equal(r.state.friends.length,10);});
+test('patrons are unique, have weighted rarity and apply bounded best-category buffs',()=>{let s=fresh(0);for(let i=0;i<PATRONS.length;i++){const r=reward(s,result,{id:`ritual-${i}`,now:i,random:()=>0});assert.ok(r.friend);s=r.state;}assert.equal(new Set(s.friends).size,PATRONS.length);const r=reward(s,result,{id:'all',random:()=>0});assert.equal(r.friend,null);assert.equal(r.earned,42);assert.equal(r.state.friends.length,PATRONS.length);});
 test('three highest records survive reload without storing extra fields',()=>{let s=fresh(0);for(const [i,score]of [40,100,10,80,60].entries())s=reward(s,{...result,score},{id:`r-${i}`,now:100+i,random:()=>.9}).state;assert.deepEqual(s.records.map(r=>r.score),[100,80,60]);assert.deepEqual(readProgress(JSON.stringify(s),200),s);});
 
 test('a saved level-three stall can buy levels four and five without losing its old upgrades',()=>{let s=readProgress(JSON.stringify({...fresh(0),coins:20000,decor:{neon:3,cat:3,radio:3,incense:3}}),0);s=upgrade(s,'neon');assert.equal(s.decor.neon,4);assert.equal(s.coins,15420);s=upgrade(s,'neon');assert.equal(s.decor.neon,5);assert.equal(s.coins,9695);assert.equal(upgrade(s,'neon'),null);assert.equal(s.decor.cat,3);assert.equal(readProgress(JSON.stringify(s),0).decor.neon,5);});
@@ -24,7 +25,7 @@ test('paid kits last three rituals, repurchased at full price, and the free fall
  assert.equal(consumeWeapon(used,'bare-hand'),used);assert.equal(consumeWeapon(used,'unknown'),null);assert.ok(bought.owned.includes('paper'));
 });
 test('original decorations retain their income ordering after the 40% reduction and migrate old saves safely',async()=>{
- const {DECOR:allDecor}=await import('../src/catalog.js');const DECOR=allDecor.filter(d=>!d.expanded);assert.deepEqual(DECOR.map(d=>d.rate),[.6,1.2,1.8,2.4,3,3.6,4.2,4.8,5.4]);assert.deepEqual(DECOR.slice(-2).map(d=>d.id),['money-tree','amethyst']);
+ const {DECOR:allDecor}=await import('../src/catalog.js');const DECOR=allDecor.filter(d=>!d.expanded&&!d.unlockStory);assert.deepEqual(DECOR.map(d=>d.rate),[.6,1.2,1.8,2.4,3,3.6,4.2,4.8,5.4]);assert.deepEqual(DECOR.slice(-2).map(d=>d.id),['money-tree','amethyst']);
  let state=readProgress(JSON.stringify({...fresh(0),coins:200000,decor:{cat:2}}),0);assert.equal(state.decor['money-tree'],0);assert.equal(state.decor.amethyst,0);assert.equal(state.decor.cat,2);
  for(const id of ['money-tree','amethyst'])for(let i=0;i<5;i++)state=upgrade(state,id);
  assert.equal(idleRate(state),13.14);assert.equal(state.coins,10400);assert.deepEqual(readProgress(JSON.stringify(state),0),state);
@@ -32,7 +33,7 @@ test('original decorations retain their income ordering after the 40% reduction 
 });
 
 test('current decoration prices match the requested increases; fractional idle earnings accumulate without loss',async()=>{
- const {DECOR:allDecor}=await import('../src/catalog.js');const DECOR=allDecor.filter(d=>!d.expanded);assert.deepEqual(DECOR.map(d=>d.cost),[1190,1145,1155,1165,1210,6240,6270,6300,6340]);
+ const {DECOR:allDecor}=await import('../src/catalog.js');const DECOR=allDecor.filter(d=>!d.expanded&&!d.unlockStory);assert.deepEqual(DECOR.map(d=>d.cost),[1190,1145,1155,1165,1210,6240,6270,6300,6340]);
  for(const [level,rate,tenCoins,tenCarry]of [[2,1.26,12,.6],[3,1.32,13,.2],[4,1.38,13,.8],[5,1.44,14,.4]]){const state={...fresh(0),decor:{neon:level}};assert.equal(idleRate(state),rate);let collected=collectIdle(state,3600000);assert.equal(collected.earned,1);assert.equal(collected.state.idleCarry,Math.round((rate-1)*100)/100);
  for(let hour=2;hour<=10;hour++)collected=collectIdle(collected.state,hour*3600000);
  assert.equal(collected.state.coins,tenCoins);assert.equal(collected.state.idleCarry,tenCarry);}

@@ -1,3 +1,7 @@
+# Current simplified comedy release
+
+Use `npm test` and `scripts/simple-comedy-check.mjs` for the current unified finisher, single-action events, auto rituals and story/gift flows. See README.md for current rules. The older signature recipes and multi-step event checks below describe earlier releases and are superseded.
+
 # Verification
 
 - **49 unit tests:** automatic 72-second and active 52-second rituals; phase/action guards; private literal worries; two simultaneous pointers; duplicate suppression; rhythm and heavy-strike scoring; combo/QTE behaviour; paper damage; pause/resume; feed/blessing bonuses; corrupt saves; merit/cost gates; all decor levels; capped idle income/fractions/backwards clocks; idempotent rewards; unique benefactors; and three best records.

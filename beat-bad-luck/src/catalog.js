@@ -23,7 +23,7 @@ export const WORRIES=[
  {id:'exam-failed',group:'study',label:'Failed an exam',labelZh:'考試肥佬',name:'The Exam Gremlin',icon:'screen',weakness:'circle'},
  {id:'study-trouble',group:'study',label:'Struggling with studies',labelZh:'學業唔好',name:'The Homework Gremlin',icon:'screen',weakness:'rub'},
  {id:'money-health',group:'money',label:'Short on money and energy',labelZh:'財少身子弱',name:'The Empty-Wallet Worry',icon:'cloud',weakness:'hold'},
- {id:'business-slow',group:'money',label:'Business is slow',labelZh:'生意唔好',name:'The Quiet-Till Gremlin',icon:'screen',weakness:'spread'},
+ {id:'business-slow',group:'money',label:'Business is slow',labelZh:'生意唔好',name:'The Quiet-Till Gremlin',icon:'screen',weakness:'hold'},
  {id:'stocks',group:'money',label:'Stocks letting you down',labelZh:'股票唔生性',name:'The Stock Market Gremlin',icon:'chart'},
  {id:'marksix',group:'money',label:'No luck with Mark Six',labelZh:'六合彩唔中',name:'The Stock Market Gremlin',icon:'chart'},
  {id:'casino-loss',group:'money',label:'No luck at the casino',labelZh:'賭場失意',name:'The Unlucky-Chip Gremlin',icon:'chart',weakness:'circle'},
@@ -45,7 +45,7 @@ export const WORRIES=[
  {id:'food-choke',group:'daily',label:'Choked while eating',labelZh:'食飯哽襯',name:'The Dinner Hiccup',icon:'cloud',weakness:'hold'},
  {id:'water-choke',group:'daily',label:'Water went down the wrong way',labelZh:'飲水濁襯',name:'The Water Hiccup',icon:'cloud',weakness:'hold'},
  {id:'walking-trip',group:'daily',label:'Tripped while walking',labelZh:'行路kick襯',name:'The Clumsy-Step Gremlin',icon:'cloud',weakness:'circle'},
- {id:'bad-luck',group:'luck',label:'Nothing seems to go right',labelZh:'頭頭碰著黑，諸事不順',name:'The Bad-Luck Cloud',icon:'cloud',weakness:'spread'},
+ {id:'bad-luck',group:'luck',label:'Nothing seems to go right',labelZh:'頭頭碰著黑，諸事不順',name:'The Bad-Luck Cloud',icon:'cloud',weakness:'hold'},
 ];
 export const WEAPONS=[
  ...SECRET_WEAPONS,
@@ -129,6 +129,7 @@ export const DECOR=[
   {"id": "sushi-1000", "name": "Salmon rose sushi ×1000", "nameZh": "花之戀壽司x1000", "cost": 9800, "rate": 10.8, "expanded": true},
   {"id": "dragon-throne", "name": "Hall of Supreme Harmony dragon throne", "nameZh": "故宫太和殿龍椅", "cost": 16000, "rate": 16.8, "expanded": true},
 ];
+DECOR.push({id:'clockoff-seal',name:'Automatic clock-off seal',nameZh:'自動準時收工印',cost:8800,rate:3.6,unlockStory:'bridge-appeal',description:'牛丸老闆御賜：個印自己識睇鐘，五點九已經瞓低等收工。',descriptionEn:'Gifted by the meatball boss. This seal stamps leave before the clock asks.'});
 // All hourly income, including the upgrade increment, is 40% below the previous balance.
 export const DECOR_LEVEL_RATE_BONUS=.06;
 export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*DECOR_LEVEL_RATE_BONUS)*100)/100:0;
