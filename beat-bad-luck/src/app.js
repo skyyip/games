@@ -101,7 +101,7 @@ function renderDecorDisplay(){
   const previous=Number(piece?.dataset.level)||0;
   if(!piece){
    piece=document.createElement('li');piece.className=`stall-piece piece-${decor.id}`;piece.dataset.piece=decor.id;
-   piece.innerHTML=`<button type="button" class="piece-manage"><span class="furnishing-art" aria-hidden="true">${decorArt(decor.id)}</span><span class="furnishing-condition" aria-hidden="true"><i></i></span><span class="furnishing-level" aria-hidden="true"></span><span class="sr-only" translate="no"></span></button><button type="button" class="piece-drag-handle" title="Drag to rearrange" aria-label="Rearrange">⠿</button>`;
+   piece.innerHTML=`<button type="button" class="piece-manage"><span class="furnishing-art" aria-hidden="true">${decorArt(decor.id)}</span><span class="furnishing-condition" aria-hidden="true"><i></i></span><span class="furnishing-level" aria-hidden="true"></span><span class="sr-only" translate="no"></span></button><button type="button" class="piece-drag-handle" title="Drag to rearrange" aria-label="Rearrange"><svg class="piece-drag-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="currentColor"><circle cx="8" cy="5" r="1.8"/><circle cx="16" cy="5" r="1.8"/><circle cx="8" cy="12" r="1.8"/><circle cx="16" cy="12" r="1.8"/><circle cx="8" cy="19" r="1.8"/><circle cx="16" cy="19" r="1.8"/></g></svg></button>`;
    piece.addEventListener('click',event=>{if(!event.target.closest('.piece-drag-handle'))uxUI?.openDecor(decor.id);});
    display.append(piece);
   }

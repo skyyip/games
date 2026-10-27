@@ -74,7 +74,7 @@ The sanctuary wallet has prominent oil/merit totals with 650 ms counting animati
 
 Traditional Chinese is the default; English follows the playground preference. During whacking, Master randomly cycles through the six requested Cantonese villain-hitting lines, without repeats within a six-line bag or at bag boundaries. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v68** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v69** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -92,3 +92,9 @@ The current browser acceptance test covers four Chinese/English portrait/landsca
 Selection polish: equipped paid/free paper cards have a bright gold border and a continuously travelling SVG perimeter glint, with a static highlight for reduced-motion preferences. The overlay never intercepts clicks or covers text; selected copy and bonuses keep at least 4.5:1 contrast. The game’s update prompt heading is 21.6px (80% of its former 27px).
 
 Kit and decoration shortcuts use distinct gold/mint raised cards and original slipper/storefront icons. Their existing tab navigation, enlarged labels and mobile touch targets are preserved.
+
+Stall badges use explicit 22px centred cells. Drag controls use centred SVG dots: visible frame 19.2px and icon 14.4px (40% smaller), retaining the 32px touch target. The decoration dialog’s SVG close mark is centred in its 44px button.
+
+Decoration upgrade prices use dark green ink on the gold button. Unaffordable upgrades keep an opaque, muted surface so their prices remain readable.
+
+Owned decoration art and its drag preview are a further 15% smaller (CSS scale 0.96 → 0.816); the shelf cells, badges and touch targets keep their sizes and positions.
