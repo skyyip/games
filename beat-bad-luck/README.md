@@ -235,3 +235,11 @@ On the coloured scene, complete **upward swipe → full circle in either directi
 Success awards `round(250 × kit multiplier × paper multiplier)` exactly once. Timeout gives no bonus and does not refund the spent two charges; normal whacking resumes with an explicit message. A finisher cannot overlap ordinary scoring, another signature or a copy/event reward, including its brief success animation. Upcoming/active event windows and less than 6.5 seconds remaining block activation and explain why in the guide. Banks reset for a new ritual.
 
 Result-popup heading/card text is 20% smaller, the close/keep button label is 30% larger, and the leading 吉 glyph moves 6px upward within its decorative frame. Daily-login popups and the collection cards keep their own typography.
+
+## Comic closing ritual and result trophy
+
+Both tiger-feeding variants now respond with squashy pork, sauce splashes, a chewing tiger and a comic burp. Mouth coating adds little hearts and a moustache joke. Ordered purification crumples the battered paper into the tiger, scatters smiling rice or beans, then sends a sunglasses-wearing green horse off to welcome helpful company. Master Yip's bilingual jokes use the existing dialogue slot; visual effects are clipped and pointer-transparent. Readiness uses a glow instead of moving the live buttons.
+
+Pork and paper support dragging, tapping and keyboard activation. Interrupted drags reset and release capture without completing a step. Pause freezes the decorative animations, including the cloned paper's internal animation; reduced motion uses brief fades. Phase changes clear old effects. The result popup's original manga trophy has oversized shiny eyes, pink cheeks, a tiny crown, cheering gloves, a bow tie and little shoes.
+
+`node scripts/ritual-comedy-check.mjs` verifies all six steps in four viewport/language/input profiles, including both pork modes, rice/beans, rejected drops, paused drags/effects, fixed target centres, reduced motion, divination retry, once-only results, replay cleanup and the trophy's mobile layout.
