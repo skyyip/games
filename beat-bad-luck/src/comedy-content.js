@@ -1,7 +1,6 @@
 // Original flyover slapstick: short callbacks, never private worry text.
-export const ULTIMATE_DURATION=2700,ULTIMATE_LIMIT=2,ULTIMATE_CHARGE=100,COMBO_GRACE=1000;
+export const ULTIMATE_DURATION=2700,ULTIMATE_LIMIT=1,ULTIMATE_CHARGE=100;
 export const NICE_AT=1350,NICE_WINDOW=220;
-export const chargeForCombo=combo=>combo>=20?4:combo>=10?3:2;
 const families=['palm','blade','spin','hammer','stamp','suction','sun','beauty','gadget','hound'];
 const groups=['requirement','stocks','people','everyday'];
 const groupFor=kind=>['work','work-life','ai-tokens'].includes(kind)?'requirement':kind==='stocks'||kind==='marksix'?'stocks':['teammates','kam-friends','family','love'].includes(kind)?'people':'everyday';

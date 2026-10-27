@@ -1,4 +1,14 @@
-# Simplified comedy ritual acceptance · 2026-10-27
+# Rhythm-guided ritual acceptance · 2026-10-27
+
+- `npm test`: **127 passed**, zero failures. Replaced retired freestyle/two-finisher assertions with timing, instruction matching, duplicate prevention, combo reset and once-only unlock checks; economy, inventory, saves, privacy, audio and story coverage remain.
+- Generated 68-second rounds use 108 BPM, preview the next gesture and reserve two beats for complex moves. Random-plan property checks verify all five gestures, nonoverlapping inclusive ±190 ms windows and enough cues to reach 100. All sixty kits exercise the real 100-cue path and their multiplier exactly once.
+- Matching one cue scores once; wrong, early and missed cues cannot build charge. Misses reset unfinished progress. At 99 the finisher stays disabled; at 100 it unlocks and stays earned. The one allowed performance pauses cue/event/round clocks and retains the combo; the optional nice tap pays once.
+- Hashed production full rituals pass at **320×568 Chinese**, **390×844 English with optional events**, **812×375 Chinese / reduced motion**, and **1440×900 English / reduced motion**. Real pointer gestures drive 100 cues; desktop uses the documented P key for pinch. Each run checks invalid-input inventory protection, the 99/100 boundary, one cinematic with user pause, all six steps, result rewards and reload.
+- Pause action labels are **15px** (+25%); final auspicious-card body copy is **12.48px** (+20%). Search inputs fill the row beside the filter, stay at 16px and do not trigger focus zoom. The raised neighbour button overrides the last tab, selects Stories and aligns its chapter heading below the sticky navigation.
+- Chinese step labels are **奉神** and **打杯**. Original smiling-stove, cheering-grain and green-horse-taxi vectors replace blessing emoji props. Portrait and landscape views were visually inspected; the landscape grid keeps every prop separate and the tiger face clear. Source cache is **v71**; all production JS/CSS/images/fonts are hashed.
+- Canonical browser command: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright BEAT_BAD_LUCK_URL=http://localhost:5210/beat-bad-luck/ node scripts/rhythm-ritual-check.mjs`. Historical browser scripts below exercise earlier mechanics.
+
+## Previous freestyle implementation (historical; superseded scoring and two-finisher rules)
 
 - `npm test`: **128 passed**, zero failures. Retired signature-recipe tests now exercise the unified system; economy, durability, gestures, save migration, privacy, backup and audio coverage remain.
 - Full browser rituals: **320×568 Traditional Chinese**, **390×844 English**, **812×375 Traditional Chinese / reduced motion**, **1440×900 English**. Tested source and hashed production output.
