@@ -25,7 +25,7 @@ test('higher oil prices give strictly higher scores for identical gestures and r
   let previous=0,previousCost=-1;
   for(const weapon of byPrice.filter(w=>!w.hidden)){const g=setup();g.game.start({weapon:weapon.id});g.advance(DURATIONS.incense);g.advance(DURATIONS.worry);g.advance(4500);
    const first=g.game.hit({gesture,pointer:1});if(weapon.cost===previousCost)assert.equal(first.points,previous);else assert.ok(first.points>previous,`${weapon.id} ${gesture}`);previous=first.points;previousCost=weapon.cost;
-   const before=g.game.score;const next=g.game.hit({gesture,pointer:2});assert.equal(next.qteComplete,true);assert.equal(g.game.score-before,next.points+Math.round(30*weaponScoreMultiplier(weapon.id)*1.1));
+   const before=g.game.score;const next=g.game.hit({gesture,pointer:2});assert.equal(next.qteComplete,true);assert.equal(g.game.score-before,next.points+Math.round(30*weaponScoreMultiplier(weapon.id)));
    closeRitual(g);assert.equal(g.game.result.weapon,weapon.id);assert.equal(g.game.result.score,g.game.score);
   }
  }

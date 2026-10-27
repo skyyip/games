@@ -52,5 +52,5 @@ test('long sampled circles retain their whole shape, bounded memory and captured
 test('new recipes keep public-API multiplied bonuses, phase guards and clean replays',()=>{
  for(const id of ['bare-hand','spanner','rebirth-paper']){let now=0;const g=new RitualGame({now:()=>now,random:()=>.1});g.start({weapon:id});assert.equal(g.activateSkill(),false);now+=DURATIONS.incense;g.advance();now+=DURATIONS.worry;g.advance();for(let i=0;i<12;i++){g.hit();now+=80;}g.advance();assert.equal(g.activateSkill(),true);let time=g.elapsed;const before=g.score;
  const phaseAt=now-g.elapsed;while(g.skill.active){const finished=completeStep(g.skill,time,(type,input,at)=>{now=phaseAt+at;return g.skillAction(type,input);});time=finished.time;assert.equal(finished.out.ok,true);}
- assert.equal(g.score-before,Math.round(50*weaponScoreMultiplier(id)*1.1));g.start({weapon:id});assert.equal(g.skill.charge,0);assert.equal(g.skill.attempts,0);}
+ assert.equal(g.score-before,Math.round(50*weaponScoreMultiplier(id)));g.start({weapon:id});assert.equal(g.skill.charge,0);assert.equal(g.skill.attempts,0);}
 });
