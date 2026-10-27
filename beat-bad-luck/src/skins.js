@@ -20,8 +20,8 @@ SKINS.push(...[
  ['unready-extra','永遠未準備好的龍套','The never-ready extra',7400,'#bdb1df','extra',1.7,'我 ready！等我搵返個人、件衫同份劇本先。']
 ].map(([id,nameZh,name,cost,color,shape,multiplier,description])=>({id,nameZh,name,cost,color,shape,multiplier,description,descriptionEn:'A three-act comic paper: swagger, pleading, then a very undignified wrap.',merit:0})));
 SKINS.unshift({id:'plain',nameZh:'免費素紙',name:'Free plain paper',cost:0,color:'#f4dfaa',shape:'paper',description:'素紙唔收錢，拍走心塞一樣得！',descriptionEn:'Always available. No score bonus and no wear.',merit:0,multiplier:1,starter:true});
-for(const skin of SKINS)if(!skin.starter)skin.multiplier=Math.round((skin.multiplier+.3)*100)/100;
-// New-series multipliers are final values; the legacy +0.3 adjustment above must not run twice.
+for(const skin of SKINS)if(!skin.starter)skin.multiplier=Math.round((skin.multiplier+.5)*100)/100;
+// New-series multipliers are final values; the legacy +0.5 adjustment above must not run twice.
 SKINS.push(...CHARACTER_SKINS);
 export const SKIN_USES=10;
 export const skinScoreMultiplier=id=>SKINS.find(s=>s.id===id)?.multiplier??SKINS[0].multiplier;

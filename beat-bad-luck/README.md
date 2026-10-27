@@ -34,19 +34,19 @@ Long-press/release, outward two-finger spreading, X and V are not scoring gestur
 
 Requirement/work-life worries emit at most two expiring copies. Stocks reward hitting during the plunge. The pig teammate cycles helmet → pretend nap → snicker; the snicker is its weakness. Other presets retain their gesture-specific optional bonuses.
 
-Three new paid, ten-use papers have three comic acts (swagger → pleading → undignified wrap): 九品甩鍋官 (6,200 oil, ×1.9), 假扮高人的老細 (6,800, ×1.95), 永遠未準備好的龍套 (7,400, ×2). The original fifteen paid paper multipliers have increased by 0.3; unlimited free plain paper stays at ×1; existing paper prices and remaining uses are preserved.
+Three new paid, ten-use papers have three comic acts (swagger → pleading → undignified wrap): 九品甩鍋官 (6,200 oil, ×2.1), 假扮高人的老細 (6,800, ×2.15), 永遠未準備好的龍套 (7,400, ×2.2). The original fifteen paid paper multipliers have increased by 0.5 in total; unlimited free plain paper stays at ×1; existing paper prices and remaining uses are preserved.
 
-Seven additional ten-use papers follow the existing catalogue. Prices and final bonuses reflect fictional comic difficulty, not real-life conduct. 銀幕奸角宗師 honours Fong Kong’s screen roles, not the actor himself; 空頭承諾王 and 迷糊雞仔偵探 are original fictional replacements for the submitted real-person negative labels. All use original chibi vector art with individual props, hit reactions and reduced-motion support. Free plain paper remains ×1; existing prices, bonuses and saved uses remain unchanged.
+Seven additional ten-use papers follow the existing catalogue. Prices and final bonuses reflect fictional comic difficulty, not real-life conduct. 銀幕奸角宗師 honours Fong Kong’s screen roles, not the actor himself; 空頭承諾王 and 迷糊雞仔偵探 are original fictional replacements for the submitted real-person negative labels. All use original chibi vector art with individual props, hit reactions and reduced-motion support. Free plain paper remains ×1; existing prices and saved uses remain unchanged. All 22 paid looks receive a further +0.2 bonus; free paper remains ×1.
 
 | Paper | Oil | Final relief bonus |
 | --- | ---: | ---: |
-| 迷糊雞仔偵探 | 7,800 | ×2.05 |
-| 空頭承諾王 | 8,400 | ×2.10 |
-| 銀幕奸角宗師 | 9,200 | ×2.20 |
-| 古惑仔・靚坤 | 10,400 | ×2.30 |
-| 古惑仔・烏鴉 | 11,800 | ×2.45 |
-| 斷水流大師兄 | 13,800 | ×2.60 |
-| 鹿鼎記・鼇拜 | 16,800 | ×2.80 |
+| 迷糊雞仔偵探 | 7,800 | ×2.25 |
+| 空頭承諾王 | 8,400 | ×2.30 |
+| 銀幕奸角宗師 | 9,200 | ×2.40 |
+| 古惑仔・靚坤 | 10,400 | ×2.50 |
+| 古惑仔・烏鴉 | 11,800 | ×2.65 |
+| 斷水流大師兄 | 13,800 | ×2.80 |
+| 鹿鼎記・鼇拜 | 16,800 | ×3.00 |
 
 The three-chapter **橋底申訴處・牛丸係老闆** story follows a missing meatball, an unreliable witness and a meatball boss on the throne. A completed ritual advances one accepted chapter even if its optional target is missed. Completion pays 60% of the listed maximum; meeting the matching worry/skill target pays the full amount. Replays retain the existing reduced pay. The final first completion places the **自動準時收工印** in the stall, with normal durability and repair. Replays never duplicate this gift; its shop entry unlocks after the story for later replacement/upgrading.
 
@@ -74,7 +74,7 @@ The sanctuary wallet has prominent oil/merit totals with 650 ms counting animati
 
 Traditional Chinese is the default; English follows the playground preference. During whacking, Master randomly cycles through the six requested Cantonese villain-hitting lines, without repeats within a six-line bag or at bag boundaries. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v67** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v68** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -88,3 +88,7 @@ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/stall-refresh-check
 ```
 
 The current browser acceptance test covers four Chinese/English portrait/landscape/desktop profiles, a reduced-motion profile, real ordinary hits, two finishers, optional timing, pause, stable event geometry, the patron cameo, one-tap feeding/blessing, automatic block retry, the final story gift, inventory accounting and reload. Set `BEAT_BAD_LUCK_URL` to run the same test against a hashed production build. The interaction check additionally exercises all nine native event controls, purchase cancellation/confirmation and manual blood dipping/smearing with one bonus. The opt-in check completes event-free and event-enabled rituals, verifies story progression with events off, and reloads both saved choices in Chinese and English mobile layouts. Historical signature/event browser scripts document retired mechanics; use the current check above for this version.
+
+Selection polish: equipped paid/free paper cards have a bright gold border and a continuously travelling SVG perimeter glint, with a static highlight for reduced-motion preferences. The overlay never intercepts clicks or covers text; selected copy and bonuses keep at least 4.5:1 contrast. The game’s update prompt heading is 21.6px (80% of its former 27px).
+
+Kit and decoration shortcuts use distinct gold/mint raised cards and original slipper/storefront icons. Their existing tab navigation, enlarged labels and mobile touch targets are preserved.

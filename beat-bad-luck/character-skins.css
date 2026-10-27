@@ -15,3 +15,23 @@
 /* The gold selected border sits on a dark card: retain readable names, uses and bonuses. */
 .skin-card[aria-pressed=true]{color:#fff4d4}
 .skin-card[aria-pressed=true] .skin-bonus{color:#ffe08c}
+/* A perimeter glint stays outside the copy and never changes card geometry. */
+.skin-card,.skin-free-card{position:relative;isolation:isolate}
+.skin-selection-glint{display:none;position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;z-index:1}
+[aria-pressed=true]>.skin-selection-glint{display:block}
+.skin-card .skin-selection-glint svg,.skin-free-card .skin-selection-glint svg{display:block;position:absolute;inset:0;width:100%;height:100%;max-height:none;overflow:visible;filter:none}
+.skin-selection-glint rect{width:calc(100% - 4px);height:calc(100% - 4px);fill:none;stroke:#fff9cf;stroke-width:3;stroke-linecap:round;stroke-dasharray:8 92;filter:drop-shadow(0 0 3px #ffdf77);animation:skin-perimeter-glint 3.2s linear infinite}
+@keyframes skin-perimeter-glint{to{stroke-dashoffset:-100}}
+#site-update-title{font-size:21.6px}
+@media(prefers-reduced-motion:reduce){.skin-selection-glint rect{animation:none}}
+/* Two colourful, tactile shortcuts stay separate from the main Start control. */
+.kit-shortcuts{gap:12px;margin-top:4px;margin-bottom:22px}
+.kit-shortcuts button{display:grid;grid-template-columns:minmax(0,1fr) 30px;align-items:center;gap:8px;min-height:68px;padding:12px 10px;border:2px solid #ffe6ac;border-radius:14px;background:linear-gradient(145deg,#ffe3a1,#eec36b);color:#3f4431;box-shadow:0 4px 0 #977044,0 7px 15px #102d2944;font-weight:800;text-align:left;line-height:1.45;transition:transform .16s ease,box-shadow .16s ease}
+.kit-shortcuts [data-shortcut=stall]{background:linear-gradient(145deg,#d7f1d5,#a7d5ba);border-color:#e9f9df;box-shadow:0 4px 0 #5b957d,0 7px 15px #102d2944;color:#234a3d}
+.kit-shortcuts button .shortcut-icon{display:grid;place-items:center;width:30px;height:36px;flex:none;color:inherit}
+.kit-shortcuts .shortcut-icon svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 1px #715b3428)}
+.kit-shortcuts button:hover{background:linear-gradient(145deg,#ffedbd,#f6cf82);border-color:#fff1cd;transform:translateY(-1px);box-shadow:0 5px 0 #977044,0 8px 19px #ecc46b33}
+.kit-shortcuts [data-shortcut=stall]:hover{background:linear-gradient(145deg,#e3f8df,#bee4cc);border-color:#f2ffe9;box-shadow:0 5px 0 #5b957d,0 8px 19px #9ed6ba33}
+.kit-shortcuts button:active{transform:translateY(3px);box-shadow:0 1px 0 #977044}.kit-shortcuts [data-shortcut=stall]:active{box-shadow:0 1px 0 #5b957d}
+.kit-shortcuts button:focus-visible{outline:3px solid #fff2c9;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.kit-shortcuts button{transition:none}}
