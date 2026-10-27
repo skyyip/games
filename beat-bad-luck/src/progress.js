@@ -1,4 +1,4 @@
-import {SKINS} from './skins.js';
+import {SKINS,SKIN_USES} from './skins.js';
 import {PATRONS,SECRET_WEAPONS,SECRET_DECOR,weightedPatron,patronBuffs,hkDay} from './ritual-rewards.js';
 import {freshNeighbourhood,readNeighbourhood,finishNeighbourhood,STORIES,commissionPay} from './neighbourhood.js';
 import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorHourlyRate} from './catalog.js';
@@ -9,12 +9,14 @@ const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.dec
 export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
 export function repairCost(state,id,now=Date.now()){const item=DECOR.find(d=>d.id===id),health=decorDurability(state,id,now);return item&&health>0&&health<100?Math.max(1,Math.ceil(item.cost*state.decor[id]*.25*(1-health/100))):0;}
 export const STORAGE_KEY='beat-bad-luck.stall.v1';
-export const WEAPON_USES=2;
+export const WEAPON_USES=3;
 export const weaponUses=(state,id)=>id==='bare-hand'?Infinity:state.owned.includes(id)?cap(state.weaponUses?.[id]??WEAPON_USES,WEAPON_USES):0;
-export function fresh(now=Date.now()){return {version:1,ownedSkins:['paper'],selectedSkin:'paper',coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],coupons:[],discovered:[],lastDaily:'',records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
+export function fresh(now=Date.now()){return {version:1,ownedSkins:['plain'],skinUses:{},selectedSkin:'plain',coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],coupons:[],discovered:[],lastDaily:'',records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
 export function readProgress(raw,now=Date.now()){
   const state=fresh(now);try{const x=JSON.parse(raw);if(!x||x.version!==1)return state;
-    state.ownedSkins=[...new Set(['paper',...(Array.isArray(x.ownedSkins)?x.ownedSkins:[]).filter(id=>SKINS.some(s=>s.id===id))])];state.selectedSkin=state.ownedSkins.includes(x.selectedSkin)?x.selectedSkin:'paper';
+    state.ownedSkins=[...new Set(['plain',...(Array.isArray(x.ownedSkins)?x.ownedSkins:[]).filter(id=>SKINS.some(s=>s.id===id))])];
+    for(const id of state.ownedSkins.filter(id=>id!=='plain')){const value=x.skinUses?.[id];state.skinUses[id]=Number.isFinite(value)?cap(value,SKIN_USES):SKIN_USES;}
+    state.ownedSkins=state.ownedSkins.filter(id=>id==='plain'||state.skinUses[id]>0);for(const id of Object.keys(state.skinUses))if(!state.ownedSkins.includes(id))delete state.skinUses[id];state.selectedSkin=state.ownedSkins.includes(x.selectedSkin)?x.selectedSkin:'plain';
     state.lastDaily=typeof x.lastDaily==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.lastDaily)?x.lastDaily:'';state.discovered=[...new Set((Array.isArray(x.discovered)?x.discovered:[]).filter(id=>[...SECRET_WEAPONS,...SECRET_DECOR].some(i=>i.id===id)))];state.coupons=(Array.isArray(x.coupons)?x.coupons:[]).filter(c=>PATRONS.some(f=>f.id===c.patron&&f.discount===c.discount)&&c.uses>0).slice(0,10).map(c=>({patron:c.patron,discount:c.discount,uses:1}));state.coins=cap(x.coins);state.merit=cap(x.merit);state.rituals=cap(x.rituals);state.owned=[...new Set(['bare-hand',...(Array.isArray(x.owned)?x.owned:[]).filter(id=>WEAPONS.some(w=>w.id===id))])];state.equipped=state.owned.includes(x.equipped)?x.equipped:'bare-hand';
     for(const id of state.owned.filter(id=>id!=='bare-hand')){const value=x.weaponUses?.[id];state.weaponUses[id]=Number.isFinite(value)?cap(value,WEAPON_USES):WEAPON_USES;}
     state.owned=state.owned.filter(id=>id==='bare-hand'||state.weaponUses[id]>0);for(const id of Object.keys(state.weaponUses))if(!state.owned.includes(id))delete state.weaponUses[id];if(!state.owned.includes(state.equipped))state.equipped='bare-hand';
@@ -80,4 +82,6 @@ export const purchasePrice=(state,base)=>Math.ceil(base*(1-patronBuffs(state).di
 function useCoupon(state){const coupons=[...(state.coupons??[])],best=coupons.reduce((a,c)=>!a||c.discount>a.discount?c:a,null);return best?{...state,coupons:coupons.filter(c=>c!==best)}:state;}
 export function dailyReward(state,now=Date.now()){const day=hkDay(now);return state.lastDaily>=day?null:{...state,coins:cap(state.coins+20),merit:cap(state.merit+30),lastDaily:day};}
 
-export function buySkin(state,id){const skin=SKINS.find(s=>s.id===id);if(!skin)return null;if(state.ownedSkins.includes(id))return {...state,selectedSkin:id};const cost=purchasePrice(state,skin.cost);if(state.coins<cost)return null;return {...useCoupon(state),coins:state.coins-cost,ownedSkins:[...state.ownedSkins,id],selectedSkin:id};}
+export const skinUses=(state,id)=>id==='plain'?Infinity:state.ownedSkins.includes(id)?cap(state.skinUses?.[id]??SKIN_USES,SKIN_USES):0;
+export function buySkin(state,id){const skin=SKINS.find(s=>s.id===id);if(!skin)return null;if(state.ownedSkins.includes(id))return {...state,selectedSkin:id};const cost=purchasePrice(state,skin.cost);if(state.coins<cost)return null;return {...useCoupon(state),coins:state.coins-cost,ownedSkins:[...state.ownedSkins,id],skinUses:{...state.skinUses,[id]:SKIN_USES},selectedSkin:id};}
+export function consumeSkin(state,id){if(!SKINS.some(s=>s.id===id)||!state.ownedSkins.includes(id))return null;if(id==='plain')return state;const remaining=skinUses(state,id)-1,uses={...state.skinUses};if(remaining)uses[id]=remaining;else delete uses[id];return {...state,skinUses:uses,ownedSkins:remaining?state.ownedSkins:state.ownedSkins.filter(s=>s!==id),selectedSkin:!remaining&&state.selectedSkin===id?'plain':state.selectedSkin};}

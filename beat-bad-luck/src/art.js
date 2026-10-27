@@ -27,7 +27,7 @@ export function weaponArt(id){const secret=SECRET_WEAPONS.find(i=>i.id===id);if(
 }
 let dollArtSerial=0;
 export function dollArt(kind='work',look=0,skin='paper'){
- if(skin!=='paper')return skinArt(skin);
+ if(skin!=='paper'&&skin!=='plain')return skinArt(skin);
  const worry=WORRIES.find(w=>w.id===kind);if(worry?.weakness)kind=({screen:'work',megaphone:'noise',chart:'stocks',house:'family',heart:'love',train:'commute',cloud:'sleep'})[worry.icon]??'sleep';
  const heads={
  house:'<path d="m25 33 45-28 45 28" fill="#d6a182" stroke="#865e4f" stroke-width="4" stroke-linejoin="round"/><rect x="34" y="30" width="72" height="47" rx="8" fill="#dec5a0" stroke="#865e4f" stroke-width="4"/><path class="paper-neutral-face" style="display:var(--neutral-display,inline)" d="m50 46 10-4m20 0 10 4m-28 16q8-5 16 0" fill="none" stroke="#6d6150" stroke-width="3" stroke-linecap="round"/>',
@@ -112,3 +112,4 @@ export function ghostArt(mood='silly'){
 }
 
 function secretArt(item){const hue=(item.secretIndex*37)%360;return wrap(`<defs><linearGradient id="secret-${item.id}" x2="1" y2="1"><stop stop-color="hsl(${hue} 85% 82%)"/><stop offset="1" stop-color="hsl(${hue+60} 80% 65%)"/></linearGradient></defs><path d="M20 22Q60 2 100 22l8 67q-47 36-96 0Z" fill="url(#secret-${item.id})" stroke="#62495e" stroke-width="3"/><text x="60" y="75" text-anchor="middle" font-size="51">${item.icon}</text><path d="m31 88 8 2m41-2 8-2M44 98q16 14 32-1" fill="none" stroke="#714a5b" stroke-width="3"/><path d="m12 12 5 9 9 2-9 4-3 9-4-9-8-3 8-4Z" fill="#ffe273"/>`);}
+export function comicTrophyArt(){return `<svg class="comic-trophy" viewBox="0 0 80 90" aria-hidden="true"><path d="M17 16H6q-1 26 20 24m37-24h11q1 26-20 24" fill="none" stroke="#df993b" stroke-width="7" stroke-linecap="round"/><path d="m20 10 42 2-4 27Q54 59 39 56 21 53 20 10Z" fill="#ffd873" stroke="#976323" stroke-width="3"/><path d="m27 16 3 18" stroke="#fff6c3" stroke-width="5" stroke-linecap="round"/><ellipse cx="32" cy="29" rx="5" ry="8" fill="#483d48"/><ellipse cx="50" cy="30" rx="5" ry="8" fill="#483d48"/><circle cx="33" cy="26" r="2" fill="#fff"/><circle cx="51" cy="27" r="2" fill="#fff"/><path d="M31 41q11 18 24-1Z" fill="#a34b64" stroke="#704047" stroke-width="2"/><path d="m36 44 12-1-1 4-10 1" fill="#fff5d9"/><ellipse cx="25" cy="38" rx="7" ry="4" fill="#ee9ca0"/><ellipse cx="60" cy="39" rx="7" ry="4" fill="#ee9ca0"/><path d="m42 56-2 14m-15 2h31v9H25Z" fill="#edb45b" stroke="#976323" stroke-width="3"/><path d="m26 79-9 7h17m18-7 10 7H45" stroke="#5a6656" stroke-width="5" stroke-linecap="round"/><path d="m65 2 3 7 8 1-6 5 1 7-7-4-6 4 2-8-6-4 8-1Z" fill="#ffa58d"/></svg>`;}

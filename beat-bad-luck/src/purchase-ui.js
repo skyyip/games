@@ -1,4 +1,5 @@
-import {skinArt} from './skins.js';
+import {polishCollections,rarity} from './collection-polish.js';
+import {skinArt,skinScoreMultiplier} from './skins.js';
 import {weaponArt,decorArt} from './art.js';
 import {weaponScoreMultiplier,decorHourlyRate} from './catalog.js';
 import {comicDescription} from './ritual-rewards.js';
@@ -6,14 +7,14 @@ import {getLanguage} from '../../grid-rush/src/language.js';
 export function createPurchaseUI({getState,itemName,onReturn,onStart,onView,onReveal=()=>{}}){
  const dialog=document.querySelector('#purchase-dialog'),find=id=>dialog.querySelector('#'+id);let receipt=null,committing=false,outside=false;
  const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en,put=(id,text)=>find(id).textContent=text;
- function render(){if(!receipt)return;const {kind,item,cost,level,pending}=receipt,kit=kind==='weapon',skin=kind==='skin';dialog.dataset.pending=String(pending);
+ function render(){if(!receipt)return;const {kind,item,cost,level,pending}=receipt,kit=kind==='weapon',skin=kind==='skin';dialog.dataset.pending=String(pending);dialog.dataset.rarity=skin?'':rarity(kind,item);
   put('purchase-kicker',pending?local('睇清楚先買，師傅唔催單！','Take a look. No pressure!'):local('到手喇！街坊笑到拍晒手！','It’s yours! The neighbours approve!'));
-  put('purchase-title',itemName(item));put('purchase-effect',skin?local('永久收藏 · 每局開始前可免費切換','Permanent collectible · switch freely before playing'):kit?local(`解壓分數 ×${weaponScoreMultiplier(item.id)} · 可用兩次儀式`,`Score ×${weaponScoreMultiplier(item.id)} · two ritual uses`):local(`等級 ${level} · 每小時 ${decorHourlyRate(item,level)} 香油錢`,`Level ${level} · ${decorHourlyRate(item,level)} oil/hour`));
+  put('purchase-title',itemName(item));put('purchase-effect',skin?local(`耐用 10 次儀式 · 解壓分數 ×${skinScoreMultiplier(item.id)}`,`Ten ritual uses · relief score ×${skinScoreMultiplier(item.id)}`):kit?local(`解壓分數 ×${weaponScoreMultiplier(item.id)} · 可用三次儀式`,`Score ×${weaponScoreMultiplier(item.id)} · three ritual uses`):local(`等級 ${level} · 每小時 ${decorHourlyRate(item,level)} 香油錢`,`Level ${level} · ${decorHourlyRate(item,level)} oil/hour`));
   put('purchase-detail',local(comicDescription(item),item.descriptionEn??'A Hong Kong comedy-inspired prop. Bad luck has just applied for annual leave.'));
   put('purchase-note',pending?local('按「確認購買」才扣款；關閉或取消不會購買。折扣券在確認付款時才使用。','You pay only after Confirm purchase. Closing cancels; a coupon is used only on confirmation.'):local('已確認購買，物品已到手並選用。','Purchase confirmed. Your collectible is ready.'));
   put('purchase-spent',pending?local(`實付 ${cost.toLocaleString()} 香油錢 · 現有 ${getState().coins.toLocaleString()}`,`${cost.toLocaleString()} oil · balance ${getState().coins.toLocaleString()}`):local(`已付 ${cost.toLocaleString()} 香油錢 · 餘額 ${getState().coins.toLocaleString()}`,`Paid ${cost.toLocaleString()} oil · ${getState().coins.toLocaleString()} left`));
   put('purchase-action',pending?local('確認購買 ✓','Confirm purchase ✓'):(kit||skin)?local('開工除厄！','Start a ritual!'):local('睇吓我的攤位','See my stall'));
-  put('purchase-continue',pending?local('取消，繼續睇','Cancel and browse'):local('完成，繼續逛逛','Done, keep browsing'));find('purchase-close').setAttribute('aria-label',pending?local('取消購買並關閉','Cancel purchase and close'):local('關閉','Close'));
+  put('purchase-continue',pending?local('取消，繼續睇','Cancel and browse'):local('完成，繼續逛逛','Done, keep browsing'));find('purchase-close').setAttribute('aria-label',pending?local('取消購買並關閉','Cancel purchase and close'):local('關閉','Close'));polishCollections();
  }
  function finish(){if(!receipt)return;const r=receipt;receipt=null;committing=false;onReturn(r.kind,r.item.id);}
  function dismiss(){if(committing)return;dialog.close();finish();}

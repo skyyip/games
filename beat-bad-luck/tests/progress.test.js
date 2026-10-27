@@ -17,8 +17,8 @@ test('three highest records survive reload without storing extra fields',()=>{le
 
 test('a saved level-three stall can buy levels four and five without losing its old upgrades',()=>{let s=readProgress(JSON.stringify({...fresh(0),coins:20000,decor:{neon:3,cat:3,radio:3,incense:3}}),0);s=upgrade(s,'neon');assert.equal(s.decor.neon,4);assert.equal(s.coins,15420);s=upgrade(s,'neon');assert.equal(s.decor.neon,5);assert.equal(s.coins,9695);assert.equal(upgrade(s,'neon'),null);assert.equal(s.decor.cat,3);assert.equal(readProgress(JSON.stringify(s),0).decor.neon,5);});
 
-test('paid kits last two rituals, repurchased at full price, and the free fallback always works',()=>{
- const initial={...fresh(0),coins:1000,merit:1000};const bought=buyWeapon(initial,'paper');const once=consumeWeapon(bought,'paper');assert.equal(weaponUses(once,'paper'),1);assert.equal(once.equipped,'paper');assert.equal(buyWeapon(once,'paper').coins,755);assert.equal(weaponUses(readProgress(JSON.stringify(once),0),'paper'),1);const used=consumeWeapon(once,'paper');
+test('paid kits last three rituals, repurchased at full price, and the free fallback always works',()=>{
+ const initial={...fresh(0),coins:1000,merit:1000};const bought=buyWeapon(initial,'paper');const once=consumeWeapon(bought,'paper');assert.equal(weaponUses(once,'paper'),2);assert.equal(once.equipped,'paper');assert.equal(buyWeapon(once,'paper').coins,755);assert.equal(weaponUses(readProgress(JSON.stringify(once),0),'paper'),2);const twice=consumeWeapon(once,'paper');assert.equal(weaponUses(twice,'paper'),1);const used=consumeWeapon(twice,'paper');
  assert.equal(used.coins,755);assert.deepEqual(used.owned,['bare-hand']);assert.equal(used.equipped,'bare-hand');assert.equal(consumeWeapon(used,'paper'),null);
  const restored=readProgress(JSON.stringify(used),0);assert.ok(!restored.owned.includes('paper'));const rebought=buyWeapon(restored,'paper');assert.equal(rebought.coins,510);assert.equal(rebought.equipped,'paper');
  assert.equal(consumeWeapon(used,'bare-hand'),used);assert.equal(consumeWeapon(used,'unknown'),null);assert.ok(bought.owned.includes('paper'));
@@ -44,7 +44,7 @@ test('four new kits use the requested gates and prices, consume once, and surviv
   const kit=WEAPONS.find(w=>w.id===id);assert.equal(kit.merit,merit);assert.equal(kit.cost,cost);assert.equal(weaponScoreMultiplier(id),multiplier);
   assert.equal(buyWeapon({...fresh(0),coins:cost,merit:merit-1},id),null);assert.equal(buyWeapon({...fresh(0),coins:cost-1,merit},id),null);
   const bought=buyWeapon({...fresh(0),coins:cost,merit},id);assert.equal(bought.coins,0);assert.equal(bought.merit,merit);assert.equal(readProgress(JSON.stringify(bought),0).equipped,id);
-  const once=consumeWeapon(bought,id);assert.equal(once.weaponUses[id],1);const used=consumeWeapon(once,id);assert.ok(!readProgress(JSON.stringify(used),0).owned.includes(id));assert.equal(used.equipped,'bare-hand');assert.equal(buyWeapon(used,id),null);
+  const once=consumeWeapon(bought,id);assert.equal(once.weaponUses[id],2);const used=consumeWeapon(consumeWeapon(once,id),id);assert.ok(!readProgress(JSON.stringify(used),0).owned.includes(id));assert.equal(used.equipped,'bare-hand');assert.equal(buyWeapon(used,id),null);
   const rebought=buyWeapon({...used,coins:cost},id);assert.equal(rebought.coins,0);const received=reward(consumeWeapon(rebought,id),{...result,weapon:id},{id:`new-${id}`,now:10,random:()=>.9});assert.equal(readProgress(JSON.stringify(received.state),10).records[0].weapon,id);
  }
  const restored=readProgress(JSON.stringify({...fresh(0),owned:['flipflop','fortune-child'],equipped:'fortune-child'}),0);assert.equal(restored.equipped,'fortune-child');assert.equal(WEAPONS.find(w=>w.id===restored.equipped).name,'Fortune-turning child');
@@ -52,6 +52,6 @@ test('four new kits use the requested gates and prices, consume once, and surviv
 
 test('every original kit costs 200 more while new players can always whack with bare hands',async()=>{
  const {WEAPONS,weaponScoreMultiplier}=await import('../src/catalog.js');assert.deepEqual(WEAPONS.filter(w=>!w.starter&&!w.expanded&&!w.hidden).map(w=>w.cost),[200,245,270,310,350,400,440,460,520,550,550,6000,6500,18000]);assert.equal(fresh(0).equipped,'bare-hand');assert.equal(weaponScoreMultiplier('bare-hand'),1);
- let state=buyWeapon({...fresh(0),coins:200},'flipflop');assert.equal(state.coins,0);state=consumeWeapon(state,'flipflop');assert.equal(state.weaponUses.flipflop,1);state=consumeWeapon(state,'flipflop');assert.equal(state.equipped,'bare-hand');assert.ok(!state.owned.includes('flipflop'));assert.equal(buyWeapon(state,'flipflop'),null);assert.equal(buyWeapon(state,'bare-hand').coins,0);
+ let state=buyWeapon({...fresh(0),coins:200},'flipflop');assert.equal(state.coins,0);state=consumeWeapon(state,'flipflop');assert.equal(state.weaponUses.flipflop,2);state=consumeWeapon(state,'flipflop');assert.equal(state.weaponUses.flipflop,1);state=consumeWeapon(state,'flipflop');assert.equal(state.equipped,'bare-hand');assert.ok(!state.owned.includes('flipflop'));assert.equal(buyWeapon(state,'flipflop'),null);assert.equal(buyWeapon(state,'bare-hand').coins,0);
  const old=readProgress(JSON.stringify({version:1,coins:0,owned:['flipflop'],equipped:'flipflop'}),0);assert.ok(old.owned.includes('flipflop'));assert.ok(old.owned.includes('bare-hand'));
 });

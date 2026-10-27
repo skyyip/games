@@ -1,3 +1,4 @@
+import {polishCollections} from './collection-polish.js';
 import {createPlayControls} from './play-controls.js';
 import {SKINS} from './skins.js';
 import {createRitualUI} from './ritual-ui.js';
@@ -13,7 +14,7 @@ import {placedLayout} from './neighbourhood.js';
 import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress,spreadProgress,holdProgress,diagonal,crossingStrokes} from './gestures.js';
 import {RitualGame,PHASES,BEAT_INTERVAL} from './game.js';
 import {WORRIES,WORRY_GROUPS,WEAPONS,DECOR,FRIENDS,CHANTS,MAX_DECOR_LEVEL,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
-import {STORAGE_KEY,readProgress,collectIdle,idleRate,buyWeapon,weaponUses,consumeWeapon,upgrade,decorDurability,repairCost,repairDecor,discardDecor,reward,purchasePrice,dailyReward,buySkin} from './progress.js';
+import {STORAGE_KEY,readProgress,collectIdle,idleRate,buyWeapon,weaponUses,consumeWeapon,upgrade,decorDurability,repairCost,repairDecor,discardDecor,reward,purchasePrice,dailyReward,buySkin,consumeSkin,skinUses} from './progress.js';
 import {weaponArt,dollArt,tigerArt,porkArt,fongCostumeArt,decorArt,ghostArt} from './art.js';
 import {StallAudio} from './audio.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
@@ -66,7 +67,7 @@ function feedback(text){literal($('#hit-feedback'),translate(text));}
 const literal=(element,text)=>{element.textContent=text;element.setAttribute('translate','no');};
 function renderRitualTiming(){
  const zh=getLanguage()==='zh-Hant';
- literal($('#kit-lifetime-note'),zh?'收費法寶每件可用兩次儀式；每局首次成功命中才扣一次，第二次後才破壞消失。未出手便離開不會扣次數。徒手永遠免費。':'Each paid kit lasts two rituals. The first successful hit spends one use per ritual; it breaks after the second use. Leaving without a hit costs no use. Bare hands are always free.');
+ literal($('#kit-lifetime-note'),zh?'收費法寶每件可用三次儀式；每局首次成功得分才扣一次，第三次後才破壞消失。未出手便離開不會扣次數。徒手永遠免費。':'Each paid kit lasts three rituals. The first scored action spends one use per ritual; it breaks after the third use. Leaving without a hit costs no use. Bare hands are always free.');
  literal($('#ritual-duration'),zh?'痛打 90 秒 · 化解祈福後擲聖杯':'90s of whacking · purification, then sacred blocks');
  $('#gesture-tools').setAttribute('aria-label',zh?'手勢提示，可左右滑動查看':'Gesture hints; swipe sideways to explore');
  const hintNames={tap:['點拍','Tap'],hold:['長按放手','Hold & release'],heavy:['滑動重扣','Swipe'],cw:['順時針','CW circle'],ccw:['逆時針','CCW circle'],rub:['來回搓','Rub'],pinch:['雙指夾','Pinch'],spread:['向外拉闊','Spread'],cross:['打叉 X','Cross X'],vee:['V 字','Draw V']};
@@ -121,10 +122,11 @@ function renderStall(){
  $('#play-panel').classList.toggle('has-neon',state.decor.neon>0);$('#play-panel').classList.toggle('has-incense',state.decor.incense>0);for(const id of illustratedDecor)$('#stall-'+id).hidden=!state.decor[id];
  renderDecorRows();
  $('#weapon-list').replaceChildren(...[...shopWeapons,...WEAPONS.filter(w=>w.hidden&&state.owned.includes(w.id))].map(w=>{const row=document.createElement('div');row.className='kit-row';const icon=document.createElement('span');icon.className='kit-art';icon.setAttribute('aria-hidden','true');icon.innerHTML=weaponArt(w.id);const owned=state.owned.includes(w.id),equipped=state.equipped===w.id,button=document.createElement('button');button.type='button';button.dataset.weapon=w.id;button.disabled=equipped||(!owned&&(state.merit<w.merit||state.coins<purchasePrice(state,w.cost)));button.textContent=equipped?'In hand':owned?'Equip':`${purchasePrice(state,w.cost)} oil`;button.setAttribute('aria-label',`${itemName(w)} · ${translate(button.textContent)}`);button.addEventListener('click',()=>{if(purchaseUI.isOpen||PHASES.includes(game.phase))return;settle();if(state.owned.includes(w.id)){state=buyWeapon(state,w.id);save();renderStall();}else requestBuy('weapon',w);});const detail=owned?(w.cost?(getLanguage()==='zh-Hant'?`剩餘 ${weaponUses(state,w.id)} 次儀式`:`${weaponUses(state,w.id)} ritual uses left`):'Free to use every time'):`Needs ${w.merit} merit`;const text=rowText(itemName(w),'');literal(text.querySelector('small'),`${kitScoreLabel(w.id)} · ${translate(detail)}`);if(KIT_SKILLS[w.id]){const detail=document.createElement('small');detail.className='kit-shop-skill';literal(detail,(getLanguage()==='zh-Hant'?'招牌技：':'Signature: ')+KIT_SKILLS[w.id].name[getLanguage()==='zh-Hant'?0:1]);text.append(detail);}if(!owned)showPurchaseShortfall(text,button,purchasePrice(state,w.cost),w.merit,`kit-reason-${w.id}`);row.append(icon,text,button);return row;}));
+ literal($('#panel-friends>.collection-note'),getLanguage()==='zh-Hant'?'儀式後有機會遇到一至五星貴人，提供香油錢、功德或折扣加成；同類加成取最高。':'Meet one- to five-star patrons after rituals for oil, merit or discounts. The strongest bonus in each category applies.');
  $('#friend-list').replaceChildren(...FRIENDS.map(f=>{const row=document.createElement('div'),icon=document.createElement('span'),owned=state.friends.includes(f.id);row.className=`friend-row patron-stars-${f.stars}${owned?'':' is-locked'}`;icon.className='friend-icon';icon.textContent=owned?f.icon:'?';const text=rowText(owned?itemName(f):(getLanguage()==='zh-Hant'?'神秘貴人':'A mysterious patron'),'');literal(text.querySelector('small'),'★'.repeat(f.stars)+' · '+patronBuffText(f,getLanguage()==='zh-Hant'));if(owned){const story=document.createElement('p');literal(story,getLanguage()==='zh-Hant'?f.story:'Your neighbour has your back. Even bad luck is taking the last bus home.');text.append(story);}row.append(icon,text);return row;}));
  $('#records').replaceChildren(...state.records.map((r,index)=>{const row=document.createElement('li'),place=document.createElement('span'),info=document.createElement('div'),name=document.createElement('b'),date=document.createElement('small'),score=document.createElement('output');row.className='record-row';place.textContent=String(index+1).padStart(2,'0');literal(name,itemName(WEAPONS.find(w=>w.id===r.weapon)));date.textContent=new Intl.DateTimeFormat(getLanguage(),{month:'short',day:'numeric'}).format(new Date(r.date));score.textContent=r.score;info.append(name,date);row.append(place,info,score);return row;}));
  neighbourhoodUI?.renderHome();kitUI?.renderHome(state.equipped);
- uxUI?.render();ritualUI?.home();playControls?.render();
+ uxUI?.render();ritualUI?.home();playControls?.render();polishCollections();
  if(!state.records.length){const empty=document.createElement('li');empty.className='empty-record';empty.textContent='Your first lighter evening is waiting.';$('#records').append(empty);}save();
 }
 function renderDecorRows(){
@@ -160,7 +162,7 @@ $('#confirm-discard').addEventListener('click',()=>{
 // Real time keeps moving while the game is open; do not move keyboard focus.
 setInterval(()=>{if(document.hidden)return;if(PHASES.includes(game.phase)||purchaseUI.isOpen){settle();purchaseUI.render();return;}const focused=document.activeElement,attribute=['decor','repair','discard','weapon'].find(name=>focused?.dataset?.[name])??focused?.dataset?.restoreAction,id=attribute?(focused.dataset[attribute]??focused.dataset.restoreId):null;settle();renderStall();if(id)restoreShopFocus(attribute,id);},60000);
 function lock(value){
- if(value)savedScroll=scrollY;document.body.classList.toggle('is-playing',value);
+ if(value){savedScroll=scrollY;window.getSelection()?.removeAllRanges();}document.body.classList.toggle('is-playing',value);
  for(const selector of ['.bbl-skip','#site-header','#intro','#stall-dashboard','#story','#rules','.bbl-footer'])$(selector).inert=value;
  if(!value)window.scrollTo({top:savedScroll,behavior:'instant'});
 }
@@ -170,7 +172,7 @@ function cancelGestures(){
  for(const id of gestures.keys()){try{$('#hit-zone').releasePointerCapture(id);}catch{}}gestures.clear();pinch=null;lastDiagonal=null;clearGesturePreview();if(interrupted)feedback(gestureText('手勢已取消，重新出手。','Gesture cancelled. Start again.'));
  if(incenseGesture){try{$('#incense-zone').releasePointerCapture(incenseGesture.id);}catch{}incenseGesture=null;}
  if(porkGesture){try{$('#pork-piece').releasePointerCapture(porkGesture.id);}catch{}porkGesture=null;}
- $('#pork-piece').style.translate='';$('#striking-weapon').style.transform='';$('#paper-tiger').classList.remove('is-ready');
+ $('.tiger-tray').classList.remove('is-smearing');$('#pork-piece').style.translate='';$('#striking-weapon').style.transform='';$('#paper-tiger').classList.remove('is-ready');
 }
 function start(){
  if(PHASES.includes(game.phase))return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
@@ -188,7 +190,7 @@ function renderPhase(){
  if(game.phase==='incense'){for(const stick of document.querySelectorAll('[data-stick]'))stick.classList.remove('is-lit');$('#phase-incense').classList.remove('is-blown');$('#blow').disabled=true;$('#mic-note').textContent='The button works without a microphone.';}
  if(game.phase==='worry')literal($('#named-worry'),game.worry);
  if(game.phase==='beat'){$('#paper-doll').innerHTML=dollArt(game.kind,game.look,game.skin);literal($('#doll-label'),game.worry);$('#striking-weapon').innerHTML=weaponArt(game.weapon);feedback('Find your rhythm.');$('#hit-zone').dataset.lastGesture='';paintPaperWear();}
- if(game.phase==='tiger'){$('#paper-tiger').innerHTML=tigerArt();$('#pork-piece').innerHTML=porkArt();$('#phase-tiger').classList.remove('is-fed');}
+ if(game.phase==='tiger'){$('#tiger-smear-paint').style.opacity='0';$('#paper-tiger').innerHTML=tigerArt();$('#pork-piece').innerHTML=porkArt();$('#phase-tiger').classList.remove('is-fed');}
  if(game.phase==='blessing'){$('#bless').classList.remove('is-burning');audio.chime();}
  ritualUI?.render();
  neighbourhoodUI?.renderPlay(true);
@@ -219,7 +221,7 @@ function sparks(large=false){
  if(reduced.matches)return;const count=Math.min(large?22:10,Math.max(0,80-$('#effects').childElementCount));for(let i=0;i<count;i++){const piece=document.createElement('i');piece.className='spark';piece.style.setProperty('--sx',`${Math.cos(i*2.4)*(large?130:70)}px`);piece.style.setProperty('--sy',`${Math.sin(i*2.4)*(large?110:75)-40}px`);piece.style.setProperty('--sr',`${i*47}deg`);piece.style.setProperty('--spark-color',['#edc77e','#f2dea1','#a9c8ad','#d99d83'][i%4]);$('#effects').append(piece);setTimeout(()=>piece.remove(),750);}
 }
 function spendKitOnce(){
- if(kitUseCommitted)return;kitUseCommitted=true;syncProgress();const spent=consumeWeapon(state,game.weapon);if(spent){state=spent;save();}
+ if(kitUseCommitted)return;kitUseCommitted=true;syncProgress();const spent=consumeWeapon(state,game.weapon);if(spent)state=spent;const paper=consumeSkin(state,game.skin);if(paper)state=paper;save();
 }
 function whack(options){
  const hit=game.hit(options);renderPhase();if(!hit)return;
@@ -333,9 +335,9 @@ function feed(){
  if(!reduced.matches){piece.animate([{transform:'translate(0,0) rotate(0) scale(1)',opacity:1},{transform:`translate(${target.x-r.x-r.width/2}px,${target.y-r.y-r.height/2}px) rotate(80deg) scale(.12)`,opacity:0}],{duration:420,easing:'cubic-bezier(.3,.1,.6,1)'});$('#paper-tiger').animate([{transform:'scale(1)'},{transform:'scale(1.3,.86) rotate(-8deg)',offset:.3},{transform:'scale(.91,1.22) rotate(6deg)',offset:.56},{transform:'scale(1.06,.97)',offset:.8},{transform:'scale(1)'}],{duration:850,easing:'ease-out'});sparks();}
 }
 const pork=$('#pork-piece');function mouth(){const r=$('#paper-tiger .tiger-mouth').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};}
-pork.addEventListener('pointerdown',event=>{if(event.button!==0||game.phase!=='tiger'||game.fed||game.pausedAt!==null)return;event.preventDefault();const r=pork.getBoundingClientRect();porkGesture={id:event.pointerId,x:event.clientX,y:event.clientY,cx:r.x+r.width/2,cy:r.y+r.height/2};pork.setPointerCapture(event.pointerId);});
-pork.addEventListener('pointermove',event=>{const g=porkGesture;if(!g||g.id!==event.pointerId)return;const dx=event.clientX-g.x,dy=event.clientY-g.y,target=mouth(),x=g.cx+dx,y=g.cy+dy,distance=Math.hypot(x-target.x,y-target.y),pull=Math.max(0,1-distance/90)**2*.5;pork.style.translate=`${dx+(target.x-x)*pull}px ${dy+(target.y-y)*pull}px`;$('#paper-tiger').classList.toggle('is-ready',distance<90);});
-pork.addEventListener('pointerup',event=>{const g=porkGesture;if(!g||g.id!==event.pointerId)return;const target=mouth(),distance=Math.hypot(g.cx+event.clientX-g.x-target.x,g.cy+event.clientY-g.y-target.y);porkGesture=null;$('#paper-tiger').classList.remove('is-ready');if(game.porkMode==='blood'&&!game.dipped){const bowl=$('#blood-bowl').getBoundingClientRect();if(Math.hypot(g.cx+event.clientX-g.x-bowl.x-bowl.width/2,g.cy+event.clientY-g.y-bowl.y-bowl.height/2)<60)game.dip();pork.style.translate='';ritualUI?.render();return;}if(distance<80)feed();else pork.style.translate='';});pork.addEventListener('pointercancel',()=>{porkGesture=null;pork.style.translate='';$('#paper-tiger').classList.remove('is-ready');});pork.addEventListener('click',event=>{if(event.detail===0)feed();});$('#feed').addEventListener('click',feed);
+pork.addEventListener('pointerdown',event=>{if(event.button!==0||game.phase!=='tiger'||game.fed||game.pausedAt!==null)return;event.preventDefault();const r=pork.getBoundingClientRect();porkGesture={id:event.pointerId,x:event.clientX,y:event.clientY,cx:r.x+r.width/2,cy:r.y+r.height/2,lastX:event.clientX,lastY:event.clientY};pork.setPointerCapture(event.pointerId);});
+pork.addEventListener('pointermove',event=>{const g=porkGesture;if(!g||g.id!==event.pointerId)return;const dx=event.clientX-g.x,dy=event.clientY-g.y,target=mouth(),x=g.cx+dx,y=g.cy+dy,distance=Math.hypot(x-target.x,y-target.y),pull=Math.max(0,1-distance/90)**2*.5;pork.style.translate=`${dx+(target.x-x)*pull}px ${dy+(target.y-y)*pull}px`;$('#paper-tiger').classList.toggle('is-ready',distance<90);$('.tiger-tray').classList.toggle('is-smearing',distance<55);if(distance<55&&game.smearTiger(Math.hypot(event.clientX-g.lastX,event.clientY-g.lastY))){const tray=$('.tiger-tray').getBoundingClientRect(),paint=$('#tiger-smear-paint');paint.style.cssText=`left:${target.x-tray.x-24}px;top:${target.y-tray.y-12}px;width:48px;height:24px;opacity:${.2+game.tigerSmear*.6};transform:scaleX(${.2+game.tigerSmear*.8})`;ritualUI?.render();}g.lastX=event.clientX;g.lastY=event.clientY;});
+pork.addEventListener('pointerup',event=>{const g=porkGesture;if(!g||g.id!==event.pointerId)return;const target=mouth(),distance=Math.hypot(g.cx+event.clientX-g.x-target.x,g.cy+event.clientY-g.y-target.y);porkGesture=null;$('.tiger-tray').classList.remove('is-smearing');$('#paper-tiger').classList.remove('is-ready');if(game.porkMode==='blood'&&!game.dipped){const bowl=$('#blood-bowl').getBoundingClientRect();if(Math.hypot(g.cx+event.clientX-g.x-bowl.x-bowl.width/2,g.cy+event.clientY-g.y-bowl.y-bowl.height/2)<60)game.dip();pork.style.translate='';ritualUI?.render();return;}if(distance<80)feed();else pork.style.translate='';});pork.addEventListener('pointercancel',()=>{porkGesture=null;pork.style.translate='';$('.tiger-tray').classList.remove('is-smearing');$('#paper-tiger').classList.remove('is-ready');});pork.addEventListener('click',event=>{if(event.detail===0)feed();});$('#feed').addEventListener('click',feed);
 
 function stopMicrophone(){micRevision++;cancelAnimationFrame(micFrame);micFrame=0;micStream?.getTracks().forEach(track=>track.stop());micStream=null;micContext?.close().catch(()=>{});micContext=null;$('#microphone').disabled=false;$('#microphone').textContent='Use microphone';}
 $('#microphone').addEventListener('click',async()=>{
@@ -378,4 +380,6 @@ $('#start').disabled=false;$('#quick-start').disabled=false;uxUI.render();
 ritualUI=createRitualUI({game,audio,getState:()=>state,refresh:renderStall,announce:say,cancelOrdinary:cancelGestures,claimDaily:async()=>{const claim=()=>{if(game.phase!=='setup')return null;syncProgress();const next=dailyReward(state);if(!next)return null;state=next;save();return next;};try{if(navigator.locks?.request)return await navigator.locks.request('beat-bad-luck-daily',claim);}catch{}return claim();}});
 ritualUI.render();ritualUI.daily();
 
-playControls=createPlayControls({getState:()=>state,itemName,requestBuy,onSelect:id=>{settle();if(!state.ownedSkins.includes(id))return;state=buySkin(state,id);save();renderStall();}});playControls.render();
+playControls=createPlayControls({game,getState:()=>state,itemName,requestBuy,onSelect:id=>{settle();if(!state.ownedSkins.includes(id))return;state=buySkin(state,id);save();renderStall();}});playControls.render();
+
+for(const type of ['contextmenu','selectstart','dragstart'])document.addEventListener(type,event=>{const target=event.target instanceof Element?event.target:null;if(target?.closest('.ritual-stage,.pause-overlay,#finisher-stage'))event.preventDefault();},{capture:true});
