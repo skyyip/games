@@ -12,8 +12,8 @@ export const SKINS=[
  ['shark','BLÅHAJ 鯊魚','Blue plush shark',500,'#73b7d2','shark','游走內耗海，張口只係想食下午茶。'],
  ['punch','Punch 媽媽','Punch’s plush mama',600,'#c98a58','ape','抱實小猩猩，煩惱就交俾師傅。'],
  ['retriever','金毛尋回犬','Golden retriever',720,'#e8b665','dog','好狗唔返工，煩惱叼走唔使送！']
-].map(([id,nameZh,name,cost,color,shape,description],index)=>({id,nameZh,name,cost:cost+(index<6?1000:index<9?2000:5000),color,shape,description,descriptionEn:'A comic worry paper for ten rituals. The first scored action spends one use.',merit:0,multiplier:[1.05,1.06,1.07,1.08,1.09,1.10,1.18,1.20,1.22,1.35,1.40,1.45][index]}));
-SKINS.unshift({id:'plain',nameZh:'免費素紙',name:'Free plain paper',cost:0,color:'#f4dfaa',shape:'paper',description:'素紙唔收錢，拍走心塞一樣得！',descriptionEn:'Always available. No score bonus and no wear.',merit:0,multiplier:1,starter:true});
+].map(([id,nameZh,name,cost,color,shape,description],index)=>({id,nameZh,name,cost:cost+(index<6?1000:index<9?2000:5000),color,shape,description,descriptionEn:'A comic worry paper for ten rituals. The first scored action spends one use.',merit:0,multiplier:[1.15,1.16,1.17,1.18,1.19,1.20,1.28,1.30,1.32,1.45,1.50,1.55][index]}));
+SKINS.unshift({id:'plain',nameZh:'免費素紙',name:'Free plain paper',cost:0,color:'#f4dfaa',shape:'paper',description:'素紙唔收錢，拍走心塞一樣得！',descriptionEn:'Always available. Score ×1.1 and no wear.',merit:0,multiplier:1.1,starter:true});
 export const SKIN_USES=10;
 export const skinScoreMultiplier=id=>SKINS.find(s=>s.id===id)?.multiplier??1;
 export function skinArt(id){const s=SKINS.find(s=>s.id===id)??SKINS[0],c=s.color,t=s.shape;
