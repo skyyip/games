@@ -60,7 +60,7 @@ STORIES.push(
  {kind:'work-life',name:['文武雙全都要收工','Clock off with style'],text:['用 5 種手勢，命中 20 次。','Use 5 gestures across 20 hits.'],goal:'variety',need:5,hits:20}]}
 );
 export function commissionPay(chapter,finished=false,replay=false){const difficulty=({eventsWon:110,variety:85,weaknessHits:70,perfect:90,copiesCleared:75})[chapter?.goal]??40,multiplier=replay ? .6 : 1;return {oil:Math.round((difficulty+(chapter?.need??0)*5+(finished?80:0))*multiplier),merit:Math.round((difficulty*.5+(chapter?.need??0)*3+(finished?50:0))*multiplier)};}
-const MOVES=['tap','heavy','rub','circle','pinch','hold','spread','cross','vee'],cap=(v,max)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
+const MOVES=['tap','heavy','rub','circle','pinch','hold','spread'],cap=(v,max)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
 export const freshNeighbourhood=()=>({active:'',replay:false,chapters:Object.fromEntries(STORIES.map(s=>[s.id,0])),challenges:[],title:'',look:'',scenes:[],layout:[],companions:[],totals:{rituals:0,events:0,copies:0,perfect:0},recentFortunes:[],fortuneSeen:[],album:[]});
 export function readNeighbourhood(raw,{weapons=[],decor=[],owned=[],rituals=0}={}){
  const next=freshNeighbourhood();next.totals.rituals=cap(rituals,1000000);if(!raw||typeof raw!=='object'){if(owned.includes('lassie'))next.companions=['lassie'];return next;}

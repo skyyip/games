@@ -54,18 +54,8 @@ try{
   else{await page.locator('#pork-piece').focus();await page.keyboard.press('Space');}
   assert.equal(await page.locator('#phase-tiger').evaluate(node=>node.classList.contains('is-fed')),true);
   if(!reduced){assert.equal(await page.locator('.ritual-comic-food').evaluate(node=>{const layer=node.parentElement;return parseFloat(node.style.left)>0&&parseFloat(node.style.left)<layer.clientWidth&&parseFloat(node.style.top)>0&&parseFloat(node.style.top)<layer.clientHeight;}),true,'food effect starts inside the visible tiger scene');await pauseEffects(page);}
-  await page.clock.fastForward(1700);assert.equal(await phase(page),'blessing');assert.equal(await page.locator('#scatter-grains').isDisabled(),true);await invoke(page,'#bless');assert.equal(await page.locator('.purify-scene').getAttribute('data-step'),'0');
-  // Pause while dragging paper: release capture and reset, with no hidden progress.
-  await beginDrag(page,'#burn-paper');await page.mouse.move(120,160,{steps:4});await invoke(page,'#pause');await page.mouse.up();assert.equal(await page.locator('#burn-paper').evaluate(node=>node.style.translate),'');assert.equal(await page.locator('#burn-paper').evaluate(node=>node.classList.contains('is-dragging')),false);await page.locator('#resume').click();await page.clock.runFor(20);assert.equal(await page.locator('.purify-scene').getAttribute('data-step'),'0');
-  if(input==='drag'){
-   await beginDrag(page,'#burn-paper');const [x,y]=await centre(page,'#burn-paper');await page.mouse.move(x+5,y-90,{steps:4});await page.mouse.up();assert.equal(await page.locator('.purify-scene').getAttribute('data-step'),'0','bad drop does not burn');
-   await drag(page,'#burn-paper','.ritual-paper-tiger .tiger-mouth');
-  }else if(input==='tap')await page.locator('#burn-paper').click();
-  else{await page.locator('#burn-paper').focus();await page.keyboard.press('Enter');}
-  assert.equal(await page.locator('.purify-scene').getAttribute('data-step'),'1');assert.equal(await page.locator('#scatter-grains').isDisabled(),false);await reachable(page,'#scatter-grains');
-  await page.locator('#scatter-grains').click();assert.equal(await page.locator('#ritual-grains i').count(),20);assert.equal(await page.locator('#ritual-grains .'+(mode==='blood'?'comic-rice':'comic-bean')).count(),20);
-  const horse=await geometry(page,'#bless');await page.clock.runFor(160);await stable(page,'#bless',horse);
-  await page.screenshot({path:`/tmp/ritual-comedy-qa/grains-${width}.png`});await reachable(page,'#bless');await page.locator('#bless').click();assert.equal(await page.locator('.purify-scene').getAttribute('data-step'),'3');
+  await page.clock.fastForward(1700);assert.equal(await phase(page),'blessing');assert.equal(await page.locator('#phase-blessing button').count(),1);await reachable(page,'#purify-next');
+  await page.locator('#purify-next').click();assert.equal(await page.locator('.purify-scene').getAttribute('data-step'),'3');assert.equal(await page.locator('#ritual-grains i').count(),20);assert.equal(await page.locator('#purify-next').isDisabled(),true);
   if(!reduced)await pauseEffects(page);
   else assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.effect.target.closest('.ritual-comedy-layer')).every(a=>a.effect.getKeyframes().every(frame=>!frame.transform))),true,'reduced-motion clones only fade');
   await page.clock.fastForward(1100);assert.equal(await phase(page),'divination');assert.equal(await page.locator('.ritual-comedy-layer > *').count(),0,'phase transition clears clones');
@@ -73,7 +63,7 @@ try{
   assert.equal(await page.locator('#ritual-loot-dialog .manga-trophy').count(),1);await reachable(page,'#loot-close');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.screenshot({path:`/tmp/ritual-comedy-qa/result-${width}.png`});
   const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')));assert.equal(state.rituals,1);assert.equal(state.records.length,1);await invoke(page,'#throw-blocks');await page.clock.fastForward(3000);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.stall.v1')).rituals),1,'result only credited once');
   await page.locator('#loot-close').click();await page.locator('#again').click();assert.equal(await phase(page),'incense');assert.equal(await page.locator('.ritual-comedy-layer > *').count(),0);
-  await context.close();console.log(`PASS ${width} ${lang}: six steps, ${mode}/${input}, interrupted drags, stable targets, paused effects, ${reduced?'reduced motion':'comic motion'}, retry and manga trophy`);
+  await context.close();console.log(`PASS ${width} ${lang}: six steps, ${mode}/${input}, interrupted pork drag, stable targets, paused effects, ${reduced?'reduced motion':'comic motion'}, retry and manga trophy`);
  }
  assert.deepEqual(errors,[]);console.log('All four full ritual comedy profiles passed.');
 }finally{await browser.close();}

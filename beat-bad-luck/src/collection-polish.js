@@ -12,6 +12,8 @@ export function polishCollections(){
  // Recompute from original font declarations, never from a previous enlargement.
  for(const [node,old]of originals){if(!node.isConnected){originals.delete(node);continue;}if(old.value)node.style.setProperty('font-size',old.value,old.priority);else node.style.removeProperty('font-size');}
  const nodes=[...document.querySelectorAll('#panel-stall *,#panel-kits *,#panel-friends *,.stall-tabs button,#rarity-legend span,#purchase-dialog h2,#purchase-dialog p,#purchase-dialog button,#decor-quick-dialog h2,#decor-quick-dialog p,#decor-quick-dialog button')].filter(e=>!e.closest('svg,.sr-only,.kit-art,.decor-icon,.friend-icon')&&([...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())||e.matches('input,select'))&&!e.matches('option,optgroup'));
- const sizes=nodes.map(node=>[node,parseFloat(getComputedStyle(node).fontSize)]);
- for(const [node,size]of sizes){if(!originals.has(node))originals.set(node,{value:node.style.getPropertyValue('font-size'),priority:node.style.getPropertyPriority('font-size')});if(size>0)node.style.setProperty('font-size',`${Math.round(size*1200)/1000}px`,'important');}
+ const extra=[...document.querySelectorAll('#neighbourhood-hub *,#active-commission,.pause-card p')].filter(e=>!e.closest('svg,select,option,.sr-only,#challenge-list,#challenge-title,#journey-tab-challenges,#layout-map small')&&([...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())||e.matches('p,b,strong,small,button,label,summary,h3')));
+ const factors=new Map([...nodes,...extra].map(node=>[node,1.2]));for(const node of document.querySelectorAll('.kit-shortcuts button'))factors.set(node,1.3);
+ const sizes=[...factors].map(([node,factor])=>[node,parseFloat(getComputedStyle(node).fontSize),factor]);
+ for(const [node,size,factor]of sizes){if(!originals.has(node))originals.set(node,{value:node.style.getPropertyValue('font-size'),priority:node.style.getPropertyPriority('font-size')});if(size>0)node.style.setProperty('font-size',`${Math.round(size*factor*1000)/1000}px`,'important');}
 }

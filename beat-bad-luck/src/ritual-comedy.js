@@ -6,7 +6,7 @@ export function createRitualComedy({game,audio}){
  let phase='',previous={dipped:false,fed:false,smear:0,purification:0},paused=false;
  const layers=new Map();for(const selector of ['.tiger-tray','.purify-scene']){const root=$(selector),layer=document.createElement('div');layer.className='ritual-comedy-layer';layer.setAttribute('aria-hidden','true');root.append(layer);layers.set(selector,layer);}
  const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
- function say(zh,en){const p=$('#fong-line');p.textContent=local(zh,en);p.setAttribute('translate','no');}
+ function say(zh,en){const p=$('#fong-line');p.textContent=zh;p.setAttribute('translate','no');}
  function animate(node,frames,duration=700,{remove=false,delay=0,pulse=false}={}){if(!node)return;if(pulse){pulses.get(node)?.cancel();pulses.delete(node);}if(reduced.matches&&!remove)return null;const animation=node.animate(reduced.matches?[{opacity:.85},{opacity:0}]:frames,{duration:reduced.matches?220:duration,delay:reduced.matches?0:delay,easing:'cubic-bezier(.2,.8,.25,1)',fill:'none'});animations.add(animation);if(pulse)pulses.set(node,animation);if(paused)animation.pause();animation.finished.then(()=>{},()=>{}).finally(()=>{animations.delete(animation);if(pulses.get(node)===animation)pulses.delete(node);if(remove)node.remove();});return animation;}
  function clear(){for(const a of animations)a.cancel();animations.clear();pulses.clear();for(const layer of layers.values())layer.replaceChildren();$('#ritual-grains')?.replaceChildren();}
  function suspend(value){paused=value;for(const layer of layers.values())layer.dataset.paused=String(value);for(const a of animations){if(value&&a.playState==='running')a.pause();else if(!value&&a.playState==='paused')a.play();}}
