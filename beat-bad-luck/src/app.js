@@ -71,7 +71,7 @@ function renderRitualTiming(){
  $('#random-events').checked=preferences.value.randomEvents;literal($('#random-events-label'),zh?'隨機挑戰事件':'Random challenge events');literal($('#random-events-help'),zh?'預設關閉。開啟後每局加入一次橋底事件，可挑戰額外加分與稱號；關閉也可完成儀式和故事。':'Off by default. Enable one event per ritual for optional bonus points and titles. You can finish rituals and stories with events off.');
  literal($('#kit-lifetime-note'),zh?'收費法寶每件可用三次儀式；每局首次成功得分才扣一次，第三次後才破壞消失。未出手便離開不會扣次數。徒手永遠免費。':'Each paid kit lasts three rituals. The first scored action spends one use per ritual; it breaks after the third use. Leaving without a hit costs no use. Bare hands are always free.');
  literal($('#ritual-duration'),zh?'痛打 68 秒 · 化解祈福後擲聖杯':'68s of whacking · purification, then sacred blocks');
- $('#gesture-tools').setAttribute('aria-label',zh?'手勢提示，可左右滑動查看':'Gesture hints; swipe sideways to explore');
+ $('#gesture-tools').setAttribute('aria-label',zh?'操作手勢提示（只作說明）':'Gesture hints (instructions only)');
  const hintNames={tap:['點拍','Tap'],heavy:['滑動重扣','Swipe'],circle:['轉圈','Circle'],rub:['來回搓','Rub'],pinch:['雙指夾','Pinch'],};
  for(const hint of document.querySelectorAll('#gesture-tools .gesture-hint'))literal(hint.querySelector('b'),hintNames[hint.dataset.direction||hint.dataset.gesture][zh?0:1]);
  $('#hit-zone').setAttribute('aria-label',zh?'在紙人上點拍、滑動、畫圈，或雙指向內夾；鍵盤可用空白鍵點拍':'Tap, swipe, circle or pinch on the paper; Space gives a keyboard tap');

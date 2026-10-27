@@ -9,7 +9,9 @@
 - The three-act papers, helmeted-cat chase and meatball enthronement were visually inspected. Beauty’s payoff smiles at its mirror; blades show three papers. Titles, captions and optional controls fit in portrait and landscape.
 - The appeal story advances despite missed bonus goals. The first final chapter grants a visible clock-off seal with a thirty-day lifetime; reload preserves it. Unit tests reject duplicate receipts and replay gifts, verify shop unlocking, replacement and old-save migration, and whitelist forty ending IDs.
 - Buying a new paper requires confirmation; cancellation leaves ownership unchanged. Confirmed paper use decrements once after a scored ritual.
-- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v64 and includes all new modules/styles.
+- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v65 and includes all new modules/styles.
+
+Hint-row follow-up: restored five read-only gesture labels below the paper. Four portrait/landscape/desktop layouts verify all five are visible on one row, tapping them awards no score or charge, and they stay clear of the arena and Master dialogue. The narrow finisher meter uses separate label/count lines to prevent vertical text.
 
 Opt-in follow-up: random challenge events default off for fresh, legacy and malformed preferences. A native checkbox above Start remembers explicit choices. Full Chinese/English mobile rituals verify no event by default, story progression without challenges, one event after opt-in, persisted opt-out, and no carry-over between rituals. The game and personality models independently default off.
 
@@ -26,6 +28,7 @@ npm test
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-comedy-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-interactions-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/event-optin-check.mjs
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/gesture-hints-check.mjs
 ```
 
 Set `BEAT_BAD_LUCK_URL` for the production server. Browser checks use Chromium mobile emulation; physical iOS/Android hardware was not available. No preview export or deployment is part of this change.

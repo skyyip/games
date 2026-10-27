@@ -1,6 +1,6 @@
 #phase-beat{position:relative}
 /* One cinematic finisher and four clear pieces of gameplay information. */
-#phase-beat .beat-stats>span:has(#live-papers),#phase-beat .rhythm-rail,#phase-beat .bpm-note,#phase-beat .qte-call,#phase-beat .gesture-controls,#kit-skill,#kit-stage,#kit-guidance{display:none!important}
+#phase-beat .beat-stats>span:has(#live-papers),#phase-beat .rhythm-rail,#phase-beat .bpm-note,#phase-beat .qte-call,#kit-skill,#kit-stage,#kit-guidance{display:none!important}
 #phase-beat .beat-telemetry{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-shrink:0}
 #phase-beat .beat-stats{position:static;display:flex;flex-direction:row;gap:24px;align-items:center;flex:0 0 auto}
 #phase-beat .beat-stats b{font-size:25px}#phase-beat .beat-stats small{font-size:11px}
@@ -104,3 +104,13 @@
 /* A visible, remembered pre-ritual choice; native checkbox keeps the entire label tappable. */
 .random-events-option{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:10px;min-height:60px;margin:12px 0;padding:12px;border:1px solid #a2b59a;border-radius:13px;background:#29453e;color:#f2dfb7;cursor:pointer;text-align:left}
 .random-events-option input{width:22px;height:22px;margin:0;accent-color:#efcd83;cursor:pointer}.random-events-option b{display:block;font-size:14px;line-height:1.4}.random-events-option small{display:block;margin-top:4px;font-size:11px;line-height:1.65;color:#d4dfc7}.random-events-option:has(input:checked){border-color:#f0ce83;background:#3c5546}.random-events-option:focus-within{outline:3px solid #f0ce83;outline-offset:3px}
+
+/* Read-only gesture labels stay visible below the paper and fit on one row. */
+#phase-beat .gesture-controls{display:block;position:relative;flex:0 0 46px;min-height:46px;width:100%;margin:0}
+#phase-beat .gesture-controls::after{content:none}
+#phase-beat .gesture-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;position:static;width:100%;height:44px;min-height:44px;padding:0;overflow:visible;scroll-snap-type:none;touch-action:manipulation}
+#phase-beat .gesture-tools .gesture-hint{width:100%;min-width:0;height:44px;min-height:44px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;line-height:1.2}
+#phase-beat .gesture-tools .gesture-hint>span{font-size:18px;line-height:1}#phase-beat .gesture-tools .gesture-hint b{font-size:11px;line-height:1.2;white-space:normal;text-align:center}
+@media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:54px minmax(0,1fr) 46px;grid-template-areas:'telemetry hud' 'arena hud' 'controls feedback'}#phase-beat .gesture-controls{grid-area:controls;align-self:end}#phase-beat .beat-reaction{align-self:end}}
+/* Keep the finisher caption readable when the hint row reduces available height. */
+.ultimate-meter{grid-template-columns:minmax(0,1fr);gap:1px}.ultimate-meter label{grid-row:1;white-space:nowrap}.ultimate-meter small{grid-column:1;grid-row:2}.ultimate-meter progress{grid-column:1;grid-row:3;height:8px}

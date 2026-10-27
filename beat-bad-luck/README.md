@@ -6,7 +6,7 @@ A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. 
 
 1. **Incense:** light three sticks and blow, using the button or an optional local microphone. No recording is saved or uploaded. The button remains available if microphone access fails.
 2. **Name the worry:** choose a grouped preset or enter a private, literal worry of at most 64 characters. Custom words are never inserted as HTML or saved in records.
-3. **Whack for 68 active seconds:** tap or swipe the paper. Circles in either direction (one gesture), rubbing, pinching, weaknesses and 108 BPM rhythm bonuses are optional. The primary goal is to finish the ritual; a neighbour commission adds a story to that goal. The main HUD shows time, relief score, combo and the finisher meter.
+3. **Whack for 68 active seconds:** tap or swipe the paper. Circles in either direction (one gesture), rubbing, pinching, weaknesses and 108 BPM rhythm bonuses are optional. The primary goal is to finish the ritual; a neighbour commission adds a story to that goal. The main HUD shows time, relief score, combo and the finisher meter. A read-only row below the paper shows Tap / Swipe / Circle / Rub / Pinch; both circle directions share one hint. The labels never activate attacks and fit on one row in portrait and landscape.
 4. **Feed the tiger:** one tap automatically dips the pork if needed and feeds the yellow paper tiger. Manual dipping and smearing are optional; at least half a coating gives `round(20 × kit × paper multiplier)` once. Close drag releases feed the tiger too.
 5. **Resolve and bless:** one confirmation burns the worry and offering paper, scatters rice or beans and burns the green-horse paper in one short animated sequence.
 6. **Sacred blocks:** cast once. A non-sacred result triggers a funny automatic retry with one flat and one curved block. No repeated button pressing is needed.
@@ -60,7 +60,7 @@ The top three scores, balances, expiry, inventory, stories, titles and collectio
 
 Traditional Chinese is the default; English follows the playground preference. Master’s spoken/bottom dialogue remains Cantonese. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v64** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v65** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -69,6 +69,7 @@ npm test
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-comedy-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-interactions-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/event-optin-check.mjs
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/gesture-hints-check.mjs
 ```
 
 The current browser acceptance test covers four Chinese/English portrait/landscape/desktop profiles, a reduced-motion profile, real ordinary hits, two finishers, optional timing, pause, stable event geometry, the patron cameo, one-tap feeding/blessing, automatic block retry, the final story gift, inventory accounting and reload. Set `BEAT_BAD_LUCK_URL` to run the same test against a hashed production build. The interaction check additionally exercises all nine native event controls, purchase cancellation/confirmation and manual blood dipping/smearing with one bonus. The opt-in check completes event-free and event-enabled rituals, verifies story progression with events off, and reloads both saved choices in Chinese and English mobile layouts. Historical signature/event browser scripts document retired mechanics; use the current check above for this version.
