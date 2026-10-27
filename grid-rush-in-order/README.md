@@ -1,6 +1,6 @@
 # Grid Rush: In Order
 
-A standalone, installable variation of **Grid Rush**, built with HTML, CSS and vanilla JavaScript. No packages, backend or accounts are needed to play. Online pages load Google Tag Manager container `GTM-TZ646NJ9`; gameplay and local records continue to work when analytics is unavailable.
+A standalone, installable variation of **Grid Rush**, built with HTML, CSS and vanilla JavaScript. No packages, backend or accounts are needed to play. Online pages load Google Tag Manager container `GTM-K72CNJRN`; gameplay and local records continue to work when analytics is unavailable.
 
 ## Run locally
 

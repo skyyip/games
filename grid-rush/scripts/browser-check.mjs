@@ -153,7 +153,7 @@ try {
   pass('reduced motion respected; no uncaught browser errors');
   assert.ok(requests.some(url => url.endsWith('/assets/fonts/SpaceGrotesk.ttf')));
   assert.ok(requests.some(url => url.endsWith('/assets/fonts/DMSans.ttf')));
-  assert.ok(requests.every(url => new URL(url).origin === new URL(baseURL).origin || url.startsWith('https://www.googletagmanager.com/gtm.js?id=GTM-TZ646NJ9')));
+  assert.ok(requests.every(url => new URL(url).origin === new URL(baseURL).origin || url.startsWith('https://www.googletagmanager.com/gtm.js?id=GTM-K72CNJRN')));
   pass('bundled fonts load locally; only the configured analytics script is external');
   await context.close();
   console.log(`\n${checks} browser checks passed. Screenshots: ${output}`);
