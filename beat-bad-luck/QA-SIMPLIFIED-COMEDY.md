@@ -1,6 +1,6 @@
 # Simplified comedy ritual acceptance · 2026-10-27
 
-- `npm test`: **115 passed**, zero failures. Retired signature-recipe tests now exercise the unified system; economy, durability, gestures, save migration, privacy, backup and audio coverage remain.
+- `npm test`: **116 passed**, zero failures. Retired signature-recipe tests now exercise the unified system; economy, durability, gestures, save migration, privacy, backup and audio coverage remain.
 - Full browser rituals: **320×568 Traditional Chinese**, **390×844 English**, **812×375 Traditional Chinese / reduced motion**, **1440×900 English**. Tested source and hashed production output.
 - Real hits charge the 2/3/4 meter, launch two automatic shows, and spend inventory once. Early optional taps are harmless; a lit-window tap awards once. User pause and the cinematic retain time/combo. Bare hands, the 3000-tool comb, beauty mirror and fire wheels work through results and reload.
 - Event appearance/completion keeps the paper target geometry unchanged. The event control stays still while its artwork moves. Exactly one random event appears; a patron cameo follows the first successful rescue when owned.
@@ -9,7 +9,9 @@
 - The three-act papers, helmeted-cat chase and meatball enthronement were visually inspected. Beauty’s payoff smiles at its mirror; blades show three papers. Titles, captions and optional controls fit in portrait and landscape.
 - The appeal story advances despite missed bonus goals. The first final chapter grants a visible clock-off seal with a thirty-day lifetime; reload preserves it. Unit tests reject duplicate receipts and replay gifts, verify shop unlocking, replacement and old-save migration, and whitelist forty ending IDs.
 - Buying a new paper requires confirmation; cancellation leaves ownership unchanged. Confirmed paper use decrements once after a scored ritual.
-- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v62 and includes all new modules/styles.
+- Production site builder publishes 20 pages with content hashes for JS/CSS/images/fonts. Existing unrelated shared translation duplicate-key warnings remain outside this change. Source offline cache is v63 and includes all new modules/styles.
+
+Duration follow-up: whacking now lasts exactly 68 active seconds. Late rhythm prompts fit before the deadline, with a final circle at 61 seconds and heavy prompt at 65 seconds. Pause and cinematic time remain excluded from the countdown.
 
 Single-event follow-up: each ritual now schedules one random event at 18 active seconds. The former second event never appears, and its single-round title/story targets now require one rescue. Existing title IDs and earned progress are preserved.
 
