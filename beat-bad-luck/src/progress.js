@@ -1,7 +1,7 @@
 import {SKINS,SKIN_USES} from './skins.js';
 import {PATRONS,SECRET_WEAPONS,SECRET_DECOR,weightedPatron,patronBuffs,hkDay} from './ritual-rewards.js';
-import {freshNeighbourhood,readNeighbourhood,finishNeighbourhood,STORIES,commissionPay} from './neighbourhood.js';
-import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorHourlyRate} from './catalog.js';
+import {freshNeighbourhood,readNeighbourhood,finishNeighbourhood,STORIES,commissionPay,pruneAlbum} from './neighbourhood.js';
+import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorUpgradeBase,decorHourlyRate} from './catalog.js';
 const cap=(value,max=1000000)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
 export const DECOR_LIFETIME=30*24*3600000;
 const clock=(state,now)=>Math.max(state.lastSeen,now);
@@ -20,7 +20,7 @@ export function readProgress(raw,now=Date.now()){
     state.lastDaily=typeof x.lastDaily==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.lastDaily)?x.lastDaily:'';state.discovered=[...new Set((Array.isArray(x.discovered)?x.discovered:[]).filter(id=>[...SECRET_WEAPONS,...SECRET_DECOR].some(i=>i.id===id)))];state.coupons=(Array.isArray(x.coupons)?x.coupons:[]).filter(c=>PATRONS.some(f=>f.id===c.patron&&f.discount===c.discount)&&c.uses>0).slice(0,10).map(c=>({patron:c.patron,discount:c.discount,uses:1}));state.coins=cap(x.coins);state.merit=cap(x.merit);state.rituals=cap(x.rituals);state.owned=[...new Set(['bare-hand',...(Array.isArray(x.owned)?x.owned:[]).filter(id=>WEAPONS.some(w=>w.id===id))])];state.equipped=state.owned.includes(x.equipped)?x.equipped:'bare-hand';
     for(const id of state.owned.filter(id=>id!=='bare-hand')){const value=x.weaponUses?.[id];state.weaponUses[id]=Number.isFinite(value)?cap(value,WEAPON_USES):WEAPON_USES;}
     state.owned=state.owned.filter(id=>id==='bare-hand'||state.weaponUses[id]>0);for(const id of Object.keys(state.weaponUses))if(!state.owned.includes(id))delete state.weaponUses[id];if(!state.owned.includes(state.equipped))state.equipped='bare-hand';
-    state.neighbourhood=readNeighbourhood(x.neighbourhood,{weapons:WEAPONS.map(w=>w.id),decor:DECOR.map(d=>d.id),owned:state.owned,rituals:state.rituals});
+    state.neighbourhood=readNeighbourhood(x.neighbourhood,{weapons:WEAPONS.map(w=>w.id),decor:DECOR.map(d=>d.id),owned:state.owned,rituals:state.rituals,now:Math.max(now,Number.isFinite(x.lastSeen)?x.lastSeen:now)});
     state.lastSeen=Number.isFinite(x.lastSeen)?Math.max(0,x.lastSeen):now;
     for(const d of DECOR){state.decor[d.id]=cap(x.decor?.[d.id],MAX_DECOR_LEVEL);if(state.decor[d.id])state.decorExpires[d.id]=Number.isFinite(x.decorExpires?.[d.id])?Math.max(0,Math.min(Math.max(now,state.lastSeen)+DECOR_LIFETIME,x.decorExpires[d.id])):now+DECOR_LIFETIME;}
     state.friends=[...new Set((Array.isArray(x.friends)?x.friends:[]).filter(id=>FRIENDS.some(f=>f.id===id)))];
@@ -30,6 +30,7 @@ export function readProgress(raw,now=Date.now()){
 }
 export const idleRate=state=>Math.round(DECOR.reduce((total,d)=>total+decorHourlyRate(d,state.decor[d.id]??0),0)*100)/100;
 export function collectIdle(state,now=Date.now()){
+  state={...state,neighbourhood:pruneAlbum(state.neighbourhood,Math.max(state.lastSeen,now))};
   const at=clock(state,now),end=Math.min(at,state.lastSeen+8*3600000),decor={...state.decor},decorExpires={...state.decorExpires},lost=[];let income=state.idleCarry;
   for(const item of DECOR){
     const level=decor[item.id]??0;if(!level){delete decorExpires[item.id];continue;}
@@ -55,7 +56,7 @@ export function consumeWeapon(state,id){
 }
 export const decorUnlocked=(state,item)=>!item.unlockStory||(state.neighbourhood?.chapters?.[item.unlockStory]??0)>=(STORIES.find(s=>s.id===item.unlockStory)?.chapters.length??Infinity);
 export function upgrade(state,id,now=Date.now()){
- const d=DECOR.find(d=>d.id===id);if(!d)return null;if(d.hidden||!decorUnlocked(state,d))return null;const level=state.decor[id]??0,cost=purchasePrice(state,d.cost*(level+1));
+ const d=DECOR.find(d=>d.id===id);if(!d)return null;if(d.hidden||!decorUnlocked(state,d))return null;const level=state.decor[id]??0,cost=purchasePrice(state,decorUpgradeBase(d,level+1));
  if(level>=MAX_DECOR_LEVEL||state.coins<cost||(level&&decorDurability(state,id,now)<=0))return null;
  return {...useCoupon(state),coins:state.coins-cost,decor:{...state.decor,[id]:level+1},decorExpires:{...state.decorExpires,[id]:level?expiry(state,id,now):clock(state,now)+DECOR_LIFETIME}};
 }

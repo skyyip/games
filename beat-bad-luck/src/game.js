@@ -45,9 +45,10 @@ export class RitualGame{
     const effort=Math.max(0,Math.min(1,Number(strength)||0));
     const power=special?special.min+Math.round(effort*(special.power-special.min)):(heavy?3+Math.round(effort*4):1);
     const before=this.papers;this.hits++;if(heavy)this.heavy++;if(special)this.specials[gesture]++;if(perfect)this.perfect++;
-    const basePoints=GESTURE_POINTS[gesture]+Math.floor(Math.min(this.combo,30)*.3);const multiplier=this.scoreMultiplier,flavour=this.flavour.hit(this.elapsed,gesture,perfect,basePoints,multiplier,{direction}),points=flavour.points;this.score+=points;this.damage+=power*(flavour.protectedHit?.35:1);this.moves[gesture]++;if(direction)this.rotations[direction]++;this.perfectStreak=perfect&&!flavour.protectedHit?this.perfectStreak+1:0;this.maxPerfectStreak=Math.max(this.maxPerfectStreak,this.perfectStreak);
+    const roll=this.random(),impactLevel=roll<.04?3:roll<.14?2:1,impactMultiplier=impactLevel===3?2:impactLevel===2?1.5:1;
+    const basePoints=(GESTURE_POINTS[gesture]+Math.floor(Math.min(this.combo,30)*.3))*impactMultiplier;const multiplier=this.scoreMultiplier,flavour=this.flavour.hit(this.elapsed,gesture,perfect,basePoints,multiplier,{direction}),points=flavour.points;this.score+=points;this.damage+=power*impactMultiplier*(flavour.protectedHit?.35:1);this.moves[gesture]++;if(direction)this.rotations[direction]++;this.perfectStreak=perfect&&!flavour.protectedHit?this.perfectStreak+1:0;this.maxPerfectStreak=Math.max(this.maxPerfectStreak,this.perfectStreak);
     const qteComplete=false;
-    return {perfect,power,points,...flavour,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
+    return {perfect,power,points,impactLevel,impactMultiplier,...flavour,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
   }
   activateSkill(){return this.startFinisher();}
   skillAction(type){return {ok:this.finisherAction(type==='tap'?'tap':type)};}

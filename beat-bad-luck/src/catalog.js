@@ -98,7 +98,7 @@ export const WEAPONS=[
 // Paid kits use configured relief bonuses, reduced by about 30% from the previous ladder.
 // Prices and merit gates are independent; free hands retain their ×1 fallback.
 export const weaponScoreMultiplier=id=>{const weapon=WEAPONS.find(w=>w.id===id);return weapon?.multiplier??1+(weapon?.cost??0)/100;};
-export const MAX_DECOR_LEVEL=5;
+export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
  ...SECRET_DECOR,
   {id:'radio',name:'Cassette radio',cost:1190,rate:0.6},
@@ -134,6 +134,8 @@ DECOR.push({id:'clockoff-seal',name:'Automatic clock-off seal',nameZh:'自動準
 for(const decor of DECOR)decor.cost=Math.max(0,decor.cost-300);
 // All hourly income, including the upgrade increment, is 40% below the previous balance.
 export const DECOR_LEVEL_RATE_BONUS=.06;
+// Existing pieces cost 20% less to upgrade; first placement retains its purchase price.
+export const decorUpgradeBase=(decor,nextLevel)=>Math.ceil(decor.cost*nextLevel*(nextLevel>1?.8:1));
 export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*DECOR_LEVEL_RATE_BONUS)*100)/100:0;
 export const FRIENDS=PATRONS;
 export const FORTUNES=[

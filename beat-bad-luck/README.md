@@ -61,13 +61,25 @@ Paid kits last **three scored rituals**; paid papers last **ten**. The first sco
 
 Purchases show a comic confirmation before any deduction, then an animated reveal. Closing or cancelling before confirmation spends nothing. Merit is an unlock threshold and is not deducted. Coupons apply once on successful purchase. Shops have bilingual search and All / Owned / Can buy filters; story-locked props cannot be purchased or shown as affordable.
 
-Every decoration base price is 300 oil lower, including care values for hidden pieces; income and existing levels are unchanged. Decorations appear immediately in a rearrangeable three-column stall shelf. Drag the ⠿ handle on touch, or drag a piece with a mouse; arrow keys on a handle also reorder. Order is saved and continues to drive scene discovery. The separate neighbourhood layout tab/dropdowns are removed. Icons use 80% of their prior scale. Decorations have five levels and **30 real days** of durability. Upgrades preserve expiry; repair restores 30 days for `ceil(base price × level × 25% × fraction worn)`. Zero durability removes the item and stops income at its expiry. Discarding gives no refund. Hourly rates retain the previous reduction and +0.06 per extra level. Offline income caps at eight hours and preserves fractional oil.
+Every decoration base price is 300 oil lower, including care values for hidden pieces; income and existing levels are unchanged. Decorations appear immediately in a rearrangeable three-column stall shelf. Drag the ⠿ handle on touch, or drag a piece with a mouse; arrow keys on a handle also reorder. Order is saved and continues to drive scene discovery. The separate neighbourhood layout tab/dropdowns are removed. Owned shelf icons use scale 0.7344, another 10% smaller than the previous 0.816; hit targets and labels stay unchanged. Decorations have eight levels and **30 real days** of durability. First placement retains its base price; later upgrades cost `ceil(base × next level × 0.8)` before the best one-use coupon. Upgrades preserve expiry; repair restores 30 days for `ceil(base price × level × 25% × fraction worn)`. Zero durability removes the item and stops income at its expiry. Discarding gives no refund. Hourly rates retain the previous reduction and +0.06 per extra level. Offline income caps at eight hours and preserves fractional oil.
 
 Eleven patrons span five rarities. Their strongest oil and merit buffs are capped at 5% per category; coupons are one-use 5–15% discounts. Thirty hidden props/kits remain a 6% post-ritual drop. Daily login awards 20 oil and 30 merit once per Hong Kong day. Receipts prevent duplicate awards.
 
 The top three scores, balances, expiry, inventory, stories, titles and collections use `beat-bad-luck.stall.v1`. Existing saves migrate without resetting owned counters or story progress. Invalid IDs are discarded. Storage failures use memory for that visit; the backup/import UI supports user-controlled transfer. Browser and installed versions share the same origin’s storage where the browser permits it.
 
-The sanctuary wallet has prominent oil/merit totals with 650 ms counting animations; reduced motion shows final values immediately. Dock, shop and detail numbers have contrasting emphasis. Home titles glow and shine slowly, selected paper cards have a gold border, and title controls use consistent 14px text. Decoration details use 90% of their former text sizes, a prominent close control, title-first focus and 260/180 ms open/close motion. The dialog remains modal during closing; purchase/discard hand-offs await completion.
+The sanctuary wallet has prominent oil/merit totals with 650 ms counting animations; reduced motion shows final values immediately. Dock, shop and detail numbers have contrasting emphasis. Home titles glow and shine slowly, selected paper cards have a gold border with a continuous six-second highlight, and title controls use consistent 14px text. Decoration details use 90% of their former text sizes, a prominent close control, title-first focus and 260/180 ms open/close motion. The dialog remains modal during closing; purchase/discard hand-offs await completion.
+
+## Merit levels, seven-day fortunes and bounded reading
+
+Merit is cumulative and is never deducted for kit unlocks. Existing saves immediately receive levels **1–168** using `12 × (level − 1)²` merit per threshold: level 10 needs 972, level 100 needs 117,612, and level 168 needs 334,668. Every ten levels unlocks one of sixteen distinct animated badges (10–160), with the latest shown above Master Yip’s home portrait. The wallet shows the current level and progress to the next. Reduced motion keeps badges and the festive red spring-couplet headline still.
+
+Each personal fortune card expires **seven elapsed days** after creation. Load, idle collection, import/export, ritual completion and a foreground minute timer prune expired cards; the 24-card cap remains. Top-three scores, merit and earned story/title collections are retained. The card uses larger small print, wrapped Chinese/English text and a cartoon lucky stamp; exported PNG is 600 × 900.
+
+Home worry selection starts empty. Choose a grouped option or enter non-whitespace text to enable either Start button; the start action independently validates this rule. Custom thoughts are used for the current ritual only. Accepting a commission selects that chapter’s worry. The neighbour shortcut opens Stories and scrolls its internal panel to the chapter heading. All accordion bodies and tab panels have bounded internal scrolling, focus outlines and touch scrolling; summaries and tab navigation remain outside the scrolling content.
+
+Ordinary whacks can randomly become **2X impacts (10% chance, ×1.5 hit points)** or **3X impacts (4% chance, ×2 hit points)**. They multiply the hit before worry/kit/paper modifiers; optional event rewards are paid separately. The gesture ranking and 100-combo/once-only finisher are unchanged. The reaction caption uses its existing row, while comic dentures/ghosts and distinct mouth/limb motion animate beside the paper. No mandatory gesture cue is added.
+
+All 22 neighbourhood chapters have original bilingual slapstick scenes inspired by Hong Kong film comedy. They keep the existing story IDs, chapter goals, gifts and optional-bonus logic.
 
 ## Audio, language and updates
 
@@ -96,7 +108,7 @@ Stall badges use explicit 22px centred cells. Drag controls use centred SVG dots
 
 Decoration upgrade prices use dark green ink on the gold button. Unaffordable upgrades keep an opaque, muted surface so their prices remain readable.
 
-Owned decoration art and its drag preview are a further 15% smaller (CSS scale 0.96 → 0.816); the shelf cells, badges and touch targets keep their sizes and positions.
+Owned decoration art and its drag preview are a further 10% smaller (CSS scale 0.816 → 0.7344); the shelf cells, badges and touch targets keep their sizes and positions.
 
 The intro uses two flexible columns across the full available width. The heading stays on two lines; the slipper and introduction share the right column. Ritual duration occupies the full row on mobile and the lower right on wider screens, without the former 135px note-width cap.
 
@@ -105,3 +117,5 @@ Both collection and neighbourhood tab rows stick to the viewport top while readi
 UI follow-up: pause action labels are 15px (25% above 12px); final auspicious-card body copy is 12.48px (20% above 10.4px). Search rows fill the available width with a compact 92px filter; input fonts stay 16px instead of compounding collection typography scaling. Original vector stove, cheering grain bowl and green-horse taxi replace the blessing emoji props.
 
 The neighbour-commission shortcut is a raised button. It always opens the Stories tab and aligns “Neighbour story chapters” below the sticky tab row, instead of restoring whichever collection tab was used last.
+
+Sanctuary acceptance: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright BEAT_BAD_LUCK_URL=http://localhost:5216/beat-bad-luck/ node scripts/sanctuary-update-check.mjs` validates responsive typography, required worry entry, eight-level pricing, retained saves, bounded scroll regions, merit badges, critical hits and full ritual/export flows.
