@@ -74,7 +74,7 @@ The sanctuary wallet has prominent oil/merit totals with 650 ms counting animati
 
 Traditional Chinese is the default; English follows the playground preference. During whacking, Master randomly cycles through the six requested Cantonese villain-hitting lines, without repeats within a six-line bag or at bag boundaries. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v69** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v70** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -98,3 +98,7 @@ Stall badges use explicit 22px centred cells. Drag controls use centred SVG dots
 Decoration upgrade prices use dark green ink on the gold button. Unaffordable upgrades keep an opaque, muted surface so their prices remain readable.
 
 Owned decoration art and its drag preview are a further 15% smaller (CSS scale 0.96 → 0.816); the shelf cells, badges and touch targets keep their sizes and positions.
+
+The intro uses two flexible columns across the full available width. The heading stays on two lines; the slipper and introduction share the right column. Ritual duration occupies the full row on mobile and the lower right on wider screens, without the former 135px note-width cap.
+
+Both collection and neighbourhood tab rows stick to the viewport top while reading their own sections. The collection wrapper bounds its sticky row before records; the neighbourhood wrapper allows viewport sticky positioning. Collection switching and shortcuts scroll to the group’s natural start, including when the tab row is already pinned. Filters continue scrolling normally.
