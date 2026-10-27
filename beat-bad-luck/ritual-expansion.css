@@ -74,6 +74,8 @@ body{padding-bottom:calc(var(--dock-space,154px) + env(safe-area-inset-bottom))}
 
 /* The daily till laughs so hard its drawer pops out. */
 .daily-bonus-art{overflow:visible;pointer-events:none}
+/* Both popup illustrations are 85% of their previous 1.2 scale. */
+#ritual-loot-dialog .loot-icon>.comic-trophy,#ritual-loot-dialog .loot-icon>.daily-bonus-art{scale:1.02}
 .daily-till-drawer,.daily-till-coin{transform-box:fill-box;transform-origin:center;animation:daily-drawer-pop 2.8s ease-in-out infinite}
 .daily-till-coin{animation-name:daily-coin-hop;animation-delay:.12s}.daily-till-coin-two{animation-delay:.3s}
 @keyframes daily-drawer-pop{0%,65%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(4px) rotate(-3deg)}38%{transform:translateY(-1px) rotate(2deg)}50%{transform:translateY(2px) rotate(-1deg)}}
