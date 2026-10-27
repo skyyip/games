@@ -1,9 +1,6 @@
-/* Keep the scoring instruction in its own fixed row, above the paper. */
-#phase-beat #qte-call{position:relative;inset:auto;transform:none;display:grid!important;grid-template-columns:26px minmax(0,1fr) auto;grid-template-rows:1fr 4px;gap:3px 7px;flex:0 0 48px;width:100%;max-width:none;height:48px;min-height:48px;margin:0;padding:5px 8px;border:1px solid #b1cfa7;border-radius:10px;background:#24483d;color:#fff1c4;box-shadow:none;white-space:normal;z-index:2;pointer-events:none;overflow:hidden}
-#rhythm-symbol{display:grid;place-items:center;font-size:25px;line-height:1}.rhythm-copy{min-width:0;line-height:1.15}.rhythm-copy b{display:block;font-size:13px}.rhythm-copy small{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#rhythm-state{align-self:center;white-space:nowrap;font-size:11px}#rhythm-countdown{grid-column:1/-1;display:block;width:100%;height:4px;accent-color:#f3d584}
-#phase-beat #qte-call[data-state=now]{border-color:#ffe58e;background:#49663f;box-shadow:inset 0 0 0 1px #ffe58e}
-#phase-beat #qte-call[data-state=matched]{border-color:#bde8c1;background:#28584a}
-#phase-beat .gesture-hint.is-prompted{background:#f2d388;color:#324535;border-radius:8px;outline:1px solid #ffeab8;transform:none}
+/* Static scoring guide replaces the required-gesture countdown. */
+#phase-beat .freestyle-guide{position:relative;display:flex;flex-direction:column;justify-content:center;flex:0 0 48px;min-width:0;height:48px;padding:4px 8px;border:1px solid #b1cfa7;border-radius:10px;background:#24483d;color:#fff1c4;pointer-events:none;overflow:hidden}
+.freestyle-guide b{font-size:13px;line-height:1.2}.freestyle-guide small{font-size:10px;line-height:1.3;white-space:normal}
 #pause-overlay .pause-card button{font-size:15px}
 #ritual-loot-dialog[data-auspicious=true] .loot-card p{font-size:12.48px}
 /* Full-width compact inputs preserve iPhone's 16px focus font and give search the spare width. */
@@ -12,7 +9,7 @@
 .shop-tools .filter-controls select{padding-right:24px}
 @media(max-height:500px) and (min-aspect-ratio:4/3){
  #phase-beat{grid-template-rows:48px minmax(0,1fr) 46px;grid-template-areas:'telemetry cue' 'arena hud' 'controls feedback'}
- #phase-beat #qte-call{grid-area:cue;align-self:start;min-width:0}
+ #phase-beat .freestyle-guide{grid-area:cue;align-self:start;min-width:0}
  #phase-beat .personality-hud{min-height:0;height:100%}
  #phase-beat .event-banner{height:68px;min-height:68px}
 }

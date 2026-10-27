@@ -1,4 +1,14 @@
-# Rhythm-guided ritual acceptance · 2026-10-27
+# Freestyle gesture scoring acceptance · 2026-10-28
+
+- `npm test`: **127 passed**, zero failures. Every supported gesture scores immediately and between ambient beats. Base points are Pinch 50 > Circle 40 > Rub 30 > Swipe 20 > Tap 10, independent of timing and effort. Existing combo, worry, kit and paper modifiers remain. Optional on-beat recognition contributes to rhythm achievements without gating input or multiplying base points.
+- Combo grace is **1,500 ms**, inclusive: the next scored gesture at 1,500 ms continues the chain; at 1,501 ms it starts a new chain. Only active play time counts. Unfinished charge resets after a longer gap, while earned points and an earned finisher stay available. At 99 hits launch remains disabled; at 100 it unlocks. Each ritual still allows one finisher and 68 active seconds.
+- Four production full rituals passed at 320×568 Chinese, 390×844 English with optional events, 812×375 Chinese/reduced motion and 1440×900 English/reduced motion during the freestyle rollout. A final 320×568 run repeats all five native gestures, the 100-hit unlock, paused cinematic, 1.5-second combo expiry, all six steps, inventory consumption once, rewards and persisted reload after the timing adjustment.
+- Required gesture/countdown UI is removed. A static, bilingual score guide replaces it; lower gesture hints remain read-only and keep their compact labels. Home, pause, finisher help and accessible instructions describe free choice and the 1.5-second combo rule. Screenshots were checked for overlap and horizontal overflow.
+- Source offline cache is **v72**. Production build creates 20 pages with content hashes for JS/CSS/images/fonts. Canonical check: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright BEAT_BAD_LUCK_URL=http://localhost:5213/beat-bad-luck/ node scripts/freestyle-ritual-check.mjs`.
+
+## Previous rhythm-guided implementation (historical; required cues removed)
+
+Rhythm-guided ritual acceptance · 2026-10-27
 
 - `npm test`: **127 passed**, zero failures. Replaced retired freestyle/two-finisher assertions with timing, instruction matching, duplicate prevention, combo reset and once-only unlock checks; economy, inventory, saves, privacy, audio and story coverage remain.
 - Generated 68-second rounds use 108 BPM, preview the next gesture and reserve two beats for complex moves. Random-plan property checks verify all five gestures, nonoverlapping inclusive ±190 ms windows and enough cues to reach 100. All sixty kits exercise the real 100-cue path and their multiplier exactly once.

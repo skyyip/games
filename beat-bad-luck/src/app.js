@@ -28,7 +28,7 @@ $('#voice').checked=preferences.value.voice;
 $('#random-events').checked=preferences.value.randomEvents;
 const phaseNames={incense:'Offer incense to the deities',worry:'Give the worry a name',beat:'Whack the bad luck away',tiger:'Feed the white tiger',blessing:'Resolve and bless',divination:'Cast the sacred blocks'};
 const lines={incense:'Three little sticks. One slow breath. No need to rush.',worry:'Write it down. You do not have to carry it home.',beat:'Tap away the overtime. Leave room for a pineapple bun.',tiger:'Give the tiger a snack. Let the gossip stop here.',blessing:'Bad luck out. Good company in. Save some kindness for yourself.',divination:'One flat and one curved face. Let good company find you.'};
-let storage=null,persistent=true,state,kind='work',frame=0,lastPhase='',lastChant=-1,lastBeat=-1,lastQte=-1,receipt='',recorded=false,kitUseCommitted=false,savedScroll=0,paperAnimation=null,shoeAnimation=null,sequence=0,shopTimer=0;
+let storage=null,persistent=true,state,kind='work',frame=0,lastPhase='',lastChant=-1,lastBeat=-1,receipt='',recorded=false,kitUseCommitted=false,savedScroll=0,paperAnimation=null,shoeAnimation=null,sequence=0,shopTimer=0;
 const illustratedDecor=new Set(['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst']);
 const shopWeapons=WEAPONS.filter(w=>!w.starter&&!w.hidden&&w.id!=='rebirth-paper').sort((a,b)=>a.cost-b.cost||a.merit-b.merit);
 shopWeapons.splice(-1,0,WEAPONS.find(w=>w.id==='rebirth-paper'));
@@ -75,9 +75,11 @@ function renderRitualTiming(){
  literal($('#ritual-duration'),zh?'痛打 68 秒 · 化解祈福後擲聖杯':'68s of whacking · purification, then sacred blocks');
  $('#gesture-tools').setAttribute('aria-label',zh?'操作手勢提示（只作說明）':'Gesture hints (instructions only)');
  const hintNames={tap:['點拍','Tap'],heavy:['滑動重扣','Swipe'],circle:['轉圈','Circle'],rub:['來回搓','Rub'],pinch:['雙指夾','Pinch'],};
- for(const hint of document.querySelectorAll('#gesture-tools .gesture-hint'))literal(hint.querySelector('b'),hintNames[hint.dataset.direction||hint.dataset.gesture][zh?0:1]);
- $('#hit-zone').setAttribute('aria-label',zh?'跟隨隨機指示，啱拍先得分。空白鍵點拍、↓滑動、C轉圈、R搓動、P夾指。':'Follow the random gesture on the beat to score. Space tap, Down swipe, C circle, R rub, P pinch.');
- literal($('#whack-rule'),zh?'打小人 68 秒。按系統隨機手勢，光條行滿時完成動作，每拍只計一次；手勢唔啱、太早或漏拍唔得分，連擊重計。連續命中 100 拍解鎖必殺，每局只可發動一次；達標後保留資格。轉圈、搓動及夾指有較長準備時間。鍵盤：空白鍵點拍、↓滑動、C 轉圈、R 搓動、P 夾指。':'Whack for 68 seconds. Follow the random gesture and complete it when the bar fills. Each cue scores once. Wrong, early or missed cues reset the combo. Match 100 consecutive cues to unlock one finisher per ritual; the unlock stays earned. Complex gestures have longer preparation. Keyboard: Space tap, ↓ swipe, C circle, R rub, P pinch.');
+ for(const hint of document.querySelectorAll('#gesture-tools .gesture-hint'))literal(hint.querySelector('b'),hintNames[hint.dataset.gesture][zh?0:1]);
+ literal($('#freestyle-title'),zh?'自由出招 · 毋須跟拍':'Freestyle · no timing required');
+ literal($('#freestyle-points'),zh?'基礎分：夾 50 ＞ 圈 40 ＞ 搓 30 ＞ 扣 20 ＞ 拍 10':'Pinch 50 › Circle 40 › Rub 30 › Swipe 20 › Tap 10');
+ $('#hit-zone').setAttribute('aria-label',zh?'自由使用任何手勢得分，毋須跟拍。空白鍵點拍、↓滑動、C轉圈、R搓動、P夾指。':'Use any gesture to score, with no timing requirement. Space tap, Down swipe, C circle, R rub, P pinch.');
+ literal($('#whack-rule'),zh?'打小人 68 秒，隨時自由出招，毋須跟隨系統手勢或節拍。基礎分：雙指夾 50 ＞ 轉圈 40 ＞ 來回搓 30 ＞ 滑動重扣 20 ＞ 點拍 10，再加連擊及法寶、小人紙和弱點加成。1.5 秒內接上下一招維持連擊；100 連擊解鎖必殺，每局一次，達標後保留資格。鍵盤：空白鍵點拍、↓滑動、C 轉圈、R 搓動、P 夾指。':'Whack freely for 68 seconds: any gesture scores at any time. Base points: Pinch 50 > Circle 40 > Rub 30 > Swipe 20 > Tap 10, plus combo, kit, paper and weakness bonuses. Keep hits within 1.5 seconds for a combo; 100 combo unlocks one finisher per ritual. Once earned, it stays unlocked. Keyboard: Space tap, ↓ swipe, C circle, R rub, P pinch.');
  literal($('#rules ol li:first-child'),zh?'奉神：輕掃或點亮三炷香，輕吹或按鈕熄去明火。':'Offer incense: swipe or tap to light three sticks, then blow gently or use the button.');
  literal($('#ritual-timing-note'),zh?'打小人 68 秒，預設無隨機挑戰；開啟後每局一次事件，一招即可解決。祭白虎後依序火化小人及衣紙、灑米或豆、焚燒綠馬紙，只需打杯一次，師傅會自動補打至聖杯。化解及打杯不催時，可隨時暫停。':'Whack for 68 seconds with random challenges off by default; enable them for one single-action event per ritual. Feed the tiger, burn the worry and offering papers, scatter rice or beans, burn the green horse paper, then cast once; Master automatically retries until sacred blocks. Purification and divination are untimed. Pause whenever you need.');
 }
@@ -180,7 +182,7 @@ function cancelGestures(){
 function start(){
  if(PHASES.includes(game.phase))return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
  const preset=WORRIES.find(w=>w.id===kind);game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preferences.value.randomEvents});neighbourhoodUI?.reset();
- lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;lastQte=-1;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
+ lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
  audio.voice=$('#voice').checked;unlockSound();renderPhase();cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);
 }
 function renderPhase(){
@@ -192,7 +194,7 @@ function renderPhase(){
  (game.phase==='beat'?$('#beat-arena'):$('#phase-body')).append($('#effects'));
  if(game.phase==='incense'){for(const stick of document.querySelectorAll('[data-stick]'))stick.classList.remove('is-lit');$('#phase-incense').classList.remove('is-blown');$('#blow').disabled=true;ritualUI?.incenseMic('idle');}
  if(game.phase==='worry')literal($('#named-worry'),game.worry);
- if(game.phase==='beat'){$('#paper-doll').dataset.comedyAct='';$('#paper-doll').innerHTML=dollArt(game.kind,game.look,game.skin);literal($('#doll-label'),game.worry);$('#striking-weapon').innerHTML=weaponArt(game.weapon);feedback('Find your rhythm.');$('#hit-zone').dataset.lastGesture='';paintPaperWear();}
+ if(game.phase==='beat'){$('#paper-doll').dataset.comedyAct='';$('#paper-doll').innerHTML=dollArt(game.kind,game.look,game.skin);literal($('#doll-label'),game.worry);$('#striking-weapon').innerHTML=weaponArt(game.weapon);feedback(gestureText('自由出招！每招都計分。','Freestyle! Every gesture scores.'));$('#hit-zone').dataset.lastGesture='';paintPaperWear();}
  if(game.phase==='tiger'){$('#tiger-smear-paint').style.opacity='0';$('#paper-tiger').innerHTML=tigerArt();$('#pork-piece').innerHTML=porkArt();$('#phase-tiger').classList.remove('is-fed');}
  if(game.phase==='blessing'){$('#bless').classList.remove('is-burning');audio.chime();}
  ritualUI?.render();
@@ -212,7 +214,6 @@ function tick(){
    paintPaperWear();neighbourhoodUI?.renderPlay();
    const beat=Math.floor(game.elapsed/BEAT_INTERVAL);if(beat!==lastBeat){lastBeat=beat;if(!game.finisherBusy)audio.tone(420,.045,'triangle',.018);}
    const pulse=game.elapsed%BEAT_INTERVAL;$('#rhythm-pulse').style.setProperty('--beat-scale',1+Math.max(0,1-pulse/160)*.65);
-   renderRhythmCue();
    const chant=Math.floor(game.elapsed/4000);if(chant!==lastChant){lastChant=chant;const line=pickChant();$('#fong-line').textContent=line;audio.speak(line,'zh-Hant');if(chant===3){audio.tone(1050,.4,'sine',.045);audio.tone(790,.4,'sine',.03,.2);}}
  }
  ritualUI?.render();
@@ -224,22 +225,8 @@ function sparks(large=false){
 function spendKitOnce(){
  if(kitUseCommitted)return;kitUseCommitted=true;syncProgress();const spent=consumeWeapon(state,game.weapon);if(spent)state=spent;const paper=consumeSkin(state,game.skin);if(paper)state=paper;save();
 }
-let shownRhythmMiss=null;
-const cueNames={tap:['點拍','Tap'],heavy:['滑動','Swipe'],rub:['來回搓','Rub'],circle:['轉圈','Circle'],pinch:['雙指夾','Pinch']};
-function renderRhythmCue(){
- const cue=game.qte,next=game.nextCue,zh=getLanguage()==='zh-Hant',state=!cue?'done':cue.matched?'matched':game.elapsed>=cue.opens?'now':'prepare';
- const prompt=$('#qte-call');prompt.hidden=false;prompt.dataset.state=state;prompt.dataset.cueId=String(cue?.id??-1);prompt.dataset.gesture=cue?.type??'';prompt.dataset.cueAt=String(cue?.at??0);prompt.dataset.cueStart=String(cue?.start??0);
- literal($('#rhythm-current'),cue?cueNames[cue.type][zh?0:1]:zh?'指示完成！':'All cues complete!');
- literal($('#rhythm-next'),next?(zh?'下一個：':'Next: ')+cueNames[next.type][zh?0:1]:zh?'最後一拍，穩住！':'Last cue. Keep steady!');
- literal($('#rhythm-state'),({prepare:zh?'準備':'Ready',now:zh?'跟拍！':'NOW!',matched:zh?'命中 ✓':'Hit ✓',done:zh?'完成':'Done'})[state]);
- $('#rhythm-symbol').textContent=({tap:'•',heavy:'↓',rub:'↔',circle:'↻',pinch:'⇢⇠'})[cue?.type]??'✓';
- $('#rhythm-countdown').value=cue?Math.max(0,Math.min(1,(game.elapsed-cue.start)/Math.max(1,cue.at-cue.start))):1;
- for(const hint of document.querySelectorAll('#gesture-tools [data-gesture]'))hint.classList.toggle('is-prompted',cue?.type===hint.dataset.gesture);
- if(cue&&lastQte!==cue.id){lastQte=cue.id;say((zh?'跟住節拍：':'Follow the beat: ')+cueNames[cue.type][zh?0:1]);}
- if(game.rhythmMiss&&shownRhythmMiss!==game.rhythmMiss){shownRhythmMiss=game.rhythmMiss;const why=game.rhythmMiss.reason;feedback(why==='gesture'?gestureText('手勢唔啱，唔計分；連擊重計。','Wrong gesture. No points; combo reset.'):why==='early'?gestureText('早咗！等光圈合攏再出手。','Too early! Wait for the cue.'):gestureText('漏咗一拍！連擊重新嚟。','Missed a beat. Start a new combo.'));}
-}
 function whack(options){
- const hit=game.hit(options);renderPhase();if(!hit){if(game.phase==='beat'){renderRhythmCue();ritualUI?.render();}return;}
+ const hit=game.hit(options);renderPhase();if(!hit){if(game.phase==='beat'){ritualUI?.render();}return;}
  spendKitOnce();
  const force=.2+Math.min(1,hit.power/9)*.8;cryDuration=900+force*900;audio.hit(game.weapon,hit.heavy,hit.perfect,hit.power);vibrate(Math.round(7+force*30));
  const paper=$('#paper-doll');paper.classList.add('is-crying');paper.style.setProperty('--hit-strength',force);paper.dataset.impact=force.toFixed(3);
@@ -328,9 +315,9 @@ zone.addEventListener('pointermove',event=>{
 });
 zone.addEventListener('pointerup',event=>{
  const stroke=gestures.get(event.pointerId);if(!stroke)return;moveStroke(stroke,event.clientX,event.clientY);
- if(pinch?.ids.includes(event.pointerId)){if(pinch.moved&&!pinch.done){for(const id of pinch.ids){const other=gestures.get(id);if(other)other.consumed=true;}feedback(gestureText('雙指向內夾，跟住上面嘅節拍。','Pinch inward in time with the cue.'));}pinch=null;}
+ if(pinch?.ids.includes(event.pointerId)){if(pinch.moved&&!pinch.done){for(const id of pinch.ids){const other=gestures.get(id);if(other)other.consumed=true;}feedback(gestureText('雙指向內夾就得分，毋須跟拍。','Pinch inward to score, at any time.'));}pinch=null;}
  gestures.delete(event.pointerId);
- if(!stroke.consumed){const action=finishStroke(stroke,performance.now());if(action){whack({...action,pointer:event.pointerId});}else feedback(gestureText('跟住手勢提示，啱拍先有分。','Follow the gesture cue. Only on-time matches score.'));}
+ if(!stroke.consumed){const action=finishStroke(stroke,performance.now());if(action){whack({...action,pointer:event.pointerId});}else feedback(gestureText('點拍、滑動、轉圈、來回搓或雙指向內夾都得分。','Tap, swipe, circle, rub or pinch inward to score.'));}
  if(!gestures.size)clearGesturePreview();
 });
 function cancelPointer(event){const stroke=gestures.get(event.pointerId);if(!stroke)return;gestures.delete(event.pointerId);if(pinch?.ids.includes(event.pointerId)){for(const id of pinch.ids){const other=gestures.get(id);if(other)other.consumed=true;}pinch=null;}clearGesturePreview();}

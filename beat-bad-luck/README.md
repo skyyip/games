@@ -6,7 +6,7 @@ A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. 
 
 1. **Offer incense / 奉神:** light three sticks and blow, using the button or an optional local microphone. No recording is saved or uploaded. The button remains available if microphone access fails.
 2. **Name the worry:** choose a grouped preset or enter a private, literal worry of at most 64 characters. Custom words are never inserted as HTML or saved in records.
-3. **Whack for 68 active seconds:** follow the system’s random Tap / Swipe / Circle / Rub / Pinch cue. Finish the gesture as its bar fills: only a matching gesture within ±190 ms scores, once per cue (±95 ms is perfect). Two count-in beats and a next-gesture preview help players prepare; complex gestures receive two beats. At 108 BPM a round has at least 100 opportunities (113 for the fixed test seed), so the 100-hit finisher is achievable. Wrong, early or missed cues reset the unfinished combo; earned points stay. The lower gesture row remains read-only. Keyboard: Space tap, Down swipe, C circle, R rub, P pinch.
+3. **Whack freely for 68 active seconds:** any supported gesture scores immediately, without a system cue or required beat. Base points are **Pinch 50 > Circle 40 > Rub 30 > Swipe 20 > Tap 10**, plus existing combo, kit, paper and worry bonuses. Strength changes impact/damage rather than base gesture points. Optional on-beat recognition still contributes to rhythm titles; it never blocks scoring. The lower gesture row remains read-only; a separate static guide shows the base score ranking. Keyboard: Space tap, Down swipe, C circle, R rub, P pinch.
 4. **Feed the tiger:** one tap automatically dips the pork if needed and feeds the yellow paper tiger. Manual dipping and smearing are optional; at least half a coating gives `round(20 × kit × paper multiplier)` once. Close drag releases feed the tiger too.
 5. **Resolve and bless:** one confirmation burns the worry and offering paper, scatters rice or beans and burns the green-horse paper in one short animated sequence.
 6. **Sacred blocks / 打杯:** cast once. A non-sacred result triggers a funny automatic retry with one flat and one curved block. No repeated button pressing is needed.
@@ -17,16 +17,15 @@ Pausing or hiding the page freezes the model clock and inputs. Quitting never gr
 
 The old kit-signature recipes and separate three-step finisher are retired from the live game. All sixty kits, including free hands, share one control:
 
-- Match **100 consecutive gesture cues** to unlock the finisher. Unfinished progress equals the current combo and resets on mistakes or missed cues. Once earned, the unlock remains available despite a later break.
-- Consecutiveness follows the generated cue sequence, including longer complex gestures; there is no fixed one-second gap penalty.
+- Land **100 consecutive hits with any gestures** to unlock the finisher. Keep the gap between scored hits at 1.5 seconds or less. A longer active-time gap resets unfinished progress, while earned points and an earned unlock remain. Pause and the cinematic preserve the combo.
 - Tap the full meter to launch an automatic **2.7-second** illustrated performance, at most **one launch per ritual**. No prerequisite signature wins, compulsory first-use popup or additional oil charge.
 - An optional nice tap at 1,350 ms ±220 ms adds 10% finisher points. Missing it never fails the show.
 - Base bonus is `round(250 × kit × paper multiplier)`; the optional bonus is `round(25 × kit × paper multiplier)`, once. Ordinary strikes, copies and event rewards cannot score during the show.
-- The cinematic freezes the ordinary round, event and rhythm clocks and preserves combo. User pause also freezes cinematic time. A long frame excludes only the actual cinematic duration.
+- The cinematic freezes the ordinary round, event and combo clocks and preserves combo. User pause also freezes cinematic time. A long frame excludes only the actual cinematic duration.
 
 Ten illustrated families retain each equipped tool’s artwork: palms/slippers, triple blades, spinning wheels, heavy bonks, application-denied stamps, suction slingshots, solar light, makeover mirrors, the 3000-tool fan and Lassie. The 3000 tools collapse into a plastic comb and a voluntary surrender; the beauty paper refuses to leave its mirror. The guide is available from home and pause, without spending charge.
 
-Long-press/release, outward two-finger spreading, X and V are not scoring gestures. Two separated fingers can still pinch inward. Pointer cancellation, lost capture, pause and resize discard unfinished gestures. A 55 ms per-pointer guard prevents duplicate hits; independent fingers cannot score the same cue twice. Stationary presses lasting 0.7 seconds or longer do not score on release; short taps still work.
+Long-press/release, outward two-finger spreading, X and V are not scoring gestures. Two separated fingers can still pinch inward. Pointer cancellation, lost capture, pause and resize discard unfinished gestures. A 55 ms per-pointer guard prevents duplicate hits; independently completed gestures can score without waiting for a cue. Stationary presses lasting 0.7 seconds or longer do not score on release; short taps still work.
 
 ## Surprises and recurring comedy
 
@@ -80,14 +79,14 @@ Offline cache **v71** includes the new content, art and presentation. Existing w
 
 ```sh
 npm test
-GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/rhythm-ritual-check.mjs
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/freestyle-ritual-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/simple-interactions-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/event-optin-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/gesture-hints-check.mjs
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/stall-refresh-check.mjs
 ```
 
-The current browser acceptance test (`rhythm-ritual-check.mjs`) drives the real pointer recognizer through 100 random cues, validates no points or inventory wear for invalid inputs, the 99/100 unlock boundary, one finisher with paused timing, all six ritual steps, cartoon blessing art, purchase-search widths, pause/result typography, inventory and reload. Desktop uses its documented P key for pinch. Older freestyle/signature browser checks document retired mechanics.
+The current browser acceptance test (`freestyle-ritual-check.mjs`) drives the real pointer recognizer through 100 freely chosen gestures at arbitrary times, verifies the 99/100 unlock boundary, one finisher with paused timing, all six ritual steps, inventory and reload, plus the existing layout checks. Desktop uses its documented P key for pinch. Older signature/cue-based checks document retired mechanics.
 
 Selection polish: equipped paid/free paper cards have a bright gold border and a continuously travelling SVG perimeter glint, with a static highlight for reduced-motion preferences. The overlay never intercepts clicks or covers text; selected copy and bonuses keep at least 4.5:1 contrast. The game’s update prompt heading is 21.6px (80% of its former 27px).
 
