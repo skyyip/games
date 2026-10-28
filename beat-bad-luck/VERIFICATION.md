@@ -1,3 +1,29 @@
+# Two-decimal values and compact shop labels — current acceptance
+
+Cache v87 adds a display-only formatter with at most two fractional digits and no unnecessary trailing zeroes. Hidden multipliers/rates such as 4.9399999999999995 and 1.3199999999999998 render as 4.94 and 1.32 across lists, owned stock, preparation and purchase effects. Numeric locale formatting is also capped at two digits. Calculation/save precision and private input remain unchanged.
+
+Decoration/helper purchase and upgrade labels, their numeric spans, helper catalogue buy/restock captions and pending purchase confirmations are exactly 85% of their previous rendered text size. Search/filter controls keep a 16px native focus font while scaling the text visually to 13.6px; compensated field wrappers retain the previous visible width and 32px height. Filtering, contrast and purchasing semantics are unchanged.
+
+Validation: all 149 unit tests passed. The shop browser suite passed 320×568 / 390×844 Chinese, 812×375 and 1280×900 English, checking exact label ratios, equal label/numeric-span size, purchase target height, the two-decimal limit, search/filter operation, no viewport zoom/overflow, confirmation/cancellation and unmodified private input.
+
+# Combat feedback and compact welcome
+
+Cache v86 adds paper-anchored 2X/3X pop-and-fade badges, retained across ordinary hits and cleaned on critical replacement, phase change or quit. The reserved combo-torch slot starts unlit, ignites on the 128th consecutive hit, burns throughout the burst, then extinguishes with continuous rising smoke. Ready and spent states survive pause correctly, and a new ritual resets the torch. Layered weapon fire deforms continuously with five staggered embers; native animation-frame samples differ while running and all fire animation freezes on pause. Zombies enter at ground level with 62% peak opacity, hopping bodies and independent grounded shadows. Effects never intercept paper input or shift the arena; reduced motion uses static artwork.
+
+The two preparation introduction sentences are removed. The welcome quote is 17.25px (+15%) using Iansui/Fredoka. The single animated level badge now sits left of the Master level in the roadside wallet. Badge checks at levels 1, 9, 10, 27, 86, 127, 167 and 168 confirm accurate artwork, alignment and no narrow-screen overflow.
+
+Validation: the combat browser suite passed 320×568 / 390×844 Traditional Chinese, 812×375 English reduced motion, and 1280×900 English. It covers critical lifetime, 127/128 torch unlock, pause/resume, actual continuous weapon-fire frames, burst expiry, smoke, cancelled-ritual reset, inventory/reward boundaries, a completed ritual and stable reachable targets. The preparation/purchase suite passed five phone, landscape and desktop profiles including the new typography and badge location. Version-85 source caches upgraded to v86 and reloaded offline while retaining progress, inventory and unrelated game data. Production builds generate content-hashed assets.
+
+# Modal catalogues and outer collections
+
+Cache v85 keeps the private worry field visible at all times and removes its reveal button. Empty-worry gating and in-memory-only private text remain unchanged. Full paper/helper catalogues use native modal dialogs with a fixed close header, touch-scrollable inner content, background scroll locking, Escape dismissal and focus return. The same owned grids move into each modal and return to the inline preparation slots on close. Separate purchase confirmation still charges only on confirmation, retains item focus when an item moves to the owned grid, and never starts a ritual automatically.
+
+The redundant stall/story headings and story tab/content are removed without deleting saved chapter progress. Titles, scenes and fortunes form three remembered tabs outside the dashboard, immediately before records. Old saved `stories` sections safely select Titles. The decorating shortcut is in the live stall heading at the upper right. Catalogue button text is 15.9375px (+25% from its previously rendered 12.75px), step 02/03 titles are +10%, and preview SVGs are 107.1px (−15%). Accordion disclosures have cartoon faces and expanded content loses its outer frame without changing its geometry.
+
+Validation: 146 unit tests passed. Production-build browser checks passed at 320×568, 375×812, 390×844, 812×375 and 1280×900 in Traditional Chinese/English, including normal/reduced motion, real touch scrolling, persistent close controls, modal focus containment, paper/helper purchase cancellation and confirmation, selection, reload, inventory preservation, empty/custom worry handling, no horizontal overflow and a complete ritual. The native 320px ritual regression also passed all five gestures, combo charging, the burst, pause/resume, result rewards and reload. The 1000-hit HUD and burst-cancellation check passed without rewards being granted on cancellation. Source cache v85 replaced v75–v84 while keeping saved inventory, chapter progress, collections and unrelated games; the game and website icons reloaded offline.
+
+Previous verification entries below describe earlier releases.
+
 # Direct content and combo HUD
 
 Cache v84 restores the live combo beside the score, with full four-digit readability and invariant HUD geometry. The boxed N/128 control stays hidden before readiness; the finisher meter remains and the animated launch control returns at 128 hits. Stall, neighbourhood, secret-collection and collected-fortune/ending sections are no longer accordions; tab navigation and desktop position memory remain. Worries are selected directly from the complete ungrouped list, with the Cantonese prompt 「衰嘢交出嚟」 and unchanged empty/custom-worry validation. Comic scene text uses exactly 85% of its former size and actor icons use 80%, while controls retain 44px targets. Preparation, native ritual, 1000-combo/abort and offline checks cover these changes and preservation of old saves.

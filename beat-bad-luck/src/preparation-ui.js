@@ -1,8 +1,10 @@
+import {formatNumber} from './number-format.js';
 import {WORRIES,WEAPONS,weaponScoreMultiplier} from './catalog.js';
 import {SKINS,skinArt,skinScoreMultiplier} from './skins.js';
 import {weaponArt} from './art.js';
 import {weaponCondition,purchasePrice,skinUses} from './progress.js';
 import {STORIES,commissionPay} from './neighbourhood.js';
+import {animateDialog} from './stall-polish.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 
 // Draft choices belong to this visit. Personal worry text is never persisted.
@@ -12,12 +14,11 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  const welcome=$('#welcome');
  let commissionEnabled=Boolean(getState().neighbourhood.active),previousStory=getState().neighbourhood.active,storiesKey='',kitsKey='';
  const steps=document.createElement('div');steps.id='ritual-preparation';steps.setAttribute('translate','no');
- steps.innerHTML=`<div class="preparation-intro"><h2 id="preparation-title"></h2><p id="preparation-help"></p></div>
- <section class="preparation-step" id="prepare-worry" aria-labelledby="prepare-worry-title"><h3 class="preparation-heading"><span class="preparation-number">01</span><span id="prepare-worry-title"></span><small id="worry-required"></small></h3><div class="preparation-body" id="prepare-worry-body"><div id="worry-controls"></div><button type="button" class="preparation-link" id="write-own-worry" aria-expanded="false" aria-controls="custom-worry-controls"></button><div id="custom-worry-controls" hidden></div><p id="worry-selection-summary" class="preparation-note"></p></div></section>
+ steps.innerHTML=` <section class="preparation-step" id="prepare-worry" aria-labelledby="prepare-worry-title"><h3 class="preparation-heading"><span class="preparation-number">01</span><span id="prepare-worry-title"></span><small id="worry-required"></small></h3><div class="preparation-body" id="prepare-worry-body"><div id="worry-controls"></div><div id="custom-worry-controls"></div><p id="worry-selection-summary" class="preparation-note"></p></div></section>
  <details class="preparation-step" id="prepare-commission"><summary class="preparation-heading"><span class="preparation-number">02</span><span><b id="prepare-commission-title"></b><small id="commission-selection-summary"></small></span></summary><div class="preparation-body"><fieldset class="preparation-options"><legend class="sr-only" id="commission-choice-label"></legend><label><input type="radio" name="preparation-commission" value="none"><span id="commission-none-label"></span></label><label><input type="radio" name="preparation-commission" value="yes"><span id="commission-yes-label"></span></label></fieldset><p class="preparation-note" id="commission-help"></p><div id="preparation-commissions" hidden></div><p class="preparation-note" id="commission-target-note"></p><button type="button" class="preparation-link" id="use-commission-worry" hidden></button></div></details>
  <details class="preparation-step" id="prepare-events"><summary class="preparation-heading"><span class="preparation-number">03</span><span><b id="prepare-events-title"></b><small id="events-selection-summary"></small></span></summary><div class="preparation-body"><fieldset class="preparation-options"><legend class="sr-only" id="events-choice-label"></legend><label><input type="radio" name="preparation-events" value="off"><span><b id="events-off-label"></b><small id="events-off-help"></small></span></label><label><input type="radio" name="preparation-events" value="on"><span><b id="events-on-label"></b><small id="events-on-help"></small></span></label></fieldset></div></details>
  <details class="preparation-step" id="prepare-skin"><summary class="preparation-heading"><span class="preparation-number">04</span><span><b id="prepare-skin-title"></b><small id="skin-selection-summary"></small></span></summary><div class="preparation-body"><div class="preparation-preview" id="preparation-skin-preview" aria-hidden="true"></div><div id="preparation-skins"></div></div></details>
- <details class="preparation-step" id="prepare-kit"><summary class="preparation-heading"><span class="preparation-number">05</span><span><b id="prepare-kit-title"></b><small id="kit-selection-summary"></small></span></summary><div class="preparation-body"><div class="preparation-preview" id="preparation-kit-preview" aria-hidden="true"></div><p id="preparation-kit-help" class="preparation-note"></p><div id="preparation-owned-kits" class="preparation-kit-grid"></div><details class="preparation-catalog" id="preparation-kit-catalog"><summary id="all-kits-label"></summary><p id="preparation-wallet" class="preparation-note"></p><div id="preparation-other-kits" class="preparation-kit-grid"></div></details></div></details>
+ <details class="preparation-step" id="prepare-kit"><summary class="preparation-heading"><span class="preparation-number">05</span><span><b id="prepare-kit-title"></b><small id="kit-selection-summary"></small></span></summary><div class="preparation-body"><div class="preparation-preview" id="preparation-kit-preview" aria-hidden="true"></div><p id="preparation-kit-help" class="preparation-note"></p><div id="preparation-owned-kits" class="preparation-kit-grid"></div><div class="preparation-catalog" id="preparation-kit-catalog"><button type="button" id="all-kits-label" class="catalog-open" aria-haspopup="dialog" aria-controls="kit-catalog-dialog"></button><dialog id="kit-catalog-dialog" class="catalog-dialog" aria-labelledby="kit-catalog-title" translate="no"><header class="catalog-heading"><h2 id="kit-catalog-title"></h2><button type="button" class="catalog-close" autofocus></button></header><div class="catalog-scroll" tabindex="0"><p id="preparation-wallet" class="preparation-note"></p><div id="preparation-other-kits" class="preparation-kit-grid"></div></div></dialog></div></div></details>
  <section class="preparation-receipt" aria-labelledby="preparation-receipt-title"><h3 id="preparation-receipt-title"></h3><p id="preparation-receipt-worry"></p><p id="preparation-receipt-options"></p><p id="preparation-receipt-items"></p><p id="preparation-usage-note" class="preparation-note"></p></section>`;
  const field=$('.worry-field'),select=$('#worry-select'),input=$('#worry-input');
  for(const id of ['commission','events'])steps.querySelector('#prepare-'+id).hidden=!optionalStepsEnabled;
@@ -34,11 +35,21 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  $('.random-events-option').hidden=true;
  $('.selected-kit').hidden=true;$('#use-hands').hidden=true;$('#open-journey').hidden=true;$('#active-commission').hidden=true;
  const skinChooser=$('.skin-chooser');$('#preparation-skins').append(skinChooser);skinChooser.open=true;
- const extras=document.createElement('details');extras.className='preparation-catalog';extras.innerHTML='<summary id="all-skins-label"></summary>';
- skinChooser.querySelector('.skin-grid').before(extras);extras.append(skinChooser.querySelector('.skin-grid'));
+ const extras=document.createElement('div');extras.className='preparation-catalog';extras.innerHTML='<button type="button" id="all-skins-label" class="catalog-open" aria-haspopup="dialog" aria-controls="skin-catalog-dialog"></button><dialog id="skin-catalog-dialog" class="catalog-dialog" aria-labelledby="skin-catalog-title" translate="no"><header class="catalog-heading"><h2 id="skin-catalog-title"></h2><button type="button" class="catalog-close" autofocus></button></header><div class="catalog-scroll" tabindex="0"></div></dialog>';
+ skinChooser.querySelector('.skin-grid').before(extras);extras.querySelector('.catalog-scroll').append(skinChooser.querySelector('.skin-grid'));
  const ownedSkins=document.createElement('div');ownedSkins.className='skin-owned-slot skin-grid';extras.before(ownedSkins);
- const dashboard=$('#stall-dashboard'),stall=document.createElement('section');stall.id='my-stall';stall.setAttribute('aria-labelledby','my-stall-label');stall.innerHTML='<h2 id="my-stall-label" translate="no"></h2>';
- dashboard.before(stall);stall.append(dashboard);$('.kit-shortcuts').querySelector('[data-shortcut=kits]').hidden=true;stall.append($('.kit-shortcuts'));
+ const dashboard=$('#stall-dashboard'),stall=document.createElement('section');stall.id='my-stall';
+ const records=$('.records-card'),hub=$('#neighbourhood-hub');dashboard.after(hub,records);
+ dashboard.before(stall);stall.append(dashboard);$('.kit-shortcuts').querySelector('[data-shortcut=kits]').hidden=true;$('.stall-showcase-heading').append($('.kit-shortcuts'));
+ // Reuse the live inventory grids in the modal, then return owned shortcuts on close.
+ for(const [type,owned,anchor]of [['skin',ownedSkins,extras],['kit',$('#preparation-owned-kits'),$('#preparation-kit-catalog')]]){
+  const dialog=animateDialog($('#'+type+'-catalog-dialog')),trigger=$('#all-'+(type==='skin'?'skins':'kits')+'-label'),scroll=dialog.querySelector('.catalog-scroll'),close=dialog.querySelector('.catalog-close');
+  trigger.addEventListener('click',()=>{scroll.prepend(owned);dialog.showModal();close.focus({preventScroll:true});});
+  close.addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('close',()=>{if(dialog.open)return;anchor.before(owned);trigger.focus({preventScroll:true});});
+  dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const controls=[...dialog.querySelectorAll('button:not(:disabled),[tabindex="0"]')].filter(node=>node.getClientRects().length),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
+ }
+
  const notice=$('#daily-reward-note');if(notice)steps.before(notice);
  const firstHelp=welcome.querySelector('.fong-intro>div:last-child');
  firstHelp.querySelector('.bbl-kicker').hidden=true;firstHelp.querySelector('h2').hidden=true;firstHelp.querySelector('p:last-child').setAttribute('translate','no');
@@ -49,16 +60,13 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  function focusStep(id='worry') {
   const step=$('#prepare-'+id);if(step.tagName==='DETAILS')step.open=true;
   const target=id==='worry'?(input.value.trim()?input:select):step.querySelector('summary');
-  if(target===input)showCustom(true);
   target.focus({preventScroll:true});step.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  }
- function showCustom(open) {$('#custom-worry-controls').hidden=!open;$('#write-own-worry').setAttribute('aria-expanded',String(open));}
- $('#write-own-worry').addEventListener('click',()=>{const open=$('#custom-worry-controls').hidden;showCustom(open);if(open){onChooseWorry('');render();input.focus();}});
- select.addEventListener('change',()=>{if(select.value)showCustom(false);render();});
+ select.addEventListener('change',render);
  input.addEventListener('input',render);
  for(const radio of document.querySelectorAll('[name=preparation-commission]'))radio.addEventListener('change',()=>{commissionEnabled=radio.value==='yes';render();});
  for(const radio of document.querySelectorAll('[name=preparation-events]'))radio.addEventListener('change',()=>{onEvents(radio.value==='on');render();});
- $('#use-commission-worry').addEventListener('click',()=>{const current=currentStory();if(current){onChooseWorry(current.chapter.kind);showCustom(false);render();focusStep('worry');}});
+ $('#use-commission-worry').addEventListener('click',()=>{const current=currentStory();if(current){onChooseWorry(current.chapter.kind);render();focusStep('worry');}});
  function renderStories() {
   const state=getState(),n=state.neighbourhood,container=$('#preparation-commissions');
   container.hidden=!commissionEnabled;
@@ -86,9 +94,9 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   const cards=WEAPONS.filter(w=>!w.hidden||state.owned.includes(w.id)).map(w=>{
    const owned=state.owned.includes(w.id),selected=state.equipped===w.id,cost=purchasePrice(state,w.cost),condition=weaponCondition(state,w.id);
    const card=document.createElement('article');card.className='preparation-kit-card';
-   const button=document.createElement('button');button.type='button';button.className='preparation-kit-choice';button.dataset.preparationKit=w.id;button.setAttribute('aria-pressed',String(selected));
+   const button=document.createElement('button');button.type='button';button.className='preparation-kit-choice';button.dataset.preparationKit=w.id;button.dataset.owned=String(owned);button.setAttribute('aria-pressed',String(selected));
    button.innerHTML=weaponArt(w.id)+'<b></b><span></span><small></small>';
-   button.querySelector('b').textContent=name(w);button.querySelector('span').textContent=`${local('解壓分數','Score')} ×${weaponScoreMultiplier(w.id)}`;
+   button.querySelector('b').textContent=name(w);button.querySelector('span').textContent=`${local('解壓分數','Score')} ×${formatNumber(weaponScoreMultiplier(w.id))}`;
    const uses=w.starter?local('免費・不限次數','Free · unlimited'):owned?local(`剩餘 ${condition.remaining} 次`,` ${condition.remaining} uses left`):local(`每件可用 ${condition.capacity} 次`,`${condition.capacity} uses per kit`);
    button.querySelector('small').textContent=uses+' · '+(selected?local('已選用 ✓','Selected ✓'):owned?local('選用','Equip'):local(`購買・${cost} 香油錢`,`Buy · ${cost} oil`));
    button.disabled=!owned&&(state.coins<cost||state.merit<w.merit);button.addEventListener('click',()=>owned?onEquip(w.id):requestBuy('weapon',w));card.append(button);
@@ -108,20 +116,21 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   const commissionText=commissionEnabled&&current?local(`${current.story.name[0]}・第 ${current.index+1} 章`,`${current.story.name[1]} · chapter ${current.index+1}`):commissionEnabled?local('請選一個委託，或今局先唔接','Choose a commission, or skip it this ritual'):local('今次專心處理自己','Just my own worry');
   const eventText=events?local('加入隨機挑戰','Random challenges on'):local('輕鬆除厄・事件關閉','Relaxed · events off');
   for(const [id,zhText,enText] of [
-   ['preparation-title','準備好，打走今日嘅心塞','Get ready to leave a worry behind'],['preparation-help','只需選一件心事。其他已有預設，想改先展開。','Only a worry is required. Other choices are ready; open any step to change them.'],
-  ['prepare-worry-title','今日有咩令你心塞？','What is weighing on you?'],['worry-required','衰嘢交出嚟','Hand it over!'],['write-own-worry','我想自己寫','Write my own worry'],
+  ['prepare-worry-title','今日有咩令你心塞？','What is weighing on you?'],['worry-required','衰嘢交出嚟','Hand it over!'],
    ['worry-question','選擇一件心塞事','Choose one worry'],['worry-privacy','心事只留在這次儀式，不會存入紀錄。','Your words stay in this ritual and are never saved.'],
    ['prepare-commission-title','順便幫街坊一個忙？','Help a neighbour along the way?'],['commission-choice-label','今局是否接委託','Commission for this ritual'],['commission-none-label','今次專心處理自己','Just my own worry'],['commission-yes-label','順便接個委託','Help with a commission'],['commission-help','完成儀式即可過章；額外挑戰只影響報酬。今局不接，已接故事及進度會保留。','Finishing the ritual advances the chapter; bonus targets affect pay. Skipping this ritual preserves your accepted story and progress.'],
    ['prepare-events-title','今局想輕鬆，定刺激啲？','A relaxed ritual, or an extra challenge?'],['events-choice-label','選擇隨機事件','Random event choice'],['events-off-label','輕鬆除厄','Relaxed ritual'],['events-off-help','不加突發事件，照樣完成儀式和故事。','No surprise event. Rituals and stories still progress.'],['events-on-label','加入隨機挑戰','Add a random challenge'],['events-on-help','今局加入一次事件，可挑戰額外分數與稱號。','One event this ritual, with optional bonus points and titles.'],
-   ['prepare-skin-title','揀個小人，代表今日嘅煩惱','Choose a look for your worry'],['prepare-kit-title','揀件除惡法寶','Choose a ritual helper'],['all-skins-label','查看全部款式／購買','All looks / buy'],['all-kits-label','查看全部法寶／購買','All helpers / buy'],['preparation-kit-help','免費及已擁有法寶可直接選用；首次得分才扣次數。','Equip a free or owned helper. A use is spent only on the first score.'],['my-stall-label','我的小攤・裝飾、街坊故事與收藏','My stall · decorations, stories & collections'],['preparation-receipt-title','今局準備好了嗎？','Ready for this ritual?'],
+   ['prepare-skin-title','揀個小人，代表今日嘅煩惱','Choose a look for your worry'],['prepare-kit-title','揀件除惡法寶','Choose a ritual helper'],['all-skins-label','查看全部款式／購買','All looks / buy'],['all-kits-label','查看全部法寶／購買','All helpers / buy'],['preparation-kit-help','免費及已擁有法寶可直接選用；首次得分才扣次數。','Equip a free or owned helper. A use is spent only on the first score.'],['preparation-receipt-title','今局準備好了嗎？','Ready for this ritual?'],
   ])text(id,zhText,enText);
+  stall.setAttribute('aria-label',local('我的小攤','My stall'));
+  for(const [type,zh,en]of [['skin','全部小人款式／購買','All worry looks / buy'],['kit','全部除厄法寶／購買','All ritual helpers / buy']]){text(type+'-catalog-title',zh,en);const dialog=$('#'+type+'-catalog-dialog');dialog.querySelector('.catalog-close').textContent=local('關閉 ✕','Close ✕');dialog.querySelector('.catalog-scroll').setAttribute('aria-label',local(zh,en));}
   $('.custom-label').textContent=local('寫低你的小心事','Write your worry');input.placeholder=local('例如：半夜又收到工作訊息…','For example: another late-night work message…');
   text('worry-selection-summary',worryText?`今日想打走：${worryText}`:'揀選上面的心事，或寫低你自己的小心事。',worryText?`Today’s worry: ${worryText}`:'Choose a worry above, or write your own.');
   text('commission-selection-summary',commissionText,commissionText);text('events-selection-summary',eventText,eventText);
-  text('skin-selection-summary',`${name(skin)} · ${skin.starter?'免費・不限次數':`剩餘 ${skinUses(state,skin.id)} 次`} · ×${skinScoreMultiplier(skin.id)}`,`${name(skin)} · ${skin.starter?'free · unlimited':`${skinUses(state,skin.id)} uses left`} · ×${skinScoreMultiplier(skin.id)}`);
-  text('kit-selection-summary',`${name(kit)} · ${kit.starter?'免費・不限次數':`剩餘 ${kitUses.remaining} 次`} · ×${weaponScoreMultiplier(kit.id)}`,`${name(kit)} · ${kit.starter?'free · unlimited':`${kitUses.remaining} uses left`} · ×${weaponScoreMultiplier(kit.id)}`);
+  text('skin-selection-summary',`${name(skin)} · ${skin.starter?'免費・不限次數':`剩餘 ${skinUses(state,skin.id)} 次`} · ×${formatNumber(skinScoreMultiplier(skin.id))}`,`${name(skin)} · ${skin.starter?'free · unlimited':`${skinUses(state,skin.id)} uses left`} · ×${formatNumber(skinScoreMultiplier(skin.id))}`);
+  text('kit-selection-summary',`${name(kit)} · ${kit.starter?'免費・不限次數':`剩餘 ${kitUses.remaining} 次`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`,`${name(kit)} · ${kit.starter?'free · unlimited':`${kitUses.remaining} uses left`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`);
   $('#preparation-skin-preview').innerHTML=skinArt(skin.id);$('#preparation-kit-preview').innerHTML=weaponArt(kit.id);
-  text('preparation-wallet',`現有 ${state.coins.toLocaleString()} 香油錢・${state.merit.toLocaleString()} 功德（只作解鎖，不扣除）`,`Balance: ${state.coins.toLocaleString()} oil · ${state.merit.toLocaleString()} merit (unlock requirement, not spent)`);
+  text('preparation-wallet',`現有 ${state.coins.toLocaleString(undefined,{maximumFractionDigits:2})} 香油錢・${state.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德（只作解鎖，不扣除）`,`Balance: ${state.coins.toLocaleString(undefined,{maximumFractionDigits:2})} oil · ${state.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit (unlock requirement, not spent)`);
   const usage=skin.starter&&kit.starter?local('本局不消耗道具。','No items are consumed this ritual.'):local(`首次得分才扣：${[!skin.starter&&'小人紙 1 次',!kit.starter&&'法寶 1 次'].filter(Boolean).join('、')}。未得分離開不扣次數。`,`First score spends ${[!skin.starter&&'1 paper use',!kit.starter&&'1 helper use'].filter(Boolean).join(' and ')}. Leaving before scoring spends nothing.`);
   text('preparation-receipt-worry',`心事：${worryText||'尚未選擇'}`,`Worry: ${worryText||'not chosen yet'}`);text('preparation-receipt-options',`${commissionText} · ${eventText}`,`${commissionText} · ${eventText}`);text('preparation-receipt-items',`${name(skin)} ＋ ${name(kit)}`,`${name(skin)} + ${name(kit)}`);text('preparation-usage-note',usage,usage);
   for(const radio of document.querySelectorAll('[name=preparation-commission]'))radio.checked=(radio.value==='yes')===commissionEnabled;
@@ -145,5 +154,5 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  new IntersectionObserver(entries=>document.body.classList.toggle('inline-start-visible',entries[0].isIntersecting),{threshold:.6}).observe($('#start'));
  new IntersectionObserver(entries=>document.body.classList.toggle('preparation-in-view',entries[0].isIntersecting)).observe(steps);
  render();
- return {render,focusStep,validate(){if(optionalStepsEnabled&&commissionEnabled&&!currentStory()){focusStep('commission');text('commission-target-note','揀一單委託，或者選「今次專心處理自己」再開始。','Choose a commission, or select “Just my own worry” before starting.');return false;}return true;},commission:()=>optionalStepsEnabled&&commissionEnabled?getState().neighbourhood.active:'',events:()=>optionalStepsEnabled&&$('#random-events').checked,acceptSavedCommission(){commissionEnabled=true;previousStory=getState().neighbourhood.active;render();},restorePurchaseFocus(kind,id){const step=kind==='skin'?'skin':'kit';$('#prepare-'+step).open=true;const button=$(kind==='skin'?`#prepare-skin [data-skin="${id}"]`:`#prepare-kit [data-preparation-kit="${id}"]`);for(const details of button?.closest('.preparation-body')?.querySelectorAll('details')??[])if(details.contains(button))details.open=true;button?.focus({preventScroll:true});return Boolean(button);}};
+ return {render,focusStep,validate(){if(optionalStepsEnabled&&commissionEnabled&&!currentStory()){focusStep('commission');text('commission-target-note','揀一單委託，或者選「今次專心處理自己」再開始。','Choose a commission, or select “Just my own worry” before starting.');return false;}return true;},commission:()=>optionalStepsEnabled&&commissionEnabled?getState().neighbourhood.active:'',events:()=>optionalStepsEnabled&&$('#random-events').checked,acceptSavedCommission(){commissionEnabled=true;previousStory=getState().neighbourhood.active;render();},restorePurchaseFocus(kind,id){const step=kind==='skin'?'skin':'kit',dialog=$('#'+step+'-catalog-dialog');$('#prepare-'+step).open=true;const scope=dialog.open?dialog:$('#prepare-'+step),button=scope.querySelector(kind==='skin'?`[data-skin="${id}"]`:`[data-preparation-kit="${id}"]`);button?.focus({preventScroll:true});return Boolean(button);}};
 }

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {fresh,STORAGE_KEY} from '../src/progress.js';
 import {WEAPONS,WORRIES} from '../src/catalog.js';
+import {SKINS} from '../src/skins.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.BEAT_BAD_LUCK_URL||'http://127.0.0.1:5198/beat-bad-luck/';
@@ -10,8 +11,8 @@ const output=process.env.PLAYGROUND_SCREENSHOTS||'/tmp/ritual-preparation-qa';
 const errors=[];
 const privateWorry='Private thought: keep my own worry';
 await mkdir(output,{recursive:true});
-async function setup({width=375,height=812,lang='zh-Hant',rich=false}={}) {
- const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',reducedMotion:'reduce',hasTouch:width<900,isMobile:width<900});
+async function setup({width=375,height=812,lang='zh-Hant',rich=false,motion='reduce'}={}) {
+ const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',reducedMotion:motion,hasTouch:width<900,isMobile:width<900});
  const seed=fresh();
  if(rich){seed.coins=50000;seed.merit=50000;seed.owned.push('flipflop');seed.weaponUses.flipflop=7;seed.equipped='flipflop';seed.ownedSkins.push('duck');seed.skinUses.duck=3;seed.selectedSkin='duck';seed.neighbourhood.active='bus';}
  await context.addInitScript(({seed,lang,key})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(seed));if(!localStorage.getItem('beat-bad-luck.preferences.v1'))localStorage.setItem('beat-bad-luck.preferences.v1',JSON.stringify({version:1,sound:false}));localStorage.setItem('playground.language.v1',lang);Math.random=()=>.25;},{seed,lang,key:STORAGE_KEY});
@@ -22,17 +23,49 @@ async function setup({width=375,height=812,lang='zh-Hant',rich=false}={}) {
 }
 const saved=page=>page.evaluate(key=>JSON.parse(localStorage.getItem(key)),STORAGE_KEY);
 const open=async(page,id)=>{const details=page.locator('#prepare-'+id);if(!await details.evaluate(e=>e.open))await details.locator(':scope>summary').click();};
+async function closeCatalogue(page,type,escape=false){
+ const dialog=page.locator('#'+type+'-catalog-dialog'),trigger=page.locator('#all-'+(type==='skin'?'skins':'kits')+'-label');
+ if(escape)await page.keyboard.press('Escape');else await dialog.locator('.catalog-close').click();
+ await dialog.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>document.activeElement.id),await trigger.getAttribute('id'),'closing restores the catalogue trigger');
+ assert.equal(await page.locator(type==='skin'?'#prepare-skin .skin-owned-slot':'#preparation-owned-kits').evaluate(node=>!node.closest('dialog')),true,'owned shortcuts return to the preparation step');
+}
+async function modalPresentation(page,type){
+ const dialog=page.locator('#'+type+'-catalog-dialog'),scroll=dialog.locator('.catalog-scroll');
+ await page.waitForFunction(id=>document.getElementById(id).dataset.motion==='open',type+'-catalog-dialog');
+ assert.equal(await dialog.isVisible(),true);assert.equal(await dialog.evaluate(node=>node.matches(':modal')),true,'catalogue uses a native modal');
+ const metrics=await scroll.evaluate(node=>{const style=getComputedStyle(node),header=node.previousElementSibling.getBoundingClientRect();return {height:node.clientHeight,total:node.scrollHeight,overflow:style.overflowY,header:header.top,page:scrollY,html:getComputedStyle(document.documentElement).overflow};});
+ assert.ok(metrics.total>metrics.height,'long catalogue has inner overflow');assert.equal(metrics.overflow,'auto');assert.equal(metrics.html,'hidden','background page is locked');
+ await scroll.evaluate(node=>node.scrollTop=node.scrollHeight);assert.ok(await scroll.evaluate(node=>node.scrollTop)>0);
+ assert.equal(await page.evaluate(()=>scrollY),metrics.page,'inner scroll never moves the page');assert.equal(await dialog.locator('.catalog-heading').evaluate(node=>node.getBoundingClientRect().top),metrics.header,'close remains in a fixed header');
+ await scroll.evaluate(node=>node.scrollTop=0);
+ if(await page.evaluate(()=>matchMedia('(any-pointer:coarse)').matches)){
+  const session=await page.context().newCDPSession(page),r=await scroll.boundingBox();
+  try{const x=Math.round(r.x+r.width/2),y=Math.round(r.y+r.height*.7);await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let step=1;step<=12;step++){await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-step*10}]});await page.waitForTimeout(20);}await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});assert.ok(await scroll.evaluate(node=>node.scrollTop)>20,'a real finger swipe scrolls the modal catalogue');assert.equal(await page.evaluate(()=>scrollY),metrics.page);}finally{await session.detach();}
+ }
+ await dialog.locator('.catalog-close').focus();await page.keyboard.press('Shift+Tab');assert.equal(await page.evaluate(()=>Boolean(document.activeElement.closest('.catalog-dialog'))),true,'keyboard focus stays inside');
+ await page.screenshot({path:`${output}/catalogue-${type}-${page.viewportSize().width}.png`});
+ await closeCatalogue(page,type,true);
+ await page.locator('#all-'+(type==='skin'?'skins':'kits')+'-label').click();await scroll.evaluate(node=>node.scrollTop=0);
+}
 async function presentation(page){
- const sizes=await page.evaluate(()=>({width:innerWidth,master:document.querySelector('.fong-intro .fong-logo').getBoundingClientRect().width,dock:document.querySelector('#quick-dock').getBoundingClientRect().height,start:document.querySelector('#quick-start').getBoundingClientRect().height}));assert.ok(Math.abs(sizes.master-(sizes.width<=600?61.6:84))<.1,'Master portrait is forty percent larger');assert.ok(sizes.dock<=84,'sticky dock remains compact');assert.ok(sizes.start>=44&&sizes.start<=46,'compact start keeps a 44px touch target');
+ const sizes=await page.evaluate(()=>({width:innerWidth,master:parseFloat(getComputedStyle(document.querySelector('.fong-intro .fong-logo')).width),dock:document.querySelector('#quick-dock').getBoundingClientRect().height,start:document.querySelector('#quick-start').getBoundingClientRect().height}));assert.ok(Math.abs(sizes.master-(sizes.width<=600?61.6:84))<.1,'Master portrait is forty percent larger');assert.ok(sizes.dock<=84,'sticky dock remains compact');assert.ok(sizes.start>=44&&sizes.start<=46,'compact start keeps a 44px touch target');
  await open(page,'skin');const cards=await page.locator('#prepare-skin').evaluate(node=>{const free=node.querySelector('[data-skin=plain]'),grid=node.querySelector('.skin-owned-slot');return {sameGrid:free.parentElement===grid,standard:free.classList.contains('skin-card')&&!free.classList.contains('skin-free-card'),columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,freeWidth:free.getBoundingClientRect().width};});assert.equal(cards.sameGrid,true,'free paper belongs to the owned paper grid');assert.equal(cards.standard,true,'free paper uses the same card style');assert.equal(cards.columns,3,'paper choices keep three columns on phones too');assert.ok(cards.freeWidth>=44);
- for(const selector of ['#all-skins-label','#all-kits-label']){const style=await page.locator(selector).evaluate(node=>{const style=getComputedStyle(node);return {border:parseFloat(style.borderTopWidth),background:style.backgroundColor};});assert.ok(style.border>=2&&style.background!=='rgba(0, 0, 0, 0)','catalogue entry has a prominent filled outline');}
+ for(const selector of ['#all-skins-label','#all-kits-label']){const style=await page.locator(selector).evaluate(node=>{const style=getComputedStyle(node);return {border:parseFloat(style.borderTopWidth),background:style.backgroundColor,font:parseFloat(style.fontSize)};});assert.ok(style.border>=2&&style.background!=='rgba(0, 0, 0, 0)','catalogue entry has a prominent filled outline');assert.ok(Math.abs(style.font-12.75*1.25)<.01,'catalogue text is 25% larger than its previous rendered size');}
  await page.locator('#prepare-skin>summary').click();
+ const quote=await page.locator('.fong-intro>div:last-child>p:last-child').evaluate(node=>({size:parseFloat(getComputedStyle(node).fontSize),font:getComputedStyle(node).fontFamily}));assert.ok(Math.abs(quote.size-15*1.15)<.01);assert.match(quote.font,/Iansui.*Fredoka/);assert.equal(await page.locator('#preparation-title,#preparation-help,.preparation-intro').count(),0);
+ const level=await page.locator('.player-level-badge').evaluate(node=>{const label=document.querySelector('#player-level-label'),r=node.getBoundingClientRect(),l=label.getBoundingClientRect();return {inside:Boolean(node.closest('.stall-wallet')),beside:node.nextElementSibling===label,left:r.right<=l.left+1,center:Math.abs(r.y+r.height/2-l.y-l.height/2)};});assert.equal(level.inside,true);assert.equal(level.beside,true);assert.equal(level.left,true);assert.ok(level.center<1);assert.equal(await page.locator('.fong-intro .player-level-badge').count(),0);
  await page.locator('#prepare-worry').scrollIntoViewIfNeeded();
 }
 try {
  const {page,context}=await setup();
  assert.equal(await page.locator('#my-stall').evaluate(node=>node.tagName),'SECTION','stall is directly displayed rather than an accordion');
- assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.tagName),'SECTION','stories and collections are directly displayed');
+ assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.tagName),'SECTION','collections are directly displayed');
+ assert.equal(await page.locator('#journey-tab-stories,#journey-panel-stories,#journey-summary,#commission-list,#street-keepsakes,#my-stall-label').count(),0,'removed story tab, contents and redundant headings stay absent');
+ assert.deepEqual(await page.locator('.journey-tabs [role=tab]').allTextContents(),['稱號','名場面','籤冊']);
+ assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.nextElementSibling?.classList.contains('records-card')&&!node.closest('#stall-dashboard,#my-stall')),true,'three collection tabs sit outside the stall and immediately before records');
+ assert.equal(await page.locator('[data-shortcut=stall]').evaluate(node=>Boolean(node.closest('.stall-showcase-heading'))),true,'decorating shortcut sits beside the stall title');
+ assert.equal(await page.locator('#worry-input').isVisible(),true,'private input is immediately visible');
+ assert.equal(await page.locator('#worry-ready-note').textContent(),'或者寫低你的小心事，先可以開工。');
  assert.equal(await page.locator('#secret-collection').evaluate(node=>node.tagName),'SECTION','secret collection is not collapsible');
  assert.equal(await page.locator('.comic-ending-book').evaluate(node=>node.tagName),'SECTION','collected endings are not collapsible');
  assert.equal(await page.locator('#worry-category').count(),0,'worry choices have no category selector');
@@ -45,6 +78,7 @@ try {
  assert.equal(await page.locator('#prepare-events').isHidden(),true);
  assert.deepEqual(await page.locator('.preparation-step:visible .preparation-number').allTextContents(),['01','02','03']);
  await presentation(page);
+ await page.locator('#worry-select').selectOption('work');assert.equal(await page.locator('#worry-input').isVisible(),true,'preset selection never hides the input');await page.locator('#worry-select').selectOption('');
  assert.equal(await page.locator('dialog[open]').count(),0,'daily gift must not interrupt preparation');
  assert.equal(await page.locator('#daily-reward-note').isVisible(),true);
  assert.equal((await saved(page)).coins,20);
@@ -58,7 +92,8 @@ try {
  await page.locator('[data-preparation-story=bus]').evaluate(node=>node.click());
  assert.equal(await page.locator('#worry-select').inputValue(),'teammates','accepting a commission must preserve the preset worry');
  assert.match(await page.locator('#commission-target-note').textContent(),/心事已保留/);
- await page.locator('#write-own-worry').click();await page.locator('#worry-input').fill(privateWorry);
+ assert.equal(await page.locator('#write-own-worry').count(),0,'private worry needs no reveal button');
+ await page.locator('#worry-input').fill(privateWorry);
  await page.locator('[data-preparation-story=cafe]').evaluate(node=>node.click());
  assert.equal(await page.locator('#worry-input').inputValue(),privateWorry,'accepting a different story must not clear private text');
  assert.ok(!(JSON.stringify(await saved(page))).includes(privateWorry));
@@ -67,7 +102,7 @@ try {
  assert.equal(await page.locator('#random-events').isChecked(),true);
  assert.equal(await page.locator('#prepare-commission').isHidden(),true);assert.equal(await page.locator('#prepare-events').isHidden(),true);assert.equal(await page.locator('#preparation-receipt-options').isHidden(),true);
  await open(page,'skin');assert.equal(await page.locator('#prepare-skin [data-skin=plain]').isVisible(),true);
- assert.equal(await page.locator('#prepare-skin .preparation-catalog').evaluate(e=>e.open),false);
+ assert.equal(await page.locator('#skin-catalog-dialog').evaluate(e=>e.open),false);
  await open(page,'kit');assert.equal(await page.locator('[data-preparation-kit=bare-hand]').isVisible(),true);
  assert.match(await page.locator('#preparation-usage-note').textContent(),/不消耗/);
  await page.locator('#prepare-skin>summary').click();await page.locator('#prepare-kit>summary').click();
@@ -94,15 +129,15 @@ try {
  assert.equal(await page.locator('#worry-input').inputValue(),'');
  assert.equal(await page.locator('#start').isDisabled(),true);
  assert.ok(!(await page.locator('#preparation-receipt-worry').textContent()).includes(privateWorry),'new-worry action must refresh the preparation summary');
- await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, prominent catalogues, full ritual and privacy');
+ await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, always-visible private input, three outer collection tabs, prominent modal catalogues, full ritual and privacy');
 
- for(const config of [{width:320,height:568,lang:'zh-Hant'},{width:812,height:375,lang:'en'},{width:1280,height:900,lang:'en'}]) {
+ for(const config of [{width:320,height:568,lang:'zh-Hant'},{width:390,height:844,lang:'zh-Hant',motion:'no-preference'},{width:812,height:375,lang:'en'},{width:1280,height:900,lang:'en'}]) {
   const {page:p,context:c}=await setup({...config,rich:true});
     await presentation(p);
   await p.locator('#worry-select').selectOption('work');
   assert.match(await p.locator('#kit-selection-summary').textContent(),/7/);
   assert.match(await p.locator('#skin-selection-summary').textContent(),/3/);
-  await open(p,'kit');await p.locator('#preparation-kit-catalog>summary').click();
+  await open(p,'kit');await p.locator('#all-kits-label').click();await modalPresentation(p,'kit');
   const kit=WEAPONS.find(w=>!w.starter&&!w.hidden&&w.id!=='flipflop'&&w.cost>0&&w.merit<=50000);
   const before=(await saved(p)).coins;
   await p.locator(`[data-preparation-kit="${kit.id}"]`).click();
@@ -114,16 +149,23 @@ try {
   assert.ok((await saved(p)).coins<before);assert.equal((await saved(p)).equipped,kit.id);
   await p.locator('#purchase-continue').click();assert.equal(await p.locator('#play-panel').getAttribute('data-phase'),'setup','purchase returns to preparation, never starts automatically');
   assert.equal(await p.evaluate(()=>document.activeElement.dataset.preparationKit),kit.id);
-  await p.locator('[data-preparation-kit=bare-hand]').click();
-  await open(p,'skin');assert.equal(await p.locator('#prepare-skin .skin-owned-slot [data-skin=duck]').isVisible(),true);
-  await p.locator('#prepare-skin [data-skin=plain]').click();
+  await p.locator('[data-preparation-kit=bare-hand]').click();await closeCatalogue(p,'kit');
+  await open(p,'skin');await p.locator('#all-skins-label').click();await modalPresentation(p,'skin');assert.equal(await p.locator('#prepare-skin .skin-owned-slot [data-skin=duck]').isVisible(),true);
+  const look=SKINS.find(s=>!s.starter&&!['plain','duck'].includes(s.id)),paperBalance=(await saved(p)).coins;
+  await p.locator(`[data-skin="${look.id}"]`).click();await p.locator('#purchase-close').click();
+  assert.equal((await saved(p)).coins,paperBalance,'closing the paper confirmation never spends oil');assert.equal(await p.evaluate(()=>document.activeElement.dataset.skin),look.id);
+  await p.locator(`[data-skin="${look.id}"]`).click();await p.locator('#purchase-action').click();await p.locator('#purchase-continue').click();
+  assert.equal((await saved(p)).selectedSkin,look.id);assert.equal(await p.locator('#skin-catalog-dialog [data-skin="'+look.id+'"]').getAttribute('aria-pressed'),'true');
+  assert.equal(await p.evaluate(()=>document.activeElement.dataset.skin),look.id,'confirmed paper moves to the owned grid without losing focus');
+  await p.locator('#prepare-skin [data-skin=plain]').click();await closeCatalogue(p,'skin');
   assert.match(await p.locator('#preparation-usage-note').textContent(),config.lang==='en'?/No items/:/不消耗/);
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await p.screenshot({path:`${output}/preparation-${config.width}-${config.lang}.png`,fullPage:true});
-  await p.reload({waitUntil:'networkidle'});
+  await p.locator('#journey-tab-album').click();await p.reload({waitUntil:'networkidle'});
+  assert.equal(await p.locator('#journey-tab-album').getAttribute('aria-selected'),'true','remaining tabs retain the remembered category');
   assert.equal((await saved(p)).weaponUses.flipflop,7,'changing equipment must not consume old stock');
   assert.equal(await p.locator('#worry-select').inputValue(),'','personal worry must not persist across reload');
-  await c.close();console.log(`PASS ${config.width} ${config.lang}: retained inventory, inline selection, purchase cancellation/confirmation/focus, no auto-start and responsive layout`);
+  await c.close();console.log(`PASS ${config.width} ${config.lang}: retained inventory, touch-scroll modal catalogues, paper/kit purchase cancellation/confirmation/focus, no auto-start and responsive layout`);
  }
  assert.deepEqual(errors,[],'no page errors');
 } finally {await browser.close();}

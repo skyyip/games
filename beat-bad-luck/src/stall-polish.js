@@ -4,8 +4,8 @@ export function countNumber(node,target){
  const locale=getLanguage(),old=counters.get(node);target=Number(target)||0;
  if(old?.target===target&&old.locale===locale)return;
  if(old?.frame)cancelAnimationFrame(old.frame);
- const state={target,locale,current:old?.current??0,frame:0},from=state.current,at=performance.now();counters.set(node,state);node.dataset.value=String(target);node.dataset.digits=String(Math.floor(target)).length;node.setAttribute('translate','no');node.setAttribute('aria-label',target.toLocaleString(locale));
- const paint=value=>{state.current=value;node.textContent=Math.round(value).toLocaleString(locale);};
+ const state={target,locale,current:old?.current??0,frame:0},from=state.current,at=performance.now();counters.set(node,state);node.dataset.value=String(target);node.dataset.digits=String(Math.floor(target)).length;node.setAttribute('translate','no');node.setAttribute('aria-label',target.toLocaleString(locale,{maximumFractionDigits:2}));
+ const paint=value=>{state.current=value;node.textContent=Math.round(value).toLocaleString(locale,{maximumFractionDigits:2});};
  if(matchMedia('(prefers-reduced-motion: reduce)').matches||from===target){paint(target);return;}
  node.classList.add('is-counting');const tick=now=>{const p=Math.min(1,(now-at)/650);paint(from+(target-from)*(1-(1-p)**3));if(p<1)state.frame=requestAnimationFrame(tick);else{state.frame=0;node.classList.remove('is-counting');}};state.frame=requestAnimationFrame(tick);
 }

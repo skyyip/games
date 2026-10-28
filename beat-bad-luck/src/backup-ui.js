@@ -11,7 +11,7 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
   put('#import-title','將這個攤位帶過來？','Bring this stall over?');
   put('#import-warning','這會取代目前版本的進度。建議先匯出現有存檔備份；擺設的耐用時間會照常流逝。','This replaces progress in this version. Export your current save first if you want a backup. Decoration durability keeps ageing normally.');
   put('#cancel-import','保留現在的攤位','Keep current stall');put('#confirm-import','取代並載入','Replace and load');
-  if(pending)put('#import-summary',`${pending.coins.toLocaleString()} 香油錢 · ${pending.merit.toLocaleString()} 功德 · ${pending.rituals} 次儀式 · ${pending.records.length} 項紀錄`,`${pending.coins.toLocaleString()} oil · ${pending.merit.toLocaleString()} merit · ${pending.rituals} rituals · ${pending.records.length} records`);
+  if(pending)put('#import-summary',`${pending.coins.toLocaleString(undefined,{maximumFractionDigits:2})} 香油錢 · ${pending.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德 · ${pending.rituals} 次儀式 · ${pending.records.length} 項紀錄`,`${pending.coins.toLocaleString(undefined,{maximumFractionDigits:2})} oil · ${pending.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit · ${pending.rituals} rituals · ${pending.records.length} records`);
  }
  function note(zh,en){put('#save-tools-status',zh,en);}
  $('#export-save').addEventListener('click',()=>{

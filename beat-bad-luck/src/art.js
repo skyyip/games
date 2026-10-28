@@ -133,8 +133,8 @@ export function dailyBonusArt(){return `<svg class="daily-bonus-art" viewBox="0 
  <path d="m83 12 2 5 6 1-5 3 1 6-4-3-5 3 1-6-4-3 5-1M6 77l3 4m-7 0 1 5m107-54 5-3m-4 10 6 1" fill="#ffdb80" stroke="#ffdb80" stroke-width="2" stroke-linecap="round"/>
 </svg>`;}
 export function zombieArt(look=0){const coat=['#7888bc','#c97c98','#689b8a'][look%3];return `<svg class="zombie-art" viewBox="0 0 100 128" aria-hidden="true" focusable="false">
- <ellipse cx="50" cy="121" rx="27" ry="4" fill="#122d3244"/>
- <g stroke="#405263" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+ <ellipse class="zombie-ground-shadow" cx="50" cy="121" rx="27" ry="4" fill="#122d3244"/>
+ <g class="zombie-body"><g stroke="#405263" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
   <path d="m35 104-5 14q8 6 16 0l4-13m14 0 6 13q-7 6-16 0l-3-13" fill="#f5d490"/>
   <path d="M30 74q-5 20-3 33 23 10 46 0 2-17-4-33Z" fill="${coat}"/>
   <path d="m31 79-19-7-6 10 23 11m41-14 18-7 6 10-23 11" fill="${coat}"/>
@@ -151,7 +151,7 @@ export function zombieArt(look=0){const coat=['#7888bc','#c97c98','#689b8a'][loo
  <ellipse cx="30" cy="60" rx="6" ry="3.5" fill="#eb9fb2"/><ellipse cx="70" cy="60" rx="6" ry="3.5" fill="#eb9fb2"/>
  <path d="M43 61q7 9 14 0" fill="#76546b" stroke="#405263" stroke-width="2" stroke-linecap="round"/><path d="m46 63 1 4 3-3m3 0 1 3 2-4" fill="#fff7de"/>
  <circle cx="50" cy="97" r="3" fill="#ffe3a2"/>
-</svg>`;}
+</g></svg>`;}
 export function comicTrophyArt(){return `<svg class="comic-trophy manga-trophy" viewBox="0 0 100 110" aria-hidden="true" focusable="false">
  <ellipse cx="50" cy="103" rx="31" ry="4" fill="#536c6330"/>
  <g stroke="#795043" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
@@ -174,4 +174,13 @@ export function comicTrophyArt(){return `<svg class="comic-trophy manga-trophy" 
  <path d="m48 76-10-4v12l11-5 13 5V72Z" fill="#f4a8ba" stroke="#a86a7a" stroke-width="2"/><circle cx="50" cy="78" r="3.5" fill="#fff3c1"/>
  <path d="m10 8 2 5 5 2-5 2-2 5-2-5-5-2 5-2Zm80 66 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" fill="#ffe398"/>
  <path d="m83 8 2 3m6 3 3-1M8 84l-3 3" fill="none" stroke="#eda0b5" stroke-width="3" stroke-linecap="round"/>
+</svg>`;}
+
+export function comboTorchArt(){return `<svg viewBox="0 0 64 100" aria-hidden="true" focusable="false">
+ <g class="torch-smoke" fill="none" stroke="#c7d9cd" stroke-width="3" stroke-linecap="round"><path class="torch-smoke-wisp" d="M29 49c-15-10 10-15 1-25"/><path class="torch-smoke-wisp" d="M35 49c14-13-9-17 1-27"/><path class="torch-smoke-wisp" d="M32 49c-9-9 9-14 0-24"/></g>
+ <g class="torch-ignition" fill="none" stroke="#ffe6a0" stroke-width="3" stroke-linecap="round"><path d="M32 3v7M8 15l6 5m36-5-6 5M3 37h8m42 0h8M13 57l6-5m32 5-6-5"/></g>
+ <path d="m24 55 4 38q4 6 8 0l4-38Z" fill="#b37a4d" stroke="#4c483d" stroke-width="3"/><path d="m28 68 9-4m-8 16 7-4m-5 13 4-2" stroke="#f4cd8c" stroke-width="2.5" stroke-linecap="round"/>
+ <path d="M19 49q13 7 26 0l-5 15q-8 6-16 0Z" fill="#65756b" stroke="#394d46" stroke-width="3"/><path d="M23 49q9-6 18 0" fill="#3a473f" stroke="#394d46" stroke-width="3"/>
+ <g class="torch-flame"><path d="M31 53C3 50 15 31 21 24c-2 12 4 14 8 7 6-8 0-17 4-25 19 12 10 23 17 29 9 13-3 23-19 18Z" fill="#ff8d40" stroke="#ffd36d" stroke-width="2"/><path d="M31 52c-13-1-12-12-6-18-1 9 7 8 8 0l3-12c12 15 12 29-5 30Z" fill="#ffe38b"/><path d="M29 51q-4-7 5-14 7 13-5 14" fill="#fff6d7"/></g>
+ <g class="torch-face" fill="#29483a"><circle cx="27" cy="57" r="1.6"/><circle cx="37" cy="57" r="1.6"/><path d="M29 61q3 4 6 0" fill="none" stroke="#29483a" stroke-width="1.6" stroke-linecap="round"/></g>
 </svg>`;}

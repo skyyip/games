@@ -12,16 +12,23 @@ export function prepareScrollRegions(){
 }
 export function renderPlayerLevel(state){
  const zh=getLanguage()==='zh-Hant',info=playerLevel(state.merit);
- for(const portrait of document.querySelectorAll('.fong-intro .master-portrait')){let badge=portrait.querySelector('.player-level-badge');if(!badge){badge=document.createElement('div');badge.className='player-level-badge';badge.setAttribute('role','img');portrait.prepend(badge);}badge.hidden=false;badge.dataset.milestone=String(info.milestone);if(badge.dataset.level!==String(info.level)){badge.dataset.level=String(info.level);badge.innerHTML=levelBadgeArt(info.level);}badge.setAttribute('aria-label',`${info.level} · ${info.name[zh?0:1]}`);badge.title=badge.getAttribute('aria-label');}
- let display=document.querySelector('#player-level');if(!display){display=document.createElement('section');display.id='player-level';display.className='player-level';display.innerHTML='<div><b id="player-level-label" translate="no"></b><small id="player-level-name" translate="no"></small></div><progress max="1" value="0"></progress><small id="player-level-progress" translate="no"></small>';document.querySelector('.stall-wallet').append(display);}
+ let display=document.querySelector('#player-level');if(!display){display=document.createElement('section');display.id='player-level';display.className='player-level';display.setAttribute('aria-labelledby','player-level-label');display.innerHTML='<div class="player-level-heading"><div class="player-level-primary"><b id="player-level-label" translate="no"></b></div><small id="player-level-name" translate="no"></small></div><progress max="1" value="0"></progress><small id="player-level-progress" translate="no"></small>';document.querySelector('.stall-wallet').append(display);}
+ let badge=display.querySelector('.player-level-badge');if(!badge){badge=document.createElement('div');badge.className='player-level-badge';badge.setAttribute('role','img');display.querySelector('.player-level-primary').prepend(badge);}badge.hidden=false;badge.dataset.milestone=String(info.milestone);if(badge.dataset.level!==String(info.level)){badge.dataset.level=String(info.level);badge.innerHTML=levelBadgeArt(info.level);}badge.setAttribute('aria-label',`${info.level} · ${info.name[zh?0:1]}`);badge.title=badge.getAttribute('aria-label');
  display.querySelector('b').textContent=zh?`師傅等級 ${info.level} / 168`:`Master level ${info.level} / 168`;
  display.querySelector('#player-level-name').textContent=info.name[zh?0:1];display.style.setProperty('--level-label-hue',String((Math.floor(info.level/10)*27+12)%360));display.querySelector('progress').value=info.progress;display.querySelector('progress').setAttribute('aria-label',zh?'下一級功德進度':'Merit progress to the next level');
- display.querySelector('#player-level-progress').textContent=info.next===null?(zh?'168 級圓滿！全橋底都叫你師傅。':'Level 168! The whole flyover calls you Master.'):(zh?`累積 ${info.merit.toLocaleString()} 功德 · 下級 ${info.next.toLocaleString()} · 每 10 級晉升稱號`:`${info.merit.toLocaleString()} merit · next ${info.next.toLocaleString()} · new title every 10 levels`);
+ display.querySelector('#player-level-progress').textContent=info.next===null?(zh?'168 級圓滿！全橋底都叫你師傅。':'Level 168! The whole flyover calls you Master.'):(zh?`累積 ${info.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德 · 下級 ${info.next.toLocaleString(undefined,{maximumFractionDigits:2})} · 每 10 級晉升稱號`:`${info.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit · next ${info.next.toLocaleString(undefined,{maximumFractionDigits:2})} · new title every 10 levels`);
 }
 let criticalTimer;
+export function clearCriticalHit(){
+ clearTimeout(criticalTimer);
+ document.querySelector('#beat-arena .critical-comic')?.remove();
+ document.querySelector('#beat-arena .critical-flying-prop')?.remove();
+ const paper=document.querySelector('#paper-doll');if(paper)paper.dataset.critical='1';
+}
 export function showCriticalHit(hit){
- const paper=document.querySelector('#paper-doll'),arena=document.querySelector('#beat-arena'),feedback=document.querySelector('#hit-feedback');clearTimeout(criticalTimer);paper.dataset.critical=String(hit.impactLevel);feedback.querySelector('.critical-comic')?.remove();arena.querySelector('.critical-flying-prop')?.remove();if(hit.impactLevel===1)return;
- const zh=getLanguage()==='zh-Hant',badge=document.createElement('span');badge.className='critical-comic critical-'+hit.impactLevel;badge.innerHTML=`<b>${hit.impactLevel}X</b><span></span>`;badge.querySelector('span').textContent=(hit.impactLevel===3?(zh?'靈魂彈出嚟！×2':'Soul off duty! ×2'):(zh?'假牙笑甩！×1.5':'Denture launch! ×1.5'))+` · +${hit.points}`;feedback.replaceChildren(badge);
+ const paper=document.querySelector('#paper-doll'),arena=document.querySelector('#beat-arena'),zone=document.querySelector('#hit-zone');paper.dataset.critical=String(hit.impactLevel);if(hit.impactLevel===1)return;
+ clearCriticalHit();paper.dataset.critical=String(hit.impactLevel);
+ const badge=document.createElement('span');badge.className='critical-comic critical-'+hit.impactLevel;badge.setAttribute('aria-hidden','true');badge.innerHTML=`<b>${hit.impactLevel}X</b>`;zone.append(badge);
  const prop=document.createElement('span');prop.className='critical-flying-prop critical-prop-'+hit.impactLevel;prop.setAttribute('aria-hidden','true');prop.textContent=hit.impactLevel===3?'👻':'⌣';arena.append(prop);
- criticalTimer=setTimeout(()=>{badge.remove();prop.remove();paper.dataset.critical='1';if(!feedback.textContent.trim())feedback.textContent=zh?'自由出招，繼續拍散衰氣！':'Whack freely. Keep it going!';},1250);
+ criticalTimer=setTimeout(clearCriticalHit,1250);
 }

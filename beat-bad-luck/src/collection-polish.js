@@ -36,6 +36,10 @@ export function polishCollections(){
  scale('#ritual-loot-dialog[data-kind=result] *',.9);
  scale('#play-panel[data-phase=beat] #fong-line',1.1);
  for(const node of document.querySelectorAll('#ritual-stage button,#ritual-stage button b,#ritual-stage button small,#ritual-stage button span,#pause-overlay button,#finisher-guide-dialog button')){if(node.closest('svg,.icon-button,.hit-zone,.simple-event')||![...node.childNodes].some(child=>child.nodeType===3&&child.textContent.trim()))continue;const size=parseFloat(getComputedStyle(node).fontSize);if(size>0&&size<16)factors.set(node,1.15);}
+ // Purchase text shrinks from its established display size; numeric spans match the label.
+ scale('#weapon-list .kit-shop-actions button,#weapon-list .kit-shop-actions button .stat-number,#decor-list [data-decor],#decor-list [data-decor] .stat-number,#decor-quick-upgrade',.85);
+ scale('#purchase-dialog[data-pending=true]:is([data-kind=weapon],[data-kind=decor]) #purchase-action',.85);
+ scale('.preparation-kit-choice[data-owned=false]>small,.preparation-kit-card>.preparation-link',.85);
  const sizes=[...factors].map(([node,factor])=>[node,parseFloat(getComputedStyle(node).fontSize),factor]);
  for(const [node,size,factor]of sizes){if(!originals.has(node))originals.set(node,{value:node.style.getPropertyValue('font-size'),priority:node.style.getPropertyPriority('font-size')});if(size>0)node.style.setProperty('font-size',`${Math.round(size*factor*1000)/1000}px`,'important');}
 }
