@@ -3,6 +3,7 @@ import {countNumber,numberText} from './stall-polish.js';
 import {createStallLayout} from './stall-layout.js';
 import {polishCollections} from './collection-polish.js';
 import {createPlayControls} from './play-controls.js';
+import {createPreparationUI} from './preparation-ui.js';
 import {SKINS} from './skins.js';
 import {createRitualUI} from './ritual-ui.js';
 import {PATRONS,patronBuffs,patronBuffText} from './ritual-rewards.js';
@@ -13,7 +14,7 @@ import {createPurchaseUI} from './purchase-ui.js';
 import {ultimateShow,createChantPicker} from './comedy-content.js';
 import {patronArt} from './celebration-art.js';
 import {createNeighbourhoodUI} from './neighbourhood-ui.js';
-import {placedLayout,placeDecoration} from './neighbourhood.js';
+import {placedLayout,placeDecoration,acceptStory} from './neighbourhood.js';
 import {beginStroke,moveStroke,strokeShape,finishStroke,pinchProgress} from './gestures.js';
 import {RitualGame,PHASES,BEAT_INTERVAL,DURATIONS} from './game.js';
 import {WORRIES,WORRY_GROUPS,WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorUpgradeBase,weaponScoreMultiplier,decorHourlyRate,DECOR_LEVEL_RATE_BONUS} from './catalog.js';
@@ -33,8 +34,8 @@ let storage=null,persistent=true,state,kind='',frame=0,lastPhase='',lastChant=-1
 const illustratedDecor=new Set(['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst']);
 const shopWeapons=WEAPONS.filter(w=>!w.starter&&!w.hidden&&w.id!=='rebirth-paper').sort((a,b)=>a.cost-b.cost||a.merit-b.merit);
 shopWeapons.splice(-1,0,WEAPONS.find(w=>w.id==='rebirth-paper'));
-let stallLayoutUI=null,neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,returnToDecor=null;
-let rigAnimations=[],cryDuration=1100;
+let stallLayoutUI=null,neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,preparationUI=null,returnToDecor=null,purchaseFromPreparation=false;
+let rigAnimations=[],cryDuration=1100,firstWhack=true;
 let pickChant=createChantPicker();
 const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,porkGesture=null,micRevision=0,micStream=null,micContext=null,micFrame=0;
 try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}
@@ -60,7 +61,7 @@ function restoreShopFocus(attribute,id,reveal=false){
  }
  target.focus({preventScroll:true});if(reveal)target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
 }
-const purchaseUI=createPurchaseUI({getState:()=>state,itemName,onReveal:()=>{audio.chime();vibrate([12,25,18]);},onReturn:(kind,id)=>{if(returnToDecor&&kind==='decor'){const piece=returnToDecor;returnToDecor=null;uxUI?.openDecor(piece);}else if(kind==='skin')document.querySelector(`[data-skin="${id}"]`)?.focus({preventScroll:true});else restoreShopFocus(kind==='weapon'?'weapon':'decor',id);},onStart:()=>start(),onView:id=>{
+const purchaseUI=createPurchaseUI({getState:()=>state,itemName,onReveal:()=>{audio.chime();vibrate([12,25,18]);},onReturn:(kind,id)=>{if(purchaseFromPreparation){purchaseFromPreparation=false;preparationUI?.restorePurchaseFocus(kind,id);}else if(returnToDecor&&kind==='decor'){const piece=returnToDecor;returnToDecor=null;uxUI?.openDecor(piece);}else if(kind==='skin')document.querySelector(`[data-skin="${id}"]`)?.focus({preventScroll:true});else restoreShopFocus(kind==='weapon'?'weapon':'decor',id);},onStart:()=>start(),onView:id=>{
  returnToDecor=null;const piece=$(`[data-piece="${id}"]`),target=piece??$('#stall-showcase-title');target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});
  if(piece){piece.classList.remove('purchase-highlight');void piece.offsetWidth;piece.classList.add('purchase-highlight');setTimeout(()=>piece.classList.remove('purchase-highlight'),1900);}
 }});
@@ -93,7 +94,7 @@ function drawWorries(){
  select.value=kind;updateStartReadiness();
 }
 $('#worry-select').addEventListener('change',event=>{const id=event.target.value;kind=WORRIES.some(w=>w.id===id)?id:'';if(kind)$('#worry-input').value='';updateStartReadiness();});
-function updateStartReadiness(){const ready=Boolean(WORRIES.some(w=>w.id===kind)||$('#worry-input').value.trim());for(const id of ['start','quick-start']){$('#'+id).disabled=!ready;$('#'+id).setAttribute('aria-describedby','worry-ready-note');}literal($('#worry-ready-note'),getLanguage()==='zh-Hant'?(ready?'心事接好，隨時開工！':'先選一個心塞原因，或者寫低你的小心事，先可以開工。'):(ready?'Your worry is ready. Start whenever you like!':'Choose a worry or write your own before starting.'));return ready;}
+function updateStartReadiness(){const ready=Boolean(WORRIES.some(w=>w.id===kind)||$('#worry-input').value.trim());for(const id of ['start','quick-start']){$('#'+id).disabled=id==='start'&&!ready;$('#'+id).setAttribute('aria-describedby','worry-ready-note');}literal($('#worry-ready-note'),getLanguage()==='zh-Hant'?(ready?'心事接好，隨時開工！':'先選一個心塞原因，或者寫低你的小心事，先可以開工。'):(ready?'Your worry is ready. Start whenever you like!':'Choose a worry or write your own before starting.'));return ready;}
 $('#worry-input').addEventListener('input',updateStartReadiness);
 function rowText(title,detail){const div=document.createElement('div'),name=document.createElement('b'),small=document.createElement('small');literal(name,translate(title));small.textContent=detail;div.append(name,small);return div;}
 function renderDecorDisplay(){
@@ -120,7 +121,7 @@ function renderDecorDisplay(){
 }
 let displayReady=false;
 const decorPrice=d=>(state.decor[d.id]??0)>=MAX_DECOR_LEVEL?Infinity:purchasePrice(state,decorUpgradeBase(d,(state.decor[d.id]??0)+1));
-function requestBuy(kind,item){if(purchaseUI.isOpen||PHASES.includes(game.phase))return;settle();const level=kind==='decor'?(state.decor[item.id]??0)+1:0,base=kind==='decor'?decorUpgradeBase(item,level):item.cost,cost=purchasePrice(state,base);purchaseUI.ask(kind,item,cost,level,()=>{settle();if(PHASES.includes(game.phase)||purchasePrice(state,base)!==cost||(kind==='decor'&&(state.decor[item.id]??0)+1!==level))return false;const next=kind==='skin'?buySkin(state,item.id):kind==='weapon'?buyWeapon(state,item.id,{restock:true}):upgrade(state,item.id);if(!next)return false;state=next;save();renderStall();return true;});}
+function requestBuy(kind,item){if(purchaseUI.isOpen||PHASES.includes(game.phase))return;purchaseFromPreparation=Boolean(preparationUI&&document.activeElement?.closest('#welcome'));settle();const level=kind==='decor'?(state.decor[item.id]??0)+1:0,base=kind==='decor'?decorUpgradeBase(item,level):item.cost,cost=purchasePrice(state,base);purchaseUI.ask(kind,item,cost,level,()=>{settle();if(PHASES.includes(game.phase)||purchasePrice(state,base)!==cost||(kind==='decor'&&(state.decor[item.id]??0)+1!==level))return false;const next=kind==='skin'?buySkin(state,item.id):kind==='weapon'?buyWeapon(state,item.id,{restock:true}):upgrade(state,item.id);if(!next)return false;state=next;save();renderStall();return true;},{returnToPreparation:purchaseFromPreparation});}
 const kitScoreLabel=id=>translate(`Relief score ×${weaponScoreMultiplier(id)}`);
 function renderStall(){
  $('#use-hands').disabled=state.equipped==='bare-hand';countNumber($('#coins'),state.coins);countNumber($('#merit'),state.merit);numberText($('#idle-note'),translate(`Your stall earns ${idleRate(state)} oil money per hour.`));
@@ -137,7 +138,7 @@ function renderStall(){
  $('#friend-list').replaceChildren(...FRIENDS.map(f=>{const row=document.createElement('div'),icon=document.createElement('span'),owned=state.friends.includes(f.id);row.className=`friend-row patron-stars-${f.stars}${owned?'':' is-locked'}`;row.dataset.patron=f.id;icon.className='friend-icon';icon.innerHTML=patronArt(f.id);const text=rowText(owned?itemName(f):(getLanguage()==='zh-Hant'?'神秘貴人':'A mysterious patron'),'');literal(text.querySelector('small'),'★'.repeat(f.stars)+' · '+patronBuffText(f,getLanguage()==='zh-Hant'));if(owned){const story=document.createElement('p');literal(story,getLanguage()==='zh-Hant'?f.story:f.storyEn);text.append(story);}row.append(icon,text);return row;}));
  $('#records').replaceChildren(...state.records.map((r,index)=>{const row=document.createElement('li'),place=document.createElement('span'),info=document.createElement('div'),name=document.createElement('b'),date=document.createElement('small'),score=document.createElement('output');row.className='record-row';place.className='record-medal';place.setAttribute('role','img');place.innerHTML=recordMedal(index+1);place.setAttribute('aria-label',(getLanguage()==='zh-Hant'?['金牌','銀牌','銅牌']:['Gold medal','Silver medal','Bronze medal'])[index]);literal(name,itemName(WEAPONS.find(w=>w.id===r.weapon)));date.textContent=new Intl.DateTimeFormat(getLanguage(),{month:'short',day:'numeric'}).format(new Date(r.date));score.textContent=r.score;info.append(name,date);row.append(place,info,score);return row;}));
  neighbourhoodUI?.renderHome();
- uxUI?.render();ritualUI?.home();playControls?.render();renderPlayerLevel(state);prepareScrollRegions();polishCollections();updateStartReadiness();
+ uxUI?.render();ritualUI?.home();playControls?.render();preparationUI?.render();renderPlayerLevel(state);prepareScrollRegions();polishCollections();updateStartReadiness();
  if(!state.records.length){const empty=document.createElement('li');empty.className='empty-record';empty.textContent='Your first lighter evening is waiting.';$('#records').append(empty);}save();
 }
 function renderDecorRows(){
@@ -174,7 +175,7 @@ $('#confirm-discard').addEventListener('click',()=>{
 setInterval(()=>{if(document.hidden)return;if(PHASES.includes(game.phase)||purchaseUI.isOpen){settle();purchaseUI.render();return;}const focused=document.activeElement,attribute=['decor','repair','discard','weapon'].find(name=>focused?.dataset?.[name])??focused?.dataset?.restoreAction,id=attribute?(focused.dataset[attribute]??focused.dataset.restoreId):null;settle();renderStall();if(id)restoreShopFocus(attribute,id);},60000);
 function lock(value){
  if(value){savedScroll=scrollY;window.getSelection()?.removeAllRanges();}document.body.classList.toggle('is-playing',value);
- for(const selector of ['.bbl-skip','#site-header','#intro','#stall-dashboard','#story','#rules','.bbl-footer'])$(selector).inert=value;
+ for(const selector of ['.bbl-skip','#site-header','#intro','#stall-dashboard','#story','#rules','.bbl-footer','#my-stall'])if($(selector))$(selector).inert=value;
  if(!value)window.scrollTo({top:savedScroll,behavior:'instant'});
 }
 function cancelGestures(){
@@ -186,8 +187,8 @@ function cancelGestures(){
  $('.tiger-tray').classList.remove('is-smearing');$('#pork-piece').style.translate='';$('#striking-weapon').style.transform='';$('#paper-tiger').classList.remove('is-ready');
 }
 function start(){
- if(PHASES.includes(game.phase))return;if(!updateStartReadiness()){$('#worry-select').focus();return;}settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
- const preset=WORRIES.find(w=>w.id===kind)||WORRIES[0];game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preferences.value.randomEvents});neighbourhoodUI?.reset();
+ if(PHASES.includes(game.phase))return;if(!updateStartReadiness()){if(preparationUI)preparationUI.focusStep('worry');else $('#worry-select').focus();return;}if(preparationUI&&!preparationUI.validate())return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
+ const preset=WORRIES.find(w=>w.id===kind)||WORRIES[0];game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:preparationUI?preparationUI.commission():state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preferences.value.randomEvents});neighbourhoodUI?.reset();
  lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
  audio.voice=$('#voice').checked;unlockSound();renderPhase();cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);
 }
@@ -200,7 +201,7 @@ function renderPhase(){
  (game.phase==='beat'?$('#beat-arena'):$('#phase-body')).append($('#effects'));
  if(game.phase==='incense'){for(const stick of document.querySelectorAll('[data-stick]'))stick.classList.remove('is-lit');$('#phase-incense').classList.remove('is-blown');$('#blow').disabled=true;ritualUI?.incenseMic('idle');}
  if(game.phase==='worry')literal($('#named-worry'),game.worry);
- if(game.phase==='beat'){$('#beat-arena .critical-comic')?.remove();$('#paper-doll').dataset.critical='1';$('#paper-doll').dataset.comedyAct='';$('#paper-doll').innerHTML=dollArt(game.kind,game.look,game.skin);literal($('#doll-label'),game.worry);$('#striking-weapon').innerHTML=weaponArt(game.weapon);feedback(gestureText('自由出招！每招都計分。','Freestyle! Every gesture scores.'));$('#hit-zone').dataset.lastGesture='';paintPaperWear();}
+ if(game.phase==='beat'){$('#beat-arena .critical-comic')?.remove();$('#paper-doll').dataset.critical='1';$('#paper-doll').dataset.comedyAct='';$('#paper-doll').innerHTML=dollArt(game.kind,game.look,game.skin);literal($('#doll-label'),game.worry);$('#striking-weapon').innerHTML=weaponArt(game.weapon);feedback(firstWhack?gestureText('先點一下小人試試！毋須跟拍，每招都計分。','Try tapping the paper worry! Any gesture scores, with no timing requirement.'):gestureText('自由出招！每招都計分。','Freestyle! Every gesture scores.'));$('#hit-zone').dataset.lastGesture='';paintPaperWear();}
  if(game.phase==='tiger'){$('#tiger-smear-paint').style.opacity='0';$('#paper-tiger').innerHTML=tigerArt();$('#pork-piece').innerHTML=porkArt();$('#phase-tiger').classList.remove('is-fed');}
  if(game.phase==='blessing'){$('#bless').classList.remove('is-burning');audio.chime();}
  ritualUI?.render();
@@ -234,7 +235,7 @@ function spendKitOnce(){
 }
 function whack(options){
  const hit=game.hit(options);renderPhase();if(!hit){if(game.phase==='beat'){ritualUI?.render();}return;}
- spendKitOnce();
+ firstWhack=false;spendKitOnce();
  const force=(.2+Math.min(1,hit.power/9)*.8)*(hit.impactLevel===3?1.65:hit.impactLevel===2?1.3:1);cryDuration=900+force*900;audio.hit(game.weapon,hit.heavy,hit.perfect,hit.power);vibrate(Math.round(7+force*30));
  const paper=$('#paper-doll');paper.classList.add('is-crying');paper.style.setProperty('--hit-strength',force);paper.dataset.impact=force.toFixed(3);
  const captions={tap:'Bonk!',heavy:'WHAM!',rub:'Scrub-a-dub!',circle:gestureText('轉走衰運！','Spin it away!'),pinch:'Squeeeze!'};
@@ -362,11 +363,11 @@ $('#microphone').addEventListener('click',async()=>{
 });
 function selectTab(name,focus=false){for(const button of document.querySelectorAll('[data-tab]')){const active=button.dataset.tab===name;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;$(`#panel-${button.dataset.tab}`).hidden=!active;if(active&&focus)button.focus({preventScroll:true});}}
 function scrollToCollection(){$('.stall-collection').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});}
-function openShop(name){settle();renderStall();selectTab(name);$(`#tab-${name}`).focus({preventScroll:true});scrollToCollection();}
+function openShop(name){if($('#my-stall'))$('#my-stall').open=true;settle();renderStall();selectTab(name);$(`#tab-${name}`).focus({preventScroll:true});scrollToCollection();}
 for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>openShop(shortcut.dataset.shortcut));
 for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>{settle();renderStall();selectTab(button.dataset.tab);scrollToCollection();});button.addEventListener('keydown',event=>{const names=['stall','kits','friends'],index=names.indexOf(button.dataset.tab);let next;if(event.key==='ArrowRight')next=(index+1)%3;if(event.key==='ArrowLeft')next=(index+2)%3;if(event.key==='Home')next=0;if(event.key==='End')next=2;if(next!==undefined){event.preventDefault();selectTab(names[next],true);scrollToCollection();}});}
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',()=>{cancelGestures();polishCollections();});reduced.addEventListener('change',()=>{paperAnimation?.cancel();shoeAnimation?.cancel();});
-neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:(gesture,direction)=>whack({gesture,direction,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onAccept:nextKind=>{kind=nextKind;$('#worry-input').value='';drawWorries();}});
+neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:(gesture,direction)=>whack({gesture,direction,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onAccept:()=>{preparationUI?.acceptSavedCommission();}});
 $('#kit-skill')?.remove();
 $('#open-journey').addEventListener('click',()=>uxUI?.openCollection());
 for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.innerHTML=fongCostumeArt();for(const id of illustratedDecor)$('#stall-'+id).innerHTML=decorArt(id);for(const ghost of document.querySelectorAll('[data-ghost]'))ghost.innerHTML=ghostArt(ghost.dataset.ghost);for(const master of document.querySelectorAll('[data-fong]')){const icon=$('.fong-logo').cloneNode(true);icon.className='fong-logo master-avatar';master.append(icon);}drawWorries();settle();renderStall();updateSound();enableOffline($('#offline-status'));
@@ -378,17 +379,19 @@ const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();ren
 window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event.key!==STORAGE_KEY&&event.key!==null))return;if(syncProgress()){if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen){settle();renderStall();}purchaseUI.render();}});
 window.addEventListener('pageshow',event=>{if(event.persisted&&syncProgress()&&!PHASES.includes(game.phase)){settle();renderStall();}});
 document.addEventListener('languagechange',()=>backupUI.render());
-uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{backToStall();$('#worry-input').value='';$('#worry-select').focus({preventScroll:true});$('.worry-field').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});},onShop:openShop,onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,openUltimateGuide:()=>ritualUI?.openFinisherGuide()});
+uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{kind='';$('#worry-input').value='';backToStall();preparationUI?.focusStep('worry');},onShop:openShop,onChoosePreparation:()=>preparationUI?.focusStep('worry'),onRenderPreparation:()=>preparationUI?.render(),onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,openUltimateGuide:()=>ritualUI?.openFinisherGuide()});
 stallLayoutUI=createStallLayout({getState:()=>state,itemName,canEdit:()=>!PHASES.includes(game.phase)&&!document.querySelector('dialog[open]'),onMove:(id,index)=>{const next=placeDecoration(state.neighbourhood,state.decor,id,index);if(next){state={...state,neighbourhood:next};save();renderStall();}}});
-$('#random-events').addEventListener('change',()=>{preferences.update({randomEvents:$('#random-events').checked});renderRitualTiming();});
+$('#random-events').addEventListener('change',()=>{preferences.update({randomEvents:$('#random-events').checked});renderRitualTiming();preparationUI?.render();});
 $('#voice').addEventListener('change',()=>{audio.voice=$('#voice').checked;preferences.update({voice:audio.voice});uxUI.render();});
-document.addEventListener('languagechange',()=>uxUI.render());
+document.addEventListener('languagechange',()=>{uxUI.render();preparationUI?.render();});
 updateStartReadiness();uxUI.render();
 
 ritualUI=createRitualUI({game,audio,getState:()=>state,refresh:renderStall,announce:say,cancelOrdinary:cancelGestures,pause,resume,claimDaily:async()=>{const claim=()=>{if(game.phase!=='setup')return null;syncProgress();const next=dailyReward(state);if(!next)return null;state=next;save();return next;};try{if(navigator.locks?.request)return await navigator.locks.request('beat-bad-luck-daily',claim);}catch{}return claim();}});
 ritualUI.render();ritualUI.daily();
 
-playControls=createPlayControls({game,getState:()=>state,itemName,requestBuy,onSelect:id=>{settle();if(!state.ownedSkins.includes(id))return;state=buySkin(state,id);save();renderStall();}});playControls.render();renderPlayerLevel(state);prepareScrollRegions();polishCollections();
+playControls=createPlayControls({game,getState:()=>state,itemName,requestBuy,onSelect:id=>{settle();if(!state.ownedSkins.includes(id))return;state=buySkin(state,id);save();renderStall();}});playControls.render();
+preparationUI=createPreparationUI({getState:()=>state,getWorry:()=>({kind,text:$('#worry-input').value}),onChooseWorry:id=>{kind=id;if(id)$('#worry-input').value='';drawWorries();},onAcceptStory:(id,replay)=>{const next=acceptStory(state.neighbourhood,id,{replay});if(!next)return false;state={...state,neighbourhood:next};save();renderStall();return true;},onEquip:id=>{settle();if(!state.owned.includes(id))return;state=buyWeapon(state,id);save();renderStall();},requestBuy,onEvents:enabled=>{$('#random-events').checked=enabled;$('#random-events').dispatchEvent(new Event('change'));}});
+playControls.render();preparationUI.render();renderPlayerLevel(state);prepareScrollRegions();polishCollections();
 
 for(const type of ['contextmenu','selectstart','dragstart'])document.addEventListener(type,event=>{const target=event.target instanceof Element?event.target:null;if(target?.closest('.ritual-stage,.pause-overlay,#finisher-stage'))event.preventDefault();},{capture:true});
 

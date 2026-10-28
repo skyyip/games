@@ -1,3 +1,7 @@
+# Ritual preparation update
+
+`preparation-check.mjs` covers the new five-section start flow on 375px Traditional Chinese, 320px Traditional Chinese 812px landscape English and 1280px desktop English profiles. It verifies nonblocking daily gifts, missing-worry and commission validation, preservation of personal worries when accepting stories, per-ritual commission skipping without chapter advancement, a full ritual with private text absent from saves, inline free/owned selection, purchase cancellation and confirmation, return-to-preparation focus, no automatic ritual start, retained stock and responsive layout. Existing freestyle checks use the new My stall and preparation entry points. Offline cache is v79.
+
 # Current Growth Release
 
 Use `npm test` and `scripts/freestyle-ritual-check.mjs` for the current game. The whacking round is 58 active seconds; base scores are Pinch 100, Circle 80, Rub 60, Swipe 40 and Tap 30. The finisher grants ten active seconds of triple-score real hits, once per ritual after 100 combo. Burst time counts toward the round. One-finger rapid taps and overlapping two-finger alternation score on pointer down; pause freezes time, and expiry, round end or quitting clears the state. There is no cinematic payout or nice-tap ring.
@@ -8,7 +12,7 @@ Browser profiles include 320×568 Chinese, 390×844 English with events, 812×37
 
 Additional style checks verify flat text-based sound controls and actual computed exterior shadow depths that are 25% lighter for primary/icon buttons. Native held-pointer tests measure price numeral contrast against every solid/gradient surface for kit purchase, restock and decoration upgrade buttons, requiring the requested minimum of 3:1 in normal, hover and active states.
 
-The offline scenario seeds an old v75 asset cache and a populated legacy save, activates **v78**, then reloads offline. All stable save fields survive, active-time income/ageing continue normally, other games' storage/cache remain intact, and all four website-logo icons decode with the expected sizes and pixels. Historical cinematic/signature checks below describe earlier releases and are superseded, not rerun by this update. Physical iOS/Android touch, vibration, speaker playback and OS-managed installed-icon refresh still require device verification.
+The offline scenario seeds an old v75 asset cache and a populated legacy save, activates **v79**, then reloads offline. All stable save fields survive, active-time income/ageing continue normally, other games' storage/cache remain intact, and all four website-logo icons decode with the expected sizes and pixels. Historical cinematic/signature checks below describe earlier releases and are superseded, not rerun by this update. Physical iOS/Android touch, vibration, speaker playback and OS-managed installed-icon refresh still require device verification.
 
 # Verification
 

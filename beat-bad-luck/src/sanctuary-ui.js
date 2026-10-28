@@ -3,7 +3,7 @@ import {playerLevel,levelBadgeArt} from './player-level.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 let scrollSerial=0;
 export function prepareScrollRegions(){
- for(const details of document.querySelectorAll('details')){
+ for(const details of document.querySelectorAll('details:not(.preparation-step):not(.preparation-catalog):not(.skin-chooser):not(#my-stall)')){
   if(!details.querySelector(':scope > summary'))continue;
   let body=details.querySelector(':scope > .accordion-scroll');
   if(!body){body=document.createElement('div');body.className='accordion-scroll';const summary=details.querySelector(':scope > summary');summary.id ||= 'accordion-heading-'+(++scrollSerial);body.setAttribute('role','region');body.setAttribute('aria-labelledby',summary.id);body.tabIndex=0;for(const child of [...details.childNodes])if(child!==summary)body.append(child);details.append(body);}

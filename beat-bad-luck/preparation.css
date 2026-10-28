@@ -1,0 +1,109 @@
+/* One preparation surface; inventory and purchases retain their existing state. */
+.preparation-ready .bbl-layout{display:block;max-width:850px;margin-inline:auto}
+.preparation-ready #welcome{padding:24px;min-height:0}
+.preparation-ready #welcome [hidden]{display:none!important}
+.preparation-ready .fong-intro{gap:12px;margin:0 0 16px;align-items:center}
+.preparation-ready .fong-intro .fong-logo{width:60px;height:68px}
+.preparation-ready .fong-intro>.master-portrait{flex:0 0 60px}
+.preparation-ready .fong-intro>div:last-child>p:last-child{font-size:15px;line-height:1.7;margin:0;color:#f7ebce}
+#ritual-preparation{position:relative;min-width:0;color:#f8edce;text-align:left}
+.preparation-intro{margin:0 0 20px}
+.preparation-intro h2{font-size:25px;line-height:1.4;margin:0 0 8px;color:#ffe5a0}
+.preparation-intro p,.preparation-note{font-size:14px;line-height:1.7;color:#e4e9cc;margin:10px 0}
+.preparation-step{margin:12px 0;border:1px solid #8fae98;border-radius:16px;background:#20433d;scroll-margin-block:18px;overflow:clip}
+.preparation-heading{display:flex;align-items:center;gap:12px;margin:0;padding:16px;color:#fff0c5;font-size:17px;line-height:1.5;text-align:left;font-weight:600;min-height:72px}
+summary.preparation-heading{cursor:pointer;list-style:none}
+summary.preparation-heading::-webkit-details-marker{display:none}
+summary.preparation-heading::after{content:'＋';font-size:23px;font-weight:400;flex:none;margin-left:auto;align-self:center}
+.preparation-step[open]>summary::after{content:'−'}
+.preparation-heading>span:not(.preparation-number){min-width:0;flex:1}
+.preparation-heading b{font:inherit;display:block}
+.preparation-heading small{display:block;font-size:13px;line-height:1.65;color:#d5e8cb;font-weight:400;margin-top:5px;overflow-wrap:anywhere}
+.preparation-heading #worry-required{margin-left:auto;margin-top:0;flex:none;padding:3px 9px;background:#f0d697;color:#27483f;border-radius:20px;font-size:12px}
+.preparation-number{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid #d7b870;border-radius:50%;font-size:14px;line-height:1;background:#183931;color:#ffe7a2;font-variant-numeric:tabular-nums}
+.preparation-body{padding:0 16px 16px;min-width:0}
+#prepare-worry-title{flex:1}
+.preparation-body label:not(.preparation-options label){font-size:14px;line-height:1.6;color:#f8edce}
+#ritual-preparation select,#ritual-preparation input[type=text],#ritual-preparation #worry-input{display:block;width:100%;min-width:0;min-height:48px;border:1px solid #acc1a4;border-radius:10px;background:#16382f;color:#fff3d4;font:400 16px/1.5 system-ui,sans-serif;padding:10px 12px;margin:8px 0 12px}
+#ritual-preparation input::placeholder{color:#bfd1ba;opacity:1}
+#ritual-preparation .worry-field{border:0;padding:0;margin:0;min-width:0}
+#ritual-preparation .worry-field legend{font-size:14px;padding:0;line-height:1.6;margin:6px 0}
+#ritual-preparation .worry-ready-note,#ritual-preparation .quiet-note{font-size:13px;line-height:1.7;color:#e6eaca;margin:8px 0}
+.preparation-options{display:grid;gap:10px;padding:0;border:0;min-width:0;margin:0}
+.preparation-options label{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid #91ad98;border-radius:12px;background:#173b32;min-height:52px;cursor:pointer}
+.preparation-options label:has(input:checked){border:2px solid #f3d289;padding:13px;background:#34594a}
+.preparation-options input{accent-color:#f1d28a;width:22px;height:22px;flex:0 0 22px;margin:2px 0}
+.preparation-options label>span{font-size:15px;line-height:1.6}
+.preparation-options b{display:block;font-weight:600}
+.preparation-options small{display:block;color:#e1e8cc;font-size:13px;line-height:1.7;margin-top:4px}
+.preparation-action,.preparation-link,.preparation-kit-choice{font:inherit;cursor:pointer;touch-action:manipulation}
+.preparation-link{display:inline-block;min-height:44px;padding:8px 2px;background:none;border:0;color:#ffe5a0;text-align:left;font-size:14px;line-height:1.6;text-decoration:underline;text-underline-offset:4px}
+.preparation-action{min-height:48px;background:#f1d28a;color:#254739;border:1px solid #f6dfa7;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:600}
+.preparation-action[aria-pressed=true]{background:#355e48;color:#f9edbc;border:2px solid #f1d28a}
+.preparation-story{border-top:1px solid #8fae9866;padding:18px 0}
+.preparation-story h4{margin:0 0 9px;font-size:16px;line-height:1.6;color:#ffdf97}
+.preparation-story p{font-size:14px;line-height:1.75;margin:8px 0;color:#f1e8cc}
+.preparation-catalog{margin:12px 0 0;border-top:1px solid #a3b29388}
+.preparation-catalog>summary{padding:14px 2px;min-height:48px;font-size:14px;line-height:1.6;color:#ffe5a0;cursor:pointer;list-style:revert}
+.preparation-preview{height:126px;margin:4px auto 16px;display:grid;place-items:center}
+.preparation-preview svg{width:126px;height:126px;max-width:100%}
+#ritual-preparation .skin-chooser{border:0;padding:0;margin:0;background:none;max-height:none}
+#ritual-preparation .skin-chooser>summary{display:none}
+#ritual-preparation .skin-note{font-size:13px;line-height:1.7;color:#e0e8c9}
+#ritual-preparation .skin-grid,.preparation-kit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-height:none;overflow:visible;padding:4px 0}
+#ritual-preparation .skin-free-slot{margin:12px 0}
+#ritual-preparation :is(.skin-card,.skin-free-card){min-height:160px;font-size:14px;line-height:1.5}
+#ritual-preparation :is(.skin-card,.skin-free-card) b{font-size:14px}
+#ritual-preparation :is(.skin-card,.skin-free-card) small{font-size:13px;line-height:1.6}
+#ritual-preparation .skin-owned-slot:empty{display:none}
+.preparation-kit-card{min-width:0;border:1px solid #91ad98;border-radius:12px;background:#173a32;overflow:hidden;text-align:center;display:flex;flex-direction:column}
+.preparation-kit-choice{display:flex;flex:1;align-items:center;flex-direction:column;gap:8px;min-width:0;width:100%;min-height:180px;padding:12px 9px;border:2px solid transparent;border-radius:11px;background:none;color:#fff0cb;box-shadow:none;transform:none}
+.preparation-kit-choice[aria-pressed=true]{border-color:#f4d68e;background:#365846}
+.preparation-kit-choice:disabled{opacity:.75;cursor:not-allowed}
+.preparation-kit-choice svg{width:70px;height:70px;max-width:100%;flex:none}
+.preparation-kit-choice b{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.preparation-kit-choice span,.preparation-kit-choice small,.preparation-kit-card>small{font-size:13px;line-height:1.6;color:#f1e5be;overflow-wrap:anywhere}
+.preparation-kit-card>small{padding:5px 8px}
+.preparation-kit-card>.preparation-link{padding:8px;text-align:center;border-top:1px solid #a1ba9388}
+.preparation-receipt{padding:18px;border:1px dashed #e1c27e;border-radius:15px;background:#173a32;margin-top:20px}
+.preparation-receipt h3{font-size:18px;color:#ffe3a0;margin:0 0 12px}
+.preparation-receipt p{font-size:14px;line-height:1.7;margin:8px 0;overflow-wrap:anywhere}
+.preparation-ready #start{margin:16px 0 0!important;min-height:56px;width:100%;font-size:18px}
+.preparation-ready #start .work-label{font-size:17px}
+.preparation-ready .welcome-options{padding-top:12px}
+.preparation-ready #my-stall{margin-top:24px;scroll-margin-top:20px;border:1px solid #a5b991;border-radius:16px;background:#24473d;padding:0 16px}
+#my-stall>summary{min-height:60px;padding:17px 0;font-size:17px;line-height:1.6;color:#ffe5a0;cursor:pointer}
+.preparation-ready #stall-dashboard{margin:0;max-width:none}
+.preparation-ready .kit-shortcuts{margin:12px 0 20px}
+.preparation-ready #quick-dock{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;max-width:850px;padding:12px 18px calc(12px + env(safe-area-inset-bottom))}
+.preparation-ready #dock-kit{font-size:14px!important;line-height:1.5;text-align:left;min-height:44px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.preparation-ready #dock-wallet{white-space:pre-line;font-size:12px;line-height:1.7;display:block;overflow-wrap:anywhere;color:#e1e8cc}
+.preparation-ready #quick-start{min-width:122px;min-height:56px;font-size:16px;padding:10px 12px}
+.preparation-ready #quick-start .work-symbol{display:none}
+.preparation-ready #quick-start .work-label{font-size:16px;line-height:1.5}
+.preparation-ready.inline-start-visible #quick-dock{visibility:hidden;pointer-events:none}
+.preparation-ready:not(.preparation-in-view) #quick-dock{visibility:hidden;pointer-events:none}
+.preparation-ready.editing-text #quick-dock,.preparation-ready.is-playing #quick-dock,.preparation-ready.is-playing #my-stall{display:none}
+.preparation-daily-note{padding:12px 14px;border-left:3px solid #e6c67f;border-radius:8px;background:#315747;color:#edf0ce;font-size:13px;line-height:1.7;margin:0 0 18px}
+.preparation-step :is(button,input,select,summary):focus-visible,#my-stall>summary:focus-visible{outline:3px solid #ffe8a0;outline-offset:3px}
+@media(max-width:600px){
+ .preparation-ready #intro .bbl-kicker{display:none}
+ .preparation-ready #intro{margin-bottom:16px}
+ .preparation-ready #intro h1{font-size:24px!important;padding:10px 12px}
+ .preparation-ready #welcome{padding:20px 14px}
+ .preparation-ready .fong-intro{margin-bottom:10px}
+ .preparation-ready .fong-intro .fong-logo{width:44px;height:50px}
+ .preparation-ready .fong-intro>.master-portrait{flex-basis:44px}
+ .preparation-daily-note{padding:10px 12px;font-size:12px;line-height:1.6;margin-bottom:14px}
+ .preparation-intro h2{font-size:22px}
+ .preparation-heading{font-size:16px;gap:10px;padding:14px 12px}
+ .preparation-number{width:30px;height:30px;flex-basis:30px;font-size:13px}
+ .preparation-body{padding:0 12px 14px}
+ #ritual-preparation .skin-grid,.preparation-kit-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .preparation-ready #quick-dock{padding:10px 12px calc(10px + env(safe-area-inset-bottom));gap:10px}
+ .preparation-ready #quick-start{min-width:96px}
+ .preparation-ready #quick-start .work-label{font-size:15px}
+ .preparation-receipt{padding:14px}
+}
+@media(max-height:500px) and (min-aspect-ratio:4/3){.preparation-ready #dock-wallet{display:none}.preparation-ready #quick-dock{padding-block:8px}.preparation-ready #intro .bbl-kicker{display:none}.preparation-ready #intro h1{font-size:26px!important;padding:10px 14px}.preparation-ready #intro{margin-bottom:16px}}
+@media(prefers-reduced-motion:reduce){#ritual-preparation *,#ritual-preparation *::before,#ritual-preparation *::after{animation:none!important;transition:none!important;scroll-behavior:auto}}
