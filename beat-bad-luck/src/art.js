@@ -132,4 +132,46 @@ export function dailyBonusArt(){return `<svg class="daily-bonus-art" viewBox="0 
  <path d="M49 66q12 3 24-1-2 19-12 18-11 0-12-17Z" fill="#7e4764" stroke="#665064" stroke-width="2"/><path d="M54 69h14" stroke="#fff4d7" stroke-width="4"/><path d="M55 79q6-7 12 0" fill="#f3a1b8"/>
  <path d="m83 12 2 5 6 1-5 3 1 6-4-3-5 3 1-6-4-3 5-1M6 77l3 4m-7 0 1 5m107-54 5-3m-4 10 6 1" fill="#ffdb80" stroke="#ffdb80" stroke-width="2" stroke-linecap="round"/>
 </svg>`;}
-export function comicTrophyArt(){return `<svg class="comic-trophy manga-trophy" viewBox="0 0 100 110" aria-hidden="true"><ellipse cx="51" cy="102" rx="33" ry="5" fill="#a9795529"/><g stroke="#815334" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M23 24Q-1 13 10 43q5 13 20 8m45-26q24-13 16 17-4 13-20 11" fill="#f7c76d"/><path d="M25 20q24-8 51 0l-2 30Q71 77 51 79 28 78 26 51Z" fill="#ffdb89"/><path d="M31 27q18-6 37 0" fill="none" stroke="#fff5c6" stroke-width="6"/><path d="m40 75-1 12h24l-4-12" fill="#e8ac62"/><path d="M30 87q21-6 42 0l1 12H28Z" fill="#ee96ac"/><path d="m30 93 39-1" stroke="#ffc9d5" stroke-width="3"/><path d="M23 59 11 65m65-5 12 4"/><path d="M16 61Q2 50 4 64q-6 5 1 9 7 5 16-5Z" fill="#fff0d3"/><path d="M83 61q10-16 10-2 12-4 4 6 4 9-9 9Z" fill="#fff0d3"/><path d="m32 99-8 6h16m23-6 11 6H58" stroke="#57857a" stroke-width="5"/><path d="m38 16-7-13 14 6 8-9 6 11 14-4-7 14Z" fill="#ffd779" stroke="#b1773c" stroke-width="2.5"/></g><ellipse cx="39" cy="45" rx="8" ry="11" fill="#513c49"/><ellipse cx="64" cy="45" rx="8" ry="11" fill="#513c49"/><circle cx="36" cy="41" r="3.5" fill="#fffdf0"/><circle cx="61" cy="41" r="3.5" fill="#fffdf0"/><circle cx="42" cy="49" r="2" fill="#ffe4af"/><circle cx="67" cy="49" r="2" fill="#ffe4af"/><ellipse cx="28" cy="59" rx="9" ry="5" fill="#f39fb0"/><ellipse cx="76" cy="59" rx="9" ry="5" fill="#f39fb0"/><path d="M41 59q11 18 22-1Z" fill="#a35072" stroke="#79434d" stroke-width="2"/><path d="M46 62h12" stroke="#fff2db" stroke-width="4"/><path d="m47 80-10-5v15l12-7 13 6V75Z" fill="#a1d6c0" stroke="#578d78" stroke-width="2"/><circle cx="49" cy="82" r="4" fill="#fff0b4"/><path d="m6 8 3 6 7 1-5 5 1 7-6-3-6 3 2-7-5-5 7-1m86 70 2 5 6 1-4 4 1 6-5-3-5 3 1-6-4-4 6-1" fill="#f6acb9"/><path d="m83 3 3 4m5 0 4-2m-4 8 5 2" stroke="#f1b757" stroke-width="3" stroke-linecap="round"/></svg>`;}
+export function zombieArt(look=0){const coat=['#7888bc','#c97c98','#689b8a'][look%3];return `<svg class="zombie-art" viewBox="0 0 100 128" aria-hidden="true" focusable="false">
+ <ellipse cx="50" cy="121" rx="27" ry="4" fill="#122d3244"/>
+ <g stroke="#405263" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m35 104-5 14q8 6 16 0l4-13m14 0 6 13q-7 6-16 0l-3-13" fill="#f5d490"/>
+  <path d="M30 74q-5 20-3 33 23 10 46 0 2-17-4-33Z" fill="${coat}"/>
+  <path d="m31 79-19-7-6 10 23 11m41-14 18-7 6 10-23 11" fill="${coat}"/>
+  <path d="m13 73-3-7q-4-5-6 1l2 5q-8-3-4 5l5 4m80-8 3-7q4-5 6 1l-2 5q8-3 4 5l-5 4" fill="#b9e5c4"/>
+  <path d="m39 75 11 13 12-13M50 88v16" fill="none" stroke="#eed4a1"/>
+  <rect x="22" y="30" width="56" height="48" rx="23" fill="#b9e5c4"/>
+  <path d="M20 31q2-9 10-11Q29 5 50 6t20 14q10 3 10 11Z" fill="${coat}"/>
+  <path d="M19 30q31-5 62 0" fill="none" stroke="#e9b88b" stroke-width="5"/>
+  <circle cx="50" cy="18" r="5" fill="#f5d791"/>
+  <path d="m43 28 15 1-3 24-14-2Z" fill="#ffe8a3" stroke="#bd9565" stroke-width="1.5"/>
+  <path d="m47 33 6 1-5 5 5 1-7 5" fill="none" stroke="#bd6571" stroke-width="2"/>
+ </g>
+ <path d="m30 52 3-2 3 2m28 0 3-2 3 2" fill="none" stroke="#405263" stroke-width="3" stroke-linecap="round"/>
+ <ellipse cx="30" cy="60" rx="6" ry="3.5" fill="#eb9fb2"/><ellipse cx="70" cy="60" rx="6" ry="3.5" fill="#eb9fb2"/>
+ <path d="M43 61q7 9 14 0" fill="#76546b" stroke="#405263" stroke-width="2" stroke-linecap="round"/><path d="m46 63 1 4 3-3m3 0 1 3 2-4" fill="#fff7de"/>
+ <circle cx="50" cy="97" r="3" fill="#ffe3a2"/>
+</svg>`;}
+export function comicTrophyArt(){return `<svg class="comic-trophy manga-trophy" viewBox="0 0 100 110" aria-hidden="true" focusable="false">
+ <ellipse cx="50" cy="103" rx="31" ry="4" fill="#536c6330"/>
+ <g stroke="#795043" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M26 29C15 9 1 27 9 39l17 16m48-26c11-20 25-2 17 10L74 55" fill="#f5a1b0"/>
+  <path d="M26 33c-10-13-15-4-9 3l9 9m48-12c10-13 15-4 9 3l-9 9" fill="none" stroke="#ffe2d6" stroke-width="4"/>
+  <path d="M23 26q27-10 54 0l-3 27c-2 17-12 24-24 24S28 70 26 53Z" fill="#ffd16f"/>
+  <path d="M30 29q20-6 40 0" stroke="#fff5c6" stroke-width="6" fill="none"/>
+  <path d="m42 75-2 10h20l-2-10" fill="#efb858"/>
+  <rect x="27" y="84" width="46" height="16" rx="8" fill="#abdcca"/>
+  <path d="M32 89h36" stroke="#e8ffdd" stroke-width="3"/>
+  <path d="m38 100-4 5h10m18-5 4 5H56" fill="none" stroke="#537e70" stroke-width="5"/>
+  <path d="m26 63-8 5m56-5 8 5" fill="none"/>
+  <path d="M20 64c-4-10-12-8-10 0-9-3-9 7-2 9 5 3 11-2 12-9m60 0c4-10 12-8 10 0 9-3 9 7 2 9-5 3-11-2-12-9" fill="#fff1d2"/>
+  <path d="m50 3 5 8 10 2-7 7 1 10-9-5-9 5 1-10-7-7 10-2Z" fill="#ffe592" stroke="#b48549" stroke-width="2"/>
+ </g>
+ <ellipse cx="38" cy="45" rx="6" ry="8" fill="#503e48"/><ellipse cx="62" cy="45" rx="6" ry="8" fill="#503e48"/>
+ <circle cx="36" cy="42" r="2.5" fill="#fffef4"/><circle cx="60" cy="42" r="2.5" fill="#fffef4"/>
+ <ellipse cx="29" cy="56" rx="7" ry="4.5" fill="#f196a8"/><ellipse cx="71" cy="56" rx="7" ry="4.5" fill="#f196a8"/>
+ <path d="M41 55q9 3 18 0c0 17-18 17-18 0Z" fill="#8a4a60" stroke="#795043" stroke-width="2"/><path d="M45 64q5-6 10 0" fill="#f6a0ad"/>
+ <path d="m48 76-10-4v12l11-5 13 5V72Z" fill="#f4a8ba" stroke="#a86a7a" stroke-width="2"/><circle cx="50" cy="78" r="3.5" fill="#fff3c1"/>
+ <path d="m10 8 2 5 5 2-5 2-2 5-2-5-5-2 5-2Zm80 66 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" fill="#ffe398"/>
+ <path d="m83 8 2 3m6 3 3-1M8 84l-3 3" fill="none" stroke="#eda0b5" stroke-width="3" stroke-linecap="round"/>
+</svg>`;}

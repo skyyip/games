@@ -1,5 +1,4 @@
 #phase-beat{position:relative}
-/* One cinematic finisher and four clear pieces of gameplay information. */
 #phase-beat .beat-stats>span:has(#live-papers),#phase-beat .rhythm-rail,#phase-beat .bpm-note,#phase-beat .qte-call,#kit-skill,#kit-stage,#kit-guidance{display:none!important}
 #phase-beat .beat-telemetry{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-shrink:0}
 #phase-beat .beat-stats{position:static;display:flex;flex-direction:row;gap:24px;align-items:center;flex:0 0 auto}
@@ -20,40 +19,21 @@
 #phase-beat .hit-feedback{height:35px!important;min-height:35px;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1.4;white-space:normal}
 #phase-beat .beat-arena .hit-zone{inset:20px auto 7px 50%;height:calc(100% - 27px);width:min(57%,245px)}
 .is-playing .master-equipped-title{display:none!important}.is-playing .play-panel .fong-bubble:has(.master-equipped-title:not([hidden])){height:56px;min-height:56px;flex-basis:56px}.is-playing .master-portrait-play:has(.master-equipped-title:not([hidden])){flex-basis:38px}
-/* The optional nice tap never holds up the automatic show. */
-#finisher-stage.unified-finisher{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:none;grid-template-rows:auto minmax(80px,1fr) 2.8em 44px 1.5em;align-items:stretch;gap:5px;padding:10px;justify-items:center;justify-content:stretch;align-content:stretch;background:radial-gradient(ellipse at 50% 35%,#fff0b8,#bc83a2 75%,#6d6a9d);color:#63445d;overflow:hidden;border:3px solid #ffe5aa}
-.unified-finisher h3{margin:0;font:500 18px/1.25 Iansui,'Fredoka',sans-serif;color:#694660;text-align:center;min-height:1.25em;width:100%}
-.ultimate-cast{position:relative;width:100%;height:100%;min-height:80px;isolation:isolate;pointer-events:none}
-.ultimate-movie-paper{position:absolute;left:20%;top:2%;height:95%;width:55%;transform-origin:50% 80%;--cry-display:inline;--neutral-display:none}
-.ultimate-movie-paper svg,.ultimate-movie-tool svg,.ultimate-payoff-prop svg{display:block;width:100%;height:100%;overflow:visible}
-.ultimate-movie-tool{position:absolute;right:0;top:7%;width:38%;height:65%;transform-origin:75% 75%}
-.ultimate-payoff-prop{position:absolute;right:7%;bottom:0;width:34%;height:65%;opacity:0;transform-origin:center}
-.ultimate-payoff-prop b{font-size:clamp(35px,8vw,72px)}
-.ultimate-movie-puff{position:absolute;left:12%;top:20%;font-size:40px;font-style:normal;color:#fff2bf;pointer-events:none}
-.ultimate-tools-fan{position:absolute;inset:0;pointer-events:none;opacity:0}.ultimate-tools-fan i{position:absolute;left:50%;top:45%;font-style:normal;font-size:26px;transform:rotate(calc(var(--tool)*30deg)) translateX(74px) rotate(calc(var(--tool)*-30deg))}
-#ultimate-punchline{width:100%;height:2.8em;min-height:2.8em;margin:0;padding:3px 6px;font-size:12px;line-height:1.4;text-align:center;background:#fff5d3;border:1px solid #b98991;border-radius:10px;overflow:hidden}
-#ultimate-nice{min-height:44px;max-width:100%;padding:5px 14px;background:#e8dfcb;color:#66546b;border:2px solid #947b9c;font-size:13px;line-height:1.3;border-radius:12px;box-shadow:none}
-#ultimate-nice[data-ready=true]{background:#ffe19b;border-color:#fff9db;box-shadow:0 0 0 5px #ffeaa077,0 0 20px #fff1b8;color:#6c4b5e;transform:scale(1.04)}
-#ultimate-nice:disabled{opacity:1;background:#c2dcc6}#ultimate-nice-note{font-size:10px;line-height:1.5;text-align:center;min-height:1.5em}
-/* Model-clock sampled animation: a paused negative delay also freezes browser artwork. */
-.ultimate-movie-paper{animation:movie-paper 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
-.ultimate-movie-tool{animation:movie-tool 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
-.ultimate-movie-puff{animation:movie-puff 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
-.unified-finisher[data-family=spin] .ultimate-movie-tool{animation-name:movie-spin}
-.unified-finisher[data-family=blade] .ultimate-movie-tool{animation-name:movie-blade}
-.unified-finisher[data-family=suction] .ultimate-movie-paper{animation-name:movie-suction}
-.unified-finisher[data-family=beauty] .ultimate-movie-paper{animation-name:movie-vanity;filter:drop-shadow(0 0 8px #ffcde8)}
-.unified-finisher[data-family=gadget] .ultimate-tools-fan{animation:movie-fan 2700ms linear both paused;animation-delay:var(--movie-at,0ms)}
-.unified-finisher[data-act=payoff] .ultimate-payoff-prop{opacity:1}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-tool{opacity:0}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-paper .paper-arm-left{rotate:40deg;transform-origin:44px 105px}.unified-finisher[data-act=payoff][data-family=gadget] .ultimate-movie-paper .paper-arm-right{rotate:-40deg;transform-origin:96px 105px}
-.unified-finisher[data-family=beauty] .ultimate-payoff-prop{right:10%;height:80%}.unified-finisher[data-family=sun] .ultimate-cast{background:radial-gradient(circle at 70% 10%,#fff5b6bb,transparent 65%)}
-@keyframes movie-paper{0%{transform:scale(.8) rotate(-4deg)}20%{transform:scale(1) rotate(3deg)}32%{transform:scale(1.2,.65) rotate(-12deg)}43%{transform:scale(.8,1.2) rotate(10deg)}57%{transform:scale(1.22,.7) rotate(-9deg)}70%{transform:scale(.9,1.12) rotate(7deg)}100%{transform:scale(.9,.82) rotate(-5deg)}}
-@keyframes movie-tool{0%{transform:translate(20px,-10px) rotate(30deg) scale(.5);opacity:0}18%{transform:translate(0,0) rotate(0) scale(1);opacity:1}33%{transform:translate(-45px,15px) rotate(-55deg)}42%{transform:translate(0,-10px) rotate(15deg)}56%{transform:translate(-45px,15px) rotate(-65deg)}70%,100%{transform:translate(10px,-10px) rotate(15deg)}}
-@keyframes movie-spin{0%{transform:scale(.4);opacity:0}20%{transform:scale(1);opacity:1}70%{transform:translateX(-70px) rotate(720deg) scale(1.3)}100%{transform:translateX(0) rotate(1080deg) scale(.7)}}
-@keyframes movie-blade{0%{transform:translateX(70px);opacity:0}18%{opacity:1}30%{transform:translateX(-75px) rotate(-30deg)}40%{transform:translateX(50px)}52%{transform:translateX(-75px) rotate(-35deg)}62%{transform:translateX(50px)}73%{transform:translateX(-80px) rotate(-40deg)}100%{transform:translateX(5px) rotate(10deg)}}
-@keyframes movie-suction{0%,20%{transform:scale(1)}35%{transform:translateX(-35px) scale(1.3,.8)}52%{transform:translateX(35px) scale(.8,1.2)}70%{transform:translateY(-25px) rotate(35deg) scale(.7)}100%{transform:translateY(10px) rotate(-5deg) scale(.9)}}
-@keyframes movie-vanity{0%{transform:scale(.8)}25%{transform:rotate(-7deg)}45%{transform:rotate(7deg)}65%{transform:scale(1.12)}80%,100%{transform:translateX(-10px) rotate(8deg) scale(1.05)}}
-@keyframes movie-fan{0%,10%{opacity:0;transform:scale(.1) rotate(-30deg)}30%,60%{opacity:1;transform:scale(1) rotate(5deg)}74%,100%{opacity:0;transform:scale(.1) rotate(80deg)}}
-@keyframes movie-puff{0%,20%{opacity:0;transform:scale(.1)}35%{opacity:1;transform:scale(1.5) rotate(20deg)}60%{transform:scale(.6) rotate(70deg)}100%{opacity:0;transform:scale(2) rotate(100deg)}}
+#phase-beat .beat-arena{isolation:isolate;overflow:hidden}
+#finisher-stage.burst-dimension{display:block;padding:0;gap:0}
+.burst-dimension{position:absolute;inset:-3px;z-index:0;pointer-events:none;overflow:hidden;border:2px solid #78eee1;border-radius:8px;background:repeating-conic-gradient(from 12deg at 50% 55%,#17696255 0deg 8deg,transparent 8deg 25deg),radial-gradient(ellipse at 50% 55%,#267f7966 12%,#152e3fe6 67%,#17292f);box-shadow:inset 0 0 30px #57d9d36b,0 0 16px #59e3d433}
+.burst-storm{width:100%;height:100%;overflow:visible}.burst-speedlines{transform-origin:50% 55%;animation:burst-rush .8s ease-in-out infinite alternate;opacity:.5}
+.burst-bolt{animation:burst-lightning 2.1s linear infinite;filter:drop-shadow(0 0 5px #b6ffff)}.burst-bolt-two{animation-delay:1.05s}
+#play-panel[data-ultimate=true] .bridge-scene{filter:hue-rotate(95deg) saturate(1.5) brightness(.65)}
+#play-panel[data-ultimate=true]{box-shadow:inset 0 0 38px #42cbbf55,0 0 24px #4bd7d44d;border-color:#84e7d4}
+#play-panel[data-ultimate=true] .beat-stats b{color:#c3fff4;text-shadow:0 0 10px #53d6c6}
+#play-panel[data-ultimate=true] #striking-weapon{isolation:isolate;filter:drop-shadow(0 0 7px #ffb34e)}
+#striking-weapon>.burst-fire{position:absolute;inset:-35% -35% -15%;width:170%;height:150%;z-index:-1;pointer-events:none;overflow:visible;transform:rotate(12deg)}
+.burst-flame-outer,.burst-flame-inner{transform-origin:50% 90%;animation:burst-flame .34s ease-in-out infinite alternate}.burst-flame-inner{animation-duration:.46s;animation-direction:alternate-reverse}
+.ritual-stage[inert] :is(.burst-dimension,.burst-dimension *,.burst-fire *){animation-play-state:paused!important}
+@keyframes burst-rush{from{transform:scale(.96);opacity:.3}to{transform:scale(1.04);opacity:.65}}
+@keyframes burst-lightning{0%,12%,100%{opacity:.15}4%,8%{opacity:1}}
+@keyframes burst-flame{from{transform:scale(.94,1.02) skewX(-4deg)}to{transform:scale(1.04,.94) skewX(4deg)}}
 @keyframes unified-ready{50%{box-shadow:0 0 19px #ffe59899}}
 /* Single action props have clear touch targets and one short cue. */
 #event-props .simple-event{top:50%;right:3px;left:auto;bottom:auto;translate:0 -50%;width:65px;height:79px;max-height:90%;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:2px;place-items:center;overflow:hidden;animation:none}
@@ -92,13 +72,6 @@
 #stall-skit[data-scene=meatball-coronation][data-act="2"] .royal-meatball-on-throne{display:block}
 #stall-skit[data-scene=meatball-coronation][data-act="2"] [data-skit-actor=beef-balls] .runaway-ball{visibility:hidden}
 .meatball-court .stall-piece:not([data-piece=dragon-throne]) .furnishing-art{animation:royal-bow 1.8s ease-in-out infinite}
-.unified-finisher[data-family=beauty][data-act=payoff] .ultimate-movie-paper{--cry-display:none;--neutral-display:inline}
-.unified-finisher[data-family=beauty][data-act=payoff] .ultimate-movie-paper::after{content:'✨ 💖';position:absolute;left:5%;top:7%;font-size:22px}
-.ultimate-blade-papers{position:absolute;inset:0;display:none;pointer-events:none}
-.unified-finisher[data-family=blade] .ultimate-blade-papers{display:block}.unified-finisher[data-family=blade] .ultimate-movie-paper{left:32%;width:36%}
-.ultimate-blade-papers span{position:absolute;top:6%;height:87%;width:36%;left:0;animation:movie-paper 2700ms linear both paused;animation-delay:var(--movie-at,0ms);--cry-display:inline;--neutral-display:none}.ultimate-blade-papers span+span{left:auto;right:0}.ultimate-blade-papers svg{width:100%;height:100%}
-.unified-finisher[data-family=sun] .ultimate-cast::before{content:'☁';position:absolute;right:0;top:0;font-size:60px;color:#858ca4}
-.unified-finisher[data-family=sun][data-act=action] .ultimate-movie-tool{opacity:.35;filter:brightness(.6)}.unified-finisher[data-family=sun][data-act=payoff] .ultimate-cast::before{content:'☀';color:#fff0ac;filter:drop-shadow(0 0 13px #fff4ab)}
 @media(prefers-reduced-motion:reduce){.runaway-ball,.ultimate-blade-papers span,.meatball-court .furnishing-art{animation:none!important}}
 
 /* A visible, remembered pre-ritual choice; native checkbox keeps the entire label tappable. */
@@ -114,3 +87,25 @@
 @media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:54px minmax(0,1fr) 46px;grid-template-areas:'telemetry hud' 'arena hud' 'controls feedback'}#phase-beat .gesture-controls{grid-area:controls;align-self:end}#phase-beat .beat-reaction{align-self:end}}
 /* Keep the finisher caption readable when the hint row reduces available height. */
 .ultimate-meter{grid-template-columns:minmax(0,1fr);gap:1px}.ultimate-meter label{grid-row:1;white-space:nowrap}.ultimate-meter small{grid-column:1;grid-row:2}.ultimate-meter progress{grid-column:1;grid-row:3;height:8px}
+
+#phase-beat .beat-telemetry{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:8px;block-size:60px;min-block-size:60px;max-block-size:60px;min-width:0;overflow:visible}
+#phase-beat .beat-stats{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:6px;min-width:0;width:100%;height:50px}
+#phase-beat .beat-stats>span{display:block;min-width:0;text-align:center;overflow:hidden}
+#phase-beat .beat-stats b{display:block;width:100%;font-size:20px;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0}
+#phase-beat .beat-stats small{display:block;font-size:10px;line-height:1.3;white-space:nowrap}
+#phase-beat .ultimate-hud{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:6px;width:100%;max-width:none;min-width:0;height:50px}
+#phase-beat .ultimate-meter{min-width:0;font-size:10px;overflow:hidden}.ultimate-meter label,.ultimate-meter small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#phase-beat #finisher-launch{width:82px;min-width:0;height:44px;border-radius:8px;font-size:11px;letter-spacing:0;font-variant-numeric:tabular-nums}
+@media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 104px}#phase-beat #finisher-launch{width:104px;font-size:12px}#phase-beat .beat-stats b{font-size:25px}#phase-beat .ultimate-meter{font-size:11px}}
+
+body :is(button,[role=button]){--button-depth:3px;--button-edge:#142e29;box-shadow:inset 0 1px 0 #ffffff66,inset 0 -2px 0 #00000020,0 var(--button-depth) 0 var(--button-edge),0 calc(var(--button-depth) + 2px) 5px #091c2440!important;transition:translate .1s ease,box-shadow .1s ease;letter-spacing:0}
+body :is(.bbl-button,.work-button,#finisher-launch[data-ready=true]){--button-depth:4px;--button-edge:#8b653e}
+body :is(.icon-button,.dialog-x,.purchase-close,.settings-open,.text-button){--button-depth:2px}
+body :is([aria-selected=true],[aria-pressed=true]){--button-depth:1px}
+body :is(#confirm-discard,#confirm-quit,[data-discard]){--button-edge:#784940}
+body :is(button,[role=button]):not(:disabled):not(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop):active{translate:0 2px;box-shadow:inset 0 2px 3px #00000025,0 1px 0 var(--button-edge)!important}
+body :is(button,[role=button]):focus-visible{outline:3px solid #ffe4a3;outline-offset:3px}
+body button:disabled{box-shadow:inset 0 1px 0 #ffffff33,0 1px 0 var(--button-edge)!important}
+body button:is(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop){box-shadow:none!important;filter:drop-shadow(0 3px 0 #0b201f99)}
+body button:is(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop):not(:disabled):active{box-shadow:none!important;filter:drop-shadow(0 1px 0 #0b201f99)}
+@media(prefers-reduced-motion:reduce){.burst-dimension *,.burst-fire *{animation:none!important}.burst-bolt{opacity:.65}body :is(button,[role=button]){transition:none}}

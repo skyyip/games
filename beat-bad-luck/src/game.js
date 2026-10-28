@@ -1,14 +1,14 @@
 import {SKINS,skinScoreMultiplier} from './skins.js';
-import {ULTIMATE_DURATION,ULTIMATE_LIMIT,NICE_AT,NICE_WINDOW,ULTIMATE_CHARGE,comedyEnding} from './comedy-content.js';
+import {ULTIMATE_DURATION,ULTIMATE_LIMIT,ULTIMATE_CHARGE,ULTIMATE_MULTIPLIER,comedyEnding} from './comedy-content.js';
 import {BEAT_INTERVAL,RHYTHM_PERFECT} from './rhythm.js';
 export {BEAT_INTERVAL} from './rhythm.js';
 import {RitualFlavour} from './ritual-flavour.js';
 import {WORRIES,WEAPONS,FORTUNES,weaponScoreMultiplier} from './catalog.js';
 export const PHASES=['incense','worry','beat','tiger','blessing','divination'];
-export const DURATIONS={incense:8000,worry:7000,beat:68000,tiger:0,blessing:0,divination:0};
+export const DURATIONS={incense:8000,worry:7000,beat:58000,tiger:0,blessing:0,divination:0};
 export const FINISHER_DURATION=ULTIMATE_DURATION,FINISHER_BUFFER=0;
 export const FINISHER_STEPS=['tap'];
-export const GESTURE_POINTS=Object.freeze({tap:10,heavy:20,rub:30,circle:40,pinch:50});
+export const GESTURE_POINTS=Object.freeze({tap:30,heavy:40,rub:60,circle:80,pinch:100});
 export const COMBO_GRACE=1500;
 const SPECIALS={rub:{min:3,power:6},circle:{min:5,power:8},pinch:{min:6,power:9}};
 export class RitualGame{
@@ -22,7 +22,7 @@ export class RitualGame{
   get finisherTime(){return this.finisher?.active?Math.max(0,this.clock-this.finisher.at):0;}
   get scoreMultiplier(){return weaponScoreMultiplier(this.weapon)*skinScoreMultiplier(this.skin);}
   get clock(){return this.pausedAt??this.now();}
-  get elapsed(){return this.phase==='beat'&&this.finisher?.active?this.finisher.beatAt:Math.max(0,this.clock-this.phaseStarted);}
+  get elapsed(){return Math.max(0,this.clock-this.phaseStarted);}
   get remaining(){return Math.max(0,(DURATIONS[this.phase]??0)-this.elapsed);}
   get papers(){return Math.floor(this.damage/50);}
   get wear(){const elapsed=this.phase==='beat'?this.elapsed:['setup','incense','worry'].includes(this.phase)?0:DURATIONS.beat;return Math.min(1,Math.max(0,elapsed/DURATIONS.beat)*.45+Math.min(1,this.score/1800)*.55);}
@@ -33,7 +33,7 @@ export class RitualGame{
   nameWorry(text,kind=this.kind){if(this.phase!=='worry'||this.pausedAt!==null)return false;this.worry=String(text).trim().slice(0,64)||this.worry;this.kind=WORRIES.some(w=>w.id===kind)?kind:this.kind;this.flavour.start(this.kind,{randomEvents:this.randomEvents});return true;}
   confirm(){if(this.phase!=='worry'||this.pausedAt!==null||this.prepared)return false;this.prepared=true;return true;}
   hit({heavy=false,strength=.5,pointer='keyboard',gesture=heavy?'heavy':'tap',direction=null}={}){
-    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.skill.busy(this.elapsed)||this.finisherBusy||!['tap','heavy','rub','circle','pinch'].includes(gesture))return null;
+    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||!['tap','heavy','rub','circle','pinch'].includes(gesture))return null;
     heavy=gesture!=='tap';direction=gesture==='circle'&&['cw','ccw'].includes(direction)?direction:null;
     const now=this.now();if(now-(this.strikes.get(pointer)??-Infinity)<55)return null;
     this.strikes.set(pointer,now);if(this.strikes.size>32)this.strikes=new Map([[pointer,now]]);
@@ -46,16 +46,16 @@ export class RitualGame{
     const power=special?special.min+Math.round(effort*(special.power-special.min)):(heavy?3+Math.round(effort*4):1);
     const before=this.papers;this.hits++;if(heavy)this.heavy++;if(special)this.specials[gesture]++;if(perfect)this.perfect++;
     const roll=this.random(),impactLevel=roll<.04?3:roll<.14?2:1,impactMultiplier=impactLevel===3?2:impactLevel===2?1.5:1;
-    const basePoints=(GESTURE_POINTS[gesture]+Math.floor(Math.min(this.combo,30)*.3))*impactMultiplier;const multiplier=this.scoreMultiplier,flavour=this.flavour.hit(this.elapsed,gesture,perfect,basePoints,multiplier,{direction}),points=flavour.points;this.score+=points;this.damage+=power*impactMultiplier*(flavour.protectedHit?.35:1);this.moves[gesture]++;if(direction)this.rotations[direction]++;this.perfectStreak=perfect&&!flavour.protectedHit?this.perfectStreak+1:0;this.maxPerfectStreak=Math.max(this.maxPerfectStreak,this.perfectStreak);
+    const basePoints=(GESTURE_POINTS[gesture]+Math.floor(Math.min(this.combo,30)*.3))*impactMultiplier;const multiplier=this.scoreMultiplier,flavour=this.flavour.hit(this.elapsed,gesture,perfect,basePoints,multiplier,{direction}),burstMultiplier=this.finisherBusy?ULTIMATE_MULTIPLIER:1,points=flavour.points*burstMultiplier;if(this.finisherBusy){this.finisher.hits++;this.finisherBonus+=points-flavour.points;}this.score+=points;this.damage+=power*impactMultiplier*(flavour.protectedHit?.35:1);this.moves[gesture]++;if(direction)this.rotations[direction]++;this.perfectStreak=perfect&&!flavour.protectedHit?this.perfectStreak+1:0;this.maxPerfectStreak=Math.max(this.maxPerfectStreak,this.perfectStreak);
     const qteComplete=false;
-    return {perfect,power,points,impactLevel,impactMultiplier,...flavour,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
+    return {perfect,power,impactLevel,impactMultiplier,...flavour,points,burstMultiplier,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
   }
   activateSkill(){return this.startFinisher();}
   skillAction(type){return {ok:this.finisherAction(type==='tap'?'tap':type)};}
   beginInteraction(){this.advance();return this.phase==='beat'&&this.pausedAt===null&&this.flavour.beginHold(this.elapsed);}
   breakCombo(){this.combo=0;this.perfectStreak=0;if(!this.finisherUnlocked||this.finisherUses>=ULTIMATE_LIMIT)this.finisherCharge=0;}
   interact(action,id){
-    this.advance();if(this.phase!=='beat'||this.pausedAt!==null||this.finisherBusy)return 0;
+    this.advance();if(this.phase!=='beat'||this.pausedAt!==null)return 0;
     if(action==='copy'){
       this.flavour.view(this.elapsed);if(!this.flavour.copies.some(c=>c.id===id))return 0;
       const hit=this.hit({gesture:'tap',pointer:'copy-'+id});if(!hit)return 0;
@@ -73,13 +73,13 @@ export class RitualGame{
   throwBlocks(){this.advance();if(this.phase!=='divination'||this.pausedAt!==null||this.blocks)return false;const roll=this.random(),faces=roll<.25?[0,1]:roll<.5?[1,0]:roll<.75?[0,0]:[1,1];this.rolls++;this.blocks={faces,rolling:true,at:this.elapsed,sacred:false};return true;}
   finisherAvailability(){if(this.phase!=='beat')return 'phase';if(this.pausedAt!==null)return 'paused';if(this.finisherBusy)return 'active';if(this.finisherUses>=ULTIMATE_LIMIT)return 'spent';return this.finisherUnlocked?'ready':'charge';}
   canFinisher(){return this.finisherAvailability()==='ready';}
-  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisher={at:this.clock,beatAt:this.elapsed,active:true,nice:false,won:false};this.finisherUses++;this.finisherCharge=0;return true;}
-  finisherAction(type='tap'){if(this.phase!=='beat'||this.pausedAt!==null||!this.finisher?.active||type!=='tap'||this.finisher.nice)return false;if(Math.abs(this.finisherTime-NICE_AT)>NICE_WINDOW)return false;this.finisher.nice=true;return true;}
-  finishFinisher(){const f=this.finisher;if(!f?.active||this.phase!=='beat'||this.pausedAt!==null||this.finisherTime<ULTIMATE_DURATION)return false;this.phaseStarted+=ULTIMATE_DURATION;if(Number.isFinite(this.lastHit))this.lastHit+=ULTIMATE_DURATION;for(const [id,t]of this.strikes)this.strikes.set(id,t+ULTIMATE_DURATION);f.active=false;f.won=true;f.completedAt=this.elapsed;this.finisherWins++;if(f.nice)this.niceWins++;const points=Math.round(250*this.scoreMultiplier)+ (f.nice?Math.round(25*this.scoreMultiplier):0);this.score+=points;this.finisherBonus+=points;return true;}
+  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisher={at:this.clock,active:true,hits:0,won:false};this.finisherUses++;this.finisherCharge=0;return true;}
+  finisherAction(){return false;}
+  finishFinisher(){const f=this.finisher;if(!f?.active||this.phase!=='beat'||this.pausedAt!==null||(this.finisherTime<ULTIMATE_DURATION&&this.remaining>0))return false;f.active=false;f.won=true;f.completedAt=this.elapsed;this.finisherWins++;return true;}
   advance(){
     if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;
     if(this.phase==='beat'){
-      if(this.finisherBusy){if(this.finisherTime>=ULTIMATE_DURATION)this.finishFinisher();else return false;}
+      if(this.finisherBusy&&(this.finisherTime>=ULTIMATE_DURATION||this.remaining===0))this.finishFinisher();
       if(this.combo&&this.clock-this.lastHit>COMBO_GRACE)this.breakCombo();
     }
     if(this.phase==='divination'&&this.blocks?.rolling&&this.elapsed-this.blocks.at>=1200){this.blocks.rolling=false;this.blocks.sacred=this.blocks.faces[0]!==this.blocks.faces[1];if(this.blocks.sacred)this.blocks.completedAt=this.blocks.at+1200;else this.blocks.retryAt=this.blocks.at+1400;}
@@ -89,6 +89,7 @@ export class RitualGame{
   }
   next(){
     const index=PHASES.indexOf(this.phase);if(index<0)return;
+    if(this.phase==='beat'&&this.finisher)this.finisher.active=false;
     if(index===PHASES.length-1){this.phase='results';this.result={auspicious:true,skin:this.skin,rolls:this.rolls,finisherWins:this.finisherWins,niceWins:this.niceWins,endingId:comedyEnding(this.weapon,this.kind).id,score:this.score,kitSkill:this.skill.snapshot(),kind:this.kind,commission:this.commission,moves:{...this.moves},rotations:{...this.rotations},maxPerfectStreak:this.maxPerfectStreak,wear:this.wear,...this.flavour.snapshot(),hits:this.hits,heavy:this.heavy,perfect:this.perfect,bestCombo:this.bestCombo,papers:this.papers,qte:this.qteSuccess,gestures:{...this.specials},fed:this.fed,blessed:this.blessed,weapon:this.weapon,seconds:(this.now()-this.started)/1000,fortune:FORTUNES[Math.min(FORTUNES.length-1,Math.floor(this.random()*FORTUNES.length))]};}
     else{this.phase=PHASES[index+1];this.phaseStarted=this.now();}
     this.transitions.push(this.phase);

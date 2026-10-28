@@ -24,15 +24,15 @@
 .fortune-slip>span:has(.comic-lucky-glyph){display:block;width:100px;height:94px;margin:auto;line-height:1}
 #personal-postcard svg{height:auto;max-height:none}
 .master-portrait:has(.player-level-badge:not([hidden])){gap:3px}
-.player-level-badge{position:relative;width:68px;height:70px;flex:none;isolation:isolate;filter:drop-shadow(0 2px 5px #f0c96b55);animation:level-badge-glow 4s ease-in-out infinite}
-.player-level-badge svg{display:block;width:100%;height:100%}.player-level-badge::after{content:'';position:absolute;inset:15px 16px 24px;border-radius:50%;background:linear-gradient(120deg,transparent 32%,#fff9d767 49%,transparent 66%);background-size:300% 100%;animation:level-badge-shine 5s ease-in-out infinite;pointer-events:none}.badge-spark{transform-origin:83px 18px;animation:badge-spark-twinkle 3.6s ease-in-out infinite}
+.player-level-badge{position:relative;width:44.2px;height:45.5px;flex:none;isolation:isolate;filter:drop-shadow(0 2px 5px #f0c96b55);animation:level-badge-glow 4s ease-in-out infinite}
+.player-level-badge svg{display:block;width:100%;height:100%}.player-level-badge::after{content:'';position:absolute;inset:21.4% 23.5% 34.3%;border-radius:50%;background:linear-gradient(120deg,transparent 32%,#fff9d767 49%,transparent 66%);background-size:300% 100%;animation:level-badge-shine 5s ease-in-out infinite;pointer-events:none}.badge-spark{transform-origin:83px 18px;animation:badge-spark-twinkle 3.6s ease-in-out infinite}
 .player-level{margin-top:15px;padding:12px;border:1px solid #d9bc73;border-radius:12px;background:#183c33;color:#fff1c7}.player-level>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:5px}.player-level b{font-size:15px}.player-level small{font-size:11px;line-height:1.55}.player-level progress{display:block;width:100%;height:8px;margin:9px 0;accent-color:#f5d07a}
 @keyframes level-badge-glow{0%,100%{filter:drop-shadow(0 2px 4px #efca7655)}50%{filter:drop-shadow(0 2px 8px #ffe5a8b0)}}@keyframes level-badge-shine{0%,40%{background-position:100% 0}80%,100%{background-position:0 0}}@keyframes badge-spark-twinkle{0%,100%{scale:.8;opacity:.6}50%{scale:1.1;opacity:1}}
 #records .record-medal{display:grid;place-items:center;width:40px;height:48px;flex:none}#records .record-medal svg{width:36px;height:43px;overflow:visible}#records .record-row{grid-template-columns:40px minmax(0,1fr) auto;gap:9px}#records .record-row div{min-width:0}#records .record-row b{overflow-wrap:anywhere}
 .critical-comic{position:absolute;left:50%;top:8px;translate:-50% 0;z-index:8;pointer-events:none;display:flex;align-items:center;gap:6px;max-width:96%;padding:6px 10px;border:2px solid #ffeb9d;border-radius:14px;background:#683d55;color:#fff4c5;box-shadow:0 3px 0 #2f3542;animation:critical-comic-pop 1.25s cubic-bezier(.18,.7,.27,1) both;white-space:nowrap}.critical-comic b{font-size:30px;line-height:1;font-family:Fredoka,system-ui,sans-serif}.critical-comic span{font-size:11px}.critical-comic i{font-style:normal;color:#ffcf63}.critical-3{background:#b34545;border-color:#fff2b5;border-radius:8px 22px 9px 20px;box-shadow:0 3px 0 #773939,0 0 14px #f1c88166}.critical-3 b{color:#ffe573}.critical-2:after{content:'⌣';position:absolute;right:5px;bottom:-20px;font-size:29px;color:#fff4e4;animation:flying-denture 1s ease-out both}.critical-3:after{content:'👻';position:absolute;right:0;bottom:-32px;font-size:32px;animation:escaping-soul 1s ease-out both}
 #paper-doll[data-critical='2'] .paper-cry-face{filter:drop-shadow(0 2px 0 #fff0c6)}#paper-doll[data-critical='3']{filter:drop-shadow(0 0 7px #ffe394b0)}#paper-doll[data-critical='3'] .paper-head{transform-origin:center;}
 @keyframes critical-comic-pop{0%{opacity:0;transform:scale(.65) rotate(-9deg)}16%{opacity:1;transform:scale(1.08) rotate(3deg)}30%,77%{opacity:1;transform:scale(1) rotate(-2deg)}100%{opacity:0;transform:translateY(-18px) scale(.95)}}@keyframes flying-denture{from{transform:translateY(10px) rotate(0)}to{transform:translate(50px,40px) rotate(240deg);opacity:0}}@keyframes escaping-soul{from{transform:translateY(20px) rotate(-12deg)}to{transform:translate(14px,-90px) rotate(15deg);opacity:0}}
-@media(max-width:360px){.bbl-intro h1{padding:11px 9px;font-size:23px}.player-level-badge{width:58px;height:60px}.critical-comic{padding:4px 6px;gap:4px}.critical-comic b{font-size:25px}.critical-comic span{font-size:10px}}
+@media(max-width:360px){.bbl-intro h1{padding:11px 9px;font-size:23px}.player-level-badge{width:37.7px;height:39px}.critical-comic{padding:4px 6px;gap:4px}.critical-comic b{font-size:25px}.critical-comic span{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.skin-selection-glint rect,.bbl-intro h1,.bbl-intro h1::after,.player-level-badge,.player-level-badge::after,.badge-spark{animation:none!important}.critical-comic{animation:none}.critical-comic::after{animation:none!important}}
 /* The critical caption uses the existing reaction row, leaving the paper unobstructed. */
 #hit-feedback:has(.critical-comic){padding:3px 6px;display:flex;align-items:center;justify-content:center}
@@ -44,3 +44,26 @@
 @media(prefers-reduced-motion:reduce){#hit-feedback .critical-comic,.critical-flying-prop{animation:none}}
 .play-panel[data-phase=setup] .neon-sign{opacity:.12}
 @media(max-width:360px){.fong-intro>.master-portrait{flex-basis:88px}.fong-intro .fong-logo{width:88px;height:99px}.fong-intro>div:last-child{min-width:0;flex:1}.fong-intro h2{font-size:22px;line-height:1.35}.fong-intro>div:last-child>p:last-child{line-height:1.6}}
+
+#phase-beat .beat-telemetry{grid-template-columns:128px minmax(0,1fr);column-gap:14px}
+#phase-beat .beat-stats{grid-template-columns:84px 38px;gap:6px;justify-content:start}
+#phase-beat .beat-stats>span:first-child{width:84px;min-width:84px;max-width:84px}
+@media(max-width:599px){#phase-beat #live-combo[data-wide=true]{font-size:16px}}
+#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 76px;max-width:230px;justify-self:start}
+#phase-beat #finisher-launch{width:76px}
+#phase-beat .ultimate-meter progress{grid-row:auto}
+.is-playing #stall-tiger{display:none!important}
+#phase-beat .simple-event small{font-size:11.5px}
+.stall-showcase{max-height:min(68svh,520px);overflow:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#d2b87b #24443d;scroll-padding:12px}
+.stall-showcase:focus-visible{outline:2px solid #efd188;outline-offset:3px}
+#weapon-list .kit-shop-actions{display:grid;align-content:center;gap:7px;min-width:86px;max-width:112px}
+#weapon-list .kit-shop-actions button{width:100%;min-height:44px;padding:6px;border:1px solid #dec08a;border-radius:7px;background:#d9c18a;color:#243f35;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+#weapon-list .kit-shop-actions button[data-restock]{background:#416455;color:#fff0c1;border-color:#96b99b}
+#weapon-list .kit-shop-actions button:disabled{opacity:.65}
+.owned-kit-tag{display:table;margin:5px 0;padding:2px 6px;border:1px solid #8fcdb0;border-radius:5px;background:#234b3d;color:#dcffe5;font-size:11px;line-height:1.5}
+@media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:194px minmax(0,1fr);column-gap:18px}#phase-beat .beat-stats{grid-template-columns:110px 66px;gap:12px}#phase-beat .beat-stats>span:first-child{width:110px;min-width:110px;max-width:110px}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 96px;max-width:260px}#phase-beat #finisher-launch{width:96px}}
+@media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:60px minmax(0,1fr) 46px;grid-template-areas:'telemetry telemetry' 'arena hud' 'controls feedback'}#phase-beat:has(#personality-hud[hidden]){grid-template-areas:'telemetry telemetry' 'arena arena' 'controls feedback'}}
+.ritual-zombie{position:absolute;left:5%;bottom:-3px;z-index:0;display:block;width:70px;height:90px;pointer-events:none;opacity:0;animation:zombie-visit 3600ms linear both paused;animation-delay:var(--zombie-at,0ms);filter:drop-shadow(0 3px 4px #102e3566)}
+.ritual-zombie svg{display:block;width:100%;height:100%}
+@keyframes zombie-visit{0%,100%{opacity:0;transform:translateY(105%) scale(.9,1.05)}12%,88%{opacity:.9}14%,42%,70%{transform:translateY(-12px) scale(.96,1.04) rotate(-4deg)}28%,56%,84%{transform:translateY(4px) scale(1.05,.94) rotate(4deg)}}
+@media(prefers-reduced-motion:reduce){.ritual-zombie{animation:none;opacity:.8;transform:none}}

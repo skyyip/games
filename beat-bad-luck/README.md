@@ -6,7 +6,7 @@ A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. 
 
 1. **Offer incense / 奉神:** light three sticks and blow, using the button or an optional local microphone. No recording is saved or uploaded. The button remains available if microphone access fails.
 2. **Name the worry:** choose a grouped preset or enter a private, literal worry of at most 64 characters. Custom words are never inserted as HTML or saved in records.
-3. **Whack freely for 68 active seconds:** any supported gesture scores immediately, without a system cue or required beat. Base points are **Pinch 50 > Circle 40 > Rub 30 > Swipe 20 > Tap 10**, plus existing combo, kit, paper and worry bonuses. Strength changes impact/damage rather than base gesture points. Optional on-beat recognition still contributes to rhythm titles; it never blocks scoring. The lower gesture row remains read-only; a separate static guide shows the base score ranking. Keyboard: Space tap, Down swipe, C circle, R rub, P pinch.
+3. **Whack freely for 58 active seconds:** any supported gesture scores immediately, without a system cue or required beat. Base points are **Pinch 100 > Circle 80 > Rub 60 > Swipe 40 > Tap 30**, plus existing combo, kit, paper and worry bonuses. Strength changes impact/damage rather than base gesture points. Optional on-beat recognition still contributes to rhythm titles; it never blocks scoring. The lower gesture row remains read-only; the former static guide is removed to enlarge the arena. The paused guide retains the score ranking. Keyboard: Space tap, Down swipe, C circle, R rub, P pinch.
 4. **Feed the tiger:** one tap automatically dips the pork if needed and feeds the yellow paper tiger. Manual dipping and smearing are optional; at least half a coating gives `round(20 × kit × paper multiplier)` once. Close drag releases feed the tiger too.
 5. **Resolve and bless:** one confirmation burns the worry and offering paper, scatters rice or beans and burns the green-horse paper in one short animated sequence.
 6. **Sacred blocks / 打杯:** cast once. A non-sacred result triggers a funny automatic retry with one flat and one curved block. No repeated button pressing is needed.
@@ -18,14 +18,15 @@ Pausing or hiding the page freezes the model clock and inputs. Quitting never gr
 The old kit-signature recipes and separate three-step finisher are retired from the live game. All sixty kits, including free hands, share one control:
 
 - Land **100 consecutive hits with any gestures** to unlock the finisher. Keep the gap between scored hits at 1.5 seconds or less. A longer active-time gap resets unfinished progress, while earned points and an earned unlock remain. Pause and the cinematic preserve the combo.
-- Tap the full meter to launch an automatic **2.7-second** illustrated performance, at most **one launch per ritual**. No prerequisite signature wins, compulsory first-use popup or additional oil charge.
-- An optional nice tap at 1,350 ms ±220 ms adds 10% finisher points. Missing it never fails the show.
-- Base bonus is `round(250 × kit × paper multiplier)`; the optional bonus is `round(25 × kit × paper multiplier)`, once. Ordinary strikes, copies and event rewards cannot score during the show.
-- The cinematic freezes the ordinary round, event and combo clocks and preserves combo. User pause also freezes cinematic time. A long frame excludes only the actual cinematic duration.
+- Tap the full meter for a **10-second burst**, at most **one launch per ritual**. No prerequisite signature wins, compulsory first-use popup or additional oil charge.
+- Rapid-tap with one finger or alternate two fingers. Each pointer press on the paper scores immediately and independently, with the existing 55 ms per-pointer duplicate guard. No pinch recognition consumes alternating presses during a burst.
+- Each real hit scores **×3**, after its ordinary critical, combo, kit, paper and worry modifiers. The extra portion is recorded as the finisher bonus. There is no automatic payout or optional nice-tap award: more taps earn more points.
+- The ten seconds **count toward the existing 58-second round**; event and combo clocks keep running. Expiry or round end immediately restores normal scoring. User pause and a hidden page freeze burst time and input; quitting clears the burst without ritual rewards.
+- A noninteractive otherworld backdrop, edge lightning, synthesized thunder and flames around the equipped tool accompany the burst. Reduced motion keeps the scene and flames still. The fixed telemetry row uses compact large totals with accessible exact numbers, so scoring cannot displace the paper.
 
-Ten illustrated families retain each equipped tool’s artwork: palms/slippers, triple blades, spinning wheels, heavy bonks, application-denied stamps, suction slingshots, solar light, makeover mirrors, the 3000-tool fan and Lassie. The 3000 tools collapse into a plastic comb and a voluntary surrender; the beauty paper refuses to leave its mirror. The guide is available from home and pause, without spending charge.
+All sixty tools retain their own artwork; the ten comedy families still determine collection endings. The paused guide is available without spending charge. The former automatic movie and nice-tap ring are retired.
 
-Long-press/release, outward two-finger spreading, X and V are not scoring gestures. Two separated fingers can still pinch inward. Pointer cancellation, lost capture, pause and resize discard unfinished gestures. A 55 ms per-pointer guard prevents duplicate hits; independently completed gestures can score without waiting for a cue. Stationary presses lasting 0.7 seconds or longer do not score on release; short taps still work.
+Outside a burst, long-press/release, outward two-finger spreading, X and V are not scoring gestures. Two separated fingers can still pinch inward. Pointer cancellation, lost capture, pause and resize discard unfinished gestures. A 55 ms per-pointer guard prevents duplicate hits; independently completed gestures can score without waiting for a cue. Stationary presses lasting 0.7 seconds or longer do not score on release; short taps still work.
 
 ## Surprises and recurring comedy
 
@@ -57,7 +58,7 @@ Fortunes retain the existing 84 bilingual quotes and Cantonese Master comments. 
 
 ## Inventory and stall
 
-Paid kits last **three scored rituals**; paid papers last **ten**. The first scoring action commits one use of each, once per ritual. Leaving before scoring preserves inventory; leaving after scoring does not refund it. The current ritual retains its configured multiplier even on the final use. Free hands remain an unlimited ×1 kit; free plain paper is unlimited ×1. Kit and paper multipliers multiply together.
+Each purchased kit adds **three scored ritual uses**; paid papers last **ten**. The same kit can be bought repeatedly: purchases add three uses without resetting partially used stock, and an Owned label shows how many kits remain. Equip is a separate, free action; Buy another always opens the normal purchase confirmation. Stock survives reload and backup transfer, is bounded at 999,999 uses, and only returns to free hands after all uses are exhausted. The first scoring action commits one use of each kit and paper, once per ritual. Leaving before scoring preserves inventory; leaving after scoring does not refund it. The current ritual retains its configured multiplier even on the final use. Free hands remain an unlimited ×1 kit; free plain paper is unlimited ×1. Kit and paper multipliers multiply together.
 
 Purchases show a comic confirmation before any deduction, then an animated reveal. Closing or cancelling before confirmation spends nothing. Merit is an unlock threshold and is not deducted. Coupons apply once on successful purchase. Shops have bilingual search and All / Owned / Can buy filters; story-locked props cannot be purchased or shown as affordable.
 
@@ -71,7 +72,7 @@ The sanctuary wallet has prominent oil/merit totals with 650 ms counting animati
 
 ## Merit levels, seven-day fortunes and bounded reading
 
-Merit is cumulative and is never deducted for kit unlocks. Existing saves immediately receive levels **1–168** using `12 × (level − 1)²` merit per threshold: level 10 needs 972, level 100 needs 117,612, and level 168 needs 334,668. Every ten levels unlocks one of sixteen distinct animated badges (10–160), with the latest shown above Master Yip’s home portrait. The wallet shows the current level and progress to the next. Reduced motion keeps badges and the festive red spring-couplet headline still.
+Merit is cumulative and is never deducted for kit unlocks. Levels **1–168** use the steeper threshold `12 * n**2 + Math.floor(n**3 / 8)`, where `n = level - 1`: level 10 needs 1,063, level 100 needs 238,899, and level 168 needs 916,850. Every successive level-up costs more, and the final level remains reachable within the existing one-million-merit cap. Existing merit, inventory and collections are unchanged; displayed levels are recalculated against the new thresholds. Every ten levels unlocks one of sixteen animated badges (10–160); their dimensions are now 65% of the former size. The wallet shows the current level and progress to the next. Reduced motion keeps badges and the festive red spring-couplet headline still.
 
 Each personal fortune card expires **seven elapsed days** after creation. Load, idle collection, import/export, ritual completion and a foreground minute timer prune expired cards; the 24-card cap remains. Top-three scores, merit and earned story/title collections are retained. The card uses larger small print, wrapped Chinese/English text and a cartoon lucky stamp; exported PNG is 600 × 900.
 
@@ -85,7 +86,9 @@ All 22 neighbourhood chapters have original bilingual slapstick scenes inspired 
 
 Traditional Chinese is the default; English follows the playground preference. During whacking, Master randomly cycles through the six requested Cantonese villain-hitting lines, without repeats within a six-line bag or at bag boundaries. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v71** includes the new content, art and presentation. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
+Offline cache **v75** includes the current gameplay, rounded cartoon trophy and function-appropriate raised buttons. Small ritual-button labels are enlarged by 15%, without compounding on rerender. Illustrated gesture targets retain their coordinates while changing shadow depth. The fixed score cell cannot shift when its value changes; the narrower finisher HUD has extra left spacing and no idle remaining-use label. Cute decorative zombies occasionally hop up from the arena's bottom edge behind the paper, then hop back out. They never intercept touches; pause freezes them, other phases hide them, and reduced motion keeps them still. The backdrop tiger is hidden during rituals; feeding the white tiger is unchanged. The stall showcase has a viewport-bounded height and keyboard-reachable inner scrolling.
+
+Favicon (64), Apple home-screen (180), and manifest icons (192/512) use the website logo with its horn and safe padding. Regenerate them with `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/build-icons.mjs`. Existing windows finish their ritual before an update activates. Production hashing and the shared update prompt remain handled by the repository build. No paid SDKs, real-money purchases, professional recordings or multiplayer server are integrated.
 
 ## Verification
 
@@ -98,7 +101,7 @@ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/gesture-hints-check
 GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node scripts/stall-refresh-check.mjs
 ```
 
-The current browser acceptance test (`freestyle-ritual-check.mjs`) drives the real pointer recognizer through 100 freely chosen gestures at arbitrary times, verifies the 99/100 unlock boundary, one finisher with paused timing, all six ritual steps, inventory and reload, plus the existing layout checks. Desktop uses its documented P key for pinch. Older signature/cue-based checks document retired mechanics.
+The current browser acceptance test (`freestyle-ritual-check.mjs`) drives the real pointer recognizer through 100 freely chosen gestures, verifies the 99/100 unlock boundary, native alternating two-finger burst input, exact triple scoring, running round time, frozen pause, full-arena lightning, contained flames, stable high-score layout, all six ritual steps, inventory and reload. Desktop uses its documented P key for pinch. Older cinematic, signature and cue-based checks document retired mechanics.
 
 Selection polish: equipped paid/free paper cards have a bright gold border and a continuously travelling SVG perimeter glint, with a static highlight for reduced-motion preferences. The overlay never intercepts clicks or covers text; selected copy and bonuses keep at least 4.5:1 contrast. The game’s update prompt heading is 21.6px (80% of its former 27px).
 

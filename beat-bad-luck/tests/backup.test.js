@@ -11,5 +11,6 @@ test('invalid, unrelated, oversized or unsupported files are rejected instead of
 test('legacy kits receive three uses; empty or invalid counters cannot revive spent inventory',()=>{
  const legacy=readProgress(JSON.stringify({version:1,owned:['paper'],equipped:'paper'}),0);assert.equal(legacy.weaponUses.paper,3);
  const spent=readProgress(JSON.stringify({...legacy,weaponUses:{paper:0,unknown:100}}),0);assert.ok(!spent.owned.includes('paper'));assert.equal(spent.equipped,'bare-hand');assert.deepEqual(spent.weaponUses,{});
- assert.equal(readProgress(JSON.stringify({...legacy,weaponUses:{paper:100}}),0).weaponUses.paper,3);
+ assert.equal(readProgress(JSON.stringify({...legacy,weaponUses:{paper:100}}),0).weaponUses.paper,100);
+ assert.equal(readProgress(JSON.stringify({...legacy,weaponUses:{paper:1e9}}),0).weaponUses.paper,999999);
 });

@@ -1,5 +1,5 @@
 // Original flyover slapstick: short callbacks, never private worry text.
-export const ULTIMATE_DURATION=2700,ULTIMATE_LIMIT=1,ULTIMATE_CHARGE=100;
+export const ULTIMATE_DURATION=10000,ULTIMATE_LIMIT=1,ULTIMATE_CHARGE=100,ULTIMATE_MULTIPLIER=3;
 export const NICE_AT=1350,NICE_WINDOW=220;
 const families=['palm','blade','spin','hammer','stamp','suction','sun','beauty','gadget','hound'];
 const groups=['requirement','stocks','people','everyday'];

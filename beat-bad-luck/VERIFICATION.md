@@ -1,6 +1,10 @@
-# Current simplified comedy release
+# Current Burst Release
 
-Use `npm test` and `scripts/simple-comedy-check.mjs` for the current unified finisher, single-action events, auto rituals and story/gift flows. See README.md for current rules. The older signature recipes and multi-step event checks below describe earlier releases and are superseded.
+Use `npm test` and `scripts/freestyle-ritual-check.mjs` for the current game. The whacking round is 58 active seconds; base scores are Pinch 100, Circle 80, Rub 60, Swipe 40 and Tap 30. The finisher grants ten active seconds of triple-score real hits, once per ritual after 100 combo. Burst time counts toward the round. One-finger rapid taps and overlapping two-finger alternation score on pointer down; pause freezes time, and expiry, round end or quitting clears the state. There is no cinematic payout or nice-tap ring.
+
+Current validation: **137 unit tests** and **six browser scenarios** pass. They cover all sixty kits, paper multipliers, critical hits, independent pointer guards, exact expiry and late-round cleanup, harder level thresholds and growing per-level costs, retained merit, repeat kit purchases/cancellation, free equipping, retained stock, full-ritual rewards and reload. Browser profiles include 320×568 Chinese, 390×844 English with events, 812×375 Chinese with reduced motion, and 1440×900 English. They check the removed freestyle block, invariant score-cell width through every hit, no idle finisher-use label, 15% larger small pause labels, 35% smaller badges, bounded stall scrolling, decorative bottom-hopping zombies with frozen pause/no touch interception, full-arena lightning and contained flames. The remaining scenarios check quitting during a burst and a fully offline reload. Favicon and all three home-screen image sizes are decoded and checked for actual logo pixels.
+
+Cache v75 carries the update and all four generated website-logo icons. Historical cinematic/signature checks and results below describe earlier releases and are superseded, not rerun by this update. Physical iOS/Android touch, vibration, speaker playback and OS-managed installed-icon refresh still require device verification.
 
 # Verification
 

@@ -31,6 +31,7 @@ export function polishCollections(){
  scale('.records-card>.bbl-kicker,#records b,#records small,#records .empty-record,#storage-note',1.15);
  scale('.fortune-slip small,#reward-line,#journey-result,#card-status,#skin-usage-result,#result-kit-note,#personal-postcard small',1.25);
  scale('#friend-arrival',1.15);scale('.result-stats small,#result>.bbl-kicker,.postcard-actions button',1.25);
+ for(const node of document.querySelectorAll('#ritual-stage button,#ritual-stage button b,#ritual-stage button small,#ritual-stage button span,#pause-overlay button,#finisher-guide-dialog button')){if(node.closest('svg,.icon-button,.hit-zone,.simple-event')||![...node.childNodes].some(child=>child.nodeType===3&&child.textContent.trim()))continue;const size=parseFloat(getComputedStyle(node).fontSize);if(size>0&&size<16)factors.set(node,1.15);}
  const sizes=[...factors].map(([node,factor])=>[node,parseFloat(getComputedStyle(node).fontSize),factor]);
  for(const [node,size,factor]of sizes){if(!originals.has(node))originals.set(node,{value:node.style.getPropertyValue('font-size'),priority:node.style.getPropertyPriority('font-size')});if(size>0)node.style.setProperty('font-size',`${Math.round(size*factor*1000)/1000}px`,'important');}
 }
