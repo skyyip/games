@@ -1,5 +1,5 @@
 import {formatNumber} from './number-format.js';
-import {WORRIES,WEAPONS,weaponScoreMultiplier} from './catalog.js';
+import {WORRIES,WORRY_GROUPS,WEAPONS,weaponScoreMultiplier} from './catalog.js';
 import {SKINS,skinArt,skinScoreMultiplier} from './skins.js';
 import {weaponArt} from './art.js';
 import {weaponCondition,purchasePrice,skinUses} from './progress.js';
@@ -19,18 +19,17 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  <details class="preparation-step" id="prepare-events"><summary class="preparation-heading"><span class="preparation-number">03</span><span><b id="prepare-events-title"></b><small id="events-selection-summary"></small></span></summary><div class="preparation-body"><fieldset class="preparation-options"><legend class="sr-only" id="events-choice-label"></legend><label><input type="radio" name="preparation-events" value="off"><span><b id="events-off-label"></b><small id="events-off-help"></small></span></label><label><input type="radio" name="preparation-events" value="on"><span><b id="events-on-label"></b><small id="events-on-help"></small></span></label></fieldset></div></details>
  <details class="preparation-step" id="prepare-skin"><summary class="preparation-heading"><span class="preparation-number">04</span><span><b id="prepare-skin-title"></b><small id="skin-selection-summary"></small></span></summary><div class="preparation-body"><div class="preparation-preview" id="preparation-skin-preview" aria-hidden="true"></div><div id="preparation-skins"></div></div></details>
  <details class="preparation-step" id="prepare-kit"><summary class="preparation-heading"><span class="preparation-number">05</span><span><b id="prepare-kit-title"></b><small id="kit-selection-summary"></small></span></summary><div class="preparation-body"><div class="preparation-preview" id="preparation-kit-preview" aria-hidden="true"></div><p id="preparation-kit-help" class="preparation-note"></p><div id="preparation-owned-kits" class="preparation-kit-grid"></div><div class="preparation-catalog" id="preparation-kit-catalog"><button type="button" id="all-kits-label" class="catalog-open" aria-haspopup="dialog" aria-controls="kit-catalog-dialog"></button><dialog id="kit-catalog-dialog" class="catalog-dialog" aria-labelledby="kit-catalog-title" translate="no"><header class="catalog-heading"><h2 id="kit-catalog-title"></h2><button type="button" class="catalog-close" autofocus></button></header><div class="catalog-scroll" tabindex="0"><p id="preparation-wallet" class="preparation-note"></p><div id="preparation-other-kits" class="preparation-kit-grid"></div></div></dialog></div></div></details>
- <section class="preparation-receipt" aria-labelledby="preparation-receipt-title"><h3 id="preparation-receipt-title"></h3><p id="preparation-receipt-worry"></p><p id="preparation-receipt-options"></p><p id="preparation-receipt-items"></p><p id="preparation-usage-note" class="preparation-note"></p></section>`;
+ <div class="preparation-start"></div>`;
  const field=$('.worry-field'),select=$('#worry-select'),input=$('#worry-input');
  for(const id of ['commission','events'])steps.querySelector('#prepare-'+id).hidden=!optionalStepsEnabled;
  if(!optionalStepsEnabled)for(const [id,number]of [['skin','02'],['kit','03']])steps.querySelector('#prepare-'+id+' .preparation-number').textContent=number;
- steps.querySelector('#preparation-receipt-options').hidden=!optionalStepsEnabled;
  welcome.querySelector('.fong-intro').after(steps);
  $('#worry-controls').append(field);
  $('#custom-worry-controls').append(field.querySelector('.custom-label'),input,$('#worry-privacy'));
  $('#worry-ready-note').setAttribute('aria-live','polite');
  $('#commission-target-note').setAttribute('role','status');
  $('#worry-select').setAttribute('aria-describedby','worry-ready-note');
- steps.querySelector('.preparation-receipt').append($('#start'));
+ steps.querySelector('.preparation-start').append($('#start'));
  // Keep existing controls and event handlers as the single source of gameplay state.
  $('.random-events-option').hidden=true;
  $('.selected-kit').hidden=true;$('#use-hands').hidden=true;$('#open-journey').hidden=true;$('#active-commission').hidden=true;
@@ -111,20 +110,20 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
     const state=getState(),worry=getWorry(),current=currentStory(),events=optionalStepsEnabled&&$('#random-events').checked;
   if(state.neighbourhood.active!==previousStory){previousStory=state.neighbourhood.active;commissionEnabled=Boolean(previousStory);}
   const selected=WORRIES.find(w=>w.id===worry.kind),worryText=worry.text.trim()||(selected?local(selected.labelZh,selected.label):'');
-  select.replaceChildren(new Option(local('揀一件心塞事…','Choose a worry…'),''),...WORRIES.map(w=>new Option(local(w.labelZh,w.label),w.id)));select.value=worry.kind;
+  select.replaceChildren(new Option(local('選擇一件心塞塞事…','Choose a worry…'),''),...WORRY_GROUPS.map(group=>{const options=document.createElement('optgroup');options.label=local(group.labelZh,group.label);options.dataset.group=group.id;for(const w of WORRIES.filter(w=>w.group===group.id))options.append(new Option(local(w.labelZh,w.label),w.id));return options;}));select.value=worry.kind;
   const skin=SKINS.find(s=>s.id===state.selectedSkin)??SKINS[0],kit=WEAPONS.find(w=>w.id===state.equipped),kitUses=weaponCondition(state,kit.id);
   const commissionText=commissionEnabled&&current?local(`${current.story.name[0]}・第 ${current.index+1} 章`,`${current.story.name[1]} · chapter ${current.index+1}`):commissionEnabled?local('請選一個委託，或今局先唔接','Choose a commission, or skip it this ritual'):local('今次專心處理自己','Just my own worry');
   const eventText=events?local('加入隨機挑戰','Random challenges on'):local('輕鬆除厄・事件關閉','Relaxed · events off');
   for(const [id,zhText,enText] of [
-  ['prepare-worry-title','今日有咩令你心塞？','What is weighing on you?'],['worry-required','衰嘢交出嚟','Hand it over!'],
-   ['worry-question','選擇一件心塞事','Choose one worry'],['worry-privacy','心事只留在這次儀式，不會存入紀錄。','Your words stay in this ritual and are never saved.'],
+  ['prepare-worry-title','今日有咩令你心很累？','What is weighing on you?'],['worry-required','衰嘢死開！','Bad luck, get lost!'],
+   ['worry-question','選擇一件心塞塞事','Choose one worry'],['worry-privacy','心事只留在這次儀式，不會存入紀錄。','Your words stay in this ritual and are never saved.'],
    ['prepare-commission-title','順便幫街坊一個忙？','Help a neighbour along the way?'],['commission-choice-label','今局是否接委託','Commission for this ritual'],['commission-none-label','今次專心處理自己','Just my own worry'],['commission-yes-label','順便接個委託','Help with a commission'],['commission-help','完成儀式即可過章；額外挑戰只影響報酬。今局不接，已接故事及進度會保留。','Finishing the ritual advances the chapter; bonus targets affect pay. Skipping this ritual preserves your accepted story and progress.'],
    ['prepare-events-title','今局想輕鬆，定刺激啲？','A relaxed ritual, or an extra challenge?'],['events-choice-label','選擇隨機事件','Random event choice'],['events-off-label','輕鬆除厄','Relaxed ritual'],['events-off-help','不加突發事件，照樣完成儀式和故事。','No surprise event. Rituals and stories still progress.'],['events-on-label','加入隨機挑戰','Add a random challenge'],['events-on-help','今局加入一次事件，可挑戰額外分數與稱號。','One event this ritual, with optional bonus points and titles.'],
-   ['prepare-skin-title','揀個小人，代表今日嘅煩惱','Choose a look for your worry'],['prepare-kit-title','揀件除惡法寶','Choose a ritual helper'],['all-skins-label','查看全部款式／購買','All looks / buy'],['all-kits-label','查看全部法寶／購買','All helpers / buy'],['preparation-kit-help','免費及已擁有法寶可直接選用；首次得分才扣次數。','Equip a free or owned helper. A use is spent only on the first score.'],['preparation-receipt-title','今局準備好了嗎？','Ready for this ritual?'],
+   ['prepare-skin-title','揀個小人，代表今日嘅煩惱','Choose a look for your worry'],['prepare-kit-title','揀件除惡法寶','Choose a ritual helper'],['all-skins-label','查看全部款式／購買','All looks / buy'],['all-kits-label','查看全部法寶／購買','All helpers / buy'],['preparation-kit-help','免費及已擁有法寶可直接選用；首次得分才扣次數。','Equip a free or owned helper. A use is spent only on the first score.'],
   ])text(id,zhText,enText);
   stall.setAttribute('aria-label',local('我的小攤','My stall'));
   for(const [type,zh,en]of [['skin','全部小人款式／購買','All worry looks / buy'],['kit','全部除厄法寶／購買','All ritual helpers / buy']]){text(type+'-catalog-title',zh,en);const dialog=$('#'+type+'-catalog-dialog');dialog.querySelector('.catalog-close').textContent=local('關閉 ✕','Close ✕');dialog.querySelector('.catalog-scroll').setAttribute('aria-label',local(zh,en));}
-  $('.custom-label').textContent=local('或寫低你的小心事','Or write your worry');input.placeholder=local('例如：半夜又收到工作訊息…','For example: another late-night work message…');
+  $('.custom-label').textContent=local('或寫低你的小心事','Or write your worry');input.placeholder='';
   text('worry-selection-summary',worryText?`今日想打走：${worryText}`:'',worryText?`Today’s worry: ${worryText}`:'');
   $('#worry-selection-summary').hidden=!worryText;
   text('commission-selection-summary',commissionText,commissionText);text('events-selection-summary',eventText,eventText);
@@ -132,8 +131,6 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   text('kit-selection-summary',`${name(kit)} · ${kit.starter?'免費・不限次數':`剩餘 ${kitUses.remaining} 次`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`,`${name(kit)} · ${kit.starter?'free · unlimited':`${kitUses.remaining} uses left`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`);
   $('#preparation-skin-preview').innerHTML=skinArt(skin.id);$('#preparation-kit-preview').innerHTML=weaponArt(kit.id);
   text('preparation-wallet',`現有 ${state.coins.toLocaleString(undefined,{maximumFractionDigits:2})} 香油錢・${state.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德（只作解鎖，不扣除）`,`Balance: ${state.coins.toLocaleString(undefined,{maximumFractionDigits:2})} oil · ${state.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit (unlock requirement, not spent)`);
-  const usage=skin.starter&&kit.starter?local('本局不消耗道具。','No items are consumed this ritual.'):local(`首次得分才扣：${[!skin.starter&&'小人紙 1 次',!kit.starter&&'法寶 1 次'].filter(Boolean).join('、')}。未得分離開不扣次數。`,`First score spends ${[!skin.starter&&'1 paper use',!kit.starter&&'1 helper use'].filter(Boolean).join(' and ')}. Leaving before scoring spends nothing.`);
-  text('preparation-receipt-worry',`心事：${worryText||'尚未選擇'}`,`Worry: ${worryText||'not chosen yet'}`);text('preparation-receipt-options',`${commissionText} · ${eventText}`,`${commissionText} · ${eventText}`);text('preparation-receipt-items',`${name(skin)} ＋ ${name(kit)}`,`${name(skin)} + ${name(kit)}`);text('preparation-usage-note',usage,usage);
   for(const radio of document.querySelectorAll('[name=preparation-commission]'))radio.checked=(radio.value==='yes')===commissionEnabled;
   for(const radio of document.querySelectorAll('[name=preparation-events]'))radio.checked=(radio.value==='on')===events;
   const mismatch=commissionEnabled&&current&&(worry.text.trim()||worry.kind!==current.chapter.kind),eventNeeded=commissionEnabled&&current&&current.chapter.goal==='eventsWon'&&!events;
@@ -143,7 +140,7 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   welcome.querySelector('.fong-intro>div:last-child>p:last-child').textContent=local('「心事交低，師傅陪你慢慢打走。」','“Set your worry down. We’ll whack it away together.”');
   for(const id of ['start','quick-start']){const button=$('#'+id);button.querySelector('.work-label').textContent=local(id==='start'?'開始打小人儀式':'開始儀式',id==='start'?'Start the ritual':'Start ritual');button.setAttribute('aria-label',local('開始打小人儀式','Start the ritual'));}
   $('#quick-start').disabled=false;$('#quick-start').setAttribute('aria-describedby','worry-ready-note');
-  $('#dock-kit').textContent=local(worryText?`修改心事：${worryText}`:'先選一件心塞事','Edit worry: '+(worryText||'choose one first'));
+  $('#dock-kit').textContent=local(worryText?`修改心事：${worryText}`:'先選一件心塞塞事','Edit worry: '+(worryText||'choose one first'));
   $('#dock-kit').setAttribute('aria-label',local('修改儀式準備中的心事','Edit the worry in ritual preparation'));
   const dockCommission=commissionEnabled&&current?local(`委託第 ${current.index+1} 章`,`Commission ch. ${current.index+1}`):local('不接委託','No commission');
   const dockUsage=skin.starter&&kit.starter?local('不耗道具','no item use'):local(`首次得分：${[!skin.starter&&'紙 1 次',!kit.starter&&'法寶 1 次'].filter(Boolean).join('／')}`,`First score: ${[!skin.starter&&'1 paper',!kit.starter&&'1 helper'].filter(Boolean).join(' + ')}`);

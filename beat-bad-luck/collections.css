@@ -1,0 +1,59 @@
+/* Each collection is a button destination, with one scroll surface per dialog. */
+.preparation-ready #stall-dashboard .stall-tabs.collection-launchers,.preparation-ready #neighbourhood-hub .journey-tabs.collection-launchers{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0;margin:16px 0;border:0;border-radius:0;box-shadow:none;background:none;backdrop-filter:none;overflow:visible}
+.preparation-ready .collection-launchers .collection-launch,.preparation-ready #open-secret-collection{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-width:0;min-height:64px;margin:0;padding:10px;border:2px solid #b9c5a1;border-radius:16px;background:linear-gradient(140deg,#385c4c,#25483f);color:#fff0c9;box-shadow:0 3px 0 #112d2a;font:600 15px/1.45 var(--display);text-align:left;white-space:normal;cursor:pointer;touch-action:manipulation;transition:background .15s ease,translate .15s ease}
+.preparation-ready .collection-launchers .collection-launch:hover,.preparation-ready #open-secret-collection:hover{border-color:#ffe1a0;background:#456951}
+.preparation-ready .collection-launchers .collection-launch:active,.preparation-ready #open-secret-collection:active{translate:0 2px;box-shadow:0 1px 0 #112d2a}
+#neighbourhood-hub .journey-tabs.collection-launchers .collection-launch{padding:10px}
+.collection-launch-art{display:grid;place-items:center;flex:0 0 32px;width:32px;height:38px;pointer-events:none}
+.collection-launch-art svg{display:block;width:100%;height:100%;overflow:visible}
+.collection-launch-label{flex:1;min-width:0;overflow-wrap:anywhere}
+.collection-launch-arrow{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;color:#ffe2a2}
+.collection-launch-arrow svg{display:block;width:100%;height:100%}
+.preparation-ready #open-secret-collection{width:100%;margin:18px 0;border-color:#dfbb87;background:linear-gradient(120deg,#5d4c64,#345347)}
+.preparation-ready .stall-collection{border:0;background:none;padding:0}
+.preparation-ready #neighbourhood-hub{padding:0;border:0;background:none}
+#neighbourhood-hub .neighbourhood-inner{padding:0}
+html:has(.collection-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
+.collection-dialog{--collection-top:max(12px,env(safe-area-inset-top));--collection-bottom:max(12px,env(safe-area-inset-bottom));--collection-left:max(10px,env(safe-area-inset-left));--collection-right:max(10px,env(safe-area-inset-right));top:var(--collection-top);bottom:var(--collection-bottom);left:var(--collection-left);right:var(--collection-right);margin:auto;width:min(760px,calc(100vw - var(--collection-left) - var(--collection-right)));max-width:none;height:min(800px,calc(100vh - var(--collection-top) - var(--collection-bottom)));height:min(800px,calc(100dvh - var(--collection-top) - var(--collection-bottom)));max-height:none;padding:0;border:2px solid #edce8c;border-radius:21px;background:#24473d;color:#fff0ca;overflow:hidden;box-shadow:0 22px 70px #081d26b3}
+.collection-dialog[open]{display:flex;flex-direction:column}
+.collection-dialog::backdrop{background:#081f2bd9;backdrop-filter:blur(5px)}
+.collection-heading{display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid #b8ba8b66;background:#345445}
+.collection-heading h2{min-width:0;margin:0;font:600 19px/1.5 var(--display);color:#ffe4a5;overflow-wrap:anywhere}
+.collection-close{display:flex;flex:none;align-items:center;justify-content:center;gap:5px;min-width:74px;min-height:44px;padding:6px 9px;border:2px solid #fff0bb;border-radius:15px;background:#f0d08b;color:#344c40;box-shadow:0 3px 0 #92704c;font:600 14px/1.3 var(--display);touch-action:manipulation;cursor:pointer}
+.collection-close>span:first-child{display:grid;place-items:center;width:23px;height:23px;background:#fff2cb;border:1px solid #ac8958;border-radius:45%;font:600 24px/1 Fredoka,system-ui,sans-serif;rotate:-8deg}
+.collection-close:active{translate:0 2px;box-shadow:0 1px 0 #92704c}
+.collection-scroll{flex:1;min-height:0;padding:14px 18px 24px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#e3c582 #214238;scroll-padding:14px;touch-action:pan-y}
+.collection-dialog .collection-panel,.collection-dialog :is([id^=journey-panel-],#secret-collection){height:auto;max-height:none;margin:0;padding:0;border:0;border-radius:0;overflow:visible;background:none}
+.collection-dialog .secret-grid,.collection-dialog .comic-quote-book ul{max-height:none;overflow:visible}
+.collection-dialog .secret-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.collection-dialog #secret-collection>h3{display:none}
+.collection-dialog #secret-collection>p{margin-top:0}
+.collection-dialog #rarity-legend{position:static;margin:0 0 14px;max-height:none}
+.collection-dialog #neighbour-note{margin-bottom:0}
+.collection-dialog .shop-tools{position:static}
+.collection-dialog .secret-grid .loot-card{overflow-wrap:anywhere}
+.collection-launch:focus-visible,.collection-dialog :focus-visible{outline:3px solid #ffe69b;outline-offset:3px}
+.collection-scroll:focus-visible{outline-offset:-4px}
+@media(max-width:600px){
+ .preparation-ready #stall-dashboard .stall-tabs.collection-launchers,.preparation-ready #neighbourhood-hub .journey-tabs.collection-launchers{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .preparation-ready .collection-launchers .collection-launch{min-height:62px;padding:9px;gap:7px;font-size:14px}
+ #neighbourhood-hub .journey-tabs.collection-launchers .collection-launch{padding:9px}
+ .collection-launchers .collection-launch:last-child{grid-column:1/-1}
+ .collection-launch-art{width:30px;height:35px;flex-basis:30px}
+ .collection-heading{padding:9px 11px;gap:8px}
+ .collection-heading h2{font-size:17px}
+ .collection-close{min-width:70px;padding-inline:7px}
+ .collection-scroll{padding:12px 13px 24px}
+ .collection-dialog .secret-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+}
+@media(max-height:500px) and (min-aspect-ratio:4/3){.collection-dialog{--collection-top:max(8px,env(safe-area-inset-top));--collection-bottom:max(8px,env(safe-area-inset-bottom))}.collection-heading{padding-block:5px}.collection-scroll{padding-top:10px}}
+@media(prefers-reduced-motion:reduce){.collection-launch,.collection-close{transition:none!important}}
+
+@media(max-width:360px){.preparation-ready #stall-dashboard .stall-tabs.collection-launchers,.preparation-ready #neighbourhood-hub .journey-tabs.collection-launchers{grid-template-columns:minmax(0,1fr)}}
+
+/* Helper details start beside the icon; each action gets its own full-width row. */
+#weapon-list>.kit-row{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:start;gap:10px 16px}
+#weapon-list>.kit-row>.kit-art{grid-column:1;grid-row:1;align-self:start;transform-origin:top center}
+#weapon-list>.kit-row>div:not(.kit-shop-actions){grid-column:2;grid-row:1;align-self:start;min-width:0}
+#weapon-list>.kit-row>.kit-shop-actions{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;max-width:none;gap:8px}
+#weapon-list>.kit-row>.kit-shop-actions button{width:100%;min-height:44px}

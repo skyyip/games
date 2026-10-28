@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {fresh,STORAGE_KEY} from '../src/progress.js';
-import {WEAPONS,WORRIES} from '../src/catalog.js';
+import {WEAPONS,WORRIES,WORRY_GROUPS} from '../src/catalog.js';
 import {SKINS} from '../src/skins.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
@@ -63,7 +63,7 @@ try {
  assert.equal(await page.locator('#my-stall').evaluate(node=>node.tagName),'SECTION','stall is directly displayed rather than an accordion');
  assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.tagName),'SECTION','collections are directly displayed');
  assert.equal(await page.locator('#journey-tab-stories,#journey-panel-stories,#journey-summary,#commission-list,#street-keepsakes,#my-stall-label').count(),0,'removed story tab, contents and redundant headings stay absent');
- assert.deepEqual(await page.locator('.journey-tabs [role=tab]').allTextContents(),['稱號','名場面','籤冊']);
+ assert.deepEqual(await page.locator('.journey-tabs .collection-launch-label').allTextContents(),['趣味稱號','攤位名場面','平安籤冊']);
  assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.nextElementSibling?.classList.contains('records-card')&&!node.closest('#stall-dashboard,#my-stall')),true,'three collection tabs sit outside the stall and immediately before records');
  assert.equal(await page.locator('[data-shortcut=stall]').evaluate(node=>Boolean(node.closest('.stall-showcase-heading'))),true,'decorating shortcut sits beside the stall title');
  assert.equal(await page.locator('#worry-input').isVisible(),true,'private input is immediately visible');
@@ -71,9 +71,9 @@ try {
  assert.equal(await page.locator('#secret-collection').evaluate(node=>node.tagName),'SECTION','secret collection is not collapsible');
  assert.equal(await page.locator('.comic-ending-book').evaluate(node=>node.tagName),'SECTION','collected endings are not collapsible');
  assert.equal(await page.locator('#worry-category').count(),0,'worry choices have no category selector');
- assert.equal(await page.locator('#worry-select optgroup').count(),0,'worries are listed directly without categories');
+ assert.equal(await page.locator('#worry-select optgroup').count(),WORRY_GROUPS.length,'native headings group related worries');
  assert.equal(await page.locator('#worry-select option').count(),WORRIES.length+1,'every worry remains selectable');
- assert.equal(await page.locator('#worry-required').textContent(),'衰嘢交出嚟');
+ assert.equal(await page.locator('#worry-required').textContent(),'衰嘢死開！');assert.equal(await page.locator('#prepare-worry-title').textContent(),'今日有咩令你心很累？');assert.equal(await page.locator('#worry-question').textContent(),'選擇一件心塞塞事');assert.equal(await page.locator('#worry-input').getAttribute('placeholder'),'');
  assert.equal(await page.locator('.preparation-step').count(),5,'optional-step code and DOM are retained');
  assert.equal(await page.locator('.preparation-step:visible').count(),3,'only three steps are shown');
  assert.equal(await page.locator('#prepare-commission').isHidden(),true);
@@ -88,7 +88,7 @@ try {
  assert.equal(await page.locator('#start').isDisabled(),true);
  await page.locator('#quick-start').evaluate(node=>node.click());assert.equal(await page.evaluate(()=>document.activeElement.id),'worry-select');
  await page.locator('#worry-select').selectOption('teammates');
- assert.match(await page.locator('#preparation-receipt-worry').textContent(),/豬隊友/);
+ assert.match(await page.locator('#worry-selection-summary').textContent(),/豬隊友/);
  assert.equal(await page.locator('#start').isEnabled(),true);assert.equal(await page.locator('#start .work-shoe').evaluate(n=>getComputedStyle(n).animationName),'none','reduced motion keeps the invitation still');await page.emulateMedia({reducedMotion:'no-preference'});assert.equal(await page.locator('#start .work-shoe').evaluate(n=>getComputedStyle(n).animationName),'preparation-shoe-hop');await page.emulateMedia({reducedMotion:'reduce'});
  await page.locator('[name=preparation-commission][value=yes]').evaluate(node=>{node.checked=true;node.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.locator('[data-preparation-story=bus]').evaluate(node=>node.click());
@@ -102,11 +102,11 @@ try {
  assert.equal((await saved(page)).neighbourhood.active,'cafe','saved accepted story survives hidden optional steps');
  await page.locator('[name=preparation-events][value=on]').evaluate(node=>{node.checked=true;node.dispatchEvent(new Event('change',{bubbles:true}));});
  assert.equal(await page.locator('#random-events').isChecked(),true);
- assert.equal(await page.locator('#prepare-commission').isHidden(),true);assert.equal(await page.locator('#prepare-events').isHidden(),true);assert.equal(await page.locator('#preparation-receipt-options').isHidden(),true);
+ assert.equal(await page.locator('#prepare-commission').isHidden(),true);assert.equal(await page.locator('#prepare-events').isHidden(),true);assert.equal(await page.locator('.preparation-start').evaluate(n=>n.children.length===1&&n.firstElementChild.id==='start'),true,'start area contains only the primary action');
  await open(page,'skin');assert.equal(await page.locator('#prepare-skin [data-skin=plain]').isVisible(),true);
  assert.equal(await page.locator('#skin-catalog-dialog').evaluate(e=>e.open),false);
  await open(page,'kit');assert.equal(await page.locator('[data-preparation-kit=bare-hand]').isVisible(),true);
- assert.match(await page.locator('#preparation-usage-note').textContent(),/不消耗/);
+ assert.equal(await page.locator('.preparation-receipt,#preparation-usage-note').count(),0);
  await page.locator('#prepare-skin>summary').click();await page.locator('#prepare-kit>summary').click();
  await page.screenshot({path:`${output}/preparation-375-zh.png`,fullPage:true});
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -130,8 +130,8 @@ try {
  await page.locator('#loot-close').click();await page.locator('#change-worry').click();
  assert.equal(await page.locator('#worry-input').inputValue(),'');
  assert.equal(await page.locator('#start').isDisabled(),true);
- assert.ok(!(await page.locator('#preparation-receipt-worry').textContent()).includes(privateWorry),'new-worry action must refresh the preparation summary');
- await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, always-visible private input, three outer collection tabs, prominent modal catalogues, full ritual and privacy');
+ assert.ok(!(await page.locator('#worry-selection-summary').textContent()).includes(privateWorry),'new-worry action must refresh the preparation summary');
+ await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, always-visible private input, three collection launch buttons, prominent modal catalogues, full ritual and privacy');
 
  for(const config of [{width:320,height:568,lang:'zh-Hant'},{width:390,height:844,lang:'zh-Hant',motion:'no-preference'},{width:812,height:375,lang:'en'},{width:1280,height:900,lang:'en'}]) {
   const {page:p,context:c}=await setup({...config,rich:true});
@@ -160,11 +160,11 @@ try {
   assert.equal((await saved(p)).selectedSkin,look.id);assert.equal(await p.locator('#skin-catalog-dialog [data-skin="'+look.id+'"]').getAttribute('aria-pressed'),'true');
   assert.equal(await p.evaluate(()=>document.activeElement.dataset.skin),look.id,'confirmed paper moves to the owned grid without losing focus');
   await p.locator('#prepare-skin [data-skin=plain]').click();await closeCatalogue(p,'skin');
-  assert.match(await p.locator('#preparation-usage-note').textContent(),config.lang==='en'?/No items/:/不消耗/);
+  assert.equal(await p.locator('.preparation-start').evaluate(n=>n.children.length===1&&n.firstElementChild.id==='start'),true);
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await p.screenshot({path:`${output}/preparation-${config.width}-${config.lang}.png`,fullPage:true});
   await p.locator('#journey-tab-album').click();await p.reload({waitUntil:'networkidle'});
-  assert.equal(await p.locator('#journey-tab-album').getAttribute('aria-selected'),'true','remaining tabs retain the remembered category');
+  assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.preferences.v1')).section),'album','the remembered collection category survives reload');assert.equal(await p.locator('.collection-dialog[open]').count(),0,'reload keeps all collection dialogs closed');
   assert.equal((await saved(p)).weaponUses.flipflop,7,'changing equipment must not consume old stock');
   assert.equal(await p.locator('#worry-select').inputValue(),'','personal worry must not persist across reload');
   await c.close();console.log(`PASS ${config.width} ${config.lang}: retained inventory, touch-scroll modal catalogues, paper/kit purchase cancellation/confirmation/focus, no auto-start and responsive layout`);
