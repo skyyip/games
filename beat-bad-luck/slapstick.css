@@ -98,14 +98,14 @@
 #phase-beat #finisher-launch{width:82px;min-width:0;height:44px;border-radius:8px;font-size:11px;letter-spacing:0;font-variant-numeric:tabular-nums}
 @media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 104px}#phase-beat #finisher-launch{width:104px;font-size:12px}#phase-beat .beat-stats b{font-size:25px}#phase-beat .ultimate-meter{font-size:11px}}
 
-body :is(button,[role=button]){--button-depth:3px;--button-edge:#142e29;box-shadow:inset 0 1px 0 #ffffff66,inset 0 -2px 0 #00000020,0 var(--button-depth) 0 var(--button-edge),0 calc(var(--button-depth) + 2px) 5px #091c2440!important;transition:translate .1s ease,box-shadow .1s ease;letter-spacing:0}
-body :is(.bbl-button,.work-button,#finisher-launch[data-ready=true]){--button-depth:4px;--button-edge:#8b653e}
-body :is(.icon-button,.dialog-x,.purchase-close,.settings-open,.text-button){--button-depth:2px}
-body :is([aria-selected=true],[aria-pressed=true]){--button-depth:1px}
+body :is(button,[role=button]):not(:where(.stall-showcase *,#quick-dock *,[role=tablist] *,#sound-setup,#settings-sound)){--button-depth:2.25px;--button-edge:#142e29;box-shadow:inset 0 .75px 0 #ffffff4d,inset 0 -1.5px 0 #00000018,0 var(--button-depth) 0 var(--button-edge),0 calc(var(--button-depth) + 1.5px) 3.75px #091c2430!important;transition:translate .1s ease,box-shadow .1s ease;letter-spacing:0}
+body :is(.bbl-button,.work-button,#finisher-launch[data-ready=true]){--button-depth:3px;--button-edge:#8b653e}
+body :is(.icon-button,.dialog-x,.purchase-close,.settings-open,.text-button){--button-depth:1.5px}
+body :is([aria-selected=true],[aria-pressed=true]){--button-depth:.75px}
 body :is(#confirm-discard,#confirm-quit,[data-discard]){--button-edge:#784940}
-body :is(button,[role=button]):not(:disabled):not(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop):active{translate:0 2px;box-shadow:inset 0 2px 3px #00000025,0 1px 0 var(--button-edge)!important}
+body :is(button,[role=button]):not(:disabled):not(:where(.stall-showcase *,#quick-dock *,[role=tablist] *,#sound-setup,#settings-sound)):not(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop):active{translate:0 1.5px;box-shadow:inset 0 1.5px 2.25px #0000001c,0 .75px 0 var(--button-edge)!important}
 body :is(button,[role=button]):focus-visible{outline:3px solid #ffe4a3;outline-offset:3px}
-body button:disabled{box-shadow:inset 0 1px 0 #ffffff33,0 1px 0 var(--button-edge)!important}
-body button:is(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop){box-shadow:none!important;filter:drop-shadow(0 3px 0 #0b201f99)}
-body button:is(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop):not(:disabled):active{box-shadow:none!important;filter:drop-shadow(0 1px 0 #0b201f99)}
+body button:disabled:not(:where(.stall-showcase *,#quick-dock *,[role=tablist] *,#sound-setup,#settings-sound)){box-shadow:inset 0 .75px 0 #ffffff26,0 .75px 0 var(--button-edge)!important}
+body button:is(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop){box-shadow:none!important;filter:drop-shadow(0 2.25px 0 #0b201f73)}
+body button:is(.hit-zone,.incense-stick,.pork-piece,.ritual-prop,.blessing-paper,.copy-target,.comic-event-prop):not(:disabled):active{box-shadow:none!important;filter:drop-shadow(0 .75px 0 #0b201f73)}
 @media(prefers-reduced-motion:reduce){.burst-dimension *,.burst-fire *{animation:none!important}.burst-bolt{opacity:.65}body :is(button,[role=button]){transition:none}}

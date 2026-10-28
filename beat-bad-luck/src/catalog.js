@@ -98,6 +98,8 @@ export const WEAPONS=[
 // Paid kits use configured relief bonuses, reduced by about 30% from the previous ladder.
 // Prices and merit gates are independent; free hands retain their ×1 fallback.
 export const weaponScoreMultiplier=id=>{const weapon=WEAPONS.find(w=>w.id===id);return weapon?.multiplier??1+(weapon?.cost??0)/100;};
+export const weaponRarity=weapon=>weapon.hidden?5:1+[400,1500,4500,10000].filter(price=>weapon.cost>price).length;
+export const weaponDurability=id=>id==='bare-hand'?Infinity:(WEAPONS.some(weapon=>weapon.id===id)?6-weaponRarity(WEAPONS.find(weapon=>weapon.id===id)):0);
 export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
  ...SECRET_DECOR,

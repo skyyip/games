@@ -2,15 +2,15 @@ import {polishCollections,rarity} from './collection-polish.js';
 import {skinArt,skinScoreMultiplier} from './skins.js';
 import {weaponArt,decorArt} from './art.js';
 import {weaponScoreMultiplier,decorHourlyRate} from './catalog.js';
-import {weaponUses} from './progress.js';
+import {weaponCondition} from './progress.js';
 import {comicDescription} from './ritual-rewards.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 export function createPurchaseUI({getState,itemName,onReturn,onStart,onView,onReveal=()=>{}}){
  const dialog=document.querySelector('#purchase-dialog'),find=id=>dialog.querySelector('#'+id);let receipt=null,committing=false,outside=false;
  const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en,put=(id,text)=>find(id).textContent=text;
- function render(){if(!receipt)return;const {kind,item,cost,level,pending}=receipt,kit=kind==='weapon',skin=kind==='skin';dialog.dataset.pending=String(pending);dialog.dataset.rarity=skin?'':rarity(kind,item);
+ function render(){if(!receipt)return;const {kind,item,cost,level,pending}=receipt,kit=kind==='weapon',skin=kind==='skin',condition=kit?weaponCondition(getState(),item.id):null,current=condition?(pending&&condition.remaining===0?condition.capacity:condition.current):0;dialog.dataset.pending=String(pending);dialog.dataset.rarity=skin?'':rarity(kind,item);
   put('purchase-kicker',pending?local('睇清楚先買，師傅唔催單！','Take a look. No pressure!'):local('到手喇！街坊笑到拍晒手！','It’s yours! The neighbours approve!'));
-    put('purchase-title',itemName(item));put('purchase-effect',skin?local(`耐用 10 次儀式 · 解壓分數 ×${skinScoreMultiplier(item.id)}`,`Ten ritual uses · relief score ×${skinScoreMultiplier(item.id)}`):kit?local(`解壓分數 ×${weaponScoreMultiplier(item.id)} · 加 1 件／3 次 · ${pending?'購後共':'現有'} ${weaponUses(getState(),item.id)+(pending?3:0)} 次`,`Score ×${weaponScoreMultiplier(item.id)} · +1 kit / 3 uses · ${weaponUses(getState(),item.id)+(pending?3:0)} uses ${pending?'after purchase':'in stock'}`):local(`等級 ${level} · 每小時 ${decorHourlyRate(item,level)} 香油錢`,`Level ${level} · ${decorHourlyRate(item,level)} oil/hour`));
+    put('purchase-title',itemName(item));put('purchase-effect',skin?local(`耐用 10 次儀式 · 解壓分數 ×${skinScoreMultiplier(item.id)}`,`Ten ritual uses · relief score ×${skinScoreMultiplier(item.id)}`):kit?local(`解壓分數 ×${weaponScoreMultiplier(item.id)} · 可用度 ${current}/${condition.capacity} · 加 1 件／${condition.capacity} 次 · ${pending?'購後共':'現有'} ${condition.remaining+(pending?condition.capacity:0)} 次`,`Score ×${weaponScoreMultiplier(item.id)} · Condition ${current}/${condition.capacity} · +1 kit / ${condition.capacity} uses · ${condition.remaining+(pending?condition.capacity:0)} uses ${pending?'after purchase':'in stock'}`):local(`等級 ${level} · 每小時 ${decorHourlyRate(item,level)} 香油錢`,`Level ${level} · ${decorHourlyRate(item,level)} oil/hour`));
   put('purchase-detail',local(comicDescription(item),item.descriptionEn??'A Hong Kong comedy-inspired prop. Bad luck has just applied for annual leave.'));
   put('purchase-note',pending?local('按「確認購買」才扣款；關閉或取消不會購買。折扣券在確認付款時才使用。','You pay only after Confirm purchase. Closing cancels; a coupon is used only on confirmation.'):local('已確認購買，物品已到手並選用。','Purchase confirmed. Your collectible is ready.'));
   put('purchase-spent',pending?local(`實付 ${cost.toLocaleString()} 香油錢 · 現有 ${getState().coins.toLocaleString()}`,`${cost.toLocaleString()} oil · balance ${getState().coins.toLocaleString()}`):local(`已付 ${cost.toLocaleString()} 香油錢 · 餘額 ${getState().coins.toLocaleString()}`,`Paid ${cost.toLocaleString()} oil · ${getState().coins.toLocaleString()} left`));

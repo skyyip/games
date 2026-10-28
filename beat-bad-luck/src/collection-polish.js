@@ -1,8 +1,8 @@
 import {prepareScrollRegions} from './sanctuary-ui.js';
-import {WEAPONS,DECOR,FRIENDS} from './catalog.js';
+import {WEAPONS,DECOR,FRIENDS,weaponRarity} from './catalog.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 const labels=[['普通','Common'],['少有','Uncommon'],['稀有','Rare'],['珍稀','Epic'],['傳說','Legendary']];
-export function rarity(kind,item){if(item.hidden)return 5;if(kind==='friend')return item.stars;const edges=kind==='weapon'?[400,1500,4500,10000]:[1500,3500,7500,15000];return Math.min(5,edges.filter(n=>item.cost>n).length+1);}
+export function rarity(kind,item){if(item.hidden)return 5;if(kind==='friend')return item.stars;if(kind==='weapon')return weaponRarity(item);return Math.min(5,[1500,3500,7500,15000].filter(n=>item.cost>n).length+1);}
 const originals=new Map();
 export function polishCollections(){
  prepareScrollRegions();
@@ -31,6 +31,8 @@ export function polishCollections(){
  scale('.records-card>.bbl-kicker,#records b,#records small,#records .empty-record,#storage-note',1.15);
  scale('.fortune-slip small,#reward-line,#journey-result,#card-status,#skin-usage-result,#result-kit-note,#personal-postcard small',1.25);
  scale('#friend-arrival',1.15);scale('.result-stats small,#result>.bbl-kicker,.postcard-actions button',1.25);
+ scale('.postcard-actions button',.7);
+ scale('#play-panel[data-phase=beat] #fong-line',1.1);
  for(const node of document.querySelectorAll('#ritual-stage button,#ritual-stage button b,#ritual-stage button small,#ritual-stage button span,#pause-overlay button,#finisher-guide-dialog button')){if(node.closest('svg,.icon-button,.hit-zone,.simple-event')||![...node.childNodes].some(child=>child.nodeType===3&&child.textContent.trim()))continue;const size=parseFloat(getComputedStyle(node).fontSize);if(size>0&&size<16)factors.set(node,1.15);}
  const sizes=[...factors].map(([node,factor])=>[node,parseFloat(getComputedStyle(node).fontSize),factor]);
  for(const [node,size,factor]of sizes){if(!originals.has(node))originals.set(node,{value:node.style.getPropertyValue('font-size'),priority:node.style.getPropertyPriority('font-size')});if(size>0)node.style.setProperty('font-size',`${Math.round(size*factor*1000)/1000}px`,'important');}

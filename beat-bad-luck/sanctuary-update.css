@@ -60,6 +60,7 @@
 #weapon-list .kit-shop-actions button{width:100%;min-height:44px;padding:6px;border:1px solid #dec08a;border-radius:7px;background:#d9c18a;color:#243f35;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
 #weapon-list .kit-shop-actions button[data-restock]{background:#416455;color:#fff0c1;border-color:#96b99b}
 #weapon-list .kit-shop-actions button:disabled{opacity:.65}
+#weapon-list .kit-shop-actions button .stat-number,#decor-list [data-decor] .stat-number{color:inherit;text-shadow:none}
 .owned-kit-tag{display:table;margin:5px 0;padding:2px 6px;border:1px solid #8fcdb0;border-radius:5px;background:#234b3d;color:#dcffe5;font-size:11px;line-height:1.5}
 @media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:194px minmax(0,1fr);column-gap:18px}#phase-beat .beat-stats{grid-template-columns:110px 66px;gap:12px}#phase-beat .beat-stats>span:first-child{width:110px;min-width:110px;max-width:110px}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 96px;max-width:260px}#phase-beat #finisher-launch{width:96px}}
 @media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:60px minmax(0,1fr) 46px;grid-template-areas:'telemetry telemetry' 'arena hud' 'controls feedback'}#phase-beat:has(#personality-hud[hidden]){grid-template-areas:'telemetry telemetry' 'arena arena' 'controls feedback'}}
@@ -67,3 +68,58 @@
 .ritual-zombie svg{display:block;width:100%;height:100%}
 @keyframes zombie-visit{0%,100%{opacity:0;transform:translateY(105%) scale(.9,1.05)}12%,88%{opacity:.9}14%,42%,70%{transform:translateY(-12px) scale(.96,1.04) rotate(-4deg)}28%,56%,84%{transform:translateY(4px) scale(1.05,.94) rotate(4deg)}}
 @media(prefers-reduced-motion:reduce){.ritual-zombie{animation:none;opacity:.8;transform:none}}
+
+.kit-durability-label{display:block;color:#e5efc5;font-size:11px;line-height:1.55;margin-top:5px}
+.kit-durability-meter{display:block;width:100%;max-width:180px;height:9px;margin:4px 0 7px;accent-color:#c4db9e}
+.friend-icon .patron-portrait{display:block;width:100%;height:100%;overflow:visible}
+.friend-row.is-locked .patron-portrait{filter:grayscale(.85);opacity:.5}
+.patron-wave{transform-origin:27px 91px;animation:patron-hello 3.4s ease-in-out infinite}
+@keyframes patron-hello{0%,55%,100%{rotate:0deg}65%,85%{rotate:13deg}75%,95%{rotate:-9deg}}
+#ritual-loot-dialog .loot-icon .reward-mascot,#ritual-loot-dialog .loot-icon .patron-portrait{display:block;width:100%;height:100%;overflow:visible}
+#ritual-loot-dialog .loot-icon:has(.reward-mascot,.patron-portrait){background:#e8e4c4;border:2px solid #d5bc8d;border-radius:8px;box-shadow:0 3px 0 #80665b33;padding:3px}
+#ritual-loot-dialog .reward-mascot{animation:reward-giggle 3s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes reward-giggle{0%,65%,100%{rotate:0deg}74%{rotate:-4deg}83%{rotate:3deg}}
+#phase-beat #finisher-launch[data-ready=true]{position:relative;overflow:visible;animation:burst-button-pulse 1.05s ease-in-out infinite;z-index:3}
+#finisher-launch[data-ready=true]::before,#finisher-launch[data-ready=true]::after{content:'✦';position:absolute;left:-9px;top:-9px;font-size:18px;line-height:1;color:#fff4b1;text-shadow:0 0 7px #ffdb72;pointer-events:none;animation:burst-spark-hop 1.3s ease-in-out infinite}
+#finisher-launch[data-ready=true]::after{color:#abfff0;animation-delay:-.65s;animation-direction:reverse;font-size:14px}
+@keyframes burst-button-pulse{0%,100%{scale:1;filter:brightness(1)}50%{scale:1.055;filter:brightness(1.16)}}
+@keyframes burst-spark-hop{0%,100%{left:-9px;top:-9px;rotate:0deg;scale:.7}25%{left:calc(100% - 5px);top:-11px;rotate:80deg;scale:1.2}50%{left:calc(100% - 3px);top:calc(100% - 5px);rotate:160deg;scale:.8}75%{left:-11px;top:calc(100% - 3px);rotate:240deg;scale:1.15}}
+.ritual-stage[inert] #finisher-launch,.ritual-stage[inert] #finisher-launch::before,.ritual-stage[inert] #finisher-launch::after{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.patron-wave,#ritual-loot-dialog .reward-mascot,#phase-beat #finisher-launch[data-ready=true],#finisher-launch[data-ready=true]::before,#finisher-launch[data-ready=true]::after{animation:none!important;scale:1;filter:none}#finisher-launch[data-ready=true]::after{left:auto;top:auto;right:-8px;bottom:-8px}}
+
+:is(.stall-showcase,#quick-dock,[role=tablist]) button{box-shadow:none;filter:none}
+#sound-setup,#settings-sound{box-shadow:none;filter:none}
+#sound-setup:active,#settings-sound:active{translate:none;box-shadow:none}
+#quick-dock .work-button:active{translate:none;box-shadow:none}
+#stall-skit .skit-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:6px;margin-top:8px;width:100%}
+#stall-skit .skit-controls button{display:flex;align-items:center;justify-content:center;min-width:0;width:100%;min-height:44px;margin:0;padding:6px 4px;line-height:1.35;white-space:normal;overflow-wrap:normal}
+:is(.stall-collection>.stall-tabs,#neighbourhood-hub .journey-tabs){--tab-ink:#e7ecd5;--tab-active:#eed39a;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:8px;padding:6px;border:1px solid #6f94807a;border-radius:8px;background:linear-gradient(180deg,#31564cbd,#234239d9),repeating-linear-gradient(45deg,#79a08922 0 1px,transparent 1px 5px);box-shadow:none}
+#neighbourhood-hub .journey-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+#neighbourhood-hub .journey-tabs button{padding-inline:1px}
+:is(.stall-tabs,.journey-tabs) button{min-width:0;min-height:44px;margin:0;padding:7px 3px;border:1px solid transparent;border-radius:5px;background:#1f3b333d;color:var(--tab-ink);line-height:1.35;white-space:normal;overflow-wrap:normal;box-shadow:none;transition:background-color .15s,color .15s}
+:is(.stall-tabs,.journey-tabs) button:hover:not([aria-selected=true]){background:#5275657a}
+:is(.stall-tabs,.journey-tabs) button[aria-selected=true]{background:var(--tab-active);border-color:#f5e1b4;color:#294536;box-shadow:none}
+:is(.stall-tabs,.journey-tabs) button:active{scale:1;transform:none;translate:none;box-shadow:none}
+@media(prefers-reduced-motion:reduce){:is(.stall-tabs,.journey-tabs) button{transition:none}}
+
+#phase-beat .beat-telemetry{block-size:76px;min-block-size:76px;max-block-size:76px}
+#phase-beat .ultimate-hud{height:64px;padding-block:6px;align-items:center}
+#phase-beat .ultimate-meter{row-gap:5px;align-content:center}
+#phase-beat .ultimate-meter progress{margin-block:4px}
+#paper-doll>svg{scale:1.1;transform-origin:50% 70%}
+@media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:76px minmax(0,1fr) 46px}}
+
+.ritual-zombie{--zombie-entry:-110%;--zombie-inset:12px;--zombie-lean:-6deg;left:0;right:auto;top:clamp(8px,var(--zombie-top,20%),calc(100% - 92px));bottom:auto;animation-name:zombie-side-visit}
+.ritual-zombie[data-side=right]{--zombie-entry:110%;--zombie-inset:-12px;--zombie-lean:6deg;left:auto;right:0}
+@keyframes zombie-side-visit{0%,100%{opacity:0;transform:translate(var(--zombie-entry),0) rotate(var(--zombie-lean))}12%,88%{opacity:.9}14%,42%,70%{transform:translate(var(--zombie-inset),-8px) rotate(calc(var(--zombie-lean)*-1))}28%,56%,84%{transform:translate(0,4px) rotate(var(--zombie-lean))}}
+.burst-dimension{border-color:#bafff0;box-shadow:inset 0 0 44px #7cfff08c,0 0 22px #55f0d978}
+.burst-dimension::before{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 48px #ccfff2b0;background:#b9ffeb12;animation:storm-glow 1.8s ease-in-out infinite}
+.burst-storm{filter:drop-shadow(0 0 7px #c5fff3);animation:storm-jolt .9s ease-in-out infinite}
+.burst-speedlines{opacity:.7;stroke-width:3}
+.burst-bolt{animation-duration:1.8s;filter:drop-shadow(0 0 9px #bdfff4)}
+.burst-bolt-two{animation-delay:.9s}.burst-branch-one{animation-delay:.45s}.burst-branch-two{animation-delay:1.35s}
+@keyframes burst-lightning{0%,18%,100%{opacity:.15}7%{opacity:1}12%{opacity:.6}}
+@keyframes storm-glow{0%,100%{opacity:.4}16%{opacity:.8}55%{opacity:.55}}
+@keyframes storm-jolt{0%,100%{transform:translate(0,0) scale(1.02)}25%{transform:translate(-2px,1px) scale(1.025)}60%{transform:translate(2px,-1px) scale(1.02)}}
+.ritual-stage[inert] .burst-dimension::before{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.ritual-zombie,.burst-dimension::before{animation:none!important;transform:none}.burst-dimension::before{opacity:.5}}
