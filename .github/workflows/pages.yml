@@ -2,7 +2,7 @@ name: Deploy Grid Rush to Pages
 on:
   push:
     branches: [main]
-    paths: [tools/**, index.html, grid-rush/**, grid-rush-in-order/**, tap-and-spill/**, line-up/**, pikmin-fling/**, just-a-sec/**, roach-rush/**, stone-skip/**, balance-bridge/**, pot-toss/**, marble-maze/**, floating-balance/**, flick-force/**, memory-trace/**, dice-party/**, poker-party/**, mahjong-match/**, beat-bad-luck/**, bun-rush/**, .github/workflows/pages.yml]
+    paths: [tools/**, index.html, sitemap.xml, llms.txt, .htaccess, grid-rush/**, grid-rush-in-order/**, tap-and-spill/**, line-up/**, pikmin-fling/**, just-a-sec/**, roach-rush/**, stone-skip/**, balance-bridge/**, pot-toss/**, marble-maze/**, floating-balance/**, flick-force/**, memory-trace/**, dice-party/**, poker-party/**, mahjong-match/**, beat-bad-luck/**, bun-rush/**, .github/workflows/pages.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,9 +25,11 @@ jobs:
           cache: npm
           cache-dependency-path: tools/package-lock.json
       - run: npm ci --prefix tools
+      - run: npm run check:seo --prefix tools
       - run: node tools/build-site.mjs _site
         env:
           PLAYGROUND_BASE_PATH: /${{ github.event.repository.name }}/
+      - run: node tools/check-seo.mjs _site /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

@@ -1,0 +1,7 @@
+# Merge into https://sky-playground.com/robots.txt at the DOMAIN ROOT.
+# A robots.txt inside /games/ is not used by search crawlers.
+# Keep any existing rules for other parts of the domain.
+User-agent: *
+Allow: /games/
+
+Sitemap: https://sky-playground.com/games/sitemap.xml

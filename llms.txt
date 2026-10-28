@@ -1,0 +1,28 @@
+# Sky Playground
+
+> Free browser games by Sky Yip. English and Traditional Chinese.
+
+Canonical collection: https://sky-playground.com/games/
+No account or app download is needed. JavaScript is required to play.
+Party games use one shared device, without online matchmaking.
+
+## Games
+
+- [Beat the Bad Luck](https://sky-playground.com/games/beat-bad-luck/): 1 player. A single-player game inspired by Hong Kong’s villain-hitting folk ritual. Complete a playful ritual and brighten Master Yip’s stall.
+- [Grid Rush](https://sky-playground.com/games/grid-rush/): 1 player. A solo speed-clicking game. Clear every tile in any order and try to finish the grid in the shortest time.
+- [Grid Rush: In Order](https://sky-playground.com/games/grid-rush-in-order/): 1 player. A solo sequence puzzle that combines quick reactions with ordering numbers, letters, colours or shapes.
+- [Tap & Spill](https://sky-playground.com/games/tap-and-spill/): 2–6 players on one device. A 2–6 player party game on one shared device. Players take turns pouring into the same glass; whoever overflows it loses.
+- [Line Up](https://sky-playground.com/games/line-up/): 2–6 players on one device. A local 2–6 player estimation game. Everyone guesses the same target percentage of a line or shape’s outline; the closest estimate wins.
+- [Pikmax Fling](https://sky-playground.com/games/pikmin-fling/): 1 player. A single-player garden arcade game. Feed a hungry plant by flinging the wandering Pikmax using their gesture prompts.
+- [Just a Sec](https://sky-playground.com/games/just-a-sec/): 2–6 players on one device. A 2–6 player local timing game. Estimate a shared target of 1–20 seconds without a visible running timer.
+- [Roach Rush](https://sky-playground.com/games/roach-rush/): 1 player. A solo timed arcade game with different gestures for ground roaches, flying roaches and mice. Keep the ant friends safe.
+- [Stone Skip](https://sky-playground.com/games/stone-skip/): 1 player. A solo stone-skipping game with an adjustable release angle. The result is an arcade distance and bounce count.
+- [Little Balance](https://sky-playground.com/games/balance-bridge/): 1 player. A single-player survival game about keeping a little walker on a bridge through gusts and other surprises.
+- [Pot Luck](https://sky-playground.com/games/pot-toss/): 1 player. A solo courtyard tossing game. Land arrows inside a moving chamber pot: bamboo arrows earn one point and rainbow arrows earn two.
+- [Marble & Mist](https://sky-playground.com/games/marble-maze/): 1 player. A solo marble maze game with five layouts. Reach the finish while dealing with mist and moving bombs.
+- [Float & Balance](https://sky-playground.com/games/floating-balance/): 1 player. A solo balance challenge. Keep a marble on a floating platform for as long as possible while disturbances change its motion.
+- [Flick Force](https://sky-playground.com/games/flick-force/): 1 player. A solo one-swipe distance game. Your swipe launches a toy car along a runway; the distance is measured in game metres.
+- [Memory Trace](https://sky-playground.com/games/memory-trace/): 2–6 players on one device. A local 2–6 player memory drawing game. Everyone sees the same shape for three seconds, then redraws it in the same place.
+- [Dice & Delight](https://sky-playground.com/games/dice-party/): 2–6 players on one device. A 2–6 player pass-and-play dice game. Each player rolls once per round using a phone shake or the roll button.
+- [Pocket Poker](https://sky-playground.com/games/poker-party/): 2–6 players on one device. A local 2–6 player card comparison game using a shuffled 52-card deck. Big Two mode compares drawn five-card hands rather than playing a shedding game.
+- [Mahjong Match](https://sky-playground.com/games/mahjong-match/): 2 players on one device. A two-player local tile game with all 144 mahjong tiles. Match by the displayed rank-equivalence rules, rather than by exact tile face.
