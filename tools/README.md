@@ -1,5 +1,11 @@
 # Static release build
 
+## Google Tag Manager
+
+All 20 published HTML pages include container **GTM-K72CNJRN** exactly once: the standard asynchronous script near the top of the head and the hidden noscript iframe immediately after the body tag. Existing correct installations are retained. The builder preserves the GTM bootstrap inline while continuing to bundle application scripts and preserve JSON-LD. No custom game-state events or saved data are added to the data layer.
+
+With Playwright installed, run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright npm run check:gtm --prefix tools` against source. After a release build, run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node tools/check-gtm.mjs _site`. The check validates placement, duplicates and the container URL, then executes JavaScript-enabled and disabled fallbacks in isolated browsers. GTM responses are mocked so validation sends no tracking data. Tag publication, triggers and any consent configuration remain managed in Google Tag Manager.
+
 ## Search and AI discovery
 
 The canonical public collection is **https://sky-playground.com/games/**. Every game has a unique title and description, an absolute canonical URL, Open Graph/Twitter metadata, inline Schema.org VideoGame and breadcrumb data, and a readable English/Traditional Chinese guide. The collection lists only its visible game cards in structured data; temporarily hiding a card does not remove the standalone game URL from the sitemap.

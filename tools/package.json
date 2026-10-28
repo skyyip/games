@@ -1,1 +1,1 @@
-{"name":"playground-site-builder","private":true,"type":"module","scripts":{"build":"node build-site.mjs","seo":"node seo.mjs","check:seo":"node check-seo.mjs"},"devDependencies":{"esbuild":"0.28.2"},"engines":{"node":">=20"}}
+{"name":"playground-site-builder","private":true,"type":"module","scripts":{"build":"node build-site.mjs","seo":"node seo.mjs","check:seo":"node check-seo.mjs","check:gtm":"node check-gtm.mjs"},"devDependencies":{"esbuild":"0.28.2"},"engines":{"node":">=20"}}

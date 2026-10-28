@@ -24,9 +24,13 @@
 .fortune-slip>span:has(.comic-lucky-glyph){display:block;width:100px;height:94px;margin:auto;line-height:1}
 #personal-postcard svg{height:auto;max-height:none}
 .master-portrait:has(.player-level-badge:not([hidden])){gap:3px}
-.player-level-badge{position:relative;width:44.2px;height:45.5px;flex:none;isolation:isolate;filter:drop-shadow(0 2px 5px #f0c96b55);animation:level-badge-glow 4s ease-in-out infinite}
+.player-level-badge{position:relative;left:-6px;width:44.2px;height:45.5px;flex:none;isolation:isolate;filter:drop-shadow(0 2px 5px #f0c96b55);animation:level-badge-glow 4s ease-in-out infinite}
 .player-level-badge svg{display:block;width:100%;height:100%}.player-level-badge::after{content:'';position:absolute;inset:21.4% 23.5% 34.3%;border-radius:50%;background:linear-gradient(120deg,transparent 32%,#fff9d767 49%,transparent 66%);background-size:300% 100%;animation:level-badge-shine 5s ease-in-out infinite;pointer-events:none}.badge-spark{transform-origin:83px 18px;animation:badge-spark-twinkle 3.6s ease-in-out infinite}
 .player-level{margin-top:15px;padding:12px;border:1px solid #d9bc73;border-radius:12px;background:#183c33;color:#fff1c7}.player-level>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:5px}.player-level b{font-size:15px}.player-level small{font-size:11px;line-height:1.55}.player-level progress{display:block;width:100%;height:8px;margin:9px 0;accent-color:#f5d07a}
+#player-level-name{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:3px 8px;border:2px solid #24463d;border-radius:3px;background:hsl(var(--level-label-hue) 72% 78%);color:#163d34;font-weight:800;box-shadow:3px 3px 0 #102e35;rotate:-2deg;overflow-wrap:anywhere}
+#player-level-name::before{content:'✦';flex:none}
+body[data-focus-input=pointer] :is(button,[role=button]):focus{outline:none!important}
+#ritual-loot-dialog[data-kind=result] :is(.loot-icon,.loot-rays){transform:scale(.9)}
 @keyframes level-badge-glow{0%,100%{filter:drop-shadow(0 2px 4px #efca7655)}50%{filter:drop-shadow(0 2px 8px #ffe5a8b0)}}@keyframes level-badge-shine{0%,40%{background-position:100% 0}80%,100%{background-position:0 0}}@keyframes badge-spark-twinkle{0%,100%{scale:.8;opacity:.6}50%{scale:1.1;opacity:1}}
 #records .record-medal{display:grid;place-items:center;width:40px;height:48px;flex:none}#records .record-medal svg{width:36px;height:43px;overflow:visible}#records .record-row{grid-template-columns:40px minmax(0,1fr) auto;gap:9px}#records .record-row div{min-width:0}#records .record-row b{overflow-wrap:anywhere}
 .critical-comic{position:absolute;left:50%;top:8px;translate:-50% 0;z-index:8;pointer-events:none;display:flex;align-items:center;gap:6px;max-width:96%;padding:6px 10px;border:2px solid #ffeb9d;border-radius:14px;background:#683d55;color:#fff4c5;box-shadow:0 3px 0 #2f3542;animation:critical-comic-pop 1.25s cubic-bezier(.18,.7,.27,1) both;white-space:nowrap}.critical-comic b{font-size:30px;line-height:1;font-family:Fredoka,system-ui,sans-serif}.critical-comic span{font-size:11px}.critical-comic i{font-style:normal;color:#ffcf63}.critical-3{background:#b34545;border-color:#fff2b5;border-radius:8px 22px 9px 20px;box-shadow:0 3px 0 #773939,0 0 14px #f1c88166}.critical-3 b{color:#ffe573}.critical-2:after{content:'⌣';position:absolute;right:5px;bottom:-20px;font-size:29px;color:#fff4e4;animation:flying-denture 1s ease-out both}.critical-3:after{content:'👻';position:absolute;right:0;bottom:-32px;font-size:32px;animation:escaping-soul 1s ease-out both}
@@ -45,8 +49,9 @@
 .play-panel[data-phase=setup] .neon-sign{opacity:.12}
 @media(max-width:360px){.fong-intro>.master-portrait{flex-basis:88px}.fong-intro .fong-logo{width:88px;height:99px}.fong-intro>div:last-child{min-width:0;flex:1}.fong-intro h2{font-size:22px;line-height:1.35}.fong-intro>div:last-child>p:last-child{line-height:1.6}}
 
-#phase-beat .beat-telemetry{grid-template-columns:128px minmax(0,1fr);column-gap:14px}
-#phase-beat .beat-stats{grid-template-columns:84px 38px;gap:6px;justify-content:start}
+#phase-beat .beat-telemetry{grid-template-columns:84px minmax(0,1fr);column-gap:14px;align-items:center}
+#phase-beat .beat-stats{grid-template-columns:84px;gap:0;justify-content:start;align-content:center;align-self:center}
+#phase-beat .beat-stats>span:has(#live-combo){display:none}
 #phase-beat .beat-stats>span:first-child{width:84px;min-width:84px;max-width:84px}
 @media(max-width:599px){#phase-beat #live-combo[data-wide=true]{font-size:16px}}
 #phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 76px;max-width:230px;justify-self:start}
@@ -62,7 +67,7 @@
 #weapon-list .kit-shop-actions button:disabled{opacity:.65}
 #weapon-list .kit-shop-actions button .stat-number,#decor-list [data-decor] .stat-number{color:inherit;text-shadow:none}
 .owned-kit-tag{display:table;margin:5px 0;padding:2px 6px;border:1px solid #8fcdb0;border-radius:5px;background:#234b3d;color:#dcffe5;font-size:11px;line-height:1.5}
-@media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:194px minmax(0,1fr);column-gap:18px}#phase-beat .beat-stats{grid-template-columns:110px 66px;gap:12px}#phase-beat .beat-stats>span:first-child{width:110px;min-width:110px;max-width:110px}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 96px;max-width:260px}#phase-beat #finisher-launch{width:96px}}
+@media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:110px minmax(0,1fr);column-gap:18px}#phase-beat .beat-stats{grid-template-columns:110px}#phase-beat .beat-stats>span:first-child{width:110px;min-width:110px;max-width:110px}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 96px;max-width:260px}#phase-beat #finisher-launch{width:96px}}
 @media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:60px minmax(0,1fr) 46px;grid-template-areas:'telemetry telemetry' 'arena hud' 'controls feedback'}#phase-beat:has(#personality-hud[hidden]){grid-template-areas:'telemetry telemetry' 'arena arena' 'controls feedback'}}
 .ritual-zombie{position:absolute;left:5%;bottom:-3px;z-index:0;display:block;width:70px;height:90px;pointer-events:none;opacity:0;animation:zombie-visit 3600ms linear both paused;animation-delay:var(--zombie-at,0ms);filter:drop-shadow(0 3px 4px #102e3566)}
 .ritual-zombie svg{display:block;width:100%;height:100%}
@@ -79,10 +84,10 @@
 #ritual-loot-dialog .loot-icon:has(.reward-mascot,.patron-portrait){background:#e8e4c4;border:2px solid #d5bc8d;border-radius:8px;box-shadow:0 3px 0 #80665b33;padding:3px}
 #ritual-loot-dialog .reward-mascot{animation:reward-giggle 3s ease-in-out infinite;transform-origin:50% 90%}
 @keyframes reward-giggle{0%,65%,100%{rotate:0deg}74%{rotate:-4deg}83%{rotate:3deg}}
-#phase-beat #finisher-launch[data-ready=true]{position:relative;overflow:visible;animation:burst-button-pulse 1.05s ease-in-out infinite;z-index:3}
+#phase-beat #finisher-launch[data-ready=true]{position:relative;overflow:visible;animation:burst-button-jump .72s ease-in-out infinite;z-index:3}
 #finisher-launch[data-ready=true]::before,#finisher-launch[data-ready=true]::after{content:'✦';position:absolute;left:-9px;top:-9px;font-size:18px;line-height:1;color:#fff4b1;text-shadow:0 0 7px #ffdb72;pointer-events:none;animation:burst-spark-hop 1.3s ease-in-out infinite}
 #finisher-launch[data-ready=true]::after{color:#abfff0;animation-delay:-.65s;animation-direction:reverse;font-size:14px}
-@keyframes burst-button-pulse{0%,100%{scale:1;filter:brightness(1)}50%{scale:1.055;filter:brightness(1.16)}}
+@keyframes burst-button-jump{0%,100%{transform:translate(0,0) rotate(-3deg)}12%{transform:translate(-7px,-8px) rotate(7deg) scale(1.06)}28%{transform:translate(7px,5px) rotate(-7deg)}43%{transform:translate(-5px,7px) rotate(5deg) scale(1.04)}61%{transform:translate(6px,-7px) rotate(-8deg) scale(1.06)}79%{transform:translate(-7px,3px) rotate(6deg)}}
 @keyframes burst-spark-hop{0%,100%{left:-9px;top:-9px;rotate:0deg;scale:.7}25%{left:calc(100% - 5px);top:-11px;rotate:80deg;scale:1.2}50%{left:calc(100% - 3px);top:calc(100% - 5px);rotate:160deg;scale:.8}75%{left:-11px;top:calc(100% - 3px);rotate:240deg;scale:1.15}}
 .ritual-stage[inert] #finisher-launch,.ritual-stage[inert] #finisher-launch::before,.ritual-stage[inert] #finisher-launch::after{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.patron-wave,#ritual-loot-dialog .reward-mascot,#phase-beat #finisher-launch[data-ready=true],#finisher-launch[data-ready=true]::before,#finisher-launch[data-ready=true]::after{animation:none!important;scale:1;filter:none}#finisher-launch[data-ready=true]::after{left:auto;top:auto;right:-8px;bottom:-8px}}
@@ -103,7 +108,7 @@
 @media(prefers-reduced-motion:reduce){:is(.stall-tabs,.journey-tabs) button{transition:none}}
 
 #phase-beat .beat-telemetry{block-size:76px;min-block-size:76px;max-block-size:76px}
-#phase-beat .ultimate-hud{height:64px;padding-block:6px;align-items:center}
+#phase-beat .ultimate-hud{height:64px;padding-block:6px;align-items:center;align-self:center;column-gap:12px}
 #phase-beat .ultimate-meter{row-gap:5px;align-content:center}
 #phase-beat .ultimate-meter progress{margin-block:4px}
 #paper-doll>svg{scale:1.1;transform-origin:50% 70%}
