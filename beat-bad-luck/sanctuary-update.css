@@ -1,6 +1,6 @@
-/* Every catalogue and accordion has a bounded, keyboard-reachable reading surface. */
-.accordion-scroll{max-height:min(68svh,660px);overflow:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#c6ac77 #24443d;padding:3px 2px 12px;min-width:0;scroll-padding:12px;}
-.tab-scroll{max-height:min(58svh,580px);overflow:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#d2b87b #24443d;scroll-padding:12px;min-width:0;padding-right:8px;}
+/* Catalogues remain keyboard-reachable; desktop scroll regions chain to the page. */
+.accordion-scroll{max-height:min(68svh,660px);overflow:auto;overscroll-behavior-y:auto;scrollbar-width:thin;scrollbar-color:#c6ac77 #24443d;padding:3px 2px 12px;min-width:0;scroll-padding:12px;}
+.tab-scroll{max-height:min(58svh,580px);overflow:auto;overscroll-behavior-y:auto;scrollbar-width:thin;scrollbar-color:#d2b87b #24443d;scroll-padding:12px;min-width:0;padding-right:8px;}
 .accordion-scroll:focus-visible,.tab-scroll:focus-visible{outline:2px solid #efd188;outline-offset:2px;border-radius:7px}
 #neighbourhood-hub>.accordion-scroll{max-height:min(78svh,780px)}
 #neighbourhood-hub .journey-tabs{position:sticky;top:0;z-index:14;background:#23453d}
@@ -49,17 +49,20 @@ body[data-focus-input=pointer] :is(button,[role=button]):focus{outline:none!impo
 .play-panel[data-phase=setup] .neon-sign{opacity:.12}
 @media(max-width:360px){.fong-intro>.master-portrait{flex-basis:88px}.fong-intro .fong-logo{width:88px;height:99px}.fong-intro>div:last-child{min-width:0;flex:1}.fong-intro h2{font-size:22px;line-height:1.35}.fong-intro>div:last-child>p:last-child{line-height:1.6}}
 
-#phase-beat .beat-telemetry{grid-template-columns:84px minmax(0,1fr);column-gap:14px;align-items:center}
-#phase-beat .beat-stats{grid-template-columns:84px;gap:0;justify-content:start;align-content:center;align-self:center}
-#phase-beat .beat-stats>span:has(#live-combo){display:none}
+#phase-beat .beat-telemetry{grid-template-columns:128px minmax(0,1fr);column-gap:8px;align-items:center}
+#phase-beat .beat-stats{grid-template-columns:84px 38px;gap:6px;justify-content:start;align-content:center;align-self:center}
+#phase-beat .beat-stats>span:has(#live-combo){display:block}
 #phase-beat .beat-stats>span:first-child{width:84px;min-width:84px;max-width:84px}
 @media(max-width:599px){#phase-beat #live-combo[data-wide=true]{font-size:16px}}
 #phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 76px;max-width:230px;justify-self:start}
+#phase-beat .ultimate-hud:has(#finisher-launch[hidden]){grid-template-columns:minmax(0,1fr)}
+#stall-skit #skit-cast [data-skit-actor]>svg{scale:.8}
 #phase-beat #finisher-launch{width:76px}
 #phase-beat .ultimate-meter progress{grid-row:auto}
 .is-playing #stall-tiger{display:none!important}
 #phase-beat .simple-event small{font-size:11.5px}
-.stall-showcase{max-height:min(68svh,520px);overflow:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#d2b87b #24443d;scroll-padding:12px}
+.stall-showcase{max-height:min(68svh,520px);overflow:auto;overscroll-behavior-y:auto;scrollbar-width:thin;scrollbar-color:#d2b87b #24443d;scroll-padding:12px}
+@media(any-pointer:coarse){.accordion-scroll,.tab-scroll,.stall-showcase,#neighbourhood-hub>.accordion-scroll,.skin-chooser>.accordion-scroll,.comic-quote-book ul{max-height:none;overflow:visible}}
 .stall-showcase:focus-visible{outline:2px solid #efd188;outline-offset:3px}
 #weapon-list .kit-shop-actions{display:grid;align-content:center;gap:7px;min-width:86px;max-width:112px}
 #weapon-list .kit-shop-actions button{width:100%;min-height:44px;padding:6px;border:1px solid #dec08a;border-radius:7px;background:#d9c18a;color:#243f35;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
@@ -67,7 +70,7 @@ body[data-focus-input=pointer] :is(button,[role=button]):focus{outline:none!impo
 #weapon-list .kit-shop-actions button:disabled{opacity:.65}
 #weapon-list .kit-shop-actions button .stat-number,#decor-list [data-decor] .stat-number{color:inherit;text-shadow:none}
 .owned-kit-tag{display:table;margin:5px 0;padding:2px 6px;border:1px solid #8fcdb0;border-radius:5px;background:#234b3d;color:#dcffe5;font-size:11px;line-height:1.5}
-@media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:110px minmax(0,1fr);column-gap:18px}#phase-beat .beat-stats{grid-template-columns:110px}#phase-beat .beat-stats>span:first-child{width:110px;min-width:110px;max-width:110px}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 96px;max-width:260px}#phase-beat #finisher-launch{width:96px}}
+@media(min-width:600px){#phase-beat .beat-telemetry{grid-template-columns:194px minmax(0,1fr);column-gap:18px}#phase-beat .beat-stats{grid-template-columns:110px 66px;gap:12px}#phase-beat .beat-stats>span:first-child{width:110px;min-width:110px;max-width:110px}#phase-beat .ultimate-hud{grid-template-columns:minmax(0,1fr) 96px;max-width:260px}#phase-beat #finisher-launch{width:96px}}
 @media(max-height:500px) and (min-aspect-ratio:4/3){#phase-beat{grid-template-rows:60px minmax(0,1fr) 46px;grid-template-areas:'telemetry telemetry' 'arena hud' 'controls feedback'}#phase-beat:has(#personality-hud[hidden]){grid-template-areas:'telemetry telemetry' 'arena arena' 'controls feedback'}}
 .ritual-zombie{position:absolute;left:5%;bottom:-3px;z-index:0;display:block;width:70px;height:90px;pointer-events:none;opacity:0;animation:zombie-visit 3600ms linear both paused;animation-delay:var(--zombie-at,0ms);filter:drop-shadow(0 3px 4px #102e3566)}
 .ritual-zombie svg{display:block;width:100%;height:100%}

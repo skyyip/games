@@ -188,7 +188,7 @@ function cancelGestures(){
 }
 function start(){
  if(PHASES.includes(game.phase))return;if(!updateStartReadiness()){if(preparationUI)preparationUI.focusStep('worry');else $('#worry-select').focus();return;}if(preparationUI&&!preparationUI.validate())return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
- const preset=WORRIES.find(w=>w.id===kind)||WORRIES[0];game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:preparationUI?preparationUI.commission():state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preferences.value.randomEvents});neighbourhoodUI?.reset();
+ const preset=WORRIES.find(w=>w.id===kind)||WORRIES[0];game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:preparationUI?preparationUI.commission():state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preparationUI?preparationUI.events():preferences.value.randomEvents});neighbourhoodUI?.reset();
  lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
  audio.voice=$('#voice').checked;unlockSound();renderPhase();cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);
 }

@@ -1,3 +1,15 @@
+# Direct content and combo HUD
+
+Cache v84 restores the live combo beside the score, with full four-digit readability and invariant HUD geometry. The boxed N/128 control stays hidden before readiness; the finisher meter remains and the animated launch control returns at 128 hits. Stall, neighbourhood, secret-collection and collected-fortune/ending sections are no longer accordions; tab navigation and desktop position memory remain. Worries are selected directly from the complete ungrouped list, with the Cantonese prompt 「衰嘢交出嚟」 and unchanged empty/custom-worry validation. Comic scene text uses exactly 85% of its former size and actor icons use 80%, while controls retain 44px targets. Preparation, native ritual, 1000-combo/abort and offline checks cover these changes and preservation of old saves.
+
+# Three-step preparation
+
+Cache v83 adds a compact sticky dock with 44px start controls, 40% larger preparation portraits (61.6px phone / 84px desktop), unified three-column free/owned paper cards and prominent native catalogue toggles. Exactly three preparation steps are visible and numbered 01–03; the five original sections and dormant commission/event handlers remain. Tests exercise those hidden handlers to prove saved stories and preferences survive while actual rituals exclude both optional features. Full ritual completion does not advance the saved inactive commission. Four preparation profiles cover free defaults, private worries, purchase cancellation/confirmation/focus, equipment changes, retained stock and responsive layout. Previous touch-scrolling improvements remain in place.
+
+# Natural touch scrolling
+
+Cache v82 removes height limits and inner scrollports from the showcase, accordion bodies, tab panels and collected-quote lists when any coarse pointer is available. Non-touch desktop lists retain their bounds and use native scroll chaining instead of containment. The browser suite sends a real synthesized finger scroll over an ordinary stall piece, verifies that the page moves while the showcase stays at scrollTop zero, and checks that no rearrangement starts. A native desktop wheel gesture at the showcase's lower edge must move the page. Region styles, desktop bounds, existing preparation flows, ritual gestures and v75/v79/v80/v81 cache replacement remain covered. Dialog scroll isolation and explicit drag handles are unchanged.
+
 # Compact preparation controls
 
 Cache v81 adds single-line, unclipped equipped titles with space reserved beside the Master; raised ritual-start buttons with 5px depth and a pressed state; and bottom accordion headings with 8px vertical padding and a 44px minimum touch target. Other dock controls and preparation-step headings retain their previous styling. The browser suite checks the requested title on narrow screens, both start-button shadows, compact bottom summaries and replacement of v75/v79/v80 caches without save loss. Shadow assertions wait for native CSS transitions to finish rather than relying on the simulated JavaScript clock.
