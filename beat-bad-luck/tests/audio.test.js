@@ -4,7 +4,7 @@ import {StallAudio} from '../src/audio.js';
 class Param{constructor(){this.value=0;}setValueAtTime(value){this.value=value;}cancelScheduledValues(){}exponentialRampToValueAtTime(){}linearRampToValueAtTime(){}}
 class AudioNode{constructor(){this.gain=new Param();this.frequency=new Param();this.threshold=new Param();this.knee=new Param();this.ratio=new Param();this.attack=new Param();this.release=new Param();this.stopped=false;}connect(){}start(){}stop(at){if(at!==undefined)return;this.stopped=true;this.onended?.();}}
 class Context{constructor(){this.state='suspended';this.sampleRate=32;this.currentTime=0;this.destination={};}async resume(){this.state='running';}async suspend(){this.state='suspended';}createGain(){return new AudioNode();}createDynamicsCompressor(){return new AudioNode();}createOscillator(){return new AudioNode();}createBiquadFilter(){return new AudioNode();}createBufferSource(){return new AudioNode();}createBuffer(channels,size){return {getChannelData:()=>new Float32Array(size)};}}
-function setup(t,AudioContext=Context){const timers=new Set();t.mock.method(globalThis,'setInterval',()=>{const id={};timers.add(id);return id;});t.mock.method(globalThis,'clearInterval',id=>timers.delete(id));const previous=Object.getOwnPropertyDescriptor(globalThis,'window');Object.defineProperty(globalThis,'window',{value:{AudioContext},configurable:true});t.after(()=>{if(previous)Object.defineProperty(globalThis,'window',previous);else delete globalThis.window;});return timers;}
+function setup(t,AudioContext=Context){const timers=new Set();t.mock.method(globalThis,'setInterval',(callback,ms)=>{const id={ms};timers.add(id);return id;});t.mock.method(globalThis,'clearInterval',id=>timers.delete(id));const previous=Object.getOwnPropertyDescriptor(globalThis,'window');Object.defineProperty(globalThis,'window',{value:{AudioContext},configurable:true});t.after(()=>{if(previous)Object.defineProperty(globalThis,'window',previous);else delete globalThis.window;});return timers;}
 test('sound defaults on, a gesture unlocks one music loop, and repeated unlocks never stack loops',async t=>{
  const timers=setup(t),audio=new StallAudio();assert.equal(audio.enabled,true);assert.equal(audio.context,null);audio.ambience(true);assert.equal(audio.rain,null);
  assert.equal(await audio.unlock(),true);assert.equal(audio.context.state,'running');assert.ok(audio.rain);assert.equal(timers.size,1);const rain=audio.rain,bar=audio.musicBar;
@@ -40,4 +40,17 @@ test('an interrupted or closed mobile context can recover on a later gesture wit
  window.AudioContext=Interruptible;const audio=new StallAudio();await audio.unlock();audio.ambience(true);const original=audio.context;assert.equal(timers.size,1);
  original.state='interrupted';original.changed();assert.equal(audio.rain,null);assert.equal(timers.size,0);assert.equal(audio.needsUnlock,true);await audio.unlock();assert.equal(audio.context,original);assert.equal(timers.size,1);
  original.state='closed';await audio.unlock();assert.notEqual(audio.context,original);assert.equal(timers.size,1);audio.stop();
+});
+
+test('burst swaps one music loop, cancels queued calm notes, preserves effects, and restores calm on expiry',async t=>{
+ const timers=setup(t),audio=new StallAudio();await audio.unlock();audio.ambience(true);
+ const calm=[...audio.musicSources];assert.equal(calm.length,5);audio.hit('paper',false,false);const effects=[...audio.sources].filter(source=>!audio.musicSources.has(source));
+ audio.setBurst(true);assert.equal(audio.burst,true);assert.equal(timers.size,1);assert.ok(calm.every(source=>source.stopped));assert.ok(effects.every(source=>!source.stopped));assert.equal(audio.musicSources.size,17);assert.equal([...timers][0].ms,1200);
+ const rain=audio.rain,bar=audio.musicBar;audio.setBurst(true);assert.equal(audio.rain,rain);assert.equal(audio.musicBar,bar);assert.equal(timers.size,1);
+ const intense=[...audio.musicSources];audio.setBurst(false);assert.equal(timers.size,1);assert.ok(intense.every(source=>source.stopped));assert.equal(audio.musicSources.size,5);assert.equal([...timers][0].ms,3600);assert.equal(audio.burst,false);audio.stop();assert.equal(timers.size,0);
+});
+test('burst respects mute and pause and can resume without stacking or leaking music',async t=>{
+ const timers=setup(t),audio=new StallAudio();await audio.unlock();audio.ambience(true);audio.setBurst(true);audio.setEnabled(false);assert.equal(timers.size,0);assert.equal(audio.musicSources.size,0);audio.setBurst(false);audio.setBurst(true);assert.equal(audio.rain,null);
+ audio.setEnabled(true);assert.equal(timers.size,1);assert.equal(audio.musicSources.size,17);audio.stop();assert.equal(audio.burst,false);assert.equal(audio.musicSources.size,0);assert.equal(timers.size,0);
+ await audio.unlock();audio.setBurst(true);audio.ambience(true);assert.equal(timers.size,1);assert.equal(audio.musicSources.size,17);audio.setBurst(false);assert.equal(audio.musicSources.size,5);audio.stop();
 });

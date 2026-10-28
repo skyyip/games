@@ -1,6 +1,6 @@
 import {WEAPONS} from './catalog.js';
 export class StallAudio{
- constructor(){this.context=null;this.master=null;this.rain=null;this.enabled=true;this.voice=false;this.chimeAt=0;this.ambienceWanted=false;this.musicTimer=null;this.musicBar=0;this.sources=new Set();this.primed=false;this.mobileBridge=null;}
+ constructor(){this.context=null;this.master=null;this.rain=null;this.enabled=true;this.voice=false;this.chimeAt=0;this.ambienceWanted=false;this.musicTimer=null;this.musicBar=0;this.sources=new Set();this.musicSources=new Set();this.burst=false;this.primed=false;this.mobileBridge=null;}
  get needsUnlock(){return !this.context||this.context.state!=='running'||Boolean(this.mobileBridge?.paused);}
  preparePlayback(){
   const nav=window.navigator??globalThis.navigator;
@@ -29,10 +29,10 @@ export class StallAudio{
  pauseBridge(){try{this.mobileBridge?.pause();}catch{}}
 
  syncGain(){if(this.master&&this.context){const gain=this.master.gain;gain.cancelScheduledValues(this.context.currentTime);gain.setValueAtTime(this.enabled?.34:0,this.context.currentTime);}}
- track(source){this.sources.add(source);source.onended=()=>this.sources.delete(source);return source;}
- clearNotes(){for(const source of this.sources){try{source.stop();}catch{}}this.sources.clear();}
+ track(source){this.sources.add(source);source.onended=()=>{this.sources.delete(source);this.musicSources.delete(source);};return source;}
+ clearNotes(){for(const source of this.sources){try{source.stop();}catch{}}this.sources.clear();this.musicSources.clear();}
 
- tone(frequency,duration=.1,type='sine',volume=.12,delay=0){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,t=c.currentTime+delay,o=this.track(c.createOscillator()),g=c.createGain();o.type=type;o.frequency.setValueAtTime(frequency,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,frequency*.7),t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+duration+.01);}
+ tone(frequency,duration=.1,type='sine',volume=.12,delay=0){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,t=c.currentTime+delay,o=this.track(c.createOscillator()),g=c.createGain();o.type=type;o.frequency.setValueAtTime(frequency,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,frequency*.7),t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+duration+.01);return o;}
  noise(duration=.1,volume=.1,filter=1600){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,buffer=c.createBuffer(1,Math.ceil(c.sampleRate*duration),c.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);const s=this.track(c.createBufferSource()),f=c.createBiquadFilter(),g=c.createGain();s.buffer=buffer;f.type='lowpass';f.frequency.value=filter;g.gain.value=volume;s.connect(f);f.connect(g);g.connect(this.master);s.start();}
  sweep(from,to,duration=.2,volume=.1,type='triangle',delay=0){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,t=c.currentTime+delay,o=this.track(c.createOscillator()),g=c.createGain();o.type=type;o.frequency.setValueAtTime(from,t);o.frequency.exponentialRampToValueAtTime(to,t+duration);g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(volume,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+duration+.02);}
  hit(weapon,heavy,perfect,power=heavy?4:1){const tone=WEAPONS.find(w=>w.id===weapon)?.tone??180,force=Math.max(.1,Math.min(1,power/9));this.tone(tone,.07+force*.14,'triangle',.1+force*.16);this.noise(.04+force*.12,.06+force*.13,weapon==='paper'?2800:1500);this.sweep(180+force*180,65+force*30,.12+force*.15,.05+force*.09,'triangle',.035);if(force>.45)this.sweep(260,440+force*270,.13,.07,'sine',.15);if(perfect)this.tone(920,.1,'sine',.04,.025);}
@@ -46,16 +46,28 @@ export class StallAudio{
   if(this.rain)return;
   const c=this.context,buffer=c.createBuffer(1,c.sampleRate*2,c.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
   const source=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();source.buffer=buffer;source.loop=true;filter.type='lowpass';filter.frequency.value=550;gain.gain.value=.027;source.connect(filter);filter.connect(gain);gain.connect(this.master);source.start();this.rain=source;
-  this.playMusicBar();this.musicTimer=setInterval(()=>this.playMusicBar(),3600);
+  this.playMusicBar();this.musicTimer=setInterval(()=>this.playMusicBar(),this.burst?1200:3600);
+ }
+ setBurst(active){
+  active=Boolean(active);if(this.burst===active)return;this.burst=active;
+  // Stop only queued music notes: impact sounds may finish naturally across the transition.
+  this.clearAmbience();for(const source of this.musicSources){try{source.stop();}catch{}}this.musicSources.clear();this.updateAmbience();
  }
  playMusicBar(){
   if(!this.enabled||!this.ambienceWanted||this.context?.state!=='running')return;
+  const note=(...args)=>{const source=this.tone(...args);if(source)this.musicSources.add(source);};
+  if(this.burst){
+   // 200 BPM minor-key chase: tight bass pulses, climbing arpeggios and offbeat accents.
+   const roots=[146.83,130.81,164.81,138.59],root=roots[this.musicBar++%roots.length];
+   for(let i=0;i<8;i++){note(root*[1,1.2,1.5,1.6][i%4],.12,'triangle',.045,i*.15);if(i%2===0)note(72,.11,'sine',.09,i*.15);else note(root*2,.045,'square',.008,i*.15);}
+   note(root/2,.9,'triangle',.023);return;
+  }
   const melodies=[[392,440,523.25,440],[349.23,392,440,329.63],[329.63,392,493.88,440],[293.66,349.23,392,293.66]],notes=melodies[this.musicBar++%melodies.length];
-  for(const [index,note]of notes.entries())this.tone(note,.7,'sine',.026,index*.9);
-  this.tone(notes[0]/2,2.8,'triangle',.014);
+  for(const [index,frequency]of notes.entries())note(frequency,.7,'sine',.026,index*.9);
+  note(notes[0]/2,2.8,'triangle',.014);
  }
 
  speak(text,language){if(!this.voice||!this.enabled||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang=language==='zh-Hant'?'zh-HK':'en-GB';const voices=speechSynthesis.getVoices();const voice=voices.find(v=>language==='zh-Hant'?/zh[-_]HK|yue/i.test(v.lang):/^en[-_]GB/i.test(v.lang));if(voice)utterance.voice=voice;utterance.rate=.95;utterance.pitch=1.04;speechSynthesis.speak(utterance);}catch{}}
  setEnabled(value){this.enabled=Boolean(value);this.syncGain();if(!this.enabled){this.clearNotes();this.pauseBridge();try{speechSynthesis.cancel();}catch{}}this.updateAmbience();}
- stop(){this.ambience(false);this.clearNotes();this.pauseBridge();try{speechSynthesis.cancel();}catch{}this.context?.suspend().catch(()=>{});}
+ stop(){this.burst=false;this.ambience(false);this.clearNotes();this.pauseBridge();try{speechSynthesis.cancel();}catch{}this.context?.suspend().catch(()=>{});}
 }

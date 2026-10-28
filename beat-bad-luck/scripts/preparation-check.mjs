@@ -32,7 +32,7 @@ async function closeCatalogue(page,type,escape=false){
 async function modalPresentation(page,type){
  const dialog=page.locator('#'+type+'-catalog-dialog'),scroll=dialog.locator('.catalog-scroll');
  await page.waitForFunction(id=>document.getElementById(id).dataset.motion==='open',type+'-catalog-dialog');
- assert.equal(await dialog.isVisible(),true);assert.equal(await dialog.evaluate(node=>node.matches(':modal')),true,'catalogue uses a native modal');
+ assert.equal(await dialog.isVisible(),true);const headingSize=await dialog.locator('h2').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));assert.ok(Math.abs(headingSize-(page.viewportSize().width<=600?15.3:17))<.01,'top-left catalogue title is fifteen percent smaller');assert.equal(await dialog.evaluate(node=>node.matches(':modal')),true,'catalogue uses a native modal');
  const metrics=await scroll.evaluate(node=>{const style=getComputedStyle(node),header=node.previousElementSibling.getBoundingClientRect();return {height:node.clientHeight,total:node.scrollHeight,overflow:style.overflowY,header:header.top,page:scrollY,html:getComputedStyle(document.documentElement).overflow};});
  assert.ok(metrics.total>metrics.height,'long catalogue has inner overflow');assert.equal(metrics.overflow,'auto');assert.equal(metrics.html,'hidden','background page is locked');
  await scroll.evaluate(node=>node.scrollTop=node.scrollHeight);assert.ok(await scroll.evaluate(node=>node.scrollTop)>0);
@@ -48,11 +48,13 @@ async function modalPresentation(page,type){
  await page.locator('#all-'+(type==='skin'?'skins':'kits')+'-label').click();await scroll.evaluate(node=>node.scrollTop=0);
 }
 async function presentation(page){
- const sizes=await page.evaluate(()=>({width:innerWidth,master:parseFloat(getComputedStyle(document.querySelector('.fong-intro .fong-logo')).width),dock:document.querySelector('#quick-dock').getBoundingClientRect().height,start:document.querySelector('#quick-start').getBoundingClientRect().height}));assert.ok(Math.abs(sizes.master-(sizes.width<=600?61.6:84))<.1,'Master portrait is forty percent larger');assert.ok(sizes.dock<=84,'sticky dock remains compact');assert.ok(sizes.start>=44&&sizes.start<=46,'compact start keeps a 44px touch target');
+ const sizes=await page.evaluate(()=>({width:innerWidth,master:parseFloat(getComputedStyle(document.querySelector('.fong-intro .fong-logo')).width),dock:document.querySelector('#quick-dock').getBoundingClientRect().height,start:document.querySelector('#quick-start').getBoundingClientRect().height}));assert.ok(Math.abs(sizes.master-(sizes.width<=600?61.6:84))<.1,'Master portrait is forty percent larger');assert.ok(sizes.dock<=53,'sticky dock remains compact');assert.ok(sizes.start>=44&&sizes.start<=46,'compact start keeps a 44px touch target');
  await open(page,'skin');const cards=await page.locator('#prepare-skin').evaluate(node=>{const free=node.querySelector('[data-skin=plain]'),grid=node.querySelector('.skin-owned-slot');return {sameGrid:free.parentElement===grid,standard:free.classList.contains('skin-card')&&!free.classList.contains('skin-free-card'),columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,freeWidth:free.getBoundingClientRect().width};});assert.equal(cards.sameGrid,true,'free paper belongs to the owned paper grid');assert.equal(cards.standard,true,'free paper uses the same card style');assert.equal(cards.columns,3,'paper choices keep three columns on phones too');assert.ok(cards.freeWidth>=44);
  for(const selector of ['#all-skins-label','#all-kits-label']){const style=await page.locator(selector).evaluate(node=>{const style=getComputedStyle(node);return {border:parseFloat(style.borderTopWidth),background:style.backgroundColor,font:parseFloat(style.fontSize)};});assert.ok(style.border>=2&&style.background!=='rgba(0, 0, 0, 0)','catalogue entry has a prominent filled outline');assert.ok(Math.abs(style.font-12.75*1.25)<.01,'catalogue text is 25% larger than its previous rendered size');}
+ const selected=await page.locator('#prepare-skin').evaluate(node=>{const style=getComputedStyle(node),body=node.querySelector('.preparation-body'),preview=node.querySelector('.preparation-preview');return {border:style.borderTopWidth,color:style.borderTopColor,inner:getComputedStyle(body).borderTopWidth,height:preview.getBoundingClientRect().height,margin:getComputedStyle(preview).marginTop};});assert.equal(selected.border,'1px');assert.notEqual(selected.color,'rgba(0, 0, 0, 0)');assert.equal(selected.inner,'0px');assert.equal(selected.margin,'0px');assert.ok(Math.abs(selected.height-107.1)<.1);
  await page.locator('#prepare-skin>summary').click();
- const quote=await page.locator('.fong-intro>div:last-child>p:last-child').evaluate(node=>({size:parseFloat(getComputedStyle(node).fontSize),font:getComputedStyle(node).fontFamily}));assert.ok(Math.abs(quote.size-15*1.15)<.01);assert.match(quote.font,/Iansui.*Fredoka/);assert.equal(await page.locator('#preparation-title,#preparation-help,.preparation-intro').count(),0);
+ const quote=await page.locator('.fong-intro>div:last-child>p:last-child').evaluate(node=>({size:parseFloat(getComputedStyle(node).fontSize),font:getComputedStyle(node).fontFamily}));assert.ok(Math.abs(quote.size-15*1.15*1.15)<.01);assert.match(quote.font,/Iansui.*Fredoka/);assert.equal(await page.locator('#preparation-title,#preparation-help,.preparation-intro').count(),0);
+ const walletLabel=await page.locator('.stall-wallet>.bbl-kicker').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));assert.ok(Math.abs(walletLabel-13.8)<.01,'sanctuary label is another twenty percent larger');
  const level=await page.locator('.player-level-badge').evaluate(node=>{const label=document.querySelector('#player-level-label'),r=node.getBoundingClientRect(),l=label.getBoundingClientRect();return {inside:Boolean(node.closest('.stall-wallet')),beside:node.nextElementSibling===label,left:r.right<=l.left+1,center:Math.abs(r.y+r.height/2-l.y-l.height/2)};});assert.equal(level.inside,true);assert.equal(level.beside,true);assert.equal(level.left,true);assert.ok(level.center<1);assert.equal(await page.locator('.fong-intro .player-level-badge').count(),0);
  await page.locator('#prepare-worry').scrollIntoViewIfNeeded();
 }
@@ -65,7 +67,7 @@ try {
  assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.nextElementSibling?.classList.contains('records-card')&&!node.closest('#stall-dashboard,#my-stall')),true,'three collection tabs sit outside the stall and immediately before records');
  assert.equal(await page.locator('[data-shortcut=stall]').evaluate(node=>Boolean(node.closest('.stall-showcase-heading'))),true,'decorating shortcut sits beside the stall title');
  assert.equal(await page.locator('#worry-input').isVisible(),true,'private input is immediately visible');
- assert.equal(await page.locator('#worry-ready-note').textContent(),'或者寫低你的小心事，先可以開工。');
+ assert.equal(await page.locator('#worry-ready-note').textContent(),'');assert.equal(await page.locator('#worry-ready-note').isHidden(),true);assert.equal(await page.locator('#worry-selection-summary').isHidden(),true);assert.equal(await page.locator('.custom-label').textContent(),'或寫低你的小心事');assert.ok(Math.abs(await page.locator('#worry-privacy').evaluate(node=>parseFloat(getComputedStyle(node).fontSize))-13*1.1*.85)<.01);
  assert.equal(await page.locator('#secret-collection').evaluate(node=>node.tagName),'SECTION','secret collection is not collapsible');
  assert.equal(await page.locator('.comic-ending-book').evaluate(node=>node.tagName),'SECTION','collected endings are not collapsible');
  assert.equal(await page.locator('#worry-category').count(),0,'worry choices have no category selector');
@@ -87,7 +89,7 @@ try {
  await page.locator('#quick-start').evaluate(node=>node.click());assert.equal(await page.evaluate(()=>document.activeElement.id),'worry-select');
  await page.locator('#worry-select').selectOption('teammates');
  assert.match(await page.locator('#preparation-receipt-worry').textContent(),/豬隊友/);
- assert.equal(await page.locator('#start').isEnabled(),true);
+ assert.equal(await page.locator('#start').isEnabled(),true);assert.equal(await page.locator('#start .work-shoe').evaluate(n=>getComputedStyle(n).animationName),'none','reduced motion keeps the invitation still');await page.emulateMedia({reducedMotion:'no-preference'});assert.equal(await page.locator('#start .work-shoe').evaluate(n=>getComputedStyle(n).animationName),'preparation-shoe-hop');await page.emulateMedia({reducedMotion:'reduce'});
  await page.locator('[name=preparation-commission][value=yes]').evaluate(node=>{node.checked=true;node.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.locator('[data-preparation-story=bus]').evaluate(node=>node.click());
  assert.equal(await page.locator('#worry-select').inputValue(),'teammates','accepting a commission must preserve the preset worry');
@@ -141,7 +143,7 @@ try {
   const kit=WEAPONS.find(w=>!w.starter&&!w.hidden&&w.id!=='flipflop'&&w.cost>0&&w.merit<=50000);
   const before=(await saved(p)).coins;
   await p.locator(`[data-preparation-kit="${kit.id}"]`).click();
-  assert.equal(await p.locator('#purchase-dialog').isVisible(),true);
+  assert.equal(await p.locator('#purchase-dialog').isVisible(),true);const title=await p.locator('#purchase-title').evaluate(n=>{const actual=parseFloat(getComputedStyle(n).fontSize),value=n.style.getPropertyValue('font-size'),priority=n.style.getPropertyPriority('font-size');n.style.removeProperty('font-size');const base=parseFloat(getComputedStyle(n).fontSize);n.style.setProperty('font-size',value,priority);return {actual,base};});assert.ok(Math.abs(title.actual-title.base*1.2*.85)<.01,'purchase title is fifteen percent smaller');
   assert.match(await p.locator('#purchase-spent').textContent(),config.lang==='en'?/balance after purchase/:/購後餘額/);
   await p.locator('#purchase-close').click();assert.equal((await saved(p)).coins,before,'cancel must not spend');
   assert.equal(await p.evaluate(()=>document.activeElement.dataset.preparationKit),kit.id);

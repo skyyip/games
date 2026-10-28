@@ -7,7 +7,7 @@
 .preparation-ready .fong-intro>.master-portrait{flex:0 0 84px}
 .preparation-ready .fong-intro>.master-portrait:has(.master-equipped-title:not([hidden])){min-width:max-content}
 .preparation-ready #welcome .master-equipped-title{width:max-content;max-width:none;white-space:nowrap;overflow-wrap:normal}
-.preparation-ready .fong-intro>div:last-child>p:last-child{font-size:17.25px;font-family:Iansui,'Fredoka',sans-serif;line-height:1.7;margin:0;color:#f7ebce}
+.preparation-ready .fong-intro>div:last-child>p:last-child{font-size:19.8375px;font-family:Iansui,'Fredoka',sans-serif;line-height:1.7;margin:0;color:#f7ebce}
 #ritual-preparation{position:relative;min-width:0;color:#f8edce;text-align:left}
 .preparation-note{font-size:14px;line-height:1.7;color:#e4e9cc;margin:10px 0}
 .preparation-step{margin:12px 0;border:1px solid #8fae98;border-radius:16px;background:#20433d;scroll-margin-block:18px;overflow:clip}
@@ -48,7 +48,7 @@ summary.preparation-heading::after{content:'＋';font-size:23px;font-weight:400;
 .preparation-catalog>summary::-webkit-details-marker{display:none}
 .preparation-catalog>summary::after{content:'＋';flex:none;font-size:20px;line-height:1}
 .preparation-catalog[open]>summary::after{content:'−'}
-.preparation-preview{height:126px;margin:4px auto 16px;display:grid;place-items:center}
+.preparation-preview{height:107.1px;margin:0 auto 8px;display:grid;place-items:center}
 .preparation-preview svg{width:126px;height:126px;max-width:100%}
 #ritual-preparation .skin-chooser{border:0;padding:0;margin:0;background:none;max-height:none}
 #ritual-preparation .skin-chooser>summary{display:none}
@@ -131,7 +131,7 @@ body.preparation-ready :is(#start,#quick-start){--button-depth:5px;--button-edge
 .preparation-ready details:not(.skin-chooser)>summary::marker{content:''}
 .preparation-ready details:not(.skin-chooser)>summary::after{content:'';display:block;flex:0 0 30px;width:30px;height:30px;margin-left:auto;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M9 9 5 3l10 5m12 1 4-6-10 5' fill='%23f4cf92' stroke='%236a5644' stroke-width='1.8' stroke-linejoin='round'/%3E%3Crect x='3' y='7' width='30' height='26' rx='12' fill='%23ffe3a8' stroke='%236a5644' stroke-width='1.8'/%3E%3Ccircle cx='11' cy='17' r='2' fill='%23364e45'/%3E%3Ccircle cx='25' cy='17' r='2' fill='%23364e45'/%3E%3Cpath d='m13 23 5 4 5-4' fill='none' stroke='%23364e45' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M8 23h2m16 0h2' stroke='%23e9919f' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");transition:transform .2s ease}
 .preparation-ready details[open]:not(.skin-chooser)>summary::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M9 9 5 3l10 5m12 1 4-6-10 5' fill='%23f4cf92' stroke='%236a5644' stroke-width='1.8' stroke-linejoin='round'/%3E%3Crect x='3' y='7' width='30' height='26' rx='12' fill='%23ffe3a8' stroke='%236a5644' stroke-width='1.8'/%3E%3Ccircle cx='11' cy='17' r='2' fill='%23364e45'/%3E%3Cpath d='m22 17 3-1 2 1m-14 10 5-4 5 4' fill='none' stroke='%23364e45' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M8 23h2m16 0h2' stroke='%23e9919f' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E")}
-.preparation-ready details[open]:not(.skin-chooser){border-color:transparent;box-shadow:none}
+.preparation-ready details[open]:not(.skin-chooser){border:1px solid #8fae98;border-radius:16px;box-shadow:none}
 .preparation-ready details[open]>.accordion-scroll,.preparation-step[open]>.preparation-body{border:0;box-shadow:none}
 #prepare-skin-title,#prepare-kit-title{font-size:110%}
 .preparation-preview svg{width:107.1px;height:107.1px}
@@ -144,7 +144,7 @@ html:has(.catalog-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 .catalog-dialog[open]{display:flex;flex-direction:column}
 .catalog-dialog::backdrop{background:#091f2bd9;backdrop-filter:blur(5px)}
 .catalog-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid #89a38b66;background:#2d5346;flex:none}
-.catalog-heading h2{min-width:0;margin:0;font-size:20px;line-height:1.5;color:#ffe2a1;overflow-wrap:anywhere}
+.catalog-heading h2{min-width:0;margin:0;font-size:17px;line-height:1.5;color:#ffe2a1;overflow-wrap:anywhere}
 .catalog-close{flex:none;min-height:44px;min-width:72px;padding:8px 12px;border:2px solid #fff2c4;border-radius:14px;background:#efce8f;color:#29473b;box-shadow:0 3px 0 #986d43;font:700 15px/1.4 var(--display);cursor:pointer;touch-action:manipulation}
 .catalog-close:active{translate:0 2px;box-shadow:0 1px 0 #986d43}
 .catalog-dialog :focus-visible{outline:3px solid #fff1a5;outline-offset:3px}
@@ -157,10 +157,29 @@ html:has(.catalog-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 .preparation-ready .stall-showcase-heading .kit-shortcuts{flex:0 0 auto;margin:0;max-width:45%}
 .stall-showcase-heading .kit-shortcuts button{min-height:44px;padding:8px;font-size:12px;gap:5px;white-space:normal}
 .stall-showcase-heading .shortcut-icon{width:28px;height:28px}
-@media(max-width:600px){.catalog-heading{padding:10px 12px;gap:8px}.catalog-heading h2{font-size:18px}.catalog-scroll{padding:12px}.catalog-close{min-width:64px;font-size:14px}.preparation-ready #neighbourhood-hub{padding:12px}.preparation-ready .stall-showcase-heading{gap:8px;padding:10px}.stall-showcase-heading .shortcut-icon{width:24px;height:24px}.stall-showcase-heading .kit-shortcuts button{padding:7px 6px}}
+@media(max-width:600px){.catalog-heading{padding:10px 12px;gap:8px}.catalog-heading h2{font-size:15.3px}.catalog-scroll{padding:12px}.catalog-close{min-width:64px;font-size:14px}.preparation-ready #neighbourhood-hub{padding:12px}.preparation-ready .stall-showcase-heading{gap:8px;padding:10px}.stall-showcase-heading .shortcut-icon{width:24px;height:24px}.stall-showcase-heading .kit-shortcuts button{padding:7px 6px}}
 @media(prefers-reduced-motion:reduce){.preparation-ready details>summary::after{transition:none}}
 
 /* Visual 15% type reduction with 16px focus fonts and unchanged 32px control bounds. */
 .shop-tools .filter-controls .filter-field{display:block;position:relative;min-width:0;height:32px;min-height:32px;margin:0}
 .shop-tools .filter-controls .filter-field>:is(input,select){position:absolute;inset:0 auto auto 0;box-sizing:border-box;width:calc(100% / .85);max-width:none;height:calc(32px / .85);min-height:calc(32px / .85);margin:0;font-size:16px!important;transform:scale(.85);transform-origin:left top}
 .shop-tools .filter-field option{font-size:13.6px}
+
+/* A single compact dock row keeps the start target generous without stacking copy. */
+.preparation-ready #quick-dock{bottom:0;width:min(850px,100%);padding:3px 12px calc(3px + env(safe-area-inset-bottom));gap:8px;border-radius:12px 12px 0 0}
+.preparation-ready #quick-dock>div{display:flex;align-items:center;min-width:0}
+.preparation-ready #dock-kit{min-height:44px;padding:2px;line-height:1.25}
+.preparation-ready #dock-wallet{display:none}
+.preparation-ready #quick-start{min-height:44px;padding:4px 10px!important}
+.preparation-ready .stall-showcase-heading .kit-shortcuts button{min-height:44px;padding:3px 6px;line-height:1.25}
+.preparation-ready .stall-showcase-heading .shortcut-icon{width:22px;height:22px}
+/* Animated invitation; avoid moving the button or its label. */
+.preparation-ready #start:not(:disabled) .work-shoe{animation:preparation-shoe-hop 2.4s cubic-bezier(.3,.1,.3,1) infinite;transform-origin:70% 80%}
+.preparation-ready #start:disabled .work-shoe,.preparation-ready #start:disabled .work-bang{animation:none}
+@keyframes preparation-shoe-hop{0%,60%,100%{transform:rotate(0deg) translateY(0)}70%{transform:rotate(-18deg) translateY(-5px)}80%{transform:rotate(12deg) translateY(2px)}89%{transform:rotate(-5deg) translateY(-2px)}}
+/* Shrink actual helper artwork in cards, keeping their hit targets and grid steady. */
+.preparation-kit-choice svg{width:63px;height:63px}
+.kit-row .kit-art{scale:1.188}
+#result-kit-art{scale:1.08}
+#purchase-dialog[data-kind=weapon] #purchase-art>svg{scale:.9}
+@media(prefers-reduced-motion:reduce){.preparation-ready #start .work-shoe,.preparation-ready #start .work-bang{animation:none!important}}

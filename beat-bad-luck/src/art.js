@@ -182,5 +182,6 @@ export function comboTorchArt(){return `<svg viewBox="0 0 64 100" aria-hidden="t
  <path d="m24 55 4 38q4 6 8 0l4-38Z" fill="#b37a4d" stroke="#4c483d" stroke-width="3"/><path d="m28 68 9-4m-8 16 7-4m-5 13 4-2" stroke="#f4cd8c" stroke-width="2.5" stroke-linecap="round"/>
  <path d="M19 49q13 7 26 0l-5 15q-8 6-16 0Z" fill="#65756b" stroke="#394d46" stroke-width="3"/><path d="M23 49q9-6 18 0" fill="#3a473f" stroke="#394d46" stroke-width="3"/>
  <g class="torch-flame"><path d="M31 53C3 50 15 31 21 24c-2 12 4 14 8 7 6-8 0-17 4-25 19 12 10 23 17 29 9 13-3 23-19 18Z" fill="#ff8d40" stroke="#ffd36d" stroke-width="2"/><path d="M31 52c-13-1-12-12-6-18-1 9 7 8 8 0l3-12c12 15 12 29-5 30Z" fill="#ffe38b"/><path d="M29 51q-4-7 5-14 7 13-5 14" fill="#fff6d7"/></g>
- <g class="torch-face" fill="#29483a"><circle cx="27" cy="57" r="1.6"/><circle cx="37" cy="57" r="1.6"/><path d="M29 61q3 4 6 0" fill="none" stroke="#29483a" stroke-width="1.6" stroke-linecap="round"/></g>
+ <g class="torch-face" stroke="#433d46" stroke-width="1.7" stroke-linecap="round"><ellipse cx="26" cy="56" rx="2.4" ry="3.1" fill="#433d46"/><ellipse cx="38" cy="56" rx="2.4" ry="3.1" fill="#433d46"/><circle cx="25.3" cy="55" r=".8" fill="#fff6d7" stroke="none"/><circle cx="37.3" cy="55" r=".8" fill="#fff6d7" stroke="none"/><path d="M28 61q4 6 8 0Z" fill="#f09a9f"/><path d="m20 60 3 1m18 0 3-1" stroke="#f28b9e" stroke-width="2.7"/></g>
+ <path d="m19 69-7 3 3 4m30-7 7 3-3 4" fill="none" stroke="#e9c18e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;}

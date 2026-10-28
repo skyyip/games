@@ -193,3 +193,20 @@ body[data-focus-input=pointer] :is(button,[role=button]):focus{outline:none!impo
 @keyframes weapon-fire-core{from{transform:scale(.88,1.2) skewX(-4deg)}to{transform:scale(1.15,.88) skewX(4deg)}}
 @keyframes weapon-ember-rise{0%{opacity:0;transform:translate(0,6px) scale(.6)}15%{opacity:.9}70%{opacity:.65}100%{opacity:0;transform:translate(var(--ember-drift),-100px) scale(.2)}}
 @media(prefers-reduced-motion:reduce){.burst-fire *{animation:none!important}.burst-fire .burst-ember{opacity:.55}}
+
+/* Shorter combo rail, with the torch centred across its complete three-row label. */
+#phase-beat .ultimate-hud{max-width:205px}
+#phase-beat .ultimate-meter{max-width:126px;grid-template-columns:minmax(0,1fr) 26px}
+#phase-beat .finisher-torch{grid-row:1/4;width:26px;height:41px;align-self:center;justify-self:center}
+#phase-beat #finisher-charge-label{grid-column:1}
+/* A comic countdown plaque stays in the existing HUD slot; it never covers the paper. */
+#phase-beat #finisher-launch[data-burst=true]{min-width:0;min-height:52px;padding:2px 3px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:center;gap:0 2px;border:2px solid #ffe6a1;border-radius:13px 7px 13px 7px;background:linear-gradient(135deg,#fff2bb,#ffd076);color:#502b50;opacity:1;box-shadow:2px 3px 0 #633b68,inset 0 2px 0 #fff9de;overflow:visible}
+.burst-count-top{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:3px;font:700 10px/1.1 var(--display);color:#783c62}
+.burst-count-top svg{width:13px;height:13px;flex:none}
+.burst-count-time{font:700 17px/1.15 Fredoka,system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.burst-count-time small{font-size:10px}
+.burst-count-multiplier{align-self:center;font:700 10px/1 Fredoka,system-ui,sans-serif;background:#783c62;color:#fff5bc;border-radius:5px;padding:3px 2px}
+@media(min-width:600px){#phase-beat .ultimate-hud{max-width:225px}#phase-beat .ultimate-meter{max-width:132px}#phase-beat #finisher-launch[data-burst=true]{padding-inline:6px}.burst-count-time{font-size:20px}.burst-count-multiplier{font-size:12px}}
+
+/* Longer patron biographies must not stretch a portrait into a tall empty column. */
+#ritual-loot-dialog .loot-icon:has(>.patron-portrait){height:86px;align-self:start}

@@ -35,3 +35,16 @@
 .kit-shortcuts button:active{transform:translateY(3px);box-shadow:0 1px 0 #977044}.kit-shortcuts [data-shortcut=stall]:active{box-shadow:0 1px 0 #5b957d}
 .kit-shortcuts button:focus-visible{outline:3px solid #fff2c9;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.kit-shortcuts button{transition:none}}
+/* History-series props stay playful and yield to the shared crying/damage poses. */
+.history-prop,.history-beard,.history-moustache,.history-bird-wing{transform-box:fill-box;transform-origin:center}
+.paper-doll.is-crying .history-prop{animation:history-prop-fumble .58s cubic-bezier(.2,.8,.25,1)}
+.paper-doll.is-crying .history-moustache,.paper-doll.is-crying .history-beard{animation:character-whiskers .46s ease-in-out}
+.paper-doll.is-crying .history-bird-wing{animation:history-bird-flap .36s ease-in-out 2;transform-origin:90% 70%}
+.paper-doll[data-comedy-act=pleading] .history-balloon{scale:.88 1;rotate:7deg}
+.paper-doll[data-comedy-act=wrap] .history-balloon{scale:.7 .55;rotate:18deg;translate:0 12px}
+.paper-doll[data-comedy-act=wrap] .history-scroll{rotate:-12deg;translate:0 5px}
+.paper-doll[data-comedy-act=wrap] .history-coins,.paper-doll[data-comedy-act=wrap] .history-cart{rotate:16deg;translate:3px 6px}
+.paper-doll[data-comedy-act=wrap] .history-beard,.paper-doll[data-comedy-act=wrap] .history-moustache{rotate:12deg;translate:4px 5px}
+@keyframes history-prop-fumble{0%,100%{transform:translate(0,0) rotate(0)}28%{transform:translate(-3px,-8px) rotate(-13deg) scale(.94,1.06)}63%{transform:translate(4px,-2px) rotate(11deg) scale(1.04,.96)}}
+@keyframes history-bird-flap{0%,100%{transform:rotate(0)}45%{transform:rotate(-24deg) scaleY(.8)}}
+@media(prefers-reduced-motion:reduce){.paper-doll.is-crying :is(.history-prop,.history-beard,.history-moustache,.history-bird-wing){animation:none}}

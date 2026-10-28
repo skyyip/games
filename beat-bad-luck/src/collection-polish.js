@@ -24,13 +24,16 @@ export function polishCollections(){
  // The explicit backup accordion request overrides the general summary reduction.
  for(const node of document.querySelectorAll('#save-tools-title'))factors.delete(node);
  scale('#save-tools-title,.save-tools p,.save-tools button',1.15);
- scale('#worry-question,.custom-label',1.15);scale('#worry-privacy',1.1);
+ scale('#worry-question,.custom-label',1.15);scale('#worry-privacy',1.1*.85);
  scale('.bbl-intro .bbl-kicker,.fong-intro .bbl-kicker,.stall-wallet>.bbl-kicker',1.15);
+ scale('.stall-wallet>.bbl-kicker',1.2);
+ scale('#purchase-title',.85);
  scale('#stall-showcase-title',1.25);scale('#open-journey',1.1);
  scale('#stall-skit *',.85);
  scale('#commission-list .neighbour-card>b',1.15);scale('#commission-list .neighbour-card>strong',.85);
  scale('.records-card>.bbl-kicker,#records b,#records small,#records .empty-record,#storage-note',1.15);
  scale('.fortune-slip small,#reward-line,#journey-result,#card-status,#skin-usage-result,#result-kit-note,#personal-postcard small',1.25);
+ scale('.fortune-slip small',1.15);
  scale('#friend-arrival',1.15);scale('.result-stats small,#result>.bbl-kicker,.postcard-actions button',1.25);
  scale('.postcard-actions button',.7);
  scale('#ritual-loot-dialog[data-kind=result] *',.9);

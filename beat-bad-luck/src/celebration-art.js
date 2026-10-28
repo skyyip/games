@@ -9,7 +9,19 @@ const patronLooks={
  'tram-tinkerer':['#70b5b4','#d4c6a9','cap','spanner'],'tofu-granny':['#ce9eb2','#e1d8ce','bun','bowl'],
  'delivery-hero':['#e6c768','#5b5763','hood','scooter'],'laundry-aunt':['#8aafd1','#64535a','scarf','basket'],
  'dim-sum-ref':['#c59272','#57545c','visor','whistle'],'night-nurse':['#a2c9b8','#6b5371','nurse','bandage'],
- 'rooftop-gardener':['#9cb96c','#a8aba2','straw','melon'],'lantern-dragon':['#d38b94','#64576d','crown','lantern']
+ 'rooftop-gardener':['#9cb96c','#a8aba2','straw','melon'],'lantern-dragon':['#d38b94','#64576d','crown','lantern'],
+ "golden-foot-ming":["#e7bc73", "#665247", "headband", "football"],
+ "da-wen-see":["#a6c8d0", "#d8d5bf", "goggles", "torch"],
+ "ghost-coach":["#b3b998", "#b6ad9e", "scarf", "crutch"],
+ "agent-butcher":["#f0a6ae", "#4f5360", "cap", "cleaver"],
+ "beggar-so":["#a4b78c", "#6e5c56", "straw", "gourd"],
+ "autumn-fragrance":["#e8a3bf", "#64505e", "flower", "fan"],
+ "agent-fat":["#8bc7bd", "#65566e", "spring", "invention"],
+ "justice-bao":["#c49aca", "#585163", "official", "gavel"],
+ "god-of-cooking":["#d78f7d", "#5d505b", "chef", "rice"],
+ "little-treasure":["#dfbd70", "#5b5668", "crown", "abacus"],
+ "kungfu-sing":["#e3cf9f", "#5f5058", "headband", "palm"],
+ "tai-chi-landlord":["#a8bcd1", "#66615b", "cap", "taichi"]
 };
 const patronProps={
  mug:'<path d="M6 9h21v22q-10 8-21 0Z" fill="#fff0c8"/><path d="M27 13q16-2 10 11l-10 1M9 2l2-5m7 5 2-5" fill="none"/>',
@@ -30,11 +42,24 @@ const patronProps={
  whistle:'<path d="M4 14q10-10 20 0l10-3v11H21q-10 17-19 3Z" fill="#f0cf75"/><circle cx="12" cy="22" r="4" fill="#d68f9d"/><path d="m27 2 2-8m8 11 7-3" fill="none"/>',
  bandage:'<rect x="2" y="1" width="34" height="40" rx="9" fill="#fff1d2"/><rect x="9" y="10" width="20" height="20" rx="5" fill="#e5b3a5"/><path d="M19 13v13m-6-6h13" stroke="#fff6df" stroke-width="4"/>',
  melon:'<ellipse cx="20" cy="24" rx="17" ry="19" fill="#accd89"/><path d="M20 5V0l7-4M12 9q-8 18 0 29m15-29q8 18 0 29" fill="none"/><path d="m10 18 3-2m13 0 3 2m-13 9q4 5 8 0" fill="none"/>',
- lantern:'<path d="M19 0v7m0 30v9" stroke="#e9bf6e" stroke-width="4"/><rect x="1" y="7" width="36" height="30" rx="12" fill="#eaa19d"/><path d="M13 8q-8 15 0 28m13-28q8 15 0 28M5 22h28" fill="none" stroke="#ffe0a2"/>'
+ lantern:'<path d="M19 0v7m0 30v9" stroke="#e9bf6e" stroke-width="4"/><rect x="1" y="7" width="36" height="30" rx="12" fill="#eaa19d"/><path d="M13 8q-8 15 0 28m13-28q8 15 0 28M5 22h28" fill="none" stroke="#ffe0a2"/>',
+ "football":"<circle cx=\"18\" cy=\"20\" r=\"17\" fill=\"#fff3d5\"/><path d=\"m18 9 8 6-3 10H12L9 15Z\" fill=\"#647082\"/><path d=\"m3 13 6 2m17 0 7-4M12 25l-6 7m17-7 7 7M18 9V3\" fill=\"none\"/>",
+ "torch":"<path d=\"m10 11 18 2-3 28-12-1Z\" fill=\"#f2c96e\"/><ellipse cx=\"19\" cy=\"10\" rx=\"14\" ry=\"8\" fill=\"#c2e3dc\"/><path d=\"m5 1-5-5m32 8 6-4M19-2v-6\" fill=\"none\" stroke=\"#f7ce70\"/><path d=\"m15 23 3 3 6-5\" fill=\"none\"/>",
+ "crutch":"<path d=\"m6 0 28 7m-22-4 4 18 12-15M16 21l-6 20m4-27 13 3\" fill=\"none\" stroke=\"#c79f6c\" stroke-width=\"5\"/><path d=\"M4 39h12\" stroke=\"#826e85\" stroke-width=\"5\"/>",
+ "cleaver":"<path d=\"m5 24 1-24h30v25Z\" fill=\"#d0e3db\"/><path d=\"m6 25 8 0v15H5Z\" fill=\"#c39375\"/><path d=\"m13 12 3-1m10 0 3 1m-13 5q5 6 10 0\" fill=\"none\"/><circle cx=\"30\" cy=\"5\" r=\"2\" fill=\"#7ba7a0\"/>",
+ "gourd":"<path d=\"M12 1h13v8q17 8 4 15 20 20-9 20S-7 24 8 24Q-2 15 12 9Z\" fill=\"#e9c884\"/><path d=\"m6 24 25-1m-17 8 3-1m6 0 3 1\" fill=\"none\"/><path d=\"M15 1h8\" stroke=\"#91b9ac\" stroke-width=\"6\"/>",
+ "fan":"<path d=\"M19 29 0 8Q19-10 38 8Z\" fill=\"#f2b7c9\"/><path d=\"M19 29V8m0 21L8 5m11 24L29 4m-10 26v12\" fill=\"none\"/><circle cx=\"19\" cy=\"10\" r=\"5\" fill=\"#fff1bd\"/>",
+ "invention":"<path d=\"M2 20h34v18H2Z\" fill=\"#c5a4d3\"/><path d=\"m9 20-4-6 8-5-4-6 8-5m10 21 6-7-8-4 5-5\" fill=\"none\"/><circle cx=\"11\" cy=\"29\" r=\"3\" fill=\"#f2d98b\"/><circle cx=\"27\" cy=\"29\" r=\"3\" fill=\"#a8d7cb\"/>",
+ "taichi":"<circle cx=\"19\" cy=\"19\" r=\"18\" fill=\"#fff2d7\"/><path d=\"M19 1c-24 0-24 36 0 36 12 0 12-18 0-18S7 1 19 1Z\" fill=\"#68717c\" stroke=\"none\"/><circle cx=\"19\" cy=\"10\" r=\"3\" fill=\"#fff2d7\"/><circle cx=\"19\" cy=\"28\" r=\"3\" fill=\"#68717c\"/>",
+ "gavel":"<path d=\"m25 14-14 25\" stroke=\"#ba846a\" stroke-width=\"6\"/><path d=\"m8 5 8-8 21 17-8 9Z\" fill=\"#d5a878\"/><path d=\"m5 38 28-1 4 7H1Z\" fill=\"#b99075\"/><path d=\"m2 0-5-3m38 5 5-1\" fill=\"none\" stroke=\"#f4d386\"/>",
+ "rice":"<path d=\"M0 18h38q-2 23-19 23T0 18Z\" fill=\"#e99fa9\"/><path d=\"M2 17q0-18 13-15 7-8 15 3 8-1 7 12Z\" fill=\"#fff5d4\"/><ellipse cx=\"20\" cy=\"12\" rx=\"10\" ry=\"7\" fill=\"#ffe9b5\"/><circle cx=\"20\" cy=\"12\" r=\"4\" fill=\"#efc65e\"/><path d=\"m10 24 4-1m10 0 4 1m-13 7q4 5 8 0\" fill=\"none\"/>",
+ "abacus":"<rect x=\"0\" y=\"1\" width=\"37\" height=\"38\" rx=\"4\" fill=\"#d7ad78\"/><path d=\"M5 12h27M5 23h27m-19-18v29m12-29v29\" fill=\"none\"/><path d=\"M9 8h8m4 10h8M9 28h8\" stroke=\"#f6df91\" stroke-width=\"6\"/>",
+ "palm":"<path d=\"m9 24-7-9q-2-6 4-4l5 5L9 0q1-6 5-2l3 16 1-20q3-5 6 0v20l3-16q4-3 6 2l-3 18 3-9q5-3 6 2l-5 21q-10 19-21 5Z\" fill=\"#ffd7a8\"/><path d=\"M18 25q12-7 12 3-2 8-9 4-5-3 1-5\" fill=\"none\" stroke=\"#d19ba4\"/>"
 };
 export function patronArt(id){
- const [coat,hair,hat,prop]=patronLooks[id]??patronLooks.waiter,elder=['tofu-granny','sweeper','rooftop-gardener'].includes(id);
- const headwear=hat==='bun'?`<circle cx="37" cy="25" r="12" fill="${hair}"/><circle cx="76" cy="24" r="12" fill="${hair}"/>`:hat==='chef'?'<path d="M33 35V23q-15-16 2-18 9-12 20-3 17-9 24 6 14 3 5 19v8Z" fill="#fff4da"/>':hat==='hood'?`<path d="M24 58Q9 4 55 5t33 54Z" fill="${coat}"/>`:hat==='crown'?'<path d="m30 30-6-20 18 8L55 0l11 18 20-6-9 21Z" fill="#f3d37e"/>':hat==='nurse'?'<path d="m31 35-5-21q29-13 57 0l-7 21Z" fill="#f2f1d8"/><path d="M55 14v14m-7-7h14" stroke="#ce7d93" stroke-width="4"/>':hat==='rollers'?`<g fill="${hair}"><circle cx="32" cy="30" r="10"/><circle cx="45" cy="20" r="11"/><circle cx="63" cy="20" r="11"/><circle cx="78" cy="31" r="10"/></g>`:hat==='scarf'?`<path d="M23 44Q14 5 54 9t33 35l-15-9H35Z" fill="${coat}"/><path d="m78 35 17 6-8 16-12-16" fill="${coat}"/>`:hat==='straw'?'<path d="M27 31q2-29 29-26t27 26m-68 5q41-12 82 0" fill="#ead298" stroke-width="6"/>':`<path d="M27 31Q25 6 55 7t30 24Z" fill="${coat}"/><path d="M24 33h65" stroke="#f2d89e" stroke-width="6"/>`;
+ const [coat,hair,hat,prop]=patronLooks[id]??patronLooks.waiter,elder=['tofu-granny','sweeper','rooftop-gardener','ghost-coach'].includes(id);
+ const movieHats={official:'<path d="M26 30 8 23 6 31l23 8m53-9 23-7 2 8-24 8M30 34V12q25-15 49 0v22Z" fill="#b790c3"/><circle cx="55" cy="19" r="7" fill="#ffe3a0"/>',headband:'<path d="M24 34Q55 12 88 34l-3 8Q55 22 26 43Z" fill="#f0bb88"/><path d="m81 30 17-9-2 11 10 7-22 1" fill="#f0bb88"/>',goggles:'<path d="M24 26h63" stroke="#a3bdc6" stroke-width="9"/><rect x="30" y="13" width="21" height="18" rx="6" fill="#ccece0"/><rect x="59" y="13" width="21" height="18" rx="6" fill="#ccece0"/>',spring:'<path d="M29 32Q25 13 55 12t29 20Z" fill="#86b9af"/><path d="M55 13l-7-4 14-4-8-4" fill="none"/><circle cx="54" cy="2" r="3" fill="#ffe0a0"/>',flower:'<circle cx="29" cy="24" r="14" fill="#eec5ce"/><path d="M22 13q12-10 13 2 14-3 10 8-1 11-12 6-9 12-14 1-12-1-6-11Z" fill="#ef9faf"/><circle cx="28" cy="22" r="6" fill="#ffe6a0"/>'};
+ const headwear=movieHats[hat]??(hat==='bun'?`<circle cx="37" cy="25" r="12" fill="${hair}"/><circle cx="76" cy="24" r="12" fill="${hair}"/>`:hat==='chef'?'<path d="M33 35V23q-15-16 2-18 9-12 20-3 17-9 24 6 14 3 5 19v8Z" fill="#fff4da"/>':hat==='hood'?`<path d="M24 58Q9 4 55 5t33 54Z" fill="${coat}"/>`:hat==='crown'?'<path d="m30 30-6-20 18 8L55 0l11 18 20-6-9 21Z" fill="#f3d37e"/>':hat==='nurse'?'<path d="m31 35-5-21q29-13 57 0l-7 21Z" fill="#f2f1d8"/><path d="M55 14v14m-7-7h14" stroke="#ce7d93" stroke-width="4"/>':hat==='rollers'?`<g fill="${hair}"><circle cx="32" cy="30" r="10"/><circle cx="45" cy="20" r="11"/><circle cx="63" cy="20" r="11"/><circle cx="78" cy="31" r="10"/></g>`:hat==='scarf'?`<path d="M23 44Q14 5 54 9t33 35l-15-9H35Z" fill="${coat}"/><path d="m78 35 17 6-8 16-12-16" fill="${coat}"/>`:hat==='straw'?'<path d="M27 31q2-29 29-26t27 26m-68 5q41-12 82 0" fill="#ead298" stroke-width="6"/>':`<path d="M27 31Q25 6 55 7t30 24Z" fill="${coat}"/><path d="M24 33h65" stroke="#f2d89e" stroke-width="6"/>`);
  return `<svg class="patron-portrait" data-patron="${Object.hasOwn(patronLooks,id)?id:'waiter'}" viewBox="0 0 120 140" aria-hidden="true" focusable="false">
   <ellipse cx="59" cy="132" rx="37" ry="5" fill="#3c65542b"/>
   <g stroke="#655365" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

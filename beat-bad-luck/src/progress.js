@@ -4,6 +4,7 @@ import {freshNeighbourhood,readNeighbourhood,finishNeighbourhood,STORIES,commiss
 import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorUpgradeBase,decorHourlyRate,weaponDurability} from './catalog.js';
 const cap=(value,max=1000000)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
 export const DECOR_LIFETIME=30*24*3600000;
+export const MAX_IDLE_HOURS=18;
 const clock=(state,now)=>Math.max(state.lastSeen,now);
 const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.decorExpires[id]:clock(state,now)+DECOR_LIFETIME;
 export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
@@ -32,7 +33,7 @@ export function readProgress(raw,now=Date.now()){
 export const idleRate=state=>Math.round(DECOR.reduce((total,d)=>total+decorHourlyRate(d,state.decor[d.id]??0),0)*100)/100;
 export function collectIdle(state,now=Date.now()){
   state={...state,neighbourhood:pruneAlbum(state.neighbourhood,Math.max(state.lastSeen,now))};
-  const at=clock(state,now),end=Math.min(at,state.lastSeen+8*3600000),decor={...state.decor},decorExpires={...state.decorExpires},lost=[];let income=state.idleCarry;
+  const at=clock(state,now),end=Math.min(at,state.lastSeen+MAX_IDLE_HOURS*3600000),decor={...state.decor},decorExpires={...state.decorExpires},lost=[];let income=state.idleCarry;
   for(const item of DECOR){
     const level=decor[item.id]??0;if(!level){delete decorExpires[item.id];continue;}
     const expires=expiry(state,item.id,now);decorExpires[item.id]=expires;

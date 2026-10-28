@@ -1,4 +1,30 @@
-# Two-decimal values and compact shop labels — current acceptance
+## Current acceptance — eighteen-hour income and movie-inspired patrons (v91)
+
+159 unit tests pass. Offline accrual is capped at 18 hours, preserves fractional carry, discards the excess absence only once and remains safe on reload/backwards clocks. Existing decoration expiry still stops income at the individual expiry; collecting never extends durability. The hourly-rate caption states the new limit in both languages.
+
+Twelve original movie-inspired comic neighbours increase the collection to 31, with distinct SVG outfits/props, original bilingual stories and existing 1–5-star weighted rarity. Encounter chance stays 30%; strongest-category oil/merit caps stay 5% and one-use coupons stay 5–15% off. Every new patron can be met exactly once and survives reload/export/import, including coupons and previously known patrons. The coupon migration test now covers the whole expanded pool rather than a fixed legacy count. The four recently removed collection paragraphs remain absent.
+
+Production browser checks pass at 320×568 Chinese, 390×844 English and 1280×900 Chinese: a 24-hour absence pays only 18 hours, reload never repeats it, all 31 illustrated rows fit, a complete ritual awards the new legendary patron with its 15% coupon, and the encounter/collection survives reload. Long biographies retain compact portrait frames. Contact-sheet/collection/arrival screenshots were visually inspected. The production build succeeds with content-hashed assets; source offline cache advances to v91.
+
+## Previous acceptance — collection copy cleanup (v90)
+
+Removed the four introductory decoration, decoration-care, kit-lifetime and patron-probability paragraphs from both language interfaces. Removed their two dynamic render references so switching tabs and rerendering cannot target deleted nodes. Item rows, wear, earnings and patron mechanics remain unchanged. Production browser smoke checks cover Chinese at 320×568 and English at 1280×900: all three tabs populate, helper search/reset works, no horizontal overflow or page errors. Production build succeeds; source cache advances to v90.
+
+## Previous acceptance — compact preparation, comic burst and larger fortune captions (v89)
+
+155 unit tests pass, including music-mode transitions, cancellation of queued calm/intense notes while preserving impacts, mute, pause/resume, recovery and one-loop scheduling. Production browser checks cover 320×568, 390×844, 812×375 and 1280×900 in Chinese/English, normal/reduced motion: short centred combo rail/torch, comic live countdown, 127/128 unlock, 10-second expiry, continuous fire, stable target bounds, pause, reset and completion. The audible 390px run confirms one 1200ms burst loop replaces the 3600ms calm loop, pause stops it and expiry restores one calm loop. Comic burst screenshots were visually reviewed.
+
+Preparation checks cover five phone/landscape/desktop profiles, 52px docks with 44px targets, 15% larger invitation, 20% larger wallet label, restored outer/removed inner frames, shorter previews, animated/still enabled slippers, smaller catalogue/purchase titles, touch scroll, cancellation/confirmation/focus, input privacy and a full ritual. All 60 helper names are checked in both languages (120 exported cards) for lower-text bounds and line overlap after enlarging captions 15%; English wraps at words. Source cache advances to v89 and the production builder hashes all assets.
+
+# Historical satire papers and shorter worry copy — current acceptance
+
+Cache v88 adds eight ten-use papers after the unchanged legacy and screen-comedy catalogues: 和珅, 秦檜, 趙高, 秦始皇, 董卓, 商紂王, 汪精衛 and 希特勒. Prices ascend from 18,600 to 45,800 oil and final multipliers from ×3.1 to ×4.5; the legacy +0.5 increment is not applied again. All have original vector costumes, unique props, shared crying/damage poses, comic hit reactions, bilingual descriptions and reduced-motion states. King Zhou is identified as an account/legend-based portrayal; the dictator is a satirical paper target with a deflating globe and peace dove.
+
+Empty-state worry/readiness instruction text and its spacing are removed. The input label becomes “或寫低你的小心事” / “Or write your worry”. Privacy copy renders at 85% of its former displayed size (12.155px). Required-worry gating, ready-state feedback and private input remain unchanged. Purchase return now scrolls the selected newly owned card into the open modal’s viewport.
+
+Validation: 153 unit tests passed, including all eight prices/final multipliers, unique original props, exact score application, affordability, coupons, ten uses, expiry/rebuy, legacy ownership and free-paper fallback. Native browser checks passed at 320×568 Chinese, 390×844 English, 812×375 Chinese reduced motion and 1280×900 English reduced motion. They cover every purchase/description, cancellation without spending, valid SVG, selected-card focus/visibility, reload, actual hit reactions and 10→9 inventory usage for all new designs, a complete ritual, revised copy and no page overflow. Internal contact-sheet and hit screenshots were visually inspected. The five-profile preparation suite also passed, and source cache v87 upgraded to v88 with the historical module available offline and both old/new paper uses preserved.
+
+# Two-decimal values and compact shop labels
 
 Cache v87 adds a display-only formatter with at most two fractional digits and no unnecessary trailing zeroes. Hidden multipliers/rates such as 4.9399999999999995 and 1.3199999999999998 render as 4.94 and 1.32 across lists, owned stock, preparation and purchase effects. Numeric locale formatting is also capped at two digits. Calculation/save precision and private input remain unchanged.
 

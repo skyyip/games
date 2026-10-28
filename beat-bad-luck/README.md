@@ -86,9 +86,9 @@ Equip is a separate, free action; Buy another opens the normal confirmation. Sto
 
 Purchases show a comic confirmation before any deduction, then an animated reveal. Closing or cancelling before confirmation spends nothing. Merit is an unlock threshold and is not deducted. Coupons apply once on successful purchase. Shops have bilingual search and All / Owned / Can buy filters; story-locked props cannot be purchased or shown as affordable.
 
-Every decoration base price is 300 oil lower, including care values for hidden pieces; income and existing levels are unchanged. Decorations appear immediately in a rearrangeable three-column stall shelf. Drag the ⠿ handle on touch, or drag a piece with a mouse; arrow keys on a handle also reorder. Order is saved and continues to drive scene discovery. The separate neighbourhood layout tab/dropdowns are removed. Owned shelf icons use scale 0.7344, another 10% smaller than the previous 0.816; hit targets and labels stay unchanged. Decorations have eight levels and **30 real days** of durability. First placement retains its base price; later upgrades cost `ceil(base × next level × 0.8)` before the best one-use coupon. Upgrades preserve expiry; repair restores 30 days for `ceil(base price × level × 25% × fraction worn)`. Zero durability removes the item and stops income at its expiry. Discarding gives no refund. Hourly rates retain the previous reduction and +0.06 per extra level. Offline income caps at eight hours and preserves fractional oil.
+Every decoration base price is 300 oil lower, including care values for hidden pieces; income and existing levels are unchanged. Decorations appear immediately in a rearrangeable three-column stall shelf. Drag the ⠿ handle on touch, or drag a piece with a mouse; arrow keys on a handle also reorder. Order is saved and continues to drive scene discovery. The separate neighbourhood layout tab/dropdowns are removed. Owned shelf icons use scale 0.7344, another 10% smaller than the previous 0.816; hit targets and labels stay unchanged. Decorations have eight levels and **30 real days** of durability. First placement retains its base price; later upgrades cost `ceil(base × next level × 0.8)` before the best one-use coupon. Upgrades preserve expiry; repair restores 30 days for `ceil(base price × level × 25% × fraction worn)`. Zero durability removes the item and stops income at its expiry. Discarding gives no refund. Hourly rates retain the previous reduction and +0.06 per extra level. Offline income caps at eighteen hours and preserves fractional oil.
 
-Each completed ritual has a strict **30% chance to meet one previously unknown patron**; collecting everyone stops encounters rather than duplicating rewards. **Nineteen patrons** span five rarities, with original cartoon portraits. The eight additions are 錯鐘叮叮維修王, 彈牙豆花婆婆, 雨衣外賣快腿哥, 襪仔配對洗衣姨, 早茶推車球證, 打呵欠夜更護士, 天台冬瓜園丁 and 迷你醒獅燈籠師. Each has a bilingual story, distinctive outfit and prop. The strongest oil and merit buffs remain capped at 5% per category; coupons are one-use 5–15% discounts. Thirty hidden props/kits remain a 6% post-ritual drop. Daily login awards 20 oil and 30 merit once per Hong Kong day. Receipts prevent duplicate awards.
+Each completed ritual has a strict **30% chance to meet one previously unknown patron**; collecting everyone stops encounters rather than duplicating rewards. **Thirty-one patrons** span five rarities, with original cartoon portraits. The earlier eight additions are 錯鐘叮叮維修王, 彈牙豆花婆婆, 雨衣外賣快腿哥, 襪仔配對洗衣姨, 早茶推車球證, 打呵欠夜更護士, 天台冬瓜園丁 and 迷你醒獅燈籠師. Each has a bilingual story, distinctive outfit and prop. The strongest oil and merit buffs remain capped at 5% per category; coupons are one-use 5–15% discounts. Thirty hidden props/kits remain a 6% post-ritual drop. Daily login awards 20 oil and 30 merit once per Hong Kong day. Receipts prevent duplicate awards.
 
 The top three scores, balances, expiry, inventory, stories, titles and collections use `beat-bad-luck.stall.v1`. Existing saves migrate without resetting owned counters or story progress. Invalid IDs are discarded. Storage failures use memory for that visit; the backup/import UI supports user-controlled transfer. Browser and installed versions share the same origin’s storage where the browser permits it.
 
@@ -110,7 +110,7 @@ All 22 neighbourhood chapters have original bilingual slapstick scenes inspired 
 
 Traditional Chinese is the default; English follows the playground preference. During whacking, Master randomly cycles through the six requested Cantonese villain-hitting lines, without repeats within a six-line bag or at bag boundaries. Local SVG and Web Audio provide the art, rain, melody, bells and impacts; speech uses an available device voice. Audio unlock retries on gestures, including iPhone’s silent media route. Mute/pause stop pending audio without stacking music loops.
 
-Offline cache **v87** includes the current gameplay, illustrated patrons, goofy reward mascots and scoped raised buttons. Both ritual-start buttons have a 5px raised edge that compresses on press; other dock controls stay flat. Equipped titles remain on one line, and remaining bottom accordion headings use compact 8px vertical padding with 44px minimum touch targets. Result trophy, commission, title and ending icons are original laughing cartoon SVGs rather than emoji; actual collectible artwork remains recognisable. All post-ritual reward-dialog text and icons are 10% smaller, without compounding on rerender or reducing button touch targets. Pointer interaction clears lingering button focus outlines, including after any dialog closes; keyboard interaction restores visible focus. Small ritual-button labels are enlarged by 15%, without compounding on rerender. During whacking, the paper artwork and Master's random dialogue are each 10% larger without changing gesture coordinates. Cute decorative zombies randomly spring in from the left or right arena edge behind the paper, then retreat. They never intercept touches; pause freezes them, other phases hide them, and reduced motion keeps them still. The backdrop tiger is hidden during rituals; feeding the white tiger is unchanged.
+Offline cache **v91** includes the current gameplay, illustrated patrons, goofy reward mascots and scoped raised buttons. Both ritual-start buttons have a 5px raised edge that compresses on press; other dock controls stay flat. Equipped titles remain on one line, and remaining bottom accordion headings use compact 8px vertical padding with 44px minimum touch targets. Result trophy, commission, title and ending icons are original laughing cartoon SVGs rather than emoji; actual collectible artwork remains recognisable. All post-ritual reward-dialog text and icons are 10% smaller, without compounding on rerender or reducing button touch targets. Pointer interaction clears lingering button focus outlines, including after any dialog closes; keyboard interaction restores visible focus. Small ritual-button labels are enlarged by 15%, without compounding on rerender. During whacking, the paper artwork and Master's random dialogue are each 10% larger without changing gesture coordinates. Cute decorative zombies randomly spring in from the left or right arena edge behind the paper, then retreat. They never intercept touches; pause freezes them, other phases hide them, and reduced motion keeps them still. The backdrop tiger is hidden during rituals; feeding the white tiger is unchanged.
 
 The stall showcase, bottom sticky dock, both tab bars and text-based sound controls use flat buttons. Other buttons retain raised feedback with 25% lighter depth, shadow and pressed offset; primary/general/icon depths are 3/2.25/1.5px. Gesture targets keep their coordinates and use correspondingly shallower drop shadows. Kit purchase/restock and decoration-price numerals inherit their button's appropriate dark/light text color; normal, hover and held-active contrast is checked against the requested 3:1 minimum. The showcase's three scene controls share one stable row. Both tab bars have integrated textured green backgrounds, flat gold selected tabs and 8px gaps. Fortune PNG/save and share label text is 30% smaller than its previous size, retaining at least 44px touch targets. The stall showcase keeps its viewport-bounded height and keyboard-reachable inner scrolling on non-touch desktops; touch devices use page scrolling.
 
@@ -162,3 +162,67 @@ Sanctuary acceptance: `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright BEAT_BAD_
 Game-generated multipliers, rates and monetary amounts display at most two decimal places, without unnecessary trailing zeroes. Display formatting never changes scoring/income calculations or saved values, and never rewrites personal worry text. Purchase/upgrade text in decoration and helper shops, helper catalogue buy captions/restock controls and pending decoration/helper confirmations is 15% smaller, including numeric spans. Non-purchase actions retain their sizing. Search/filter text is visually 15% smaller while the native controls retain a 16px focus font and their original visible width/32px height to avoid iPhone focus zoom.
 
 `node scripts/shop-typography-check.mjs` (with the same `BEAT_BAD_LUCK_URL` / `GRID_RUSH_PLAYWRIGHT_MODULE` settings) covers exact scaling, hidden-item decimals, filters, confirmation/cancellation, retained control bounds, private input and responsive layouts.
+
+## Historical satire paper series
+
+Eight original chibi paper targets follow the seven screen-comedy looks. They use unique hats/props, shared crying and wear states, and their own comic prop reactions. The order translates historical/story portrayals into game difficulty; King Zhou’s description identifies later legendary material. The dictator caricature is satirical, with a deflating globe balloon and peace dove.
+
+| Paper | Oil | Final score multiplier |
+| --- | ---: | ---: |
+| 巨貪和珅 | 18,600 | ×3.1 |
+| 莫須有秦檜 | 20,800 | ×3.2 |
+| 指鹿為馬趙高 | 23,400 | ×3.35 |
+| 暴君秦始皇 | 26,400 | ×3.5 |
+| 殘暴不仁董卓 | 29,800 | ×3.7 |
+| 荒淫殘暴商紂王 | 33,800 | ×3.9 |
+| 賣國賊汪精衛 | 38,800 | ×4.2 |
+| 納粹希特勒 | 45,800 | ×4.5 |
+
+Each costs oil only, lasts ten scored rituals and supports existing coupons, purchase confirmation, rebuy, save/backup and free-paper fallback. Final multipliers bypass the old catalogue’s +0.5 adjustment; existing ownership and prices are retained. A confirmed purchase scrolls the newly owned selected card into view inside the catalogue.
+
+The empty-worry instruction sentences are removed with their empty spacing. The input label is “或寫低你的小心事” / “Or write your worry”; privacy copy is 15% smaller than its previous rendered size. Worry validation and private-text handling remain intact.
+
+Run `node scripts/historical-skins-check.mjs` with the existing browser module/URL environment variables to exercise all eight purchases, bilingual descriptions, valid artwork, hit reactions, uses, reload, cancellation, a complete ritual and responsive layouts.
+
+
+### Compact preparation and comic burst (cache v89)
+
+Selected paper/helper previews remove their excess top space while keeping the artwork at its existing 107.1px size. Expanded accordions have one visible outer border, without a second frame around their scroll region. Catalogue headings and purchase item titles are 15% smaller. The bottom dock uses one 52px row (plus the device safe-area inset) and retains 44px start/edit targets; configuration remains in preparation. The invitation is 15% larger, the roadside-sanctuary label is 20% larger, and the decoration shortcut has less vertical padding. Helper icons are 10% smaller in inventory/preparation cards and purchase/result artwork. The enabled start button animates its slipper without moving the label, with a still version for reduced motion.
+
+The shorter combo rail centres a smiling comic torch. During a burst, the existing right-hand HUD slot becomes a high-contrast comic clock plaque; a concise hit label/count fits even at 320px. Audio switches from the calm melody to a 200 BPM minor-key chase with bass pulses and arpeggios, then returns to calm. Only queued music notes are cancelled on a mood change; impact sounds may finish. Mute, pause/resume and exit stop/restart the appropriate single loop without stacking.
+
+Lower fortune-card captions are another 15% larger both on screen and in saved/shared images. Shorter lines, word-aware English wrapping and increased baseline gaps keep master comments, helper names, the title and Hong Kong timestamp inside the card.
+
+Additional typography check:
+
+```sh
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright-module.mjs node beat-bad-luck/scripts/fortune-typography-check.mjs
+```
+
+
+### Eighteen-hour stall income and twelve film-inspired patrons (cache v91)
+
+The offline cap is now **18 hours**, shown beside the stall's hourly rate. The cap discards only excess absent time; reloading cannot collect it again. Fractional oil carries forward. Each decoration still earns only until its own expiry, and neither the cap nor collecting repairs or extends its 30-day durability.
+
+The patron pool grows from 19 to **31**. These are original comic neighbours/portraits inspired by the following film roles, with new Cantonese/English stories rather than film footage or recordings:
+
+| New neighbour | Role inspiration | Stars | Oil | Merit | Welcome coupon |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 黃金右腳明鋒 | 《少林足球》明鋒 | 1 | +1% | +1% | — |
+| 尷尬發明家達聞西 | 《國產凌凌漆》達聞西 | 1 | — | +2% | — |
+| 拖鞋教練鬼王達 | 《破壞之王》鬼王達 | 2 | +2% | +2% | — |
+| 平價肉檔凌凌漆 | 《國產凌凌漆》凌凌漆 | 2 | +2% | — | 95% price |
+| 瞓醒先出掌蘇乞兒 | 《武狀元蘇乞兒》蘇燦 | 2 | — | +2% | 95% price |
+| 笑口常開秋香 | 《唐伯虎點秋香》秋香 | 3 | +3% | +2% | 92% price |
+| 零零發彈弓發明王 | 《大內密探零零發》零零發 | 3 | +2% | +3% | 90% price |
+| 太極收聲包租公 | 《功夫》包租公 | 3 | +3% | — | 92% price |
+| 橋底申冤包龍星 | 《九品芝麻官》包龍星 | 4 | — | +4% | 88% price |
+| 黯然開飯廚神 | 《食神》史提芬周 | 4 | +4% | +3% | 88% price |
+| 一蚊都識慳韋小寶 | 《鹿鼎記》韋小寶 | 4 | +4% | — | 88% price |
+| 掃地練掌阿星 | 《功夫》阿星 | 5 | +5% | +5% | 85% price |
+
+Completed rituals retain a 30% chance of meeting one previously unknown patron, weighted by the existing five rarities. Strongest-category oil/merit bonuses still cap at 5%; welcome coupons are one-use and the best is spent first. All original IDs, owned patrons, buffs and coupons survive version-one save/backup migration. The removed collection introduction paragraphs stay removed.
+
+```sh
+GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright-module.mjs BEAT_BAD_LUCK_URL=http://localhost:5233/beat-bad-luck/ node beat-bad-luck/scripts/movie-patrons-check.mjs
+```
