@@ -1,3 +1,4 @@
+import {stallIcon} from './mobile-dialogs.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 import {animateDialog} from './stall-polish.js';
 import {decorArt,weaponArt} from './art.js';
@@ -7,7 +8,7 @@ const scenesIcon=comicIcon('<rect x="7" y="19" width="34" height="23" rx="5" fil
 const albumIcon=comicIcon('<path d="M8 6h29v36H10q-7-4 0-9h27" fill="#f1b5c6"/><path d="M13 6v27m5-18h13m-10 6v1m7-1v1m-7 5q4 4 8 0" fill="none"/>');
 const secretIcon=comicIcon('<path d="M8 21h32v22H8Z" fill="#b8c8ed"/><path d="M5 15h38v10H5Z" fill="#ffe3a3"/><path d="M24 15V43m-1-28Q5 12 12 4q10-3 12 11 2-14 12-11 7 8-11 11" fill="none"/><path d="m14 31 3-1m13 0 3 1m-14 5q5 5 10 0" fill="none"/>');
 const entries=[
- ['shop-stall','#panel-stall','#tab-stall',['裝飾攤位','Decorate stall'],()=>decorArt('cat')],
+ ['shop-stall','#panel-stall','#tab-stall',['裝飾攤位','Decorate stall'],()=>stallIcon],
  ['shop-kits','#panel-kits','#tab-kits',['除厄法寶庫','Ritual helpers'],()=>weaponArt('flipflop')],
  ['shop-friends','#panel-friends','#tab-friends',['貴人圖鑑','Good company'],()=>patronArt('kungfu-sing')],
  ['challenges','#journey-panel-challenges','#journey-tab-challenges',['趣味稱號','Fun titles'],()=>recordMedal(1)],

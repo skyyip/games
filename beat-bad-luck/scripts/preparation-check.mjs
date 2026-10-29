@@ -65,8 +65,8 @@ try {
  assert.equal(await page.locator('#journey-tab-stories,#journey-panel-stories,#journey-summary,#commission-list,#street-keepsakes,#my-stall-label').count(),0,'removed story tab, contents and redundant headings stay absent');
  assert.deepEqual(await page.locator('.journey-tabs .collection-launch-label').allTextContents(),['趣味稱號','攤位名場面','平安籤冊']);
  assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.nextElementSibling?.classList.contains('records-card')&&!node.closest('#stall-dashboard,#my-stall')),true,'three collection tabs sit outside the stall and immediately before records');
- assert.equal(await page.locator('[data-shortcut=stall]').evaluate(node=>Boolean(node.closest('.stall-showcase-heading'))),true,'decorating shortcut sits beside the stall title');
- assert.equal(await page.locator('#worry-input').isVisible(),true,'private input is immediately visible');
+ assert.equal(await page.locator('[data-shortcut=stall]').evaluate(node=>Boolean(node.closest('#stall-showcase-dialog .stall-modal-tools'))),true,'decorating shortcut sits at the top-left of the stall dialog');
+ assert.equal(await page.locator('#worry-input').isVisible(),false,'private input stays in its closed dialog');
  assert.equal(await page.locator('#worry-ready-note,#worry-selection-summary').count(),0);assert.equal(await page.locator('.custom-label').textContent(),'或寫低你的小心事');assert.ok(Math.abs(await page.locator('#worry-privacy').evaluate(node=>parseFloat(getComputedStyle(node).fontSize))-13*1.1*.85)<.01);
  assert.equal(await page.locator('#secret-collection').evaluate(node=>node.tagName),'SECTION','secret collection is not collapsible');
  assert.equal(await page.locator('.comic-ending-book').evaluate(node=>node.tagName),'SECTION','collected endings are not collapsible');
@@ -80,7 +80,7 @@ try {
  assert.equal(await page.locator('#prepare-events').isHidden(),true);
  assert.deepEqual(await page.locator('.preparation-step:visible .preparation-number').allTextContents(),['01','02','03']);
  await presentation(page);
- await page.locator('#worry-select').selectOption('work');assert.equal(await page.locator('#worry-input').isVisible(),true,'preset selection never hides the input');await page.locator('#worry-select').selectOption('');
+ await page.locator('#worry-select').selectOption('work');assert.equal(await page.locator('#worry-input').isVisible(),false,'preset selection keeps the editor hidden');await page.locator('#worry-select').selectOption('');
  assert.equal(await page.locator('dialog[open]').count(),0,'daily gift must not interrupt preparation');
  assert.equal(await page.locator('#daily-reward-note').isVisible(),true);
  assert.equal((await saved(page)).coins,16);
@@ -95,7 +95,7 @@ try {
  assert.equal(await page.locator('#worry-select').inputValue(),'teammates','accepting a commission must preserve the preset worry');
  assert.match(await page.locator('#commission-target-note').textContent(),/心事已保留/);
  assert.equal(await page.locator('#write-own-worry').count(),0,'private worry needs no reveal button');
- await page.locator('#worry-input').fill(privateWorry);
+ await page.locator('#write-worry').click();await page.locator('#worry-input').fill(privateWorry);await page.locator('#save-worry').click();await page.locator('#worry-dialog').waitFor({state:'hidden'});
  await page.locator('[data-preparation-story=cafe]').evaluate(node=>node.click());
  assert.equal(await page.locator('#worry-input').inputValue(),privateWorry,'accepting a different story must not clear private text');
  assert.ok(!(JSON.stringify(await saved(page))).includes(privateWorry));
@@ -131,7 +131,7 @@ try {
  assert.equal(await page.locator('#worry-input').inputValue(),'');
  assert.equal(await page.locator('#start').isDisabled(),true);
  assert.equal(await page.locator('#worry-selection-summary').count(),0);
- await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, always-visible private input, three collection launch buttons, prominent modal catalogues, full ritual and privacy');
+ await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, modal private input with draft cancellation, three collection launch buttons, prominent modal catalogues, full ritual and privacy');
 
  for(const config of [{width:320,height:568,lang:'zh-Hant'},{width:390,height:844,lang:'zh-Hant',motion:'no-preference'},{width:812,height:375,lang:'en'},{width:1280,height:900,lang:'en'}]) {
   const {page:p,context:c}=await setup({...config,rich:true});

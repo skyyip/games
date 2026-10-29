@@ -1,6 +1,6 @@
 {
   "id": "./",
-  "name": "Stone Skip \u00b7 Your Playground.",
+  "name": "Stone Skip · Your Playground.",
   "short_name": "Stone Skip",
   "description": "Choose a stone and send it skipping down a quiet river.",
   "start_url": "./",
@@ -10,14 +10,16 @@
   "theme_color": "#f6f3e9",
   "icons": [
     {
-      "src": "../grid-rush/assets/icons/icon-192.png",
+      "src": "../beat-bad-luck/assets/icons/website-logo-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "../grid-rush/assets/icons/icon-512.png",
+      "src": "../beat-bad-luck/assets/icons/website-logo-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

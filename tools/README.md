@@ -38,3 +38,5 @@ The service-worker update prompt and saved progress continue working. Moving to 
 The shared update checker checks the release manifest on visibility and every five minutes. A new release opens a native Update / Later prompt when gameplay and dialogs allow. Update explicitly activates the new hashed worker and calls `window.location.reload()` in the accepting tab; Later snoozes for 30 minutes. Other tabs keep their current ritual and records. No forced automatic reload occurs.
 
 `tools/check-updates.mjs` is a local integration fixture requiring two generated releases and the `/tmp/ritual-live` server on port 5182. It tests snoozing, explicit activation, one-tab reload, preserved saves and offline opening. Do not run it against a production host.
+
+Shared favicon and Home Screen artwork can be checked with `node tools/check-brand-icons.mjs` from the repository root, or pass a built site directory to also verify hashed PNG URLs. Each app retains its own installation start URL and scope.

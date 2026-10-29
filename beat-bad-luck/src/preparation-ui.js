@@ -1,3 +1,4 @@
+import {createWorryDialog} from './mobile-dialogs.js';
 import {formatNumber} from './number-format.js';
 import {WORRIES,WORRY_GROUPS,WEAPONS,weaponScoreMultiplier} from './catalog.js';
 import {SKINS,skinArt,skinScoreMultiplier} from './skins.js';
@@ -25,7 +26,7 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  if(!optionalStepsEnabled)for(const [id,number]of [['skin','02'],['kit','03']])steps.querySelector('#prepare-'+id+' .preparation-number').textContent=number;
  welcome.querySelector('.fong-intro').after(steps);
  $('#worry-controls').append(field);
- $('#custom-worry-controls').append(field.querySelector('.custom-label'),input,$('#worry-privacy'));
+ const worryDialog=createWorryDialog({container:$('#custom-worry-controls'),input,label:field.querySelector('.custom-label'),privacy:$('#worry-privacy'),onDone:render});
  $('#commission-target-note').setAttribute('role','status');
  $('#worry-select').removeAttribute('aria-describedby');input.setAttribute('aria-describedby','worry-privacy');
  steps.querySelector('.preparation-start').append($('#start'));
@@ -57,11 +58,12 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  const name=item=>local(item.nameZh??translate(item.name),item.name);
  function focusStep(id='worry') {
   const step=$('#prepare-'+id);if(step.tagName==='DETAILS')step.open=true;
-  const target=id==='worry'?(input.value.trim()?input:select):step.querySelector('summary');
+  if(id==='worry'&&input.value.trim()){worryDialog.open();return;}
+  const target=id==='worry'?select:step.querySelector('summary');
   target.focus({preventScroll:true});step.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  }
  select.addEventListener('change',render);
- input.addEventListener('input',render);
+ input.addEventListener('input',()=>{if(!input.closest('dialog[open]'))render();});
  for(const radio of document.querySelectorAll('[name=preparation-commission]'))radio.addEventListener('change',()=>{commissionEnabled=radio.value==='yes';render();});
  for(const radio of document.querySelectorAll('[name=preparation-events]'))radio.addEventListener('change',()=>{onEvents(radio.value==='on');render();});
  $('#use-commission-worry').addEventListener('click',()=>{const current=currentStory();if(current){onChooseWorry(current.chapter.kind);render();focusStep('worry');}});
@@ -106,6 +108,7 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   if(focused)$('#prepare-kit').querySelector(`[data-preparation-kit="${focused}"]`)?.focus({preventScroll:true});
  }
  function render() {
+  worryDialog.refresh();
     const state=getState(),worry=getWorry(),current=currentStory(),events=optionalStepsEnabled&&$('#random-events').checked;
   if(state.neighbourhood.active!==previousStory){previousStory=state.neighbourhood.active;commissionEnabled=Boolean(previousStory);}
   const selected=WORRIES.find(w=>w.id===worry.kind),worryText=worry.text.trim()||(selected?local(selected.labelZh,selected.label):'');

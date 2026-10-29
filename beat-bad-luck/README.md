@@ -2,13 +2,25 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
-## Combat refresh and power budget (cache v94)
+## Mobile drawers and repeatable bursts (cache v95)
+
+All twenty pages now use the existing Beat the Bad Luck horned logo for their favicon and Apple Home Screen icon. All twenty web manifests use its 192px/512px artwork, retaining each app’s own name, start URL and scope. Every source service worker preloads the shared icons in its own existing cache; production still hashes the image URLs.
+
+The private worry input starts hidden inside a native dialog. The write/edit button opens it at a 16px input size. Submit applies the text; X/Escape restores the previous text. The draft is never saved. The live stall display also opens from a button into an inner-scrolling dialog. Its upper-left Decorate stall action uses a stall illustration, matching the collection launcher. Browsing the decoration shop and closing it returns to the stall. Its live pieces retain keyboard/touch rearranging; drag previews render inside the dialog’s top layer and edge scrolling uses the inner surface. Chinese decoration browsing has explicit Chinese labels rather than relying on auto-translation.
+
+Dismiss controls throughout the game share one centered 44px × button with an accessible close label. Existing purchase cancellation, pause/resume and focus-return handlers remain attached. Redundant settings dismissal is hidden; later-created version dialogs receive the same close control. Confirmation, purchase and destructive-action buttons retain their own labels.
+
+Each **new 128-hit chain** earns another ten-second ×3 burst, with no per-ritual use limit. Casting consumes the earned charge. Burst taps score but do not charge the next burst; charging resumes after it ends. A gap over 1.5 seconds resets unfinished charge, while an earned unlock survives. The overall combo is separate and can continue across a cast. Multiple bursts still consume only one kit/paper use for the ritual. The meter is vertically centered with the left stats. Fire moves continuously with staggered deformation, then shrinks/fades into brief smoke before the next charge; reduced motion stays static. Sound uses a small smiling comic speaker.
+
+Ambient visitors are capped at **three papers, two ghosts and one zombie**. Their staggered lifetimes permit the higher density without exceeding six native visitor animations; pause, reduced-motion and phase-exit cleanup remain enabled. Helper-library buttons fit their text and align beneath the description; library artwork is another 10% larger.
+
+## Previous v94: combat refresh and power budget
 
 Owned paid-paper cards have a separate comic magnifier in the upper-right corner. It opens a read-only native detail dialog, including name, drawing, description, multiplier, price and remaining uses. Inspecting never equips, buys or consumes stock. It also works over the full paper catalogue and returns keyboard focus to its own trigger. Free plain paper remains the normal unlimited ×1 card. The selected paper preview has a -20px top margin; the chooser has no shadow. The hourly-income caption is 10% larger.
 
 All new oil acquisition is reduced by 20% and merit acquisition by 10%: ritual pay, commission pay, daily gifts and stall earnings. The reduction happens once per source, with final whole-unit rewards rounded normally and fractional stall carry retained. Existing balances, prices, merit thresholds, coupons, levels and remaining inventory are preserved. New paid kits and secret drops have at least two uses; a partly worn legacy kit may still have one use left.
 
-Joss-paper cartoons fall at the sides of the arena. Ghosts drift and zombies peek from an edge before retreating. Each type shuffles happy, angry, sad and tired faces without immediate repeats. At most two papers, one ghost and one zombie exist together. They never capture input, freeze on pause and are removed on phase exit; reduced motion shows at most one static visitor.
+Joss-paper cartoons fall at the sides of the arena. Ghosts drift and zombies peek from an edge before retreating. Each type shuffles happy, angry, sad and tired faces without immediate repeats. At most three papers, two ghosts and one zombie exist together. They never capture input, freeze on pause and are removed on phase exit; reduced motion shows at most one static visitor.
 
 The model still uses a high-resolution clock and scores in the original input handler. A 50ms UI loop avoids rendering the whole ritual on every display frame. Repeated stat, paper-wear and panel writes are cached; animation work runs on native transforms/opacity. Hidden/offscreen home animation is paused, hit debris is bounded, and audio reuses noise/rain buffers. The DOM switch haptic fallback uses a real native `switch` checkbox on supporting Safari versions, inside the hit handler. Other browsers use Vibration API where available. Haptics are rate-limited; two decorative DOM buffers restart the comic hit flash without replacing the live pointer target or forcing a layout read. Hardware, browser settings and OS support determine whether physical haptics occur.
 
@@ -38,7 +50,7 @@ Pausing or hiding the page freezes the model clock and inputs. Quitting never gr
 The old kit-signature recipes and separate three-step finisher are retired from the live game. All sixty kits, including free hands, share one control:
 
 - Land **128 consecutive hits with any gestures** to unlock the finisher. Keep the gap between scored hits at 1.5 seconds or less. A longer active-time gap resets unfinished progress, while earned points and an earned unlock remain. Pause preserves the combo. The battle HUD displays the combo to the right of the relief score; both remain centered with the finisher meter. The duplicate boxed N/128 control is hidden before readiness; the launch button appears when earned.
-- Tap the full meter for a **10-second burst**, at most **one launch per ritual**. No prerequisite signature wins, compulsory first-use popup or additional oil charge.
+- Tap the full meter for a **10-second burst**, then earn a new 128-hit chain for another launch without a per-ritual limit. During a burst, hits score but do not charge the next burst. After it ends, a new chain charges normally.
 - The torch is removed. Four comic flame edges surround the charge rail at 128 combo and throughout the burst. After expiry, a static toasted rail and dazed charcoal face replace the flames. The meter keeps the same footprint, pauses its motion and resets with a new ritual.
 - Each of the sixty helpers has its own bilingual finisher name, comic payoff, original stage props, tool trajectory and paper pose. These are automatic visual performances over the shared rapid-tap controls, not a second gesture challenge. Native transform/opacity animations are disposed at expiry/exit and paused with the ritual. Hidden helpers have their own stage drawings too.
 - A ready burst button continuously jumps up, down, left and right with exaggerated comic rotation and hopping border sparkles. The sparkles never intercept input. Reduced motion keeps a static bright border and stars instead.
@@ -83,7 +95,7 @@ Fortunes retain the existing 84 bilingual quotes and Cantonese Master comments. 
 
 ## Ritual preparation
 
-The start screen presents three numbered sections: personal worry, worry-paper look and ritual helper. Neighbour commission and random-event controls are retained but hidden while optional steps are disabled. Only a worry is required; other sections show their current defaults and can be opened in any order. Free plain paper and bare hands are always available, while returning players retain usable equipped items. Owned looks/helpers appear inline before the purchase-catalogue buttons, and are also available inside the modal catalogues.
+The start screen presents three numbered sections: personal worry, worry-paper look and ritual helper. Neighbour commission and random-event controls are retained but hidden while optional steps are disabled. Only a worry is required; other sections show their current defaults and can be opened in any order. Free plain paper and bare hands are always available, while returning players retain usable equipped items. Owned looks/helpers appear inline before the purchase-catalogue buttons, and are also available inside the modal catalogues. The private text input is in its own write/edit dialog.
 
 Accepting a story preserves the player's preset or private worry text. The suggested story worry is an explicit replacement action. “Just my own worry” skips the commission for this ritual while retaining the accepted story and chapter progress. Completing a ritual still advances an included commission without meeting its optional bonus target. Opting into commissions without selecting one prompts for a selection or explicit skip.
 

@@ -1,0 +1,55 @@
+/* One visual dismiss control, retaining each dialog's original close/cancel logic. */
+body dialog.unified-modal{position:fixed}
+body dialog.unified-modal .modal-close{position:absolute;inset:10px 10px auto auto;display:grid!important;place-items:center!important;flex:none;box-sizing:border-box;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:0!important;border:2px solid #fff0bc!important;border-radius:14px!important;background:linear-gradient(150deg,#ffe8af,#ebc777)!important;color:#354f46!important;box-shadow:0 3px 0 #8c704d!important;font-size:0!important;line-height:1!important;text-indent:-9999px;overflow:hidden;z-index:10;touch-action:manipulation;cursor:pointer;transform:none!important;rotate:none!important}
+body dialog.unified-modal .modal-close>*{display:none!important}
+body dialog.unified-modal .modal-close::before{content:'×';position:absolute;inset:0;display:grid;place-items:center;font:600 30px/1 Fredoka,system-ui,sans-serif;text-indent:0;letter-spacing:0;color:#354f46}
+body dialog.unified-modal .modal-close::after{content:none!important}
+body dialog.unified-modal .modal-close:active{translate:0 2px;box-shadow:0 1px 0 #8c704d!important}
+body dialog.unified-modal .modal-close:focus-visible{outline:3px solid #97f1df;outline-offset:3px}
+body dialog.unified-modal>.collection-heading,body dialog.unified-modal>.catalog-heading{min-height:66px;padding-right:66px;box-sizing:border-box}
+body dialog.unified-modal:not(:has(>.collection-heading,>.catalog-heading)){padding-top:64px}
+body dialog.unified-modal #loot-title{padding-inline:20px}
+html:has(.mobile-sheet[open]){overflow:hidden;scrollbar-gutter:stable}
+.mobile-sheet{inset:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));margin:auto;width:min(660px,calc(100vw - 20px));max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding:0;border:2px solid #edce8c;border-radius:22px;background:#24473d;color:#fff0ca;overflow:hidden;box-shadow:0 16px 60px #081d2699}
+.mobile-sheet[open]{display:flex;flex-direction:column}.mobile-sheet::backdrop{background:#081f2bd9}
+.mobile-sheet .collection-heading h2{font-size:18px}
+.mobile-sheet-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;padding:16px;scroll-padding:16px}
+#worry-dialog{width:min(500px,calc(100vw - 20px))}
+#worry-dialog .custom-label{display:block;margin:0 0 9px}
+#worry-dialog #worry-input{display:block;width:100%;box-sizing:border-box;font-size:16px!important;line-height:1.6;padding:13px;border:2px solid #b6d1af;border-radius:14px;background:#163c34;color:#fff5d6;user-select:text;touch-action:manipulation}
+#worry-dialog #worry-privacy{font-size:13px;line-height:1.7;white-space:normal}
+.worry-dialog-actions{display:flex;justify-content:space-between;gap:12px;margin-top:20px}.worry-dialog-actions button{min-height:44px;font:600 16px/1.4 var(--display)}
+.write-worry-button{display:flex;align-items:center;justify-content:center;min-height:46px;width:100%;padding:10px 14px;border:2px dashed #b8ceac;border-radius:14px;background:#315546;color:#fff1cd;box-shadow:0 3px 0 #173d33;font:600 16px/1.5 var(--display);touch-action:manipulation;cursor:pointer}
+.stall-showcase-open{display:flex;align-items:center;gap:12px;width:100%;min-height:78px;padding:14px;border:2px solid #e9cd85;border-radius:19px;background:linear-gradient(120deg,#436650,#2b5044);box-shadow:0 4px 0 #163b31;color:#fff2c8;font:600 18px/1.5 var(--display);text-align:left;touch-action:manipulation;cursor:pointer}
+.stall-showcase-open>span:nth-child(2){flex:1}.stall-open-art{flex:0 0 44px;width:44px;height:48px}.stall-open-art svg{width:100%;height:100%}
+#stall-showcase-dialog>.collection-heading{justify-content:flex-start}
+#stall-showcase-dialog .stall-showcase{margin:0;max-height:none!important;overflow:visible!important;border:0;box-shadow:none}
+#stall-showcase-dialog .stall-showcase-heading{display:none}
+#stall-showcase-dialog-title{font:600 20px/1.5 var(--display);margin:0 0 15px}
+#stall-showcase-dialog .stall-modal-tools{min-width:0}
+body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align-items:center;justify-content:flex-start;flex-direction:row;gap:8px;min-height:44px;padding:8px 12px;border:2px solid #dce5b6;border-radius:13px;background:linear-gradient(140deg,#476b52,#2d5344);color:#fff0bf;box-shadow:0 3px 0 #163b31;font:600 15px/1.4 var(--display);text-align:left;touch-action:manipulation;cursor:pointer}
+.stall-button-art,#tab-stall .collection-launch-art{display:block;width:30px;height:32px;flex:0 0 30px}.stall-button-art svg{width:100%;height:100%}#tab-stall .collection-launch-arrow{display:none}
+/* Smaller, left-aligned purchase actions sit under the helper's description. */
+#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions{grid-column:2;justify-items:start;justify-self:start;width:100%;display:flex;flex-wrap:wrap}
+#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions button{width:auto;min-width:0;max-width:100%;padding-inline:14px;text-align:left;white-space:normal;justify-content:flex-start}
+#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.1;transform-origin:top center}
+#phase-beat .beat-telemetry{align-items:center!important}#phase-beat .ultimate-hud{align-self:center;align-items:center;height:60px}#phase-beat .ultimate-meter{align-self:center}
+#sound.icon-button{display:grid;place-items:center;padding:3px!important}#sound>svg{width:100%;height:100%;overflow:visible}
+/* Continuous asymmetric flame deformation, never opacity strobing. */
+.meter-fire-edge svg{animation:meter-flame-breathe 1.35s cubic-bezier(.45,0,.55,1) infinite!important;transform-origin:50% 100%}
+.meter-fire-bottom svg{animation-duration:1.7s!important;animation-delay:-.6s!important}.meter-fire-left svg{animation-duration:1.15s!important;animation-delay:-.35s!important}.meter-fire-right svg{animation-duration:1.5s!important;animation-delay:-.9s!important}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning]){filter:drop-shadow(0 0 3px #f6b25e66)}
+@keyframes meter-flame-breathe{0%,100%{transform:scale(1,.9) skewX(-3deg)}28%{transform:scale(.98,1.13) skewX(2deg)}58%{transform:scale(1.03,.98) skewX(-1deg)}78%{transform:scale(.99,1.08) skewX(3deg)}}
+.finisher-charge-frame[data-state=cooling] #finisher-charge{border-color:#806b58;accent-color:#8e795e;background:#514c42;transition:border-color .5s,background-color .5s}
+.finisher-charge-frame[data-state=cooling] .meter-charred{display:block;opacity:.7}
+.meter-smoke{position:absolute;inset:0;display:none;pointer-events:none}.finisher-charge-frame[data-state=cooling] .meter-smoke{display:block}
+.meter-smoke i{position:absolute;left:25%;top:4px;width:9px;height:15px;border-left:2px solid #cfdbcd;border-radius:50%;opacity:0;animation:meter-smoke-rise 1.6s ease-out both}.meter-smoke i:nth-child(2){left:52%;animation-delay:.15s}.meter-smoke i:nth-child(3){left:78%;animation-delay:.3s}
+@keyframes meter-smoke-rise{0%{opacity:0;transform:translateY(2px) scale(.5)}20%{opacity:.65}100%{opacity:0;transform:translate(6px,-22px) scale(1.6)}}
+@media(max-width:360px){.mobile-sheet-scroll{padding:12px}.stall-showcase-open{font-size:16px;padding:11px}#collection-dialog-shop-kits #weapon-list>.kit-row{column-gap:12px}}
+@media(prefers-reduced-motion:reduce){.meter-fire-edge svg,.meter-smoke i{animation:none!important}.finisher-charge-frame[data-state=cooling] .meter-smoke i{opacity:.35}.finisher-charge-frame{filter:none!important}}
+.finisher-charge-frame[data-state=cooling] .meter-fire-edge{display:block;transform-origin:50% 100%;animation:meter-fire-extinguish .65s cubic-bezier(.2,.65,.35,1) both}
+.finisher-charge-frame[data-state=cooling] .meter-fire-edge svg{animation:meter-fire-settle .65s ease-out both!important}
+@keyframes meter-fire-extinguish{0%{opacity:.95;transform:scale(1)}40%{opacity:.65;transform:scale(.98,.7)}100%{opacity:0;transform:scale(.92,.04)}}
+@keyframes meter-fire-settle{from{transform:skewX(-3deg) scaleY(1)}to{transform:skewX(6deg) scaleY(.8)}}
+.ritual-stage[inert] :is(.meter-fire-edge,.meter-smoke i){animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.finisher-charge-frame[data-state=cooling] .meter-fire-edge{display:none}.meter-fire-edge{animation:none!important}}

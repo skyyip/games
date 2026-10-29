@@ -1,4 +1,14 @@
-## Current acceptance — comic combat, inspection and power budget (v94)
+## Current acceptance — private input/stall dialogs, repeatable bursts and shared icons (v95)
+
+**167 unit tests pass.** Repeat charging tests cover 127/128 boundaries, retained earned unlocks, broken unfinished chains, no charge from burst taps, six independently charged launches without a hidden ceiling, pause, scoring, deadline and reset. Existing economy, durability, private-save and progression checks remain enabled.
+
+Native production-browser checks pass at 320×568 Chinese, 390×844 Chinese, 812×375 English/reduced motion and 1280×900 English. Each completes a ritual after two independently earned bursts. Tests cover hidden private input, 16px editing, submit/cancel/Escape with rollback and focus return, stall inner scrolling and rearranging, nested details, decoration-shop return, readable Chinese shop copy, left-aligned shorter kit actions, 10% larger art, a single centered X per dialog, centered telemetry, pause and cleanup. Multiple casts consume only one helper use; private text never appears in the save.
+
+The five-profile preparation regression and four-profile seven-collection regression pass with the new modal routes. All sixty finisher renderers still pass native finite-keyframe/pause/disposal checks. A simulated 90-second ambient lifecycle visits all four moods per type, reaches the new six-sprite bound (3/2/1) and cleans up completely. Screenshots of the input, stall and cooldown were visually reviewed.
+
+`tools/check-brand-icons.mjs` verifies all twenty pages and twenty manifests reference the Beat the Bad Luck artwork and that production PNG URLs are hashed and exist. Source offline checks for Grid Rush, Roach Rush and Dice Party load all four new icon sizes successfully. The v94 → v95 source upgrade preserves balances, legacy stock, paper uses, patrons and unrelated caches, then supports offline paper inspection and ritual hits with the twelve current resources cached. The production build succeeds for all twenty pages.
+
+## Previous acceptance — comic combat, inspection and power budget (v94)
 
 All **165** unit tests pass. New coverage checks all sixty bilingual finisher names, endings, stage props and distinct finite motion recipes, minimum two-use paid inventory, four emotional spirit drawings, once-only reward reductions, daily 16/27 income, twelve-hour accrual and retained legacy balances/levels. Existing reward, commission, precision/carry, expiry, stock, coupon, pause/timing, paper-use and save tests remain enabled with the new expected economy.
 
