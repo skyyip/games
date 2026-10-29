@@ -1,4 +1,4 @@
-const CACHE='cha-chaan-mop-v2';
+const CACHE='cha-chaan-mop-v3';
 const FILES=['./','./index.html','./styles.css','./manifest.webmanifest','./assets/cover.svg','./src/app.js','./src/game.js','./src/renderer.js','./src/copy.js','./src/progress.js','./src/audio.js','../grid-rush/src/language.js','../grid-rush/src/translations.js','../grid-rush/src/navigation.js','../grid-rush/src/site-updates.js','../grid-rush/src/victory.js','../grid-rush/victory.css','../grid-rush/comic-chinese.css','../grid-rush/assets/fonts/Iansui.woff2','../grid-rush/assets/fonts/Fredoka.woff2','../beat-bad-luck/assets/icons/website-logo-64.png','../beat-bad-luck/assets/icons/website-logo-180.png','../beat-bad-luck/assets/icons/website-logo-192.png','../beat-bad-luck/assets/icons/website-logo-512.png'].map(p=>new URL(p,self.location.href).href);
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(url=>new Request(url,{cache:'reload'}))))));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE_UPDATE')self.skipWaiting();});

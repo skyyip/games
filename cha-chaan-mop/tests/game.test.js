@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, advance, moveMop, shout, hitNPC, superMove, feet, eat, isRaised, wetDiner, pause, resume, cleanPercent, activeNPCs } from '../src/game.js';
+import { createGame, advance, moveMop, shout, hitNPC, superMove, feet, eat, isRaised, wetDiner, pause, resume, cleanPercent, activeNPCs, releaseAll } from '../src/game.js';
 function run(g, seconds){for(let left=seconds;left>1e-6;left-=1/60)advance(g,Math.min(left,1/60));}
 test('all floor cells are visible, cleanable and outside furniture',()=>{const g=createGame();assert(g.cells.length>200);assert(g.cells.every(c=>c.x>=27&&c.x<=573&&c.y>=112&&c.y<670));assert.equal(new Set(g.cells.map(c=>`${c.x},${c.y}`)).size,g.cells.length);assert.equal(activeNPCs(g).length,6);});
-test('mop travel is limited and cleaning requires actual movement',()=>{const g=createGame({events:false});run(g,1);assert.equal(g.score,0);moveMop(g,300,150);advance(g,.1);assert(g.mop.y>530);assert(g.cleanCount>0);assert(g.mop.y<610);});
+test('mop travel is limited and cleaning requires actual movement',()=>{const g=createGame({events:false});run(g,1);assert.equal(g.score,0);moveMop(g,300,150);advance(g,.1);assert(g.mop.y>150);assert(g.mop.y<400);assert(g.cleanCount>0);assert(g.mop.y<610);});
 test('cleaning every accessible patch completes a sister round',()=>{const g=createGame({events:false,duration:90});for(const cell of g.cells){moveMop(g,cell.x,cell.y);for(let i=0;i<100&&g.status==='playing';i++){advance(g,1/60);if(Math.hypot(g.mop.x-cell.x,g.mop.y-cell.y)<10)break;}}assert.equal(cleanPercent(g),100);assert.equal(g.status,'finished');assert.equal(g.endReason,'clean');});
 test('a perfect poke is the 0.24 second window BEFORE a lift',()=>{const g=createGame({events:false});shout(g);const n=g.npcs.find(n=>n.type==='sneaker');run(g,.25);assert(hitNPC(g,n));assert.equal(g.perfects,1);assert.equal(g.score,160);assert.equal(g.tips,100);run(g,.8);assert(!hitNPC(g,n));});
 test('unannounced pokes cost tip rating; consecutive hits have capped combo rewards',()=>{const g=createGame({events:false});for(let i=0;i<15;i++){const n={x:100,y:200,type:'phone',cooldown:0,reactsAt:Infinity,raisedUntil:0,hits:0};hitNPC(g,n);run(g,.1);}assert.equal(g.bestCombo,15);assert.equal(g.tips,55);assert(g.score<15*38);});
@@ -23,3 +23,25 @@ test('pause freezes clock, attacks, effects and releases held inputs',()=>{const
 test('effects and audio queue remain bounded under very fast play',()=>{const g=createGame();for(let i=0;i<1000;i++){hitNPC(g,{x:1,y:1,type:'phone',hits:0,cooldown:0,reactsAt:Infinity});}assert(g.effects.length<=48);assert(g.sound.length<=8);});
 test('parking the mop on a foot cannot farm repeated hits',()=>{const g=createGame({mode:'versus',events:false});moveMop(g,142,295);run(g,1);const wet=g.diners[0].wet;assert(wet>0);run(g,5);assert.equal(g.diners[0].wet,wet);});
 test('soap drops high-heel guard temporarily and adds a slapstick wobble state',()=>{const g=createGame();const ol=g.npcs[2];g.mop.x=ol.x;g.mop.y=ol.y+60;g.rage=100;superMove(g,'soap');assert(ol.slipUntil>g.time);run(g,.2);assert(hitNPC(g,ol));run(g,4.1);assert(!hitNPC(g,ol));});
+
+test('a quick released swipe reaches its final target promptly and the sister follows closely',()=>{
+  const g=createGame({mode:'versus',events:false});moveMop(g,300,150);g.mop.moving=false;
+  run(g,.25);assert.equal(g.mop.y,150);assert.equal(g.mop.pending,false);
+  assert(Math.abs(g.sister.y-230)<25);assert(Math.abs(g.sister.x-270)<2);
+  const after={x:g.mop.x,y:g.mop.y};run(g,2);assert.deepEqual({x:g.mop.x,y:g.mop.y},after);
+});
+test('pause cancels queued mop travel rather than letting it resume behind a dialog',()=>{
+  const g=createGame({events:false});moveMop(g,50,150);advance(g,1/60);pause(g);
+  const before={x:g.mop.x,y:g.mop.y};resume(g);run(g,.5);assert.deepEqual({x:g.mop.x,y:g.mop.y},before);
+  moveMop(g,450,400);releaseAll(g);run(g,.2);assert.deepEqual({x:g.mop.x,y:g.mop.y},before);
+});
+test('fast boosted movement checks the swept path for foot contact and cleaning',()=>{
+  const g=createGame({mode:'versus',events:false});g.mop.x=180;g.mop.y=263;
+  g.event={kind:'rain',until:10};g.soapUntil=10;moveMop(g,27,263);
+  advance(g,1/60);assert.equal(g.diners[0].wet,1,'a grazing foot is hit between endpoints');assert(g.cleanCount>0);
+});
+test('responsive mop follows the same route at low and high display refresh rates',()=>{
+  const a=createGame({mode:'versus',events:false}),b=createGame({mode:'versus',events:false});
+  moveMop(a,100,180);moveMop(b,100,180);for(let i=0;i<6;i++)advance(a,1/20);for(let i=0;i<36;i++)advance(b,1/120);
+  assert.equal(a.mop.x,100);assert.equal(b.mop.x,100);assert.equal(a.mop.y,180);assert.equal(b.mop.y,180);
+});

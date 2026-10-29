@@ -2,9 +2,15 @@
 
 Verified 2026-10-29. Automated browser checks use system Chromium and viewport / touch emulation; physical iPhone / Android thermal, speaker and speech-voice behaviour has not been measured.
 
+## Responsive-control update (source cache v3)
+
+Four current source-browser profiles (320 × 568 / 390 × 844 Chinese; 812 × 375 / 1280 × 900 English) pass. Checks additionally measure the actual rendered shoe pixels: lifting moves the shoe by more than 30 room units and releasing restores its height. Native simultaneous foot holds, reduced motion, visible table clearance and a quick released cleaning swipe are covered. Artifacts: `/tmp/mop-responsive-qa/`.
+
+The extra simulation cases cover prompt final-target settlement after release, closer character following, pause/release cancellation, swept foot/dirt contact under speed boosts and equivalent arrival at 20/120Hz. Stationary mop farming, independent dodge inputs, cramps, NPC defences and original progression tests remain intact. The production build and all 21 built-page metadata checks pass.
+
 ## Logic
 
-`node --test cha-chaan-mop/tests/*.test.js` — **25 passed**.
+`node --test --test-isolation=none cha-chaan-mop/tests/*.test.js` — **29 passed**.
 
 Covers the entire reachable clean floor, limited mop speed, perfect-poke timing, each NPC defence, shout cooldown, combo bounds, rage specials, soap guard break, independently held feet, three-second cramps and recovery, rain / lunch modifiers, wet-hit grace, sweep versus splash defences, bonus meals, a complete winning diner round, versus elimination / timeout, pause cleanup, bounded effects / audio, prevention of stationary-mop score farming, malformed storage, atomic cosmetic purchases, top-three partitions and isolated persistence.
 

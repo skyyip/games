@@ -102,7 +102,7 @@ function loop(now){
   const dt=Math.min((now-previous)/1000,.1);previous=now;
   if(mode!=='diner'){
     const dx=Number(keys.has('arrowright'))-Number(keys.has('arrowleft')),dy=Number(keys.has('arrowdown'))-Number(keys.has('arrowup'));
-    if(dx||dy)moveMop(game,game.mop.x+dx*80,game.mop.y+dy*80);
+    if(dx||dy){const step=650*dt/Math.hypot(dx,dy);moveMop(game,game.mop.x+dx*step,game.mop.y+dy*step);}
     else if(pointer===null)game.mop.moving=false;
   }
   advance(game,dt);renderer.draw(game,lang(),progress.equipped,reduced.matches);
@@ -149,7 +149,7 @@ function eatAction(kind){eat(game,kind);updateUI();}
 const canvas=$('#room');
 canvas.addEventListener('pointerdown',e=>{if(e.button!==0||!game||game.status!=='playing'||mode==='diner'||pointer!==null)return;e.preventDefault();audio.unlock();pointer=e.pointerId;canvas.setPointerCapture(pointer);const p=renderer.point(e.clientX,e.clientY);moveMop(game,p.x,p.y);});
 canvas.addEventListener('pointermove',e=>{if(e.pointerId!==pointer||!game)return;e.preventDefault();const p=renderer.point(e.clientX,e.clientY);moveMop(game,p.x,p.y);});
-function releasePointer(e){if(e.pointerId!==pointer)return;pointer=null;if(game)game.mop.moving=false;}
+function releasePointer(e){if(e.pointerId!==pointer)return;pointer=null;if(!game)return;if(e.type==='pointerup'){const p=renderer.point(e.clientX,e.clientY);moveMop(game,p.x,p.y);}else{game.mop.pending=false;game.mop.tx=game.mop.x;game.mop.ty=game.mop.y;}game.mop.moving=false;}
 canvas.addEventListener('pointerup',releasePointer);canvas.addEventListener('pointercancel',releasePointer);canvas.addEventListener('lostpointercapture',releasePointer);canvas.addEventListener('contextmenu',e=>e.preventDefault());
 function keyFoot(key,down){
   if(!game)return false;

@@ -4,13 +4,19 @@ A Hong Kong café cartoon game with three fully local modes. No account, backend
 
 ## Play
 
-Open `/cha-chaan-mop/` from a local HTTP server, or choose the new card on the playground. Pick a 60- or 90-second round. Café surprises can be disabled for practice.
+Open `/cha-chaan-mop/` from a local HTTP server or its direct website URL. The playground card is temporarily hidden. Pick a 60- or 90-second round. Café surprises can be disabled for practice.
 
 - **姐姐 / Mop master:** drag anywhere inside the room to move the mop. Each dirty patch earns 2. Clean the whole floor before time runs out, or finish with a timed score. Normal shouts make customers lift their feet after a delay; poke in the final 0.24s before the lift for double points. Both shout buttons share a cooldown. Phone users react slowly (1.1s), sneakerheads quickly (0.44s); office heels require a MEGA shout (0.78s), while the uncle ignores shouting and takes three pokes. Surprise pokes lower the tip rating.
 - **顧客 / Feet-up survival:** hold left and right independently to raise feet, release to lower. A sweep requires both; a splash requires the menu shield. Holding both for about 3.8s causes a three-second cramp. Dodge without a wet hit, then eat or drink with a foot lifted within 1.8s for double meal progress and 32 points of cramp relief. Eating/drinking share a 2.8s cooldown. Finish both food and drink to win; three wet hits or an unfinished meal at timeout loses.
 - **同機對戰 / Couch clash:** 1 mop master versus 1–3 diners simultaneously on one screen. Mop master drags, diners use their colour-coded foot buttons. Three wet hits eliminates a diner. Eliminate all diners to win; otherwise surviving diners win at timeout. No food or clean-floor victory in this mode. Multi-touch phones work; tablets provide more space. The shared score and tips track the mop master’s cleaning and pokes.
 
 Desktop: arrows move the mop; E shouts, Q MEGA-shouts, F cyclones, G uses soap. Solo diner: A/D feet, S menu, Space eats, Enter drinks (or use the visible buttons). Versus diner pairs: A/D, J/L, N/M; the mop master uses mouse drag. Esc pauses. Foot controls also support Space/Enter while focused.
+
+## Responsive controls and clear foot poses
+
+The Chinese hero now reads **利姐開工，全場縮腳！**. NPC and multiplayer shoes lift 54 room units; solo diner shoes lift 42 (previously 19). Knees bend outward, shoes tilt, and separate floor shadows plus small up arrows make lifted feet identifiable. A thinner table edge keeps lifted shoes visible. Foot visuals ease up over 120ms and down over 100ms; dodge decisions still respond immediately to input. Reduced motion uses the correct static pose.
+
+The mop catches up rapidly to a moving pointer without teleporting. It completes the final released swipe target, while pause/cancel clears queued movement. The character follows with a shorter settling time. Collision and dirt checks cover each travelled segment, including rain/soap boosts, so fast movement cannot skip contacts. Directional keys retain the original 650-unit/second movement rate.
 
 ## Scoring, events and cosmetics
 

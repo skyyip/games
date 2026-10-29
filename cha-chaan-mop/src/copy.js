@@ -1,7 +1,7 @@
 export const COPY = {
   title: ['茶記大作戰：縮腳啦笨！', 'Mop Mayhem: Feet Up!'],
   kicker: ['一地奶茶，一場腳力大戰。', 'Milk tea spilled. Slippers ready.'],
-  heroTitle: ['姐姐開工，\n全場縮腳！', 'Mop the floor.\nSpare the sneakers?'],
+  heroTitle: ['利姐開工，\n全場縮腳！', 'Mop the floor.\nSpare the sneakers?'],
   heroText: ['拖走打工怨氣，保住限量波鞋。今日你企邊？', 'Clean up the chaos, or keep your favourite shoes dry. Pick a side.'],
   home: ['返回遊樂場', 'Back to playground'], sound: ['聲音', 'Sound'], soundOff: ['靜音', 'Muted'],
   choose: ['今日邊位開工？', 'Pick your side'], sister: ['姐姐模式', 'Mop master'], diner: ['顧客模式', 'Feet-up survival'], versus: ['同機對戰', 'Couch clash'],

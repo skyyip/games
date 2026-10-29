@@ -31,7 +31,7 @@ export function sister(c,x,y,time,equipped={},angry=false) {
 function table(c,p,large=false) {
   const x=p.x,y=p.y-25,s=large?1.6:1;
   oval(c,x,y+22,75*s,31*s,'#35433722');
-  box(c,x-61*s,y-15*s,122*s,50*s,13,'#b18859',C.ink);
+  box(c,x-61*s,y-15*s,122*s,40*s,13,'#b18859',C.ink);
   box(c,x-65*s,y-32*s,130*s,53*s,13,'#f7d398',C.ink);
   line(c,[[x-52*s,y-20*s],[x+50*s,y-20*s]],'#fff2ce',3);
   // A pineapple bun and a cup of tea, each with a tiny face.
@@ -41,18 +41,33 @@ function table(c,p,large=false) {
   line(c,[[x+32*s,y-32*s],[x+29*s,y-16*s]],'#2c765e',3);
   if(large) face(c,x-22*s,y-9*s,'calm',.35);
 }
-function shoe(c,x,y,raised,wet,style='sneakers',color=C.red) {
-  const lift=raised?19:0;
-  oval(c,x,y+8,17,6,'#35433722');
-  line(c,[[x,y-30],[x,y-lift]],'#e5ae83',10);
-  const fill=style==='heels'?'#814665':style==='slippers'?'#f2c263':style==='toes'?'#e6bca6':'#fff7e9';
-  box(c,x-13,y-6-lift,26,25,8,wet?'#b8dce0':fill,C.ink);
-  if(style==='slippers')line(c,[[x-9,y-lift],[x,y+7-lift],[x+9,y-lift]],color,3);
-  else if(style==='toes')for(let k=0;k<3;k++)line(c,[[x-6+k*6,y+7-lift],[x-6+k*6,y+13-lift]],'#b78d7b',1.5);
-  else {line(c,[[x-8,y+5-lift],[x+8,y+5-lift]],color,2);line(c,[[x-8,y+10-lift],[x+8,y+10-lift]],color,2);}
-  if(raised) {label(c,'↑',x,y-48,21,C.dark);}
+// Visual easing stays separate from the immediate, authoritative dodge state.
+const footPoses=new WeakMap();
+function footPose(subject,side,raised,time,reduced) {
+  let poses=footPoses.get(subject);if(!poses){poses={};footPoses.set(subject,poses);}
+  const target=Number(raised);let pose=poses[side];
+  if(!pose)pose=poses[side]={target,from:target,value:target,at:time};
+  if(target!==pose.target){pose.from=pose.value;pose.target=target;pose.at=time;}
+  const progress=reduced?1:Math.min(1,Math.max(0,(time-pose.at)/(target ? .12 : .1)));
+  pose.value=pose.from+(target-pose.from)*(1-(1-progress)**3);
+  return pose.value;
 }
-function npc(c,n,g,lang) {
+function shoe(c,x,y,lift,wet,style='sneakers',color=C.red,side=1,maxLift=54) {
+  const height=maxLift*lift,footX=x+side*12*lift,footY=y-height;
+  oval(c,x,y+20,17-5*lift,6-2*lift,`rgba(53,67,55,${.16-.08*lift})`);
+  // Knee bends up and out; the lifted shoe clears the floor by over its own height.
+  line(c,[[x,y-88],[x+side*(9+12*lift),y-44-20*lift],[footX,footY]],'#e5ae83',10);
+  c.save();c.translate(footX,footY);c.rotate(-side*.25*lift);
+  const fill=style==='heels'?'#814665':style==='slippers'?'#f2c263':style==='toes'?'#e6bca6':'#fff7e9';
+  if(lift>.05){c.strokeStyle='#fff6d9';c.lineWidth=6;c.beginPath();c.roundRect(-14,-7,28,27,9);c.stroke();}
+  box(c,-13,-6,26,25,8,wet?'#b8dce0':fill,lift>.5?C.dark:C.ink);
+  if(style==='slippers')line(c,[[-9,0],[0,7],[9,0]],color,3);
+  else if(style==='toes')for(let k=0;k<3;k++)line(c,[[-6+k*6,7],[-6+k*6,13]],'#b78d7b',1.5);
+  else {line(c,[[-8,5],[8,5]],color,2);line(c,[[-8,10],[8,10]],color,2);}
+  c.restore();
+  if(lift>.15){const ax=footX+side*24;line(c,[[ax,footY+14],[ax,footY-2],[ax-4,footY+3],[ax,footY-2],[ax+4,footY+3]],C.dark,3);}
+}
+function npc(c,n,g,lang,reduced) {
   const slipping=g.time<(n.slipUntil||0);
   const lifted=slipping||g.time>=n.reactsAt&&g.time<n.raisedUntil;
   const bounce=g.time<n.flash?Math.sin((g.time-n.flash)*40)*5:0;
@@ -71,14 +86,14 @@ function npc(c,n,g,lang) {
   if(n.type==='ol'){oval(c,24,-109,9,6,'#d38c9a');oval(c,31,-110,7,6,'#d38c9a');}
   c.restore();
   const style=n.type==='ol'?'heels':'sneakers';
-  shoe(c,n.x-21,n.y+62,lifted,false,style);shoe(c,n.x+21,n.y+62,lifted,false,style);
+  shoe(c,n.x-21,n.y+62,footPose(n,'left',lifted,g.time,reduced),false,style,C.red,-1);shoe(c,n.x+21,n.y+62,footPose(n,'right',lifted,g.time,reduced),false,style,C.red,1);
   if(n.reactsAt>g.time&&n.reactsAt<Infinity) {
     const left=n.reactsAt-g.time;
     box(c,n.x-35,n.y+81,70,9,4,'#c5ccb3');box(c,n.x-35,n.y+81,70*Math.min(1,left/1.1),9,4,left<.24?'#f2bc46':'#71998c');
   }
   if(n.type==='uncle'&&n.hits%3) label(c,`${n.hits%3}/3`,n.x,n.y+100,16,'#825041');
 }
-function diner(c,d,g,eq,lang) {
+function diner(c,d,g,eq,lang,reduced) {
   const p=dinerSeat(g,d.id),isSolo=g.mode==='diner';
   c.save();c.translate(p.x,p.y);
   box(c,-49,-94,98,65,18,colours[d.id],C.ink);
@@ -87,8 +102,8 @@ function diner(c,d,g,eq,lang) {
   line(c,[[-24,-106],[-10,-120],[12,-115],[25,-106]],'#51483e',9);
   face(c,0,-93,d.wet>=3?'panic':'calm',.85);
   c.restore();
-  shoe(c,p.x-25,p.y+65,isRaised(g,d,'left'),d.wet>0,eq.shoes,colours[d.id]);
-  shoe(c,p.x+25,p.y+65,isRaised(g,d,'right'),d.wet>1,eq.shoes,colours[d.id]);
+  shoe(c,p.x-25,p.y+65,footPose(d,'left',isRaised(g,d,'left'),g.time,reduced),d.wet>0,eq.shoes,colours[d.id],-1,isSolo?42:54);
+  shoe(c,p.x+25,p.y+65,footPose(d,'right',isRaised(g,d,'right'),g.time,reduced),d.wet>1,eq.shoes,colours[d.id],1,isSolo?42:54);
   if(d.block){box(c,p.x-60,p.y-8,120,75,8,'#f9efcb',C.ink);label(c,lang==='en'?'MENU':'是日靚餐',p.x,p.y+16,20,C.dark);label(c,'$ 38',p.x,p.y+43,18,C.red);}
   if(!isSolo) {box(c,p.x-27,p.y+94,54,26,8,colours[d.id]);label(c,`P${d.id+1}`,p.x,p.y+107,17,'#fff');}
   if(g.time<d.crampUntil) label(c,'⚡',p.x,p.y+5,34,'#e49a29');
@@ -139,12 +154,12 @@ export function createRenderer(canvas) {
     }
     if(g.soap&&g.time<g.soapUntil){oval(c,g.soap.x,g.soap.y,130,53,'#9bd5c170','#75bda9');for(let i=0;i<8;i++)oval(c,g.soap.x+Math.cos(i)*70,g.soap.y+Math.sin(i*3)*25,5+i%3,5+i%3,'#ffffff99');}
     if(g.mode==='sister') {
-      for(const n of activeNPCs(g)) {npc(c,n,g,lang);if(!n.guest)table(c,n);if(n.type==='phone'){box(c,n.x+38,n.y-64,19,28,4,C.ink);box(c,n.x+41,n.y-61,13,19,2,'#a9dfcd');}}
+      for(const n of activeNPCs(g)) {npc(c,n,g,lang,reduced);if(!n.guest)table(c,n);if(n.type==='phone'){box(c,n.x+38,n.y-64,19,28,4,C.ink);box(c,n.x+41,n.y-61,13,19,2,'#a9dfcd');}}
     } else if(g.mode==='versus') {
-      for(const d of g.diners){const p=dinerSeat(g,d.id);diner(c,d,g,eq,lang);table(c,p);}
+      for(const d of g.diners){const p=dinerSeat(g,d.id);diner(c,d,g,eq,lang,reduced);table(c,p);}
     } else {
       box(c,75,150,450,50,16,'#b74c3f',C.ink);line(c,[[90,176],[510,176]],'#d97662',2);
-      diner(c,g.diners[0],g,eq,lang);table(c,dinerSeat(g,0),true);
+      diner(c,g.diners[0],g,eq,lang,reduced);table(c,dinerSeat(g,0),true);
       const a=g.attack;
       if(a){
         const progress=Math.min(1,(g.time-a.start)/(a.impact-a.start));

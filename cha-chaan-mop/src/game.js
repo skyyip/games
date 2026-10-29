@@ -9,6 +9,12 @@ export const SEATS = [
 ];
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+// Test the full travelled segment so fast swipes cannot jump over a shoe or dirty patch.
+const sweepDistance = (p, from, to) => {
+  const dx=to.x-from.x,dy=to.y-from.y,length2=dx*dx+dy*dy;
+  const f=length2?clamp(((p.x-from.x)*dx+(p.y-from.y)*dy)/length2,0,1):0;
+  return Math.hypot(p.x-from.x-dx*f,p.y-from.y-dy*f);
+};
 export function createGame(options = {}, random = Math.random) {
   const mode = ['sister', 'diner', 'versus'].includes(options.mode) ? options.mode : 'sister';
   const count = mode === 'versus' ? clamp(Math.round(options.players || 1), 1, 3) : 1;
@@ -18,7 +24,7 @@ export function createGame(options = {}, random = Math.random) {
     score: 0, combo: 0, bestCombo: 0, lastHit: -9, perfects: 0, pokes: 0,
     rage: 0, tips: 100, cleanCount: 0, shoutReady: 0, shoutText: '', shoutUntil: 0,
     event: null, nextEvent: options.events === false ? Infinity : 16,
-    mop: { x: 300, y: 610, tx: 300, ty: 610, moving: false },
+    mop: { x: 300, y: 610, tx: 300, ty: 610, moving: false, pending: false },
     sister: { x: 300, y: 650 }, effects: [], serial: 0, sound: [],
     cycloneUntil: 0, soapUntil: 0, soap: null,
     npcs: SEATS.map((p, i) => ({ ...p, type: TYPES[i % 4], raisedUntil: 0, reactsAt: Infinity, hits: 0, cooldown: 0, flash: 0, perfect: false })),
@@ -43,7 +49,7 @@ export function emit(g, kind, x, y, value = 0) {
 function sound(g, type) { if (g.sound.length < 8) g.sound.push(type); }
 export function moveMop(g, x, y, active = true) {
   if (g.status !== 'playing' || g.mode === 'diner') return;
-  g.mop.tx = clamp(x, 27, W - 27); g.mop.ty = clamp(y, 115, H - 30); g.mop.moving = active;
+  g.mop.tx = clamp(x, 27, W - 27); g.mop.ty = clamp(y, 115, H - 30); g.mop.moving = active; g.mop.pending = active;
 }
 export function shout(g, roar = false) {
   if (g.status !== 'playing' || g.mode === 'diner' || g.time < g.shoutReady) return false;
@@ -133,14 +139,14 @@ export function eat(g, kind) {
   emit(g, kind, 300, 235); sound(g, 'eat');
   return true;
 }
-function cleanAround(g, radius) {
-  for (const cell of g.cells) if (!cell.clean && distance(cell, g.mop) < radius) {
+function cleanAround(g, radius, from=g.mop) {
+  for (const cell of g.cells) if (!cell.clean && sweepDistance(cell, from, g.mop) < radius) {
     cell.clean = true; g.cleanCount++; g.score += 2; g.rage = Math.min(100, g.rage + .5);
   }
 }
 function end(g, winner, reason) {
   g.status = 'finished'; g.winner = winner; g.endReason = reason;
-  g.mop.moving = false; for (const d of g.diners) d.left = d.right = d.block = false;
+  releaseAll(g);
 }
 export function advance(g, seconds) {
   if (g.status !== 'playing' || !Number.isFinite(seconds) || seconds <= 0) return;
@@ -159,20 +165,21 @@ function tick(g, dt) {
   }
   for(const n of g.npcs) if(n.raisedUntil>0&&g.time>=n.raisedUntil&&g.time>=n.reactsAt) {n.raisedUntil=0;n.reactsAt=Infinity;}
   if (g.mode !== 'diner') {
-    const m = g.mop, dx = m.tx - m.x, dy = m.ty - m.y, len = Math.hypot(dx, dy);
-    const speed = 650 * (g.event?.kind === 'rain' ? 1.2 : 1) * (g.time < g.soapUntil ? 1.25 : 1);
-    const travelling = m.moving && len > 1;
-    if (travelling) { const f = Math.min(1, speed * dt / len); m.x += dx * f; m.y += dy * f; }
-    const follow = 1 - Math.exp(-7 * dt);
+    const m = g.mop, from={x:m.x,y:m.y}, dx = m.tx - m.x, dy = m.ty - m.y, len = Math.hypot(dx, dy);
+    // Fast catch-up follows a swipe without teleporting through feet or dirt.
+    const speed = Math.min(2600, Math.max(1000, len * 24)) * (g.event?.kind === 'rain' ? 1.2 : 1) * (g.time < g.soapUntil ? 1.25 : 1);
+    const travelling = (m.moving || m.pending) && len > 0;
+    if (travelling) { const f = Math.min(1, speed * dt / len); m.x += dx * f; m.y += dy * f; if (f === 1) m.pending = false; }
+    const follow = 1 - Math.exp(-28 * dt);
     g.sister.x += (m.x - 30 - g.sister.x) * follow;
     g.sister.y += (clamp(m.y + 80, 150, 665) - g.sister.y) * follow;
-    if (travelling || g.time < g.cycloneUntil) cleanAround(g, g.time < g.cycloneUntil ? 85 : 34);
-    if (g.mode === 'sister' && travelling) for (const n of activeNPCs(g)) if (distance({ x: n.x, y: n.y + 65 }, m) < 39) hitNPC(g, n);
+    if (travelling || g.time < g.cycloneUntil) cleanAround(g, g.time < g.cycloneUntil ? 85 : 34, from);
+    if (g.mode === 'sister' && travelling) for (const n of activeNPCs(g)) if (sweepDistance({ x: n.x, y: n.y + 65 }, from, m) < 39) hitNPC(g, n);
     if (g.mode === 'versus') for (const d of g.diners) {
       const p = dinerSeat(g, d.id);
       for (const [side, offset] of [['left', -24], ['right', 24]]) {
         const foot = { x: p.x + offset, y: p.y + 65 };
-        if (travelling && distance(foot, m) < 34 && !isRaised(g, d, side)) {
+        if (travelling && sweepDistance(foot, from, m) < 34 && !isRaised(g, d, side)) {
           if (wetDiner(g, d, foot.x, foot.y)) { addScore(g, 55, foot.x, foot.y); g.rage = Math.min(100, g.rage + 25); }
         }
       }
@@ -215,5 +222,5 @@ function updateAttack(g) {
 }
 export function pause(g) { if (g.status === 'playing') { g.status = 'paused'; releaseAll(g); } }
 export function resume(g) { if (g.status === 'paused') g.status = 'playing'; }
-export function releaseAll(g) { g.mop.moving = false; for (const d of g.diners) d.left = d.right = d.block = false; }
+export function releaseAll(g) { g.mop.moving = g.mop.pending = false; g.mop.tx = g.mop.x; g.mop.ty = g.mop.y; for (const d of g.diners) d.left = d.right = d.block = false; }
 export function cleanPercent(g) { return Math.round(g.cleanCount / g.cells.length * 100); }
