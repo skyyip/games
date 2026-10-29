@@ -15,7 +15,6 @@ html:has(.mobile-sheet[open]){overflow:hidden;scrollbar-gutter:stable}
 .mobile-sheet .collection-heading h2{font-size:18px}
 .mobile-sheet-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;padding:16px;scroll-padding:16px}
 #worry-dialog{width:min(500px,calc(100vw - 20px))}
-#worry-dialog .custom-label{display:block;margin:0 0 9px}
 #worry-dialog #worry-input{display:block;width:100%;box-sizing:border-box;font-size:16px!important;line-height:1.6;padding:13px;border:2px solid #b6d1af;border-radius:14px;background:#163c34;color:#fff5d6;user-select:text;touch-action:manipulation}
 #worry-dialog #worry-privacy{font-size:13px;line-height:1.7;white-space:normal}
 .worry-dialog-actions{display:flex;justify-content:space-between;gap:12px;margin-top:20px}.worry-dialog-actions button{min-height:44px;font:600 16px/1.4 var(--display)}
@@ -33,26 +32,23 @@ body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions{grid-column:2;justify-items:start;justify-self:start;width:100%;display:flex;flex-wrap:wrap}
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions button{width:auto;min-width:0;max-width:100%;padding-inline:14px;text-align:left;white-space:normal;justify-content:flex-start}
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.45475;transform-origin:top center}
-#phase-beat .beat-telemetry{align-items:center!important}#phase-beat .ultimate-hud{align-self:center;align-items:center;height:60px}#phase-beat .ultimate-meter{align-self:center}
+#phase-beat .beat-telemetry{align-items:center!important}#phase-beat .ultimate-hud{align-self:center;align-items:center;height:45px}#phase-beat .ultimate-meter{align-self:center}
 #sound.icon-button{display:grid;place-items:center;padding:3px!important}#sound>svg{width:100%;height:100%;overflow:visible}
 /* Continuous asymmetric flame deformation, never opacity strobing. */
 .meter-fire-edge svg{animation:meter-flame-breathe 1.35s cubic-bezier(.45,0,.55,1) infinite!important;transform-origin:50% 100%}
 .meter-fire-bottom svg{animation-duration:1.7s!important;animation-delay:-.6s!important}.meter-fire-left svg{animation-duration:1.15s!important;animation-delay:-.35s!important}.meter-fire-right svg{animation-duration:1.5s!important;animation-delay:-.9s!important}
 .finisher-charge-frame:is([data-state=ready],[data-state=burning]){filter:drop-shadow(0 0 3px #f6b25e66)}
 @keyframes meter-flame-breathe{0%,100%{transform:scale(1,.9) skewX(-3deg)}28%{transform:scale(.98,1.13) skewX(2deg)}58%{transform:scale(1.03,.98) skewX(-1deg)}78%{transform:scale(.99,1.08) skewX(3deg)}}
-.finisher-charge-frame[data-state=cooling] #finisher-charge{border-color:#806b58;accent-color:#8e795e;background:#514c42;transition:border-color .5s,background-color .5s}
-.finisher-charge-frame[data-state=cooling] .meter-charred{display:block;opacity:.7}
-.meter-smoke{position:absolute;inset:0;display:none;pointer-events:none}.finisher-charge-frame[data-state=cooling] .meter-smoke{display:block}
-.meter-smoke i{position:absolute;left:25%;top:4px;width:9px;height:15px;border-left:2px solid #cfdbcd;border-radius:50%;opacity:0;animation:meter-smoke-rise 1.6s ease-out both}.meter-smoke i:nth-child(2){left:52%;animation-delay:.15s}.meter-smoke i:nth-child(3){left:78%;animation-delay:.3s}
-@keyframes meter-smoke-rise{0%{opacity:0;transform:translateY(2px) scale(.5)}20%{opacity:.65}100%{opacity:0;transform:translate(6px,-22px) scale(1.6)}}
 @media(max-width:360px){.mobile-sheet-scroll{padding:12px}.stall-showcase-open{font-size:16px;padding:11px}#collection-dialog-shop-kits #weapon-list>.kit-row{column-gap:12px}}
-@media(prefers-reduced-motion:reduce){.meter-fire-edge svg,.meter-smoke i{animation:none!important}.finisher-charge-frame[data-state=cooling] .meter-smoke i{opacity:.35}.finisher-charge-frame{filter:none!important}}
-.finisher-charge-frame[data-state=cooling] .meter-fire-edge{display:block;transform-origin:50% 100%;animation:meter-fire-extinguish .65s cubic-bezier(.2,.65,.35,1) both}
-.finisher-charge-frame[data-state=cooling] .meter-fire-edge svg{animation:meter-fire-settle .65s ease-out both!important}
-@keyframes meter-fire-extinguish{0%{opacity:.95;transform:scale(1)}40%{opacity:.65;transform:scale(.98,.7)}100%{opacity:0;transform:scale(.92,.04)}}
-@keyframes meter-fire-settle{from{transform:skewX(-3deg) scaleY(1)}to{transform:skewX(6deg) scaleY(.8)}}
-.ritual-stage[inert] :is(.meter-fire-edge,.meter-smoke i){animation-play-state:paused!important}
-@media(prefers-reduced-motion:reduce){.finisher-charge-frame[data-state=cooling] .meter-fire-edge{display:none}.meter-fire-edge{animation:none!important}}
+/* A warm aura follows the rail border, never covering the meter fill or labels. */
+.finisher-charge-frame::before{content:'';position:absolute;left:-1px;right:-1px;top:7px;bottom:7px;display:none;border:1px solid #ffe5a0;border-radius:6px;box-shadow:0 0 4px #ffcc6a,0 0 9px #f4873866;pointer-events:none}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning]) .meter-fire-edge{animation:meter-aura-ignite .28s ease-out both}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning]) .meter-flame-tongue{transform-box:fill-box;transform-origin:50% 100%;animation:meter-tongue-rise var(--flame-speed,1s) ease-in-out var(--flame-delay,0s) infinite}
+@keyframes meter-aura-ignite{from{opacity:0}to{opacity:1}}
+@keyframes meter-tongue-rise{0%,100%{transform:scale(.94,.82) skewX(-4deg)}38%{transform:scale(1.03,1.12) skewX(5deg)}72%{transform:scale(.98,.97) skewX(-2deg)}}
+.ritual-stage[inert] :is(.meter-fire-edge,.meter-fire-edge svg,.meter-flame-tongue){animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.meter-fire-edge,.meter-fire-edge svg,.meter-flame-tongue{animation:none!important}.finisher-charge-frame{filter:none!important}}
 
 #weapon-list .owned-kit-tag{display:inline-flex;width:fit-content;max-width:100%;align-self:flex-start;justify-self:start;flex:0 0 auto;white-space:normal;overflow-wrap:anywhere}
 .write-worry-button:hover{border-color:#f2d598;background:linear-gradient(140deg,#4b715c,#355b49)}
@@ -103,9 +99,9 @@ body dialog.unified-modal.purchase-dialog[open]{display:flex;flex-direction:colu
 .stall-wallet>#open-stall-showcase>span:nth-child(2){flex:0 1 auto}
 body .skin-inspect svg,body .skin-inspect:active svg{translate:3px -3px!important;transform:none!important}
 /* Five live launchers share the same grid on phones and larger screens. */
-.preparation-ready #collection-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0;padding:0;border:0;background:none;box-shadow:none}
-.preparation-ready #collection-menu>.collection-launch{width:100%;min-width:0;min-height:66px;margin:0;padding:10px;grid-column:auto}
-@media(max-width:600px){.preparation-ready #collection-menu{gap:9px}.preparation-ready #collection-menu>.collection-launch{gap:6px;padding:8px;font-size:14px}.preparation-ready #collection-menu .collection-launch-art{width:24px;height:30px;flex-basis:24px}.preparation-ready #collection-menu .collection-launch-arrow{width:16px;height:16px;flex-basis:16px}}
+.preparation-ready #collection-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 16px;padding:0;border:0;background:none;box-shadow:none}
+.preparation-ready #collection-menu>.collection-launch{width:100%;min-width:0;min-height:66px;margin:0;padding:10px;grid-column:auto;font-size:18px}
+@media(max-width:600px){.preparation-ready #collection-menu{gap:9px}.preparation-ready #collection-menu>.collection-launch{gap:6px;padding:8px;font-size:16.8px}.preparation-ready #collection-menu .collection-launch-art{width:24px;height:30px;flex-basis:24px}.preparation-ready #collection-menu .collection-launch-arrow{width:16px;height:16px;flex-basis:16px}}
 
 /* Reserve the same scrollbar space before, during and after every dialog. */
 html{scrollbar-gutter:stable}
@@ -118,3 +114,15 @@ body dialog[data-motion=closing]::backdrop{animation:modal-shade-out 190ms ease-
 @keyframes modal-shade-in{from{opacity:var(--modal-shade-start,0)}to{opacity:1}}
 @keyframes modal-shade-out{from{opacity:var(--modal-shade-start,1)}to{opacity:0}}
 @media(prefers-reduced-motion:reduce){body dialog[data-motion]::backdrop{animation:none!important}}
+
+#collection-menu .collection-launch-label{font-size:inherit!important}
+
+#save-tools-title[hidden]{display:none!important}
+.save-tools:has(>#save-tools-title[hidden]){margin:0;padding:0;border:0}
+
+@media(max-width:360px){.wallet-totals{grid-template-columns:minmax(0,1fr);gap:8px}.wallet-totals>span{display:flex;align-items:center;justify-content:space-between;gap:10px}.wallet-totals b{white-space:nowrap}}
+
+#collection-dialog-shop-kits .weapon-inspect,#collection-dialog-shop-kits .weapon-inspect svg{background:transparent!important}
+#collection-dialog-shop-kits .weapon-inspect svg{border:0;padding:0}
+#about-game{padding-block:6px}
+#about-game>summary{min-height:36px;padding-block:4px}

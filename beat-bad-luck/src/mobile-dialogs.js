@@ -31,7 +31,7 @@ export function createStallShowcaseDialog({openShop,canOpen,refreshHome}){
 }
 // All genuine dismiss controls share one X. Existing confirmation/action buttons retain their purpose.
 export function setupModalChrome(){
- const selector='.collection-close,.catalog-close,.sheet-close,.dialog-x,[data-close],#purchase-close,#finisher-guide-close,#settings-done,#loot-close';
+ const selector='.collection-close,.catalog-close,.sheet-close,.dialog-x,[data-close],#purchase-close,#finisher-guide-close,#settings-done';
  function decorate(dialog){animateDialog(dialog);dialog.classList.add('unified-modal');if(dialog.id==='settings-dialog')dialog.querySelector('#settings-done').hidden=true;let buttons=[...dialog.querySelectorAll(selector)].filter(n=>n.tagName==='BUTTON'&&!n.hidden);if(!buttons.length){const x=document.createElement('button');x.type='button';x.className='sheet-close';x.addEventListener('click',()=>{dialog.dispatchEvent(new Event('cancel',{cancelable:true}));if(dialog.open)dialog.close();});dialog.prepend(x);buttons=[x];}for(const b of buttons){b.classList.add('modal-close');b.setAttribute('aria-label',local('關閉','Close'));b.setAttribute('title',local('關閉','Close'));}}
  document.querySelectorAll('dialog').forEach(decorate);
  new MutationObserver(records=>{for(const r of records)for(const n of r.addedNodes)if(n instanceof HTMLDialogElement)decorate(n);}).observe(document.body,{childList:true});

@@ -51,8 +51,8 @@ export function createCollectionDialogs({preferences,canOpen=()=>true}){
  for(const group of document.querySelectorAll('.stall-tabs,.journey-tabs')){group.setAttribute('role','group');group.classList.add('collection-launchers');if(![...group.children].some(child=>!child.hidden))group.hidden=true;}
  const legend=document.querySelector('#rarity-legend');if(legend)records.get('shop-stall').scroll.prepend(legend);
  function render(){menu.setAttribute('aria-label',local(['貴人及收藏','Patrons and collections']));for(const record of records.values()){
-  const {id,trigger,title,close,label}=record,text=id==='secret'?record.panel.querySelector('h3').textContent:local(label);
-  trigger.querySelector('.collection-launch-label').textContent=text;title.textContent=text;close.querySelector('.collection-close-label').textContent=local(['關閉','Close']);close.setAttribute('aria-label',local(['關閉','Close'])+' · '+text);
+  const {id,trigger,title,close,label}=record,text=local(label);
+  trigger.querySelector('.collection-launch-label').textContent=text;title.textContent=id==='secret'?record.panel.querySelector('h3').textContent:text;close.querySelector('.collection-close-label').textContent=local(['關閉','Close']);close.setAttribute('aria-label',local(['關閉','Close'])+' · '+text);
   trigger.removeAttribute('aria-selected');trigger.tabIndex=0;
  }if(active?.dialog.open&&document.activeElement===document.body&&active.focusIndex>=0){const button=active.panel.querySelectorAll('button')[active.focusIndex];if(button&&!button.disabled)button.focus({preventScroll:true});}}
  async function open(id,opener){

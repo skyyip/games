@@ -29,7 +29,8 @@ export function polishCollections(){
  scale('.stall-wallet>.bbl-kicker',1.2);
  scale('#purchase-title',.85);
  scale('#idle-note',1.1);
- scale('#coins,#merit',1.2);
+ scale('#coins,#merit',1.32);
+ scale('#intro h1,#intro p,#intro small',.95);
  scale('.stall-wallet h2,.records-card h2',.85);
  scale('#stall-showcase-title',1.25);scale('#open-journey',1.1);
  scale('#stall-skit *',.85);
@@ -37,6 +38,7 @@ export function polishCollections(){
  scale('.records-card>.bbl-kicker,#records b,#records small,#records .empty-record,#storage-note',1.15);
  scale('.fortune-slip small,#reward-line,#journey-result,#card-status,#skin-usage-result,#result-kit-note,#personal-postcard small',1.25);
  scale('.fortune-slip small',1.15);
+ scale('#result-change-kit',1.2);
  scale('#friend-arrival',1.15);scale('.result-stats small,#result>.bbl-kicker,.postcard-actions button',1.25);
  scale('.postcard-actions button',.7);
  scale('#ritual-loot-dialog[data-kind=result] *',.9);
@@ -46,6 +48,8 @@ export function polishCollections(){
  scale('#weapon-list .kit-shop-actions button,#weapon-list .kit-shop-actions button .stat-number,#decor-list [data-decor],#decor-list [data-decor] .stat-number,#decor-quick-upgrade',.85);
  scale('#purchase-dialog[data-pending=true]:is([data-kind=weapon],[data-kind=decor]) #purchase-action',.85);
  scale('.preparation-kit-choice[data-owned=false]>small,.preparation-kit-card>.preparation-link',.85);
+ // All five collection launchers share a single CSS type scale.
+ for(const node of document.querySelectorAll('#collection-menu,#collection-menu *'))factors.delete(node);
  const sizes=[...factors].map(([node,factor])=>[node,parseFloat(getComputedStyle(node).fontSize),factor]);
  for(const [node,size,factor]of sizes){if(!originals.has(node))originals.set(node,{value:node.style.getPropertyValue('font-size'),priority:node.style.getPropertyPriority('font-size')});if(size>0)node.style.setProperty('font-size',`${Math.round(size*factor*1000)/1000}px`,'important');}
 }

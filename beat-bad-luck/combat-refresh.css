@@ -27,18 +27,12 @@ html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 #phase-beat #finisher-count{grid-column:1;grid-row:3}
 .meter-fire-edge{position:absolute;display:none;pointer-events:none}
 .meter-fire-edge svg{display:block;width:100%;height:100%;transform-origin:50% 100%;animation:meter-fire-dance .8s ease-in-out infinite alternate}
-.meter-fire-top{left:0;right:0;top:0;height:11px}
-.meter-fire-bottom{left:0;right:0;bottom:0;height:11px;rotate:180deg}
+.meter-fire-top{left:-2px;right:-2px;top:-6px;height:16px}
+.meter-fire-bottom{left:-2px;right:-2px;bottom:-6px;height:16px;rotate:180deg}
 .meter-fire-left,.meter-fire-right{top:4px;bottom:4px;width:11px}
 .meter-fire-left{left:-5px;rotate:-90deg}.meter-fire-right{right:-5px;rotate:90deg}
 .finisher-charge-frame:is([data-state=ready],[data-state=burning]) .meter-fire-edge{display:block}
 .finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffcd7d;accent-color:#f6b16e}
-.finisher-charge-frame[data-state=spent] #finisher-charge{background:repeating-linear-gradient(135deg,#50403c 0 5px,#776455 5px 8px);border:2px dashed #382f35;accent-color:#61504a}
-.finisher-charge-frame[data-state=spent] #finisher-charge::-webkit-progress-bar{background:#55483f}
-.finisher-charge-frame[data-state=spent] #finisher-charge::-webkit-progress-value{background:repeating-linear-gradient(135deg,#5a4843 0 5px,#8d7464 5px 8px)}
-.finisher-charge-frame[data-state=spent] #finisher-charge::-moz-progress-bar{background:#69564d}
-.meter-charred{display:none;position:absolute;right:1px;top:4px;width:33px;height:17px;pointer-events:none}
-.meter-charred svg{display:block;width:100%;height:100%}.finisher-charge-frame[data-state=spent] .meter-charred{display:block}
 @keyframes meter-fire-dance{from{transform:scale(.97,.85)}to{transform:scale(1.03,1.12)}}
 .ritual-stage[inert] .meter-fire-edge svg{animation-play-state:paused!important}
 
