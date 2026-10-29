@@ -1,8 +1,8 @@
 /* One visual dismiss control, retaining each dialog's original close/cancel logic. */
 body dialog.unified-modal{position:fixed}
-body dialog.unified-modal .modal-close{position:absolute;inset:10px 10px auto auto;display:grid!important;place-items:center!important;flex:none;box-sizing:border-box;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:0!important;border:2px solid #fff0bc!important;border-radius:14px!important;background:linear-gradient(150deg,#ffe8af,#ebc777)!important;color:#354f46!important;box-shadow:0 3px 0 #8c704d!important;font-size:0!important;line-height:1!important;text-indent:-9999px;overflow:hidden;z-index:10;touch-action:manipulation;cursor:pointer;transform:none!important;rotate:none!important}
+body dialog.unified-modal .modal-close{position:absolute;inset:10px 10px auto auto;display:grid!important;place-items:center!important;flex:none;box-sizing:border-box;width:35.2px!important;min-width:35.2px!important;max-width:35.2px!important;height:35.2px!important;min-height:35.2px!important;max-height:35.2px!important;margin:0!important;padding:0!important;border:2px solid #fff0bc!important;border-radius:11.2px!important;background:linear-gradient(150deg,#ffe8af,#ebc777)!important;color:#354f46!important;box-shadow:0 3px 0 #8c704d!important;font-size:0!important;line-height:1!important;text-indent:-9999px;overflow:hidden;z-index:10;touch-action:manipulation;cursor:pointer;transform:none!important;rotate:none!important}
 body dialog.unified-modal .modal-close>*{display:none!important}
-body dialog.unified-modal .modal-close::before{content:'';position:absolute;left:50%;top:50%;right:auto;bottom:auto;width:20px;height:20px;transform:translate(-50%,-50%);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 6 12 12M18 6 6 18' fill='none' stroke='%23354f46' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;text-indent:0}
+body dialog.unified-modal .modal-close::before{content:'';position:absolute;left:50%;top:50%;right:auto;bottom:auto;width:16px;height:16px;transform:translate(-50%,-50%);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 6 12 12M18 6 6 18' fill='none' stroke='%23354f46' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;text-indent:0}
 body dialog.unified-modal .modal-close::after{content:none!important}
 body dialog.unified-modal .modal-close:active{translate:0 2px;box-shadow:0 1px 0 #8c704d!important}
 body dialog.unified-modal .modal-close:focus-visible{outline:3px solid #97f1df;outline-offset:3px}
@@ -98,3 +98,23 @@ body dialog.unified-modal.purchase-dialog[open]{display:flex;flex-direction:colu
 .purchase-dialog .purchase-content{box-sizing:border-box;width:100%;min-height:0;max-height:calc(100dvh - 32px);padding-top:58px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
 #purchase-dialog #purchase-coupons,#purchase-dialog #purchase-spent{grid-column:2}
 @media(max-width:640px){#purchase-dialog #purchase-coupons,#purchase-dialog #purchase-spent{grid-column:auto}}
+/* Content-width start-page actions; the original touch targets remain intact. */
+.preparation-ready #write-worry,.stall-wallet>#open-stall-showcase{display:inline-flex;width:fit-content;max-width:100%;align-self:flex-start;justify-self:start;justify-content:flex-start;margin-inline:0}
+.stall-wallet>#open-stall-showcase>span:nth-child(2){flex:0 1 auto}
+body .skin-inspect svg,body .skin-inspect:active svg{translate:3px -3px!important;transform:none!important}
+/* Five live launchers share the same grid on phones and larger screens. */
+.preparation-ready #collection-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0;padding:0;border:0;background:none;box-shadow:none}
+.preparation-ready #collection-menu>.collection-launch{width:100%;min-width:0;min-height:66px;margin:0;padding:10px;grid-column:auto}
+@media(max-width:600px){.preparation-ready #collection-menu{gap:9px}.preparation-ready #collection-menu>.collection-launch{gap:6px;padding:8px;font-size:14px}.preparation-ready #collection-menu .collection-launch-art{width:24px;height:30px;flex-basis:24px}.preparation-ready #collection-menu .collection-launch-arrow{width:16px;height:16px;flex-basis:16px}}
+
+/* Reserve the same scrollbar space before, during and after every dialog. */
+html{scrollbar-gutter:stable}
+#save-tools-title.collection-launch{width:fit-content;max-width:100%;justify-self:start;align-self:flex-start}
+
+/* Animate the native backdrop with CSS; WAAPI ::backdrop effects are not universal. */
+body dialog[data-motion=opening],body dialog[data-motion=closing]{will-change:opacity,transform}
+body dialog[data-motion=opening]::backdrop{animation:modal-shade-in 220ms ease-out both!important}
+body dialog[data-motion=closing]::backdrop{animation:modal-shade-out 190ms ease-out both!important}
+@keyframes modal-shade-in{from{opacity:var(--modal-shade-start,0)}to{opacity:1}}
+@keyframes modal-shade-out{from{opacity:var(--modal-shade-start,1)}to{opacity:0}}
+@media(prefers-reduced-motion:reduce){body dialog[data-motion]::backdrop{animation:none!important}}

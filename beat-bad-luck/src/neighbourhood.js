@@ -94,7 +94,8 @@ STORIES.push(
 export function commissionPay(chapter,finished=false,replay=false,bonusMet=true){const difficulty=({eventsWon:110,variety:85,weaknessHits:70,perfect:90,copiesCleared:75})[chapter?.goal]??40,multiplier=(replay?.6:1)*(bonusMet?1:.6),oil=chapter?.reward?.oil??difficulty+(chapter?.need??0)*5,merit=chapter?.reward?.merit??difficulty*.5+(chapter?.need??0)*3;return {oil:oilGain(Math.round((oil+(finished?80:0))*multiplier)),merit:meritGain(Math.round((merit+(finished?50:0))*multiplier))};}
 for(const story of STORIES)for(const [index,chapter]of story.chapters.entries())chapter.comedy=STREET_COMEDY[story.id]?.[index]??STREET_COMEDY.neighbour[index%3];
 const MOVES=['tap','heavy','rub','circle','pinch'],cap=(v,max)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
-export const ALBUM_LIFETIME=7*24*3600000;
+export const ALBUM_RETENTION_DAYS=12;
+export const ALBUM_LIFETIME=ALBUM_RETENTION_DAYS*24*3600000;
 export function pruneAlbum(state,now=Date.now()){const album=state.album.filter(e=>Number.isFinite(e.at)&&e.at>now-ALBUM_LIFETIME);return album.length===state.album.length?state:{...state,album};}
 export const freshNeighbourhood=()=>({active:'',replay:false,chapters:Object.fromEntries(STORIES.map(s=>[s.id,0])),challenges:[],title:'',look:'',scenes:[],layout:[],companions:[],totals:{rituals:0,events:0,copies:0,perfect:0},recentFortunes:[],fortuneSeen:[],endingSeen:[],album:[]});
 export function readNeighbourhood(raw,{weapons=[],decor=[],owned=[],rituals=0,now=Date.now()}={}){

@@ -44,9 +44,13 @@ export function createCollectionDialogs({preferences,canOpen=()=>true}){
   scroll.addEventListener('click',event=>{const button=event.target.closest('button');record.focusIndex=button?[...panel.querySelectorAll('button')].indexOf(button):-1;},true);
   dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const controls=[...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href],[tabindex="0"]')].filter(n=>n.getClientRects().length),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
  }
- for(const group of document.querySelectorAll('.stall-tabs,.journey-tabs')){group.setAttribute('role','group');group.classList.add('collection-launchers');}
+ // One two-column menu keeps all five destinations together, retaining their handlers.
+ const menu=document.createElement('div');menu.id='collection-menu';menu.className='collection-launchers collection-menu';menu.setAttribute('role','group');
+ const hub=document.querySelector('#neighbourhood-hub .neighbourhood-inner')??document.querySelector('#neighbourhood-hub');hub.prepend(menu);
+ for(const id of ['shop-friends','secret','album','challenges','scenes']){const record=records.get(id);if(record)menu.append(record.trigger);}
+ for(const group of document.querySelectorAll('.stall-tabs,.journey-tabs')){group.setAttribute('role','group');group.classList.add('collection-launchers');if(![...group.children].some(child=>!child.hidden))group.hidden=true;}
  const legend=document.querySelector('#rarity-legend');if(legend)records.get('shop-stall').scroll.prepend(legend);
- function render(){for(const record of records.values()){
+ function render(){menu.setAttribute('aria-label',local(['貴人及收藏','Patrons and collections']));for(const record of records.values()){
   const {id,trigger,title,close,label}=record,text=id==='secret'?record.panel.querySelector('h3').textContent:local(label);
   trigger.querySelector('.collection-launch-label').textContent=text;title.textContent=text;close.querySelector('.collection-close-label').textContent=local(['關閉','Close']);close.setAttribute('aria-label',local(['關閉','Close'])+' · '+text);
   trigger.removeAttribute('aria-selected');trigger.tabIndex=0;

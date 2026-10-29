@@ -29,6 +29,8 @@ export function polishCollections(){
  scale('.stall-wallet>.bbl-kicker',1.2);
  scale('#purchase-title',.85);
  scale('#idle-note',1.1);
+ scale('#coins,#merit',1.2);
+ scale('.stall-wallet h2,.records-card h2',.85);
  scale('#stall-showcase-title',1.25);scale('#open-journey',1.1);
  scale('#stall-skit *',.85);
  scale('#commission-list .neighbour-card>b',1.15);scale('#commission-list .neighbour-card>strong',.85);

@@ -21,25 +21,26 @@ export function animateDialog(dialog){
  if(dialogControllers.has(dialog))return dialog;
  dialogControllers.set(dialog,true);
  const nativeOpen=dialog.showModal.bind(dialog),nativeClose=dialog.close.bind(dialog);
- let motion=null,backdrop=null,closing=null,generation=0;
+ let motion=null,closing=null,generation=0;
  const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
- const cancel=()=>{motion?.cancel();backdrop?.cancel();motion=backdrop=null;};
- function shade(from,to,duration,easing){try{backdrop=dialog.animate([{opacity:from},{opacity:to}],{pseudoElement:'::backdrop',duration,easing,fill:'both'});}catch{}}
+ const cancel=()=>{motion?.cancel();motion=null;};
+ const shadeStart=fallback=>{const value=dialog.open?getComputedStyle(dialog,'::backdrop').opacity:fallback;dialog.style.setProperty('--modal-shade-start',value);};
  dialog.showModal=()=>{
   if(dialog.open&&dialog.dataset.motion!=='closing')return;
   const current=dialog.open?getComputedStyle(dialog):null,start=current?{opacity:current.opacity,transform:current.transform}:{opacity:0,transform:'translateY(14px) scale(.97)'};
-  const token=++generation;closing=null;cancel();if(!dialog.open)nativeOpen();dialog.dataset.motion='opening';
+  const token=++generation;shadeStart('0');closing=null;cancel();if(!dialog.open)nativeOpen();dialog.dataset.motion='opening';
   if(reduced()){dialog.dataset.motion='open';return;}
-  shade(0,1,220,'ease-out');motion=dialog.animate([start,{opacity:1,transform:'none'}],{duration:220,easing:'cubic-bezier(.18,.75,.3,1)',fill:'both'});
+  motion=dialog.animate([start,{opacity:1,transform:'none'}],{duration:220,easing:'cubic-bezier(.18,.75,.3,1)',fill:'both'});
   motion.finished.then(()=>{if(token!==generation)return;dialog.dataset.motion='open';cancel();},()=>{});
  };
  dialog.close=(returnValue)=>{
   if(closing)return closing;if(!dialog.open)return Promise.resolve();
   const style=getComputedStyle(dialog),start={opacity:style.opacity,transform:style.transform},token=++generation;
-  cancel();dialog.dataset.motion='closing';
+  shadeStart('1');cancel();dialog.dataset.motion='closing';
   closing=(async()=>{
    if(!reduced()){
-    shade(1,0,190,'ease-in-out');motion=dialog.animate([start,{opacity:0,transform:'translateY(10px) scale(.98)'}],{duration:190,easing:'cubic-bezier(.4,0,.6,1)',fill:'both'});
+    // Fade in place: scaling a scrolling dialog makes text and rounded borders wobble.
+    motion=dialog.animate([start,{opacity:0,transform:start.transform}],{duration:190,easing:'ease-out',fill:'both'});
     try{await motion.finished;}catch{}
    }
    if(token!==generation)return;
