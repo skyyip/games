@@ -9,6 +9,7 @@ Party games use one shared device, without online matchmaking.
 ## Games
 
 - [Beat the Bad Luck](https://sky-playground.com/games/beat-bad-luck/): 1 player. A single-player game inspired by Hong Kong’s villain-hitting folk ritual. Complete a playful ritual and brighten Master Yip’s stall.
+- [Mop Mayhem: Feet Up!](https://sky-playground.com/games/cha-chaan-mop/): 1–4 players on one device. A playful Hong Kong café game with mop-master cleaning, feet-up diner survival and simultaneous local 1-vs-1–3 play on one device.
 - [Grid Rush](https://sky-playground.com/games/grid-rush/): 1 player. A solo speed-clicking game. Clear every tile in any order and try to finish the grid in the shortest time.
 - [Grid Rush: In Order](https://sky-playground.com/games/grid-rush-in-order/): 1 player. A solo sequence puzzle that combines quick reactions with ordering numbers, letters, colours or shapes.
 - [Tap & Spill](https://sky-playground.com/games/tap-and-spill/): 2–6 players on one device. A 2–6 player party game on one shared device. Players take turns pouring into the same glass; whoever overflows it loses.

@@ -12,6 +12,14 @@ export const games = [
     related: ['roach-rush', 'flick-force'],
   },
   {
+    slug: 'cha-chaan-mop', name: 'Mop Mayhem: Feet Up!', zh: '茶記大作戰：縮腳啦笨！', genre: 'Arcade', players: [1, 4], topic: 'Hong Kong Café Mop Game',
+    description: 'Play Mop Mayhem: Feet Up!, a free Hong Kong café game. Mop as the auntie, dodge as a diner or share one screen for a 1-vs-1–3 couch clash.',
+    intro: 'A playful Hong Kong café game with mop-master cleaning, feet-up diner survival and simultaneous local 1-vs-1–3 play on one device.',
+    chinese: '以茶餐廳拖地為主題。扮姐姐拖地隊腳、當顧客縮腳吃喝，或在同一部多點觸控裝置上進行一對一至三人對戰。',
+    steps: ['Choose Mop master, Feet-up survival or Couch clash and a 60- or 90-second round.', 'Drag the mop to clean and poke, or hold the foot buttons to dodge while managing cramps.', 'Finish the floor or meal, or win the local clash; save scores and unlock cosmetic outfits with tips.'],
+    related: ['beat-bad-luck', 'roach-rush'],
+  },
+  {
     slug: 'grid-rush', name: 'Grid Rush', zh: '方格快手', genre: 'Arcade', players: [1, 1], topic: 'Speed Clicking Game',
     description: 'Play Grid Rush free in your browser. Clear every tile in any order, race the timer and challenge your personal best on phone or desktop.',
     intro: 'A solo speed-clicking game. Clear every tile in any order and try to finish the grid in the shortest time.',

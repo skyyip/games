@@ -1,6 +1,11 @@
 // English source messages and their Traditional Chinese translations.
 // Named placeholders preserve numbers and player names without interpreting HTML.
 export const messages = {
+  "Mop Mayhem: Feet Up!": "茶記大作戰：縮腳啦笨！",
+  "Favourite: Mop Mayhem: Feet Up!": "收藏：茶記大作戰：縮腳啦笨！",
+  "1–4 players": "1–4 人",
+  "Café chaos": "茶記大作戰",
+  "Mop the floor or save your sneakers. A little Hong Kong café chaos, solo or with friends.": "姐姐拖地，顧客縮腳。自己挑戰，或者同朋友即場開戰！",
   "Climbing height": "攀爬高度",
   "Island good fortune": "福氣值",
   "Ready to play offline": "離線遊玩已準備好",
