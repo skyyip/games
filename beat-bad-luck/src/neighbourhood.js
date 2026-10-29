@@ -1,3 +1,4 @@
+import {oilGain,meritGain} from './economy.js';
 import {ENDINGS,comedyEnding} from './comedy-content.js';
 import {SKINS} from './skins.js';
 import {WORRIES} from './catalog.js';
@@ -88,7 +89,7 @@ STORIES.push(
   {kind:'shopping-rush',name:['冬瓜霸住升降機','A melon blocks the lift'],text:['用齊 5 種手勢，命中 30 次。','Use all 5 gestures across 30 hits.'],goal:'variety',need:5,hits:30,reward:{oil:360,merit:230}},
   {kind:'family',name:['笑哈哈燈籠送到家','The smiling lantern comes home'],text:['命中 20 次、餵虎及祈福，將安心送返街坊。','Land 20 hits, feed and bless to bring peace home.'],goal:'kindness',need:20,reward:{oil:520,merit:360}}]}
 );
-export function commissionPay(chapter,finished=false,replay=false,bonusMet=true){const difficulty=({eventsWon:110,variety:85,weaknessHits:70,perfect:90,copiesCleared:75})[chapter?.goal]??40,multiplier=(replay?.6:1)*(bonusMet?1:.6),oil=chapter?.reward?.oil??difficulty+(chapter?.need??0)*5,merit=chapter?.reward?.merit??difficulty*.5+(chapter?.need??0)*3;return {oil:Math.round((oil+(finished?80:0))*multiplier),merit:Math.round((merit+(finished?50:0))*multiplier)};}
+export function commissionPay(chapter,finished=false,replay=false,bonusMet=true){const difficulty=({eventsWon:110,variety:85,weaknessHits:70,perfect:90,copiesCleared:75})[chapter?.goal]??40,multiplier=(replay?.6:1)*(bonusMet?1:.6),oil=chapter?.reward?.oil??difficulty+(chapter?.need??0)*5,merit=chapter?.reward?.merit??difficulty*.5+(chapter?.need??0)*3;return {oil:oilGain(Math.round((oil+(finished?80:0))*multiplier)),merit:meritGain(Math.round((merit+(finished?50:0))*multiplier))};}
 for(const story of STORIES)for(const [index,chapter]of story.chapters.entries())chapter.comedy=STREET_COMEDY[story.id]?.[index]??STREET_COMEDY.neighbour[index%3];
 const MOVES=['tap','heavy','rub','circle','pinch'],cap=(v,max)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
 export const ALBUM_LIFETIME=7*24*3600000;

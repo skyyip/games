@@ -48,10 +48,10 @@ async function modalPresentation(page,type){
  await page.locator('#all-'+(type==='skin'?'skins':'kits')+'-label').click();await scroll.evaluate(node=>node.scrollTop=0);
 }
 async function presentation(page){
- const sizes=await page.evaluate(()=>({width:innerWidth,master:parseFloat(getComputedStyle(document.querySelector('.fong-intro .fong-logo')).width),dock:document.querySelector('#quick-dock').getBoundingClientRect().height,start:document.querySelector('#quick-start').getBoundingClientRect().height}));assert.ok(Math.abs(sizes.master-(sizes.width<=600?61.6:84))<.1,'Master portrait is forty percent larger');assert.ok(sizes.dock<=53,'sticky dock remains compact');assert.ok(sizes.start>=44&&sizes.start<=46,'compact start keeps a 44px touch target');
+ const sizes=await page.evaluate(()=>({width:innerWidth,master:parseFloat(getComputedStyle(document.querySelector('.fong-intro .fong-logo')).width),dock:document.querySelector('#quick-dock').getBoundingClientRect().height,start:document.querySelector('#quick-start').getBoundingClientRect().height}));assert.ok(Math.abs(sizes.master-(sizes.width<=600?61.6:84))<.1,'Master portrait is forty percent larger');assert.ok(sizes.dock<=64,'sticky dock remains compact');assert.ok(sizes.start>=44&&sizes.start<=46,'compact start keeps a 44px touch target');
  await open(page,'skin');const cards=await page.locator('#prepare-skin').evaluate(node=>{const free=node.querySelector('[data-skin=plain]'),grid=node.querySelector('.skin-owned-slot');return {sameGrid:free.parentElement===grid,standard:free.classList.contains('skin-card')&&!free.classList.contains('skin-free-card'),columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,freeWidth:free.getBoundingClientRect().width};});assert.equal(cards.sameGrid,true,'free paper belongs to the owned paper grid');assert.equal(cards.standard,true,'free paper uses the same card style');assert.equal(cards.columns,3,'paper choices keep three columns on phones too');assert.ok(cards.freeWidth>=44);
  for(const selector of ['#all-skins-label','#all-kits-label']){const style=await page.locator(selector).evaluate(node=>{const style=getComputedStyle(node);return {border:parseFloat(style.borderTopWidth),background:style.backgroundColor,font:parseFloat(style.fontSize)};});assert.ok(style.border>=2&&style.background!=='rgba(0, 0, 0, 0)','catalogue entry has a prominent filled outline');assert.ok(Math.abs(style.font-12.75*1.25)<.01,'catalogue text is 25% larger than its previous rendered size');}
- const selected=await page.locator('#prepare-skin').evaluate(node=>{const style=getComputedStyle(node),body=node.querySelector('.preparation-body'),preview=node.querySelector('.preparation-preview');return {border:style.borderTopWidth,color:style.borderTopColor,inner:getComputedStyle(body).borderTopWidth,height:preview.getBoundingClientRect().height,margin:getComputedStyle(preview).marginTop};});assert.equal(selected.border,'1px');assert.notEqual(selected.color,'rgba(0, 0, 0, 0)');assert.equal(selected.inner,'0px');assert.equal(selected.margin,'0px');assert.ok(Math.abs(selected.height-107.1)<.1);
+ const selected=await page.locator('#prepare-skin').evaluate(node=>{const style=getComputedStyle(node),body=node.querySelector('.preparation-body'),preview=node.querySelector('.preparation-preview');return {border:style.borderTopWidth,color:style.borderTopColor,inner:getComputedStyle(body).borderTopWidth,height:preview.getBoundingClientRect().height,margin:getComputedStyle(preview).marginTop};});assert.equal(selected.border,'1px');assert.notEqual(selected.color,'rgba(0, 0, 0, 0)');assert.equal(selected.inner,'0px');assert.equal(selected.margin,'-20px');assert.ok(Math.abs(selected.height-107.1)<.1);
  await page.locator('#prepare-skin>summary').click();
  const quote=await page.locator('.fong-intro>div:last-child>p:last-child').evaluate(node=>({size:parseFloat(getComputedStyle(node).fontSize),font:getComputedStyle(node).fontFamily}));assert.ok(Math.abs(quote.size-15*1.15*1.15)<.01);assert.match(quote.font,/Iansui.*Fredoka/);assert.equal(await page.locator('#preparation-title,#preparation-help,.preparation-intro').count(),0);
  const walletLabel=await page.locator('.stall-wallet>.bbl-kicker').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));assert.ok(Math.abs(walletLabel-13.8)<.01,'sanctuary label is another twenty percent larger');
@@ -67,7 +67,7 @@ try {
  assert.equal(await page.locator('#neighbourhood-hub').evaluate(node=>node.nextElementSibling?.classList.contains('records-card')&&!node.closest('#stall-dashboard,#my-stall')),true,'three collection tabs sit outside the stall and immediately before records');
  assert.equal(await page.locator('[data-shortcut=stall]').evaluate(node=>Boolean(node.closest('.stall-showcase-heading'))),true,'decorating shortcut sits beside the stall title');
  assert.equal(await page.locator('#worry-input').isVisible(),true,'private input is immediately visible');
- assert.equal(await page.locator('#worry-ready-note').textContent(),'');assert.equal(await page.locator('#worry-ready-note').isHidden(),true);assert.equal(await page.locator('#worry-selection-summary').isHidden(),true);assert.equal(await page.locator('.custom-label').textContent(),'或寫低你的小心事');assert.ok(Math.abs(await page.locator('#worry-privacy').evaluate(node=>parseFloat(getComputedStyle(node).fontSize))-13*1.1*.85)<.01);
+ assert.equal(await page.locator('#worry-ready-note,#worry-selection-summary').count(),0);assert.equal(await page.locator('.custom-label').textContent(),'或寫低你的小心事');assert.ok(Math.abs(await page.locator('#worry-privacy').evaluate(node=>parseFloat(getComputedStyle(node).fontSize))-13*1.1*.85)<.01);
  assert.equal(await page.locator('#secret-collection').evaluate(node=>node.tagName),'SECTION','secret collection is not collapsible');
  assert.equal(await page.locator('.comic-ending-book').evaluate(node=>node.tagName),'SECTION','collected endings are not collapsible');
  assert.equal(await page.locator('#worry-category').count(),0,'worry choices have no category selector');
@@ -83,12 +83,12 @@ try {
  await page.locator('#worry-select').selectOption('work');assert.equal(await page.locator('#worry-input').isVisible(),true,'preset selection never hides the input');await page.locator('#worry-select').selectOption('');
  assert.equal(await page.locator('dialog[open]').count(),0,'daily gift must not interrupt preparation');
  assert.equal(await page.locator('#daily-reward-note').isVisible(),true);
- assert.equal((await saved(page)).coins,20);
+ assert.equal((await saved(page)).coins,16);
  assert.equal(await page.locator('#my-stall').isVisible(),true);
  assert.equal(await page.locator('#start').isDisabled(),true);
  await page.locator('#quick-start').evaluate(node=>node.click());assert.equal(await page.evaluate(()=>document.activeElement.id),'worry-select');
  await page.locator('#worry-select').selectOption('teammates');
- assert.match(await page.locator('#worry-selection-summary').textContent(),/豬隊友/);
+ assert.equal(await page.locator('#worry-select').inputValue(),'teammates');
  assert.equal(await page.locator('#start').isEnabled(),true);assert.equal(await page.locator('#start .work-shoe').evaluate(n=>getComputedStyle(n).animationName),'none','reduced motion keeps the invitation still');await page.emulateMedia({reducedMotion:'no-preference'});assert.equal(await page.locator('#start .work-shoe').evaluate(n=>getComputedStyle(n).animationName),'preparation-shoe-hop');await page.emulateMedia({reducedMotion:'reduce'});
  await page.locator('[name=preparation-commission][value=yes]').evaluate(node=>{node.checked=true;node.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.locator('[data-preparation-story=bus]').evaluate(node=>node.click());
@@ -130,7 +130,7 @@ try {
  await page.locator('#loot-close').click();await page.locator('#change-worry').click();
  assert.equal(await page.locator('#worry-input').inputValue(),'');
  assert.equal(await page.locator('#start').isDisabled(),true);
- assert.ok(!(await page.locator('#worry-selection-summary').textContent()).includes(privateWorry),'new-worry action must refresh the preparation summary');
+ assert.equal(await page.locator('#worry-selection-summary').count(),0);
  await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, always-visible private input, three collection launch buttons, prominent modal catalogues, full ritual and privacy');
 
  for(const config of [{width:320,height:568,lang:'zh-Hant'},{width:390,height:844,lang:'zh-Hant',motion:'no-preference'},{width:812,height:375,lang:'en'},{width:1280,height:900,lang:'en'}]) {

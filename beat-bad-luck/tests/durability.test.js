@@ -14,7 +14,7 @@ test('existing stalls start fresh at migration; subsequent saves do not reset ag
 });
 test('offline payouts stop exactly at expiry, then remove the item once',()=>{
  const original=furnished();const state={...original,decorExpires:{neon:2*3600000}};
- const collected=collectIdle(state,8*3600000);assert.equal(collected.earned,2);assert.deepEqual(collected.lost,['neon']);assert.equal(collected.state.decor.neon,0);assert.equal(collected.state.decorExpires.neon,undefined);assert.equal(idleRate(collected.state),0);
+ const collected=collectIdle(state,8*3600000);assert.equal(collected.earned,1);assert.deepEqual(collected.lost,['neon']);assert.equal(collected.state.decor.neon,0);assert.equal(collected.state.decorExpires.neon,undefined);assert.equal(idleRate(collected.state),0);
  const again=collectIdle(collected.state,10*3600000);assert.equal(again.earned,0);assert.deepEqual(again.lost,[]);assert.equal(state.decor.neon,1);
 });
 test('repairs price proportional wear and level, require funds, restore thirty days and retain levels',()=>{
@@ -29,6 +29,6 @@ test('discarding removes levels and durability without refund and prevents futur
  const state=collectIdle(furnished('cat',4),DAY).state,discarded=discardDecor(state,'cat');assert.equal(discarded.coins,state.coins);assert.equal(discarded.decor.cat,0);assert.equal(discarded.decorExpires.cat,undefined);assert.equal(collectIdle(discarded,2*DAY).earned,0);assert.equal(discardDecor(discarded,'cat'),null);assert.equal(discardDecor(state,'fake'),null);assert.equal(upgrade(discarded,'cat',DAY).decor.cat,1);assert.equal(state.decor.cat,4);
 });
 test('items expire independently, capped payouts retain fractions, and backwards clocks cannot heal them',()=>{
- let state=furnished();state=upgrade(state,'radio',0);state.decorExpires={neon:2*3600000,radio:30*DAY};const expired=collectIdle(state,8*3600000);assert.equal(expired.earned,7);assert.equal(expired.state.decor.radio,1);assert.equal(expired.state.decor.neon,0);
+ let state=furnished();state=upgrade(state,'radio',0);state.decorExpires={neon:2*3600000,radio:30*DAY};const expired=collectIdle(state,8*3600000);assert.equal(expired.earned,5);assert.equal(expired.state.decor.radio,1);assert.equal(expired.state.decor.neon,0);
  const later=collectIdle(furnished(),10*DAY).state;assert.equal(later.lastSeen,10*DAY);const backwards=collectIdle(readProgress(JSON.stringify(later),5*DAY),5*DAY);assert.equal(backwards.earned,0);assert.equal(backwards.state.lastSeen,10*DAY);close(decorDurability(backwards.state,'neon',5*DAY),decorDurability(later,'neon',10*DAY));
 });

@@ -1,10 +1,11 @@
+import {oilGain,meritGain,DAILY_OIL,DAILY_MERIT} from './economy.js';
 import {SKINS,SKIN_USES} from './skins.js';
 import {PATRONS,SECRET_WEAPONS,SECRET_DECOR,weightedPatron,patronBuffs,hkDay} from './ritual-rewards.js';
 import {freshNeighbourhood,readNeighbourhood,finishNeighbourhood,STORIES,commissionPay,pruneAlbum} from './neighbourhood.js';
 import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL,decorUpgradeBase,decorHourlyRate,weaponDurability} from './catalog.js';
 const cap=(value,max=1000000)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
 export const DECOR_LIFETIME=30*24*3600000;
-export const MAX_IDLE_HOURS=18;
+export const MAX_IDLE_HOURS=12;
 const clock=(state,now)=>Math.max(state.lastSeen,now);
 const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.decorExpires[id]:clock(state,now)+DECOR_LIFETIME;
 export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
@@ -30,7 +31,7 @@ export function readProgress(raw,now=Date.now()){
     state.idleCarry=Number.isFinite(x.idleCarry)?Math.max(0,Math.min(.999999999,x.idleCarry)):0;state.lastReceipt=typeof x.lastReceipt==='string'?x.lastReceipt.slice(0,80):null;
   }catch{}return state;
 }
-export const idleRate=state=>Math.round(DECOR.reduce((total,d)=>total+decorHourlyRate(d,state.decor[d.id]??0),0)*100)/100;
+export const idleRate=state=>Math.round(DECOR.reduce((total,d)=>total+decorHourlyRate(d,state.decor[d.id]??0),0)*1e6)/1e6;
 export function collectIdle(state,now=Date.now()){
   state={...state,neighbourhood:pruneAlbum(state.neighbourhood,Math.max(state.lastSeen,now))};
   const at=clock(state,now),end=Math.min(at,state.lastSeen+MAX_IDLE_HOURS*3600000),decor={...state.decor},decorExpires={...state.decorExpires},lost=[];let income=state.idleCarry;
@@ -73,8 +74,8 @@ export function discardDecor(state,id){
 }
 export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   if(!id||(state.lastReceipt===id||state.neighbourhood?.album?.some(e=>e.id===id))||!result||!Number.isFinite(result.score)||result.score<0)return null;
-  const buffs=patronBuffs(state),earned=Math.round((20+Math.floor(result.score/60)+(result.fed?5:0)+(result.blessed?5:0))*(1+buffs.oil));
-  const merit=Math.round((12+cap(result.papers)*6+cap(result.qte)*4)*(1+buffs.merit));const available=FRIENDS.filter(f=>!state.friends.includes(f.id));let friend=null;
+  const buffs=patronBuffs(state),earned=oilGain(Math.round((20+Math.floor(result.score/60)+(result.fed?5:0)+(result.blessed?5:0))*(1+buffs.oil)));
+  const merit=meritGain(Math.round((12+cap(result.papers)*6+cap(result.qte)*4)*(1+buffs.merit)));const available=FRIENDS.filter(f=>!state.friends.includes(f.id));let friend=null;
   if(available.length&&random()<.3)friend=weightedPatron(available,random);
   const records=[...state.records,{score:cap(result.score),hits:cap(result.hits),weapon:result.weapon,date:now}].sort((a,b)=>b.score-a.score||a.date-b.date).slice(0,3);
   const journey=finishNeighbourhood(state.neighbourhood??freshNeighbourhood(),result,{id,now});
@@ -86,7 +87,7 @@ export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
 }
 export const purchasePrice=(state,base)=>Math.ceil(base*(1-patronBuffs(state).discount));
 function useCoupon(state){const coupons=[...(state.coupons??[])],best=coupons.reduce((a,c)=>!a||c.discount>a.discount?c:a,null);return best?{...state,coupons:coupons.filter(c=>c!==best)}:state;}
-export function dailyReward(state,now=Date.now()){const day=hkDay(now);return state.lastDaily>=day?null:{...state,coins:cap(state.coins+20),merit:cap(state.merit+30),lastDaily:day};}
+export function dailyReward(state,now=Date.now()){const day=hkDay(now);return state.lastDaily>=day?null:{...state,coins:cap(state.coins+DAILY_OIL),merit:cap(state.merit+DAILY_MERIT),lastDaily:day};}
 
 export const skinUses=(state,id)=>id==='plain'?Infinity:state.ownedSkins.includes(id)?cap(state.skinUses?.[id]??SKIN_USES,SKIN_USES):0;
 export function buySkin(state,id){const skin=SKINS.find(s=>s.id===id);if(!skin)return null;if(state.ownedSkins.includes(id))return {...state,selectedSkin:id};const cost=purchasePrice(state,skin.cost);if(state.coins<cost)return null;return {...useCoupon(state),coins:state.coins-cost,ownedSkins:[...state.ownedSkins,id],skinUses:{...state.skinUses,[id]:SKIN_USES},selectedSkin:id};}

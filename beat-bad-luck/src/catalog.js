@@ -1,3 +1,4 @@
+import {OIL_GAIN_FACTOR} from './economy.js';
 import {SECRET_WEAPONS,SECRET_DECOR,PATRONS} from './ritual-rewards.js';
 export const WORRY_GROUPS=[
  {id:'work',labelZh:'事業與職場',label:'Work & careers'},
@@ -107,7 +108,7 @@ export const WEAPONS=[
 // Prices and merit gates are independent; free hands retain their ×1 fallback.
 export const weaponScoreMultiplier=id=>{const weapon=WEAPONS.find(w=>w.id===id);return weapon?.multiplier??1+(weapon?.cost??0)/100;};
 export const weaponRarity=weapon=>weapon.hidden?5:1+[400,1500,4500,10000].filter(price=>weapon.cost>price).length;
-export const weaponDurability=id=>id==='bare-hand'?Infinity:(WEAPONS.some(weapon=>weapon.id===id)?6-weaponRarity(WEAPONS.find(weapon=>weapon.id===id)):0);
+export const weaponDurability=id=>id==='bare-hand'?Infinity:(WEAPONS.some(weapon=>weapon.id===id)?Math.max(2,6-weaponRarity(WEAPONS.find(weapon=>weapon.id===id))):0);
 export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
  ...SECRET_DECOR,
@@ -142,11 +143,12 @@ export const DECOR=[
 DECOR.push({id:'clockoff-seal',name:'Automatic clock-off seal',nameZh:'自動準時收工印',cost:8800,rate:3.6,unlockStory:'bridge-appeal',description:'牛丸老闆御賜：個印自己識睇鐘，五點九已經瞓低等收工。',descriptionEn:'Gifted by the meatball boss. This seal stamps leave before the clock asks.'});
 // Decoration base prices are 300 oil lower; levels and income stay intact.
 for(const decor of DECOR)decor.cost=Math.max(0,decor.cost-300);
-// All hourly income, including the upgrade increment, is 40% below the previous balance.
-export const DECOR_LEVEL_RATE_BONUS=.06;
+// Apply the new 20% acquisition reduction to rates that already include the earlier 40% reduction.
+for(const decor of DECOR)decor.rate=Math.round(decor.rate*OIL_GAIN_FACTOR*1e6)/1e6;
+export const DECOR_LEVEL_RATE_BONUS=.06*OIL_GAIN_FACTOR;
 // Existing pieces cost 20% less to upgrade; first placement retains its purchase price.
 export const decorUpgradeBase=(decor,nextLevel)=>Math.ceil(decor.cost*nextLevel*(nextLevel>1?.8:1));
-export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*DECOR_LEVEL_RATE_BONUS)*100)/100:0;
+export const decorHourlyRate=(decor,level)=>level>0?Math.round((decor.rate+(level-1)*DECOR_LEVEL_RATE_BONUS)*1e6)/1e6:0;
 export const FRIENDS=PATRONS;
 export const FORTUNES=[
   'You have done enough for today. Leave a little room for yourself.',

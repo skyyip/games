@@ -1,6 +1,6 @@
 import {WEAPONS} from './catalog.js';
 export class StallAudio{
- constructor(){this.context=null;this.master=null;this.rain=null;this.enabled=true;this.voice=false;this.chimeAt=0;this.ambienceWanted=false;this.musicTimer=null;this.musicBar=0;this.sources=new Set();this.musicSources=new Set();this.burst=false;this.primed=false;this.mobileBridge=null;}
+ constructor(){this.context=null;this.master=null;this.rain=null;this.enabled=true;this.voice=false;this.chimeAt=0;this.ambienceWanted=false;this.musicTimer=null;this.musicBar=0;this.sources=new Set();this.musicSources=new Set();this.burst=false;this.noiseBuffers=new Map();this.rainBuffer=null;this.lastHitSoundAt=-Infinity;this.primed=false;this.mobileBridge=null;}
  get needsUnlock(){return !this.context||this.context.state!=='running'||Boolean(this.mobileBridge?.paused);}
  preparePlayback(){
   const nav=window.navigator??globalThis.navigator;
@@ -17,7 +17,7 @@ export class StallAudio{
  prime(){const c=this.context;if(this.primed&&c.state==='running')return;const source=this.track(c.createBufferSource());source.buffer=c.createBuffer(1,1,c.sampleRate);source.connect(this.master);source.start(0);source.stop(c.currentTime+1/c.sampleRate);this.primed=true;}
  async unlock(){
   try{
-   if(this.context?.state==='closed'){this.clearAmbience();this.clearNotes();this.context=null;this.master=null;this.primed=false;}
+   if(this.context?.state==='closed'){this.clearAmbience();this.clearNotes();this.context=null;this.master=null;this.primed=false;this.noiseBuffers.clear();this.rainBuffer=null;this.lastHitSoundAt=-Infinity;}
    if(this.enabled)this.preparePlayback();
    if(!this.context){this.context=new (window.AudioContext||window.webkitAudioContext)();this.context.addEventListener?.('statechange',()=>{if(this.context.state==='running'){this.syncGain();this.updateAmbience();}else{this.clearAmbience();this.clearNotes();}});}
    if(!this.master){this.master=this.context.createGain();this.master.gain.value=this.enabled?.34:0;const limiter=this.context.createDynamicsCompressor();limiter.threshold.value=-14;limiter.knee.value=12;limiter.ratio.value=8;limiter.attack.value=.004;limiter.release.value=.16;this.master.connect(limiter);limiter.connect(this.context.destination);this.limiter=limiter;}
@@ -33,9 +33,10 @@ export class StallAudio{
  clearNotes(){for(const source of this.sources){try{source.stop();}catch{}}this.sources.clear();this.musicSources.clear();}
 
  tone(frequency,duration=.1,type='sine',volume=.12,delay=0){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,t=c.currentTime+delay,o=this.track(c.createOscillator()),g=c.createGain();o.type=type;o.frequency.setValueAtTime(frequency,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,frequency*.7),t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+duration+.01);return o;}
- noise(duration=.1,volume=.1,filter=1600){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,buffer=c.createBuffer(1,Math.ceil(c.sampleRate*duration),c.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);const s=this.track(c.createBufferSource()),f=c.createBiquadFilter(),g=c.createGain();s.buffer=buffer;f.type='lowpass';f.frequency.value=filter;g.gain.value=volume;s.connect(f);f.connect(g);g.connect(this.master);s.start();}
+ noise(duration=.1,volume=.1,filter=1600){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,seconds=Math.max(.02,Math.round(duration*50)/50);let buffer=this.noiseBuffers.get(seconds);if(!buffer){buffer=c.createBuffer(1,Math.ceil(c.sampleRate*seconds),c.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);if(this.noiseBuffers.size>=12)this.noiseBuffers.delete(this.noiseBuffers.keys().next().value);this.noiseBuffers.set(seconds,buffer);}const source=this.track(c.createBufferSource()),f=c.createBiquadFilter(),g=c.createGain();source.buffer=buffer;f.type='lowpass';f.frequency.value=filter;g.gain.value=volume;source.connect(f);f.connect(g);g.connect(this.master);source.start();}
+
  sweep(from,to,duration=.2,volume=.1,type='triangle',delay=0){if(!this.enabled||!this.context||this.context.state!=='running')return;const c=this.context,t=c.currentTime+delay,o=this.track(c.createOscillator()),g=c.createGain();o.type=type;o.frequency.setValueAtTime(from,t);o.frequency.exponentialRampToValueAtTime(to,t+duration);g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(volume,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+duration+.02);}
- hit(weapon,heavy,perfect,power=heavy?4:1){const tone=WEAPONS.find(w=>w.id===weapon)?.tone??180,force=Math.max(.1,Math.min(1,power/9));this.tone(tone,.07+force*.14,'triangle',.1+force*.16);this.noise(.04+force*.12,.06+force*.13,weapon==='paper'?2800:1500);this.sweep(180+force*180,65+force*30,.12+force*.15,.05+force*.09,'triangle',.035);if(force>.45)this.sweep(260,440+force*270,.13,.07,'sine',.15);if(perfect)this.tone(920,.1,'sine',.04,.025);}
+ hit(weapon,heavy,perfect,power=heavy?4:1){if(!this.enabled||!this.context||this.context.state!=='running'||this.context.currentTime-this.lastHitSoundAt<.045)return;this.lastHitSoundAt=this.context.currentTime;const tone=WEAPONS.find(w=>w.id===weapon)?.tone??180,force=Math.max(.1,Math.min(1,power/9));this.tone(tone,.07+force*.14,'triangle',.1+force*.16);this.noise(.04+force*.12,.06+force*.13,weapon==='paper'?2800:1500);this.sweep(180+force*180,65+force*30,.12+force*.15,.05+force*.09,'triangle',.035);if(force>.45)this.sweep(260,440+force*270,.13,.07,'sine',.15);if(perfect)this.tone(920,.1,'sine',.04,.025);}
  chomp(){this.noise(.08,.14,700);this.tone(210,.12,'triangle',.14,.05);this.sweep(350,110,.28,.12,'triangle',.12);this.tone(620,.15,'sine',.05,.35);}
 
  chime(){for(const [i,f]of [660,880,1100].entries())this.tone(f,.4,'sine',.07,i*.1);}
@@ -44,7 +45,7 @@ export class StallAudio{
  updateAmbience(){
   if(!this.ambienceWanted||!this.enabled||!this.context||this.context.state!=='running'){this.clearAmbience();return;}
   if(this.rain)return;
-  const c=this.context,buffer=c.createBuffer(1,c.sampleRate*2,c.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+  const c=this.context;let buffer=this.rainBuffer;if(!buffer){buffer=c.createBuffer(1,c.sampleRate*2,c.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;this.rainBuffer=buffer;}
   const source=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();source.buffer=buffer;source.loop=true;filter.type='lowpass';filter.frequency.value=550;gain.gain.value=.027;source.connect(filter);filter.connect(gain);gain.connect(this.master);source.start();this.rain=source;
   this.playMusicBar();this.musicTimer=setInterval(()=>this.playMusicBar(),this.burst?1200:3600);
  }

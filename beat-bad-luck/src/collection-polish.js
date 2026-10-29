@@ -28,6 +28,7 @@ export function polishCollections(){
  scale('.bbl-intro .bbl-kicker,.fong-intro .bbl-kicker,.stall-wallet>.bbl-kicker',1.15);
  scale('.stall-wallet>.bbl-kicker',1.2);
  scale('#purchase-title',.85);
+ scale('#idle-note',1.1);
  scale('#stall-showcase-title',1.25);scale('#open-journey',1.1);
  scale('#stall-skit *',.85);
  scale('#commission-list .neighbour-card>b',1.15);scale('#commission-list .neighbour-card>strong',.85);

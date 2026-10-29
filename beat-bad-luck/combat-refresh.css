@@ -1,0 +1,93 @@
+/* Read-only inspection is a sibling of the equip button, never a nested button. */
+.skin-card-shell{position:relative;min-width:0;display:flex}
+.skin-card-shell>.skin-card{width:100%;height:100%;flex:1}
+.skin-inspect{position:absolute;top:0;right:0;z-index:4;display:grid;place-items:center;width:44px;height:44px;padding:7px;border:0;background:transparent;box-shadow:none;cursor:pointer;touch-action:manipulation}
+.skin-inspect svg{width:30px;height:30px;border:1px solid #82617a;border-radius:10px;background:#fff0bb;padding:2px;box-shadow:1px 2px 0 #493c4c}
+.skin-inspect:hover svg{background:#fff8db}
+.skin-inspect:active svg{translate:0 2px;box-shadow:none}
+html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
+.skin-detail-dialog{inset:max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom));margin:auto;width:min(480px,calc(100vw - 20px));max-height:calc(100dvh - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)));padding:0;border:2px solid #e9cd87;border-radius:20px;background:#24483d;color:#fff0c9;overflow:hidden;box-shadow:0 15px 50px #102c2c88}
+.skin-detail-dialog[open]{display:flex;flex-direction:column}
+.skin-detail-dialog::backdrop{background:#081f2bd9}
+.skin-detail-scroll{min-height:0;padding:14px 18px 22px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+#skin-detail-art{display:grid;place-items:center;height:190px}
+#skin-detail-art>svg{width:160px;height:184px}
+.skin-detail-scroll p{font:400 15px/1.7 var(--display);margin:10px 0;overflow-wrap:anywhere}
+.skin-detail-scroll dl{margin:16px 0;display:grid;gap:9px}
+.skin-detail-scroll dl>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid #b7c599;border-radius:10px;background:#1c3c34}
+.skin-detail-scroll dt{font-size:14px;line-height:1.5}.skin-detail-scroll dd{margin:0;color:#ffe29c;font:700 19px/1.4 Fredoka,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#skin-detail-note{font-size:13px;color:#e2e9c9}
+.skin-inspect:focus-visible,.skin-detail-dialog :focus-visible{outline:3px solid #ffe49b;outline-offset:2px}
+
+/* The charge rail itself lights up; there is no separate torch or reserved slot. */
+#phase-beat .ultimate-meter{grid-template-columns:minmax(0,1fr);grid-template-rows:16px 24px 12px;max-width:132px;row-gap:2px}
+#phase-beat #finisher-charge-label{grid-column:1;grid-row:1}
+#phase-beat .finisher-charge-frame{grid-column:1;grid-row:2;position:relative;width:100%;height:24px;padding:8px 0}
+#phase-beat #finisher-charge{display:block;width:100%;height:8px;margin:0;border:1px solid #94aa8b;border-radius:5px;overflow:hidden;background:#163d34;accent-color:#f0cc80}
+#phase-beat #finisher-count{grid-column:1;grid-row:3}
+.meter-fire-edge{position:absolute;display:none;pointer-events:none}
+.meter-fire-edge svg{display:block;width:100%;height:100%;transform-origin:50% 100%;animation:meter-fire-dance .8s ease-in-out infinite alternate}
+.meter-fire-top{left:0;right:0;top:0;height:11px}
+.meter-fire-bottom{left:0;right:0;bottom:0;height:11px;rotate:180deg}
+.meter-fire-left,.meter-fire-right{top:4px;bottom:4px;width:11px}
+.meter-fire-left{left:-5px;rotate:-90deg}.meter-fire-right{right:-5px;rotate:90deg}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning]) .meter-fire-edge{display:block}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffcd7d;accent-color:#f6b16e}
+.finisher-charge-frame[data-state=spent] #finisher-charge{background:repeating-linear-gradient(135deg,#50403c 0 5px,#776455 5px 8px);border:2px dashed #382f35;accent-color:#61504a}
+.finisher-charge-frame[data-state=spent] #finisher-charge::-webkit-progress-bar{background:#55483f}
+.finisher-charge-frame[data-state=spent] #finisher-charge::-webkit-progress-value{background:repeating-linear-gradient(135deg,#5a4843 0 5px,#8d7464 5px 8px)}
+.finisher-charge-frame[data-state=spent] #finisher-charge::-moz-progress-bar{background:#69564d}
+.meter-charred{display:none;position:absolute;right:1px;top:4px;width:33px;height:17px;pointer-events:none}
+.meter-charred svg{display:block;width:100%;height:100%}.finisher-charge-frame[data-state=spent] .meter-charred{display:block}
+@keyframes meter-fire-dance{from{transform:scale(.97,.85)}to{transform:scale(1.03,1.12)}}
+.ritual-stage[inert] .meter-fire-edge svg{animation-play-state:paused!important}
+
+/* Background comic spirits have a bounded lifetime and never intercept gestures. */
+.ghost-parade{display:none!important}
+.ambient-comics{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;contain:layout style paint}
+.ambient-sprite{position:absolute;display:block;pointer-events:none;will-change:transform,opacity}
+.ambient-sprite>svg{display:block;width:100%;height:100%}
+.ambient-paper{top:0;width:30px;height:36px}
+.ambient-ghost{width:40px;height:45px}
+.ambient-zombie{width:52px;height:65px}
+
+/* Each helper gets its own prop set, motion recipe, paper pose and comic caption. */
+.weapon-signature{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.signature-motif{position:absolute;inset:9% 0 4%;pointer-events:none}
+.signature-motif>svg{width:100%;height:100%;overflow:visible}
+.signature-caption{position:absolute;left:7px;right:7px;top:5px;margin:0;padding:3px 6px;border-left:3px solid #f5d48b;border-radius:4px;background:#173b3cbb;color:#fff2b8;font:600 12px/1.35 var(--display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.signature-tool{position:absolute;left:7%;top:39%;width:58px;height:68px;opacity:.7}
+.signature-paper{position:absolute;right:5%;bottom:8%;width:45px;height:53px;opacity:.65;--cry-display:inline;--neutral-display:none}
+.signature-tool>svg,.signature-paper>svg{display:block;width:100%;height:100%}
+#paper-doll:is([data-finisher-pose=flat],[data-finisher-pose=pudding],[data-finisher-pose=cheeks])>svg{transform-origin:50% 85%;animation:signature-squish 1.4s ease-in-out infinite}
+#paper-doll:is([data-finisher-pose=spin],[data-finisher-pose=orbit],[data-finisher-pose=flip],[data-finisher-pose=ring])>svg{transform-origin:center;animation:signature-spin .95s ease-in-out infinite alternate}
+#paper-doll:is([data-finisher-pose=mirror],[data-finisher-pose=heart],[data-finisher-pose=shine]) .paper-head{transform-origin:50% 55%;animation:signature-preen 1.5s ease-in-out infinite}
+.weapon-signature[data-pose=sunbeam] .signature-motif>svg{animation:signature-sun 2.8s ease-in-out infinite}
+.weapon-signature[data-pose=stamp] .signature-motif>svg{transform-origin:center;animation:signature-stamp 1.9s ease-in-out infinite}
+@keyframes signature-squish{0%,100%{transform:scale(1)}40%{transform:scale(1.12,.85)}65%{transform:scale(.94,1.08)}}
+@keyframes signature-spin{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@keyframes signature-preen{0%,100%{transform:rotate(0deg)}40%{transform:rotate(-5deg)}70%{transform:rotate(5deg)}}
+@keyframes signature-sun{0%,12%,24%,100%{opacity:.25}6%,18%{opacity:.75}40%,82%{opacity:1}}
+@keyframes signature-stamp{0%,100%{transform:scale(.92);opacity:.3}30%{transform:scale(1.05);opacity:.9}50%{transform:scale(1);opacity:.65}}
+.ritual-stage[inert] #paper-doll[data-finisher-pose] *{animation-play-state:paused!important}
+
+/* A double-buffered decorative DOM hit flash, paired with rate-limited haptics. */
+.dom-impact-switch{position:absolute;left:50%;top:55%;width:140px;height:140px;translate:-50% -50%;z-index:4;pointer-events:none;contain:layout style}
+.dom-impact-copy{position:absolute;inset:0;display:none;color:#ffe2a0;pointer-events:none}
+.dom-impact-copy[data-active=true]{display:block;animation:dom-impact-burst .24s ease-out both}
+.dom-impact-copy[data-critical="3"]{color:#f4a5d6}.dom-impact-copy[data-critical="2"]{color:#b6f0df}
+.dom-impact-copy svg{display:block;width:100%;height:100%}
+@keyframes dom-impact-burst{0%{opacity:.85;transform:translate(-2px,1px) scale(.55)}35%{opacity:1;transform:translate(2px,-1px) scale(var(--impact-scale,1))}100%{opacity:0;transform:translate(0,0) scale(1.35)}}
+
+/* Avoid full-scene animated filters and offscreen work on phones. */
+#play-panel[data-ultimate=true] .bridge-scene,#play-panel[data-ultimate=true] #striking-weapon,.burst-storm,.burst-bolt,.burst-fire .burst-flame-outer{filter:none}
+.burst-dimension{box-shadow:inset 0 0 0 2px #7ee3d044}
+.burst-dimension::before{animation:none;box-shadow:none;background:#8ee5d60c;opacity:1}
+.burst-storm{animation:none}.burst-bolt{animation-duration:2.5s}
+body.is-playing :is(#site-header,#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card,#story,#rules),body.is-playing :is(#site-header,#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card,#story,#rules) *,body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card)::before,body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card)::after{animation-play-state:paused!important}
+[data-motion-visible=false]:not(:has(dialog[open])) *,[data-motion-visible=false]:not(:has(dialog[open]))::before,[data-motion-visible=false]:not(:has(dialog[open]))::after,body[data-document-hidden=true] *,body[data-document-hidden=true] *::before,body[data-document-hidden=true] *::after{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.meter-fire-edge svg,.weapon-signature *,#paper-doll[data-finisher-pose] *{animation:none!important}.dom-impact-copy{display:none!important}}
+
+.weapon-signature[data-paused=true] *{animation-play-state:paused!important}
+
+.impact-haptic-switch{position:fixed;left:-4px;top:-4px;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}.impact-haptic-switch input{width:1px;height:1px;margin:0}

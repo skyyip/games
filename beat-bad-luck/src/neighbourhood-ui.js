@@ -17,7 +17,7 @@ export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refr
  let homeKey='',playKey='',sceneKey='',entry=null,currentScene=null,sceneBeat=0,sceneTick=0,cameoUsed=false,cameoUntil=0;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const cameo=document.createElement('div');cameo.id='extra-king-cameo';cameo.className='extra-king-cameo';cameo.hidden=true;cameo.setAttribute('aria-hidden','true');cameo.innerHTML=extraKingArt()+'<i>?!</i>';$('#beat-arena').append(cameo);
- let scenePlaying=!reduced.matches,sceneNextAt=0;
+ let scenePlaying=!reduced.matches,sceneNextAt=0,sceneVisible=false;new IntersectionObserver(entries=>{sceneVisible=entries[0].isIntersecting;}).observe($('#stall-skit'));
  function announce(text){put($('#neighbour-note'),text);}
  function update(next){setNeighbourhood(next);homeKey='';refresh();}
  function renderHome(){
@@ -47,7 +47,7 @@ export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refr
  $('#next-skit').addEventListener('click',()=>nextScene(true));
  $('#toggle-skit-auto').addEventListener('click',()=>{scenePlaying=!scenePlaying;sceneNextAt=performance.now()+3000;paintAutoScene();});
  reduced.addEventListener('change',()=>{if(reduced.matches){scenePlaying=false;paintAutoScene();}});
- setInterval(()=>{if(document.hidden||!currentScene||!scenePlaying||!['setup','results'].includes(game.phase)||performance.now()<sceneNextAt)return;sceneBeat++;paintScene();if(++sceneTick>=4)nextScene();},3000);
+ setInterval(()=>{if(document.hidden||!sceneVisible||!currentScene||!scenePlaying||!['setup','results'].includes(game.phase)||performance.now()<sceneNextAt)return;sceneBeat++;paintScene();if(++sceneTick>=4)nextScene();},3000);
  function comicSound(type){if(type==='sneeze'){audio.sweep(150,520,.15,.06,'triangle');audio.noise(.08,.055,1300);audio.sweep(300,75,.3,.07,'triangle',.12);}else if(type==='minibus'){audio.tone(1050,.12,'sine',.045);audio.tone(1450,.12,'sine',.025,.045);}else if(type==='receipt'||type==='auntie'){audio.noise(.12,.04,2300);audio.sweep(650,130,.22,.045,'triangle');}else if(type==='blackout'){audio.tone(320,.1,'sine',.03);audio.tone(880,.2,'sine',.04,.06);}else if(type==='pigeon'){audio.sweep(850,1350,.12,.035,'sine');audio.noise(.08,.03,900);}else audio.sweep(190,360,.16,.035,'triangle');}
  function rescue(event){if(cameoUsed||!event?.won||!getState().friends.includes('extra-king'))return;cameoUsed=true;cameoUntil=game.elapsed+1700;cameo.hidden=false;put($('#hit-feedback'),['龍套王跌帽踢走衰運：「吓？未開鏡咩？」','龍套王跌帽踢走衰運：「吓？未開鏡咩？」']);}
  function action(type,id){const event=game.flavour.eventAt(game.elapsed),points=game.interact(type,id);if(!points)return false;onExtraScore();comicSound(type);audio.chime();put($('#hit-feedback'),[`一招搞掂！＋${points}`,`One move! +${points}`]);rescue(event);renderPlay(true);return true;}

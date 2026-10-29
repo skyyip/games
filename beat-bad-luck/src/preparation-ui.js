@@ -14,7 +14,7 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  const welcome=$('#welcome');
  let commissionEnabled=Boolean(getState().neighbourhood.active),previousStory=getState().neighbourhood.active,storiesKey='',kitsKey='';
  const steps=document.createElement('div');steps.id='ritual-preparation';steps.setAttribute('translate','no');
- steps.innerHTML=` <section class="preparation-step" id="prepare-worry" aria-labelledby="prepare-worry-title"><h3 class="preparation-heading"><span class="preparation-number">01</span><span id="prepare-worry-title"></span><small id="worry-required"></small></h3><div class="preparation-body" id="prepare-worry-body"><div id="worry-controls"></div><div id="custom-worry-controls"></div><p id="worry-selection-summary" class="preparation-note"></p></div></section>
+ steps.innerHTML=` <section class="preparation-step" id="prepare-worry" aria-labelledby="prepare-worry-title"><h3 class="preparation-heading"><span class="preparation-number">01</span><span id="prepare-worry-title"></span><small id="worry-required"></small></h3><div class="preparation-body" id="prepare-worry-body"><div id="worry-controls"></div><div id="custom-worry-controls"></div></div></section>
  <details class="preparation-step" id="prepare-commission"><summary class="preparation-heading"><span class="preparation-number">02</span><span><b id="prepare-commission-title"></b><small id="commission-selection-summary"></small></span></summary><div class="preparation-body"><fieldset class="preparation-options"><legend class="sr-only" id="commission-choice-label"></legend><label><input type="radio" name="preparation-commission" value="none"><span id="commission-none-label"></span></label><label><input type="radio" name="preparation-commission" value="yes"><span id="commission-yes-label"></span></label></fieldset><p class="preparation-note" id="commission-help"></p><div id="preparation-commissions" hidden></div><p class="preparation-note" id="commission-target-note"></p><button type="button" class="preparation-link" id="use-commission-worry" hidden></button></div></details>
  <details class="preparation-step" id="prepare-events"><summary class="preparation-heading"><span class="preparation-number">03</span><span><b id="prepare-events-title"></b><small id="events-selection-summary"></small></span></summary><div class="preparation-body"><fieldset class="preparation-options"><legend class="sr-only" id="events-choice-label"></legend><label><input type="radio" name="preparation-events" value="off"><span><b id="events-off-label"></b><small id="events-off-help"></small></span></label><label><input type="radio" name="preparation-events" value="on"><span><b id="events-on-label"></b><small id="events-on-help"></small></span></label></fieldset></div></details>
  <details class="preparation-step" id="prepare-skin"><summary class="preparation-heading"><span class="preparation-number">04</span><span><b id="prepare-skin-title"></b><small id="skin-selection-summary"></small></span></summary><div class="preparation-body"><div class="preparation-preview" id="preparation-skin-preview" aria-hidden="true"></div><div id="preparation-skins"></div></div></details>
@@ -26,9 +26,8 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
  welcome.querySelector('.fong-intro').after(steps);
  $('#worry-controls').append(field);
  $('#custom-worry-controls').append(field.querySelector('.custom-label'),input,$('#worry-privacy'));
- $('#worry-ready-note').setAttribute('aria-live','polite');
  $('#commission-target-note').setAttribute('role','status');
- $('#worry-select').setAttribute('aria-describedby','worry-ready-note');
+ $('#worry-select').removeAttribute('aria-describedby');input.setAttribute('aria-describedby','worry-privacy');
  steps.querySelector('.preparation-start').append($('#start'));
  // Keep existing controls and event handlers as the single source of gameplay state.
  $('.random-events-option').hidden=true;
@@ -124,8 +123,6 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   stall.setAttribute('aria-label',local('我的小攤','My stall'));
   for(const [type,zh,en]of [['skin','全部小人款式／購買','All worry looks / buy'],['kit','全部除厄法寶／購買','All ritual helpers / buy']]){text(type+'-catalog-title',zh,en);const dialog=$('#'+type+'-catalog-dialog');dialog.querySelector('.catalog-close').textContent=local('關閉 ✕','Close ✕');dialog.querySelector('.catalog-scroll').setAttribute('aria-label',local(zh,en));}
   $('.custom-label').textContent=local('或寫低你的小心事','Or write your worry');input.placeholder='';
-  text('worry-selection-summary',worryText?`今日想打走：${worryText}`:'',worryText?`Today’s worry: ${worryText}`:'');
-  $('#worry-selection-summary').hidden=!worryText;
   text('commission-selection-summary',commissionText,commissionText);text('events-selection-summary',eventText,eventText);
   text('skin-selection-summary',`${name(skin)} · ${skin.starter?'免費・不限次數':`剩餘 ${skinUses(state,skin.id)} 次`} · ×${formatNumber(skinScoreMultiplier(skin.id))}`,`${name(skin)} · ${skin.starter?'free · unlimited':`${skinUses(state,skin.id)} uses left`} · ×${formatNumber(skinScoreMultiplier(skin.id))}`);
   text('kit-selection-summary',`${name(kit)} · ${kit.starter?'免費・不限次數':`剩餘 ${kitUses.remaining} 次`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`,`${name(kit)} · ${kit.starter?'free · unlimited':`${kitUses.remaining} uses left`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`);
@@ -139,7 +136,7 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
   $('#use-commission-worry').hidden=!mismatch;text('use-commission-worry','改用委託建議心事（會取代目前心事）','Use the suggested worry (replaces my current worry)');
   welcome.querySelector('.fong-intro>div:last-child>p:last-child').textContent=local('「心事交低，師傅陪你慢慢打走。」','“Set your worry down. We’ll whack it away together.”');
   for(const id of ['start','quick-start']){const button=$('#'+id);button.querySelector('.work-label').textContent=local(id==='start'?'開始打小人儀式':'開始儀式',id==='start'?'Start the ritual':'Start ritual');button.setAttribute('aria-label',local('開始打小人儀式','Start the ritual'));}
-  $('#quick-start').disabled=false;$('#quick-start').setAttribute('aria-describedby','worry-ready-note');
+  $('#quick-start').disabled=false;$('#quick-start').removeAttribute('aria-describedby');
   $('#dock-kit').textContent=local(worryText?`修改心事：${worryText}`:'先選一件心塞塞事','Edit worry: '+(worryText||'choose one first'));
   $('#dock-kit').setAttribute('aria-label',local('修改儀式準備中的心事','Edit the worry in ritual preparation'));
   const dockCommission=commissionEnabled&&current?local(`委託第 ${current.index+1} 章`,`Commission ch. ${current.index+1}`):local('不接委託','No commission');

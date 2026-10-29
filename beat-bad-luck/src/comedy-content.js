@@ -1,3 +1,4 @@
+import {finisherScene} from './finisher-scenes.js';
 // Original flyover slapstick: short callbacks, never private worry text.
 export const ULTIMATE_DURATION=10000,ULTIMATE_LIMIT=1,ULTIMATE_CHARGE=128,ULTIMATE_MULTIPLIER=3;
 export const NICE_AT=1350,NICE_WINDOW=220;
@@ -17,7 +18,7 @@ const shows={
  gadget:{name:['攞你命3000・膠梳投降式','3000 tools, one plastic comb'],prop:'梳',setup:['十二件工具展開！場面要夠大！','Twelve tools unfold! Maximum spectacle!'],payoff:['最後只得把膠梳？小人竟然自己投降！','Just a plastic comb? The gremlin surrenders anyway!']},
  hound:{name:['神犬叼走心塞','Fetch the fuss'],prop:'🐾',setup:['神犬拉茜出場，小人扮波波！','Lassie arrives. Gremlin pretends to be a ball!'],payoff:['好狗唔返工，衰運叼走唔使送！','Good dogs don’t do overtime. Bad luck fetched!']}
 };
-export function ultimateShow(id,kind='work'){const family=ultimateFamily(id),s=shows[family];return {...s,family,ending:comedyEnding(id,kind)};}
+export function ultimateShow(id,kind='work'){const family=ultimateFamily(id),s=shows[family];return {...s,...finisherScene(id),family,ending:comedyEnding(id,kind)};}
 const endings={
  requirement:['最後修改版已被封箱，膠紙寫住「聽朝先」。','The final revision is boxed up, labelled “tomorrow”.'],
  stocks:['股價仲有上落，你個心可以先落班。','Markets still wobble. Your heart can clock off.'],
