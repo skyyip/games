@@ -1,6 +1,9 @@
 // English source messages and their Traditional Chinese translations.
 // Named placeholders preserve numbers and player names without interpreting HTML.
 export const messages = {
+  "Feet Up Café": "茶記縮腳大亂鬥",
+  "Shout, mop and chase gold guests. Or dodge from all four sides and save your sneakers!": "利姐喊縮腳追金圈客人；食客四方避拖，保住波鞋！",
+  "Café comic action": "茶記漫畫大亂鬥",
   "Mop Mayhem: Feet Up!": "茶記大作戰：縮腳啦笨！",
   "Favourite: Mop Mayhem: Feet Up!": "收藏：茶記大作戰：縮腳啦笨！",
   "1–4 players": "1–4 人",

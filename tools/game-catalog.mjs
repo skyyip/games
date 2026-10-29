@@ -12,6 +12,14 @@ export const games = [
     related: ['roach-rush', 'flick-force'],
   },
   {
+    slug: 'feet-up-cafe', name: 'Feet Up Café', zh: '茶記縮腳大亂鬥', genre: 'Arcade', players: [1, 1], topic: 'Hong Kong Café Action Game', listed: false,
+    description: 'Play Feet Up Café, a cute Hong Kong café action game. Shout and mop as Auntie Li, or dodge mops from four directions while protecting your sneakers.',
+    intro: 'Two solo modes: chain well-timed mop pokes and catch gold-ring guests, or lift your feet against four-direction attacks and finish your meal. Optional shift goals award bonus tips.',
+    chinese: '兩個單人模式：當利姐喊縮腳、連隊客人隻腳和追逐金圈矚目客；或當食客閃避前後左右的地拖、捉準時機縮腳，再食飽飲飽。完成當更目標有額外小費。',
+    steps: ['Choose Auntie Li or Diner, a 60- or 90-second round, and optional café events.', 'Drag and shout to poke feet, or hold the matching foot buttons to dodge and release to recover.', 'Complete optional shift goals, save a top-three score for each mode and unlock cosmetic equipment.'],
+    related: ['beat-bad-luck', 'roach-rush'],
+  },
+  {
     slug: 'cha-chaan-mop', name: 'Mop Mayhem: Feet Up!', zh: '茶記大作戰：縮腳啦笨！', genre: 'Arcade', players: [1, 4], topic: 'Hong Kong Café Mop Game', listed: false,
     description: 'Play Mop Mayhem: Feet Up!, a free Hong Kong café game. Mop as the auntie, dodge as a diner or share one screen for a 1-vs-1–3 couch clash.',
     intro: 'A playful Hong Kong café game with mop-master cleaning, feet-up diner survival and simultaneous local 1-vs-1–3 play on one device.',
