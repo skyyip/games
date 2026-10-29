@@ -1,3 +1,4 @@
+import {setAttribute} from './performance.js';
 import {createAltarScene} from './altar-scene.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 
@@ -9,13 +10,13 @@ const bowlArt=svg(`<ellipse cx="50" cy="75" rx="40" ry="4" fill="#694d4f33"/><g 
 const blowArt=svg(`<path d="M15 23q35-21 57 7 15 20-4 39-23 17-47-3Q1 47 15 23Z" fill="#c5dfc1" stroke="#547b75" stroke-width="3"/><circle cx="35" cy="36" r="4" fill="#4d5263"/><path d="m48 31 8 4-8 4" fill="none" stroke="#4d5263" stroke-width="3" stroke-linecap="round"/><ellipse cx="30" cy="51" rx="12" ry="9" fill="#eca5b3"/><ellipse cx="64" cy="48" rx="5" ry="7" fill="#755369"/><path d="M76 38q19-9 19 0-1 6-10 3m-8 9h20m-20 9q19 9 18 0" fill="none" stroke="#a7cfc4" stroke-width="4" stroke-linecap="round"/>`);
 const micArt=svg(`<path d="M28 40v10q0 21 22 21t22-21V40M50 71v8M34 79h32" fill="none" stroke="#537b79" stroke-width="5" stroke-linecap="round"/><rect x="32" y="7" width="36" height="52" rx="18" fill="#d7b5e5" stroke="#755b82" stroke-width="3"/><path d="M40 16h20m-21 6h22" stroke="#f8e2f5" stroke-width="3" stroke-linecap="round"/><circle cx="43" cy="33" r="3" fill="#614d69"/><circle cx="57" cy="33" r="3" fill="#614d69"/><path d="M43 42q7 10 14 0" fill="#945c80"/><g class="mic-cheeks" fill="#f19fb8"><ellipse cx="36" cy="40" rx="5" ry="3"/><ellipse cx="64" cy="40" rx="5" ry="3"/></g><path class="mic-music" d="M81 12v17q-11-2-10 5 4 8 13 1V19l10-3V8Z" fill="#efc87f"/>`);
 const $=selector=>document.querySelector(selector);
-const put=(node,text)=>{if(node.textContent!==text)node.textContent=text;node.setAttribute('translate','no');};
+const put=(node,text)=>{if(node.textContent!==text)node.textContent=text;setAttribute(node,'translate','no');};
 
 export function createIncenseUI({game,audio,getState}){
  const panel=$('#phase-incense'),zone=$('#incense-zone'),sticks=[...zone.querySelectorAll('[data-stick]')],blow=$('#blow'),mic=$('#microphone');
  const altar=createAltarScene({game,getState});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),animations=new Set();
- let phase='',lit=0,blown=false,mode='idle',held=null;
+ let phase='',lit=0,blown=false,mode='idle',held=null,paintKey='';
  for(const stick of sticks){const face=document.createElement('span');face.className='incense-buddy';face.setAttribute('aria-hidden','true');face.innerHTML=buddyArt;const flame=document.createElement('span');flame.className='incense-flame-friend';flame.setAttribute('aria-hidden','true');flame.innerHTML=flameArt;stick.append(face,flame);}
  $('.incense-bowl').innerHTML=bowlArt;$('.incense-bowl svg').setAttribute('preserveAspectRatio','none');$('.incense-bowl svg').setAttribute('viewBox','0 22 100 58');
  for(const [button,art]of [[blow,blowArt],[mic,micArt]]){button.replaceChildren();const icon=document.createElement('span');icon.className='incense-button-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML=art;const label=document.createElement('span');label.className='incense-button-label';label.setAttribute('translate','no');button.append(icon,label);}
@@ -28,8 +29,8 @@ export function createIncenseUI({game,audio,getState}){
  function cancelPointer(){held=null;zone.classList.remove('is-kindling');}
  function suspend(){for(const effect of animations){if(game.pausedAt!==null&&effect.playState==='running')effect.pause();else if(game.pausedAt===null&&effect.playState==='paused')effect.play();}}
  function render(){
-  if(phase!==game.phase){clear();phase=game.phase;lit=0;blown=false;mode='idle';for(const stick of sticks)delete stick.dataset.celebrated;panel.style.setProperty('--mic-level',0);}
-  suspend();if(phase!=='incense'){altar.sync();return;}
+  if(phase!==game.phase){clear();phase=game.phase;lit=0;blown=false;mode='idle';paintKey='';for(const stick of sticks)delete stick.dataset.celebrated;panel.style.setProperty('--mic-level',0);}
+  suspend();altar.sync();if(phase!=='incense')return;const key=[getLanguage(),phase,game.lit.size,game.blown,mode].join('|');if(key===paintKey)return;paintKey=key;
   for(const [index,stick]of sticks.entries()){const on=game.lit.has(index);stick.classList.toggle('is-lit',on);stick.setAttribute('aria-pressed',String(on));stick.setAttribute('aria-label',local(`香仔 ${index+1}${on?' 已點燃':'：點拍叫醒'}`,`Incense buddy ${index+1}${on?' is lit':': tap to wake'}`));put(stick.querySelector('b'),local(on?'醒咗！':'瞓緊…',on?'Awake!':'Zzz…'));}
   if(game.lit.size>lit){for(const index of game.lit){if(!sticks[index].dataset.celebrated){sticks[index].dataset.celebrated='true';animate(sticks[index].querySelector('.incense-buddy svg'),[{transform:'scale(.7,1.25)'},{transform:'scale(1.35,.7) rotate(-10deg)',offset:.45},{transform:'none'}]);burst(sticks[index],['✦','♥']);audio.tone(430+index*120,.09,'triangle',.025);}}animate($('.incense-bowl svg'),[{transform:'scale(1)'},{transform:'scale(1.13,.85)',offset:.4},{transform:'none'}]);lit=game.lit.size;put($('#fong-line'),['一號香仔起身！唔使返工，放心啦！','兩枝都醒，最後嗰枝仲扮瞓！','齊人！輕吹就得，唔使颱風級！'][lit-1]);}
   panel.classList.toggle('is-blown',game.blown);if(game.blown&&!blown){cancelPointer();burst($('.incense-bowl'),['💨','✦','♥']);animate($('.incense-bowl svg'),[{transform:'scale(.85,1.15)'},{transform:'scale(1.18,.75) rotate(-5deg)',offset:.4},{transform:'none'}],750);blown=true;put($('#fong-line'),'吹走衰氣，唔好吹走我頂帽呀！');}
@@ -39,7 +40,6 @@ export function createIncenseUI({game,audio,getState}){
   const labels={idle:['叫咪幫手','Ask the mic'],requesting:['叫醒咪仔','Waking mic…'],listening:['咪仔收工','Stop the mic'],error:['再叫咪仔','Try the mic']};
   const notes={idle:['可以按「呼～」或開咪輕吹；師傅會幫手接棒。','Use the puff button or enable the mic and blow gently. Master helps if time runs out.'],requesting:['咪高峰準備中…唔使開演唱會，輕吹就得！','Mic is getting ready. No concert needed, just a gentle puff!'],listening:['咪高峰豎起耳仔！點齊三枝，再輕吹；聲音唔會儲存。','Mic’s all ears! Light all three, then blow gently. Audio stays unrecorded.'],error:['咪高峰請假！點齊香後按「呼～」，一樣得！','Mic’s on holiday! Light all three, then use the puff button.']};
   put(mic.querySelector('.incense-button-label'),game.blown?local('咪仔收工啦','Mic off'):local(...labels[mode]));mic.disabled=game.blown||mode==='requesting';panel.dataset.mic=mode;mic.setAttribute('aria-pressed',String(mode==='listening'));put($('#mic-note'),game.blown?local('火仔熄咗，香煙繼續扭腰；鬆一鬆膊頭！','Flames out, smoke still dancing. Let your shoulders relax!'):local(...notes[mode]));
-  altar.sync();
  }
  function microphone(value){mode=value;panel.style.setProperty('--mic-level',0);render();}
  function level(value){panel.style.setProperty('--mic-level',Math.max(0,Math.min(1,value)));}

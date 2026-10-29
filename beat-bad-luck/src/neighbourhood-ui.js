@@ -1,3 +1,4 @@
+import {setHidden,setData,setAttribute} from './performance.js';
 import {ENDINGS} from './comedy-content.js';
 import {extraKingArt,runawayMeatballArt} from './slapstick-art.js';
 import {eventArt} from './comic-art.js';
@@ -8,7 +9,7 @@ import {dollArt,decorArt,weaponArt} from './art.js';
 import {postcardSvg,postcardPng} from './postcard.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 import {EVENTS,EVENT_DURATION,eventStep} from './ritual-flavour.js';
-const $=s=>document.querySelector(s),local=value=>Array.isArray(value)?value[getLanguage()==='zh-Hant'?0:1]:value,put=(e,text)=>{e.textContent=local(text);e.setAttribute('translate','no');};
+const $=s=>document.querySelector(s),local=value=>Array.isArray(value)?value[getLanguage()==='zh-Hant'?0:1]:value,put=(e,text)=>{const value=local(text);if(e.textContent!==value)e.textContent=value;setAttribute(e,'translate','no');};
 const name=item=>item.nameZh?(getLanguage()==='zh-Hant'?item.nameZh:item.name):translate(item.name);
 const card=(title,text)=>{const box=document.createElement('article'),heading=document.createElement('b'),p=document.createElement('p');box.className='neighbour-card';put(heading,title);put(p,text);box.append(heading,p);return box;};
 const button=(text,action)=>{const b=document.createElement('button');b.type='button';b.className='soft-button';put(b,text);b.addEventListener('click',action);return b;};
@@ -17,7 +18,7 @@ export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refr
  let homeKey='',playKey='',sceneKey='',entry=null,currentScene=null,sceneBeat=0,sceneTick=0,cameoUsed=false,cameoUntil=0;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const cameo=document.createElement('div');cameo.id='extra-king-cameo';cameo.className='extra-king-cameo';cameo.hidden=true;cameo.setAttribute('aria-hidden','true');cameo.innerHTML=extraKingArt()+'<i>?!</i>';$('#beat-arena').append(cameo);
- let scenePlaying=!reduced.matches,sceneNextAt=0,sceneVisible=false;new IntersectionObserver(entries=>{sceneVisible=entries[0].isIntersecting;}).observe($('#stall-skit'));
+ let scenePlaying=!reduced.matches,sceneNextAt=0,sceneVisible=false,sceneTimer=0;new IntersectionObserver(entries=>{sceneVisible=entries[0].isIntersecting;scheduleScene();}).observe($('#stall-skit'));
  function announce(text){put($('#neighbour-note'),text);}
  function update(next){setNeighbourhood(next);homeKey='';refresh();}
  function renderHome(){
@@ -41,25 +42,28 @@ export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refr
  }
  function paintScene(){if(!currentScene)return;const beats=currentScene.beats??[currentScene.line,['全攤位：嘩——！','The whole stall: “WHOOOA!”'],currentScene.line];put($('#skit-line'),beats[sceneBeat%beats.length]);put($('#skit-puff'),[['嘭！','WHAM!'],['彈！','BOING!'],['唔關我事！','WASN’T ME!']][sceneBeat%3]);$('#stall-skit').dataset.act=sceneBeat%3;for(const root of document.querySelectorAll('.stall-showcase,.stall-extension'))root.classList.toggle('meatball-court',currentScene.id==='meatball-coronation'&&sceneBeat%3===2);}
  function paintAutoScene(){put($('#toggle-skit-auto'),scenePlaying?['自動串戲：開','Auto scenes: on']:['自動串戲：關','Auto scenes: off']);$('#toggle-skit-auto').setAttribute('aria-label',local(['自動串戲','Automatic scenes']));$('#toggle-skit-auto').setAttribute('aria-pressed',String(scenePlaying));}
- function showScene(scene,manual=false){if(manual)sceneNextAt=performance.now()+6000;paintAutoScene();currentScene=scene;sceneBeat=sceneTick=0;sceneKey=scene.id+getLanguage();$('#stall-skit').hidden=false;$('#stall-skit').dataset.scene=scene.id;$('#stall-skit').dataset.motion=scene.motion??(scene.id==='charge'?'orbit':scene.id==='emperor'?'royal':'bounce');$('#skit-cast').innerHTML=(scene.id==='emperor'?['beggar-dog-rice','dragon-throne','lassie']:scene.actors).map(id=>`<span data-skit-actor="${id}">${scene.id==='meatball-coronation'&&id==='beef-balls'?runawayMeatballArt():id==='lassie'?weaponArt(id):decorArt(id)}${scene.id==='meatball-coronation'&&id==='dragon-throne'?'<i class="royal-meatball-on-throne">'+runawayMeatballArt(false)+'</i>':''}${scene.id==='meatball-coronation'&&id==='cat'?'<i class="chase-helmet">⛑</i>':''}</span>`).join('');put($('#skit-name'),scene.name);put($('#next-skit-line'),['下一句笑料','Next punchline']);put($('#next-skit'),['下一場・再癲啲 ↗','Next scene · more chaos ↗']);paintScene();}
+ function showScene(scene,manual=false){if(manual)sceneNextAt=performance.now()+6000;paintAutoScene();currentScene=scene;sceneBeat=sceneTick=0;sceneKey=scene.id+getLanguage();$('#stall-skit').hidden=false;$('#stall-skit').dataset.scene=scene.id;$('#stall-skit').dataset.motion=scene.motion??(scene.id==='charge'?'orbit':scene.id==='emperor'?'royal':'bounce');$('#skit-cast').innerHTML=(scene.id==='emperor'?['beggar-dog-rice','dragon-throne','lassie']:scene.actors).map(id=>`<span data-skit-actor="${id}">${scene.id==='meatball-coronation'&&id==='beef-balls'?runawayMeatballArt():id==='lassie'?weaponArt(id):decorArt(id)}${scene.id==='meatball-coronation'&&id==='dragon-throne'?'<i class="royal-meatball-on-throne">'+runawayMeatballArt(false)+'</i>':''}${scene.id==='meatball-coronation'&&id==='cat'?'<i class="chase-helmet">⛑</i>':''}</span>`).join('');put($('#skit-name'),scene.name);put($('#next-skit-line'),['下一句笑料','Next punchline']);put($('#next-skit'),['下一場・再癲啲 ↗','Next scene · more chaos ↗']);paintScene();scheduleScene();}
  function nextScene(manual=false){const state=getState(),choices=SCENES.filter(s=>state.neighbourhood.scenes.includes(s.id)||availableScenes(state.neighbourhood,state.decor).some(x=>x.id===s.id));if(!choices.length)return;const index=choices.findIndex(s=>s.id===currentScene?.id);showScene(choices[(index+1)%choices.length],manual);}
- $('#next-skit-line').addEventListener('click',()=>{sceneBeat++;sceneTick=0;sceneNextAt=performance.now()+6000;paintScene();});
+ $('#next-skit-line').addEventListener('click',()=>{sceneBeat++;sceneTick=0;sceneNextAt=performance.now()+6000;paintScene();scheduleScene();});
  $('#next-skit').addEventListener('click',()=>nextScene(true));
- $('#toggle-skit-auto').addEventListener('click',()=>{scenePlaying=!scenePlaying;sceneNextAt=performance.now()+3000;paintAutoScene();});
- reduced.addEventListener('change',()=>{if(reduced.matches){scenePlaying=false;paintAutoScene();}});
- setInterval(()=>{if(document.hidden||!sceneVisible||!currentScene||!scenePlaying||!['setup','results'].includes(game.phase)||performance.now()<sceneNextAt)return;sceneBeat++;paintScene();if(++sceneTick>=4)nextScene();},3000);
+ $('#toggle-skit-auto').addEventListener('click',()=>{scenePlaying=!scenePlaying;sceneNextAt=performance.now()+3000;paintAutoScene();scheduleScene();});
+ reduced.addEventListener('change',()=>{if(reduced.matches){scenePlaying=false;paintAutoScene();scheduleScene();}});
+ function scheduleScene(){clearTimeout(sceneTimer);sceneTimer=0;if(document.hidden||!sceneVisible||!currentScene||!scenePlaying||!['setup','results'].includes(game.phase)||$('#stall-skit').hidden)return;sceneTimer=setTimeout(()=>{sceneTimer=0;if(document.hidden||!sceneVisible||!['setup','results'].includes(game.phase))return;sceneBeat++;paintScene();if(++sceneTick>=4)nextScene();scheduleScene();},Math.max(3000,sceneNextAt-performance.now()));}
+ document.addEventListener('visibilitychange',scheduleScene);
  function comicSound(type){if(type==='sneeze'){audio.sweep(150,520,.15,.06,'triangle');audio.noise(.08,.055,1300);audio.sweep(300,75,.3,.07,'triangle',.12);}else if(type==='minibus'){audio.tone(1050,.12,'sine',.045);audio.tone(1450,.12,'sine',.025,.045);}else if(type==='receipt'||type==='auntie'){audio.noise(.12,.04,2300);audio.sweep(650,130,.22,.045,'triangle');}else if(type==='blackout'){audio.tone(320,.1,'sine',.03);audio.tone(880,.2,'sine',.04,.06);}else if(type==='pigeon'){audio.sweep(850,1350,.12,.035,'sine');audio.noise(.08,.03,900);}else audio.sweep(190,360,.16,.035,'triangle');}
  function rescue(event){if(cameoUsed||!event?.won||!getState().friends.includes('extra-king'))return;cameoUsed=true;cameoUntil=game.elapsed+1700;cameo.hidden=false;put($('#hit-feedback'),['龍套王跌帽踢走衰運：「吓？未開鏡咩？」','龍套王跌帽踢走衰運：「吓？未開鏡咩？」']);}
  function action(type,id){const event=game.flavour.eventAt(game.elapsed),points=game.interact(type,id);if(!points)return false;onExtraScore();comicSound(type);audio.chime();put($('#hit-feedback'),[`一招搞掂！＋${points}`,`One move! +${points}`]);rescue(event);renderPlay(true);return true;}
  function cancel(){if(swiping){try{swiping.b.releasePointerCapture(swiping.id);}catch{}}swiping=null;game.flavour.cancelHold();for(const e of document.querySelectorAll('.comic-event-prop'))e.classList.remove('is-dragging');}
- function renderPlay(force=false){const playing=game.phase==='beat';$('#personality-hud').hidden=!playing||!game.randomEvents;$('#flavour-playfield').hidden=!playing;if(!playing){cancel();cameo.hidden=true;return;}
-  const view=game.flavour.view(game.elapsed),event=view.event,key=JSON.stringify([getLanguage(),view.mood,view.copies.map(c=>c.id),event?.id,event?.won]);cameo.hidden=game.elapsed>=cameoUntil;
-  $('#paper-doll').dataset.mood=view.mood;$('#hit-zone').dataset.personality=game.kind;if(view.mood==='falling')$('#paper-doll').classList.add('is-crying');
+ function renderPlay(force=false){if(sceneTimer&&!['setup','results'].includes(game.phase)){clearTimeout(sceneTimer);sceneTimer=0;}const playing=game.phase==='beat';
+  if(!playing){if(playKey==='inactive')return;playKey='inactive';setHidden($('#personality-hud'),true);setHidden($('#flavour-playfield'),true);cancel();setHidden(cameo,true);return;}
+  const view=game.flavour.view(game.elapsed),event=view.event,key=JSON.stringify([getLanguage(),game.kind,game.commission,game.randomEvents,view.mood,view.copies.map(c=>c.id),event?.id,event?.won]);
+  setHidden(cameo,game.elapsed>=cameoUntil);
   if(game.kind==='stocks')$('#paper-doll').style.translate=`0 ${Math.sin(game.elapsed/700)*9}px`;
-  $('#stock-track').hidden=game.kind!=='stocks';$('#pig-helmet').hidden=game.kind!=='teammates'||view.mood!=='helmet';$('#pig-sleep').hidden=game.kind!=='teammates'||view.mood!=='sleeping';$('#pig-smirk').hidden=game.kind!=='teammates'||view.mood!=='snickering';
-  for(const id of ['wind-catch','rain-cover','rain-awning','event-move'])$('#'+id).hidden=true;$('#hit-zone').classList.remove('needs-shelter');
-  if(event){$('#event-time').value=event.won?EVENT_DURATION:Math.max(0,EVENT_DURATION-(game.elapsed-event.at));put($('#event-status'),event.won?['搞掂！','Done!']:[`${Math.ceil((EVENT_DURATION-game.elapsed+event.at)/1000)}s`,`${Math.ceil((EVENT_DURATION-game.elapsed+event.at)/1000)}s`]);}
+  if(event){const value=event.won?EVENT_DURATION:Math.max(0,Math.round((EVENT_DURATION-game.elapsed+event.at)/100)*100);if($('#event-time').value!==value)$('#event-time').value=value;put($('#event-status'),event.won?['搞掂！','Done!']:[`${Math.ceil((EVENT_DURATION-game.elapsed+event.at)/1000)}s`,`${Math.ceil((EVENT_DURATION-game.elapsed+event.at)/1000)}s`]);}
   if(key===playKey)return;playKey=key;
+  setHidden($('#personality-hud'),!game.randomEvents);setHidden($('#flavour-playfield'),false);setData($('#paper-doll'),'mood',view.mood);setData($('#hit-zone'),'personality',game.kind);if(view.mood==='falling')$('#paper-doll').classList.add('is-crying');
+  setHidden($('#stock-track'),game.kind!=='stocks');setHidden($('#pig-helmet'),game.kind!=='teammates'||view.mood!=='helmet');setHidden($('#pig-sleep'),game.kind!=='teammates'||view.mood!=='sleeping');setHidden($('#pig-smirk'),game.kind!=='teammates'||view.mood!=='snickering');
+  for(const id of ['wind-catch','rain-cover','rain-awning','event-move'])setHidden($('#'+id),true);$('#hit-zone').classList.remove('needs-shelter');
     put($('#personality-hint'),game.commission?['目標：完成這局，幫街坊收工。','Goal: finish this ritual for your neighbour.']:['自由出招，連擊 88 下解鎖必殺。','Any gesture scores: 88 combo unlocks your finisher.']);
   $('#copy-targets').replaceChildren(...view.copies.map(copy=>{const b=button(['最後一次…暫定！','Final revision… provisionally!'],()=>action('copy',copy.id));b.className='copy-target';b.dataset.copy=copy.id;b.innerHTML=`<span aria-hidden="true">${dollArt('work',1)}</span><small translate="no">${local(['最後一次…暫定！','Final… provisionally!'])}</small>`;return b;}));
   $('#event-banner').hidden=!event;$('#flavour-playfield').dataset.event=event?.type??'';$('#paper-doll').dataset.comicEvent=event&&!event.won?event.type:'';

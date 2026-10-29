@@ -26,7 +26,7 @@ export function clearCriticalHit(){
  const paper=document.querySelector('#paper-doll');if(paper)paper.dataset.critical='1';
 }
 export function showCriticalHit(hit){
- const paper=document.querySelector('#paper-doll'),arena=document.querySelector('#beat-arena'),zone=document.querySelector('#hit-zone');paper.dataset.critical=String(hit.impactLevel);if(hit.impactLevel===1)return;
+ const paper=document.querySelector('#paper-doll'),arena=document.querySelector('#beat-arena'),zone=document.querySelector('#hit-zone');if(paper.dataset.critical!==String(hit.impactLevel))paper.dataset.critical=String(hit.impactLevel);if(hit.impactLevel===1)return;
  clearCriticalHit();paper.dataset.critical=String(hit.impactLevel);
  const badge=document.createElement('span');badge.className='critical-comic critical-'+hit.impactLevel;badge.setAttribute('aria-hidden','true');badge.innerHTML=`<b>${hit.impactLevel}X</b>`;zone.append(badge);
  const prop=document.createElement('span');prop.className='critical-flying-prop critical-prop-'+hit.impactLevel;prop.setAttribute('aria-hidden','true');prop.textContent=hit.impactLevel===3?'👻':'⌣';arena.append(prop);

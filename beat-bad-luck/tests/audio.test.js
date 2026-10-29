@@ -54,3 +54,10 @@ test('burst respects mute and pause and can resume without stacking or leaking m
  audio.setEnabled(true);assert.equal(timers.size,1);assert.equal(audio.musicSources.size,17);audio.stop();assert.equal(audio.burst,false);assert.equal(audio.musicSources.size,0);assert.equal(timers.size,0);
  await audio.unlock();audio.setBurst(true);audio.ambience(true);assert.equal(timers.size,1);assert.equal(audio.musicSources.size,17);audio.setBurst(false);assert.equal(audio.musicSources.size,5);audio.stop();
 });
+
+test('completed sounds and stopped ambience disconnect their whole graph, not only their sources',async t=>{
+ setup(t);const nodes=[];class Tracked extends Context{node(){const node=new AudioNode();node.disconnect=()=>node.disconnected=true;nodes.push(node);return node;}createGain(){return this.node();}createOscillator(){return this.node();}createBiquadFilter(){return this.node();}createBufferSource(){return this.node();}}
+ window.AudioContext=Tracked;const audio=new StallAudio();await audio.unlock();
+ for(const action of [()=>audio.tone(440),()=>audio.noise(.1),()=>audio.sweep(220,440)]){const start=nodes.length,previous=new Set(audio.sources);action();const source=[...audio.sources].find(n=>!previous.has(n));assert.ok(source);source.onended();assert.ok(nodes.slice(start).every(n=>n.disconnected));assert.ok(!audio.sources.has(source));}
+ audio.ambience(true);const rain=audio.rain,chain=[...audio.rainNodes];assert.equal(chain.length,2);audio.stop();assert.ok([rain,...chain].every(n=>n.disconnected));assert.equal(audio.rainNodes.length,0);assert.equal(audio.sources.size,0);
+});

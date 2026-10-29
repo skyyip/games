@@ -2,7 +2,7 @@ import {createWeaponInspector} from './skin-inspector.js';
 import {createAltarUI} from './altar-ui.js';
 import {setAltarDecor} from './altar-layout.js';
 import {comicSpeakerArt,createStallShowcaseDialog,setupModalChrome} from './mobile-dialogs.js';
-import {UI_TICK_MS,observeDecorativeVisibility} from './performance.js';
+import {uiTickDelay,createDOMLookup,observeDecorativeVisibility} from './performance.js';
 import {createImpactSwitch} from './impact-switch.js';
 import {createCollectionDialogs} from './collection-dialogs.js';
 import {formatNumber} from './number-format.js';
@@ -32,7 +32,7 @@ import {StallAudio} from './audio.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 import {enableOffline} from '../../grid-rush/src/party-ui.js';
 const preferences=createPreferences();
-const $=selector=>document.querySelector(selector),game=new RitualGame(),audio=new StallAudio(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const $=createDOMLookup(),game=new RitualGame(),audio=new StallAudio(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
 audio.setEnabled(preferences.value.sound);
 $('#voice').checked=preferences.value.voice;
 $('#random-events').checked=preferences.value.randomEvents;
@@ -43,7 +43,7 @@ const illustratedDecor=new Set(['cat','radio','incense','tiger','aquarium','thre
 const shopWeapons=WEAPONS.filter(w=>!w.starter&&!w.hidden&&w.id!=='rebirth-paper').sort((a,b)=>a.cost-b.cost||a.merit-b.merit);
 shopWeapons.splice(-1,0,WEAPONS.find(w=>w.id==='rebirth-paper'));
 let altarUI=null,stallShowcaseUI=null,collectionUI=null,stallLayoutUI=null,neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,preparationUI=null,returnToDecor=null,purchaseFromPreparation=false;
-let rigAnimations=[],cryDuration=1100,firstWhack=true,paperPaintKey='';
+let rigAnimations=[],cryDuration=1100,firstWhack=true,paperPaintKey='',weaponRowsKey='',friendRowsKey='',recordRowsKey='',decorRowsKey='',lastVisualHitAt=-Infinity;
 const statCache=new Map(),textMeasure=document.createElement('canvas').getContext('2d');
 let pickChant=createChantPicker();
 const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,porkGesture=null,micRevision=0,micStream=null,micContext=null,micFrame=0;
@@ -100,9 +100,10 @@ function settle(){syncProgress();const idle=collectIdle(state);state=idle.state;
 function message(text){$('#shop-message').textContent=text;clearTimeout(shopTimer);shopTimer=setTimeout(()=>$('#shop-message').textContent='',4500);say(text);}
 function drawWorries(){
  const select=$('#worry-select'),zh=getLanguage()==='zh-Hant';
- select.replaceChildren(new Option(zh?'選擇一件心塞塞事…':'Choose a worry…',''),...WORRY_GROUPS.map(group=>{const options=document.createElement('optgroup');options.label=zh?group.labelZh:group.label;options.dataset.group=group.id;
-  for(const worry of WORRIES.filter(w=>w.group===group.id)){const option=new Option(worryLabel(worry),worry.id);option.dataset.worry=worry.id;options.append(option);}return options;}));
- select.value=kind;updateStartReadiness();
+ if(select.dataset.language!==getLanguage()){select.dataset.language=getLanguage();
+  select.replaceChildren(new Option(zh?'揀件心事…':'Choose a worry…',''),...WORRY_GROUPS.map(group=>{const options=document.createElement('optgroup');options.label=zh?group.labelZh:group.label;options.dataset.group=group.id;
+   for(const worry of WORRIES.filter(w=>w.group===group.id)){const option=new Option(worryLabel(worry),worry.id);option.dataset.worry=worry.id;options.append(option);}return options;}));
+ }if(select.value!==kind)select.value=kind;updateStartReadiness();
 }
 $('#worry-select').addEventListener('change',event=>{const id=event.target.value;kind=WORRIES.some(w=>w.id===id)?id:'';if(kind)$('#worry-input').value='';updateStartReadiness();});
 function updateStartReadiness(){const ready=Boolean(WORRIES.some(w=>w.id===kind)||$('#worry-input').value.trim());for(const id of ['start','quick-start']){const button=$('#'+id);button.disabled=id==='start'&&!ready;button.setAttribute('aria-disabled',String(id==='start'&&!ready));}return ready;}
@@ -146,22 +147,29 @@ function requestBuy(kind,item){
 const kitScoreLabel=id=>translate(`Relief score ×${formatNumber(weaponScoreMultiplier(id))}`);
 function renderStall(){
  $('#use-hands').disabled=state.equipped==='bare-hand';countNumber($('#coins'),state.coins);countNumber($('#merit'),state.merit);numberText($('#idle-note'),getLanguage()==='zh-Hant'?`每小時 ${formatNumber(idleRate(state))} 香油錢 · 離線最多累積 ${MAX_IDLE_HOURS} 小時`:`${formatNumber(idleRate(state))} oil/hour · Offline earnings: up to ${MAX_IDLE_HOURS} hours.`);
- const kit=WEAPONS.find(w=>w.id===state.equipped),condition=weaponCondition(state,kit.id);$('#equipped-art').innerHTML=weaponArt(kit.id);literal($('#equipped-name'),`${itemName(kit)} · ${kitScoreLabel(kit.id)}${kit.cost?(getLanguage()==='zh-Hant'?` · 可用度 ${condition.current}/${condition.capacity} · 庫存 ${condition.remaining} 次`:` · Condition ${condition.current}/${condition.capacity} · ${condition.remaining} in stock`):''}`);
+ const kit=WEAPONS.find(w=>w.id===state.equipped),condition=weaponCondition(state,kit.id);if($('#equipped-art').dataset.item!==kit.id){$('#equipped-art').dataset.item=kit.id;$('#equipped-art').innerHTML=weaponArt(kit.id);}literal($('#equipped-name'),`${itemName(kit)} · ${kitScoreLabel(kit.id)}${kit.cost?(getLanguage()==='zh-Hant'?` · 可用度 ${condition.current}/${condition.capacity} · 庫存 ${condition.remaining} 次`:` · Condition ${condition.current}/${condition.capacity} · ${condition.remaining} in stock`):''}`);
  renderDecorDisplay();
  $('#play-panel').classList.toggle('has-neon',state.decor.neon>0);$('#play-panel').classList.toggle('has-incense',state.decor.incense>0);for(const id of illustratedDecor)$('#stall-'+id).hidden=!state.decor[id];
  renderDecorRows();
+ const weaponKey=JSON.stringify([getLanguage(),state.coins,state.merit,state.coupons,state.owned,state.equipped,state.weaponUses]);if(weaponKey!==weaponRowsKey){weaponRowsKey=weaponKey;
  $('#weapon-list').replaceChildren(...[...shopWeapons,...WEAPONS.filter(w=>w.hidden&&state.owned.includes(w.id))].map(w=>{
   const row=document.createElement('div');row.className='kit-row';const icon=document.createElement('span');icon.className='kit-art';icon.setAttribute('aria-hidden','true');icon.innerHTML=weaponArt(w.id);const owned=state.owned.includes(w.id),equipped=state.equipped===w.id,zh=getLanguage()==='zh-Hant',price=purchasePrice(state,w.cost),button=document.createElement('button');button.type='button';button.dataset.weapon=w.id;button.disabled=equipped||(!owned&&(state.merit<w.merit||state.coins<bestPurchasePrice(state,w.cost)));literal(button,equipped?(zh?'已選用':'In hand'):owned?(zh?'選用':'Equip'):(zh?`${price} 香油錢`:`${price} oil`));button.setAttribute('aria-label',`${itemName(w)} · ${button.textContent}`);button.addEventListener('click',()=>{if(purchaseUI.isOpen||PHASES.includes(game.phase))return;settle();if(state.owned.includes(w.id)){state=buyWeapon(state,w.id);save();renderStall();}else requestBuy('weapon',w);});
   const {capacity,remaining:uses,current}=weaponCondition(state,w.id),detail=owned?(zh?`庫存共 ${uses} 次`:`${uses} uses in stock`):`Needs ${w.merit} merit`,text=rowText(itemName(w),'');literal(text.querySelector('small'),`${kitScoreLabel(w.id)} · ${translate(detail)}`);const label=document.createElement('small');label.className='kit-durability-label';literal(label,zh?`可用度 ${owned?current:capacity}/${capacity} · 每件 ${capacity} 次`:`Durability ${owned?current:capacity}/${capacity} · ${capacity} uses per kit`);const meter=document.createElement('meter');meter.className='kit-durability-meter';meter.min=0;meter.max=capacity;meter.value=owned?current:capacity;meter.setAttribute('aria-label',`${itemName(w)} · ${label.textContent}`);text.append(label,meter);if(owned){const tag=document.createElement('small');tag.className='owned-kit-tag';literal(tag,zh?`已擁有 · 約 ${Math.ceil(uses/capacity)} 件`:`Owned · ~${Math.ceil(uses/capacity)}`);text.append(tag);}const skill=document.createElement('small');skill.className='kit-shop-skill';literal(skill,(zh?'必殺：':'Finisher: ')+ultimateShow(w.id).name[zh?0:1]);text.append(skill);
   const actions=document.createElement('div');actions.className='kit-shop-actions';actions.append(button);if(owned&&!w.hidden){const buy=document.createElement('button');buy.type='button';buy.dataset.restock=w.id;buy.disabled=state.merit<w.merit||state.coins<bestPurchasePrice(state,w.cost);literal(buy,zh?`再買一件 · ${price}`:`Buy another · ${price}`);buy.setAttribute('aria-label',`${itemName(w)} · ${buy.textContent}`);buy.addEventListener('click',()=>requestBuy('weapon',w));actions.append(buy);showPurchaseShortfall(text,buy,price,w.merit,`kit-reason-${w.id}`);}else if(!owned)showPurchaseShortfall(text,button,price,w.merit,`kit-reason-${w.id}`);row.append(icon,text,actions);weaponInspector.attach(row,w.id);return row;
  }));
+ }
+ const friendKey=JSON.stringify([getLanguage(),state.friends]);if(friendKey!==friendRowsKey){friendRowsKey=friendKey;
  $('#friend-list').replaceChildren(...FRIENDS.map(f=>{const row=document.createElement('div'),icon=document.createElement('span'),owned=state.friends.includes(f.id);row.className=`friend-row patron-stars-${f.stars}${owned?'':' is-locked'}`;row.dataset.patron=f.id;icon.className='friend-icon';icon.innerHTML=patronArt(f.id);const text=rowText(owned?itemName(f):(getLanguage()==='zh-Hant'?'神秘貴人':'A mysterious patron'),'');literal(text.querySelector('small'),'★'.repeat(f.stars)+' · '+patronBuffText(f,getLanguage()==='zh-Hant'));if(owned){const story=document.createElement('p');literal(story,getLanguage()==='zh-Hant'?f.story:f.storyEn);text.append(story);}row.append(icon,text);return row;}));
+ }
+ const recordKey=JSON.stringify([getLanguage(),state.records]);if(recordKey!==recordRowsKey){recordRowsKey=recordKey;
  $('#records').replaceChildren(...state.records.map((r,index)=>{const row=document.createElement('li'),place=document.createElement('span'),info=document.createElement('div'),name=document.createElement('b'),date=document.createElement('small'),score=document.createElement('output');row.className='record-row';place.className='record-medal';place.setAttribute('role','img');place.innerHTML=recordMedal(index+1);place.setAttribute('aria-label',(getLanguage()==='zh-Hant'?['金牌','銀牌','銅牌']:['Gold medal','Silver medal','Bronze medal'])[index]);literal(name,itemName(WEAPONS.find(w=>w.id===r.weapon)));date.textContent=new Intl.DateTimeFormat(getLanguage(),{month:'short',day:'numeric'}).format(new Date(r.date));score.textContent=r.score;info.append(name,date);row.append(place,info,score);return row;}));
+ }
  neighbourhoodUI?.renderHome();
  uxUI?.render();ritualUI?.home();playControls?.render();preparationUI?.render();weaponInspector.render();collectionUI?.render();altarUI?.home();renderPlayerLevel(state);prepareScrollRegions();polishCollections();updateStartReadiness();
- if(!state.records.length){const empty=document.createElement('li');empty.className='empty-record';empty.textContent='Your first lighter evening is waiting.';$('#records').append(empty);}save();
+ if(!state.records.length&&!$('#records .empty-record')){const empty=document.createElement('li');empty.className='empty-record';empty.textContent='Your first lighter evening is waiting.';$('#records').append(empty);}save();
 }
 function renderDecorRows(){
+ const key=JSON.stringify([getLanguage(),state.coins,state.coupons,state.decor,state.decorExpires,state.neighbourhood.chapters,Math.floor(Date.now()/60000)]);if(key===decorRowsKey)return;decorRowsKey=key;
  $('#decor-list').replaceChildren(...[...DECOR.filter(d=>!d.hidden||state.decor[d.id]>0)].sort((a,b)=>decorPrice(a)-decorPrice(b)||a.cost-b.cost).map(d=>{
   const row=document.createElement('div');row.className='decor-row';const icon=document.createElement('span');icon.className='decor-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML=decorArt(d.id);
   const level=state.decor[d.id],cost=purchasePrice(state,decorUpgradeBase(d,level+1)),button=document.createElement('button');button.type='button';button.dataset.decor=d.id;button.disabled=!decorUnlocked(state,d)||d.hidden||level>=MAX_DECOR_LEVEL||state.coins<bestPurchasePrice(state,decorUpgradeBase(d,level+1));button.textContent=!decorUnlocked(state,d)?(getLanguage()==='zh-Hant'?'完成申訴故事解鎖':'Finish the appeals story'):d.hidden?(getLanguage()==='zh-Hant'?'儀式限定收藏':'Ritual-only keepsake'):level>=MAX_DECOR_LEVEL?(getLanguage()==='zh-Hant'?'已升至最高級':'Fully upgraded'):(getLanguage()==='zh-Hant'?`${cost} 香油錢`:`${cost} oil`);button.setAttribute('aria-label',`${itemName(d)} · ${translate(button.textContent)}`);
@@ -192,7 +200,10 @@ $('#confirm-discard').addEventListener('click',()=>{
  const id=discardTarget;settle();const next=discardDecor(state,id);if(next){state=next;save();message('Decoration discarded. A little space for something new.');}$('#discard-dialog').close();renderStall();restoreShopFocus('decor',id,true);
 });
 // Real time keeps moving while the game is open; do not move keyboard focus.
-setInterval(()=>{if(document.hidden)return;if(PHASES.includes(game.phase)||purchaseUI.isOpen){settle();purchaseUI.render();return;}const focused=document.activeElement,attribute=['decor','repair','discard','weapon'].find(name=>focused?.dataset?.[name])??focused?.dataset?.restoreAction,id=attribute?(focused.dataset[attribute]??focused.dataset.restoreId):null;settle();renderStall();if(id)restoreShopFocus(attribute,id);},60000);
+function maintainStall(){if(document.hidden)return;if(PHASES.includes(game.phase)||purchaseUI.isOpen){settle();purchaseUI.render();return;}const focused=document.activeElement,attribute=['decor','repair','discard','weapon'].find(name=>focused?.dataset?.[name])??focused?.dataset?.restoreAction,id=attribute?(focused.dataset[attribute]??focused.dataset.restoreId):null;const before=JSON.stringify({...state,lastSeen:0,idleCarry:0}),hasDecor=Object.values(state.decor).some(Boolean);settle();if(hasDecor||JSON.stringify({...state,lastSeen:0,idleCarry:0})!==before){renderStall();if(id)restoreShopFocus(attribute,id);}}
+let upkeepTimer=null;
+function scheduleUpkeep(){clearInterval(upkeepTimer);upkeepTimer=document.hidden?null:setInterval(maintainStall,60000);}
+scheduleUpkeep();document.addEventListener('visibilitychange',scheduleUpkeep);window.addEventListener('pagehide',()=>{clearInterval(upkeepTimer);upkeepTimer=null;});window.addEventListener('pageshow',scheduleUpkeep);
 function lock(value){
  if(value){savedScroll=scrollY;window.getSelection()?.removeAllRanges();}document.body.classList.toggle('is-playing',value);
  for(const selector of ['.bbl-skip','#site-header','#intro','#stall-dashboard','#story','#rules','.bbl-footer','#my-stall'])if($(selector))$(selector).inert=value;
@@ -212,8 +223,9 @@ function start(){
  lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
  audio.voice=$('#voice').checked;unlockSound();renderPhase();clearTimeout(frame);scheduleTick();
 }
+function clearHitAnimations(){paperAnimation?.cancel();shoeAnimation?.cancel();paperAnimation=shoeAnimation=null;for(const animation of rigAnimations)animation.cancel();rigAnimations=[];lastVisualHitAt=-Infinity;}
 function renderPhase(){
- if(game.phase===lastPhase)return;if(game.phase!=='beat'){clearCriticalHit();impactSwitch.clear();}lastPhase=game.phase;$('#play-panel').dataset.phase=game.phase;cancelGestures();stopMicrophone();$('#effects').replaceChildren();
+ if(game.phase===lastPhase)return;if(game.phase!=='beat'){clearCriticalHit();impactSwitch.clear();clearHitAnimations();}lastPhase=game.phase;$('#play-panel').dataset.phase=game.phase;cancelGestures();stopMicrophone();$('#effects').replaceChildren();
  if(game.phase==='results'){finish();return;}
  $('#phase-title').textContent=phaseNames[game.phase];$('#fong-line').textContent=({incense:'三枝香，慢慢呼一口氣，唔使急。',worry:'寫低心塞，今晚唔使再揹返屋企。',beat:'拍走加班，留返個胃食菠蘿包！',tiger:'白虎食飽飽，是非嘴放大假！',blessing:'衰氣走開，貴人入嚟，留返啲溫柔俾自己。',divination:'一正一反就圓滿，貴人就快到！'})[game.phase];
  for(const item of document.querySelectorAll('.phase-panel'))item.hidden=item.id!==`phase-${game.phase}`;
@@ -230,28 +242,27 @@ function renderPhase(){
  $('#phase-title').focus({preventScroll:true});say(phaseNames[game.phase]);audio.speak($('#fong-line').textContent,'zh-Hant');
 }
 function paintPaperWear(){
- const rawWear=game.wear,crying=game.hits>0&&performance.now()-game.lastHit<cryDuration,key=`${Math.round(rawWear*150)}|${crying}`;if(key===paperPaintKey)return;paperPaintKey=key;const wear=Math.round(rawWear*150)/150,paper=$('#paper-doll');paper.dataset.comedyAct=wear<.25?'swagger':wear<.7?'pleading':'wrap';paper.classList.toggle('is-crying',crying);paper.style.setProperty('--paper-wear',wear);paper.style.setProperty('--paper-tear',Math.max(0,Math.min(1,(wear-.2)/.5)));paper.style.setProperty('--edge-loss',Math.max(0,Math.min(1.2,(wear-.25)/.65)));paper.style.setProperty('--paper-punch',Math.max(0,Math.min(1,(wear-.75)/.25)));
+ const rawWear=game.wear,crying=game.hits>0&&performance.now()-game.lastHit<cryDuration,key=`${Math.round(rawWear*60)}|${crying}`;if(key===paperPaintKey)return;paperPaintKey=key;const wear=Math.round(rawWear*60)/60,paper=$('#paper-doll');const act=wear<.25?'swagger':wear<.7?'pleading':'wrap';if(paper.dataset.comedyAct!==act)paper.dataset.comedyAct=act;paper.classList.toggle('is-crying',crying);paper.style.setProperty('--paper-wear',wear);paper.style.setProperty('--paper-tear',Math.max(0,Math.min(1,(wear-.2)/.5)));paper.style.setProperty('--edge-loss',Math.max(0,Math.min(1.2,(wear-.25)/.65)));paper.style.setProperty('--paper-punch',Math.max(0,Math.min(1,(wear-.75)/.25)));
  for(const [index,threshold]of [.2,.38,.55].entries())paper.style.setProperty(`--edge-loss-${index}`,Math.max(0,Math.min(1,(wear-threshold)/(1-threshold))));paper.style.setProperty('--paper-patch',Math.max(0,Math.min(1,(wear-.5)/.3)));paper.style.setProperty('--head-slump',`${wear*6}deg`);paper.style.setProperty('--head-drop',`${wear*3}px`);
- const stage=Math.min(3,Math.floor(wear*4));paper.dataset.wearStage=stage;const text=['Fresh paper','Creased paper','Torn paper','Tattered paper'][stage];if($('#paper-condition').dataset.stage!==String(stage)){$('#paper-condition').dataset.stage=stage;literal($('#paper-condition'),translate(text));}
+ const stage=Math.min(3,Math.floor(wear*4));if(paper.dataset.wearStage!==String(stage))paper.dataset.wearStage=stage;const text=['Fresh paper','Creased paper','Torn paper','Tattered paper'][stage];if($('#paper-condition').dataset.stage!==String(stage)){$('#paper-condition').dataset.stage=stage;literal($('#paper-condition'),translate(text));}
 }
-function scheduleTick(){frame=setTimeout(tick,UI_TICK_MS);}
-function paintStat(id,value){const node=$('#'+id),digits=String(value);if(node.textContent===digits&&statCache.has(id))return;let cell=statCache.get(id);if(!cell){node.dataset.wide=String(value>=1000);node.style.removeProperty('font-size');const style=getComputedStyle(node);cell={width:node.parentElement.clientWidth,base:parseFloat(style.fontSize),font:style.fontFamily,weight:style.fontWeight};statCache.set(id,cell);}textMeasure.font=`${cell.weight} ${cell.base}px ${cell.font}`;const width=textMeasure.measureText(digits).width,size=Math.min(cell.base,cell.base*Math.max(1,cell.width-2)/Math.max(1,width));node.style.fontSize=Math.floor(size*100)/100+'px';node.textContent=digits;node.dataset.value=value;node.dataset.wide=String(value>=1000);node.title=value.toLocaleString(undefined,{maximumFractionDigits:2});node.setAttribute('aria-label',node.title);}
+function scheduleTick(){frame=setTimeout(tick,uiTickDelay(game.phase));}
+function paintStat(id,value){const node=$('#'+id),digits=String(value);if(node.textContent===digits&&statCache.has(id))return;let cell=statCache.get(id);if(!cell){if(node.dataset.wide!==String(value>=1000))node.dataset.wide=String(value>=1000);node.style.removeProperty('font-size');const style=getComputedStyle(node);cell={width:node.parentElement.clientWidth,base:parseFloat(style.fontSize),font:style.fontFamily,weight:style.fontWeight};statCache.set(id,cell);}textMeasure.font=`${cell.weight} ${cell.base}px ${cell.font}`;const width=textMeasure.measureText(digits).width,size=Math.min(cell.base,cell.base*Math.max(1,cell.width-2)/Math.max(1,width));const fontSize=Math.floor(size*100)/100+'px';if(node.style.fontSize!==fontSize)node.style.fontSize=fontSize;node.textContent=digits;node.dataset.value=value;if(node.dataset.wide!==String(value>=1000))node.dataset.wide=String(value>=1000);node.title=value.toLocaleString(undefined,{maximumFractionDigits:2});node.setAttribute('aria-label',node.title);}
 function paintStats(){paintStat('live-score',game.score);paintStat('live-combo',game.combo);if($('#live-papers').textContent!==String(game.papers))$('#live-papers').textContent=game.papers;}
 function tick(){
- frame=0;if(game.pausedAt!==null||!PHASES.includes(game.phase))return;game.advance();if(game.score>0&&!kitUseCommitted)spendKitOnce();renderPhase();if(game.phase==='results')return;
+ frame=0;if(document.hidden||game.pausedAt!==null||!PHASES.includes(game.phase))return;game.advance();if(game.score>0&&!kitUseCommitted)spendKitOnce();renderPhase();if(game.phase==='results')return;
  if(['incense','worry','beat'].includes(game.phase)){const seconds=String(Math.ceil(game.remaining/1000));if($('#phase-clock').textContent!==seconds)$('#phase-clock').textContent=seconds;}
  if(game.phase==='beat'){
   paintStats();
    paintPaperWear();neighbourhoodUI?.renderPlay();
    const beat=Math.floor(game.elapsed/BEAT_INTERVAL);if(beat!==lastBeat){lastBeat=beat;if(!game.finisherBusy)audio.tone(420,.045,'triangle',.018);}
-   const pulse=game.elapsed%BEAT_INTERVAL;$('#rhythm-pulse').style.setProperty('--beat-scale',1+Math.max(0,1-pulse/160)*.65);
    const chant=Math.floor(game.elapsed/4000);if(chant!==lastChant){lastChant=chant;const line=pickChant();$('#fong-line').textContent=line;audio.speak(line,'zh-Hant');if(chant===3){audio.tone(1050,.4,'sine',.045);audio.tone(790,.4,'sine',.03,.2);}}
  }
  ritualUI?.render();
  scheduleTick();
 }
 function sparks(large=false){
- if(reduced.matches)return;const count=Math.min(large?10:5,Math.max(0,24-$('#effects').childElementCount));for(let i=0;i<count;i++){const piece=document.createElement('i');piece.className='spark';piece.style.setProperty('--sx',`${Math.cos(i*2.4)*(large?130:70)}px`);piece.style.setProperty('--sy',`${Math.sin(i*2.4)*(large?110:75)-40}px`);piece.style.setProperty('--sr',`${i*47}deg`);piece.style.setProperty('--spark-color',['#edc77e','#f2dea1','#a9c8ad','#d99d83'][i%4]);$('#effects').append(piece);setTimeout(()=>piece.remove(),750);}
+ if(reduced.matches)return;const count=Math.min(large?6:3,Math.max(0,12-$('#effects').childElementCount));for(let i=0;i<count;i++){const piece=document.createElement('i');piece.className='spark';piece.style.setProperty('--sx',`${Math.cos(i*2.4)*(large?130:70)}px`);piece.style.setProperty('--sy',`${Math.sin(i*2.4)*(large?110:75)-40}px`);piece.style.setProperty('--sr',`${i*47}deg`);piece.style.setProperty('--spark-color',['#edc77e','#f2dea1','#a9c8ad','#d99d83'][i%4]);$('#effects').append(piece);setTimeout(()=>piece.remove(),750);}
 }
 function spendKitOnce(){
  if(kitUseCommitted)return;kitUseCommitted=true;syncProgress();const spent=consumeWeapon(state,game.weapon);if(spent)state=spent;const paper=consumeSkin(state,game.skin);if(paper)state=paper;save();
@@ -260,11 +271,11 @@ function whack(options){
  const hit=game.hit(options);renderPhase();if(!hit){if(game.phase==='beat'){ritualUI?.render();}return;}
  firstWhack=false;spendKitOnce();
  const force=(.2+Math.min(1,hit.power/9)*.8)*(hit.impactLevel===3?1.65:hit.impactLevel===2?1.3:1);cryDuration=900+force*900;audio.hit(game.weapon,hit.heavy,hit.perfect,hit.power);impactSwitch.hit(force,hit.impactLevel);paintStats();
- const paper=$('#paper-doll');paper.classList.add('is-crying');paper.style.setProperty('--hit-strength',force);paper.dataset.impact=force.toFixed(3);
+ const paper=$('#paper-doll'),at=performance.now(),visual=at-lastVisualHitAt>=100;paper.classList.add('is-crying');if(visual){lastVisualHitAt=at;const impact=force.toFixed(3);if(paper.dataset.impact!==impact){paper.style.setProperty('--hit-strength',force);paper.dataset.impact=impact;}}
  const captions={tap:'Bonk!',heavy:'WHAM!',rub:'Scrub-a-dub!',circle:gestureText('轉走衰運！','Spin it away!'),pinch:'Squeeeze!'};
  if(hit.gesture==='circle')audio.sweep(hit.direction==='ccw'?1000:450,hit.direction==='ccw'?450:1000,.16,.04);
  feedback(`${(hit.perfect?gestureText('啱拍！','On beat!'):translate(captions[hit.gesture]))} · +${hit.points}`);$('#hit-zone').dataset.lastGesture=hit.gesture;$('#hit-zone').dataset.lastDirection=hit.direction||'';paintPaperWear();neighbourhoodUI?.hitFeedback(hit);neighbourhoodUI?.renderPlay(true);if(hit.impactLevel>1)feedback(`${hit.impactLevel}X · ${gestureText('重擊爆笑！','Comic critical!')} +${hit.points}`);showCriticalHit(hit);
- if(!reduced.matches){
+ if(!reduced.matches&&visual){
   paperAnimation?.cancel();shoeAnimation?.cancel();for(const animation of rigAnimations)animation.cancel();rigAnimations=[];
   const angle=8+force*27,travel=6+force*23,squash=1-force*.38;
   const moves={rub:[`translateX(${-travel}px) rotate(${-angle}deg)`,`translateX(${travel}px) rotate(${angle}deg)`,`translateX(${-travel*.6}px) rotate(${-angle*.5}deg)`],circle:[`rotate(${-angle}deg) scale(${1+force*.1},${squash})`,`rotate(${angle*1.4}deg) scale(${1-force*.15},${1+force*.2})`,`rotate(${-angle*.4}deg)`],pinch:[`scale(${1-force*.48},${1+force*.3})`,`scale(${1+force*.27},${1-force*.18})`,`scale(.96,1.04)`]};
@@ -277,7 +288,7 @@ function whack(options){
   toolMoves.circle=[`translate(${-turn*toolTravel}px,-25px) rotate(${turn*100}deg)`,`translate(${-turn*toolTravel}px,${toolTravel*.55}px) rotate(${turn*230}deg)`,`translate(10px,0) rotate(${turn*360}deg)`];
   shoeAnimation=$('#striking-weapon').animate([{transform:'rotate(-18deg)'},...toolMoves[hit.gesture].map(transform=>({transform})),{transform:'rotate(-18deg)'}],{duration:260+force*260,easing:'ease-out'});
   if(hit.gesture!=='tap'&&!game.finisherBusy)for(const [selector,sign]of [['.paper-arm-left',-1],['.paper-arm-right',1],['.paper-leg-left',1],['.paper-leg-right',-1],['.paper-head',-.4]]){const part=paper.querySelector(selector);if(part)rigAnimations.push(part.animate([{transform:'rotate(0)'},{transform:`rotate(${sign*(18+force*58)}deg)`,offset:.23},{transform:`rotate(${-sign*(10+force*34)}deg)`,offset:.6},{transform:'rotate(0)'}],{duration:400+force*360,easing:'ease-out'}));}
-  const count=Math.min(Math.round(2+force*4),Math.max(0,18-$('#effects').childElementCount));for(let i=0;i<count;i++){const bit=document.createElement('i');bit.className='paper-bit';bit.style.setProperty('--dx',`${Math.cos(i*2.4)*(30+force*100)}px`);bit.style.setProperty('--dy',`${Math.sin(i*2.4)*(30+force*75)-25}px`);bit.style.setProperty('--turn',`${i*53+force*220}deg`);$('#effects').append(bit);setTimeout(()=>bit.remove(),750);}
+  const count=game.finisherBusy?0:Math.min(hit.gesture==='tap'?1:3,Math.max(0,10-$('#effects').childElementCount));for(let i=0;i<count;i++){const bit=document.createElement('i');bit.className='paper-bit';bit.style.setProperty('--dx',`${Math.cos(i*2.4)*(30+force*100)}px`);bit.style.setProperty('--dy',`${Math.sin(i*2.4)*(30+force*75)-25}px`);bit.style.setProperty('--turn',`${i*53+force*220}deg`);$('#effects').append(bit);setTimeout(()=>bit.remove(),750);}
  }
  if(hit.paperCleared||hit.combo%10===0){sparks(hit.paperCleared);audio.chime();if(hit.paperCleared)say('One paper worry scattered. A little room for good things.');}
  ritualUI?.render();
@@ -289,15 +300,15 @@ function finish(){
  $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);
  uxUI?.showResult(kitUseCommitted);$('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');ritualUI?.rewards(received,game.result);polishCollections();
 }
-function backToStall(){clearCriticalHit();impactSwitch.clear();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();ritualUI?.render();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
-function pause(){if(!PHASES.includes(game.phase))return;game.pause();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;uxUI?.renderPause();polishCollections();$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}
-function resume(){if(!game.resume())return;$('#pause-overlay').hidden=true;$('#ritual-stage').inert=false;audio.unlock().then(()=>{if(game.pausedAt===null&&PHASES.includes(game.phase))audio.ambience(true);});$('#phase-title').focus({preventScroll:true});scheduleTick();}
+function backToStall(){clearCriticalHit();impactSwitch.clear();clearHitAnimations();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();ritualUI?.render();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
+function pause(){if(!PHASES.includes(game.phase))return;game.pause();clearTimeout(frame);frame=0;for(const animation of [paperAnimation,shoeAnimation,...rigAnimations])if(animation?.playState==='running')animation.pause();cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;uxUI?.renderPause();polishCollections();$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}
+function resume(){if(!game.resume())return;for(const animation of [paperAnimation,shoeAnimation,...rigAnimations])if(animation?.playState==='paused')animation.play();$('#pause-overlay').hidden=true;$('#ritual-stage').inert=false;if(audio.enabled)audio.unlock().then(()=>{if(game.pausedAt===null&&PHASES.includes(game.phase))audio.ambience(true);});$('#phase-title').focus({preventScroll:true});scheduleTick();}
 function updateSound(){
  for(const id of ['sound','sound-setup'])$(`#${id}`).setAttribute('aria-pressed',String(audio.enabled));
  const label=audio.enabled?'Mute sound':'Unmute sound';$('#sound').setAttribute('aria-label',label);$('#sound').title=translate(label);$('#sound').innerHTML=comicSpeakerArt(!audio.enabled);$('#sound-setup').textContent=audio.enabled?'Sound on':'Sound off';uxUI?.render();
 }
-function unlockSound(){return audio.unlock().then(()=>{audio.ambience(!document.hidden&&game.pausedAt===null);updateSound();});}
-function toggleSound(){audio.setEnabled(!audio.enabled);preferences.update({sound:audio.enabled});if(audio.enabled)unlockSound();updateSound();}
+function unlockSound(){if(!audio.enabled)return Promise.resolve(false);return audio.unlock().then(()=>{audio.ambience(!document.hidden&&game.pausedAt===null);updateSound();});}
+function toggleSound(){audio.setEnabled(!audio.enabled);preferences.update({sound:audio.enabled});if(audio.enabled)unlockSound();else audio.stop();updateSound();}
 // Mobile Safari may reject pointer-down activation or interrupt audio after a call.
 // Keep retrying from real gesture endings instead of removing the first listener.
 function beginAudio(){if(audio.enabled&&!document.hidden&&game.pausedAt===null&&audio.needsUnlock)unlockSound();}
@@ -368,7 +379,7 @@ pork.addEventListener('pointerdown',event=>{if(event.button!==0||game.phase!=='t
 pork.addEventListener('pointermove',event=>{const g=porkGesture;if(!g||g.id!==event.pointerId)return;const dx=event.clientX-g.x,dy=event.clientY-g.y,target=mouth(),x=g.cx+dx,y=g.cy+dy,distance=Math.hypot(x-target.x,y-target.y),pull=Math.max(0,1-distance/90)**2*.5;pork.style.translate=`${dx+(target.x-x)*pull}px ${dy+(target.y-y)*pull}px`;$('#paper-tiger').classList.toggle('is-ready',distance<90);$('.tiger-tray').classList.toggle('is-smearing',distance<55);if(distance<55&&game.smearTiger(Math.hypot(event.clientX-g.lastX,event.clientY-g.lastY))){const tray=$('.tiger-tray').getBoundingClientRect(),paint=$('#tiger-smear-paint');paint.style.cssText=`left:${target.x-tray.x-24}px;top:${target.y-tray.y-12}px;width:48px;height:24px;opacity:${.2+game.tigerSmear*.6};transform:scaleX(${.2+game.tigerSmear*.8})`;ritualUI?.render();}g.lastX=event.clientX;g.lastY=event.clientY;});
 pork.addEventListener('pointerup',event=>{const g=porkGesture;if(!g||g.id!==event.pointerId)return;const target=mouth(),distance=Math.hypot(g.cx+event.clientX-g.x-target.x,g.cy+event.clientY-g.y-target.y),tap=Math.hypot(event.clientX-g.x,event.clientY-g.y)<12;porkGesture=null;$('.tiger-tray').classList.remove('is-smearing');$('#paper-tiger').classList.remove('is-ready');if(tap){pork.style.translate='';feed();return;}if(game.porkMode==='blood'&&!game.dipped){const bowl=$('#blood-bowl').getBoundingClientRect();if(Math.hypot(g.cx+event.clientX-g.x-bowl.x-bowl.width/2,g.cy+event.clientY-g.y-bowl.y-bowl.height/2)<60)game.dip();else ritualUI?.comicMiss('pork','dip');pork.style.translate='';ritualUI?.render();return;}if(distance<80)feed();else{pork.style.translate='';ritualUI?.comicMiss('pork');}});for(const type of ['pointercancel','lostpointercapture'])pork.addEventListener(type,()=>{porkGesture=null;pork.style.translate='';$('.tiger-tray').classList.remove('is-smearing');$('#paper-tiger').classList.remove('is-ready');});pork.addEventListener('click',event=>{if(event.detail===0)feed();});$('#feed').addEventListener('click',feed);
 
-function stopMicrophone(){micRevision++;cancelAnimationFrame(micFrame);micFrame=0;micStream?.getTracks().forEach(track=>track.stop());micStream=null;micContext?.close().catch(()=>{});micContext=null;ritualUI?.incenseMic('idle');}
+function stopMicrophone(){micRevision++;clearTimeout(micFrame);micFrame=0;micStream?.getTracks().forEach(track=>track.stop());micStream=null;micContext?.close().catch(()=>{});micContext=null;ritualUI?.incenseMic('idle');}
 $('#microphone').addEventListener('click',async()=>{
  if(micStream){stopMicrophone();return;}
  if(game.phase!=='incense'||game.blown||game.pausedAt!==null)return;
@@ -381,13 +392,13 @@ $('#microphone').addEventListener('click',async()=>{
    if(revision!==micRevision||game.phase!=='incense'){stream.getTracks().forEach(track=>track.stop());context.close().catch(()=>{});return;}
    micStream=stream;micContext=context;const source=context.createMediaStreamSource(stream),analyser=context.createAnalyser();analyser.fftSize=512;source.connect(analyser);const samples=new Float32Array(analyser.fftSize);let loudSince=null;
    ritualUI?.incenseMic('listening');
-   function listen(){if(revision!==micRevision||game.phase!=='incense'||game.pausedAt!==null){stopMicrophone();return;}analyser.getFloatTimeDomainData(samples);const rms=Math.sqrt(samples.reduce((sum,s)=>sum+s*s,0)/samples.length);ritualUI?.incenseLevel(rms/.15);if(rms>.1){loudSince??=performance.now();if(performance.now()-loudSince>180&&game.lit.size===3){blow();return;}}else loudSince=null;micFrame=requestAnimationFrame(listen);}micFrame=requestAnimationFrame(listen);
+   function listen(){if(revision!==micRevision||game.phase!=='incense'||game.pausedAt!==null){stopMicrophone();return;}analyser.getFloatTimeDomainData(samples);const rms=Math.sqrt(samples.reduce((sum,s)=>sum+s*s,0)/samples.length);ritualUI?.incenseLevel(rms/.15);if(rms>.1){loudSince??=performance.now();if(performance.now()-loudSince>180&&game.lit.size===3){blow();return;}}else loudSince=null;micFrame=setTimeout(listen,50);}micFrame=setTimeout(listen,50);
  }catch{stream?.getTracks().forEach(track=>track.stop());context?.close().catch(()=>{});if(revision===micRevision){stopMicrophone();ritualUI?.incenseMic('error');}}
 });
 function openShop(name){const button=$(`#tab-${name}`);if(!button)return;const focused=document.activeElement,opener=focused?.matches('[data-shortcut],[data-tab]')?focused:(button.hidden?$('#open-stall-showcase'):button);settle();renderStall();collectionUI?.open('shop-'+name,opener);}
 for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>openShop(shortcut.dataset.shortcut));
 for(const button of document.querySelectorAll('[data-tab]'))button.addEventListener('click',()=>openShop(button.dataset.tab));
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',()=>{statCache.clear();cancelGestures();polishCollections();});reduced.addEventListener('change',()=>{paperPaintKey='';paperAnimation?.cancel();shoeAnimation?.cancel();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',()=>{statCache.clear();cancelGestures();polishCollections();});reduced.addEventListener('change',()=>{paperPaintKey='';clearHitAnimations();});
 neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:(gesture,direction)=>whack({gesture,direction,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onPreviewScene:async()=>{await collectionUI?.closeActive({returnFocus:false});await stallShowcaseUI?.open();const scene=$('#stall-skit');scene.tabIndex=-1;scene.focus({preventScroll:true});scene.scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});},onAccept:()=>{preparationUI?.acceptSavedCommission();}});
 $('#kit-skill')?.remove();
 $('#open-journey').addEventListener('click',()=>uxUI?.openCollection());
@@ -420,9 +431,6 @@ altarUI=createAltarUI({getState:()=>state,itemName,isPlaying:()=>PHASES.includes
 setupModalChrome();
 
 for(const type of ['contextmenu','selectstart','dragstart'])document.addEventListener(type,event=>{const target=event.target instanceof Element?event.target:null;if(target?.closest('.ritual-stage,.pause-overlay,#finisher-stage'))event.preventDefault();},{capture:true});
-
-// Reap expired cards while a stall stays open as well as on load/import/return.
-setInterval(()=>{if(!document.hidden&&!PHASES.includes(game.phase)&&!document.querySelector('dialog[open]')){const count=state.neighbourhood.album.length;settle();if(state.neighbourhood.album.length!==count)renderStall();}},60000);
 
 document.querySelector('.ghost-parade')?.remove();
 observeDecorativeVisibility();

@@ -112,7 +112,8 @@ export function createPreparationUI({weaponInspector,getState,getWorry,onChooseW
     const state=getState(),worry=getWorry(),current=currentStory(),events=optionalStepsEnabled&&$('#random-events').checked;
   if(state.neighbourhood.active!==previousStory){previousStory=state.neighbourhood.active;commissionEnabled=Boolean(previousStory);}
   const selected=WORRIES.find(w=>w.id===worry.kind),worryText=worry.text.trim()||(selected?local(selected.labelZh,selected.label):'');
-  select.replaceChildren(new Option(local('揀件心事…','Choose a worry…'),''),...WORRY_GROUPS.map(group=>{const options=document.createElement('optgroup');options.label=local(group.labelZh,group.label);options.dataset.group=group.id;for(const w of WORRIES.filter(w=>w.group===group.id))options.append(new Option(local(w.labelZh,w.label),w.id));return options;}));select.value=worry.kind;
+  if(select.dataset.language!==getLanguage()){select.dataset.language=getLanguage();select.replaceChildren(new Option(local('揀件心事…','Choose a worry…'),''),...WORRY_GROUPS.map(group=>{const options=document.createElement('optgroup');options.label=local(group.labelZh,group.label);options.dataset.group=group.id;for(const w of WORRIES.filter(w=>w.group===group.id))options.append(new Option(local(w.labelZh,w.label),w.id));return options;}));}if(select.value!==worry.kind)select.value=worry.kind;
+
   const skin=SKINS.find(s=>s.id===state.selectedSkin)??SKINS[0],kit=WEAPONS.find(w=>w.id===state.equipped),kitUses=weaponCondition(state,kit.id);
   const commissionText=commissionEnabled&&current?local(`${current.story.name[0]}・第 ${current.index+1} 章`,`${current.story.name[1]} · chapter ${current.index+1}`):commissionEnabled?local('請選一個委託，或今局先唔接','Choose a commission, or skip it this ritual'):local('今次專心處理自己','Just my own worry');
   const eventText=events?local('加入隨機挑戰','Random challenges on'):local('輕鬆除厄・事件關閉','Relaxed · events off');
@@ -129,7 +130,7 @@ export function createPreparationUI({weaponInspector,getState,getWorry,onChooseW
   text('commission-selection-summary',commissionText,commissionText);text('events-selection-summary',eventText,eventText);
   text('skin-selection-summary',`${name(skin)} · ${skin.starter?'免費・不限次數':`剩餘 ${skinUses(state,skin.id)} 次`} · ×${formatNumber(skinScoreMultiplier(skin.id))}`,`${name(skin)} · ${skin.starter?'free · unlimited':`${skinUses(state,skin.id)} uses left`} · ×${formatNumber(skinScoreMultiplier(skin.id))}`);
   text('kit-selection-summary',`${name(kit)} · ${kit.starter?'免費・不限次數':`剩餘 ${kitUses.remaining} 次`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`,`${name(kit)} · ${kit.starter?'free · unlimited':`${kitUses.remaining} uses left`} · ×${formatNumber(weaponScoreMultiplier(kit.id))}`);
-  $('#preparation-skin-preview').innerHTML=skinArt(skin.id);$('#preparation-kit-preview').innerHTML=weaponArt(kit.id);
+  for(const [id,item,art]of [['preparation-skin-preview',skin,skinArt],['preparation-kit-preview',kit,weaponArt]]){const node=$('#'+id);if(node.dataset.item!==item.id){node.dataset.item=item.id;node.innerHTML=art(item.id);}}
   text('preparation-wallet',`現有 ${state.coins.toLocaleString(undefined,{maximumFractionDigits:2})} 香油錢・${state.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德（只作解鎖，不扣除）`,`Balance: ${state.coins.toLocaleString(undefined,{maximumFractionDigits:2})} oil · ${state.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit (unlock requirement, not spent)`);
   for(const radio of document.querySelectorAll('[name=preparation-commission]'))radio.checked=(radio.value==='yes')===commissionEnabled;
   for(const radio of document.querySelectorAll('[name=preparation-events]'))radio.checked=(radio.value==='on')===events;

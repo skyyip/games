@@ -27,20 +27,20 @@ export function animateDialog(dialog){
  const shadeStart=fallback=>{const value=dialog.open?getComputedStyle(dialog,'::backdrop').opacity:fallback;dialog.style.setProperty('--modal-shade-start',value);};
  dialog.showModal=()=>{
   if(dialog.open&&dialog.dataset.motion!=='closing')return;
-  const current=dialog.open?getComputedStyle(dialog):null,start=current?{opacity:current.opacity,transform:current.transform}:{opacity:0,transform:'translateY(14px) scale(.97)'};
+  const current=dialog.open?getComputedStyle(dialog):null,start=current?{opacity:current.opacity}:{opacity:0};
   const token=++generation;shadeStart('0');closing=null;cancel();if(!dialog.open)nativeOpen();dialog.dataset.motion='opening';
   if(reduced()){dialog.dataset.motion='open';return;}
-  motion=dialog.animate([start,{opacity:1,transform:'none'}],{duration:220,easing:'cubic-bezier(.18,.75,.3,1)',fill:'both'});
+  motion=dialog.animate([start,{opacity:1}],{duration:180,easing:'cubic-bezier(.18,.75,.3,1)',fill:'both'});
   motion.finished.then(()=>{if(token!==generation)return;dialog.dataset.motion='open';cancel();},()=>{});
  };
  dialog.close=(returnValue)=>{
   if(closing)return closing;if(!dialog.open)return Promise.resolve();
-  const style=getComputedStyle(dialog),start={opacity:style.opacity,transform:style.transform},token=++generation;
+  const style=getComputedStyle(dialog),start={opacity:style.opacity},token=++generation;
   shadeStart('1');cancel();dialog.dataset.motion='closing';
   closing=(async()=>{
    if(!reduced()){
-    // Fade in place: scaling a scrolling dialog makes text and rounded borders wobble.
-    motion=dialog.animate([start,{opacity:0,transform:start.transform}],{duration:190,easing:'ease-out',fill:'both'});
+    // Opacity-only compositing keeps SVGs/text sharp and avoids re-rasterizing a scaled modal.
+    motion=dialog.animate([start,{opacity:0}],{duration:150,easing:'ease-out',fill:'both'});
     try{await motion.finished;}catch{}
    }
    if(token!==generation)return;
