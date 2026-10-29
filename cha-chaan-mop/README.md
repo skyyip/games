@@ -16,7 +16,7 @@ Desktop: arrows move the mop; E shouts, Q MEGA-shouts, F cyclones, G uses soap. 
 
 The Chinese hero now reads **利姐開工，全場縮腳！**. NPC and multiplayer shoes lift 54 room units; solo diner shoes lift 42 (previously 19). Knees bend outward, shoes tilt, and separate floor shadows plus small up arrows make lifted feet identifiable. A thinner table edge keeps lifted shoes visible. Foot visuals ease up over 120ms and down over 100ms; dodge decisions still respond immediately to input. Reduced motion uses the correct static pose.
 
-The mop catches up rapidly to a moving pointer without teleporting. It completes the final released swipe target, while pause/cancel clears queued movement. The character follows with a shorter settling time. Collision and dirt checks cover each travelled segment, including rain/soap boosts, so fast movement cannot skip contacts. Directional keys retain the original 650-unit/second movement rate.
+The mop catches up rapidly to a moving pointer without teleporting; movement is tuned 15% faster than the first responsive-control update. It completes the final released swipe target, while pause/cancel clears queued movement. The character follows with a shorter settling time. Collision and dirt checks cover each travelled segment, including rain/soap boosts, so fast movement cannot skip contacts. Directional keys use the same 15% speed increase (747.5 room units/second).
 
 ## Scoring, events and cosmetics
 

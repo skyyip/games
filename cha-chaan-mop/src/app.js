@@ -102,7 +102,7 @@ function loop(now){
   const dt=Math.min((now-previous)/1000,.1);previous=now;
   if(mode!=='diner'){
     const dx=Number(keys.has('arrowright'))-Number(keys.has('arrowleft')),dy=Number(keys.has('arrowdown'))-Number(keys.has('arrowup'));
-    if(dx||dy){const step=650*dt/Math.hypot(dx,dy);moveMop(game,game.mop.x+dx*step,game.mop.y+dy*step);}
+    if(dx||dy){const step=747.5*dt/Math.hypot(dx,dy);moveMop(game,game.mop.x+dx*step,game.mop.y+dy*step);}
     else if(pointer===null)game.mop.moving=false;
   }
   advance(game,dt);renderer.draw(game,lang(),progress.equipped,reduced.matches);

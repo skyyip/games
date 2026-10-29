@@ -167,7 +167,7 @@ function tick(g, dt) {
   if (g.mode !== 'diner') {
     const m = g.mop, from={x:m.x,y:m.y}, dx = m.tx - m.x, dy = m.ty - m.y, len = Math.hypot(dx, dy);
     // Fast catch-up follows a swipe without teleporting through feet or dirt.
-    const speed = Math.min(2600, Math.max(1000, len * 24)) * (g.event?.kind === 'rain' ? 1.2 : 1) * (g.time < g.soapUntil ? 1.25 : 1);
+    const speed = Math.min(2600, Math.max(1000, len * 24)) * 1.15 * (g.event?.kind === 'rain' ? 1.2 : 1) * (g.time < g.soapUntil ? 1.25 : 1);
     const travelling = (m.moving || m.pending) && len > 0;
     if (travelling) { const f = Math.min(1, speed * dt / len); m.x += dx * f; m.y += dy * f; if (f === 1) m.pending = false; }
     const follow = 1 - Math.exp(-28 * dt);
