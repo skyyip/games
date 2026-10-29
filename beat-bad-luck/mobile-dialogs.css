@@ -2,7 +2,7 @@
 body dialog.unified-modal{position:fixed}
 body dialog.unified-modal .modal-close{position:absolute;inset:10px 10px auto auto;display:grid!important;place-items:center!important;flex:none;box-sizing:border-box;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:0!important;border:2px solid #fff0bc!important;border-radius:14px!important;background:linear-gradient(150deg,#ffe8af,#ebc777)!important;color:#354f46!important;box-shadow:0 3px 0 #8c704d!important;font-size:0!important;line-height:1!important;text-indent:-9999px;overflow:hidden;z-index:10;touch-action:manipulation;cursor:pointer;transform:none!important;rotate:none!important}
 body dialog.unified-modal .modal-close>*{display:none!important}
-body dialog.unified-modal .modal-close::before{content:'×';position:absolute;inset:0;display:grid;place-items:center;font:600 30px/1 Fredoka,system-ui,sans-serif;text-indent:0;letter-spacing:0;color:#354f46}
+body dialog.unified-modal .modal-close::before{content:'';position:absolute;left:50%;top:50%;right:auto;bottom:auto;width:20px;height:20px;transform:translate(-50%,-50%);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 6 12 12M18 6 6 18' fill='none' stroke='%23354f46' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;text-indent:0}
 body dialog.unified-modal .modal-close::after{content:none!important}
 body dialog.unified-modal .modal-close:active{translate:0 2px;box-shadow:0 1px 0 #8c704d!important}
 body dialog.unified-modal .modal-close:focus-visible{outline:3px solid #97f1df;outline-offset:3px}
@@ -19,7 +19,7 @@ html:has(.mobile-sheet[open]){overflow:hidden;scrollbar-gutter:stable}
 #worry-dialog #worry-input{display:block;width:100%;box-sizing:border-box;font-size:16px!important;line-height:1.6;padding:13px;border:2px solid #b6d1af;border-radius:14px;background:#163c34;color:#fff5d6;user-select:text;touch-action:manipulation}
 #worry-dialog #worry-privacy{font-size:13px;line-height:1.7;white-space:normal}
 .worry-dialog-actions{display:flex;justify-content:space-between;gap:12px;margin-top:20px}.worry-dialog-actions button{min-height:44px;font:600 16px/1.4 var(--display)}
-.write-worry-button{display:flex;align-items:center;justify-content:center;min-height:46px;width:100%;padding:10px 14px;border:2px dashed #b8ceac;border-radius:14px;background:#315546;color:#fff1cd;box-shadow:0 3px 0 #173d33;font:600 16px/1.5 var(--display);touch-action:manipulation;cursor:pointer}
+.write-worry-button{display:flex;align-items:center;justify-content:center;min-height:46px;width:100%;padding:10px 14px;border:1px solid #bbd1ad;border-radius:14px;background:linear-gradient(140deg,#3e6452,#2d5143);color:#fff1cd;box-shadow:inset 0 1px 0 #ffffff24,0 3px 0 #173d33;font:600 13.6px/1.5 var(--display);touch-action:manipulation;cursor:pointer}
 .stall-showcase-open{display:flex;align-items:center;gap:12px;width:100%;min-height:78px;padding:14px;border:2px solid #e9cd85;border-radius:19px;background:linear-gradient(120deg,#436650,#2b5044);box-shadow:0 4px 0 #163b31;color:#fff2c8;font:600 18px/1.5 var(--display);text-align:left;touch-action:manipulation;cursor:pointer}
 .stall-showcase-open>span:nth-child(2){flex:1}.stall-open-art{flex:0 0 44px;width:44px;height:48px}.stall-open-art svg{width:100%;height:100%}
 #stall-showcase-dialog>.collection-heading{justify-content:flex-start}
@@ -32,7 +32,7 @@ body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align
 /* Smaller, left-aligned purchase actions sit under the helper's description. */
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions{grid-column:2;justify-items:start;justify-self:start;width:100%;display:flex;flex-wrap:wrap}
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions button{width:auto;min-width:0;max-width:100%;padding-inline:14px;text-align:left;white-space:normal;justify-content:flex-start}
-#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.1;transform-origin:top center}
+#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.265;transform-origin:top center}
 #phase-beat .beat-telemetry{align-items:center!important}#phase-beat .ultimate-hud{align-self:center;align-items:center;height:60px}#phase-beat .ultimate-meter{align-self:center}
 #sound.icon-button{display:grid;place-items:center;padding:3px!important}#sound>svg{width:100%;height:100%;overflow:visible}
 /* Continuous asymmetric flame deformation, never opacity strobing. */
@@ -53,3 +53,7 @@ body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align
 @keyframes meter-fire-settle{from{transform:skewX(-3deg) scaleY(1)}to{transform:skewX(6deg) scaleY(.8)}}
 .ritual-stage[inert] :is(.meter-fire-edge,.meter-smoke i){animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.finisher-charge-frame[data-state=cooling] .meter-fire-edge{display:none}.meter-fire-edge{animation:none!important}}
+
+#weapon-list .owned-kit-tag{display:inline-flex;width:fit-content;max-width:100%;align-self:flex-start;justify-self:start;flex:0 0 auto;white-space:normal;overflow-wrap:anywhere}
+.write-worry-button:hover{border-color:#f2d598;background:linear-gradient(140deg,#4b715c,#355b49)}
+.write-worry-button:focus-visible{outline:3px solid #a6e4cc;outline-offset:3px}

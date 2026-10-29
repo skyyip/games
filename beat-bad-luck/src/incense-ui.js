@@ -1,3 +1,4 @@
+import {createAltarScene} from './altar-scene.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
 
 const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
@@ -10,8 +11,9 @@ const micArt=svg(`<path d="M28 40v10q0 21 22 21t22-21V40M50 71v8M34 79h32" fill=
 const $=selector=>document.querySelector(selector);
 const put=(node,text)=>{if(node.textContent!==text)node.textContent=text;node.setAttribute('translate','no');};
 
-export function createIncenseUI({game,audio}){
+export function createIncenseUI({game,audio,getState}){
  const panel=$('#phase-incense'),zone=$('#incense-zone'),sticks=[...zone.querySelectorAll('[data-stick]')],blow=$('#blow'),mic=$('#microphone');
+ const altar=createAltarScene({game,getState});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),animations=new Set();
  let phase='',lit=0,blown=false,mode='idle',held=null;
  for(const stick of sticks){const face=document.createElement('span');face.className='incense-buddy';face.setAttribute('aria-hidden','true');face.innerHTML=buddyArt;const flame=document.createElement('span');flame.className='incense-flame-friend';flame.setAttribute('aria-hidden','true');flame.innerHTML=flameArt;stick.append(face,flame);}
@@ -27,7 +29,7 @@ export function createIncenseUI({game,audio}){
  function suspend(){for(const effect of animations){if(game.pausedAt!==null&&effect.playState==='running')effect.pause();else if(game.pausedAt===null&&effect.playState==='paused')effect.play();}}
  function render(){
   if(phase!==game.phase){clear();phase=game.phase;lit=0;blown=false;mode='idle';for(const stick of sticks)delete stick.dataset.celebrated;panel.style.setProperty('--mic-level',0);}
-  suspend();if(phase!=='incense')return;
+  suspend();if(phase!=='incense'){altar.sync();return;}
   for(const [index,stick]of sticks.entries()){const on=game.lit.has(index);stick.classList.toggle('is-lit',on);stick.setAttribute('aria-pressed',String(on));stick.setAttribute('aria-label',local(`香仔 ${index+1}${on?' 已點燃':'：點拍叫醒'}`,`Incense buddy ${index+1}${on?' is lit':': tap to wake'}`));put(stick.querySelector('b'),local(on?'醒咗！':'瞓緊…',on?'Awake!':'Zzz…'));}
   if(game.lit.size>lit){for(const index of game.lit){if(!sticks[index].dataset.celebrated){sticks[index].dataset.celebrated='true';animate(sticks[index].querySelector('.incense-buddy svg'),[{transform:'scale(.7,1.25)'},{transform:'scale(1.35,.7) rotate(-10deg)',offset:.45},{transform:'none'}]);burst(sticks[index],['✦','♥']);audio.tone(430+index*120,.09,'triangle',.025);}}animate($('.incense-bowl svg'),[{transform:'scale(1)'},{transform:'scale(1.13,.85)',offset:.4},{transform:'none'}]);lit=game.lit.size;put($('#fong-line'),['一號香仔起身！唔使返工，放心啦！','兩枝都醒，最後嗰枝仲扮瞓！','齊人！輕吹就得，唔使颱風級！'][lit-1]);}
   panel.classList.toggle('is-blown',game.blown);if(game.blown&&!blown){cancelPointer();burst($('.incense-bowl'),['💨','✦','♥']);animate($('.incense-bowl svg'),[{transform:'scale(.85,1.15)'},{transform:'scale(1.18,.75) rotate(-5deg)',offset:.4},{transform:'none'}],750);blown=true;put($('#fong-line'),'吹走衰氣，唔好吹走我頂帽呀！');}
@@ -37,6 +39,7 @@ export function createIncenseUI({game,audio}){
   const labels={idle:['叫咪幫手','Ask the mic'],requesting:['叫醒咪仔','Waking mic…'],listening:['咪仔收工','Stop the mic'],error:['再叫咪仔','Try the mic']};
   const notes={idle:['可以按「呼～」或開咪輕吹；師傅會幫手接棒。','Use the puff button or enable the mic and blow gently. Master helps if time runs out.'],requesting:['咪高峰準備中…唔使開演唱會，輕吹就得！','Mic is getting ready. No concert needed, just a gentle puff!'],listening:['咪高峰豎起耳仔！點齊三枝，再輕吹；聲音唔會儲存。','Mic’s all ears! Light all three, then blow gently. Audio stays unrecorded.'],error:['咪高峰請假！點齊香後按「呼～」，一樣得！','Mic’s on holiday! Light all three, then use the puff button.']};
   put(mic.querySelector('.incense-button-label'),game.blown?local('咪仔收工啦','Mic off'):local(...labels[mode]));mic.disabled=game.blown||mode==='requesting';panel.dataset.mic=mode;mic.setAttribute('aria-pressed',String(mode==='listening'));put($('#mic-note'),game.blown?local('火仔熄咗，香煙繼續扭腰；鬆一鬆膊頭！','Flames out, smoke still dancing. Let your shoulders relax!'):local(...notes[mode]));
+  altar.sync();
  }
  function microphone(value){mode=value;panel.style.setProperty('--mic-level',0);render();}
  function level(value){panel.style.setProperty('--mic-level',Math.max(0,Math.min(1,value)));}
@@ -44,5 +47,5 @@ export function createIncenseUI({game,audio}){
  function move(event){if(held!==event.pointerId)return;const r=zone.getBoundingClientRect();match.style.left=Math.max(20,Math.min(r.width-20,event.clientX-r.x))+'px';match.style.top=Math.max(10,Math.min(r.height-30,event.clientY-r.y))+'px';}
  zone.addEventListener('pointermove',move);for(const name of ['pointerup','pointercancel','lostpointercapture'])zone.addEventListener(name,cancelPointer);
  reduced.addEventListener('change',clear);
- return {render,microphone,level,cancel(){cancelPointer();suspend();}};
+ return {render,microphone,level,cancel(){cancelPointer();suspend();altar.cancel();}};
 }

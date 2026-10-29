@@ -1,4 +1,14 @@
-## Current acceptance — private input/stall dialogs, repeatable bursts and shared icons (v95)
+## Current acceptance — five-prop offering altar and preparation polish (v96)
+
+**173 unit tests pass.** Six altar tests cover zero/five/max/duplicates/unowned values, immutable free configuration, old-save migration, export/import round-trips, stale-clock protection, expiry/discard reminders, explicit replacement and acknowledgement, centered sparse positions, hidden-owned props and all four combination requirements. Existing inventory, earnings, finisher and progression tests remain enabled.
+
+Production native-browser checks pass at **320×568 Chinese**, **390×844 Chinese**, **812×375 English/reduced motion** and **1280×900 English**. Each selects five props, rejects a sixth, cancels a draft without saving, saves/restores across reload, then completes a ritual with real tap/click input. Props remain outside the incense hit boxes; every stick stays reachable and at least 44px wide. Lighting/gag/pause do not shift the swipe area or action buttons. Added prop effects never exceed two animations, freeze on pause, stay static for reduced motion and are cleared on phase exit. The meatball/cat scene is exercised deterministically. One ordinary hit remains 45 points for the seeded critical, confirming the altar adds no modifier. Expired-slot replacement and empty-inventory shopping routes pass.
+
+The four empty-altar incense profiles pass native lighting/puff/replay plus simulated microphone denial, listening, late grant, cancellation, timeout and stream cleanup. This caught and fixed an inherited pointer-events issue when the decorative wrapper uses display:contents. Five preparation profiles pass inventory, modal purchases, focus and full-ritual privacy. The collection regression now uses visible launchers; decoration browsing stays accessible from the stall. Phone audits verify owned-kit tags fit their text (about 90px inside 185px/255px detail areas), the 1.265 library icon scale, 13.6px solid-border private-write button, and geometric SVG close centering. Screenshots of the chooser, altar, library and launcher layout were reviewed.
+
+Source cache **v95 → v96** preloads the four altar resources along with the previous twelve. Offline reload retains a saved altar arrangement and supports paper inspection and ritual play, preserving balances, stock, patrons and unrelated caches. The twenty-page production build succeeds with hashed JS/CSS/assets. No changes are made outside beat-bad-luck/.
+
+## Previous acceptance — private input/stall dialogs, repeatable bursts and shared icons (v95)
 
 **167 unit tests pass.** Repeat charging tests cover 127/128 boundaries, retained earned unlocks, broken unfinished chains, no charge from burst taps, six independently charged launches without a hidden ceiling, pause, scoring, deadline and reset. Existing economy, durability, private-save and progression checks remain enabled.
 

@@ -1,3 +1,4 @@
+import {pruneAltar} from './altar-layout.js';
 import {oilGain,meritGain,DAILY_OIL,DAILY_MERIT} from './economy.js';
 import {SKINS,SKIN_USES} from './skins.js';
 import {PATRONS,SECRET_WEAPONS,SECRET_DECOR,weightedPatron,patronBuffs,hkDay} from './ritual-rewards.js';
@@ -14,7 +15,7 @@ export const STORAGE_KEY='beat-bad-luck.stall.v1';
 export const WEAPON_USES=3,MAX_WEAPON_USES=999999;
 export const weaponUses=(state,id)=>id==='bare-hand'?Infinity:state.owned.includes(id)?cap(state.weaponUses?.[id]??WEAPON_USES,MAX_WEAPON_USES):0;
 export function weaponCondition(state,id){const remaining=weaponUses(state,id),capacity=weaponDurability(id);return {remaining,capacity,current:capacity===Infinity?Infinity:remaining>0&&capacity>0?(remaining-1)%capacity+1:0};}
-export function fresh(now=Date.now()){return {version:1,ownedSkins:['plain'],skinUses:{},selectedSkin:'plain',coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],coupons:[],discovered:[],lastDaily:'',records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
+export function fresh(now=Date.now()){return {version:1,altarDecor:[],altarMissing:[],ownedSkins:['plain'],skinUses:{},selectedSkin:'plain',coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],coupons:[],discovered:[],lastDaily:'',records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
 export function readProgress(raw,now=Date.now()){
   const state=fresh(now);try{const x=JSON.parse(raw);if(!x||x.version!==1)return state;
     state.ownedSkins=[...new Set(['plain',...(Array.isArray(x.ownedSkins)?x.ownedSkins:[]).filter(id=>SKINS.some(s=>s.id===id))])];
@@ -28,6 +29,7 @@ export function readProgress(raw,now=Date.now()){
     for(const d of DECOR){state.decor[d.id]=cap(x.decor?.[d.id],MAX_DECOR_LEVEL);if(state.decor[d.id])state.decorExpires[d.id]=Number.isFinite(x.decorExpires?.[d.id])?Math.max(0,Math.min(Math.max(now,state.lastSeen)+DECOR_LIFETIME,x.decorExpires[d.id])):now+DECOR_LIFETIME;}
     state.friends=[...new Set((Array.isArray(x.friends)?x.friends:[]).filter(id=>FRIENDS.some(f=>f.id===id)))];
     state.records=(Array.isArray(x.records)?x.records:[]).filter(r=>r&&Number.isFinite(r.score)&&r.score>=0&&Number.isFinite(r.date)&&WEAPONS.some(w=>w.id===r.weapon)).map(r=>({score:cap(r.score),date:cap(r.date,8640000000000000),weapon:r.weapon,hits:cap(r.hits)})).sort((a,b)=>b.score-a.score||a.date-b.date).slice(0,3);
+    state.altarDecor=x.altarDecor;state.altarMissing=x.altarMissing;Object.assign(state,pruneAltar(state,now));
     state.idleCarry=Number.isFinite(x.idleCarry)?Math.max(0,Math.min(.999999999,x.idleCarry)):0;state.lastReceipt=typeof x.lastReceipt==='string'?x.lastReceipt.slice(0,80):null;
   }catch{}return state;
 }
@@ -42,7 +44,7 @@ export function collectIdle(state,now=Date.now()){
     if(expires<=at){decor[item.id]=0;delete decorExpires[item.id];lost.push(item.id);}
   }
   const total=Math.round(income*1e9)/1e9,earned=Math.floor(total);
-  return {state:{...state,decor,decorExpires,coins:cap(state.coins+earned),lastSeen:at,idleCarry:Math.round((total-earned)*1e9)/1e9},earned,lost};
+  return {state:pruneAltar({...state,decor,decorExpires,coins:cap(state.coins+earned),lastSeen:at,idleCarry:Math.round((total-earned)*1e9)/1e9},at),earned,lost};
 }
 export function buyWeapon(state,id,{restock=false}={}){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon)return null;
@@ -70,7 +72,7 @@ export function repairDecor(state,id,now=Date.now()){
 }
 export function discardDecor(state,id){
  if(!DECOR.some(d=>d.id===id)||!state.decor[id])return null;
- const decorExpires={...state.decorExpires};delete decorExpires[id];return {...state,decor:{...state.decor,[id]:0},decorExpires};
+ const decorExpires={...state.decorExpires};delete decorExpires[id];return pruneAltar({...state,decor:{...state.decor,[id]:0},decorExpires},state.lastSeen);
 }
 export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   if(!id||(state.lastReceipt===id||state.neighbourhood?.album?.some(e=>e.id===id))||!result||!Number.isFinite(result.score)||result.score<0)return null;

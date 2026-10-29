@@ -2,7 +2,21 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
-## Mobile drawers and repeatable bursts (cache v95)
+## My offering altar (cache v96)
+
+Open **Your little stall → Arrange offering altar / 佈置奉神台** to choose zero to five owned, unexpired decorations. The chooser supports search, a five-slot preview, a live count and Clear altar. At five props, unselected choices are disabled while selected choices remain removable. Changes are drafts until Save; X/Escape cancels. Empty inventories can open decoration shopping. Saving is free and does not alter prices, balances, levels, expiry, income, ritual scores or kit/paper uses.
+
+The ordered `altarDecor` configuration lives in the existing version-one progress save and participates in export/import and same-origin browser/Home Screen storage. Old saves start with an empty altar. Unknown/unowned, duplicate or excessive entries are sanitized. Expired or discarded props free their positions and enter a bounded `altarMissing` reminder on preparation; saving an arrangement acknowledges it. Buying the prop again does not silently restore the old placement.
+
+During Offer incense, up to three rear props and two front-side props surround the center. Sparse selections are centered automatically. Only the selected props appear in this phase; the old ambient shelf artwork remains in other phases. The original three sticks, swipe area, puff button and microphone keep their native input handlers. Prop layers never intercept pointers. Cat claps, fish blow hearts, tiger yawns, and other props bounce briefly when incense is lit. At three lit sticks, the arrangement bows. Four eligible combinations can occasionally stage a short original gag: meatball/cat rescue, tiger waiting for a meatball, cat/throne pay-rise request, and fish/tiger heart-bubble truce. Captions use the existing reserved Master line.
+
+Only two added native transform/opacity animations can run at once. There are no idle prop animation loops or background timers. Pause/hidden-page behavior freezes motion; reduced motion retains static decoration and readable captions; phase exit cancels effects and removes temporary marks. A zero-prop altar keeps the original incense layout.
+
+The preparation-page decoration-shopping launcher is hidden; the live stall retains its upper-left shopping action. All modal dismiss marks use a centered SVG cross rather than font-dependent glyph alignment. Owned-kit badges fit their content. Library artwork is 15% larger than v95 (scale 1.265), and the private-write button uses 15% smaller text (13.6px), a solid border and a soft filled treatment.
+
+Run `scripts/altar-check.mjs` against the production preview for full save/restore, layout, native tap, gag, pause and ritual checks. `tests/altar.test.js` covers migration, backup, strict five-prop validation, expiry/discard and unchanged economics. The refreshed `scripts/incense-check.mjs` covers empty-altars and simulated microphone denial/listening/late-permission/cleanup.
+
+## Previous v95: mobile drawers and repeatable bursts
 
 All twenty pages now use the existing Beat the Bad Luck horned logo for their favicon and Apple Home Screen icon. All twenty web manifests use its 192px/512px artwork, retaining each app’s own name, start URL and scope. Every source service worker preloads the shared icons in its own existing cache; production still hashes the image URLs.
 

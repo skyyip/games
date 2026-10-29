@@ -1,3 +1,5 @@
+import {createAltarUI} from './altar-ui.js';
+import {setAltarDecor} from './altar-layout.js';
 import {comicSpeakerArt,createStallShowcaseDialog,setupModalChrome} from './mobile-dialogs.js';
 import {UI_TICK_MS,observeDecorativeVisibility} from './performance.js';
 import {createImpactSwitch} from './impact-switch.js';
@@ -39,7 +41,7 @@ let storage=null,persistent=true,state,kind='',frame=0,lastPhase='',lastChant=-1
 const illustratedDecor=new Set(['cat','radio','incense','tiger','aquarium','three-stars','money-tree','amethyst']);
 const shopWeapons=WEAPONS.filter(w=>!w.starter&&!w.hidden&&w.id!=='rebirth-paper').sort((a,b)=>a.cost-b.cost||a.merit-b.merit);
 shopWeapons.splice(-1,0,WEAPONS.find(w=>w.id==='rebirth-paper'));
-let stallShowcaseUI=null,collectionUI=null,stallLayoutUI=null,neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,preparationUI=null,returnToDecor=null,purchaseFromPreparation=false;
+let altarUI=null,stallShowcaseUI=null,collectionUI=null,stallLayoutUI=null,neighbourhoodUI=null,uxUI=null,ritualUI=null,playControls=null,preparationUI=null,returnToDecor=null,purchaseFromPreparation=false;
 let rigAnimations=[],cryDuration=1100,firstWhack=true,paperPaintKey='';
 const statCache=new Map(),textMeasure=document.createElement('canvas').getContext('2d');
 let pickChant=createChantPicker();
@@ -143,7 +145,7 @@ function renderStall(){
  $('#friend-list').replaceChildren(...FRIENDS.map(f=>{const row=document.createElement('div'),icon=document.createElement('span'),owned=state.friends.includes(f.id);row.className=`friend-row patron-stars-${f.stars}${owned?'':' is-locked'}`;row.dataset.patron=f.id;icon.className='friend-icon';icon.innerHTML=patronArt(f.id);const text=rowText(owned?itemName(f):(getLanguage()==='zh-Hant'?'神秘貴人':'A mysterious patron'),'');literal(text.querySelector('small'),'★'.repeat(f.stars)+' · '+patronBuffText(f,getLanguage()==='zh-Hant'));if(owned){const story=document.createElement('p');literal(story,getLanguage()==='zh-Hant'?f.story:f.storyEn);text.append(story);}row.append(icon,text);return row;}));
  $('#records').replaceChildren(...state.records.map((r,index)=>{const row=document.createElement('li'),place=document.createElement('span'),info=document.createElement('div'),name=document.createElement('b'),date=document.createElement('small'),score=document.createElement('output');row.className='record-row';place.className='record-medal';place.setAttribute('role','img');place.innerHTML=recordMedal(index+1);place.setAttribute('aria-label',(getLanguage()==='zh-Hant'?['金牌','銀牌','銅牌']:['Gold medal','Silver medal','Bronze medal'])[index]);literal(name,itemName(WEAPONS.find(w=>w.id===r.weapon)));date.textContent=new Intl.DateTimeFormat(getLanguage(),{month:'short',day:'numeric'}).format(new Date(r.date));score.textContent=r.score;info.append(name,date);row.append(place,info,score);return row;}));
  neighbourhoodUI?.renderHome();
- uxUI?.render();ritualUI?.home();playControls?.render();preparationUI?.render();collectionUI?.render();renderPlayerLevel(state);prepareScrollRegions();polishCollections();updateStartReadiness();
+ uxUI?.render();ritualUI?.home();playControls?.render();preparationUI?.render();collectionUI?.render();altarUI?.home();renderPlayerLevel(state);prepareScrollRegions();polishCollections();updateStartReadiness();
  if(!state.records.length){const empty=document.createElement('li');empty.className='empty-record';empty.textContent='Your first lighter evening is waiting.';$('#records').append(empty);}save();
 }
 function renderDecorRows(){
@@ -369,7 +371,7 @@ $('#microphone').addEventListener('click',async()=>{
    function listen(){if(revision!==micRevision||game.phase!=='incense'||game.pausedAt!==null){stopMicrophone();return;}analyser.getFloatTimeDomainData(samples);const rms=Math.sqrt(samples.reduce((sum,s)=>sum+s*s,0)/samples.length);ritualUI?.incenseLevel(rms/.15);if(rms>.1){loudSince??=performance.now();if(performance.now()-loudSince>180&&game.lit.size===3){blow();return;}}else loudSince=null;micFrame=requestAnimationFrame(listen);}micFrame=requestAnimationFrame(listen);
  }catch{stream?.getTracks().forEach(track=>track.stop());context?.close().catch(()=>{});if(revision===micRevision){stopMicrophone();ritualUI?.incenseMic('error');}}
 });
-function openShop(name){const button=$(`#tab-${name}`);if(!button)return;const focused=document.activeElement,opener=focused?.matches('[data-shortcut],[data-tab]')?focused:button;settle();renderStall();collectionUI?.open('shop-'+name,opener);}
+function openShop(name){const button=$(`#tab-${name}`);if(!button)return;const focused=document.activeElement,opener=focused?.matches('[data-shortcut],[data-tab]')?focused:(button.hidden?$('#open-stall-showcase'):button);settle();renderStall();collectionUI?.open('shop-'+name,opener);}
 for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>openShop(shortcut.dataset.shortcut));
 for(const button of document.querySelectorAll('[data-tab]'))button.addEventListener('click',()=>openShop(button.dataset.tab));
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',()=>{statCache.clear();cancelGestures();polishCollections();});reduced.addEventListener('change',()=>{paperPaintKey='';paperAnimation?.cancel();shoeAnimation?.cancel();});
@@ -400,6 +402,8 @@ preparationUI=createPreparationUI({getState:()=>state,getWorry:()=>({kind,text:$
 collectionUI=createCollectionDialogs({preferences,canOpen:()=>!PHASES.includes(game.phase)});
 playControls.render();preparationUI.render();renderPlayerLevel(state);prepareScrollRegions();polishCollections();
 stallShowcaseUI=createStallShowcaseDialog({openShop,canOpen:()=>!PHASES.includes(game.phase)&&!document.querySelector('dialog[open]:not(#stall-showcase-dialog)'),refreshHome:renderStall});
+$('#tab-stall').hidden=true;
+altarUI=createAltarUI({getState:()=>state,itemName,isPlaying:()=>PHASES.includes(game.phase),beforeOpen:()=>{settle();renderStall();},onShop:openShop,onSave:ids=>{if(PHASES.includes(game.phase))return false;settle();const next=setAltarDecor(state,ids);if(!next){renderStall();return false;}state=next;save();renderStall();return true;}});
 setupModalChrome();
 
 for(const type of ['contextmenu','selectstart','dragstart'])document.addEventListener(type,event=>{const target=event.target instanceof Element?event.target:null;if(target?.closest('.ritual-stage,.pause-overlay,#finisher-stage'))event.preventDefault();},{capture:true});

@@ -18,7 +18,7 @@ const blockArt=(face,label)=>`<i class="block-ground-shadow" aria-hidden="true">
 
 export function createRitualUI({game,audio,getState,claimDaily,refresh,announce,cancelOrdinary,pause,resume}){
  let phase='',lastKey='',panelPaintKey='';
- const incenseUI=createIncenseUI({game,audio});
+ const incenseUI=createIncenseUI({game,audio,getState});
  const finisherUI=createFinisherUI({game,audio,announce,cancelOrdinary,pause,resume,getState});
  const collection=document.createElement('section');collection.id='secret-collection';collection.className='secret-collection';collection.innerHTML='<h3 translate="no"></h3><p translate="no"></p><div class="secret-grid"></div>';$('#stall-dashboard').append(collection);let collectionKey='';
  const dailyNote=document.createElement('p');dailyNote.id='daily-reward-note';dailyNote.className='preparation-daily-note';dailyNote.hidden=true;dailyNote.setAttribute('role','status');dailyNote.setAttribute('translate','no');$('#welcome').prepend(dailyNote);

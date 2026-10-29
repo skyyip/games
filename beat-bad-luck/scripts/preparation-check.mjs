@@ -131,7 +131,7 @@ try {
  assert.equal(await page.locator('#worry-input').inputValue(),'');
  assert.equal(await page.locator('#start').isDisabled(),true);
  assert.equal(await page.locator('#worry-selection-summary').count(),0);
- await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, modal private input with draft cancellation, three collection launch buttons, prominent modal catalogues, full ritual and privacy');
+ await context.close();console.log('PASS fresh player: three steps, retained optional code/preferences, compact dock, larger Master, uniform three-column paper cards, modal private input with draft cancellation, collection launch buttons, prominent modal catalogues, full ritual and privacy');
 
  for(const config of [{width:320,height:568,lang:'zh-Hant'},{width:390,height:844,lang:'zh-Hant',motion:'no-preference'},{width:812,height:375,lang:'en'},{width:1280,height:900,lang:'en'}]) {
   const {page:p,context:c}=await setup({...config,rich:true});
