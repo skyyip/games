@@ -15,11 +15,37 @@ export function numberText(node,text){
  for(const match of text.matchAll(/\d[\d,]*(?:\.\d+)?(?:[KMB萬億])?/g)){fragment.append(document.createTextNode(text.slice(last,match.index)));const n=document.createElement('strong');n.className='stat-number';n.textContent=match[0];fragment.append(n);last=match.index+match[0].length;}
  fragment.append(document.createTextNode(text.slice(last)));node.replaceChildren(fragment);
 }
-// Animate the actual modal; it stays modal until the closing animation finishes.
+// One controller per native dialog. Hold the final fade until close(), then restore DOM/focus.
+const dialogControllers=new WeakMap();
 export function animateDialog(dialog){
- const nativeOpen=dialog.showModal.bind(dialog),nativeClose=dialog.close.bind(dialog);let motion=null,closing=null;
+ if(dialogControllers.has(dialog))return dialog;
+ dialogControllers.set(dialog,true);
+ const nativeOpen=dialog.showModal.bind(dialog),nativeClose=dialog.close.bind(dialog);
+ let motion=null,backdrop=null,closing=null,generation=0;
  const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
- dialog.showModal=()=>{if(dialog.open)return;motion?.cancel();nativeOpen();dialog.dataset.motion='opening';if(reduced()){dialog.dataset.motion='open';return;}motion=dialog.animate([{opacity:0,transform:'translateY(18px) scale(.94)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:260,easing:'cubic-bezier(.2,.85,.25,1)',fill:'none'});motion.finished.then(()=>dialog.dataset.motion='open',()=>{});};
- dialog.close=()=>{if(closing)return closing;if(!dialog.open)return Promise.resolve();motion?.cancel();dialog.dataset.motion='closing';dialog.querySelectorAll('button').forEach(b=>b.setAttribute('aria-disabled','true'));closing=Promise.resolve().then(async()=>{if(!reduced()){motion=dialog.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(12px) scale(.97)'}],{duration:180,easing:'ease-in',fill:'none'});try{await motion.finished;}catch{}}nativeClose();dialog.dataset.motion='closed';dialog.querySelectorAll('button').forEach(b=>b.removeAttribute('aria-disabled'));closing=null;});return closing;};
- dialog.addEventListener('click',e=>{if(dialog.dataset.motion==='closing'){e.preventDefault();e.stopImmediatePropagation();}},true);dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close();});return dialog;
+ const cancel=()=>{motion?.cancel();backdrop?.cancel();motion=backdrop=null;};
+ function shade(from,to,duration,easing){try{backdrop=dialog.animate([{opacity:from},{opacity:to}],{pseudoElement:'::backdrop',duration,easing,fill:'both'});}catch{}}
+ dialog.showModal=()=>{
+  if(dialog.open&&dialog.dataset.motion!=='closing')return;
+  const current=dialog.open?getComputedStyle(dialog):null,start=current?{opacity:current.opacity,transform:current.transform}:{opacity:0,transform:'translateY(14px) scale(.97)'};
+  const token=++generation;closing=null;cancel();if(!dialog.open)nativeOpen();dialog.dataset.motion='opening';
+  if(reduced()){dialog.dataset.motion='open';return;}
+  shade(0,1,220,'ease-out');motion=dialog.animate([start,{opacity:1,transform:'none'}],{duration:220,easing:'cubic-bezier(.18,.75,.3,1)',fill:'both'});
+  motion.finished.then(()=>{if(token!==generation)return;dialog.dataset.motion='open';cancel();},()=>{});
+ };
+ dialog.close=(returnValue)=>{
+  if(closing)return closing;if(!dialog.open)return Promise.resolve();
+  const style=getComputedStyle(dialog),start={opacity:style.opacity,transform:style.transform},token=++generation;
+  cancel();dialog.dataset.motion='closing';
+  closing=(async()=>{
+   if(!reduced()){
+    shade(1,0,190,'ease-in-out');motion=dialog.animate([start,{opacity:0,transform:'translateY(10px) scale(.98)'}],{duration:190,easing:'cubic-bezier(.4,0,.6,1)',fill:'both'});
+    try{await motion.finished;}catch{}
+   }
+   if(token!==generation)return;
+   if(returnValue===undefined)nativeClose();else nativeClose(returnValue);dialog.dataset.motion='closed';cancel();closing=null;
+  })();return closing;
+ };
+ for(const type of ['click','keydown'])dialog.addEventListener(type,e=>{if(dialog.dataset.motion==='closing'){e.preventDefault();e.stopImmediatePropagation();}},true);
+ dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close();});return dialog;
 }

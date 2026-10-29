@@ -49,3 +49,11 @@
 #play-panel[data-phase=incense]:has(.altar-stage[data-empty=false]) .neon-sign{opacity:.14}
 #phase-incense .altar-stage .incense-zone{pointer-events:auto}
 @media(max-width:380px){.preparation-ready #stall-dashboard .stall-tabs.collection-launchers{grid-template-columns:minmax(0,1fr)}}
+/* Reuse the stall's pointer/keyboard reorder controls, with a draft until Save. */
+#altar-config-preview .altar-preview-slot{position:relative;height:82px;overflow:visible;user-select:none;-webkit-user-select:none}
+.altar-slot-art{display:block;width:100%;height:64px;pointer-events:none}.altar-slot-art>svg{width:100%;height:100%;padding:3px;box-sizing:border-box}
+.altar-slot-number{position:absolute;top:2px;left:3px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#f8d58b;color:#304e41;font:600 12px/1 Fredoka,system-ui}
+#altar-config-preview .piece-drag-handle{position:absolute;right:-2px;bottom:-2px;display:grid;place-items:center;min-width:44px;min-height:44px;width:44px;height:44px;margin:0;padding:11px;border:0;box-shadow:none!important;background:transparent;transform:none;scale:1;touch-action:none;color:#314f41}
+#altar-config-preview .piece-drag-handle>svg{width:20px;height:20px;padding:2px;border:1px solid #aa935d;border-radius:6px;background:#ffe3a1}
+#altar-config-preview .is-dragging{opacity:.4}#altar-config-preview .is-drop-target{border:2px dashed #ffe59c;background:#526e50;box-shadow:inset 0 0 0 2px #ffe59c55}
+.stall-drag-preview .altar-slot-art{height:100%}.stall-drag-preview .altar-slot-art>svg{width:100%;height:100%}

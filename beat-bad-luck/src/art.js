@@ -1,3 +1,4 @@
+import {cinemaDecorArt} from './cinema-expansion.js';
 import {clockoffSealArt} from './slapstick-art.js';
 import {WORRIES} from './catalog.js';
 import {skinArt} from './skins.js';
@@ -88,7 +89,7 @@ export const fongCostumeArt=()=>wrap(`
  <path d="m144 107 3 6 7 2-6 4-1 7-5-5-7 1 4-6-3-7Z" fill="#edc77e"/>
 `,'0 0 160 180');
 
-export function decorArt(id){if(id==='clockoff-seal')return clockoffSealArt();const secret=SECRET_DECOR.find(i=>i.id===id);if(secret)return secretArt(secret);
+export function decorArt(id){const cinema=cinemaDecorArt(id);if(cinema)return wrap(cinema);if(id==='clockoff-seal')return clockoffSealArt();const secret=SECRET_DECOR.find(i=>i.id===id);if(secret)return secretArt(secret);
  const expanded=extraDecorArt(id);if(expanded)return wrap(expanded);
  const art={
  'money-tree':`<path d="M57 86V36m0 32L31 49m26 10 27-22" fill="none" stroke="#92704b" stroke-width="7" stroke-linecap="round"/><g class="decor-tree-crown" stroke="#466e53" stroke-width="2"><ellipse cx="31" cy="43" rx="23" ry="17" fill="#88ad79" transform="rotate(20 31 43)"/><ellipse cx="81" cy="33" rx="23" ry="18" fill="#98bc83" transform="rotate(-18 81 33)"/><ellipse cx="55" cy="24" rx="24" ry="18" fill="#b1c98b"/><ellipse cx="77" cy="58" rx="21" ry="15" fill="#8eb781"/><g fill="#edc77e" stroke="#b68b43"><circle cx="30" cy="41" r="8"/><circle cx="59" cy="23" r="8"/><circle cx="83" cy="37" r="8"/><circle cx="77" cy="58" r="7"/></g><path d="M27 38h6v6h-6Zm29-18h6v6h-6Zm24 14h6v6h-6Z" fill="#739d71" stroke="none"/></g><path d="M29 80h58l-7 28H36Z" fill="#ce8771" stroke="#8f5c49" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="76" width="68" height="11" rx="5" fill="#e3aa85" stroke="#8f5c49" stroke-width="3"/><path d="m46 95 5-2m15 0 5 2m-18 4q6 6 12 0" fill="none" stroke="#805746" stroke-width="2.5" stroke-linecap="round"/><circle cx="41" cy="100" r="4" fill="#e8ae94"/><circle cx="75" cy="100" r="4" fill="#e8ae94"/>`,

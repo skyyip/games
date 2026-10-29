@@ -46,12 +46,12 @@ export function collectIdle(state,now=Date.now()){
   const total=Math.round(income*1e9)/1e9,earned=Math.floor(total);
   return {state:pruneAltar({...state,decor,decorExpires,coins:cap(state.coins+earned),lastSeen:at,idleCarry:Math.round((total-earned)*1e9)/1e9},at),earned,lost};
 }
-export function buyWeapon(state,id,{restock=false}={}){
+export function buyWeapon(state,id,{restock=false,coupon=null}={}){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon)return null;
   if(state.owned.includes(id)&&(!restock||!weapon.cost))return {...state,equipped:id};
-  if(weapon.hidden)return null;const paid=purchasePrice(state,weapon.cost);if(state.coins<paid||state.merit<weapon.merit)return null;
+  if(weapon.hidden)return null;if(coupon!==null&&!selectedCoupon(state,coupon))return null;const paid=purchasePrice(state,weapon.cost,coupon);if(state.coins<paid||state.merit<weapon.merit)return null;
   const uses=weaponUses(state,id),durability=weaponDurability(id);if(uses>MAX_WEAPON_USES-durability)return null;
-  return {...useCoupon(state),neighbourhood:id==='lassie'?{...state.neighbourhood,companions:['lassie']}:state.neighbourhood,coins:state.coins-paid,weaponUses:{...state.weaponUses,[id]:uses+durability},owned:[...new Set([...state.owned,id])],equipped:id};
+  return {...useCoupon(state,coupon),neighbourhood:id==='lassie'?{...state.neighbourhood,companions:['lassie']}:state.neighbourhood,coins:state.coins-paid,weaponUses:{...state.weaponUses,[id]:uses+durability},owned:[...new Set([...state.owned,id])],equipped:id};
 }
 // Call once per ritual, on its first successful hit. Bare hands never wear out.
 export function consumeWeapon(state,id){
@@ -61,10 +61,10 @@ export function consumeWeapon(state,id){
   return {...state,weaponUses:uses,owned:remaining?state.owned:state.owned.filter(owned=>owned!==id),equipped:!remaining&&state.equipped===id?'bare-hand':state.equipped};
 }
 export const decorUnlocked=(state,item)=>!item.unlockStory||(state.neighbourhood?.chapters?.[item.unlockStory]??0)>=(STORIES.find(s=>s.id===item.unlockStory)?.chapters.length??Infinity);
-export function upgrade(state,id,now=Date.now()){
- const d=DECOR.find(d=>d.id===id);if(!d)return null;if(d.hidden||!decorUnlocked(state,d))return null;const level=state.decor[id]??0,cost=purchasePrice(state,decorUpgradeBase(d,level+1));
+export function upgrade(state,id,now=Date.now(),{coupon=null}={}){
+ const d=DECOR.find(d=>d.id===id);if(!d)return null;if(d.hidden||!decorUnlocked(state,d)||coupon!==null&&!selectedCoupon(state,coupon))return null;const level=state.decor[id]??0,cost=purchasePrice(state,decorUpgradeBase(d,level+1),coupon);
  if(level>=MAX_DECOR_LEVEL||state.coins<cost||(level&&decorDurability(state,id,now)<=0))return null;
- return {...useCoupon(state),coins:state.coins-cost,decor:{...state.decor,[id]:level+1},decorExpires:{...state.decorExpires,[id]:level?expiry(state,id,now):clock(state,now)+DECOR_LIFETIME}};
+ return {...useCoupon(state,coupon),coins:state.coins-cost,decor:{...state.decor,[id]:level+1},decorExpires:{...state.decorExpires,[id]:level?expiry(state,id,now):clock(state,now)+DECOR_LIFETIME}};
 }
 export function repairDecor(state,id,now=Date.now()){
  const cost=repairCost(state,id,now);if(!cost||state.coins<cost)return null;
@@ -84,13 +84,24 @@ export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   const completion=journey.completed,chapter=completion?STORIES.find(s=>s.id===completion.story)?.chapters[completion.chapter-1]:null,story=completion?commissionPay(chapter,completion.finished,completion.replay,completion.bonusMet):{oil:0,merit:0};
   let next={...state,neighbourhood:journey.state,coins:cap(state.coins+earned+story.oil),merit:cap(state.merit+merit+story.merit),rituals:cap(state.rituals+1),friends:friend?[...state.friends,friend.id]:state.friends,coupons:friend?.discount?[...(state.coupons??[]),{patron:friend.id,discount:friend.discount,uses:1}]:state.coupons??[],records,lastReceipt:id};
   const gift=completion?.finished&&!completion.replay?STORIES.find(s=>s.id===completion.story)?.decorGift:null;if(gift&&!state.decor[gift])next={...next,decor:{...next.decor,[gift]:1},decorExpires:{...next.decorExpires,[gift]:now+DECOR_LIFETIME}};
-  let secret=null;if(random()<.06){const pool=[...SECRET_WEAPONS,...SECRET_DECOR],unseen=pool.filter(i=>!(state.discovered??[]).includes(i.id)),choices=unseen.length?unseen:pool;secret=choices[Math.min(choices.length-1,Math.floor(random()*choices.length))];next={...next,discovered:[...new Set([...(state.discovered??[]),secret.id])]};if(SECRET_WEAPONS.includes(secret))next={...next,owned:[...new Set([...next.owned,secret.id])],weaponUses:{...next.weaponUses,[secret.id]:Math.min(MAX_WEAPON_USES,weaponUses(next,secret.id)+weaponDurability(secret.id))}};else next={...next,decor:{...next.decor,[secret.id]:Math.min(MAX_DECOR_LEVEL,(next.decor[secret.id]??0)+1)},decorExpires:{...next.decorExpires,[secret.id]:next.decorExpires[secret.id]??now+DECOR_LIFETIME}};}
+  let secret=null;if(random()<.08){const pool=[...SECRET_WEAPONS,...SECRET_DECOR],unseen=pool.filter(i=>!(state.discovered??[]).includes(i.id)),choices=unseen.length?unseen:pool;secret=choices[Math.min(choices.length-1,Math.floor(random()*choices.length))];next={...next,discovered:[...new Set([...(state.discovered??[]),secret.id])]};if(SECRET_WEAPONS.includes(secret))next={...next,owned:[...new Set([...next.owned,secret.id])],weaponUses:{...next.weaponUses,[secret.id]:Math.min(MAX_WEAPON_USES,weaponUses(next,secret.id)+weaponDurability(secret.id))}};else next={...next,decor:{...next.decor,[secret.id]:Math.min(MAX_DECOR_LEVEL,(next.decor[secret.id]??0)+1)},decorExpires:{...next.decorExpires,[secret.id]:next.decorExpires[secret.id]??now+DECOR_LIFETIME}};}
   return {journey,gift,state:next,earned:earned+story.oil,merit:merit+story.merit,story,friend,secret,buffs};
 }
-export const purchasePrice=(state,base)=>Math.ceil(base*(1-patronBuffs(state).discount));
-function useCoupon(state){const coupons=[...(state.coupons??[])],best=coupons.reduce((a,c)=>!a||c.discount>a.discount?c:a,null);return best?{...state,coupons:coupons.filter(c=>c!==best)}:state;}
+// A coupon is optional and explicit. A snapshot prevents a stale selection spending another ticket.
+export function selectedCoupon(state,selection){
+ if(!selection||!Number.isInteger(selection.index))return null;
+ const coupon=state.coupons?.[selection.index];
+ return coupon&&coupon.uses>0&&coupon.patron===selection.patron&&coupon.discount===selection.discount?coupon:null;
+}
+export const purchasePrice=(state,base,coupon=null)=>Math.ceil(base*(1-(selectedCoupon(state,coupon)?.discount??0)));
+export const couponChoices=state=>(state.coupons??[]).flatMap((c,index)=>c.uses>0?[{index,patron:c.patron,discount:c.discount}]:[]);
+export const bestPurchasePrice=(state,base)=>Math.min(purchasePrice(state,base),...couponChoices(state).map(c=>purchasePrice(state,base,c)));
+function useCoupon(state,selection){
+ if(!selectedCoupon(state,selection))return state;
+ return {...state,coupons:state.coupons.flatMap((c,index)=>index!==selection.index?[c]:c.uses>1?[{...c,uses:c.uses-1}]:[])};
+}
 export function dailyReward(state,now=Date.now()){const day=hkDay(now);return state.lastDaily>=day?null:{...state,coins:cap(state.coins+DAILY_OIL),merit:cap(state.merit+DAILY_MERIT),lastDaily:day};}
 
 export const skinUses=(state,id)=>id==='plain'?Infinity:state.ownedSkins.includes(id)?cap(state.skinUses?.[id]??SKIN_USES,SKIN_USES):0;
-export function buySkin(state,id){const skin=SKINS.find(s=>s.id===id);if(!skin)return null;if(state.ownedSkins.includes(id))return {...state,selectedSkin:id};const cost=purchasePrice(state,skin.cost);if(state.coins<cost)return null;return {...useCoupon(state),coins:state.coins-cost,ownedSkins:[...state.ownedSkins,id],skinUses:{...state.skinUses,[id]:SKIN_USES},selectedSkin:id};}
+export function buySkin(state,id,{coupon=null}={}){const skin=SKINS.find(s=>s.id===id);if(!skin)return null;if(state.ownedSkins.includes(id))return {...state,selectedSkin:id};if(coupon!==null&&!selectedCoupon(state,coupon))return null;const cost=purchasePrice(state,skin.cost,coupon);if(state.coins<cost)return null;return {...useCoupon(state,coupon),coins:state.coins-cost,ownedSkins:[...state.ownedSkins,id],skinUses:{...state.skinUses,[id]:SKIN_USES},selectedSkin:id};}
 export function consumeSkin(state,id){if(!SKINS.some(s=>s.id===id)||!state.ownedSkins.includes(id))return null;if(id==='plain')return state;const remaining=skinUses(state,id)-1,uses={...state.skinUses};if(remaining)uses[id]=remaining;else delete uses[id];return {...state,skinUses:uses,ownedSkins:remaining?state.ownedSkins:state.ownedSkins.filter(s=>s!==id),selectedSkin:!remaining&&state.selectedSkin===id?'plain':state.selectedSkin};}

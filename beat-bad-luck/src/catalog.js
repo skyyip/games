@@ -1,3 +1,4 @@
+import {CINEMA_DECOR} from './cinema-expansion.js';
 import {OIL_GAIN_FACTOR} from './economy.js';
 import {SECRET_WEAPONS,SECRET_DECOR,PATRONS} from './ritual-rewards.js';
 export const WORRY_GROUPS=[
@@ -111,7 +112,7 @@ export const weaponRarity=weapon=>weapon.hidden?5:1+[400,1500,4500,10000].filter
 export const weaponDurability=id=>id==='bare-hand'?Infinity:(WEAPONS.some(weapon=>weapon.id===id)?Math.max(2,6-weaponRarity(WEAPONS.find(weapon=>weapon.id===id))):0);
 export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
- ...SECRET_DECOR,
+ ...SECRET_DECOR,...CINEMA_DECOR.map(d=>({...d})),
   {id:'radio',name:'Cassette radio',cost:1190,rate:0.6},
   {id:'neon',name:'Retro neon sign',cost:1145,rate:1.2},
   {id:'incense',name:'Incense stand',cost:1155,rate:1.8},

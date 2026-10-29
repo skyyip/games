@@ -69,3 +69,32 @@ body .skin-inspect svg,body .skin-inspect:active svg{box-shadow:none!important;f
 #collection-dialog-backup .save-actions button{flex:1;min-width:130px;min-height:44px}
 #collection-dialog-backup #save-tools-note,#collection-dialog-backup #save-tools-status{font-size:15px;line-height:1.8;overflow-wrap:anywhere}
 #collection-dialog-shop-kits #weapon-list>.kit-row{min-height:96px}
+/* Compact, stable controls in the ritual preparation and collection dialogs. */
+body details,body details[open]{box-shadow:none!important}
+body dialog[data-motion],body dialog[data-motion]::backdrop{animation:none!important;transition:none!important}
+body .skin-inspect svg{width:21px;height:21px;box-sizing:border-box;border-radius:7px}
+.preparation-kit-card,#weapon-list .kit-row{position:relative}
+.preparation-kit-choice,.preparation-kit-choice[aria-pressed=true]{box-sizing:border-box;border-width:2px!important;translate:none!important;transform:none!important;padding-top:30px}
+.preparation-kit-choice .kit-choice-status{display:flex;align-items:center;justify-content:center;min-height:3em;font-size:12px;line-height:1.5;font-style:normal;color:#fff0c8}
+.preparation-kit-card .skin-inspect,#weapon-list .skin-inspect{position:absolute;inset:0 0 auto auto;width:44px;height:44px;min-width:44px;min-height:44px}
+#weapon-list .kit-row{padding-right:40px}
+#weapon-detail-art{display:grid;place-items:center;height:190px}#weapon-detail-art>svg{width:160px;height:184px}.item-detail-note{font-size:13px!important;color:#e2e9c9}
+#weapon-detail-dialog .skin-detail-scroll dd{max-width:58%;text-align:right;overflow-wrap:anywhere}
+#tab-kits[hidden]{display:none!important}.preparation-ready #stall-dashboard .stall-tabs.collection-launchers{grid-template-columns:1fr}
+.stall-wallet>#open-stall-showcase{min-height:50px;margin:0 0 15px;padding:8px 10px;gap:8px;font-size:14px;line-height:1.5;border-radius:12px;box-shadow:0 3px 0 #163b31}
+.stall-wallet>#open-stall-showcase .stall-open-art{width:28px;height:28px;flex:0 0 28px}
+#save-tools-title.collection-launch{font-size:12.8px}
+#story>summary,#rules>summary{font-size:17.85px!important;line-height:1.45;min-height:38px;padding-block:6px}
+#purchase-coupons{margin:12px 0;padding:12px;border:1px solid #c4d2a4;border-radius:12px;background:#1c3e36;color:#fff0c8;text-align:left}
+#purchase-coupon-label{display:block;font-size:15px;line-height:1.6;font-weight:600;margin-bottom:7px}
+#purchase-coupon{box-sizing:border-box;width:100%;min-height:44px;border:2px solid #d9cd97;border-radius:9px;background:#15372f;color:#fff0c8;padding:8px 30px 8px 10px;font:400 16px/1.5 var(--display)}
+#purchase-coupon-note{font-size:13px;line-height:1.7;margin:8px 0 0;color:#dfebce}
+
+#story,#rules{padding-block:12px}#story>summary::after,#rules>summary::after{width:26px;height:26px;flex-basis:26px}
+@media(max-width:640px){#story>summary,#rules>summary{font-size:17px!important}}
+/* Keep X fixed in the modal frame while the long purchase review scrolls below it. */
+body dialog.unified-modal.purchase-dialog{display:none;overflow:hidden;padding:0!important;max-height:calc(100dvh - 28px)}
+body dialog.unified-modal.purchase-dialog[open]{display:flex;flex-direction:column}
+.purchase-dialog .purchase-content{box-sizing:border-box;width:100%;min-height:0;max-height:calc(100dvh - 32px);padding-top:58px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+#purchase-dialog #purchase-coupons,#purchase-dialog #purchase-spent{grid-column:2}
+@media(max-width:640px){#purchase-dialog #purchase-coupons,#purchase-dialog #purchase-spent{grid-column:auto}}

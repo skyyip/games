@@ -1,4 +1,14 @@
-## Current acceptance — five-prop offering altar and preparation polish (v96)
+## Current acceptance — collection, checkout and altar refresh (v99)
+
+**525 repository unit tests pass**, including **181 Beat the Bad Luck tests**. New transaction tests cover an explicit weaker/stronger/no coupon, exact final debit, stale selection rejection, insufficient money/merit, free re-equipping and cancellation-safe immutable state. Existing purchase, wear, durability, backup, reward-receipt and score invariants remain enabled. Every one of the 42 secret drops is reachable and persists; the strict 8% boundary and duplicate-receipt rejection pass. All eight new cinema titles have reachable goals and reject an empty ritual. New props/titles/altar order survive save and backup.
+
+`scripts/shop-refresh-check.mjs` passes at 320×568 Chinese, 390×844 Chinese with motion, 812×375 English and 1280×900 English. It verifies 21px magnifier art in 44px targets, unchanged owned-helper card height on selection, matching paper/helper detail structures, native modal closing with an interpolated frame still modal, cancelled purchase, specifically chosen weaker coupon, no-coupon checkout and exact resulting balances/ticket counts. Mouse/keyboard/touch altar drafts support cancellation, explicit Save and reload; desktop thumbnail dragging is also covered. A low-balance checkout rejects the weaker coupon but enables the stronger one, debits exactly 102 oil and retains the unused ticket. The new folded paper completes an entire ritual, including one 88-hit burst, tiger feeding, blessing and blocks, consuming one paper/helper use. No uncaught page errors or horizontal overflow. Purchase screenshots confirm the selected coupon/final price are prominent and the X remains in the frame above scrollable review content.
+
+Source cache migration **v98 → v99** preloads the new cinema and finisher-recipe modules; offline altar selection, paper inspection and combat work with unchanged legacy balances, inventory and unrelated-game cache/storage. The same four-size checkout/altar suite and complete ritual pass against the production /games/ build. The production build and metadata checks pass for all 22 pages. All source changes stay in `beat-bad-luck/`.
+
+Artifacts: `/tmp/bbl-shop-refresh/`; current build `/tmp/bbl-shop-refresh-site/`. These are Chromium/viewport-emulation checks, not physical iPhone performance measurements.
+
+## Previous acceptance — five-prop offering altar and preparation polish (v96)
 
 **173 unit tests pass.** Six altar tests cover zero/five/max/duplicates/unowned values, immutable free configuration, old-save migration, export/import round-trips, stale-clock protection, expiry/discard reminders, explicit replacement and acknowledgement, centered sparse positions, hidden-owned props and all four combination requirements. Existing inventory, earnings, finisher and progression tests remain enabled.
 

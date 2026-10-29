@@ -2,7 +2,21 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
-## Current UI and income update (cache v98)
+## Collection, checkout and altar refresh (cache v99)
+
+Paper magnifiers use 21px artwork (30% smaller) within unchanged 44px targets. Paid **小人紙 / Paper worry** now has a folded talisman silhouette, red chest stamp and its own neutral/crying face; free plain paper stays unchanged. Paid helpers get independent magnifiers in both preparation cards and library rows. The helper inspector shares the paper inspector's illustration/description/stat layout and never buys, equips or consumes an item. Selection status occupies a reserved line, so selecting an owned helper preserves card height.
+
+Native dialogs use one idempotent animation controller. Content and backdrop fade together; the outgoing frame remains until native close, and return focus/DOM moves happen after closing. The purchase X stays in the frame while its content scrolls. All details lose box shadows. The home helper-library launcher is hidden; the preparation catalogue remains available. The stall launcher is now the first control in the wallet; its old roadside-sanctuary caption is hidden. Backup-launcher text is 20% smaller; the story/rules summary text is another 15% smaller with less vertical padding.
+
+Checkout explicitly offers **no coupon** or any owned patron ticket. It previews the base price, selected discount and final debit. Confirm consumes only that selected ticket; cancel, free re-equipping, failed gates and stale coupon snapshots consume none. The default price is the base price. Affordability gates allow opening checkout when a ticket would make the item affordable. This applies to paper, helpers/restocks and decoration purchase/upgrades; repairs remain separate.
+
+The offering altar reuses the stall's pointer/keyboard drag controller and visual ghost/drop targets. Rearrange selected preview props using mouse, a touch handle or left/right keys. Changes remain a draft until Save; closing cancels. The saved order persists into incense placement and backups.
+
+Added **10 purchasable cinema-inspired decorations**, **12 secret keepsakes** (six helpers and six props), and **8 unlockable cinema titles**. There are now 59 decorations, 66 helpers, 42 secret keepsakes and 23 titles. New secret helpers have authored motion recipes, prop art and comic payoffs. A completed ritual's secret roll is strictly below **8%**; duplicate receipts still cannot reroll. Chinese collection copy is 「圓滿儀式有機會掉落一件隱藏收藏。食粥食飯，睇你自己啦！」. Existing balances, inventory, levels, durability and discovered IDs are preserved.
+
+Current acceptance: `scripts/shop-refresh-check.mjs` covers four sizes/languages, animated closing, cancelled/selected/no-coupon checkout, exact debits, pointer/keyboard/touch draft ordering, reload and a complete ritual with the new paper. `tests/shop-refresh.test.js` covers explicit/stale/failed coupon transactions, retained saves/backups and all new title unlocks.
+
+## Previous UI and income update (cache v98)
 
 New earnings are 60% lower than before this update: oil uses a .32 base factor (previously .8), merit .36 (previously .9). This applies once to daily gifts, ritual rewards, commissions and stall income. Daily gifts are now 6 oil / 11 merit. Fractional stall carry remains intact; existing balances, costs, stock and records are preserved.
 

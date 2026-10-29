@@ -23,8 +23,8 @@ test('new props fill a coherent increasing bonus ladder without changing the thr
  for(let i=1;i<sorted.length;i++){const a=sorted[i-1],b=sorted[i];if(a.cost===b.cost)assert.equal(weaponScoreMultiplier(a.id),weaponScoreMultiplier(b.id));else assert.ok(weaponScoreMultiplier(a.id)<weaponScoreMultiplier(b.id),`${a.id} → ${b.id}`);}
  assert.deepEqual(['triple-trio','marksix-snowball','rebirth-paper'].map(weaponScoreMultiplier),[7,10.5,19.6]);
 });
-test('eighteen new decorations migrate at zero while preserving existing money, inventory and ageing',()=>{
- assert.equal(decor.length,18);assert.equal(new Set(DECOR.map(d=>d.id)).size,DECOR.length);
+test('twenty-eight expanded decorations migrate at zero while preserving existing money, inventory and ageing',()=>{
+ assert.equal(decor.length,28);assert.equal(new Set(DECOR.map(d=>d.id)).size,DECOR.length);
  const old={version:1,coins:12345,merit:6000,owned:['marksix-snowball'],equipped:'marksix-snowball',decor:{cat:3},decorExpires:{cat:DECOR_LIFETIME},lastSeen:DAY};
  const migrated=readProgress(JSON.stringify(old),DAY);assert.equal(migrated.coins,12345);assert.equal(migrated.equipped,'marksix-snowball');assert.equal(migrated.decor.cat,3);assert.equal(migrated.decorExpires.cat,DECOR_LIFETIME);
  for(const piece of decor){assert.equal(migrated.decor[piece.id],0);assert.equal(migrated.decorExpires[piece.id],undefined);}

@@ -3,13 +3,13 @@ import {formatNumber} from './number-format.js';
 import {WORRIES,WORRY_GROUPS,WEAPONS,weaponScoreMultiplier} from './catalog.js';
 import {SKINS,skinArt,skinScoreMultiplier} from './skins.js';
 import {weaponArt} from './art.js';
-import {weaponCondition,purchasePrice,skinUses} from './progress.js';
+import {weaponCondition,purchasePrice,bestPurchasePrice,skinUses} from './progress.js';
 import {STORIES,commissionPay} from './neighbourhood.js';
 import {animateDialog} from './stall-polish.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 
 // Draft choices belong to this visit. Personal worry text is never persisted.
-export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptStory,onEquip,requestBuy,onEvents}) {
+export function createPreparationUI({weaponInspector,getState,getWorry,onChooseWorry,onAcceptStory,onEquip,requestBuy,onEvents}) {
  const $=selector=>document.querySelector(selector),local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
  const optionalStepsEnabled=false;
  const welcome=$('#welcome');
@@ -98,11 +98,11 @@ export function createPreparationUI({getState,getWorry,onChooseWorry,onAcceptSto
    button.innerHTML=weaponArt(w.id)+'<b></b><span></span><small></small>';
    button.querySelector('b').textContent=name(w);button.querySelector('span').textContent=`${local('解壓分數','Score')} ×${formatNumber(weaponScoreMultiplier(w.id))}`;
    const uses=w.starter?local('免費・不限次數','Free · unlimited'):owned?local(`剩餘 ${condition.remaining} 次`,` ${condition.remaining} uses left`):local(`每件可用 ${condition.capacity} 次`,`${condition.capacity} uses per kit`);
-   button.querySelector('small').textContent=uses+' · '+(selected?local('已選用 ✓','Selected ✓'):owned?local('選用','Equip'):local(`購買・${cost} 香油錢`,`Buy · ${cost} oil`));
-   button.disabled=!owned&&(state.coins<cost||state.merit<w.merit);button.addEventListener('click',()=>owned?onEquip(w.id):requestBuy('weapon',w));card.append(button);
+   button.querySelector('small').textContent=uses;const status=document.createElement('em');status.className='kit-choice-status';status.textContent=selected?local('已選用 ✓','Selected ✓'):owned?local('選用','Equip'):local(`購買・${cost} 香油錢`,`Buy · ${cost} oil`);button.append(status);
+   button.disabled=!owned&&(state.coins<bestPurchasePrice(state,w.cost)||state.merit<w.merit);button.addEventListener('click',()=>owned?onEquip(w.id):requestBuy('weapon',w));card.append(button);
    if(!owned&&button.disabled){const note=document.createElement('small');note.textContent=state.merit<w.merit?local(`需要 ${w.merit} 功德（不扣除）`,`Requires ${w.merit} merit (not spent)`):local(`還欠 ${cost-state.coins} 香油錢`,`Need ${cost-state.coins} more oil`);card.append(note);}
-   if(owned&&!w.starter&&!w.hidden){const buy=document.createElement('button');buy.type='button';buy.className='preparation-link';buy.dataset.preparationRestock=w.id;buy.textContent=local(`補購・${cost} 香油錢`,`Restock · ${cost} oil`);buy.disabled=state.coins<cost||state.merit<w.merit;buy.addEventListener('click',()=>requestBuy('weapon',w));card.append(buy);}
-   return {owned,card};
+   if(owned&&!w.starter&&!w.hidden){const buy=document.createElement('button');buy.type='button';buy.className='preparation-link';buy.dataset.preparationRestock=w.id;buy.textContent=local(`補購・${cost} 香油錢`,`Restock · ${cost} oil`);buy.disabled=state.coins<bestPurchasePrice(state,w.cost)||state.merit<w.merit;buy.addEventListener('click',()=>requestBuy('weapon',w));card.append(buy);}
+   weaponInspector?.attach(card,w.id);return {owned,card};
   });
   $('#preparation-owned-kits').replaceChildren(...cards.filter(c=>c.owned).map(c=>c.card));$('#preparation-other-kits').replaceChildren(...cards.filter(c=>!c.owned).map(c=>c.card));
   if(focused)$('#prepare-kit').querySelector(`[data-preparation-kit="${focused}"]`)?.focus({preventScroll:true});

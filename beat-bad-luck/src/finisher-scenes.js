@@ -1,3 +1,5 @@
+import {CINEMA_SECRET_KITS} from './cinema-expansion.js';
+import {EXTRA_KITS} from './kit-catalog.js';
 // One authored comic recipe per helper; steps animate, while tapping remains the only burst control.
 export const FINISHER_SCENES={
 "secret-loudspeaker":{"name":["收工獅吼震走鐘","Clock-off lion roar"],"payoff":["一嗌收工，連個鐘都打卡走先。","The roar sends the time clock home before everyone else."],"tag":["殺青！","THAT’S A WRAP!"],"pose":"flat","steps":[{"type":"circle","direction":"cw"},{"type":"tap","target":1,"random":false}],"spread":22,"tilt":9},
@@ -61,6 +63,9 @@ export const FINISHER_SCENES={
 "lassie":{"name":["拉茜假髮追逐賽","Lassie and the runaway wig"],"payoff":["拉茜叼返個假髮，小人即刻跑返嚟認領！","Lassie fetched the wig. The gremlin came back immediately!"],"tag":["返嚟領取","FETCH!"],"pose":"dog","steps":[{"type":"trace","path":[[0.18,0.7],[0.35,0.3],[0.65,0.58],[0.82,0.25]]},{"type":"tap","target":2,"random":false}],"spread":28,"tilt":9},
 "immunity-token":{"name":["今日唔批","Application denied"],"payoff":["今日唔批！覆核都唔批！","DENIED! The appeal is denied too!"],"tag":["啪！收工","WHAM! OFF DUTY"],"pose":"stamp","steps":[{"type":"drag","from":[0.5,0.2],"to":[0.5,0.6]},{"type":"tap","target":1},{"type":"drag","from":[0.5,0.2],"to":[0.5,0.6]}],"spread":29,"tilt":12}
 };
+for(const [i,[id]]of CINEMA_SECRET_KITS.entries()){
+ const recipe=EXTRA_KITS[id];FINISHER_SCENES[id]={name:recipe.name,payoff:recipe.win,tag:recipe.tag,pose:recipe.pose,steps:recipe.steps.map(({label,...step})=>step),spread:38+i,tilt:12+i*5};
+}
 export const finisherScene=id=>FINISHER_SCENES[id]??FINISHER_SCENES['bare-hand'];
 export function finisherKeyframes(id){
  const spec=finisherScene(id),frames=[{transform:'translate(0,0) rotate(0deg) scale(.8)',opacity:.3}],spread=spec.spread;

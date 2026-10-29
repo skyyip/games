@@ -1,3 +1,4 @@
+import {CINEMA_SECRET_KITS,CINEMA_SECRET_DECOR} from './cinema-expansion.js';
 // Original comic homages; no film stills, recordings or private worries are stored.
 const kits=[
  ['secret-loudspeaker','收工獅吼咪','Off-duty lion-roar mic','📢','一嗌收工，連個鐘都打卡走先。'],
@@ -31,6 +32,7 @@ const decor=[
  ['secret-star','星級掃地僧','Star-rated sweeping monk','🧹','掃走霉運順便掃走未讀通知。'],
  ['secret-pineapple','菠蘿油時光機','Pineapple-bun time machine','🍍','返去五分鐘前，食多個菠蘿油。'],
  ['secret-chair','導演喊收工龍椅','Director clock-off throne','🎬','一坐低就喊 Cut，連煩惱都殺青。']];
+kits.push(...CINEMA_SECRET_KITS);decor.push(...CINEMA_SECRET_DECOR);
 export const SECRET_WEAPONS=kits.map(([id,nameZh,name,icon,description],i)=>({id,nameZh,name,icon,description,descriptionEn:'A ridiculous Hong Kong cinema-inspired keepsake. Even bad luck needs a day off.',hidden:true,cost:1800+i*240,merit:0,multiplier:3.5+i*.18,tone:190+i*24,secretIndex:i}));
 export const SECRET_DECOR=decor.map(([id,nameZh,name,icon,description],i)=>({id,nameZh,name,icon,description,descriptionEn:'A tiny comedy set for your stall. The neighbours insist on an encore.',hidden:true,expanded:true,cost:2500+i*350,rate:1.2+i*.12,secretIndex:i}));
 export const PATRONS=[

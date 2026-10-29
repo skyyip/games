@@ -68,6 +68,12 @@ const secretRecipes=[
  [tap(1,'點月光暫停','Tap the moonlight pause'),hold(700,'按住收工鍵','Hold the off-duty key')],
  [drop([.2,.25],[.78,.65],'把漏雨拖入遮底','Drag the rain under the umbrella'),swipe('up','向上抖水','Shake the water upward')],
  [turn('cw','轉一圈開鑼','Circle to wind the gong'),swipe('down','落掌收工','Strike down to clock off')],
- [trace([[.2,.65],[.5,.25],[.8,.65]],'沿星點畫飛拖路','Trace the cosmic slipper'),pinch('夾住太空衰運','Pinch the cosmic bad luck')]
+ [trace([[.2,.65],[.5,.25],[.8,.65]],'沿星點畫飛拖路','Trace the cosmic slipper'),pinch('夾住太空衰運','Pinch the cosmic bad luck')],
+ [rub(4,'來回梳好四下','Comb back and forth four times'),tap(2,'點中假髮收工','Tap the wig to clock off')],
+ [hold(620,'按住獅吼假髮','Hold the roaring wig'),pinch('夾細音量','Pinch the volume down')],
+ [swipe('up','加一隻蛋','Add an egg'),turn('ccw','逆轉兜起免加班飯','Circle up an off-duty meal'),tap(1,'點羹開飯','Tap the dinner spoon')],
+ [beat(1,620,'驚堂木亮起時拍','Tap the lit gavel'),drop([.16,.72],[.77,.3],'把甩鍋拖返被告席','Drag the blame pot to the witness stand')],
+ [trace([[.18,.24],[.5,.72],[.82,.24]],'畫出八雞報喜路線','Trace the lucky-chicken route'),rub(2,'雞毛掃兩下','Brush twice')],
+ [pinch('夾住收工匙','Pinch the clock-off key'),hold(530,'按住開收工門','Hold to open the off-duty door'),swipe('right','衰運請出門','Swipe bad luck out')]
 ];
-for(const [i,item]of SECRET_WEAPONS.entries())EXTRA_KITS[item.id]=kit([item.nameZh+'絕招',item.name+' signature'],[item.description,item.descriptionEn],['殺青！','THAT’S A WRAP!'],i%2?'spin':'flat',secretRecipes[i]);
+for(const [i,item]of SECRET_WEAPONS.entries())EXTRA_KITS[item.id]=kit([item.nameZh+'絕招',item.name+' signature'],[item.description,item.descriptionEn],['殺青！','THAT’S A WRAP!'],i%2?'spin':'flat',secretRecipes[i%secretRecipes.length]);
