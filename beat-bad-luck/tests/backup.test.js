@@ -4,7 +4,7 @@ import {fresh,buyWeapon,consumeWeapon,readProgress,reward} from '../src/progress
 import {PATRONS} from '../src/ritual-rewards.js';
 test('portable backup round-trips balances, remaining uses, records, stall expiry and collections',()=>{
  let state=buyWeapon({...fresh(100),coins:10000,merit:9000},'paper');state=consumeWeapon(state,'paper');state.decor.cat=2;state.decorExpires.cat=100000;state.records=[{score:999,hits:10,weapon:'paper',date:1}];state.neighbourhood.title='rhythm';
- const exported=createBackup(state,200);assert.deepEqual(parseBackup(exported,200),readProgress(JSON.stringify(state),200));assert.equal(parseBackup(exported,200).weaponUses.paper,4);assert.equal(parseBackup(exported,200).decorExpires.cat,100000);
+ const exported=createBackup(state,200);assert.deepEqual(parseBackup(exported,200),readProgress(JSON.stringify(state),200));assert.equal(parseBackup(exported,200).weaponUses.paper,7);assert.equal(parseBackup(exported,200).decorExpires.cat,100000);
 });
 test('invalid, unrelated, oversized or unsupported files are rejected instead of resetting progress',()=>{
  for(const raw of ['', 'null','{}','not json','[]',JSON.stringify({game:'another',format:1,progress:fresh(0)}),JSON.stringify({game:'beat-bad-luck',format:2,progress:fresh(0)}),JSON.stringify({game:'beat-bad-luck',format:1,progress:{version:1}}),' '.repeat(262145)])assert.throws(()=>parseBackup(raw,0));

@@ -120,7 +120,7 @@ body dialog[data-motion=closing]::backdrop{animation:modal-shade-out 150ms ease-
 
 @media(max-width:360px){.wallet-totals{grid-template-columns:minmax(0,1fr);gap:8px}.wallet-totals>span{display:flex;align-items:center;justify-content:space-between;gap:10px}.wallet-totals b{white-space:nowrap}}
 
-#collection-dialog-shop-kits .weapon-inspect,#collection-dialog-shop-kits .weapon-inspect svg{background:transparent!important}
+#collection-dialog-shop-kits .weapon-inspect,#collection-dialog-shop-kits .weapon-inspect svg{background:transparent!important;border:0!important}
 #collection-dialog-shop-kits .weapon-inspect svg{border:0;padding:0}
 #about-game{padding-block:6px}
 #about-game>summary{min-height:36px;padding-block:4px}
@@ -174,3 +174,7 @@ body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card) 
 .meter-fire-left{left:-4px}.meter-fire-right{right:-4px}
 .finisher-charge-frame:is([data-state=ready],[data-state=burning]){filter:drop-shadow(0 0 2px #f6b25e55)}
 .finisher-charge-frame::before{box-shadow:0 0 3px #ffcc6a,0 0 6px #f4873844}
+
+#collection-dialog-shop-kits .weapon-inspect{top:5px}
+#collection-dialog-shop-kits .weapon-inspect::before,#collection-dialog-shop-kits .weapon-inspect::after{content:none!important}
+#ritual-preparation #worry-select{margin-top:-7px}

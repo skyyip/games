@@ -109,7 +109,12 @@ export const WEAPONS=[
 // Prices and merit gates are independent; free hands retain their ×1 fallback.
 export const weaponScoreMultiplier=id=>{const weapon=WEAPONS.find(w=>w.id===id);return weapon?.multiplier??1+(weapon?.cost??0)/100;};
 export const weaponRarity=weapon=>weapon.hidden?5:1+[400,1500,4500,10000].filter(price=>weapon.cost>price).length;
-export const weaponDurability=id=>id==='bare-hand'?Infinity:(WEAPONS.some(weapon=>weapon.id===id)?Math.max(2,6-weaponRarity(WEAPONS.find(weapon=>weapon.id===id))):0);
+// Use original catalogue prices, so discounts never change a kit's durability.
+export const weaponDurability=id=>{
+ if(id==='bare-hand')return Infinity;
+ const weapon=WEAPONS.find(item=>item.id===id);
+ return weapon?8-[400,1500,4500,10000,15000].filter(limit=>weapon.cost>limit).length:0;
+};
 export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
  ...SECRET_DECOR,...CINEMA_DECOR.map(d=>({...d})),

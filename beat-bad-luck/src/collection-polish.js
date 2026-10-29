@@ -29,7 +29,7 @@ export function polishCollections(){
  scale('.stall-wallet>.bbl-kicker',1.2);
  scale('#purchase-title',.85);
  scale('#idle-note',1.1);
- scale('#coins,#merit',1.32);
+ scale('#coins,#merit',1.452);
  scale('#intro h1,#intro p,#intro small',.95);
  scale('.stall-wallet h2,.records-card h2',.85);
  scale('#stall-showcase-title',1.25);scale('#open-journey',1.1);
