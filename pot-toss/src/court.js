@@ -1,12 +1,13 @@
 import {flightAt,throwVelocity,descendingTime,RIM_HEIGHT,POT_DEPTH,MOUTH_RADIUS,clamp} from './game.js';
 export class Court {
   constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.width=0;this.height=0;this.last={};new ResizeObserver(()=>this.resize()).observe(canvas);this.resize();}
-  resize(){const r=this.canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);this.width=r.width;this.height=r.height;this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.draw(this.last);}
+  resize(){const r=this.canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);if(this.width===r.width&&this.height===r.height&&this.dpr===dpr)return;this.roomLayer=null;this.dpr=dpr;this.width=r.width;this.height=r.height;this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.draw(this.last);}
   project(x,z,h=0){const scale=1/(1+z*.12);return {x:this.width/2+x*this.width*.28*scale,y:this.height*.89-z*this.height*.13*scale-h*Math.min(this.width*.28,this.height*.21)*scale,scale};}
   ellipse(x,y,rx,ry,fill,stroke,width=1){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}
   path(points,fill,stroke,width=1){const c=this.ctx;c.beginPath();for(const [i,p] of points.entries()){i?c.lineTo(...p):c.moveTo(...p);}if(fill){c.closePath();c.fillStyle=fill;c.fill();}if(stroke){c.lineWidth=width;c.strokeStyle=stroke;c.stroke();}}
   background(time,reduced){
     const c=this.ctx,w=this.width,h=this.height;
+    if(!this.roomLayer){
     const sky=c.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#f2e6da');sky.addColorStop(.45,'#f0dfd0');sky.addColorStop(1,'#dfc8b9');c.fillStyle=sky;c.fillRect(0,0,w,h);
     this.ellipse(w*.79,h*.14,Math.min(w*.06,33),Math.min(w*.06,33),'#faefc9');
     c.fillStyle='#dfc7bc';c.fillRect(0,h*.3,w,h*.08);c.fillStyle='#e9d4c4';c.fillRect(0,h*.30,w,3);c.fillStyle='#cdb1a5';c.fillRect(0,h*.375,w,3);
@@ -23,6 +24,8 @@ export class Court {
     const unit=Math.min(w*.1,h*.14);c.save();c.translate(w*.08,h*.56);c.rotate(-.08);c.fillStyle='#aebba2';c.fillRect(-unit*.35,-unit*.35,unit*.7,unit*.6);this.ellipse(0,-unit*.35,unit*.35,unit*.1,'#bec8ad');c.strokeStyle='#91a38d';c.lineWidth=3;c.beginPath();c.ellipse(-unit*.42,-unit*.08,unit*.24,unit*.23,0,0,Math.PI*2);c.stroke();this.path([[unit*.3,-unit*.16],[unit*.75,-unit*.45],[unit*.8,-unit*.35],[unit*.38,unit*.05]],'#9eaf97');c.restore();
     c.save();c.translate(w*.91,h*.56);const s=unit*.8;this.path([[-s*.4,0],[s*.4,0],[s*.29,s*.45],[-s*.28,s*.45]],'#c88f77');this.ellipse(0,0,s*.43,s*.1,'#e0ae8d');c.strokeStyle='#8c9e79';c.lineWidth=2;c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(-s*.1,-s*.3,s*.08,-s*.8);c.stroke();this.ellipse(-s*.19,-s*.42,s*.25,s*.12,'#acb590');this.ellipse(s*.24,-s*.59,s*.25,s*.12,'#94a786');c.restore();
     for(const [x,y,r] of [[.17,.82,4],[.84,.73,3],[.12,.87,2]])this.ellipse(w*x,h*y,r,r*.6,'#cbb7a4');
+      this.roomLayer=document.createElement('canvas');this.roomLayer.width=this.canvas.width;this.roomLayer.height=this.canvas.height;this.roomLayer.getContext('2d').drawImage(this.canvas,0,0);
+    }else c.drawImage(this.roomLayer,0,0,w,h);
     if(!reduced){const x=w*(.06+((time*.007)%1)*.88),y=h*(.19+Math.sin(time*.5)*.012);c.strokeStyle='#bfa58c55';c.lineWidth=1;c.beginPath();c.moveTo(x-5,y);c.quadraticCurveTo(x,y-5,x+5,y);c.stroke();}
   }
   pot(game,reduced,time=0){

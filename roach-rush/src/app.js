@@ -91,14 +91,14 @@ function sync(){
       button.innerHTML=sprite(entity.type,entity.size)+'<span class="charge-ring" aria-hidden="true"></span>';
       entities.append(button);buttons.set(entity.id,button);setTimeout(()=>button.classList.remove('is-new'),280);
     }
-    button.disabled=game.state!=='playing';button.dataset.mode=entity.mode;
+    if(button.disabled !== (game.state!=='playing'))button.disabled=game.state!=='playing';if(button.dataset.mode!==entity.mode)button.dataset.mode=entity.mode;
     const label=describe(entity);if(button.dataset.sourceLabel!==label){button.dataset.sourceLabel=label;button.setAttribute('aria-label',label);}
   }
 }
 function renderScore(){
-  $('#timer').textContent=clock(game.remaining);$('.scoreboard').classList.toggle('is-urgent',game.state==='playing'&&game.remaining<=10000);
+  const time=clock(game.remaining);if($('#timer').textContent!==time)$('#timer').textContent=time;$('.scoreboard').classList.toggle('is-urgent',game.state==='playing'&&game.remaining<=10000);
   if(game.score!==previousScore){$('#score').textContent=game.score;$('#score').setAttribute('aria-label',`Score: ${game.score} points`);$('#score').classList.toggle('is-penalty',previousScore!==null&&game.score<previousScore);if(previousScore!==null)animateChange($('#score'));previousScore=game.score;}
-  $('#best').textContent=records[game.duration][0]?.score??'—';
+  const best=String(records[game.duration][0]?.score??'—');if($('#best').textContent!==best)$('#best').textContent=best;
   for(const kind of ['spray','trap']){
     const tool=$(`#${kind}`),left=usesLeft(kind),state=`${game.state}:${left}`;tool.disabled=game.state!=='playing'||left===0;
     if(tool.dataset.state!==state){tool.dataset.state=state;tool.classList.toggle('is-used',left===0);$(`#${kind}-count`).textContent=`×${left}`;tool.setAttribute('aria-label',kind==='spray'?`Insect spray. ${left} uses remaining. Drag into the room, or press Enter to aim.`:`Mouse traps. ${left} uses remaining. Drag into the room, or press Enter to aim.`);}
@@ -110,13 +110,16 @@ function frozen(){
   const focused=document.activeElement?.closest('.critter');if(focused)ids.add(Number(focused.dataset.id));return ids;
 }
 function positionEntities(){
-  if(!layout)readLayout();renderTraps();
+  if(!layout)readLayout();
+  const sizes=new Map([...buttons].map(([id,node])=>[id,{width:node.offsetWidth,height:node.offsetHeight}]));
+  const activeGestures=[...gestures.values()];
+  renderTraps();
   for(const entity of game.entities.values()){
     const button=buttons.get(entity.id);if(!button)continue;
-    const drag=[...gestures.values()].find(g=>g.id===entity.id&&!g.cancelled&&(g.charged||entity.type==='ant'&&g.distance>10));
+    const drag=activeGestures.find(g=>g.id===entity.id&&!g.cancelled&&(g.charged||entity.type==='ant'&&g.distance>10));
     const p=drag?.last||{x:layout.x+entity.x*layout.width,y:layout.y+entity.y*layout.height-entity.flight*(10+Math.sin(entity.phase*.18)*2)};
     positions.set(entity.id,p);
-    button.style.transform=`translate(${p.x-button.offsetWidth/2}px,${p.y-button.offsetHeight/2}px)`;
+    button.style.transform=`translate(${p.x-sizes.get(entity.id).width/2}px,${p.y-sizes.get(entity.id).height/2}px)`;
     button.style.setProperty('--angle',`${entity.heading*180/Math.PI}deg`);
     button.style.setProperty('--flight',String(entity.flight));
     button.style.setProperty('--step',reducedMotion.matches?'0':String(Math.sin(entity.phase)));
@@ -211,6 +214,7 @@ function finish(){
   $('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'center',behavior:'instant'});announce(`Time is up. Final score ${game.score} points.`);
 }
 function tick(){
+  frame=0;if(document.hidden)return;
   const now=performance.now(),events=game.advance(frozen());
   if(events.finished||game.state==='finished'){finish();return;}
   for(const entity of events.spawned)spawnFeedback(entity);
@@ -313,7 +317,7 @@ window.addEventListener('keyup',event=>{
 });
 cage.addEventListener('click',()=>{if(keyboardGrab?.charged){const g=keyboardGrab;keyboardGrab=null;clearGesture(g);apply(game.catchMouse(g.id,performance.now()-g.started,true));updateGestures(performance.now());if(game.state==='finished')finish();}});
 window.addEventListener('keydown',event=>{if(event.key==='Escape'){cancelAll();hint('Grab cancelled. Try again when you’re ready.');}});
-window.addEventListener('blur',cancelAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAll();});
+window.addEventListener('blur',cancelAll);document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAll();cancelAnimationFrame(frame);frame=0;}else if(game.state==='playing'&&!frame)frame=requestAnimationFrame(tick);});
 for(const kind of ['spray','trap']){
   const tool=$(`#${kind}`);
   tool.addEventListener('pointerdown',event=>{

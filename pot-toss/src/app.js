@@ -63,7 +63,7 @@ function tick(now){
   if(key&&game.ready){const power=keyboardPower(now-key.started);aim={power,heading:Number($('#aim').value)*Math.PI/180};setPower(power);}
   if(feedbackUntil&&now>feedbackUntil){feedbackUntil=0;$('#shot-feedback').hidden=true;}
   court.draw({game,aim,time:now/1000,reduced:reducedMotion.matches});positionArrow();
-  if(!document.hidden&&(game.state==='playing'||(game.state==='idle'&&!reducedMotion.matches)))frame=requestAnimationFrame(tick);
+  if(!document.hidden&&(game.state==='playing'))frame=requestAnimationFrame(tick);
 }
 function start(){
   clearTimeout(deadline);releaseInput();game.start(selectedDuration());recorded=false;moving=false;feedbackUntil=0;$('#shot-feedback').hidden=true;$('#movement-label').textContent='A quiet start';$('#movement-pill').classList.remove('is-moving');$('#aim').value=0;

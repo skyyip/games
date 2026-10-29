@@ -14,3 +14,9 @@ for (const type of ['pageswap','pagereveal']) {
 document.addEventListener('dblclick',event=>{
  if(!event.target.closest?.('input,textarea,[contenteditable="true"]'))event.preventDefault();
 },{passive:false});
+
+// Hidden tabs need no decorative CSS animation; game-specific pause rules stay in charge.
+const updatePageVisibility=()=>{document.documentElement.dataset.pageHidden=String(document.hidden);};
+document.addEventListener('visibilitychange',updatePageVisibility);
+window.addEventListener('pageshow',updatePageVisibility);
+updatePageVisibility();

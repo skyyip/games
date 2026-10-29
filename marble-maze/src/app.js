@@ -117,7 +117,7 @@ function tick(now){
     }
   }
   update(now);board.draw({game,time:now/1000,reduced:reducedMotion.matches,dt:Math.min(dt,.1)});
-  if(!document.hidden&&(['playing','ending','countdown','calibrating','permission'].includes(ui)||(ui==='setup'&&!reducedMotion.matches)))frame=requestAnimationFrame(tick);
+  if(!document.hidden&&(['playing','ending','countdown','calibrating','permission'].includes(ui)))frame=requestAnimationFrame(tick);
 }
 for(const button of document.querySelectorAll('[data-steer]')){
   button.addEventListener('pointerdown',event=>{if(ui!=='playing'||runMode!=='touch'||event.button!==0)return;event.preventDefault();pointers.set(event.pointerId,button.dataset.steer);button.setPointerCapture(event.pointerId);button.classList.add('is-held');});

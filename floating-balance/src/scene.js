@@ -1,7 +1,7 @@
 import {vertices,clamp,RADIUS} from './game.js';
 export class FloatingScene {
   constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.width=0;this.height=0;this.last={};new ResizeObserver(()=>this.resize()).observe(canvas);this.resize();}
-  resize(){const r=this.canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);this.width=r.width;this.height=r.height;this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.draw(this.last);}
+  resize(){const r=this.canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);if(this.width===r.width&&this.height===r.height&&this.dpr===dpr)return;this.dpr=dpr;this.width=r.width;this.height=r.height;this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.draw(this.last);}
   project(p,game,z=0){const scale=Math.min(this.width*.38,this.height*.34),tx=game.tilt.x,ty=game.tilt.y,xx=p.x*Math.cos(tx)+p.y*Math.sin(ty)*Math.sin(tx),yy=p.y*Math.cos(ty),zz=-p.x*Math.sin(tx)+p.y*Math.sin(ty)*Math.cos(tx)+z,perspective=1/(1+zz*.12);return {x:this.width/2+xx*scale*perspective,y:this.height*.49+(yy*.79-zz*.42)*scale*perspective,scale:scale*perspective};}
   ellipse(x,y,rx,ry,fill,stroke,width=1){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}
   path(points,fill,stroke,width=1){const c=this.ctx;c.beginPath();points.forEach((p,i)=>{i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);});c.closePath();if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}

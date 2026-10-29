@@ -2,7 +2,7 @@
 
 ## Google Tag Manager
 
-All 20 published HTML pages include container **GTM-K72CNJRN** exactly once: the standard asynchronous script near the top of the head and the hidden noscript iframe immediately after the body tag. Existing correct installations are retained. The builder preserves the GTM bootstrap inline while continuing to bundle application scripts and preserve JSON-LD. No custom game-state events or saved data are added to the data layer.
+All 21 published HTML pages include container **GTM-K72CNJRN** exactly once: the standard asynchronous script near the top of the head and the hidden noscript iframe immediately after the body tag. Existing correct installations are retained. The builder preserves the GTM bootstrap inline while continuing to bundle application scripts and preserve JSON-LD. No custom game-state events or saved data are added to the data layer.
 
 With Playwright installed, run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright npm run check:gtm --prefix tools` against source. After a release build, run `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node tools/check-gtm.mjs _site`. The check validates placement, duplicates and the container URL, then executes JavaScript-enabled and disabled fallbacks in isolated browsers. GTM responses are mocked so validation sends no tracking data. Tag publication, triggers and any consent configuration remain managed in Google Tag Manager.
 
@@ -40,3 +40,7 @@ The shared update checker checks the release manifest on visibility and every fi
 `tools/check-updates.mjs` is a local integration fixture requiring two generated releases and the `/tmp/ritual-live` server on port 5182. It tests snoozing, explicit activation, one-tab reload, preserved saves and offline opening. Do not run it against a production host.
 
 Shared favicon and Home Screen artwork can be checked with `node tools/check-brand-icons.mjs` from the repository root, or pass a built site directory to also verify hashed PNG URLs. Each app retains its own installation start URL and scope.
+
+## Performance
+
+See [PERFORMANCE.md](./PERFORMANCE.md) for shared loading/runtime improvements, local measurements and verification commands. `audit-performance.mjs` measures every route without service-worker noise; `check-performance.mjs` checks all production games offline; `check-release-cache.mjs` checks real release upgrades and cross-game font reuse.

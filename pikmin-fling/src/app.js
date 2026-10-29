@@ -58,33 +58,43 @@ function renderUnit(id) {
   const button=buttons[id],unit=game.units[id];
   roster[id].type=unit.type;
   button.dataset.growth=unit.growth;button.dataset.type=roster[id].type;
+  motionStates.delete(button);
   const previous=button.querySelector('.pikmin-art'),sprite=createSprite(unit.type,unit.growth);
   if(previous)previous.replaceWith(sprite);else button.prepend(sprite);
   button.querySelector('.growth-badge').textContent=symbols[unit.growth];
   button.setAttribute('aria-label',`${TYPE_NAMES[unit.type]} ${growthNames[unit.growth]} Pikmax ${id+1}.${game.mode==='timed'?` Worth ${unitPoints(unit)} points.`:''} ${hints[unit.growth]} Keyboard: Enter to feed.`);
 }
+const unitStyles=new WeakMap(),motionStates=new WeakMap(),progressText=new Map();
+let lastPoseAt=-Infinity;
+function paintUnitStyle(node,key,value){let last=unitStyles.get(node);if(!last){last=new Map();unitStyles.set(node,last);}if(last.get(key)===value)return;last.set(key,value);node.style.setProperty(key,value);}
+function progressValue(selector,value){const source=String(value);if(progressText.get(selector)===source)return;progressText.set(selector,source);$(selector).textContent=source;}
 function positionUnits() {
-  const now=performance.now()/1000;
+  const now=performance.now()/1000,poseDue=now-lastPoseAt>=1/30;
+  if(poseDue)lastPoseAt=now;
   for(const unit of roster){
+    if(game.units[unit.id].status!=='ready')continue;
     const button=buttons[unit.id],moving=game.state==='playing'&&!reducedMotion.matches&&!button.classList.contains('is-paused')&&!button.classList.contains('is-held');
     button.style.transform=`translate(${unit.x-22}px,${unit.y-unitHeight/2}px)`;
+    // Position stays frame-smooth; expensive articulated SVG poses refresh at 30 Hz.
+    if(!poseDue&&motionStates.get(button)===moving)continue;
+    motionStates.set(button,moving);
     const flying=unit.type==='winged'||unit.type==='glow',phase=unit.gait??0;
     const pose=walkingPose(phase,unit.vx,unit.vy,moving,unit.type==='white');
     const flutter=moving?Math.sin(phase)*4:0;
-    button.style.setProperty('--stride',`${flying?flutter:pose.feet[0].angle}deg`);
-    for(const [index,side] of ['left','right','middle'].entries()){
+    paintUnitStyle(button,'--stride',`${flying?flutter:pose.feet[0].angle}deg`);
+    for(const [index,side] of (unit.type==='white'?['left','right','middle']:['left','right']).entries()){
       const foot=pose.feet[index];
-      if(index)button.style.setProperty(`--${side}-stride`,`${flying?-flutter:foot?.angle??0}deg`);
-      button.style.setProperty(`--${side}-foot-x`,`${!flying&&foot?foot.x:0}px`);
-      button.style.setProperty(`--${side}-foot-y`,`${!flying&&foot?foot.y:0}px`);
+      if(index)paintUnitStyle(button,`--${side}-stride`,`${flying?-flutter:foot?.angle??0}deg`);
+      paintUnitStyle(button,`--${side}-foot-x`,`${!flying&&foot?foot.x:0}px`);
+      paintUnitStyle(button,`--${side}-foot-y`,`${!flying&&foot?foot.y:0}px`);
     }
-    button.style.setProperty('--bob',`${moving?(flying?Math.sin(now*3+unit.id)*1.5:pose.bob):0}px`);
-    button.style.setProperty('--sway',`${flying?0:pose.sway}px`);
-    button.style.setProperty('--glow-tail-sway',`${moving?Math.sin(now*3.4+unit.id)*5:0}deg`);
-    button.style.setProperty('--lift',`${flying?-6:0}px`);
-    button.style.setProperty('--flap',moving&&flying?String(.5+.5*Math.sin(now*30+unit.id)):'.5');
-    button.style.setProperty('--lean',`${moving?unit.vx/24*2:0}deg`);
-    button.style.setProperty('--look',`${unit.vx/24*1.2}px`);
+    paintUnitStyle(button,'--bob',`${moving?(flying?Math.sin(now*3+unit.id)*1.5:pose.bob):0}px`);
+    paintUnitStyle(button,'--sway',`${flying?0:pose.sway}px`);
+    if(unit.type==='glow')paintUnitStyle(button,'--glow-tail-sway',`${moving?Math.sin(now*3.4+unit.id)*5:0}deg`);
+    paintUnitStyle(button,'--lift',`${flying?-6:0}px`);
+    paintUnitStyle(button,'--flap',moving&&flying?String(.5+.5*Math.sin(now*30+unit.id)):'.5');
+    paintUnitStyle(button,'--lean',`${moving?unit.vx/24*2:0}deg`);
+    paintUnitStyle(button,'--look',`${unit.vx/24*1.2}px`);
   }
 }
 function renderRoster() {
@@ -137,12 +147,12 @@ function renderRecords() {
 }
 
 function renderProgress() {
-  $('#timer').textContent=seconds(game.mode==='timed'?game.remainingTime:game.elapsed);
+  progressValue('#timer',seconds(game.mode==='timed'?game.remainingTime:game.elapsed));
   $('.scoreboard').classList.toggle('is-urgent',game.mode==='timed'&&game.state==='playing'&&game.remainingTime<=5000);
-  $('#fed').textContent=game.progress;$('#total').textContent=game.count;
-  $('#progress').max=game.count;$('#progress').value=game.progress;
-  for(const [growth,count] of Object.entries(game.growthCounts))$(`#${growth}-count`).textContent=count;
-  $('#phase').textContent=game.state==='playing'?'FEEDING TIME':game.state==='completed'?(game.endReason==='timeout'?"TIME’S UP":'CLEAN SWEEP'):'READY TO FLING';
+  progressValue('#fed',game.progress);progressValue('#total',game.count);
+  if($('#progress').max!==game.count)$('#progress').max=game.count;if($('#progress').value!==game.progress)$('#progress').value=game.progress;
+  for(const [growth,count] of Object.entries(game.growthCounts))progressValue(`#${growth}-count`,count);
+  progressValue('#phase',game.state==='playing'?'FEEDING TIME':game.state==='completed'?(game.endReason==='timeout'?"TIME’S UP":'CLEAN SWEEP'):'READY TO FLING');
 }
 
 function cancelEffects() {
@@ -260,7 +270,9 @@ function renderGestures(now) {
   $('#chains').replaceChildren(fragment);
 }
 function tick(now) {
-  frame=0;taps.expire(now);renderGestures(now);
+  frame=0;if(document.hidden)return;
+  const flightBounds=flights.size?world.getBoundingClientRect():null,flightMouth=flights.size?$('#mouth-target').getBoundingClientRect():null;
+  taps.expire(now);renderGestures(now);
   const frozen=protectedIds();
   const changed=game.advance(frozen);
   if(game.state==='completed'){renderProgress();finishRound();return;}
@@ -270,13 +282,13 @@ function tick(now) {
     if(changed.length>newGlow.length){cycle++;$('#cycle-status').textContent=`Growth wave ${cycle} · ${changed.length-newGlow.length} changed`;}
     if(newGlow.length)announce('A Glow Pikmax appeared. Glow types earn one extra point in 35s Rush.');
   }
-  if(game.mode!=='normal')$('#cycle-timer').textContent=`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`;
+  if(game.mode!=='normal')progressValue('#cycle-timer',`Next in ${Math.max(0,Math.ceil((game.nextChange-now)/1000))}s`);
   const ready=roster.filter(p=>game.units[p.id].status==='ready');
   if(!reducedMotion.matches)walkRoster(ready,lastFrame?(now-lastFrame)/1000:0,fieldWidth,fieldHeight,frozen,Math.random,unitHeight);
   for(const unit of ready)buttons[unit.id].classList.toggle('is-paused',frozen.has(unit.id));
   lastFrame=now;positionUnits();
-  const bounds=world.getBoundingClientRect(),mouth=$('#mouth-target').getBoundingClientRect();
-  const target={x:mouth.x+mouth.width/2-bounds.x,y:mouth.y+mouth.height/2-bounds.y};
+  const bounds=flightBounds,mouth=flightMouth;
+  const target=bounds?{x:mouth.x+mouth.width/2-bounds.x,y:mouth.y+mouth.height/2-bounds.y}:null;
   let arrivals=0;const previousScore=game.score;
   for(const [id,flight] of flights) {
     const t=Math.min(1,(now-flight.started)/480);
@@ -368,7 +380,7 @@ units.addEventListener('lostpointercapture',event=>release(event,true));
 for(const type of ['selectstart','dragstart','contextmenu'])$('#pen').addEventListener(type,event=>event.preventDefault());
 const cancelGestures=()=>{for(const pointerId of [...gestures.keys()])release({pointerId},true);taps.clear();};
 window.addEventListener('blur',cancelGestures);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelGestures();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelGestures();cancelAnimationFrame(frame);frame=0;lastFrame=0;}else if(game.state==='playing'&&!frame)frame=requestAnimationFrame(tick);});
 units.addEventListener('click',event=>{const button=event.target.closest('.pikmin');if(button && event.detail===0)launch([Number(button.dataset.id)],{kind:'accessible'},true);});
 units.addEventListener('keydown',event=>{
   const button=event.target.closest('.pikmin');

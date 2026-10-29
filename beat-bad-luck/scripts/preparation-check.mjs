@@ -116,7 +116,7 @@ try {
  await page.clock.fastForward(2100);await page.locator('#confirm-worry').evaluate(e=>e.click());await page.clock.fastForward(2100);
  assert.equal(await page.locator('#play-panel').getAttribute('data-phase'),'beat');
  assert.equal(await page.locator('#personality-hud').isHidden(),true,'hidden event preference cannot enable challenges');
- assert.match(await page.locator('#personality-hint').textContent(),/128/,'hidden saved commission is not attached to this ritual');
+ assert.match(await page.locator('#personality-hint').textContent(),/88/,'hidden saved commission is not attached to this ritual');
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('beat-bad-luck.preferences.v1')).randomEvents),true,'hidden event preference is preserved');
  assert.match(await page.locator('#doll-label').textContent(),/Private thought/);
  await page.locator('#hit-zone').press('Space');

@@ -1,6 +1,6 @@
 import {finisherScene} from './finisher-scenes.js';
 // Original flyover slapstick: short callbacks, never private worry text.
-export const ULTIMATE_DURATION=10000,ULTIMATE_LIMIT=Infinity,ULTIMATE_CHARGE=128,ULTIMATE_MULTIPLIER=3;
+export const ULTIMATE_DURATION=10000,ULTIMATE_LIMIT=Infinity,ULTIMATE_CHARGE=88,ULTIMATE_MULTIPLIER=3;
 export const NICE_AT=1350,NICE_WINDOW=220;
 const families=['palm','blade','spin','hammer','stamp','suction','sun','beauty','gadget','hound'];
 const groups=['requirement','stocks','people','everyday'];

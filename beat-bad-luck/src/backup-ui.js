@@ -3,7 +3,7 @@ import {getLanguage} from '../../grid-rush/src/language.js';
 export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersistent}){
  const $=s=>document.querySelector(s),dialog=$('#import-dialog'),file=$('#import-save-file');let pending=null,busy=false,opener=null,requestedOpener=null;
  const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
- const put=(id,zh,en)=>{$(id).textContent=local(zh,en);};
+ const put=(id,zh,en)=>{const node=$(id),target=id==='#save-tools-title'?(node.querySelector('.collection-launch-label')??node):node;target.textContent=local(zh,en);};
  function render(){
   put('#save-tools-title','帶住攤位周圍去','Take your stall with you');
   put('#save-tools-note','同一網址及共用儲存空間會自動同步。若手機把瀏覽器與主畫面版本分開儲存，請在原版本匯出存檔，再到另一版本匯入。存檔包括香油錢、功德、法寶剩餘次數、擺設及紀錄；兩份存檔不會合併。','The same URL and shared storage sync automatically. If your phone separates browser and Home Screen storage, export here and import in the other version. Backups include oil, merit, remaining kit uses, decorations and records. Backups replace rather than merge.');

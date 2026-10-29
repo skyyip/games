@@ -14,6 +14,7 @@ const entries=[
  ['challenges','#journey-panel-challenges','#journey-tab-challenges',['趣味稱號','Fun titles'],()=>recordMedal(1)],
  ['scenes','#journey-panel-scenes','#journey-tab-scenes',['攤位名場面','Stall scenes'],()=>scenesIcon],
  ['album','#journey-panel-album','#journey-tab-album',['平安籤冊','Fortune album'],()=>albumIcon],
+ ['backup','#save-tools-panel','#save-tools-title',['帶住攤位周圍去','Take your stall with you'],()=>stallIcon],
  ['secret','#secret-collection',null,['神秘片場收藏','Secret film-set collection'],()=>secretIcon]
 ];
 // Move the live content, retaining all inventory, purchase and collection handlers.
@@ -32,7 +33,7 @@ export function createCollectionDialogs({preferences,canOpen=()=>true}){
   trigger.removeAttribute('role');trigger.removeAttribute('aria-selected');trigger.tabIndex=0;trigger.classList.add('collection-launch');trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-controls',dialog.id);trigger.setAttribute('translate','no');
   trigger.innerHTML=`<span class="collection-launch-art" aria-hidden="true">${art()}</span><span class="collection-launch-label"></span><span class="collection-launch-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 18 18 6M7 6h11v11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   const record={id,panel,trigger,dialog,scroll,close,title,label,position:preferences.value.positions[id]??0,returnFocus:true,opener:trigger,focusIndex:-1};records.set(id,record);
-  if(id==='secret')trigger.addEventListener('click',()=>open(id,trigger));
+  if(id==='secret'||id==='backup')trigger.addEventListener('click',()=>open(id,trigger));
   close.addEventListener('click',()=>dialog.close());
   let outsideDown=false;const outside=event=>{const r=dialog.getBoundingClientRect();return event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom;};
   dialog.addEventListener('pointerdown',event=>outsideDown=event.target===dialog&&outside(event));

@@ -29,7 +29,18 @@ const patterns = Object.entries(messages).filter(([key]) => key.includes('{'))
 export function getLanguage() { return language; }
 
 // Translate presentation only: game state, input values and saved scores are untouched.
+const translations = new Map();
+const TRANSLATION_LIMIT = 2048;
 export function translate(message, depth = 0) {
+  if (language === 'en' || depth > 5 || !/[A-Za-z]/.test(message)) return message;
+  const key = depth + ':' + message;
+  if (translations.has(key)) return translations.get(key);
+  const value = translateUncached(message, depth);
+  if (translations.size >= TRANSLATION_LIMIT) translations.clear();
+  translations.set(key, value);
+  return value;
+}
+function translateUncached(message, depth = 0) {
   if (language === 'en' || depth > 5 || !/[A-Za-z]/.test(message)) return message;
   const exact = Object.hasOwn(messages, message) ? messages[message] : folded.get(message.toLowerCase());
   if (exact !== undefined && !message.includes('{')) return exact;
@@ -51,13 +62,15 @@ const ignored = 'script, style, noscript, [translate="no"], .brand, .language-sw
 const playerNames = '#next-player, #turn-name, .result-person > strong, #loser > span, #stats .n > span:first-child';
 
 function translateText(node) {
+  const current = node.nodeValue, previous = originals.get(node);
+  if (previous?.output === current && previous.language === language) return;
+  // Timers, scores and authored Chinese need no dictionary or ancestor walk.
+  if (!previous && !/[A-Za-z]/.test(current)) return;
   const parent = node.parentElement;
   if (!parent || parent.closest(ignored) || parent.matches(playerNames)) return;
-  const current = node.nodeValue;
-  const previous = originals.get(node);
   const source = previous?.output === current ? previous.source : current;
   const output = source.replace(/\S[\s\S]*\S|\S/u, text => translate(text));
-  originals.set(node, { source, output });
+  originals.set(node, { source, output, language });
   if (current !== output) node.nodeValue = output;
 }
 
@@ -70,17 +83,19 @@ function translateAttributes(element) {
     // Only metadata descriptions and app names use the content attribute.
     if (name === 'content' && !element.matches('meta[name="description"], meta[name="apple-mobile-web-app-title"]')) continue;
     const current = element.getAttribute(name), previous = saved.get(name);
+    if (previous?.output === current && previous.language === language) continue;
     const source = previous?.output === current ? previous.source : current;
     const output = translate(source);
-    saved.set(name, { source, output });
+    saved.set(name, { source, output, language });
     if (current !== output) element.setAttribute(name, output);
   }
 }
 
 function translateTree(root) {
   if (root.nodeType === Node.TEXT_NODE) { translateText(root); return; }
-  if (root.nodeType !== Node.ELEMENT_NODE || root.matches('script, style, noscript')) return;
+  if (root.nodeType !== Node.ELEMENT_NODE || root.matches(ignored)) return;
   translateAttributes(root);
+  if (root.localName === 'svg' && !root.querySelector('text, tspan, title, desc, [aria-label], [title]')) return;
   for (const child of root.childNodes) translateTree(child);
 }
 
@@ -129,11 +144,18 @@ function init() {
   // Observe only changed text, new subtrees and presentation attributes. Numeric
   // timers and scores bypass dictionary/pattern matching; CSS motion is unaffected.
   new MutationObserver(records => {
+    const trees = new Set(), texts = new Set(), attrs = new Set();
     for (const record of records) {
-      if (record.type === 'characterData') translateText(record.target);
-      else if (record.type === 'attributes') translateAttributes(record.target);
-      else for (const node of record.addedNodes) translateTree(node);
+      const parent = record.target.nodeType === Node.ELEMENT_NODE ? record.target : record.target.parentElement;
+      // Games with their own bilingual renderer and purely decorative SVGs opt out.
+      if (!parent || parent.closest(ignored)) continue;
+      if (record.type === 'characterData') texts.add(record.target);
+      else if (record.type === 'attributes') attrs.add(record.target);
+      else for (const node of record.addedNodes) trees.add(node);
     }
+    for (const node of trees) if (node.isConnected && !trees.has(node.parentNode)) translateTree(node);
+    for (const node of texts) if (node.isConnected) translateText(node);
+    for (const node of attrs) if (node.isConnected) translateAttributes(node);
   }).observe(document.documentElement, {
     subtree: true, childList: true, characterData: true,
     attributes: true, attributeFilter: attributes,

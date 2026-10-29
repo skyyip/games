@@ -29,7 +29,7 @@ function stopTimers(){cancelAnimationFrame(frame);clearTimeout(timer);frame=0;ti
 function viewingTick(){
   frame=0;if(game.state!=='viewing')return;
   if(game.advance()){stopTimers();render();$('#board').focus({preventScroll:true});say('The shape is gone. Draw it in the original place.');return;}
-  $('#countdown').textContent=String(Math.ceil(game.remaining/1000));frame=requestAnimationFrame(viewingTick);
+  const digit=String(Math.ceil(game.remaining/1000));if($('#countdown').textContent!==digit)$('#countdown').textContent=digit;frame=requestAnimationFrame(viewingTick);
 }
 function cancelPointer(){const id=pointer;pointer=null;current=null;if(id!==null&&$('#board').hasPointerCapture(id))$('#board').releasePointerCapture(id);pen=false;}
 function freshInk(){cancelPointer();strokes=[];keyboard=false;cursor={x:.5,y:.5};buttons();}

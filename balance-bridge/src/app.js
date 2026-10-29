@@ -129,7 +129,7 @@ function tick(now){
   $('#balance-status').textContent=ui==='setup'?'Find your centre.':danger?'Easy now. Lean the other way.':Math.abs(lean)<.25?'Lovely and steady.':'Small steps. You have got this.';
   $('#tilt-readout').textContent=`${(runMode==='motion'?(sensor?.degrees||0):game.input*17).toFixed(1)}°`;
   banner();scene.draw(game,clock,reducedMotion.matches);
-  if(!document.hidden&&(['playing','falling','countdown','calibrating','permission'].includes(ui)||(ui==='setup'&&!reducedMotion.matches)))frame=requestAnimationFrame(tick);
+  if(!document.hidden&&(['playing','falling','countdown','calibrating','permission'].includes(ui)))frame=requestAnimationFrame(tick);
 }
 $('#mode-options').addEventListener('change',modeHint);$('#start').addEventListener('click',start);$('#pause').addEventListener('click',()=>pause());$('#resume').addEventListener('click',resume);$('#cancel-ready').addEventListener('click',setup);$('#quit').addEventListener('click',setup);$('#change').addEventListener('click',setup);$('#again').addEventListener('click',()=>{recorded=false;game.reset();$('#event-banner').hidden=true;runMode==='motion'?prepareMotion():beginCountdown();});
 $('#fallback').addEventListener('click',()=>{revision++;requesting=false;stopSensor();runMode='touch';document.querySelector('input[name=mode][value=touch]').checked=true;resetInput();beginCountdown(pendingResume);});

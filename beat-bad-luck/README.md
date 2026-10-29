@@ -2,6 +2,16 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
+## Current UI and income update (cache v98)
+
+New earnings are 60% lower than before this update: oil uses a .32 base factor (previously .8), merit .36 (previously .9). This applies once to daily gifts, ritual rewards, commissions and stall income. Daily gifts are now 6 oil / 11 merit. Fractional stall carry remains intact; existing balances, costs, stock and records are preserved.
+
+Each fresh **88-hit chain** unlocks a ten-second burst, replacing 128. Recharging, unlimited independently earned bursts and the 1.5-second combo interval remain unchanged. All related hints and accessible meter labels use 88.
+
+The selected paper preview has 5px more top space (-15px margin). Its magnifier has no 3D shadow or press movement, retaining its touch target. Selected helper cards have square lower highlight corners, and helper-library artwork is 15% larger with room around it. **帶住攤位周圍去 / Take your stall with you** opens a scrollable native modal with the existing export/import flow, consistent close control and return focus. Import remains a separate explicit confirmation.
+
+`scripts/current-ui-check.mjs` checks four viewport/language combinations, real backup export/import/cancel, preview geometry and a full ritual with 87/88-hit boundaries, two charged bursts, completed ending and reduced rewards. Shared production checks also verify compressed Latin fonts and offline startup across all games.
+
 ## My offering altar (cache v96)
 
 Open **Your little stall → Arrange offering altar / 佈置奉神台** to choose zero to five owned, unexpired decorations. The chooser supports search, a five-slot preview, a live count and Clear altar. At five props, unselected choices are disabled while selected choices remain removable. Changes are drafts until Save; X/Escape cancels. Empty inventories can open decoration shopping. Saving is free and does not alter prices, balances, levels, expiry, income, ritual scores or kit/paper uses.

@@ -391,7 +391,7 @@ class WaterSimulation {
   }
   reset() { this.level = 0; this.opening = 0; this.lever = 0; this.leverVelocity = 0; this.flowing = false; this.amp = 0; this.ampVelocity = 0; this.parts = []; this.t = 0; this.spilling = false; this.spill = 0; this.gauge = false; }
   resize() {
-    const r = this.cv.getBoundingClientRect(), d = devicePixelRatio || 1;
+    const r = this.cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
     this.cv.width = Math.round(r.width * d); this.cv.height = Math.round(r.height * d);
     // Fit the scene uniformly so a short viewport cannot squash the cup.
     this.scale = Math.min(this.cv.width / W, this.cv.height / H);
@@ -604,7 +604,8 @@ class GameStateMachine {
 /* ---------- App glue ---------- */
 const audio = new AudioFx(), sm = new GameStateMachine(), sim = new WaterSimulation($('#cv'));
 let setupPlayers = Array.from({ length: 2 }, (_, i) => ({ name: playerName(i + 1), color: COLORS[i] }));
-let beatAt = 0, vigPhase = 0, last = performance.now(), toastT = 0;
+let beatAt = 0, vigPhase = 0, last = performance.now(), toastT = 0, waterFrame = 0;
+function ensureWaterFrame() { if (!waterFrame && !document.hidden) { last = performance.now(); waterFrame = requestAnimationFrame(frame); } }
 
 const input = new InputHandler($('#touch'), {
   start() { audio.ensure(); audio.open(); sim.flowing = true; sim.gauge = true; },
@@ -642,6 +643,7 @@ function resize(n) {
   setupPlayers.length = n; renderSetup();
 }
 function newGame() {
+  ensureWaterFrame();
   sm.start(setupPlayers.map((p, i) => ({ name: p.name.trim() || playerName(i + 1), color: p.color })));
   sim.reset(); audio.flow(0);
   for (const s of ['#setup', '#result', '#tag', '#tension']) $(s).hidden = true;
@@ -670,6 +672,7 @@ function overflow() {
   setTimeout(showResult, 2200);
 }
 function showResult() {
+  cancelAnimationFrame(waterFrame); waterFrame = 0;
   $('#tag').hidden = true; $('#hud').hidden = true;
   $('#loser').innerHTML = `<span style="color:${sm.loser.color}">${esc(sm.loser.name)}</span> spilled the glass! 💦`;
   $('#roundInfo').textContent = `${sm.rounds} rounds · Glass capacity ${sm.capacity} units`;
@@ -683,6 +686,7 @@ function showResult() {
 function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
 function frame(now) {
+  waterFrame = 0; if (document.hidden) return;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (sm.state === 'TURN' && input.active) {
     const target = input.read(now);
@@ -700,7 +704,7 @@ function frame(now) {
     vigPhase += dt * (3 + ten * 6); $('#vig').style.opacity = reducedMotion.matches ? ten * 0.45 : ten * (0.45 + 0.4 * Math.sin(vigPhase));
   } else $('#vig').style.opacity = 0;
   $('#tension').hidden = !(lv > 1 && sm.state !== 'OVER');
-  requestAnimationFrame(frame);
+  if (sm.state !== 'SETUP' && !(sm.state === 'OVER' && !$('#result').hidden)) waterFrame = requestAnimationFrame(frame);
 }
 
 $('#minus').onclick = () => resize(setupPlayers.length - 1);
@@ -708,14 +712,16 @@ $('#plus').onclick = () => resize(setupPlayers.length + 1);
 $('#start').onclick = () => { audio.ensure(); newGame(); };
 $('#go').onclick = startTurn;
 $('#again').onclick = () => { audio.ensure(); newGame(); };
-$('#toSetup').onclick = () => { $('#result').hidden = true; $('#setup').hidden = false; $('#hud').hidden = $('#bottom').hidden = true; sm.state = 'SETUP'; sim.reset(); };
+$('#toSetup').onclick = () => { $('#result').hidden = true; $('#setup').hidden = false; $('#hud').hidden = $('#bottom').hidden = true; sm.state = 'SETUP'; sim.reset(); ensureWaterFrame(); };
 $('#mute').onclick = e => {
   audio.setMuted(!audio.muted);
   e.currentTarget.setAttribute('aria-pressed',String(audio.muted));
   e.currentTarget.setAttribute('aria-label',audio.muted?'Unmute sound':'Mute sound');
 };
-addEventListener('resize', () => sim.resize());
-renderSetup(); requestAnimationFrame(frame);
+addEventListener('resize', () => { sim.resize(); ensureWaterFrame(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { input.end(); sim.flowing = false; audio.flow(0); cancelAnimationFrame(waterFrame); waterFrame = 0; } else ensureWaterFrame(); });
+addEventListener('pagehide', () => { cancelAnimationFrame(waterFrame); waterFrame = 0; audio.flow(0); });
+renderSetup(); ensureWaterFrame();
 </script>
 </body>
 </html>

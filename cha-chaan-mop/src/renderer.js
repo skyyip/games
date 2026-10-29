@@ -109,6 +109,7 @@ export function createRenderer(canvas) {
   const c=canvas.getContext('2d',{alpha:false});
   const background=document.createElement('canvas');background.width=W;background.height=H;
   const b=background.getContext('2d');
+  const dirt=document.createElement('canvas');dirt.width=W;dirt.height=H;const dc=dirt.getContext('2d');let dirtGame=null,dirtCount=-1;const dirtyCells=new Set();
   function buildRoom(lang) {
     b.fillStyle='#cddfc7';b.fillRect(0,0,W,H);
     for(let y=95;y<H;y+=56)for(let x=0;x<W;x+=56){b.fillStyle=(Math.round(x/56)+Math.round(y/56))%2?'#d7e5cf':'#e2ebd6';b.fillRect(x+1,y+1,54,54);}
@@ -119,14 +120,20 @@ export function createRenderer(canvas) {
     for(const x of [35,510]) {box(b,x,17,55,57,5,'#c6dbbd','#e5ce99');for(let k=0;k<4;k++)line(b,[[x+10,29+k*10],[x+44,29+k*10]],'#5b8069',2);}
     for(let i=0;i<4;i++){oval(b,43+i*13,681,4,2,'#a1b18b');oval(b,517+i*13,681,4,2,'#a1b18b');}
   }
-  let language='';
+  let language='',needsResize=true;
+  new ResizeObserver(()=>{needsResize=true;}).observe(canvas);
   function resize() {const rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,1.75);const width=Math.round(rect.width*dpr),height=Math.round(rect.height*dpr);if(width&&height&&(canvas.width!==width||canvas.height!==height)){canvas.width=width;canvas.height=height;}}
   function draw(g,lang,eq,reduced=false) {
-    resize();if(language!==lang){language=lang;buildRoom(lang);}
+    if(needsResize){resize();needsResize=false;}if(language!==lang){language=lang;buildRoom(lang);}
     c.setTransform(1,0,0,1,0,0);c.fillStyle='#bdceb2';c.fillRect(0,0,canvas.width,canvas.height);const scale=Math.min(canvas.width/W,canvas.height/H);c.setTransform(scale,0,0,scale,(canvas.width-W*scale)/2,(canvas.height-H*scale)/2);c.drawImage(background,0,0);
     const time=reduced?0:g.time;
     // Small opaque puddles read as dirt; cleaned cells restore the original tile.
-    if(g.mode!=='diner')for(const cell of g.cells)if(!cell.clean){oval(c,cell.x,cell.y,8+(cell.x%3),4,'#947a4b45');if((cell.x+cell.y)%5===0)oval(c,cell.x+7,cell.y-5,3,2,'#ac795a66');}
+    if(g.mode!=='diner'){
+      if(dirtGame!==g){dc.clearRect(0,0,W,H);dirtyCells.clear();for(const cell of g.cells)if(!cell.clean){dirtyCells.add(cell);oval(dc,cell.x,cell.y,8+(cell.x%3),4,'#947a4b45');if((cell.x+cell.y)%5===0)oval(dc,cell.x+7,cell.y-5,3,2,'#ac795a66');}dirtGame=g;}
+      else if(dirtCount!==g.cleanCount)for(const cell of dirtyCells)if(cell.clean){dc.clearRect(cell.x-14,cell.y-12,28,24);dirtyCells.delete(cell);}
+      dirtCount=g.cleanCount;
+      c.drawImage(dirt,0,0);
+    }
     if(g.event?.kind==='rain') {
       for(let i=0;i<12;i++){const x=(i*73+time*60)%600,y=(i*97+time*90)%700;line(c,[[x,y],[x-6,y+16]],'#6b9ca055',2);}
     }

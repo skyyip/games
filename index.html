@@ -20,7 +20,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script type="module" blocking="render" src="./grid-rush/src/playground-ui.js"></script>
 <script type="module" blocking="render" src="./grid-rush/src/landing.js"></script>
 <style>
-@font-face{font-family:'Fredoka';src:url('./grid-rush/assets/fonts/Fredoka.ttf') format('truetype');font-weight:300 700;font-style:normal;font-display:swap}
+@font-face{font-family:'Fredoka';src:url('./grid-rush/assets/fonts/Fredoka.woff2') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}
 :root{--bg:#070b1a;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}
 html{color-scheme:dark}
@@ -304,14 +304,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="game-card" data-game="beat-bad-luck">
       <button class="favourite-button" type="button" aria-label="Favourite: Beat the Bad Luck" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="beat-bad-luck/" style="--accent:#efca87;--art:linear-gradient(135deg,#24474a,#9e8c5c)">
-      <div class="art" aria-hidden="true"><img class="flick-cover" src="./beat-bad-luck/assets/stall-cover.svg?v=master-scar-right" alt="" draggable="false"></div>
+      <div class="art" aria-hidden="true"><img decoding="async" fetchpriority="high" class="flick-cover" src="./beat-bad-luck/assets/stall-cover.svg?v=master-scar-right" alt="" draggable="false"></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Ritual &amp; relief</span></div><h2>Beat the Bad Luck</h2><p>A slipper, a paper gremlin and five little steps. Tap away the bad luck and brighten Master Yip’s Hong Kong stall.</p><span class="play">Play now <i>→</i></span></div>
       </a>
     </article>
     <article class="game-card" data-game="cha-chaan-mop">
       <button class="favourite-button" type="button" aria-label="Favourite: Mop Mayhem: Feet Up!" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="cha-chaan-mop/" style="--accent:#eab863;--art:linear-gradient(135deg,#d0dfc2,#f1c374)">
-        <div class="art" aria-hidden="true"><img class="flick-cover" src="./cha-chaan-mop/assets/cover.svg" alt="" draggable="false"></div>
+        <div class="art" aria-hidden="true"><img loading="lazy" decoding="async" class="flick-cover" src="./cha-chaan-mop/assets/cover.svg" alt="" draggable="false"></div>
         <div class="body"><div class="tags"><span>1–4 players</span><span>Café chaos</span></div><h2>Mop Mayhem: Feet Up!</h2><p>Mop the floor or save your sneakers. A little Hong Kong café chaos, solo or with friends.</p><span class="play">Play now <i>→</i></span></div>
       </a>
     </article>
@@ -319,7 +319,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="game-card" data-game="bun-rush" hidden>
       <button class="favourite-button" type="button" aria-label="Favourite: Cheung Chau Bun Rush" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="bun-rush/" style="--accent:#dcc17f;--art:linear-gradient(135deg,#b8cdb5,#e8d3a0)">
-      <div class="art" aria-hidden="true"><img class="flick-cover" src="./bun-rush/assets/cover.svg" alt="" draggable="false"></div>
+      <div class="art" aria-hidden="true"><img loading="lazy" decoding="async" class="flick-cover" src="./bun-rush/assets/cover.svg" alt="" draggable="false"></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Buns &amp; parade</span></div><h2>Cheung Chau Bun Rush</h2><p>A sixty-second bun tower, a pocket of wishes, and a funny little harbour parade.</p><span class="play">Play now <i>→</i></span></div>
       </a>
     </article>
@@ -385,7 +385,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="game-card" data-game="pikmin-fling">
       <button class="favourite-button" type="button" aria-label="Favourite: Pikmax Fling" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="pikmin-fling/" style="--accent:#bef264;--art:linear-gradient(135deg,#b5d477,#648b40)">
-      <div class="art" aria-hidden="true"><img class="pikmax-cover" src="./pikmin-fling/assets/pikmax-cover.svg" alt="" draggable="false"></div>
+      <div class="art" aria-hidden="true"><img loading="lazy" decoding="async" class="pikmax-cover" src="./pikmin-fling/assets/pikmax-cover.svg" alt="" draggable="false"></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Fling &amp; swipe</span></div><h2>Pikmax Fling</h2><p>Fling a colourful crowd into one hungry plant. Clear the garden. Beat your best.</p><span class="play">Play now <i>→</i></span></div>
     </a>
     </article>
@@ -455,7 +455,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="game-card" data-game="flick-force">
       <button class="favourite-button" type="button" aria-label="Favourite: Flick Force" aria-pressed="false" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><g class="star-rays"><path d="M16 1v2M27 5l-2 2M31 16h-2M27 27l-2-2M5 27l2-2M1 16h2M5 5l2 2"/></g><path class="star-shape" d="m16 5 3.4 7 7.6 1-5.5 5.2 1.3 7.8-6.8-3.7L9.2 26l1.3-7.8L5 13l7.6-1Z"/></svg></button>
       <a class="card" href="flick-force/" style="--accent:#efbea4;--art:linear-gradient(135deg,#e7e5c9,#a9c49a)">
-      <div class="art" aria-hidden="true"><img class="flick-cover" src="./flick-force/assets/flick-car-cover.svg" alt="" draggable="false"></div>
+      <div class="art" aria-hidden="true"><img loading="lazy" decoding="async" class="flick-cover" src="./flick-force/assets/flick-car-cover.svg" alt="" draggable="false"></div>
       <div class="body"><div class="tags"><span>Solo</span><span>Flick &amp; glide</span></div><h2>Flick Force</h2><p>One swipe, a long way. Flick up or down and chase your three longest distances.</p><span class="play">Play now <i>→</i></span></div>
       </a>
     </article>

@@ -6,7 +6,7 @@
 .skin-card[aria-pressed=true],.skin-free-card[aria-pressed=true]{border-color:#ffe08c!important;box-shadow:0 0 0 2px #ffe08c,inset 0 0 18px #eec66b30,0 0 14px #eec66b55!important;background:#48604b!important}
 #welcome .master-equipped-title{position:relative;overflow:hidden;background:linear-gradient(110deg,#fff1ae,#efc675,#ffe6a0);color:#63452c;box-shadow:0 0 13px #f8d67a77,0 3px 0 #876143;animation:title-glow 3.8s ease-in-out infinite}
 #welcome .master-equipped-title::after{content:'';position:absolute;inset:-20% auto -20% -70%;width:40%;background:linear-gradient(90deg,transparent,#fff9d9cc,transparent);transform:skewX(-20deg);animation:title-glint 4.5s ease-in-out infinite;pointer-events:none}
-@keyframes title-glow{50%{box-shadow:0 0 23px #f8d67aaa,0 3px 0 #876143}}@keyframes title-glint{0%,50%{left:-70%}80%,100%{left:145%}}
+@keyframes title-glow{50%{box-shadow:0 0 23px #f8d67aaa,0 3px 0 #876143}}@keyframes title-glint{0%,50%{transform:translateX(0) skewX(-20deg)}80%,100%{transform:translateX(537.5%) skewX(-20deg)}}
 .journey-tabs button,#challenge-list button{font-size:14px!important;line-height:1.35!important}
 /* Every owned decoration lives in the same rearrangeable miniature shelf. */
 #stall-extension{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px;list-style:none;margin:0}

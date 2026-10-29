@@ -1,6 +1,7 @@
 // Optional QA with an existing Playwright installation; no package installation.
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
+import {games} from '../../tools/game-catalog.mjs';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const base=process.env.PIKMIN_FLING_URL||'http://localhost:5173/pikmin-fling/';
@@ -60,7 +61,7 @@ try{
     pass(`${label}: leaf/bud/flower artwork and labels load, correct gestures launch matching sprites, and the round completes`);
   }
   const {context,page}=await setup({viewport:{width:1440,height:1100}});
-  assert.equal(await page.title(),'Pikmax Fling · Sky Playground');
+  assert.equal(await page.title(),'Pikmax Fling — Flinging Arcade Game | Sky Playground');
   await page.waitForTimeout(80);assert.equal(await page.locator('#timer').textContent(),'0.00');
   assert.equal(await page.locator('.pikmin').count(),35);assert.equal(await page.locator('.pikmin:not(:disabled)').count(),0);
   for(const [growth,count] of [['leaf',25],['bud',5],['flower',5]])assert.equal(await page.locator(`.pikmin[data-growth="${growth}"]`).count(),count);
@@ -151,7 +152,7 @@ try{
   await swipe(page,pikmin(page,'leaf').first());await page.locator('#reset').click();await page.waitForTimeout(600);
   assert.equal(await page.locator('#timer').textContent(),'0.00');assert.equal(await page.locator('#fed').textContent(),'0');
   assert.equal(await page.locator('.flying-pikmin').count(),0);assert.equal((await stored(page)).normal.length,1);
-  pass('completion freezes the timer, saves a highlighted record, replay restores 30, and reset cancels stale arrivals');
+  pass('completion freezes the timer, saves a highlighted record, replay restores 35, and reset cancels stale arrivals');
   await page.locator('input[value="challenge"]').check();await page.locator('#start').click();await finishByKeyboard(page);
   assert.equal((await stored(page)).challenge.length,1);
   await page.reload();await page.locator('#start:not(:disabled)').waitFor();assert.equal(await page.locator('.record').count(),1);
@@ -166,7 +167,7 @@ try{
   const held=await stable(c,pikmin(c,'bud').first()),origin=await centre(held);
   await c.mouse.move(origin.x,origin.y);await c.mouse.down();await c.clock.fastForward(3100);
   assert.match(await c.locator('#cycle-status').textContent(),/Growth wave 1/);assert.equal(await held.getAttribute('data-growth'),'bud');
-  assert.equal(await c.locator('.pikmin[data-growth="leaf"]').count(),20);
+  assert.equal(await c.locator('.pikmin[data-growth="leaf"]').count(),25);
   assert.equal(await c.locator('.pikmin[data-growth="bud"]').count(),5);
   await c.mouse.up();assert.equal(await held.isDisabled(),false);assert.equal(await c.locator('.is-linked').count(),0);
   await c.clock.fastForward(3100);assert.match(await c.locator('#cycle-status').textContent(),/Growth wave 2/);
@@ -272,7 +273,7 @@ try{
   assert.equal(await fresh.locator('.pikmin .pikmin-art').count(),35);
   pass('both modes and all growth artwork work offline after installation, including a fresh offline tab');
   await offline.context.setOffline(false);await offline.page.locator('.playground-home').click();await offline.page.waitForURL(new URL('../',base).href);
-  assert.equal(await offline.page.locator('.card').count(),12);await offline.context.close();
+  assert.equal(await offline.page.locator('.card').count(),games.length);await offline.context.close();
   assert.deepEqual(errors,[]);pass('All games navigation works and no uncaught browser errors occur');
   console.log(`\n${checks} Pikmax Fling browser checks passed. Screenshots: ${output}`);
 }finally{await browser.close();}

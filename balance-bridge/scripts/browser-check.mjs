@@ -34,7 +34,7 @@ async function calibrate(p){await p.evaluate(()=>{clearInterval(window.__sensor)
 try{
   await mkdir('/tmp/balance-bridge-qa',{recursive:true});
   for(const language of ['zh-Hant','en']){
-    const {context,page:p}=await setup({language});assert.equal(await p.locator('html').getAttribute('lang'),language);assert.match(await p.title(),language==='en'?/Little Balance/:/火柴人走獨木橋/);assert.equal(await p.locator('.event-guide article').count(),5);
+    const {context,page:p}=await setup({language});assert.equal(await p.locator('html').getAttribute('lang'),language);assert.match(await p.title(),/^Little Balance — .* \| Sky Playground$/);assert.equal(await p.locator('.event-guide article').count(),5);
     await p.screenshot({path:`/tmp/balance-bridge-qa/setup-${language}.png`,fullPage:true});await startTouch(p);assert.equal(await p.locator('#records .record-row').count(),0);
     await p.clock.runFor(14000);assert.equal(await p.locator('#result').isVisible(),true);assert.equal(await p.locator('#records .record-row').count(),1);const time=await p.locator('#final-time').textContent();assert.match(time,/^\d+:\d{2}\.\d{2}$/);
     await p.screenshot({path:`/tmp/balance-bridge-qa/result-${language}.png`});

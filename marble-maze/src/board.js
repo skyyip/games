@@ -2,12 +2,13 @@ import {BALL_RADIUS,BOMB_RADIUS,clamp} from './game.js';
 export function miniMaze(level){const cells=[];for(let y=0;y<level.size;y++)for(let x=0;x<level.size;x++)if(level.grid[y][x])cells.push(`<path d="M${x} ${y}h1v1h-1Z"/>`);return `<svg viewBox="-1 -1 19 19" aria-hidden="true"><rect x="-1" y="-1" width="19" height="19" rx="2" fill="#d3dfc5"/><g fill="#f5f4df">${cells.join('')}</g><circle cx="8.5" cy="15.5" r=".7" fill="#729c8b"/><circle cx="8.5" cy="1.5" r=".7" fill="#c79758"/></svg>`;}
 export class MazeBoard {
   constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.width=0;this.height=0;this.last={};this.fogAlpha=0;new ResizeObserver(()=>this.resize()).observe(canvas);this.resize();}
-  resize(){const r=this.canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);this.width=r.width;this.height=r.height;this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.draw(this.last);}
+  resize(){const r=this.canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);if(this.width===r.width&&this.height===r.height&&this.dpr===dpr)return;this.floor=null;this.dpr=dpr;this.width=r.width;this.height=r.height;this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.draw(this.last);}
   geometry(level){const size=Math.max(1,Math.min(this.width-16,this.height-16)),cell=size/level.size;return {size,cell,x:(this.width-size)/2,y:(this.height-size)/2};}
   round(x,y,w,h,r,fill,stroke){const c=this.ctx;c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}}
   circle(x,y,r,fill,stroke,width=1){const c=this.ctx;c.beginPath();c.arc(x,y,Math.max(.1,r),0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.lineWidth=width;c.strokeStyle=stroke;c.stroke();}}
   draw({game,time=0,reduced=false,dt=1/60}={}){
     this.last={game,time,reduced,dt};const c=this.ctx,w=this.width,h=this.height;if(!w||!h||!game)return;const {level}=game,g=this.geometry(level),s=g.cell;
+    if(!this.floor||this.floorLevel!==level){
     c.clearRect(0,0,w,h);c.fillStyle='#eaf0e1';c.fillRect(0,0,w,h);
     c.save();c.translate(g.x,g.y);this.round(-5,-3,g.size+10,g.size+10,13,'#b3bea0');this.round(-5,-6,g.size+10,g.size+10,13,'#d3ddbe','#aebd9b');
     this.round(0,0,g.size,g.size,9,'#eee8d3');c.save();this.round(0,0,g.size,g.size,8);c.clip();
@@ -17,6 +18,8 @@ export class MazeBoard {
       if(level.grid[y][x]){c.fillStyle=(x+y)%2?'#ede6cf':'#f0ead6';c.fillRect(xx,yy,s,s);c.fillStyle='#d8ccae38';c.fillRect(xx+s*.15,yy+s*.77,s*.33,.6);}
       else{c.shadowColor='#38573266';c.shadowBlur=4;c.shadowOffsetY=4;c.fillStyle='#789b73';c.fillRect(xx,yy+4,s,s);c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetY=0;const wall=c.createLinearGradient(xx,yy,xx+s,yy+s);wall.addColorStop(0,'#e3ebcd');wall.addColorStop(.5,'#bfd1a3');wall.addColorStop(1,'#96b582');c.fillStyle=wall;c.fillRect(xx,yy,s,s-3);if(level.grid[y+1]?.[x]){c.fillStyle='#96ab85';c.fillRect(xx,yy+s-3,s,3);}if(level.grid[y]?.[x+1]){c.fillStyle='#b0c29a';c.fillRect(xx+s-2,yy,2,s);}if(level.grid[y-1]?.[x]){c.fillStyle='#d5dfc0';c.fillRect(xx,yy,s,1.2);}}
     }
+      this.floor=document.createElement('canvas');this.floor.width=this.canvas.width;this.floor.height=this.canvas.height;this.floor.getContext('2d').drawImage(this.canvas,0,0);this.floorLevel=level;
+    }else{c.drawImage(this.floor,0,0,w,h);c.save();c.translate(g.x,g.y);c.save();this.round(0,0,g.size,g.size,8);c.clip();}
     const start={x:level.start.x*s,y:level.start.y*s},goal={x:level.goal.x*s,y:level.goal.y*s};
     this.circle(start.x,start.y,s*.32,'#d2e0cc','#97b299');this.circle(start.x,start.y,s*.11,'#9cbbaa');
     const pulse=game.pending&&!reduced?Math.sin(time*12)*.5+.5:0;

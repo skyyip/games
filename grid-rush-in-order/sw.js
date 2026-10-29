@@ -1,6 +1,6 @@
 // Bump the version whenever an app asset changes. An update waits until existing
 // app windows close, so it cannot replace a player's game during a round.
-const CACHE_NAME = 'grid-rush-in-order-app-v45';
+const CACHE_NAME = 'grid-rush-in-order-app-v46';
 const APP_FILES = ['../beat-bad-luck/assets/icons/website-logo-64.png','../beat-bad-luck/assets/icons/website-logo-180.png','../beat-bad-luck/assets/icons/website-logo-192.png','../beat-bad-luck/assets/icons/website-logo-512.png','../grid-rush/comic-chinese.css','../grid-rush/assets/fonts/Iansui.woff2','../grid-rush/src/site-updates.js','../grid-rush/victory.css','../grid-rush/src/victory.js',
   './',
   './index.html',
@@ -18,8 +18,8 @@ const APP_FILES = ['../beat-bad-luck/assets/icons/website-logo-64.png','../beat-
   './src/shapes.js',
   './src/leaderboard.js',
   './src/pwa.js',
-  './assets/fonts/DMSans.ttf',
-  './assets/fonts/SpaceGrotesk.ttf',
+  '../grid-rush/assets/fonts/DMSans.woff2',
+  '../grid-rush/assets/fonts/SpaceGrotesk.woff2',
   '../grid-rush/assets/icons/favicon.png', './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',

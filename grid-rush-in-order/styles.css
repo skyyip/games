@@ -1,6 +1,6 @@
 @font-face {
   font-family:'DM Sans';
-  src:url('./assets/fonts/DMSans.ttf') format('truetype');
+  src:url('../grid-rush/assets/fonts/DMSans.woff2') format('woff2');
   font-weight:100 1000;
   font-style:normal;
   font-display:swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family:'Space Grotesk';
-  src:url('./assets/fonts/SpaceGrotesk.ttf') format('truetype');
+  src:url('../grid-rush/assets/fonts/SpaceGrotesk.woff2') format('woff2');
   font-weight:300 700;
   font-style:normal;
   font-display:swap;

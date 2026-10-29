@@ -10,6 +10,7 @@ let frame = 0, previousTime = 0;
 
 // One clock for the springs that are actually moving. It sleeps when they settle.
 function tick(now) {
+  if (document.hidden) { frame = 0; previousTime = 0; return; }
   const dt = previousTime ? (now - previousTime) / 1000 : 1 / 60;
   previousTime = now;
   for (const spring of running) {
@@ -41,7 +42,7 @@ function makeSpring(initial, draw, physics = {}) {
         this.draw(this.value);
       } else {
         running.add(this);
-        if (!frame) frame = requestAnimationFrame(tick);
+        if (!frame && !document.hidden) frame = requestAnimationFrame(tick);
       }
     },
     reset() {
@@ -338,6 +339,10 @@ window.addEventListener('pagehide', () => {
   cancelAnimationFrame(frame); frame = 0; previousTime = 0;
   for (const animation of animations) animation.cancel();
   for (const spring of springs) spring.reset();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { cancelAnimationFrame(frame); frame = 0; previousTime = 0; }
+  else if (running.size && !frame) frame = requestAnimationFrame(tick);
 });
 function init() { initControls(); initCards(); initChoices(); initSheets(); initFeedback(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

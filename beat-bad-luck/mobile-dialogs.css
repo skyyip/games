@@ -32,7 +32,7 @@ body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align
 /* Smaller, left-aligned purchase actions sit under the helper's description. */
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions{grid-column:2;justify-items:start;justify-self:start;width:100%;display:flex;flex-wrap:wrap}
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-shop-actions button{width:auto;min-width:0;max-width:100%;padding-inline:14px;text-align:left;white-space:normal;justify-content:flex-start}
-#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.265;transform-origin:top center}
+#collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.45475;transform-origin:top center}
 #phase-beat .beat-telemetry{align-items:center!important}#phase-beat .ultimate-hud{align-self:center;align-items:center;height:60px}#phase-beat .ultimate-meter{align-self:center}
 #sound.icon-button{display:grid;place-items:center;padding:3px!important}#sound>svg{width:100%;height:100%;overflow:visible}
 /* Continuous asymmetric flame deformation, never opacity strobing. */
@@ -57,3 +57,15 @@ body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align
 #weapon-list .owned-kit-tag{display:inline-flex;width:fit-content;max-width:100%;align-self:flex-start;justify-self:start;flex:0 0 auto;white-space:normal;overflow-wrap:anywhere}
 .write-worry-button:hover{border-color:#f2d598;background:linear-gradient(140deg,#4b715c,#355b49)}
 .write-worry-button:focus-visible{outline:3px solid #a6e4cc;outline-offset:3px}
+
+/* Flat inspection controls, preserving the full 44px touch target. */
+body button.skin-inspect,body button.skin-inspect:active,body button.skin-inspect:disabled{box-shadow:none!important;filter:none!important;translate:none!important;transform:none!important}
+body .skin-inspect svg,body .skin-inspect:active svg{box-shadow:none!important;filter:none!important;translate:none!important;transform:none!important}
+#kit-catalog-dialog .preparation-kit-choice[aria-pressed=true],#kit-catalog-dialog .preparation-kit-card:has(>.preparation-kit-choice[aria-pressed=true]){border-bottom-left-radius:0;border-bottom-right-radius:0}
+#kit-catalog-dialog .preparation-kit-choice>svg{width:72.45px;height:72.45px}
+#collection-dialog-shop-kits #weapon-list>.kit-row{column-gap:18px}
+#save-tools-title.collection-launch{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:10px 12px;border:2px solid #b9c5a1;border-radius:14px;background:linear-gradient(140deg,#385c4c,#25483f);color:#fff0c9;text-align:left;font:600 16px/1.5 var(--display);touch-action:manipulation;cursor:pointer}
+#collection-dialog-backup .save-actions{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}
+#collection-dialog-backup .save-actions button{flex:1;min-width:130px;min-height:44px}
+#collection-dialog-backup #save-tools-note,#collection-dialog-backup #save-tools-status{font-size:15px;line-height:1.8;overflow-wrap:anywhere}
+#collection-dialog-shop-kits #weapon-list>.kit-row{min-height:96px}
