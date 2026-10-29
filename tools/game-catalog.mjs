@@ -12,7 +12,7 @@ export const games = [
     related: ['roach-rush', 'flick-force'],
   },
   {
-    slug: 'cha-chaan-mop', name: 'Mop Mayhem: Feet Up!', zh: '茶記大作戰：縮腳啦笨！', genre: 'Arcade', players: [1, 4], topic: 'Hong Kong Café Mop Game',
+    slug: 'cha-chaan-mop', name: 'Mop Mayhem: Feet Up!', zh: '茶記大作戰：縮腳啦笨！', genre: 'Arcade', players: [1, 4], topic: 'Hong Kong Café Mop Game', listed: false,
     description: 'Play Mop Mayhem: Feet Up!, a free Hong Kong café game. Mop as the auntie, dodge as a diner or share one screen for a 1-vs-1–3 couch clash.',
     intro: 'A playful Hong Kong café game with mop-master cleaning, feet-up diner survival and simultaneous local 1-vs-1–3 play on one device.',
     chinese: '以茶餐廳拖地為主題。扮姐姐拖地隊腳、當顧客縮腳吃喝，或在同一部多點觸控裝置上進行一對一至三人對戰。',
