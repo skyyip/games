@@ -1,6 +1,6 @@
 import {createWorryDialog} from './mobile-dialogs.js';
 import {formatNumber} from './number-format.js';
-import {WORRIES,WORRY_GROUPS,WEAPONS,weaponScoreMultiplier} from './catalog.js';
+import {WORRIES,WORRY_GROUPS,WEAPONS,compareCatalogueValue,weaponScoreMultiplier} from './catalog.js';
 import {SKINS,skinArt,skinScoreMultiplier} from './skins.js';
 import {weaponArt} from './art.js';
 import {weaponCondition,purchasePrice,bestPurchasePrice,skinUses} from './progress.js';
@@ -9,7 +9,7 @@ import {animateDialog} from './stall-polish.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 
 // Draft choices belong to this visit. Personal worry text is never persisted.
-export function createPreparationUI({weaponInspector,getState,getWorry,onChooseWorry,onAcceptStory,onEquip,requestBuy,onEvents}) {
+export function createPreparationUI({onCatalogChange=()=>{},weaponInspector,getState,getWorry,onChooseWorry,onAcceptStory,onEquip,requestBuy,onEvents}) {
  const $=selector=>document.querySelector(selector),local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
  const optionalStepsEnabled=false;
  const welcome=$('#welcome');
@@ -43,9 +43,9 @@ export function createPreparationUI({weaponInspector,getState,getWorry,onChooseW
  // Reuse the live inventory grids in the modal, then return owned shortcuts on close.
  for(const [type,owned,anchor]of [['skin',ownedSkins,extras],['kit',$('#preparation-owned-kits'),$('#preparation-kit-catalog')]]){
   const dialog=animateDialog($('#'+type+'-catalog-dialog')),trigger=$('#all-'+(type==='skin'?'skins':'kits')+'-label'),scroll=dialog.querySelector('.catalog-scroll'),close=dialog.querySelector('.catalog-close');
-  trigger.addEventListener('click',()=>{scroll.prepend(owned);dialog.showModal();close.focus({preventScroll:true});});
+  trigger.addEventListener('click',()=>{scroll.prepend(owned);dialog.showModal();render();onCatalogChange();close.focus({preventScroll:true});});
   close.addEventListener('click',()=>dialog.close());
-  dialog.addEventListener('close',()=>{if(dialog.open)return;anchor.before(owned);trigger.focus({preventScroll:true});});
+  dialog.addEventListener('close',()=>{if(dialog.open)return;anchor.before(owned);render();onCatalogChange();trigger.focus({preventScroll:true});});
   dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const controls=[...dialog.querySelectorAll('button:not(:disabled),[tabindex="0"]')].filter(node=>node.getClientRects().length),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
  }
 
@@ -90,8 +90,9 @@ export function createPreparationUI({weaponInspector,getState,getWorry,onChooseW
  }
  function renderKits() {
   const state=getState(),focused=document.activeElement?.dataset.preparationKit??document.activeElement?.dataset.preparationRestock;
-  const key=JSON.stringify([getLanguage(),state.owned,state.equipped,state.weaponUses,state.coins,state.merit,state.coupons]);if(key===kitsKey)return;kitsKey=key;
-  const cards=WEAPONS.filter(w=>!w.hidden||state.owned.includes(w.id)).map(w=>{
+  const catalogOpen=Boolean($('#kit-catalog-dialog')?.open);
+  const key=JSON.stringify([catalogOpen,getLanguage(),state.owned,state.equipped,state.weaponUses,state.coins,state.merit,state.coupons]);if(key===kitsKey)return;kitsKey=key;
+  const cards=WEAPONS.filter(w=>!w.hidden||state.owned.includes(w.id)).sort(compareCatalogueValue).map(w=>{
    const owned=state.owned.includes(w.id),selected=state.equipped===w.id,cost=purchasePrice(state,w.cost),condition=weaponCondition(state,w.id);
    const card=document.createElement('article');card.className='preparation-kit-card';
    const button=document.createElement('button');button.type='button';button.className='preparation-kit-choice';button.dataset.preparationKit=w.id;button.dataset.owned=String(owned);button.setAttribute('aria-pressed',String(selected));
@@ -104,7 +105,7 @@ export function createPreparationUI({weaponInspector,getState,getWorry,onChooseW
    if(owned&&!w.starter&&!w.hidden){const buy=document.createElement('button');buy.type='button';buy.className='preparation-link';buy.dataset.preparationRestock=w.id;buy.textContent=local(`補購・${cost} 香油錢`,`Restock · ${cost} oil`);buy.disabled=state.coins<bestPurchasePrice(state,w.cost)||state.merit<w.merit;buy.addEventListener('click',()=>requestBuy('weapon',w));card.append(buy);}
    weaponInspector?.attach(card,w.id);return {owned,card};
   });
-  $('#preparation-owned-kits').replaceChildren(...cards.filter(c=>c.owned).map(c=>c.card));$('#preparation-other-kits').replaceChildren(...cards.filter(c=>!c.owned).map(c=>c.card));
+  $('#preparation-owned-kits').hidden=catalogOpen;$('#preparation-owned-kits').replaceChildren(...(catalogOpen?[]:cards.filter(c=>c.owned).map(c=>c.card)));$('#preparation-other-kits').replaceChildren(...cards.filter(c=>catalogOpen||!c.owned).map(c=>c.card));
   if(focused)$('#prepare-kit').querySelector(`[data-preparation-kit="${focused}"]`)?.focus({preventScroll:true});
  }
  function render() {

@@ -1,5 +1,5 @@
 import {createStallLayout} from './stall-layout.js';
-import {DECOR} from './catalog.js';
+import {DECOR,compareCatalogueValue} from './catalog.js';
 import {ALTAR_LIMIT,altarSelection,canPlaceOnAltar} from './altar-layout.js';
 import {decorArt} from './art.js';
 import {animateDialog} from './stall-polish.js';
@@ -14,7 +14,7 @@ export function createAltarUI({getState,itemName,beforeOpen,onSave,onShop,isPlay
  const name=id=>itemName(DECOR.find(item=>item.id===id));
  function labels(){dialog.querySelector('h2').textContent=local('我的奉神台','My offering altar');$('#altar-search-label').textContent=local('搜尋已擁有擺設','Search owned props');$('#altar-search').placeholder=local('搜尋已擁有擺設','Search owned props');$('#altar-clear').textContent=local('全部取走','Clear altar');$('#altar-save').textContent=local('擺好，就用呢個！','Save this arrangement');$('#altar-shop').textContent=local('去裝飾攤位揀擺設','Browse stall decorations');}
  function paint(){
-  const state=getState(),available=DECOR.filter(item=>canPlaceOnAltar(state,item.id)).sort((a,b)=>a.cost-b.cost),query=$('#altar-search').value.trim().toLocaleLowerCase();
+  const state=getState(),available=DECOR.filter(item=>canPlaceOnAltar(state,item.id)).sort(compareCatalogueValue),query=$('#altar-search').value.trim().toLocaleLowerCase();
   const valid=draft.filter(id=>canPlaceOnAltar(state,id));if(valid.length!==draft.length){draft=valid;$('#altar-config-feedback').textContent=local('有擺設已退場，位置已騰空，可以補選。','A prop has retired. Its space is free for another.');}
   $('#altar-config-count').textContent=local(`已放置 ${draft.length}／${ALTAR_LIMIT} 件`,`Placed ${draft.length} / ${ALTAR_LIMIT}`);$('#altar-config-count').dataset.full=String(draft.length===ALTAR_LIMIT);
   $('#altar-config-preview').setAttribute('aria-label',local('已選奉神台擺設，拖曳移位','Selected altar props; drag to rearrange'));

@@ -117,6 +117,8 @@ export const weaponDurability=id=>{
  const weapon=WEAPONS.find(item=>item.id===id);
  return weapon?8-[400,1500,4500,10000,15000].filter(limit=>weapon.cost>limit).length:0;
 };
+// Display sorting only: never mutate catalogue order or saved item/layout IDs.
+export const compareCatalogueValue=(a,b)=>a.cost-b.cost||(a.multiplier??a.rate??0)-(b.multiplier??b.rate??0)||(a.merit??0)-(b.merit??0)||a.id.localeCompare(b.id);
 export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
  ...SECRET_DECOR,...CINEMA_DECOR.map(d=>({...d})),...FILM_DECOR.map(d=>({...d})),
