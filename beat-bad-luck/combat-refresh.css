@@ -22,16 +22,17 @@ html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 /* The charge rail itself lights up; there is no separate torch or reserved slot. */
 #phase-beat .ultimate-meter{grid-template-columns:minmax(0,1fr);grid-template-rows:16px 24px 12px;max-width:132px;row-gap:2px}
 #phase-beat #finisher-charge-label{grid-column:1;grid-row:1}
-#phase-beat .finisher-charge-frame{grid-column:1;grid-row:2;position:relative;width:100%;height:24px;padding:8px 0}
+#phase-beat .finisher-charge-frame{grid-column:1;grid-row:2;position:relative;width:100%;height:24px;padding:8px 0;--charge-fill:#86d7a3}
 #phase-beat #finisher-charge{display:block;width:100%;height:8px;margin:0;border:1px solid #94aa8b;border-radius:5px;overflow:hidden;background:#163d34;accent-color:#f0cc80}
 #phase-beat #finisher-count{grid-column:1;grid-row:3}
-/* A static yellow fill and one opacity-only border pulse keep the rail calm. */
-#phase-beat #finisher-charge{appearance:none;accent-color:#ffe05c}
+/* Green while charging; yellow with one opacity-only border pulse when ready. */
+#phase-beat #finisher-charge{appearance:none;accent-color:var(--charge-fill)}
 #phase-beat #finisher-charge::-webkit-progress-bar{background:#163d34;border-radius:4px}
-#phase-beat #finisher-charge::-webkit-progress-value{background:#ffe05c;border-radius:4px}
-#phase-beat #finisher-charge::-moz-progress-bar{background:#ffe05c;border-radius:4px}
+#phase-beat #finisher-charge::-webkit-progress-value{background:var(--charge-fill);border-radius:4px}
+#phase-beat #finisher-charge::-moz-progress-bar{background:var(--charge-fill);border-radius:4px}
 .finisher-charge-frame::before{content:'';position:absolute;inset:7px -1px;display:none;border:2px solid #fff0a0;border-radius:6px;box-shadow:0 0 5px #ffdb6677;pointer-events:none}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffe05c}
+#phase-beat .finisher-charge-frame:is([data-state=ready],[data-state=burning]){--charge-fill:#ffe05c}
+#phase-beat .finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffe05c}
 .finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block;animation:combo-border-pulse 1.6s ease-in-out infinite}
 @keyframes combo-border-pulse{0%,100%{opacity:.4}50%{opacity:1}}
 .ritual-stage[inert] .finisher-charge-frame::before{animation-play-state:paused!important}
