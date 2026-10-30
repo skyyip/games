@@ -25,7 +25,7 @@ export class RitualGame{
   get elapsed(){return Math.max(0,this.clock-this.phaseStarted);}
   get remaining(){return Math.max(0,(DURATIONS[this.phase]??0)-this.elapsed);}
   get papers(){return Math.floor(this.damage/50);}
-  get wear(){const elapsed=this.phase==='beat'?this.elapsed:['setup','incense','worry'].includes(this.phase)?0:DURATIONS.beat;return Math.min(1,Math.max(0,elapsed/DURATIONS.beat)*.45+Math.min(1,this.score/1800)*.55);}
+  get wear(){return Math.min(1,this.hits/100);}
   pause(){if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;this.pausedAt=this.now();this.flavour.cancelHold();this.skill.cancelPointer();return true;}
   resume(){if(this.pausedAt===null)return false;const delta=this.now()-this.pausedAt;this.started+=delta;this.phaseStarted+=delta;if(this.finisher?.active)this.finisher.at+=delta;if(Number.isFinite(this.lastHit))this.lastHit+=delta;for(const [id,t]of this.strikes)this.strikes.set(id,t+delta);this.pausedAt=null;return true;}
   light(index){if(this.phase!=='incense'||this.pausedAt!==null||!Number.isInteger(index)||index<0||index>2)return false;const fresh=!this.lit.has(index);this.lit.add(index);return fresh;}

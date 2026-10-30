@@ -34,19 +34,7 @@ body .decorate-stall-button,body #tab-stall.collection-launch{display:flex;align
 #collection-dialog-shop-kits #weapon-list>.kit-row>.kit-art{scale:1.45475;transform-origin:top center}
 #phase-beat .beat-telemetry{align-items:center!important}#phase-beat .ultimate-hud{align-self:center;align-items:center;height:45px}#phase-beat .ultimate-meter{align-self:center}
 #sound.icon-button{display:grid;place-items:center;padding:3px!important}#sound>svg{width:100%;height:100%;overflow:visible}
-/* Continuous asymmetric flame deformation, never opacity strobing. */
-.meter-fire-edge svg{animation:meter-flame-breathe 1.35s cubic-bezier(.45,0,.55,1) infinite!important;transform-origin:50% 100%}
-.meter-fire-bottom svg{animation-duration:1.7s!important;animation-delay:-.6s!important}.meter-fire-left svg{animation-duration:1.15s!important;animation-delay:-.35s!important}.meter-fire-right svg{animation-duration:1.5s!important;animation-delay:-.9s!important}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning]){filter:drop-shadow(0 0 3px #f6b25e66)}
-@keyframes meter-flame-breathe{0%,100%{transform:scale(1,.9) skewX(-3deg)}28%{transform:scale(.98,1.13) skewX(2deg)}58%{transform:scale(1.03,.98) skewX(-1deg)}78%{transform:scale(.99,1.08) skewX(3deg)}}
 @media(max-width:360px){.mobile-sheet-scroll{padding:12px}.stall-showcase-open{font-size:16px;padding:11px}#collection-dialog-shop-kits #weapon-list>.kit-row{column-gap:12px}}
-/* A warm aura follows the rail border, never covering the meter fill or labels. */
-.finisher-charge-frame::before{content:'';position:absolute;left:-1px;right:-1px;top:7px;bottom:7px;display:none;border:1px solid #ffe5a0;border-radius:6px;box-shadow:0 0 4px #ffcc6a,0 0 9px #f4873866;pointer-events:none}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning]) .meter-fire-edge{animation:meter-aura-ignite .28s ease-out both}
-@keyframes meter-aura-ignite{from{opacity:0}to{opacity:1}}
-.ritual-stage[inert] :is(.meter-fire-edge,.meter-fire-edge svg,.meter-flame-tongue){animation-play-state:paused!important}
-@media(prefers-reduced-motion:reduce){.meter-fire-edge,.meter-fire-edge svg,.meter-flame-tongue{animation:none!important}.finisher-charge-frame{filter:none!important}}
 
 #weapon-list .owned-kit-tag{display:inline-flex;width:fit-content;max-width:100%;align-self:flex-start;justify-self:start;flex:0 0 auto;white-space:normal;overflow-wrap:anywhere}
 .write-worry-button:hover{border-color:#f2d598;background:linear-gradient(140deg,#4b715c,#355b49)}
@@ -167,13 +155,6 @@ body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card) 
 .bbl-intro h1::after,.master-equipped-title::after,.skin-selection-glint{display:none!important}
 .skin-selection-glint rect{animation:none!important;will-change:auto}
 #play-panel[data-phase=beat] .bridge-scene #stall-amethyst{display:none!important}
-/* Finer flames hug the rail without crowding its label or the launch button. */
-.meter-fire-top{top:-2px;height:11px}
-.meter-fire-bottom{bottom:-2px;height:11px}
-.meter-fire-left,.meter-fire-right{top:6px;bottom:6px;width:8px}
-.meter-fire-left{left:-4px}.meter-fire-right{right:-4px}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning]){filter:drop-shadow(0 0 2px #f6b25e55)}
-.finisher-charge-frame::before{box-shadow:0 0 3px #ffcc6a,0 0 6px #f4873844}
 
 #collection-dialog-shop-kits .weapon-inspect{top:5px}
 #collection-dialog-shop-kits .weapon-inspect::before,#collection-dialog-shop-kits .weapon-inspect::after{content:none!important}

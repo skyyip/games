@@ -25,16 +25,17 @@ html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 #phase-beat .finisher-charge-frame{grid-column:1;grid-row:2;position:relative;width:100%;height:24px;padding:8px 0}
 #phase-beat #finisher-charge{display:block;width:100%;height:8px;margin:0;border:1px solid #94aa8b;border-radius:5px;overflow:hidden;background:#163d34;accent-color:#f0cc80}
 #phase-beat #finisher-count{grid-column:1;grid-row:3}
-.meter-fire-edge{position:absolute;display:none;pointer-events:none}
-.meter-fire-edge svg{display:block;width:100%;height:100%;transform-origin:50% 100%;animation:meter-fire-dance .8s ease-in-out infinite alternate}
-.meter-fire-top{left:-2px;right:-2px;top:-6px;height:16px}
-.meter-fire-bottom{left:-2px;right:-2px;bottom:-6px;height:16px;rotate:180deg}
-.meter-fire-left,.meter-fire-right{top:4px;bottom:4px;width:11px}
-.meter-fire-left{left:-5px;rotate:-90deg}.meter-fire-right{right:-5px;rotate:90deg}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning]) .meter-fire-edge{display:block}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffcd7d;accent-color:#f6b16e}
-@keyframes meter-fire-dance{from{transform:scale(.97,.85)}to{transform:scale(1.03,1.12)}}
-.ritual-stage[inert] .meter-fire-edge svg{animation-play-state:paused!important}
+/* A static yellow fill and one opacity-only border pulse keep the rail calm. */
+#phase-beat #finisher-charge{appearance:none;accent-color:#ffe05c}
+#phase-beat #finisher-charge::-webkit-progress-bar{background:#163d34;border-radius:4px}
+#phase-beat #finisher-charge::-webkit-progress-value{background:#ffe05c;border-radius:4px}
+#phase-beat #finisher-charge::-moz-progress-bar{background:#ffe05c;border-radius:4px}
+.finisher-charge-frame::before{content:'';position:absolute;inset:7px -1px;display:none;border:2px solid #fff0a0;border-radius:6px;box-shadow:0 0 5px #ffdb6677;pointer-events:none}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffe05c}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block;animation:combo-border-pulse 1.6s ease-in-out infinite}
+@keyframes combo-border-pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.ritual-stage[inert] .finisher-charge-frame::before{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.finisher-charge-frame::before{animation:none!important;opacity:1}}
 
 /* Background comic spirits have a bounded lifetime and never intercept gestures. */
 .ghost-parade{display:none!important}
@@ -80,7 +81,7 @@ html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 .burst-storm{animation:none}.burst-bolt{animation-duration:2.5s}
 body.is-playing :is(#site-header,#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card,#story,#rules),body.is-playing :is(#site-header,#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card,#story,#rules) *,body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card)::before,body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card)::after{animation-play-state:paused!important}
 [data-motion-visible=false]:not(:has(dialog[open])) *,[data-motion-visible=false]:not(:has(dialog[open]))::before,[data-motion-visible=false]:not(:has(dialog[open]))::after,body[data-document-hidden=true] *,body[data-document-hidden=true] *::before,body[data-document-hidden=true] *::after{animation-play-state:paused!important}
-@media(prefers-reduced-motion:reduce){.meter-fire-edge svg,.weapon-signature *,#paper-doll[data-finisher-pose] *{animation:none!important}.dom-impact-copy{display:none!important}}
+@media(prefers-reduced-motion:reduce){.weapon-signature *,#paper-doll[data-finisher-pose] *{animation:none!important}.dom-impact-copy{display:none!important}}
 
 .weapon-signature[data-paused=true] *{animation-play-state:paused!important}
 
