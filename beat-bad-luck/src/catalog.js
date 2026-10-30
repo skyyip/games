@@ -1,3 +1,4 @@
+import {FILM_WEAPONS,FILM_DECOR} from './film-comedy.js';
 import {CINEMA_DECOR} from './cinema-expansion.js';
 import {OIL_GAIN_FACTOR} from './economy.js';
 import {SECRET_WEAPONS,SECRET_DECOR,PATRONS} from './ritual-rewards.js';
@@ -58,6 +59,7 @@ export const WORRIES=[
  {id:'bad-luck',group:'luck',label:'Nothing seems to go right',labelZh:'頭頭碰著黑，諸事不順',name:'The Bad-Luck Cloud',icon:'cloud',weakness:'heavy'},
 ];
 export const WEAPONS=[
+ ...FILM_WEAPONS,
  ...SECRET_WEAPONS,
   {id:'bare-hand',name:'Bare hands',merit:0,cost:0,tone:150,starter:true},
   {id:'flipflop',name:'Blue-and-white flip-flop',merit:0,cost:200,multiplier:2.1,tone:180},
@@ -117,7 +119,7 @@ export const weaponDurability=id=>{
 };
 export const MAX_DECOR_LEVEL=8;
 export const DECOR=[
- ...SECRET_DECOR,...CINEMA_DECOR.map(d=>({...d})),
+ ...SECRET_DECOR,...CINEMA_DECOR.map(d=>({...d})),...FILM_DECOR.map(d=>({...d})),
   {id:'radio',name:'Cassette radio',cost:1190,rate:0.6},
   {id:'neon',name:'Retro neon sign',cost:1145,rate:1.2},
   {id:'incense',name:'Incense stand',cost:1155,rate:1.8},

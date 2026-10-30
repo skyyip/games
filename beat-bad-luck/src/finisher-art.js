@@ -1,3 +1,4 @@
+import {filmFinisherArt} from './film-comedy.js';
 // Static comic set pieces, separated from the old interactive skill engine.
 const props={
  'bare-hand':'<path d="m33 105 15-12 14 15m190-3-15-12-14 15" fill="none" stroke="#efc6a1" stroke-width="10"/><path d="m43 70 6 9m-20 8 10 2m205-19-6 9m20 8-10 2" stroke="#efd18d" stroke-width="3"/>',
@@ -75,4 +76,4 @@ Object.assign(props,{
  'secret-chicken-feather':'<g stroke="#9c7763" stroke-width="3"><path d="M30 83q-7-62 58-68Q89 64 30 83Z" fill="#f2d7a0"/><path d="m22 91 52-59" fill="none"/><ellipse cx="251" cy="56" rx="25" ry="19" fill="#ffe5a7"/><path d="m269 54 18 6-17 8" fill="#efaa78"/><circle cx="255" cy="50" r="3" fill="#66526a"/><path d="m237 32 5-10 8 10" fill="#d98288"/></g>',
  'secret-clockoff-key':'<g stroke="#94724f" stroke-width="4" fill="#f4d18a"><circle cx="43" cy="43" r="20"/><circle cx="43" cy="43" r="7" fill="#2a4c40"/><path d="m57 58 32 28m-11-6 9-10m-19 1 9-10"/><path d="M222 85V16h48v69" fill="#91b8a1"/><circle cx="258" cy="52" r="4"/><path d="m242 32 5 10 11 1-8 8 2 11-10-6-10 6 2-11-8-8 11-1Z" fill="#ffe7a1"/></g>'
 });
-export function finisherPropArt(id){return props[id]??'';}
+export function finisherPropArt(id){return filmFinisherArt(id)||props[id]||'';}

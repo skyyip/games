@@ -7,10 +7,10 @@ import {finisherScene,finisherKeyframes} from '../src/finisher-scenes.js';
 import {COMIC_MOODS,spiritPaperArt,comicGhostArt} from '../src/combat-art.js';
 import {fresh,reward,collectIdle,MAX_IDLE_HOURS,dailyReward} from '../src/progress.js';
 import {OIL_GAIN_FACTOR,MERIT_GAIN_FACTOR} from '../src/economy.js';
-test('all sixty-six helper finishers have unique bilingual names, comic endings and finite distinct motion recipes',()=>{
- assert.equal(WEAPONS.length,66);const names=new Set(),motions=new Set();
+test('all helper finishers have unique bilingual names, comic endings and finite distinct motion recipes',()=>{
+ assert.equal(WEAPONS.filter(w=>w.series!=='film-comedy').length,66);const names=new Set(),motions=new Set();
  for(const kit of WEAPONS){const scene=finisherScene(kit.id);for(const field of ['name','payoff','tag'])assert.ok(scene[field].length===2&&scene[field].every(text=>typeof text==='string'&&text.length>0),kit.id+field);assert.ok(scene.steps.length>=2);assert.ok(scene.pose);assert.match(finisherPropArt(kit.id),/<(?:g|path|rect|circle|ellipse)/,kit.id+' prop');names.add(scene.name[0]);const frames=finisherKeyframes(kit.id);assert.ok(frames.length>=4);for(const frame of frames){assert.equal(/NaN|undefined|Infinity|--\d/.test(frame.transform),false,kit.id);assert.ok(frame.opacity>=0&&frame.opacity<=1);}motions.add(JSON.stringify(frames));}
- assert.equal(names.size,66);assert.equal(motions.size,66);
+ assert.equal(names.size,WEAPONS.length);assert.equal(motions.size,WEAPONS.length);
 });
 test('all paid helpers including secret drops last three to eight uses and free hands remain unlimited',()=>{for(const kit of WEAPONS)assert.ok(kit.starter?weaponDurability(kit.id)===Infinity:(weaponDurability(kit.id)>=3&&weaponDurability(kit.id)<=8),kit.id);});
 test('all four moods have distinct joss-paper and ghost art, with no zombie spawn budget',()=>{assert.deepEqual(AMBIENT_LIMITS,{paper:3,ghost:2});assert.deepEqual(COMIC_MOODS,['happy','angry','sad','tired']);for(const art of [spiritPaperArt,comicGhostArt]){const drawings=COMIC_MOODS.map(mood=>art(mood));assert.equal(new Set(drawings).size,4);for(const drawing of drawings)assert.match(drawing,/<svg/);}});

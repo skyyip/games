@@ -1,3 +1,4 @@
+import {filmWeaponArt,filmDecorArt} from './film-comedy.js';
 import {cinemaDecorArt} from './cinema-expansion.js';
 import {clockoffSealArt} from './slapstick-art.js';
 import {WORRIES} from './catalog.js';
@@ -5,7 +6,7 @@ import {skinArt} from './skins.js';
 import {SECRET_WEAPONS,SECRET_DECOR} from './ritual-rewards.js';
 import {extraWeaponArt,extraDecorArt} from './expansion-art.js';
 const wrap=(content,box='0 0 120 120')=>`<svg viewBox="${box}" aria-hidden="true" focusable="false">${content}</svg>`;
-export function weaponArt(id){const secret=SECRET_WEAPONS.find(i=>i.id===id);if(secret)return secretArt(secret);
+export function weaponArt(id){const film=filmWeaponArt(id);if(film)return wrap(film);const secret=SECRET_WEAPONS.find(i=>i.id===id);if(secret)return secretArt(secret);
  const expanded=extraWeaponArt(id);if(expanded)return wrap(expanded);
  const art={
  'bare-hand':`<path d="m33 70-12-15q-8-14 0-18 8-4 17 11l2 4-9-33q-3-13 6-14 9-2 12 13l7 24-1-31Q54-1 63 1q9 0 8 14l1 28 6-23q4-12 12-8 8 3 4 15l-5 25 6-9q8-10 14-5 7 5-1 16l-13 22q-3 20-19 32l-5 9-30-5 1-14q-8-11-9-28Z" fill="#efcc9f" stroke="#a67b56" stroke-width="3" stroke-linejoin="round"/><path d="m45 66 12 10m11-10 9-10m-22 25 17 1" fill="none" stroke="#cd9e77" stroke-width="2" stroke-linecap="round"/><path d="m45 96 29 6-3 13-31-6Z" fill="#90b1a4" stroke="#617f75" stroke-width="2"/><path d="m57 56 2 5 6 1-4 4 1 6-5-3-5 3 1-6-4-4 6-1Z" fill="#f7e8bf"/>`,
@@ -101,7 +102,7 @@ export const fongCostumeArt=()=>wrap(`
  <path d="m144 107 3 6 7 2-6 4-1 7-5-5-7 1 4-6-3-7Z" fill="#edc77e"/>
 `,'0 0 160 180');
 
-export function decorArt(id){const cinema=cinemaDecorArt(id);if(cinema)return wrap(cinema);if(id==='clockoff-seal')return clockoffSealArt();const secret=SECRET_DECOR.find(i=>i.id===id);if(secret)return secretArt(secret);
+export function decorArt(id){const film=filmDecorArt(id);if(film)return wrap(film);const cinema=cinemaDecorArt(id);if(cinema)return wrap(cinema);if(id==='clockoff-seal')return clockoffSealArt();const secret=SECRET_DECOR.find(i=>i.id===id);if(secret)return secretArt(secret);
  const expanded=extraDecorArt(id);if(expanded)return wrap(expanded);
  const art={
  'money-tree':`<path d="M57 86V36m0 32L31 49m26 10 27-22" fill="none" stroke="#92704b" stroke-width="7" stroke-linecap="round"/><g class="decor-tree-crown" stroke="#466e53" stroke-width="2"><ellipse cx="31" cy="43" rx="23" ry="17" fill="#88ad79" transform="rotate(20 31 43)"/><ellipse cx="81" cy="33" rx="23" ry="18" fill="#98bc83" transform="rotate(-18 81 33)"/><ellipse cx="55" cy="24" rx="24" ry="18" fill="#b1c98b"/><ellipse cx="77" cy="58" rx="21" ry="15" fill="#8eb781"/><g fill="#edc77e" stroke="#b68b43"><circle cx="30" cy="41" r="8"/><circle cx="59" cy="23" r="8"/><circle cx="83" cy="37" r="8"/><circle cx="77" cy="58" r="7"/></g><path d="M27 38h6v6h-6Zm29-18h6v6h-6Zm24 14h6v6h-6Z" fill="#739d71" stroke="none"/></g><path d="M29 80h58l-7 28H36Z" fill="#ce8771" stroke="#8f5c49" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="76" width="68" height="11" rx="5" fill="#e3aa85" stroke="#8f5c49" stroke-width="3"/><path d="m46 95 5-2m15 0 5 2m-18 4q6 6 12 0" fill="none" stroke="#805746" stroke-width="2.5" stroke-linecap="round"/><circle cx="41" cy="100" r="4" fill="#e8ae94"/><circle cx="75" cy="100" r="4" fill="#e8ae94"/>`,

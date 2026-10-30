@@ -1,7 +1,9 @@
+import {FILM_FINISHERS} from './film-comedy.js';
 import {CINEMA_SECRET_KITS} from './cinema-expansion.js';
 import {EXTRA_KITS} from './kit-catalog.js';
 // One authored comic recipe per helper; steps animate, while tapping remains the only burst control.
 export const FINISHER_SCENES={
+ ...FILM_FINISHERS,
 "secret-loudspeaker":{"name":["收工獅吼震走鐘","Clock-off lion roar"],"payoff":["一嗌收工，連個鐘都打卡走先。","The roar sends the time clock home before everyone else."],"tag":["殺青！","THAT’S A WRAP!"],"pose":"flat","steps":[{"type":"circle","direction":"cw"},{"type":"tap","target":1,"random":false}],"spread":22,"tilt":9},
 "secret-lollipop":{"name":["初戀糖圈捲心塞","Sweetheart worry swirl"],"payoff":["唔使等有錢先食糖，今日已經夠甜。","A candy spiral sweetens every last excuse."],"tag":["殺青！","THAT’S A WRAP!"],"pose":"spin","steps":[{"type":"circle","direction":"ccw"},{"type":"hold","ms":600}],"spread":23,"tilt":12},
 "secret-drumstick":{"name":["雞髀和尚打飽嗝","Drumstick monk burp"],"payoff":["雞髀未咬，小人已經話自己齋戒。","One cartoon burp and bad luck asks for a takeaway bag."],"tag":["殺青！","THAT’S A WRAP!"],"pose":"flat","steps":[{"type":"swipe","direction":"up"},{"type":"swipe","direction":"down"}],"spread":24,"tilt":15},

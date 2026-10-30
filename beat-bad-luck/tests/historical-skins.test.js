@@ -4,9 +4,9 @@ import {SKINS,skinArt,skinScoreMultiplier} from '../src/skins.js';
 import {fresh,buySkin,consumeSkin,skinUses,readProgress} from '../src/progress.js';
 import {RitualGame} from '../src/game.js';
 test('eight historical satires append after the screen series with ascending final prices and bonuses',()=>{
- assert.deepEqual(SKINS.slice(-8),HISTORICAL_SKINS);assert.equal(SKINS.length,new Set(SKINS.map(s=>s.id)).size);
+ assert.deepEqual(SKINS.slice(23,31),HISTORICAL_SKINS);assert.equal(SKINS.length,new Set(SKINS.map(s=>s.id)).size);
  assert.deepEqual(HISTORICAL_SKINS.map(s=>s.id),['history-heshen','history-qin-hui','history-zhao-gao','history-qin-shi-huang','history-dong-zhuo','history-king-zhou','history-wang-jingwei','history-hitler']);
- let previous=SKINS.at(-9);for(const s of HISTORICAL_SKINS){assert.ok(s.cost>previous.cost);assert.ok(s.multiplier>previous.multiplier);assert.equal(skinScoreMultiplier(s.id),s.multiplier);assert.equal(s.merit,0);assert.equal(s.series,'history-satire');assert.ok(s.name&&s.nameZh&&s.description&&s.descriptionEn);previous=s;}assert.equal(skinScoreMultiplier('plain'),1);
+ let previous=SKINS[22];for(const s of HISTORICAL_SKINS){assert.ok(s.cost>previous.cost);assert.ok(s.multiplier>previous.multiplier);assert.equal(skinScoreMultiplier(s.id),s.multiplier);assert.equal(s.merit,0);assert.equal(s.series,'history-satire');assert.ok(s.name&&s.nameZh&&s.description&&s.descriptionEn);previous=s;}assert.equal(skinScoreMultiplier('plain'),1);
  assert.deepEqual(HISTORICAL_SKINS.map(s=>s.multiplier),[3.1,3.2,3.35,3.5,3.7,3.9,4.2,4.5]);
 });
 test('each historical character has unique original props, visible crying and no external artwork',()=>{

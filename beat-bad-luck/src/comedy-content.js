@@ -1,3 +1,4 @@
+import {FILM_WEAPONS} from './film-comedy.js';
 import {finisherScene} from './finisher-scenes.js';
 // Original flyover slapstick: short callbacks, never private worry text.
 export const ULTIMATE_DURATION=10000,ULTIMATE_LIMIT=Infinity,ULTIMATE_CHARGE=88,ULTIMATE_MULTIPLIER=3;
@@ -5,7 +6,7 @@ export const NICE_AT=1350,NICE_WINDOW=220;
 const families=['palm','blade','spin','hammer','stamp','suction','sun','beauty','gadget','hound'];
 const groups=['requirement','stocks','people','everyday'];
 const groupFor=kind=>['work','work-life','ai-tokens'].includes(kind)?'requirement':kind==='stocks'||kind==='marksix'?'stocks':['teammates','kam-friends','family','love'].includes(kind)?'people':'everyday';
-export function ultimateFamily(id){if(id==='beauty-fist')return 'beauty';if(id==='solar-torch')return 'sun';if(id==='plunger-nunchucks')return 'suction';if(id.includes('3000'))return 'gadget';if(id==='lassie')return 'hound';if(/stamp|token|seal|rebirth|marksix|triple/.test(id))return 'stamp';if(/knife|dagger|sword|spear|blade/.test(id))return 'blade';if(/wheel|pinwheel|nunchuck|record|whirl/.test(id))return 'spin';if(/hammer|mace|stool|spanner/.test(id))return 'hammer';return 'palm';}
+export function ultimateFamily(id){const film=FILM_WEAPONS.find(w=>w.id===id);if(film)return film.family;if(id==='beauty-fist')return 'beauty';if(id==='solar-torch')return 'sun';if(id==='plunger-nunchucks')return 'suction';if(id.includes('3000'))return 'gadget';if(id==='lassie')return 'hound';if(/stamp|token|seal|rebirth|marksix|triple/.test(id))return 'stamp';if(/knife|dagger|sword|spear|blade/.test(id))return 'blade';if(/wheel|pinwheel|nunchuck|record|whirl/.test(id))return 'spin';if(/hammer|mace|stool|spanner/.test(id))return 'hammer';return 'palm';}
 const shows={
  palm:{name:['雙掌準時收工','Clock-off double palm'],prop:'🩴',setup:['雙拖就位，今日唔接 OT！','Slippers ready. Overtime denied!'],payoff:['啪！小人變咗夾心餅！','SLAP! A gremlin sandwich!']},
  blade:{name:['三紙串燒收工刀','Triple-paper clock-off blade'],prop:'✦',setup:['三張最後修改版，一齊排隊！','Three final revisions, form a queue!'],payoff:['一刀串晒，最後一次都冇用！','All skewered. Final-final means nothing!']},
