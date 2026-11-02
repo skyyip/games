@@ -4,7 +4,7 @@ import {getLanguage} from '../../grid-rush/src/language.js';
 
 export function createBurstUI({game,onHit}){
  const arena=document.querySelector('#beat-arena'),root=document.createElement('section');
- root.id='burst-challenge';root.hidden=true;root.setAttribute('aria-labelledby','burst-challenge-title');root.setAttribute('translate','no');
+ root.id='burst-challenge';root.style.setProperty('--burst-ring-duration',RING_ROUND_MS+'ms');root.hidden=true;root.setAttribute('aria-labelledby','burst-challenge-title');root.setAttribute('translate','no');
  const ringMarkup=Array.from({length:MAX_RINGS},(_,i)=>`<button type="button" id="burst-ring-target${i?'-'+i:''}" class="burst-ring-target" data-slot="${i}" hidden><svg viewBox="0 0 200 200" aria-hidden="true" focusable="false"><circle class="burst-ring-halo" cx="100" cy="100" r="38"/><circle class="burst-ring-guide" cx="100" cy="100" r="32"/><g class="burst-ring-moving"><circle cx="100" cy="100" r="32"/><circle class="burst-ring-trace" cx="100" cy="100" r="37"/></g><circle cx="90" cy="94" r="3" fill="#fff2c4"/><circle cx="110" cy="94" r="3" fill="#fff2c4"/><path d="M90 105q10 10 20 0" fill="none" stroke="#fff2c4" stroke-width="3" stroke-linecap="round"/></svg></button>`).join('');
  root.innerHTML='<h3 id="burst-challenge-title" class="sr-only"></h3><button type="button" id="burst-body-target"></button><span id="burst-target-exit" aria-hidden="true" hidden></span>'+ringMarkup+'<div id="burst-pull-zone" role="group" tabindex="0"><span class="burst-pull-arrow" aria-hidden="true">↑</span><span class="burst-pull-handle" aria-hidden="true">↕</span><span class="burst-pull-arrow" aria-hidden="true">↓</span></div><p id="burst-challenge-result" class="sr-only" role="status"></p>';
  arena.append(root);

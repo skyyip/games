@@ -6,7 +6,7 @@ export {BEAT_INTERVAL} from './rhythm.js';
 import {RitualFlavour} from './ritual-flavour.js';
 import {WORRIES,WEAPONS,FORTUNES,weaponScoreMultiplier} from './catalog.js';
 export const PHASES=['incense','worry','beat','tiger','blessing','divination'];
-export const DURATIONS={incense:8000,worry:7000,beat:58000,tiger:0,blessing:0,divination:0};
+export const DURATIONS={incense:8000,worry:7000,beat:66000,tiger:0,blessing:0,divination:0};
 export const FINISHER_DURATION=ULTIMATE_DURATION,FINISHER_BUFFER=0;
 export const FINISHER_STEPS=['tap'];
 export const GESTURE_POINTS=Object.freeze({tap:30,heavy:40,rub:60,circle:80,pinch:100});

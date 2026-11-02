@@ -2,6 +2,12 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
+## Current combat timing (cache v132)
+
+Whacking lasts **66 active seconds**. Each freshly earned 88-hit chain unlocks a **12-second finisher**; those seconds count toward the round, so the round deadline can end a late finisher. Pause and a hidden page freeze both clocks.
+
+The second finisher generates random batches of one, two or three independently timed rings, staggered at 320–440ms intervals. Each ring lasts **1.3 seconds**, with its gold-ring meeting point at 1.04 seconds. The whole touch target stays within the **central 80% of the arena's width and height** (10% inset on each side), with additional room to avoid overlap and preserve 44px touch targets. Existing score grades, multipliers and the first finisher's short target fades remain unchanged. These settings supersede timing notes in the earlier update history below.
+
 ## Collection, checkout and altar refresh (cache v99)
 
 Paper magnifiers use 21px artwork (30% smaller) within unchanged 44px targets. Paid **小人紙 / Paper worry** now has a folded talisman silhouette, red chest stamp and its own neutral/crying face; free plain paper stays unchanged. Paid helpers get independent magnifiers in both preparation cards and library rows. The helper inspector shares the paper inspector's illustration/description/stat layout and never buys, equips or consumes an item. Selection status occupies a reserved line, so selecting an owned helper preserves card height.

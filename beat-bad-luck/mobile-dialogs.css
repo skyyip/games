@@ -231,7 +231,7 @@ body .has-favorite>button.item-favorite{width:44px;height:44px;min-width:44px;mi
 #burst-challenge .burst-ring-target{position:absolute;left:50%;transform:translate(-50%,-50%);min-width:44px;min-height:44px;max-width:none;max-height:none;border:0;padding:0;background:radial-gradient(circle,#183e3be6,transparent 73%);box-shadow:none!important;translate:none!important;scale:none!important;filter:none!important;pointer-events:auto;touch-action:manipulation;color:#fff1bd}
 .burst-ring-target>svg{display:block;width:100%;height:100%;overflow:visible}
 .burst-ring-guide{fill:#244b40e6;stroke:#ffdc76;stroke-width:4}
-.burst-ring-halo{fill:none;stroke:#ffeab5;stroke-width:2;stroke-dasharray:4 6;transform-origin:100px 100px;animation:burst-ring-aura 1.1s ease-in-out infinite}
+.burst-ring-halo{fill:none;stroke:#ffeab5;stroke-width:2;stroke-dasharray:4 6;transform-origin:100px 100px;animation:burst-ring-aura var(--burst-ring-duration,1.3s) ease-in-out infinite}
 .burst-ring-moving{transform-origin:100px 100px}
 .burst-ring-moving circle{fill:none;stroke:var(--ring-ink,#bdf5ce);stroke-width:4}
 .burst-ring-moving .burst-ring-trace{stroke:#fff3bb;stroke-width:1.5;stroke-dasharray:3 8}
