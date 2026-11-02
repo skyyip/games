@@ -12,17 +12,17 @@ test('ninety-five worries each belong to exactly one of eleven nonempty bilingua
  for(const [id,[label,group]]of Object.entries(added)){const worry=WORRIES.find(w=>w.id===id);assert.equal(worry.labelZh,label);assert.equal(worry.group,group);assert.ok(worry.label);}
  assert.equal(WORRIES.find(w=>w.id==='love').group,'romance');assert.equal(WORRIES.find(w=>w.id==='sleep-deprived').group,'health');
 });
-test('new worry IDs play, score and survive fortune/save/backup round-trips without storing custom words',()=>{
+test('new worry IDs play, score and survive fortune/save/backup round-trips without storing custom words',async()=>{
  for(const id of Object.keys(added)){let now=0;const game=new RitualGame({now:()=>now});game.start({kind:id,worry:'private text never saved'});game.next();game.next();now=100;game.advance();assert.ok(game.hit({gesture:'tap',pointer:1}));while(game.phase!=='results')game.next();assert.equal(game.result.kind,id);
- const received=reward(fresh(1000),game.result,{id:'new-worry-'+id,now:1000,random:()=>.9});for(const state of [received.state,readProgress(JSON.stringify(received.state),1000),parseBackup(createBackup(received.state,1000),1000)]){assert.equal(state.neighbourhood.album[0].kind,id);assert.ok(!JSON.stringify(state).includes('private text never saved'));}
+ const received=reward(fresh(1000),game.result,{id:'new-worry-'+id,now:1000,random:()=>.9});for(const state of [received.state,readProgress(JSON.stringify(received.state),1000),(await parseBackup((await createBackup(received.state,1000)),1000))]){assert.equal(state.neighbourhood.album[0].kind,id);assert.ok(!JSON.stringify(state).includes('private text never saved'));}
  }
 });
 
-test('thirty-three local Hong Kong jokes add three choices per category and retain their identity, weakness and private saves',()=>{
+test('thirty-three local Hong Kong jokes add three choices per category and retain their identity, weakness and private saves',async()=>{
  assert.equal(LOCAL_WORRIES.length,33);assert.equal(WORRIES.slice(0,62).some(w=>w.id.startsWith('hk-')),false);
  for(const group of WORRY_GROUPS)assert.equal(LOCAL_WORRIES.filter(w=>w.group===group.id).length,3);
  for(const worry of LOCAL_WORRIES){
   assert.ok(worry.labelZh&&worry.label&&worry.name);assert.ok(['tap','heavy','rub','circle','pinch'].includes(worry.weakness));const g=new RitualGame({now:()=>1000,random:()=>.4});g.start({kind:worry.id,worry:'private local worry'});g.next();g.next();assert.equal(g.kind,worry.id);const hit=g.hit({gesture:worry.weakness});assert.ok(hit?.weak,worry.id);assert.ok(hit.points>0);while(g.phase!=='results')g.next();
-  const outcome=reward(fresh(1000),g.result,{id:worry.id,now:1000,random:()=>.9});for(const state of [readProgress(JSON.stringify(outcome.state),1000),parseBackup(createBackup(outcome.state,1000),1000)]){assert.equal(state.neighbourhood.album[0].kind,worry.id);assert.ok(!JSON.stringify(state).includes('private local worry'));}
+  const outcome=reward(fresh(1000),g.result,{id:worry.id,now:1000,random:()=>.9});for(const state of [readProgress(JSON.stringify(outcome.state),1000),(await parseBackup((await createBackup(outcome.state,1000)),1000))]){assert.equal(state.neighbourhood.album[0].kind,worry.id);assert.ok(!JSON.stringify(state).includes('private local worry'));}
  }
 });

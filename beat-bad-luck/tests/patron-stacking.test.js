@@ -17,9 +17,9 @@ test('stacked bonuses pay the actual ritual oil and merit amounts and cannot pay
  assert.equal(out.earned,341);assert.equal(out.merit,168);assert.equal(out.state.coins,441);assert.equal(out.state.merit,368);
  assert.equal(state.coins,100);assert.equal(state.merit,200);assert.equal(reward(out.state,result,{id:'stacked-reward'}),null);
 });
-test('existing patron collections gain stacking after reload and backup without changing balances, coupons, daily or idle pay',()=>{
+test('existing patron collections gain stacking after reload and backup without changing balances, coupons, daily or idle pay',async()=>{
  const state={...fresh(0),coins:100,merit:200,friends:patrons,coupons:[{patron:'star-master',discount:.25,uses:1}],decor:{neon:1},decorExpires:{neon:DECOR_LIFETIME}};
- for(const restored of [readProgress(JSON.stringify(state),0),parseBackup(createBackup(state,0),0)]){
+ for(const restored of [readProgress(JSON.stringify(state),0),(await parseBackup((await createBackup(state,0)),0))]){
   assert.deepEqual(patronBuffs(restored),{oil:.035,merit:.035,discount:.25});assert.equal(restored.coins,100);assert.equal(restored.merit,200);assert.deepEqual(restored.coupons,state.coupons);
   assert.equal(collectIdle(restored,18*3600000).earned,6);const daily=dailyReward(restored,0);assert.equal(daily.coins-restored.coins,6);assert.equal(daily.merit-restored.merit,11);
  }

@@ -2,6 +2,12 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
+## Encrypted portable files (cache v136)
+
+Exports are passwordless `.bblsave` files with AES-256-GCM authenticated encryption, a fresh random 96-bit IV and a 128-bit tag. Imports decrypt and validate the versioned envelope before showing the existing replace/cancel confirmation. Modified, damaged, oversized and old plain JSON exports are rejected without replacing local progress. Local browser/Home Screen storage and existing on-device saves remain unchanged.
+
+Web Crypto requires HTTPS (or localhost for development). Encryption failure never falls back to a plain export. This is simple client-side file protection: the shared application key is delivered with the game, so it is not an anti-cheat or server-authoritative trust boundary. Keep the v2 key stable for future imports.
+
 ## Optional ritual ending (cache v133)
 
 After whacking, choose **Finish now** to let Master Yip handle the tiger feeding, blessing and sacred blocks and open the fortune immediately, or **Step by step** to keep the original interactions. The choice waits without a countdown. Both paths use the normal result/reward pipeline and consume kit/paper stock only once; optional manual smearing still earns its own bonus. Replaying asks again.

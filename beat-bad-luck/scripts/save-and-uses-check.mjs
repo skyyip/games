@@ -1,6 +1,7 @@
 import {launchSkill,endRitual} from './interaction-helpers.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir} from 'node:fs/promises';
+import {parseBackup} from '../src/backup.js';
 import {DURATIONS} from '../src/game.js';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({headless:true}),base=process.env.BEAT_BAD_LUCK_URL||'http://localhost:5173/beat-bad-luck/',key='beat-bad-luck.stall.v1';let cases=0;const errors=[];
@@ -28,7 +29,7 @@ try{
  }
  for(const lang of ['zh-Hant','en']){
   const seed={owned:['bare-hand','paper'],equipped:'paper',weaponUses:{paper:1},decor:{cat:2},decorExpires:{cat:Date.now()+7*86400000},records:[{score:1234,hits:20,weapon:'paper',date:1}],rituals:9},source=await context(seed,lang),a=await open(source);await a.locator('.save-tools').evaluate(e=>e.open=true);
-  const downloadEvent=a.waitForEvent('download');await a.locator('#export-save').click();const download=await downloadEvent,path=await download.path(),backup=JSON.parse(await readFile(path,'utf8'));assert.equal(backup.progress.weaponUses.paper,1);assert.equal(backup.progress.records[0].score,1234);
+  const downloadEvent=a.waitForEvent('download');await a.locator('#export-save').click();const download=await downloadEvent,path=await download.path(),backup={progress:await parseBackup(await readFile(path,'utf8'))};assert.equal(backup.progress.weaponUses.paper,1);assert.equal(backup.progress.records[0].score,1234);
   const target=await context({coins:25,merit:0},lang,{width:320,height:568});await target.addInitScript(()=>Object.defineProperty(navigator,'standalone',{value:true}));const b=await open(target);await b.locator('.save-tools').evaluate(e=>e.open=true);assert.equal((await saved(b)).coins,25);await b.locator('#import-save-file').setInputFiles(path);await b.locator('#import-dialog[open]').waitFor();assert.equal((await saved(b)).coins,25);await b.locator('#cancel-import').click();assert.equal((await saved(b)).coins,25);
   await b.locator('#import-save-file').setInputFiles(path);await b.locator('#import-dialog[open]').waitFor();await b.locator('#confirm-import').click();assert.equal((await saved(b)).coins,backup.progress.coins);assert.equal((await saved(b)).weaponUses.paper,1);assert.equal((await saved(b)).records[0].score,1234);assert.equal((await saved(b)).decorExpires.cat,backup.progress.decorExpires.cat);await b.locator('[data-piece="cat"]').waitFor();assert.match(await b.locator('#save-tools-status').textContent(),lang==='en'?/Save loaded/:/已載入/);await b.reload();await b.locator('#start:not(:disabled)').waitFor();assert.equal((await saved(b)).rituals,9);
   await b.locator('.save-tools').evaluate(e=>e.open=true);await b.locator('#import-save-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":1}')});await b.waitForFunction(()=>document.querySelector('#save-tools-status').textContent.length>0);assert.equal(await b.locator('#import-dialog').isVisible(),false);assert.equal((await saved(b)).records[0].score,1234);await source.close();await target.close();pass(`${lang}: actual download and import into isolated standalone storage, review/cancel/replace/reload, durability/counters/records preserved, malformed file refused`);

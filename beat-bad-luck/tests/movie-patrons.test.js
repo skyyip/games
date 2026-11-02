@@ -17,9 +17,9 @@ test('twelve movie-inspired patrons have unique original portraits, bilingual st
  for(const id of ids){const patron=PATRONS.find(f=>f.id===id);assert.ok(patron,id);assert.ok(patron.story.length>30&&patron.storyEn.length>30);assert.ok(patron.name&&patron.nameZh);assert.ok(patron.weight>0);assert.ok(patron.oil<=.025&&patron.merit<=.025&&patron.discount<=.25);const art=patronArt(id);assert.ok(art.includes(`data-patron="${id}"`));assert.ok(!/undefined|NaN|<image|<script/.test(art));portraits.push(art);}
  assert.equal(new Set(portraits).size,12);assert.deepEqual([...new Set(ids.map(id=>PATRONS.find(f=>f.id===id).stars))].sort(),[1,2,3,4,5]);
 });
-test('all new patrons can be met without replacing old collections and survive reload and backup with their coupons',()=>{
+test('all new patrons can be met without replacing old collections and survive reload and backup with their coupons',async()=>{
  for(const id of ids){const known=PATRONS.filter(f=>f.id!==id).map(f=>f.id),state={...fresh(0),friends:known},rolls=[.299999,0,.9],outcome=reward(state,result,{id:'movie-'+id,now:1000,random:()=>rolls.shift()});assert.equal(outcome.friend.id,id);assert.deepEqual(state.friends,known);assert.deepEqual(outcome.state.friends,[...known,id]);assert.equal(reward(outcome.state,result,{id:'movie-'+id,random:()=>{throw Error('duplicate encounter');}}),null);
- for(const restored of [readProgress(JSON.stringify(outcome.state),1000),parseBackup(createBackup(outcome.state,1000),1000)]){assert.deepEqual(restored.friends,outcome.state.friends);assert.deepEqual(restored.coupons,outcome.state.coupons);}
+ for(const restored of [readProgress(JSON.stringify(outcome.state),1000),(await parseBackup((await createBackup(outcome.state,1000)),1000))]){assert.deepEqual(restored.friends,outcome.state.friends);assert.deepEqual(restored.coupons,outcome.state.coupons);}
  }
 });
 test('new patrons award their stated buffs on future rituals, stack their category bonuses and never duplicate an encounter',()=>{

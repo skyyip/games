@@ -14,11 +14,11 @@ test('twenty-two new worries cover all eleven categories, play under their own I
  for(const worry of added){assert.ok(worry.label&&worry.labelZh&&worry.name);const g=new RitualGame({now:()=>0,random:()=>.4});g.start({kind:worry.id});g.next();g.next();assert.equal(g.kind,worry.id);assert.ok(g.hit());}
 });
 
-test('new patron coupons are stronger by rarity while old and new tickets survive saves and portable backups',()=>{
+test('new patron coupons are stronger by rarity while old and new tickets survive saves and portable backups',async()=>{
  for(const p of PATRONS.filter(p=>p.discount)){assert.ok(p.discount>p.legacyDiscount);assert.equal(p.discount,[0,.1,.12,.15,.2,.25][p.stars]);}
  const coupons=[{patron:'bun-aunt',discount:.05,uses:1},{patron:'bun-aunt',discount:.12,uses:1},{patron:'star-master',discount:.15,uses:1},{patron:'star-master',discount:.25,uses:1}];
  const state={...fresh(0),coins:1000,merit:1000,coupons};
- for(const copy of [readProgress(JSON.stringify(state),0),parseBackup(createBackup(state,0),0)]){assert.deepEqual(copy.coupons,coupons);assert.equal(patronBuffs(copy).discount,.25);}
+ for(const copy of [readProgress(JSON.stringify(state),0),(await parseBackup((await createBackup(state,0)),0))]){assert.deepEqual(copy.coupons,coupons);assert.equal(patronBuffs(copy).discount,.25);}
  const dirty=readProgress(JSON.stringify({...state,coupons:[...coupons,null,{patron:'star-master',discount:.99,uses:1},{patron:'bun-aunt',discount:.25,uses:1},{patron:'fake',discount:.25,uses:1}]}),0);assert.deepEqual(dirty.coupons,coupons);
  for(const [index,price]of [[0,190],[1,176],[2,170],[3,150]]){const coupon={...coupons[index],index};assert.equal(purchasePrice(state,200,coupon),price);const bought=buyWeapon(state,'flipflop',{coupon});assert.equal(bought.coins,1000-price);assert.deepEqual(bought.coupons,coupons.filter((_,i)=>i!==index));}assert.equal(state.coupons.length,4);
 });
@@ -35,8 +35,8 @@ test('a welcome coupon is not doubled, return coupons need a known eligible patr
  const bothRolls=[.9,.079999,0,0,0],both=reward({...fresh(0),friends:['bun-aunt']},result,{id:'both',random:()=>bothRolls.shift()});assert.equal(both.secret.id,'secret-loudspeaker');assert.equal(both.couponGift.patron,'bun-aunt');assert.equal(both.couponSource,'return');
 });
 
-test('repeat tickets above the old patron-count limit persist, and a full pouch never overwrites an existing ticket',()=>{
+test('repeat tickets above the old patron-count limit persist, and a full pouch never overwrites an existing ticket',async()=>{
  const coupons=Array.from({length:MAX_COUPONS},()=>({patron:'bun-aunt',discount:.12,uses:1})),state={...known(),coupons};
- for(const copy of [readProgress(JSON.stringify(state),0),parseBackup(createBackup(state,0),0)])assert.deepEqual(copy.coupons,coupons);
+ for(const copy of [readProgress(JSON.stringify(state),0),(await parseBackup((await createBackup(state,0)),0))])assert.deepEqual(copy.coupons,coupons);
  const out=reward(state,result,{id:'full',random:()=>0});assert.equal(out.couponGift,null);assert.deepEqual(out.state.coupons,coupons);
 });

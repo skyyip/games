@@ -21,10 +21,10 @@ test('stale, altered or missing tickets reject the purchase without substituting
 test('failed purchases and free re-equipping never consume a selected ticket',()=>{
  const s=initial(),coupon=couponChoices(s)[1];assert.equal(buyWeapon({...s,coins:0},'paper',{coupon}),null);assert.equal(buyWeapon({...s,merit:0},'paper',{coupon}),null);assert.deepEqual(buyWeapon(s,'bare-hand',{coupon}).coupons,s.coupons);assert.deepEqual(s.coupons,[weak,strong]);
 });
-test('new cinema props and hidden finds survive save and backup with levels, titles and altar order',()=>{
+test('new cinema props and hidden finds survive save and backup with levels, titles and altar order',async()=>{
  let s=initial();for(const item of CINEMA_DECOR){const d=DECOR.find(d=>d.id===item.id);assert.equal(d.cost,item.cost-300);assert.equal(d.rate,Math.round(item.rate*.32*1e6)/1e6);assert.match(skinArt('paper'),/paper-head/);s.decor[item.id]=2;s.decorExpires[item.id]=DECOR_LIFETIME;}
  s.altarDecor=CINEMA_DECOR.slice(0,5).map(i=>i.id);s.discovered=[...CINEMA_SECRET_KITS,...CINEMA_SECRET_DECOR].map(i=>i[0]);s.neighbourhood.challenges=CINEMA_TITLES.map(i=>i.id);s.neighbourhood.title=CINEMA_TITLES[0].id;
- for(const copy of [readProgress(JSON.stringify(s),0),parseBackup(createBackup(s,0),0)]){assert.deepEqual(copy.altarDecor,s.altarDecor);assert.deepEqual(copy.discovered,s.discovered);assert.deepEqual(copy.neighbourhood.challenges,s.neighbourhood.challenges);assert.equal(copy.neighbourhood.title,s.neighbourhood.title);}assert.equal(SECRET_WEAPONS.length+SECRET_DECOR.length,42);
+ for(const copy of [readProgress(JSON.stringify(s),0),(await parseBackup((await createBackup(s,0)),0))]){assert.deepEqual(copy.altarDecor,s.altarDecor);assert.deepEqual(copy.discovered,s.discovered);assert.deepEqual(copy.neighbourhood.challenges,s.neighbourhood.challenges);assert.equal(copy.neighbourhood.title,s.neighbourhood.title);}assert.equal(SECRET_WEAPONS.length+SECRET_DECOR.length,42);
 });
 test('each new cinema title has a reachable specific challenge and does not unlock from an empty ritual',()=>{
  const base={score:100,hits:0,weapon:'bare-hand',kind:'work',moves:{},fed:false,blessed:false};const cases={

@@ -46,10 +46,10 @@ test('each new kit has its own comic burst name, scene art and bounded motion wi
  for(const kit of FILM_WEAPONS){assert.equal(finisherScene(kit.id),FILM_FINISHERS[kit.id]);assert.equal(ultimateShow(kit.id).family,kit.family);assert.match(finisherPropArt(kit.id),/film-finisher-motif/);for(const frame of finisherKeyframes(kit.id))assert.ok(!/NaN|undefined|Infinity/.test(frame.transform));let now=0;const g=new RitualGame({now:()=>now,random:()=>.4});g.start({weapon:kit.id});g.next();g.next();for(let i=0;i<88;i++){now+=60;g.hit();}assert.ok(g.startFinisher());const score=g.score;now+=ULTIMATE_DURATION;g.advance();assert.equal(g.score,score);assert.equal(g.finisherBusy,false);}
 });
 
-test('new decorations follow existing purchase, eight-level upgrade, income, ageing, altar and backup rules',()=>{
+test('new decorations follow existing purchase, eight-level upgrade, income, ageing, altar and backup rules',async()=>{
  let state={...fresh(0),coins:1e7,merit:1e6};
  for(const item of FILM_DECOR){const actual=DECOR.find(d=>d.id===item.id);assert.equal(actual.cost,item.cost-300);assert.equal(actual.rate,Math.round(item.rate*OIL_GAIN_FACTOR*1e6)/1e6);assert.equal(upgrade({...fresh(0),coins:actual.cost-1},item.id,0),null);state=upgrade(state,item.id,0);assert.equal(state.decorExpires[item.id],DECOR_LIFETIME);assert.ok(decorHourlyRate(actual,1)>0);for(let level=2;level<=8;level++)state=upgrade(state,item.id,0);assert.equal(upgrade(state,item.id,0),null);}
  state=setAltarDecor(state,FILM_DECOR.slice(0,5).map(d=>d.id),0);assert.equal(altarSelection(state,0).length,5);const ids=FILM_DECOR.slice(0,5).map(d=>d.id).reverse();state=setAltarDecor(state,ids,0);
- for(const copy of [readProgress(JSON.stringify(state),0),parseBackup(createBackup(state,0),0)]){assert.deepEqual(copy.decor,state.decor);assert.deepEqual(copy.altarDecor,ids);}
+ for(const copy of [readProgress(JSON.stringify(state),0),(await parseBackup((await createBackup(state,0)),0))]){assert.deepEqual(copy.decor,state.decor);assert.deepEqual(copy.altarDecor,ids);}
  const earned=collectIdle(state,3600000);assert.ok(earned.earned>0);assert.equal(collectIdle(earned.state,3600000).earned,0);const aged=collectIdle(readProgress(JSON.stringify(state),DECOR_LIFETIME+1),DECOR_LIFETIME+1).state;for(const item of FILM_DECOR)assert.equal(aged.decor[item.id],0);assert.deepEqual(aged.altarDecor,[]);
 });
