@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {WORRIES,WORRY_GROUPS} from '../src/catalog.js';
+import {WORRIES,WORRY_GROUPS,LOCAL_WORRIES} from '../src/catalog.js';
 import {RitualGame} from '../src/game.js';
 import {fresh,reward,readProgress} from '../src/progress.js';
 import {createBackup,parseBackup} from '../src/backup.js';
 const added={'emotional-dumping':['情緒垃圾桶','emotions'],'draining-socialising':['難以拒絕嘅無效社交','relationships'],'rest-guilt':['躺平嘅罪惡感','emotions'],'boss-urgent-call':['老闆急Call','work'],'boss-chasing-calls':['老闆奪命追魂Call','work']};
-test('sixty-two worries each belong to exactly one of eleven nonempty bilingual categories',()=>{
- assert.equal(WORRIES.length,62);assert.equal(WORRY_GROUPS.length,11);assert.equal(new Set(WORRIES.map(w=>w.id)).size,62);assert.equal(new Set(WORRY_GROUPS.map(g=>g.id)).size,11);
+test('ninety-five worries each belong to exactly one of eleven nonempty bilingual categories',()=>{
+ assert.equal(WORRIES.length,95);assert.equal(WORRY_GROUPS.length,11);assert.equal(new Set(WORRIES.map(w=>w.id)).size,95);assert.equal(new Set(WORRY_GROUPS.map(g=>g.id)).size,11);
  for(const group of WORRY_GROUPS){assert.ok(group.label&&group.labelZh);assert.ok(WORRIES.some(w=>w.group===group.id));}
  for(const worry of WORRIES)assert.equal(WORRY_GROUPS.filter(g=>g.id===worry.group).length,1,worry.id);
  for(const [id,[label,group]]of Object.entries(added)){const worry=WORRIES.find(w=>w.id===id);assert.equal(worry.labelZh,label);assert.equal(worry.group,group);assert.ok(worry.label);}
@@ -15,5 +15,14 @@ test('sixty-two worries each belong to exactly one of eleven nonempty bilingual 
 test('new worry IDs play, score and survive fortune/save/backup round-trips without storing custom words',()=>{
  for(const id of Object.keys(added)){let now=0;const game=new RitualGame({now:()=>now});game.start({kind:id,worry:'private text never saved'});game.next();game.next();now=100;game.advance();assert.ok(game.hit({gesture:'tap',pointer:1}));while(game.phase!=='results')game.next();assert.equal(game.result.kind,id);
  const received=reward(fresh(1000),game.result,{id:'new-worry-'+id,now:1000,random:()=>.9});for(const state of [received.state,readProgress(JSON.stringify(received.state),1000),parseBackup(createBackup(received.state,1000),1000)]){assert.equal(state.neighbourhood.album[0].kind,id);assert.ok(!JSON.stringify(state).includes('private text never saved'));}
+ }
+});
+
+test('thirty-three local Hong Kong jokes add three choices per category and retain their identity, weakness and private saves',()=>{
+ assert.equal(LOCAL_WORRIES.length,33);assert.equal(WORRIES.slice(0,62).some(w=>w.id.startsWith('hk-')),false);
+ for(const group of WORRY_GROUPS)assert.equal(LOCAL_WORRIES.filter(w=>w.group===group.id).length,3);
+ for(const worry of LOCAL_WORRIES){
+  assert.ok(worry.labelZh&&worry.label&&worry.name);assert.ok(['tap','heavy','rub','circle','pinch'].includes(worry.weakness));const g=new RitualGame({now:()=>1000,random:()=>.4});g.start({kind:worry.id,worry:'private local worry'});g.next();g.next();assert.equal(g.kind,worry.id);const hit=g.hit({gesture:worry.weakness});assert.ok(hit?.weak,worry.id);assert.ok(hit.points>0);while(g.phase!=='results')g.next();
+  const outcome=reward(fresh(1000),g.result,{id:worry.id,now:1000,random:()=>.9});for(const state of [readProgress(JSON.stringify(outcome.state),1000),parseBackup(createBackup(outcome.state,1000),1000)]){assert.equal(state.neighbourhood.album[0].kind,worry.id);assert.ok(!JSON.stringify(state).includes('private local worry'));}
  }
 });

@@ -1,6 +1,7 @@
 export {comicLuckyGlyph,recordMedal} from './celebration-art.js';
 import {playerLevel,levelBadgeArt} from './player-level.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
+import {formatNumber} from './number-format.js';
 let scrollSerial=0;
 export function prepareScrollRegions(){
  for(const details of document.querySelectorAll('details:not(.preparation-step):not(.preparation-catalog):not(.skin-chooser):not(#my-stall)')){
@@ -26,7 +27,18 @@ export function clearCriticalHit(){
  const paper=document.querySelector('#paper-doll');if(paper)paper.dataset.critical='1';
 }
 export function showCriticalHit(hit){
- const paper=document.querySelector('#paper-doll'),arena=document.querySelector('#beat-arena'),zone=document.querySelector('#hit-zone');if(paper.dataset.critical!==String(hit.impactLevel))paper.dataset.critical=String(hit.impactLevel);if(hit.impactLevel===1)return;
+ const paper=document.querySelector('#paper-doll'),arena=document.querySelector('#beat-arena'),zone=document.querySelector('#hit-zone');if(paper.dataset.critical!==String(hit.impactLevel))paper.dataset.critical=String(hit.impactLevel);
+ if(hit.challengeGrade&&Number.isFinite(hit.points)&&hit.points>0){
+  let badge=arena.querySelector(':scope>.finisher-score');
+  if(!badge){clearCriticalHit();badge=document.createElement('span');badge.className='critical-comic finisher-score';badge.setAttribute('aria-hidden','true');badge.append(document.createElement('b'),document.createElement('small'));arena.append(badge);}
+  else{clearTimeout(criticalTimer);for(const animation of badge.getAnimations())if(Number(animation.currentTime)>=300){animation.currentTime=0;animation.play();}}
+  const points=String(hit.points),label=['Target','Pull'].includes(hit.challengeGrade)?(getLanguage()==='zh-Hant'?'必殺！':'BURST!'):hit.challengeGrade;
+  if(badge.dataset.grade!==hit.challengeGrade)badge.dataset.grade=hit.challengeGrade;
+  if(badge.dataset.points!==points){badge.dataset.points=points;badge.querySelector('b').textContent='+'+formatNumber(hit.points,{grouping:true});}
+  if(badge.querySelector('small').textContent!==label)badge.querySelector('small').textContent=label;
+  criticalTimer=setTimeout(clearCriticalHit,900);return;
+ }
+ if(hit.impactLevel===1)return;
  clearCriticalHit();paper.dataset.critical=String(hit.impactLevel);
  const badge=document.createElement('span');badge.className='critical-comic critical-'+hit.impactLevel;badge.setAttribute('aria-hidden','true');badge.innerHTML=`<b>${hit.impactLevel}X</b>`;zone.append(badge);
  const prop=document.createElement('span');prop.className='critical-flying-prop critical-prop-'+hit.impactLevel;prop.setAttribute('aria-hidden','true');prop.textContent=hit.impactLevel===3?'👻':'⌣';arena.append(prop);

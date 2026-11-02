@@ -9,7 +9,7 @@ const result={score:600,hits:40,papers:2,qte:1,weapon:'bare-hand',fed:true,bless
 const known=()=>({...fresh(0),friends:PATRONS.map(p=>p.id)});
 
 test('twenty-two new worries cover all eleven categories, play under their own IDs and retain the original forty',()=>{
- const original=WORRIES.slice(0,40),added=WORRIES.slice(40);assert.equal(added.length,22);assert.equal(original[0].id,'work');assert.equal(original.at(-1).id,'bad-luck');
+ const original=WORRIES.slice(0,40),added=WORRIES.slice(40,62);assert.equal(added.length,22);assert.equal(original[0].id,'work');assert.equal(original.at(-1).id,'bad-luck');
  for(const group of WORRY_GROUPS)assert.equal(added.filter(w=>w.group===group.id).length,2);
  for(const worry of added){assert.ok(worry.label&&worry.labelZh&&worry.name);const g=new RitualGame({now:()=>0,random:()=>.4});g.start({kind:worry.id});g.next();g.next();assert.equal(g.kind,worry.id);assert.ok(g.hit());}
 });
