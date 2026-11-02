@@ -18,9 +18,17 @@ FROGGER_URL=http://localhost:5287/games/frogger-jump/ node frogger-jump/scripts/
 FROGGER_URL=http://localhost:5287/games/frogger-jump/ node frogger-jump/scripts/social-check.mjs
 ```
 
+## Configuration activation · 2026-11-03
+
+- Added the supplied web app settings and bumped the source service-worker version.
+- Re-ran all **42** local logic tests, production build and 24-page built metadata checks successfully.
+- Configured-UI browser smoke check passed: registration/sign-in forms, required input visibility, named local-practice fallback, game settlement and no runtime exceptions. No production account was created.
+- Isolated guest/offline/storage regressions pass with an explicit null Firebase override, so those tests never accidentally write to the production project.
+- Read-only probes for the Auth project configuration and public top-ten query were blocked by the execution environment's proxy: **Tunnel connection failed: 403 Forbidden**. This is not a Firebase response and does not prove the project settings are invalid. Live sign-in, rules/index status and remote ranking updates have not been confirmed.
+
 ## Firebase boundary — not a passed cloud deployment
 
-The user has **not created a Firebase project**. No production configuration, account, database, rule deployment or live leaderboard has been created. The UI shows this state and keeps local practice unranked, with a separate wallet. The client-side integration uses Firebase Auth/Firestore directly and lazy-loads the SDK only when configured.
+The user supplied the public web configuration for **`sky-playground-3c5af` on 2026-11-03**. It is now configured in the client and enables the cloud sign-in/registration UI. The assistant has not created any production account, database or rule/index deployment. Whether the Email/Password provider, published rules and index are ready remains unverified from this environment. Local practice stays unranked with a separate wallet.
 
 A **21-case security harness** is prepared for local Firebase emulators: atomic name reservation, case collisions, wallet privacy, unauthorized coin/animal changes, atomic run completion, duplicate payouts, other-user/forged scores, bounded public queries and exact-price purchases. It has **not passed or been certified**: downloading the required Firestore emulator JAR failed with **403 Domain forbidden** in this execution environment. It must be run after emulator access is available. See `FIREBASE.md` for activation and test commands.
 

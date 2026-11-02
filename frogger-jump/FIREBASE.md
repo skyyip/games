@@ -2,14 +2,14 @@
 
 ## Current state
 
-The application integration, email/password Auth flow, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The user has not created a Firebase project or supplied web configuration, so the real cloud service is not enabled or deployed.** The game shows an explicit setup notice and a local unranked practice mode; there are no fake global players or fabricated rankings.
+The application integration, email/password Auth flow, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable the Email/Password provider, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
 
 ## Activate after creating the project
 
 1. Create a Firebase project and add a **Web app**. Auth and Firestore work within the Spark plan's applicable quotas; this version does not require Cloud Functions or Admin credentials.
 2. Enable **Authentication → Email/Password**. Use the same account on different devices. Add the actual web domains, such as `skyyip.github.io` and `sky-playground.com`, to the authorized domains where required by your Auth configuration.
 3. Create a Cloud Firestore database, choose a suitable region, then deploy this folder's **rules and index**. Do not leave test-mode write permissions active.
-4. Paste the web app's public `firebaseConfig` object (apiKey, authDomain, projectId, appId and supplied optional fields) into `src/firebase-settings.js`, replacing the default unconfigured expression. Alternatively set `window.FROGGER_FIREBASE_CONFIG` before the game module loads. These public web identifiers are not Admin credentials; never put a service-account/private key into the browser.
+4. The supplied web app's public `firebaseConfig` is stored in `src/firebase-settings.js`. Update that file if changing projects. Alternatively set `window.FROGGER_FIREBASE_CONFIG` before the game module loads. These public web identifiers are not Admin credentials; never put a service-account/private key into the browser.
 5. Rebuild and deploy the game. Verify a name reservation, sign in from another device, purchase an animal and finish a ranked run. Wait for the leaderboard index to finish building before expecting its ordered query to work.
 
 From the repository root, after authenticating the Firebase CLI to the intended project:
@@ -50,6 +50,6 @@ firebase emulators:exec --project demo-frogger --only firestore \
 
 It covers unique names/case collisions, private wallet reads, unauthorized minting, paid-animal ownership, run atomicity, exactly-once rewards, forged/other-user leaderboard writes, oversized/negative scores and bounded public queries. It uses a **demo** project, not production data.
 
-**These emulator checks were not executed successfully in this environment:** the required Firestore emulator JAR download returned **403 Domain forbidden**. The harness and rules are prepared, but they must not be represented as emulator-certified until run in an environment that can fetch it. No real cloud deployment was attempted without the user's Firebase project.
+**These emulator checks were not executed successfully in this environment:** the required Firestore emulator JAR download returned **403 Domain forbidden**. The harness and rules are prepared, but they must not be represented as emulator-certified until run in an environment that can fetch it. No real Firebase rule/index deployment or production test-account creation has been performed by the assistant.
 
 For full Auth-emulator browser testing, run the configured Auth/Firestore emulators on 9098/8089. The browser may set `window.FROGGER_FIREBASE_EMULATORS=true` with demo web config **only on localhost/127.0.0.1**; production hosts cannot activate this path.
