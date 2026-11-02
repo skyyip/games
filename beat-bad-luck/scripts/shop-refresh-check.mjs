@@ -7,7 +7,7 @@ const read=p=>p.evaluate(key=>JSON.parse(localStorage.getItem(key)),STORAGE_KEY)
 async function close(p,id){await p.locator('#'+id+' .modal-close').click();await p.locator('#'+id).waitFor({state:'hidden'});}
 async function setup(width,height,language,motion='reduce',coins=200000){
  const c=await browser.newContext({viewport:{width,height},hasTouch:width<900,reducedMotion:motion,serviceWorkers:'block'});await c.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
- const now=Date.now(),patrons=[PATRONS.find(p=>p.discount===.05),PATRONS.find(p=>p.discount===.15)];
+ const now=Date.now(),patrons=[.05,.15].map(discount=>({...PATRONS.find(p=>p.legacyDiscount===discount),discount}));
  const seed={...fresh(now),coins,merit:100000,lastDaily:hkDay(now),ownedSkins:['plain','paper','duck'],selectedSkin:'paper',skinUses:{paper:10,duck:10},owned:['bare-hand','flipflop','paper'],equipped:'flipflop',weaponUses:{flipflop:5,paper:5},friends:patrons.map(p=>p.id),coupons:patrons.map(p=>({patron:p.id,discount:p.discount,uses:1})),decor:{cat:1,neon:1,'beef-balls':1,tiger:1},decorExpires:Object.fromEntries(['cat','neon','beef-balls','tiger'].map(id=>[id,now+DECOR_LIFETIME])),altarDecor:['cat','neon','beef-balls']};
  await c.addInitScript(({seed,key,language})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(seed));localStorage.setItem('playground.language.v1',language);localStorage.setItem('beat-bad-luck.preferences.v1',JSON.stringify({version:1,sound:false}));Math.random=()=>.4;},{seed,key:STORAGE_KEY,language});
  const p=await c.newPage();p.on('pageerror',e=>errors.push(e.stack));await p.goto(base,{waitUntil:'networkidle'});return{p,c};

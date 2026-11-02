@@ -6,15 +6,15 @@ import {fresh,collectIdle,readProgress,idleRate,DECOR_LIFETIME,MAX_IDLE_HOURS,re
 import {createBackup,parseBackup} from '../src/backup.js';
 const ids=['golden-foot-ming','da-wen-see','ghost-coach','agent-butcher','beggar-so','autumn-fragrance','agent-fat','tai-chi-landlord','justice-bao','god-of-cooking','little-treasure','kungfu-sing'];
 const result={score:600,hits:40,papers:2,qte:1,weapon:'bare-hand',fed:true,blessed:true};
-test('offline earnings pay through twelve hours, keep fractional carry and never pay the capped period twice',()=>{
- assert.equal(MAX_IDLE_HOURS,12);const state={...fresh(0),decor:{neon:1},decorExpires:{neon:DECOR_LIFETIME}};assert.equal(idleRate(state),.384);
- for(const hours of [0,8,11.5,12,12.5,18,24,72]){const outcome=collectIdle(state,hours*3600000),total=Math.min(hours,12)*.384;assert.equal(outcome.earned,Math.floor(total));assert.ok(Math.abs(outcome.state.idleCarry-(total-Math.floor(total)))<1e-8);const restored=readProgress(JSON.stringify(outcome.state),hours*3600000);assert.equal(collectIdle(restored,hours*3600000).earned,0);assert.equal(outcome.state.decorExpires.neon,DECOR_LIFETIME);}
- const capped=collectIdle(state,24*3600000);assert.equal(capped.earned,4);assert.equal(capped.state.lastSeen,24*3600000);const nextHour=collectIdle(capped.state,25*3600000);assert.equal(nextHour.earned,0);assert.equal(nextHour.state.idleCarry,.992);assert.equal(collectIdle(nextHour.state,0).earned,0);
+test('offline earnings pay through eighteen hours, keep fractional carry and never pay the capped period twice',()=>{
+ assert.equal(MAX_IDLE_HOURS,18);const state={...fresh(0),decor:{neon:1},decorExpires:{neon:DECOR_LIFETIME}};assert.equal(idleRate(state),.384);
+ for(const hours of [0,8,12,17.5,18,18.5,24,72]){const outcome=collectIdle(state,hours*3600000),total=Math.min(hours,18)*.384;assert.equal(outcome.earned,Math.floor(total));assert.ok(Math.abs(outcome.state.idleCarry-(total-Math.floor(total)))<1e-8);const restored=readProgress(JSON.stringify(outcome.state),hours*3600000);assert.equal(collectIdle(restored,hours*3600000).earned,0);assert.equal(outcome.state.decorExpires.neon,DECOR_LIFETIME);}
+ const capped=collectIdle(state,24*3600000);assert.equal(capped.earned,6);assert.equal(capped.state.lastSeen,24*3600000);const nextHour=collectIdle(capped.state,25*3600000);assert.equal(nextHour.earned,1);assert.equal(nextHour.state.idleCarry,.296);assert.equal(collectIdle(nextHour.state,0).earned,0);
  const expired=collectIdle({...state,decorExpires:{neon:10*3600000}},24*3600000);assert.equal(expired.earned,3);assert.equal(expired.state.decor.neon,0);assert.deepEqual(expired.lost,['neon']);
 });
 test('twelve movie-inspired patrons have unique original portraits, bilingual stories and five balanced rarities',()=>{
  assert.equal(PATRONS.length,31);assert.equal(new Set(PATRONS.map(f=>f.id)).size,31);const portraits=[];
- for(const id of ids){const patron=PATRONS.find(f=>f.id===id);assert.ok(patron,id);assert.ok(patron.story.length>30&&patron.storyEn.length>30);assert.ok(patron.name&&patron.nameZh);assert.ok(patron.weight>0);assert.ok(patron.oil<=.05&&patron.merit<=.05&&patron.discount<=.15);const art=patronArt(id);assert.ok(art.includes(`data-patron="${id}"`));assert.ok(!/undefined|NaN|<image|<script/.test(art));portraits.push(art);}
+ for(const id of ids){const patron=PATRONS.find(f=>f.id===id);assert.ok(patron,id);assert.ok(patron.story.length>30&&patron.storyEn.length>30);assert.ok(patron.name&&patron.nameZh);assert.ok(patron.weight>0);assert.ok(patron.oil<=.05&&patron.merit<=.05&&patron.discount<=.25);const art=patronArt(id);assert.ok(art.includes(`data-patron="${id}"`));assert.ok(!/undefined|NaN|<image|<script/.test(art));portraits.push(art);}
  assert.equal(new Set(portraits).size,12);assert.deepEqual([...new Set(ids.map(id=>PATRONS.find(f=>f.id===id).stars))].sort(),[1,2,3,4,5]);
 });
 test('all new patrons can be met without replacing old collections and survive reload and backup with their coupons',()=>{

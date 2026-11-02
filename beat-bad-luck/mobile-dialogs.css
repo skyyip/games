@@ -159,3 +159,21 @@ body.is-playing :is(#intro,#welcome,#my-stall,#neighbourhood-hub,.records-card) 
 #collection-dialog-shop-kits .weapon-inspect{top:5px}
 #collection-dialog-shop-kits .weapon-inspect::before,#collection-dialog-shop-kits .weapon-inspect::after{content:none!important}
 #ritual-preparation #worry-select{margin-top:-7px}
+
+/* A compact, always-visible summary of bonuses that apply to ritual rewards. */
+.stall-patron-buffs{margin:14px 0 10px;padding:12px;border:1px solid #b7d7ae;border-radius:13px;background:#15392f;text-align:left}
+.stall-patron-buffs h3{margin:0 0 9px;color:#f7e5b4;font:600 14px/1.4 var(--display)}
+.stall-buff-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stall-buff-values>span{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:7px 8px;border-radius:8px;background:#284d3d}
+.stall-buff-values small{min-width:0;overflow-wrap:anywhere;font-size:12px;color:#f1ebcf}.stall-buff-values strong{color:#b9f2bd;font:700 22px/1.2 Fredoka,system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stall-patron-buffs p{margin:8px 0 0;color:#d0dfc6;font-size:12px;line-height:1.6}
+/* The ticket picker is a deliberate choice, with a prominent price-saving receipt. */
+#purchase-coupons{border:2px dashed #f3d07f;padding:13px;border-radius:13px;background:#244f3d}
+#purchase-coupon-label{color:#fff0ba;font-weight:700}
+#purchase-coupon{min-height:50px;border:3px solid #e7ba59;border-radius:11px;background-color:#fff1bd;color:#284536;padding:9px 38px 9px 12px;font-weight:600;box-shadow:0 3px 0 #94723d}
+#purchase-coupon:focus-visible{outline:3px solid #a7e7c5;outline-offset:3px}
+#purchase-coupon:disabled{background-color:#dfdfc4;color:#4e6052;box-shadow:none}
+#purchase-coupons[data-applied=true]{border-style:solid;border-color:#b6e2a7}
+#purchase-coupons[data-applied=true] #purchase-coupon-note{color:#d2ffc1;font-weight:700}
+
+#purchase-dialog #purchase-coupon{font-size:16px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12'%3E%3Cpath d='m3 3 5 5 5-5' fill='none' stroke='%23284536' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-size:16px 12px;background-position:right 12px center;background-repeat:no-repeat}
