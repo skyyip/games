@@ -1,4 +1,4 @@
-import {createBurstChallenge,resolveBurstAction} from './burst-challenges.js';
+import {createBurstChallenge,resolveBurstAction,syncBurstChallenge,TARGET_HIT_INTERVAL_MS} from './burst-challenges.js';
 import {SKINS,skinScoreMultiplier} from './skins.js';
 import {ULTIMATE_DURATION,ULTIMATE_CHARGE,comedyEnding} from './comedy-content.js';
 import {BEAT_INTERVAL,RHYTHM_PERFECT} from './rhythm.js';
@@ -37,7 +37,7 @@ export class RitualGame{
     this.advance();if(this.phase!=='beat'||this.pausedAt!==null||!['tap','heavy','rub','circle','pinch'].includes(gesture))return null;
     if(this.finisherBusy&&!challengeAction||!this.finisherBusy&&challengeAction)return null;
     heavy=gesture!=='tap';direction=gesture==='circle'&&['cw','ccw'].includes(direction)?direction:null;
-    const now=this.now();if(now-(this.strikes.get(pointer)??-Infinity)<55)return null;
+    const now=this.now(),cooldown=this.finisherBusy&&this.finisher.challenge.mode==='targets'?TARGET_HIT_INTERVAL_MS:55;if(now-(this.strikes.get(pointer)??-Infinity)<cooldown)return null;
     const challenge=this.finisherBusy?resolveBurstAction(this.finisher.challenge,challengeAction,this.finisherTime,this.random):null;if(this.finisherBusy&&!challenge)return null;
     if(challenge?.grade==='Miss'){this.strikes.set(pointer,now);return {miss:true,challengeGrade:'Miss',points:0};}
     this.strikes.set(pointer,now);if(this.strikes.size>32)this.strikes=new Map([[pointer,now]]);
@@ -84,6 +84,7 @@ export class RitualGame{
     if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;
     if(this.phase==='beat'){
       if(this.finisherBusy&&(this.finisherTime>=ULTIMATE_DURATION||this.remaining===0))this.finishFinisher();
+      if(this.finisherBusy)syncBurstChallenge(this.finisher.challenge,this.finisherTime,this.random);
       if(!this.finisherBusy&&this.combo&&this.clock-this.lastHit>COMBO_GRACE)this.breakCombo();
     }
     if(this.phase==='divination'&&this.blocks?.rolling&&this.elapsed-this.blocks.at>=1200){this.blocks.rolling=false;this.blocks.sacred=this.blocks.faces[0]!==this.blocks.faces[1];if(this.blocks.sacred)this.blocks.completedAt=this.blocks.at+1200;else this.blocks.retryAt=this.blocks.at+1400;}
