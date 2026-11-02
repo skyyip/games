@@ -1,5 +1,6 @@
+import {createBurstChallenge,resolveBurstAction} from './burst-challenges.js';
 import {SKINS,skinScoreMultiplier} from './skins.js';
-import {ULTIMATE_DURATION,ULTIMATE_LIMIT,ULTIMATE_CHARGE,ULTIMATE_MULTIPLIER,comedyEnding} from './comedy-content.js';
+import {ULTIMATE_DURATION,ULTIMATE_CHARGE,comedyEnding} from './comedy-content.js';
 import {BEAT_INTERVAL,RHYTHM_PERFECT} from './rhythm.js';
 export {BEAT_INTERVAL} from './rhythm.js';
 import {RitualFlavour} from './ritual-flavour.js';
@@ -32,23 +33,26 @@ export class RitualGame{
   blow(){if(this.phase!=='incense'||this.pausedAt!==null||(this.lit.size!==3||this.blown))return false;this.blown=true;return true;}
   nameWorry(text,kind=this.kind){if(this.phase!=='worry'||this.pausedAt!==null)return false;this.worry=String(text).trim().slice(0,64)||this.worry;this.kind=WORRIES.some(w=>w.id===kind)?kind:this.kind;this.flavour.start(this.kind,{randomEvents:this.randomEvents});return true;}
   confirm(){if(this.phase!=='worry'||this.pausedAt!==null||this.prepared)return false;this.prepared=true;return true;}
-  hit({heavy=false,strength=.5,pointer='keyboard',gesture=heavy?'heavy':'tap',direction=null}={}){
+  hit({challengeAction=null,heavy=false,strength=.5,pointer='keyboard',gesture=heavy?'heavy':'tap',direction=null}={}){
     this.advance();if(this.phase!=='beat'||this.pausedAt!==null||!['tap','heavy','rub','circle','pinch'].includes(gesture))return null;
+    if(this.finisherBusy&&!challengeAction||!this.finisherBusy&&challengeAction)return null;
     heavy=gesture!=='tap';direction=gesture==='circle'&&['cw','ccw'].includes(direction)?direction:null;
     const now=this.now();if(now-(this.strikes.get(pointer)??-Infinity)<55)return null;
+    const challenge=this.finisherBusy?resolveBurstAction(this.finisher.challenge,challengeAction,this.finisherTime,this.random):null;if(this.finisherBusy&&!challenge)return null;
+    if(challenge?.grade==='Miss'){this.strikes.set(pointer,now);return {miss:true,challengeGrade:'Miss',points:0};}
     this.strikes.set(pointer,now);if(this.strikes.size>32)this.strikes=new Map([[pointer,now]]);
     // Rhythm is optional flavour, never an input gate or a base-score multiplier.
-    const pulse=this.elapsed%BEAT_INTERVAL,perfect=Math.min(pulse,BEAT_INTERVAL-pulse)<=RHYTHM_PERFECT+1e-6;
+    const pulse=this.elapsed%BEAT_INTERVAL,perfect=challenge?challenge.grade==='Excellence':Math.min(pulse,BEAT_INTERVAL-pulse)<=RHYTHM_PERFECT+1e-6;
     this.combo++;this.lastHit=now;this.bestCombo=Math.max(this.bestCombo,this.combo);this.qteSuccess++;
     if(!this.finisherBusy){this.finisherChain++;this.finisherCharge=Math.min(ULTIMATE_CHARGE,this.finisherChain);if(this.finisherChain>=ULTIMATE_CHARGE)this.finisherUnlocked=true;if(this.finisherUnlocked)this.finisherCharge=ULTIMATE_CHARGE;}
     const special=SPECIALS[gesture];
     const effort=Math.max(0,Math.min(1,Number(strength)||0));
-    const power=special?special.min+Math.round(effort*(special.power-special.min)):(heavy?3+Math.round(effort*4):1);
+    const power=challenge?({Target:5,Pull:6,Excellence:9,Great:6,Nice:3}[challenge.grade]):special?special.min+Math.round(effort*(special.power-special.min)):(heavy?3+Math.round(effort*4):1);
     const before=this.papers;this.hits++;if(heavy)this.heavy++;if(special)this.specials[gesture]++;if(perfect)this.perfect++;
-    const roll=this.random(),impactLevel=roll<.04?3:roll<.14?2:1,impactMultiplier=impactLevel===3?2:impactLevel===2?1.5:1;
-    const basePoints=(GESTURE_POINTS[gesture]+Math.floor(Math.min(this.combo,30)*.3))*impactMultiplier;const multiplier=this.scoreMultiplier,flavour=this.flavour.hit(this.elapsed,gesture,perfect,basePoints,multiplier,{direction}),burstMultiplier=this.finisherBusy?ULTIMATE_MULTIPLIER:1,points=flavour.points*burstMultiplier;if(this.finisherBusy){this.finisher.hits++;this.finisherBonus+=points-flavour.points;}this.score+=points;this.damage+=power*impactMultiplier*(flavour.protectedHit?.35:1);this.moves[gesture]++;if(direction)this.rotations[direction]++;this.perfectStreak=perfect&&!flavour.protectedHit?this.perfectStreak+1:0;this.maxPerfectStreak=Math.max(this.maxPerfectStreak,this.perfectStreak);
+    const roll=challenge?1:this.random(),impactLevel=roll<.04?3:roll<.14?2:1,impactMultiplier=impactLevel===3?2:impactLevel===2?1.5:1;
+    const basePoints=(GESTURE_POINTS[gesture]+Math.floor(Math.min(this.combo,30)*.3))*impactMultiplier;const multiplier=this.scoreMultiplier,flavour=challenge?{points:Math.round(challenge.points*multiplier)}:this.flavour.hit(this.elapsed,gesture,perfect,basePoints,multiplier,{direction}),burstMultiplier=1,points=flavour.points;if(this.finisherBusy){this.finisher.hits++;this.finisherBonus+=points;}this.score+=points;this.damage+=power*impactMultiplier*(flavour.protectedHit?.35:1);this.moves[gesture]++;if(direction)this.rotations[direction]++;this.perfectStreak=perfect&&!flavour.protectedHit?this.perfectStreak+1:0;this.maxPerfectStreak=Math.max(this.maxPerfectStreak,this.perfectStreak);
     const qteComplete=false;
-    return {perfect,power,impactLevel,impactMultiplier,...flavour,points,burstMultiplier,paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
+    return {perfect,power,impactLevel,impactMultiplier,...flavour,points,burstMultiplier,...(challenge?{challengeGrade:challenge.grade,challengePart:challenge.part}:{}),paperCleared:this.papers>before,qteComplete,heavy,gesture,direction,combo:this.combo};
   }
   activateSkill(){return this.startFinisher();}
   skillAction(type){return {ok:this.finisherAction(type==='tap'?'tap':type)};}
@@ -73,14 +77,14 @@ export class RitualGame{
   throwBlocks(){this.advance();if(this.phase!=='divination'||this.pausedAt!==null||this.blocks)return false;const roll=this.random(),faces=roll<.25?[0,1]:roll<.5?[1,0]:roll<.75?[0,0]:[1,1];this.rolls++;this.blocks={faces,rolling:true,at:this.elapsed,sacred:false};return true;}
   finisherAvailability(){if(this.phase!=='beat')return 'phase';if(this.pausedAt!==null)return 'paused';if(this.finisherBusy)return 'active';return this.finisherUnlocked?'ready':'charge';}
   canFinisher(){return this.finisherAvailability()==='ready';}
-  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisher={at:this.clock,active:true,hits:0,won:false};this.finisherUses++;this.finisherCharge=0;this.finisherChain=0;this.finisherUnlocked=false;return true;}
-  finisherAction(){return false;}
-  finishFinisher(){const f=this.finisher;if(!f?.active||this.phase!=='beat'||this.pausedAt!==null||(this.finisherTime<ULTIMATE_DURATION&&this.remaining>0))return false;f.active=false;f.won=true;f.completedAt=this.elapsed;this.finisherWins++;return true;}
+  startFinisher(){this.advance();if(!this.canFinisher())return false;this.finisher={at:this.clock,active:true,hits:0,won:false,challenge:createBurstChallenge(this.finisherUses+1,this.random)};this.finisherUses++;this.finisherCharge=0;this.finisherChain=0;this.finisherUnlocked=false;return true;}
+  finisherAction(action,options={}){return this.hit({pointer:'finisher-action',...options,gesture:'tap',challengeAction:action});}
+  finishFinisher(){const f=this.finisher;if(!f?.active||this.phase!=='beat'||this.pausedAt!==null||(this.finisherTime<ULTIMATE_DURATION&&this.remaining>0))return false;f.active=false;f.won=true;f.completedAt=this.elapsed;if(Number.isFinite(this.lastHit))this.lastHit=this.clock;this.finisherWins++;return true;}
   advance(){
     if(this.pausedAt!==null||!PHASES.includes(this.phase))return false;
     if(this.phase==='beat'){
       if(this.finisherBusy&&(this.finisherTime>=ULTIMATE_DURATION||this.remaining===0))this.finishFinisher();
-      if(this.combo&&this.clock-this.lastHit>COMBO_GRACE)this.breakCombo();
+      if(!this.finisherBusy&&this.combo&&this.clock-this.lastHit>COMBO_GRACE)this.breakCombo();
     }
     if(this.phase==='divination'&&this.blocks?.rolling&&this.elapsed-this.blocks.at>=1200){this.blocks.rolling=false;this.blocks.sacred=this.blocks.faces[0]!==this.blocks.faces[1];if(this.blocks.sacred)this.blocks.completedAt=this.blocks.at+1200;else this.blocks.retryAt=this.blocks.at+1400;}
     if(this.phase==='divination'&&this.blocks&&!this.blocks.rolling&&!this.blocks.sacred&&this.elapsed>=this.blocks.retryAt){const faces=[0,1];this.rolls++;this.blocks={faces,rolling:true,at:this.elapsed,sacred:false,assisted:true};}
@@ -90,7 +94,7 @@ export class RitualGame{
   next(){
     const index=PHASES.indexOf(this.phase);if(index<0)return;
     if(this.phase==='beat'&&this.finisher)this.finisher.active=false;
-    if(index===PHASES.length-1){this.phase='results';this.result={auspicious:true,skin:this.skin,rolls:this.rolls,finisherWins:this.finisherWins,niceWins:this.niceWins,endingId:comedyEnding(this.weapon,this.kind).id,score:this.score,kitSkill:this.skill.snapshot(),kind:this.kind,commission:this.commission,moves:{...this.moves},rotations:{...this.rotations},maxPerfectStreak:this.maxPerfectStreak,wear:this.wear,...this.flavour.snapshot(),hits:this.hits,heavy:this.heavy,perfect:this.perfect,bestCombo:this.bestCombo,papers:this.papers,qte:this.qteSuccess,gestures:{...this.specials},fed:this.fed,blessed:this.blessed,weapon:this.weapon,seconds:(this.now()-this.started)/1000,fortune:FORTUNES[Math.min(FORTUNES.length-1,Math.floor(this.random()*FORTUNES.length))]};}
+    if(index===PHASES.length-1){this.phase='results';this.result={auspicious:true,skin:this.skin,look:this.look,rolls:this.rolls,finisherWins:this.finisherWins,niceWins:this.niceWins,endingId:comedyEnding(this.weapon,this.kind).id,score:this.score,kitSkill:this.skill.snapshot(),kind:this.kind,commission:this.commission,moves:{...this.moves},rotations:{...this.rotations},maxPerfectStreak:this.maxPerfectStreak,wear:this.wear,...this.flavour.snapshot(),hits:this.hits,heavy:this.heavy,perfect:this.perfect,bestCombo:this.bestCombo,papers:this.papers,qte:this.qteSuccess,gestures:{...this.specials},fed:this.fed,blessed:this.blessed,weapon:this.weapon,seconds:(this.now()-this.started)/1000,fortune:FORTUNES[Math.min(FORTUNES.length-1,Math.floor(this.random()*FORTUNES.length))]};}
     else{this.phase=PHASES[index+1];this.phaseStarted=this.now();}
     this.transitions.push(this.phase);
   }

@@ -1,3 +1,4 @@
+import {createFortunePreview} from './fortune-preview.js';
 import {setHidden,setData,setAttribute} from './performance.js';
 import {ENDINGS} from './comedy-content.js';
 import {extraKingArt,runawayMeatballArt} from './slapstick-art.js';
@@ -5,7 +6,7 @@ import {eventArt} from './comic-art.js';
 import {COMIC_FORTUNES} from './fortune-catalog.js';
 import {ALBUM_RETENTION_DAYS,STORIES,CHALLENGES,SCENES,acceptStory,placedLayout,placeDecoration,availableScenes,discoverScenes,personalFortune,commissionPay} from './neighbourhood.js';
 import {WORRIES,DECOR,WEAPONS} from './catalog.js';
-import {dollArt,decorArt,weaponArt} from './art.js';
+import {dollArt,decorArt,weaponArt,paperWearStyle} from './art.js';
 import {postcardSvg,postcardPng} from './postcard.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 import {EVENTS,EVENT_DURATION,eventStep} from './ritual-flavour.js';
@@ -15,6 +16,7 @@ const card=(title,text)=>{const box=document.createElement('article'),heading=do
 const button=(text,action)=>{const b=document.createElement('button');b.type='button';b.className='soft-button';put(b,text);b.addEventListener('click',action);return b;};
 const eventNames=Object.fromEntries(EVENTS.map(e=>[e.id,e.name]));
 export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refresh,onAccept,onPreviewScene,cancelGestures,onExtraScore,onGesture}){
+ const fortunePreview=createFortunePreview();
  let homeKey='',playKey='',sceneKey='',entry=null,currentScene=null,sceneBeat=0,sceneTick=0,cameoUsed=false,cameoUntil=0;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const cameo=document.createElement('div');cameo.id='extra-king-cameo';cameo.className='extra-king-cameo';cameo.hidden=true;cameo.setAttribute('aria-hidden','true');cameo.innerHTML=extraKingArt()+'<i>?!</i>';$('#beat-arena').append(cameo);
@@ -22,6 +24,7 @@ export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refr
  function announce(text){put($('#neighbour-note'),text);}
  function update(next){setNeighbourhood(next);homeKey='';refresh();}
  function renderHome(){
+  fortunePreview.render();
   let state=getState(),n=state.neighbourhood;const found=discoverScenes(n,state.decor);if(found!==n){setNeighbourhood(found);state=getState();n=found;audio.chime();}
   const key=JSON.stringify([getLanguage(),n,state.decor]);if(key===homeKey)return;homeKey=key;
   for(const [id,text]of Object.entries({'open-journey':['順便接街坊委託','Pick up a neighbour commission'],'challenge-title':['技巧挑戰與稱號','Skill challenges & titles'],'scene-title':['攤位名場面','Stall scene collection'],'album-title':['我的平安籤冊','My fortune album'],'rain-cover':['移到遮雨棚','Move under shelter']}))put($('#'+id),text);
@@ -33,7 +36,7 @@ export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refr
   put($('#album-title'),[`平安籤冊・保存 ${ALBUM_RETENTION_DAYS} 天・${n.album.length}/24 張`,`Fortune album · ${ALBUM_RETENTION_DAYS}-day retention · ${n.album.length}/24 cards`]);
   $('#scene-list').replaceChildren(...SCENES.map(scene=>{const box=card(n.scenes.includes(scene.id)?scene.name:['未發現的名場面','Undiscovered scene'],n.scenes.includes(scene.id)?scene.line:[`線索：${scene.needs.map(id=>name(DECOR.find(d=>d.id===id))).join('＋')}${scene.companion?'＋神犬拉茜':''}`,`Clue: ${scene.needs.map(id=>DECOR.find(d=>d.id===id).name).join(' + ')}${scene.companion?' + Lassie':''}`]);if(n.scenes.includes(scene.id)||availableScenes(n,state.decor).some(s=>s.id===scene.id))box.append(button(['重播小劇場','Replay the little scene'],()=>{showScene(scene,true);if(onPreviewScene)onPreviewScene();else $('#stall-skit').scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});}));return box;}));
   const scenes=availableScenes(n,state.decor),scene=scenes[scenes.length-1];$('#stall-skit').hidden=!scene;if(scene&&scene.id+getLanguage()!==sceneKey)showScene(scene);
-  $('#fortune-album').replaceChildren(...n.album.slice(0,24).map(saved=>{const box=card(personalFortune(saved),[`${saved.score} 解壓分 · ${new Date(saved.at).toLocaleDateString('zh-HK')}`,`${saved.score} relief points · ${new Date(saved.at).toLocaleDateString('en-GB')}`]);const image=document.createElement('div');image.className='album-photo';image.setAttribute('aria-hidden','true');image.innerHTML=dollArt(saved.kind,0);box.prepend(image);box.dataset.fortune=saved.fortuneId??'legacy';box.append(button(['儲存這張籤卡','Save this fortune card'],()=>saveCard(saved,false)));return box;}));
+  $('#fortune-album').replaceChildren(...n.album.slice(0,24).map(saved=>{const box=card(personalFortune(saved),[`${saved.score} 解壓分 · ${new Date(saved.at).toLocaleDateString('zh-HK')}`,`${saved.score} relief points · ${new Date(saved.at).toLocaleDateString('en-GB')}`]);const image=document.createElement('div');image.className='album-photo';image.setAttribute('aria-hidden','true');image.innerHTML=dollArt(saved.kind,saved.look??0,saved.skin??'paper');image.style.cssText=paperWearStyle(saved.wear);image.dataset.skin=saved.skin??'paper';box.dataset.entryId=saved.id;box.prepend(image);box.dataset.fortune=saved.fortuneId??'legacy';const preview=button(['預覽這張籤卡','Preview this fortune card'],()=>fortunePreview.open(saved,preview));preview.dataset.previewFortune=saved.id;box.append(preview);box.append(button(['儲存這張籤卡','Save this fortune card'],()=>saveCard(saved,false)));return box;}));
   if(n.fortuneSeen.length){const book=document.createElement('section'),heading=document.createElement('h3'),list=document.createElement('ul');book.className='comic-quote-book';put(heading,[`重溫已收集的 ${n.fortuneSeen.length} 款搞笑籤`,`Reread ${n.fortuneSeen.length} collected comic fortunes`]);for(const id of n.fortuneSeen){const fortune=COMIC_FORTUNES.find(f=>f.id===id);if(!fortune)continue;const li=document.createElement('li');put(li,fortune.quote);list.append(li);}book.append(heading,list);$('#fortune-album').prepend(book);}
   {const book=document.createElement('section'),title=document.createElement('h3'),list=document.createElement('ul');book.className='comic-ending-book';put(title,[`無厘頭結局 ${n.endingSeen?.length??0}/${ENDINGS.length}`,`Slapstick endings ${n.endingSeen?.length??0}/${ENDINGS.length}`]);for(const id of n.endingSeen??[]){const ending=ENDINGS.find(e=>e.id===id);if(ending){const li=document.createElement('li');put(li,ending.quote);list.append(li);}}book.append(title,list);$('#fortune-album').prepend(book);}
   if(!n.album.length)$('#fortune-album').append(card(['第一張平安籤等緊你','Your first fortune is waiting'],[`完成儀式後會自動收藏，每張保存 ${ALBUM_RETENTION_DAYS} 天，最多保留最近 24 張，期滿自動刪除。自訂心事不會寫入存檔。`,`Each card expires after ${ALBUM_RETENTION_DAYS} days; up to 24 recent cards are kept. Custom worry text is never saved.`]));

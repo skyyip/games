@@ -9,7 +9,7 @@ import {animateDialog} from './stall-polish.js';
 import {getLanguage,translate} from '../../grid-rush/src/language.js';
 
 // Draft choices belong to this visit. Personal worry text is never persisted.
-export function createPreparationUI({onCatalogChange=()=>{},weaponInspector,getState,getWorry,onChooseWorry,onAcceptStory,onEquip,requestBuy,onEvents}) {
+export function createPreparationUI({favorites,onCatalogChange=()=>{},weaponInspector,getState,getWorry,onChooseWorry,onAcceptStory,onEquip,requestBuy,onEvents}) {
  const $=selector=>document.querySelector(selector),local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
  const optionalStepsEnabled=false;
  const welcome=$('#welcome');
@@ -42,14 +42,14 @@ export function createPreparationUI({onCatalogChange=()=>{},weaponInspector,getS
  dashboard.before(stall);stall.append(dashboard);$('.kit-shortcuts').querySelector('[data-shortcut=kits]').hidden=true;$('.stall-showcase-heading').append($('.kit-shortcuts'));
  // Reuse the live inventory grids in the modal, then return owned shortcuts on close.
  for(const [type,owned,anchor]of [['skin',ownedSkins,extras],['kit',$('#preparation-owned-kits'),$('#preparation-kit-catalog')]]){
-  const dialog=animateDialog($('#'+type+'-catalog-dialog')),trigger=$('#all-'+(type==='skin'?'skins':'kits')+'-label'),scroll=dialog.querySelector('.catalog-scroll'),close=dialog.querySelector('.catalog-close');
+  const dialog=animateDialog($('#'+type+'-catalog-dialog')),trigger=$('#all-'+(type==='skin'?'skins':'kits')+'-label'),scroll=dialog.querySelector('.catalog-scroll'),close=dialog.querySelector('.catalog-close');favorites?.bind(dialog,type==='kit'?'weapon':'skin');
   trigger.addEventListener('click',()=>{scroll.prepend(owned);dialog.showModal();render();onCatalogChange();close.focus({preventScroll:true});});
   close.addEventListener('click',()=>dialog.close());
   dialog.addEventListener('close',()=>{if(dialog.open)return;anchor.before(owned);render();onCatalogChange();trigger.focus({preventScroll:true});});
   dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const controls=[...dialog.querySelectorAll('button:not(:disabled),[tabindex="0"]')].filter(node=>node.getClientRects().length),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
  }
 
- const notice=$('#daily-reward-note');if(notice)steps.before(notice);
+ const notice=$('#daily-reward-note');if(notice)$('#idle-note').before(notice);
  const firstHelp=welcome.querySelector('.fong-intro>div:last-child');
  firstHelp.querySelector('.bbl-kicker').hidden=true;firstHelp.querySelector('h2').hidden=true;firstHelp.querySelector('p:last-child').setAttribute('translate','no');
  document.body.classList.add('preparation-ready');
@@ -103,7 +103,7 @@ export function createPreparationUI({onCatalogChange=()=>{},weaponInspector,getS
    button.disabled=!owned&&(state.coins<bestPurchasePrice(state,w.cost)||state.merit<w.merit);button.addEventListener('click',()=>owned?onEquip(w.id):requestBuy('weapon',w));card.append(button);
    if(!owned&&button.disabled){const note=document.createElement('small');note.textContent=state.merit<w.merit?local(`需要 ${w.merit} 功德（不扣除）`,`Requires ${w.merit} merit (not spent)`):local(`還欠 ${cost-state.coins} 香油錢`,`Need ${cost-state.coins} more oil`);card.append(note);}
    if(owned&&!w.starter&&!w.hidden){const buy=document.createElement('button');buy.type='button';buy.className='preparation-link';buy.dataset.preparationRestock=w.id;buy.textContent=local(`補購・${cost} 香油錢`,`Restock · ${cost} oil`);buy.disabled=state.coins<bestPurchasePrice(state,w.cost)||state.merit<w.merit;buy.addEventListener('click',()=>requestBuy('weapon',w));card.append(buy);}
-   weaponInspector?.attach(card,w.id);return {owned,card};
+   weaponInspector?.attach(card,w.id);favorites?.attach(card,'weapon',w);return {owned,card};
   });
   $('#preparation-owned-kits').hidden=catalogOpen;$('#preparation-owned-kits').replaceChildren(...(catalogOpen?[]:cards.filter(c=>c.owned).map(c=>c.card)));$('#preparation-other-kits').replaceChildren(...cards.filter(c=>catalogOpen||!c.owned).map(c=>c.card));
   if(focused)$('#prepare-kit').querySelector(`[data-preparation-kit="${focused}"]`)?.focus({preventScroll:true});

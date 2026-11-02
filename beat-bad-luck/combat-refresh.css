@@ -30,11 +30,11 @@ html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 #phase-beat #finisher-charge::-webkit-progress-bar{background:#163d34;border-radius:4px}
 #phase-beat #finisher-charge::-webkit-progress-value{background:var(--charge-fill);border-radius:4px}
 #phase-beat #finisher-charge::-moz-progress-bar{background:var(--charge-fill);border-radius:4px}
-.finisher-charge-frame::before{content:'';position:absolute;inset:7px -1px;display:none;border:2px solid #fff0a0;border-radius:6px;box-shadow:0 0 5px #ffdb6677;pointer-events:none}
+.finisher-charge-frame::before{content:'';position:absolute;inset:5px -3px;display:none;border:3px solid #fff1a3;border-radius:7px;box-shadow:0 0 6px #ffdc6acc,0 0 10px #f7bd4c88;pointer-events:none}
 #phase-beat .finisher-charge-frame:is([data-state=ready],[data-state=burning]){--charge-fill:#ffe05c}
 #phase-beat .finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffe05c}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block;animation:combo-border-pulse 1.6s ease-in-out infinite}
-@keyframes combo-border-pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block;animation:combo-border-pulse 1.2s ease-in-out infinite}
+@keyframes combo-border-pulse{0%,100%{opacity:.2;transform:scale(.99,.92)}45%,60%{opacity:1;transform:scale(1.03,1.16)}}
 .ritual-stage[inert] .finisher-charge-frame::before{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.finisher-charge-frame::before{animation:none!important;opacity:1}}
 
