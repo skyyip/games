@@ -2,6 +2,12 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
+## Optional ritual ending (cache v133)
+
+After whacking, choose **Finish now** to let Master Yip handle the tiger feeding, blessing and sacred blocks and open the fortune immediately, or **Step by step** to keep the original interactions. The choice waits without a countdown. Both paths use the normal result/reward pipeline and consume kit/paper stock only once; optional manual smearing still earns its own bonus. Replaying asks again.
+
+Falling joss papers have been removed from combat. Up to two little ghosts still drift and fade, now with small ivory fangs in all four moods. Their existing pause, reduced-motion and phase-exit cleanup remains in place.
+
 ## Current combat timing (cache v132)
 
 Whacking lasts **66 active seconds**. Each freshly earned 88-hit chain unlocks a **12-second finisher**; those seconds count toward the round, so the round deadline can end a late finisher. Pause and a hidden page freeze both clocks.

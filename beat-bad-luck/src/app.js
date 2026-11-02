@@ -420,7 +420,10 @@ $('#voice').addEventListener('change',()=>{audio.voice=$('#voice').checked;prefe
 document.addEventListener('languagechange',()=>{uxUI.render();preparationUI?.render();});
 updateStartReadiness();uxUI.render();
 
-ritualUI=createRitualUI({game,audio,getState:()=>state,refresh:renderStall,announce:say,cancelOrdinary:cancelGestures,pause,resume,onChallengeHit:whack,claimDaily:async()=>{const claim=()=>{if(game.phase!=='setup')return null;syncProgress();const next=dailyReward(state);if(!next)return null;state=next;save();return next;};try{if(navigator.locks?.request)return await navigator.locks.request('beat-bad-luck-daily',claim);}catch{}return claim();}});
+ritualUI=createRitualUI({game,audio,getState:()=>state,refresh:renderStall,announce:say,cancelOrdinary:cancelGestures,pause,resume,onChallengeHit:whack,onCompletionChoice:mode=>{
+ if(!game.chooseCompletion(mode))return;cancelGestures();renderPhase();
+ if(game.phase==='tiger'){ritualUI.render();$('#feed').focus({preventScroll:true});}
+},claimDaily:async()=>{const claim=()=>{if(game.phase!=='setup')return null;syncProgress();const next=dailyReward(state);if(!next)return null;state=next;save();return next;};try{if(navigator.locks?.request)return await navigator.locks.request('beat-bad-luck-daily',claim);}catch{}return claim();}});
 ritualUI.render();ritualUI.daily();
 
 favoritesUI=createFavorites({getState:()=>state,itemName,onToggle:(kind,id)=>{if(PHASES.includes(game.phase))return;syncProgress();const next=toggleFavorite(state,kind,id);if(!next)return;state=next;save();renderStall();}});
