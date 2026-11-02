@@ -4,7 +4,7 @@ import {fresh,buyWeapon,consumeWeapon,readProgress,reward} from '../src/progress
 import {PATRONS} from '../src/ritual-rewards.js';
 test('exports use fresh AES-GCM nonces and hide progress, with passwordless portable round trips',async()=>{
  const state={...fresh(100),coins:4567,merit:8910},one=await createBackup(state,200),two=await createBackup(state,200),a=JSON.parse(one),b=JSON.parse(two);
- assert.equal(a.format,2);assert.equal(a.algorithm,'AES-256-GCM');assert.equal(a.progress,undefined);assert.equal(one.includes('"coins"'),false);assert.equal(one.includes('"merit"'),false);assert.notEqual(a.iv,b.iv);assert.notEqual(a.data,b.data);assert.equal(Buffer.from(a.iv,'base64').length,12);
+ assert.equal(a.format,3);assert.equal(a.signatureAlgorithm,'HMAC-SHA-256');assert.equal(Buffer.from(a.signature,'base64').length,32);assert.equal(a.algorithm,'AES-256-GCM');assert.equal(a.progress,undefined);assert.equal(one.includes('"coins"'),false);assert.equal(one.includes('"merit"'),false);assert.notEqual(a.iv,b.iv);assert.notEqual(a.data,b.data);assert.equal(Buffer.from(a.iv,'base64').length,12);
  assert.deepEqual(await parseBackup(one,200),readProgress(JSON.stringify(state),200));assert.deepEqual(await parseBackup(two,200),readProgress(JSON.stringify(state),200));
 });
 test('editing ciphertext, its authentication tag or IV is rejected; valid plain JSON cannot bypass encryption',async()=>{

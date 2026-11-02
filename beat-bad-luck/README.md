@@ -2,6 +2,16 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
 
+## Portable file validation (cache v137)
+
+The three safeguards apply only to exported/imported `.bblsave` files. In-game score, wallet calculations and local browser storage are not changed.
+
+- **Dynamic sanity checks:** validate balances/counters, stock and ownership, skin uses, decoration levels/expiry, coupon rates, records, album and story bounds against the current catalog before export and after decryption. Reject invalid values instead of silently clamping them. Legacy stock limits, old coupon rates and missing old cosmetic fields remain supported.
+- **Memory obfuscation/encapsulation:** AES/HMAC key material is encoded in module scope, decoded only for native non-extractable CryptoKey imports, and its mutable buffers are cleared. Exports snapshot data before async work; mutable plaintext encryption/decryption buffers are cleared in `finally`. Returned progress remains ordinary application data; JavaScript cannot guarantee erasure of immutable strings or stop a determined debugger.
+- **File signature:** v3 exports add HMAC-SHA-256 over canonical format/algorithm/IV/ciphertext metadata, verified before decryption. AES-GCM also authenticates the payload with version-specific associated data; stripping the signature and relabelling a new file as v2 fails. Original v2 encrypted files still import with their original AES key and tag plus sanity checks. Plain JSON stays rejected.
+
+Both keys remain client-held: this raises the barrier to casual file editing, not server-authoritative anti-cheat. No gameplay polling, backend or new permissions are introduced. Invalid imports never replace the current progress.
+
 ## Encrypted portable files (cache v136)
 
 Exports are passwordless `.bblsave` files with AES-256-GCM authenticated encryption, a fresh random 96-bit IV and a 128-bit tag. Imports decrypt and validate the versioned envelope before showing the existing replace/cancel confirmation. Modified, damaged, oversized and old plain JSON exports are rejected without replacing local progress. Local browser/Home Screen storage and existing on-device saves remain unchanged.
