@@ -13,7 +13,7 @@ test('the player can choose a weaker ticket while saving the stronger one; the d
  const s=initial(),ticket=couponChoices(s)[0],quote=purchasePrice(s,245,ticket),n=buyWeapon(s,'paper',{coupon:ticket});assert.equal(quote,233);assert.equal(s.coins-n.coins,quote);assert.deepEqual(n.coupons,[strong]);assert.deepEqual(s.coupons,[weak,strong]);
 });
 test('the selected discount applies to new paper and decor upgrades and consumes exactly that ticket',()=>{
- for(const [base,buy]of [[1120,(s,c)=>buySkin(s,'duck',{coupon:c})],[845,(s,c)=>upgrade(s,'neon',0,{coupon:c})]]){const s=initial(),c=couponChoices(s)[1],n=buy(s,c);assert.equal(s.coins-n.coins,Math.ceil(base*.85));assert.deepEqual(n.coupons,[weak]);}
+ for(const [base,buy]of [[1000,(s,c)=>buySkin(s,'duck',{coupon:c})],[845,(s,c)=>upgrade(s,'neon',0,{coupon:c})]]){const s=initial(),c=couponChoices(s)[1],n=buy(s,c);assert.equal(s.coins-n.coins,Math.ceil(base*.85));assert.deepEqual(n.coupons,[weak]);}
 });
 test('stale, altered or missing tickets reject the purchase without substituting another coupon',()=>{
  const s=initial(),c=couponChoices(s)[1];for(const bad of [{...c,index:9},{...c,discount:.05},{...c,patron:'missing'}]){assert.equal(selectedCoupon(s,bad),null);assert.equal(buySkin(s,'duck',{coupon:bad}),null);assert.equal(buyWeapon(s,'paper',{coupon:bad}),null);assert.equal(upgrade(s,'neon',0,{coupon:bad}),null);}assert.equal(buyWeapon({...s,coupons:[strong]},'paper',{coupon:c}),null);

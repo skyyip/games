@@ -1,3 +1,4 @@
+import {comicGhostArt} from './combat-art.js';
 export {comicLuckyGlyph,recordMedal} from './celebration-art.js';
 import {playerLevel,levelBadgeArt} from './player-level.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
@@ -41,6 +42,6 @@ export function showCriticalHit(hit){
  if(hit.impactLevel===1)return;
  clearCriticalHit();paper.dataset.critical=String(hit.impactLevel);
  const badge=document.createElement('span');badge.className='critical-comic critical-'+hit.impactLevel;badge.setAttribute('aria-hidden','true');badge.innerHTML=`<b>${hit.impactLevel}X</b>`;zone.append(badge);
- const prop=document.createElement('span');prop.className='critical-flying-prop critical-prop-'+hit.impactLevel;prop.setAttribute('aria-hidden','true');prop.textContent=hit.impactLevel===3?'👻':'⌣';arena.append(prop);
+ const prop=document.createElement('span');prop.className='critical-flying-prop critical-prop-'+hit.impactLevel;prop.setAttribute('aria-hidden','true');if(hit.impactLevel===3)prop.innerHTML=comicGhostArt('happy');else prop.textContent='⌣';arena.append(prop);
  criticalTimer=setTimeout(clearCriticalHit,1250);
 }

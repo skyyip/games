@@ -37,10 +37,10 @@ export class RitualGame{
     this.advance();if(this.phase!=='beat'||this.pausedAt!==null||!['tap','heavy','rub','circle','pinch'].includes(gesture))return null;
     if(this.finisherBusy&&!challengeAction||!this.finisherBusy&&challengeAction)return null;
     heavy=gesture!=='tap';direction=gesture==='circle'&&['cw','ccw'].includes(direction)?direction:null;
-    const now=this.now(),cooldown=this.finisherBusy&&this.finisher.challenge.mode==='targets'?TARGET_HIT_INTERVAL_MS:55;if(now-(this.strikes.get(pointer)??-Infinity)<cooldown)return null;
+    const strikeKey=this.finisherBusy&&this.finisher.challenge.mode==='timing'?`ring:${pointer}:${challengeAction}`:pointer,now=this.now(),cooldown=this.finisherBusy&&this.finisher.challenge.mode==='targets'?TARGET_HIT_INTERVAL_MS:55;if(now-(this.strikes.get(strikeKey)??-Infinity)<cooldown)return null;
     const challenge=this.finisherBusy?resolveBurstAction(this.finisher.challenge,challengeAction,this.finisherTime,this.random):null;if(this.finisherBusy&&!challenge)return null;
-    if(challenge?.grade==='Miss'){this.strikes.set(pointer,now);return {miss:true,challengeGrade:'Miss',points:0};}
-    this.strikes.set(pointer,now);if(this.strikes.size>32)this.strikes=new Map([[pointer,now]]);
+    if(challenge?.grade==='Miss'){this.strikes.set(strikeKey,now);if(this.strikes.size>32)this.strikes=new Map([[strikeKey,now]]);return {miss:true,challengeGrade:'Miss',points:0};}
+    this.strikes.set(strikeKey,now);if(this.strikes.size>32)this.strikes=new Map([[strikeKey,now]]);
     // Rhythm is optional flavour, never an input gate or a base-score multiplier.
     const pulse=this.elapsed%BEAT_INTERVAL,perfect=challenge?challenge.grade==='Excellence':Math.min(pulse,BEAT_INTERVAL-pulse)<=RHYTHM_PERFECT+1e-6;
     this.combo++;this.lastHit=now;this.bestCombo=Math.max(this.bestCombo,this.combo);this.qteSuccess++;

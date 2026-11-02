@@ -25,6 +25,8 @@ SKINS.unshift({id:'plain',nameZh:'免費素紙',name:'Free plain paper',cost:0,c
 for(const skin of SKINS)if(!skin.starter)skin.multiplier=Math.round((skin.multiplier+.5)*100)/100;
 // New-series multipliers are final values; the legacy +0.5 adjustment above must not run twice.
 SKINS.push(...CHARACTER_SKINS,...HISTORICAL_SKINS,...FILM_SKINS);
+// Apply the same reduction to every series; the plain fallback stays free.
+for(const skin of SKINS)if(!skin.starter)skin.cost=Math.max(0,skin.cost-120);
 export const SKIN_USES=10;
 export const skinScoreMultiplier=id=>SKINS.find(s=>s.id===id)?.multiplier??SKINS[0].multiplier;
 export function skinArt(id){const s=SKINS.find(s=>s.id===id)??SKINS[0],c=s.color,t=s.shape;
