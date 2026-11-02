@@ -12,10 +12,10 @@ export const games = [
   },
   {
     slug: 'frogger-jump', name: 'Frogger Jump 2.5D', zh: '蓄力蛙：鱷口求生', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game', listed: false,
-    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, and survive zigzag stumps, thorn obstacles, anglerfish and a red crocodile.',
-    intro: 'A solo isometric jumping game. Charge a ping-pong power meter and release to hop automatically towards the next log. Land accurately to keep your streak alive.',
-    chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按讓力度在 0–100% 來回，放手自動瞄準下一塊樹樁；預判 I 字與 Z 字路線，跳過荊棘，小心隨機出現的小樹樁、2.5 秒沉木與 2.1 秒燈籠魚，挑戰最高連跳。',
-    steps: ['Hold the screen, mouse button or Space to charge. Release to jump towards the next stump.', 'Judge the changing gap and top radius. Read the current log and two upcoming logs as straight and zigzag routes alternate.', 'Hazards are random from the start. Skip thorn logs by aiming at the log beyond. Leave sinking logs in 2.5 seconds and anglerfish lures in 2.1 seconds after landing; compare your locally saved best runs.'],
+    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, earn coins, unlock cute animals and leap across logs and water lilies while avoiding thorns and hungry river creatures.',
+    intro: 'A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn animal-unlock coins and use a species-specific skill. Firebase rankings activate after project setup.',
+    chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按蓄力，放手自動瞄準木樁或睡蓮；落地賺金幣解鎖企鵝、兔子、猴子與水獺，每 20 跳補充一次技能。Firebase 設定完成後可保留唯一名字，參加顯示所用動物的雲端前十名排行。',
+    steps: ['Enter a player name, choose an owned animal, then hold the screen, mouse button or Space and release to hop.', 'Read three wood or lily platforms ahead. Use your animal skill to clear obstacles or improve a landing; another use is earned every 20 successful landings.', 'Complete a run to earn coins and unlock more animals. When Firebase is configured, sign in for unique names, cross-device wallets and the public top ten; local practice stays unranked.'],
     related: ['floating-balance', 'stone-skip'],
   },
   {

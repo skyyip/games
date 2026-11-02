@@ -26,6 +26,7 @@ jobs:
           cache-dependency-path: tools/package-lock.json
       - run: npm ci --prefix tools
       - run: npm ci --prefix mo-lei-tau-studio
+      - run: npm ci --prefix frogger-jump
       - run: npm run check:seo --prefix tools
       - run: node tools/build-site.mjs _site
         env:

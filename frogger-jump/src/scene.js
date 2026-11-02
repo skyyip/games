@@ -1,9 +1,9 @@
-import {CAMERA_MS,SINK_MS,DROWN_MS,FISH_WARNING_MS} from './game.js';
+import {CAMERA_MS,SINK_MS,DROWN_MS,FISH_WARNING_MS,SPLASH_MS} from './game.js';
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
 export class RiverScene{
- constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
  resize(width,height){this.width=Math.max(1,width);this.height=Math.max(1,height);const dpr=Math.min(devicePixelRatio||1,2);this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;}
- reset(){this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;}
+ reset(){this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;}
  ellipse(x,y,rx,ry,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  path(points,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();points(c);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  projection(game){
@@ -20,7 +20,7 @@ export class RiverScene{
   const c=this.ctx,{s,point}=projection;
   for(const [effect,duration]of [[this.launch,380],[this.effect,650]]){
    if(!effect)continue;const t=(game.clock-effect.at)/duration;if(t<0||t>=1)continue;
-   const p=point(effect.point),r=effect.r*s,waterY=p.y+r*.95+5*s;c.save();
+   const p=point(effect.point),r=effect.r*s,waterY=p.y+r*(effect.kind==='lily'?.12:.95)+5*s;c.save();
    for(let i=0;i<2;i++){const phase=clamp(t-i*.14);if(phase<=0)continue;c.globalAlpha=(1-t)*(.5-i*.15);this.ellipse(p.x,waterY,r*(1.06+phase*.65),r*.39*(1.06+phase*.65),null,'#e5f7df',1.5*s);}
    if(effect===this.launch&&t<.75){c.globalAlpha=(1-t/.75)*.6;for(let i=0;i<4;i++){const side=i%2?-1:1;this.ellipse(p.x+side*r*(.7+t*(.5+i*.1)),waterY-(Math.sin(Math.PI*t/.75)*(8+i*2))*s,1.5*s,2*s,'#d9f2df');}}
    c.restore();
@@ -34,6 +34,7 @@ export class RiverScene{
   for(let i=0;i<6;i++){const right=i%2,x=right?w-12-(i*23%26):13+i*7%19,y=h*(.15+i*.14);this.ellipse(x,y,15+i%3*3,7,'#649c78');this.path(p=>{p.moveTo(x,y);p.lineTo(x+14,y-5);p.lineTo(x+10,y+5);},'#83b18a');if(i%3===0)this.ellipse(x-2,y-2,3,2,'#f6d6a0');}
  }
  stump(game,stump,index,projection){
+  if(stump.kind==='lily'){this.lily(game,stump,index,projection);return;}
   const c=this.ctx,{s,point}=projection,p=point(stump),shake=this.shake(game,stump),submerge=stump.id===game.current.id&&stump.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,r=stump.r*s,ry=r*.43,height=r*.95,x=p.x+shake.x,y=p.y+shake.y+submerge*65*s+this.impact(game,stump)*s;c.save();c.globalAlpha=1-submerge;
   this.ellipse(x+5,y+height+8,r*1.13,ry*.8,'#306f6b26');
   c.strokeStyle='#d9eee0aa';c.lineWidth=1.5;this.ellipse(x,y+height+4,r*1.22,ry*.95,null,'#d8f2e099');
@@ -42,6 +43,10 @@ export class RiverScene{
   const top=c.createRadialGradient(x-r*.35,y-ry*.4,1,x,y,r);top.addColorStop(0,dark?'#d1ac83':'#ffdfa1');top.addColorStop(1,dark?'#8d654e':'#c29c67');this.ellipse(x,y,r,ry,top,dark?'#70503e':'#8d6c46',2);
   for(const k of [.74,.49,.22])this.ellipse(x-r*.05,y,r*k,ry*k,null,dark?'#8b654b':'#bc9966',1);
   this.ellipse(x-r*.08,y,2*s,s,dark?'#70503e':'#9b774e');
+  this.surfaceMarks(game,stump,index,{s,r,ry,height,x,y});
+  if(dark){c.font='700 14px system-ui';c.fillStyle='#fff0cf';c.fillText('!',x+r*.62,y+height*.7);}c.restore();
+ }
+ surfaceMarks(game,stump,index,{s,r,ry,height,x,y}){const c=this.ctx;
   if(stump===game.target){this.ellipse(x,y,r+5,ry+3,null,'#fff5bd',2);this.path(p=>{p.moveTo(x-5*s,y-ry-13*s);p.lineTo(x,y-ry-7*s);p.lineTo(x+5*s,y-ry-13*s);},null,'#fff7c9',2);}
   if(stump.thorns){
    this.path(p=>{p.moveTo(x-r*.8,y);p.bezierCurveTo(x-r*.3,y-ry,x+r*.1,y+ry,x+r*.8,y-ry*.3);},null,'#456748',5*s);
@@ -54,8 +59,37 @@ export class RiverScene{
    this.ellipse(lx-2*s,ly-26*s,(5+urgency*2)*s,6*s,warning?'#fff2a1':'#d6f1ae','#588171');
   }
   const text=index===0?(this.zh?'腳下':'HERE'):stump.thorns?(this.zh?'跨過！':'SKIP!'):stump===game.target?(this.zh?'下一跳':'NEXT'):(this.zh?'再下一跳':'THEN');c.textAlign='center';c.font='700 11px "DM Sans",system-ui';c.fillStyle=stump.thorns?'#633d38':'#234e43';c.fillText(text,x,index>0?y-ry-23:y+height+ry+19);
-  if(dark){c.font='700 14px system-ui';c.fillStyle='#fff0cf';c.fillText('!',x+r*.62,y+height*.7);}c.restore();
+  if(stump.reinforced||stump.guarded)this.ellipse(x,y,r+2,ry+2,null,stump.guarded?'#cceff2':'#d6f2ff',2.5*s);
  }
+ lily(game,stump,index,projection){
+  const c=this.ctx,{s,point}=projection,p=point(stump),shake=this.shake(game,stump),submerge=stump===game.current&&stump.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,r=stump.r*s,ry=r*.43,height=r*.12,x=p.x+shake.x,y=p.y+shake.y+this.impact(game,stump)*s*1.5+submerge*65*s;c.save();c.globalAlpha=1-submerge;
+  this.ellipse(x+3*s,y+6*s,r*1.04,ry,'#2d696c22');this.ellipse(x,y+8*s,r*1.14,ry*1.07,null,'#d5efdc88',1.5);
+  const top=c.createRadialGradient(x-r*.3,y-ry*.3,1,x,y,r);top.addColorStop(0,'#b2da91');top.addColorStop(1,stump.sinking?'#648a5c':'#68a36e');
+  c.beginPath();c.moveTo(x,y);c.ellipse(x,y,r,ry,0,.22,Math.PI*2-.22);c.closePath();c.fillStyle=top;c.fill();c.lineWidth=2.5*s;c.strokeStyle='#488264';c.stroke();
+  for(let i=1;i<8;i++){const a=i*Math.PI/4;this.path(p=>{p.moveTo(x,y);p.lineTo(x+Math.cos(a)*r*.82,y+Math.sin(a)*ry*.82);},null,'#60955e88',1.2*s);}
+  this.ellipse(x-r*.4,y-ry*.15,6*s,2*s,'#e9f7d49c');
+  if(stump.id%3===0){const fx=x-r*.48,fy=y-ry*.72;for(let i=0;i<5;i++){const a=i*Math.PI*2/5;this.ellipse(fx+Math.cos(a)*5*s,fy+Math.sin(a)*4*s,4*s,3*s,'#f1c2c8','#d497a3',.5);}this.ellipse(fx,fy,3*s,2*s,'#f7df9a');}
+  this.surfaceMarks(game,stump,index,{s,r,ry,height,x,y});c.restore();
+ }
+ animal(x,y,scale,kind,pose){
+  if(kind==='frog'){this.frog(x,y,scale,pose);return;}
+  const {squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}=pose,c=this.ctx,ink='#4b514b';c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.15-stretch*.07)*(1-fall*.55),scale*(1-squat*.2+stretch*.1)*(1-fall*.55));
+  if(!airborne)this.ellipse(0,2,23,5,'#31543733');
+  if(kind==='monkey')this.path(p=>{p.moveTo(16,-8);p.bezierCurveTo(44,0,41,-36,30,-30);p.quadraticCurveTo(24,-26,32,-22);},null,'#9f7655',5);
+  const penguin=kind==='penguin',bunny=kind==='bunny',body=penguin?'#6d8797':bunny?'#efded8':kind==='monkey'?'#b48b65':'#b49b7d',light=penguin?'#fff2d7':bunny?'#fff5e7':'#f4d6ad';
+  for(const sign of [-1,1]){const footX=sign*(13+kick*7-tuck*5),footY=kick*13-tuck*4;this.ellipse(footX,footY,penguin?11:9,4,penguin?'#e6ac59':body,ink,1.5);}
+  const shade=c.createRadialGradient(-8,-31,2,0,-13,29);shade.addColorStop(0,light);shade.addColorStop(.2,body);shade.addColorStop(1,penguin?'#506b7f':bunny?'#d6bab8':'#917354');this.ellipse(0,-19,penguin?21:22,24,shade,ink,1.8);this.ellipse(0,-15,14,18,light);
+  if(!penguin)for(const sign of [-1,1]){const earX=sign*(bunny?10:19),earY=bunny?-51:-34;this.ellipse(earX,earY,bunny?6:8,bunny?17:8,body,ink,1.6);if(!penguin)this.ellipse(earX,earY,bunny?3:4,bunny?11:4,'#efb9b8');}
+  this.ellipse(0,-28,penguin?18:22,19,body,ink,1.8);this.ellipse(0,-25,penguin?14:17,13,light);
+  for(const sign of [-1,1]){this.ellipse(sign*8,-31,3,Math.max(1,4*(1-blink)),ink);this.ellipse(sign*14,-23,4,2,'#eeb3a5');}
+  if(penguin)this.path(p=>{p.moveTo(-5,-26);p.lineTo(0,-20);p.lineTo(5,-26);p.closePath();},'#e6ac59',ink,1);else{this.ellipse(0,-24,bunny?2:3,2,'#8b6256');this.path(p=>{p.moveTo(-5,-20);p.quadraticCurveTo(0,-15,5,-20);},null,ink,1.5);}
+  if(kind==='otter')for(const side of [-1,1])for(const dy of [-2,2])this.path(p=>{p.moveTo(side*7,-22+dy);p.lineTo(side*19,-23+dy*1.4);},null,'#805f4f',1);
+  for(const sign of [-1,1])this.path(p=>{p.moveTo(sign*18,-19);p.quadraticCurveTo(sign*(29+kick*2),-15-reach*8,sign*(24+stretch*4),-6+kick*5-reach*14);},null,penguin?'#59768c':body,penguin?7:6);
+  if(penguin){this.path(p=>{p.moveTo(-14,-17);p.quadraticCurveTo(0,-11,14,-17);},null,'#b6dbe4',5);this.path(p=>{p.moveTo(10,-16);p.lineTo(15,-3);},null,'#b6dbe4',5);}c.restore();
+ }
+ splash(game,projection){const age=game.clock-game.fall.at;if(age>800)return;const c=this.ctx,{s,point}=projection,p=point(game.fall),t=clamp(age/800);c.save();c.globalAlpha=1-t;this.ellipse(p.x,p.y+5*s,(18+t*45)*s,(6+t*16)*s,null,'#efffe7',2.5*s);for(let i=0;i<8;i++){const a=i*Math.PI/4,spread=10+t*48;this.ellipse(p.x+Math.cos(a)*spread*s,p.y+Math.sin(a)*spread*.27*s-Math.sin(Math.PI*clamp(t/.7))*(15+i%3*5)*s,2.5*s,4*s,'#def5e7');}c.restore();}
+ skillEffect(game,projection){const e=this.skill;if(!e||this.reduced.matches)return;const age=game.clock-e.at;if(age<0||age>650)return;const {s,point}=projection,c=this.ctx,p=point(e.point),t=age/650,colors={frog:'#d7f1a8',penguin:'#e0f7ff',bunny:'#ffe1e8',monkey:'#e8e5a1',otter:'#c9f1ed'};c.save();c.globalAlpha=1-t;this.ellipse(p.x,p.y,(e.radius+10+t*24)*s,(e.radius+10+t*24)*s*.43,null,colors[e.animal],3*s);for(let i=0;i<6;i++){const a=i*Math.PI/3;this.ellipse(p.x+Math.cos(a)*(e.radius+10+t*20)*s,p.y+Math.sin(a)*(e.radius+10+t*20)*s*.43,3*s,2*s,colors[e.animal]);}c.restore();}
+
  frog(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,airborne=false,lean=0,fall=0}={}){
   const c=this.ctx;c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.2-stretch*.08)*(1-fall*.55),scale*(1-squat*.24+stretch*.12)*(1-fall*.55));
   if(!airborne)this.ellipse(0,2,23+squat*3,5,'#31543733');
@@ -72,7 +106,7 @@ export class RiverScene{
   this.path(p=>{p.moveTo(-19,-17);p.quadraticCurveTo(-27,-11-reach*10,-26-stretch*5,-5+kick*5-reach*16);p.moveTo(19,-17);p.quadraticCurveTo(27,-11-reach*10,26+stretch*5,-5+kick*5-reach*16);},null,'#4d8349',3);c.restore();
  }
  angler(game,projection){
-  const c=this.ctx,{point,s}=projection,p=point(game.fall),t=clamp((game.clock-game.fall.at)/DROWN_MS),rise=Math.sin(Math.PI*clamp(t/.95)),open=Math.sin(Math.PI*clamp(t/.8)),k=Math.min(1.05,Math.max(.65,s*1.15));
+  const c=this.ctx,{point,s}=projection,p=point(game.fall),t=clamp((game.clock-game.fall.at-SPLASH_MS)/(DROWN_MS-SPLASH_MS)),rise=Math.sin(Math.PI*clamp(t/.95)),open=Math.sin(Math.PI*clamp(t/.8)),k=Math.min(1.05,Math.max(.65,s*1.15));
   c.save();c.translate(Math.max(55,Math.min(this.width-55,p.x)),p.y-rise*40);c.scale(k,k);
   this.ellipse(0,25,63,12,'#235a6433');this.ellipse(0,25,72+t*18,14+t*4,null,'#def8eb99',2);
   this.path(p=>{p.moveTo(-43,2);p.lineTo(-74,-18);p.quadraticCurveTo(-66,8,-74,25);p.closePath();},'#6d8ca0','#365f70',2);
@@ -84,7 +118,7 @@ export class RiverScene{
  }
 
  crocodile(game,projection){
-  const c=this.ctx,{point,s}=projection,f=game.fall,p=point(f),t=clamp((game.clock-f.at)/DROWN_MS),jump=Math.sin(Math.PI*clamp((t-.08)/.92))*35,open=Math.sin(Math.PI*clamp(t/.82)),k=Math.min(1.1,Math.max(.65,s*1.2));
+  const c=this.ctx,{point,s}=projection,f=game.fall,p=point(f),t=clamp((game.clock-f.at-SPLASH_MS)/(DROWN_MS-SPLASH_MS)),jump=Math.sin(Math.PI*clamp((t-.08)/.92))*35,open=Math.sin(Math.PI*clamp(t/.82)),k=Math.min(1.1,Math.max(.65,s*1.2));
   c.save();c.translate(Math.max(61,Math.min(this.width-61,p.x)),p.y-jump);c.scale(k,k);
   this.ellipse(0,10,67,21,'#2b7d7833');
   for(let i=0;i<8;i++){const angle=i*Math.PI/4,r=18+t*65;this.ellipse(Math.cos(angle)*r,Math.sin(angle)*r*.4,3,2,`rgba(235,255,239,${1-t})`);}
@@ -105,9 +139,12 @@ export class RiverScene{
     const height=clamp(frog.lift/180),c=this.ctx;c.save();c.globalAlpha=.23-height*.12;this.ellipse(p.x,p.y,23*s*(1-height*.4),6*s*(1-height*.35),'#234d48');c.restore();
    }
    const pose=this.reduced.matches?{...frog,squat:game.state==='charging'?game.power:0,stretch:0,kick:0,tuck:0,reach:0,blink:0}:frog;
-   this.frog(p.x+shake.x,p.y+shake.y+this.impact(game,game.current)*s-frog.lift*s,s*1.12,{...pose,airborne:game.state==='jumping'});
-  }else{const t=clamp((game.clock-game.fall.at)/DROWN_MS);if(t<.55)this.frog(p.x,p.y+t*18,s*1.12,{fall:t});if(game.fall.reason==='angler')this.angler(game,projection);else this.crocodile(game,projection);}
-  this.headAnchor={x:p.x+shake.x,y:p.y+shake.y-frog.lift*s-48*s*(1-frog.squat*.24)};
+   this.animal(p.x+shake.x,p.y+shake.y+this.impact(game,game.current)*s*(game.current.kind==='lily'?1.5:1)-frog.lift*s,s*1.12,game.animal,{...pose,airborne:game.state==='jumping'});
+  }else{
+   const age=game.clock-game.fall.at,t=clamp(age/SPLASH_MS),c=this.ctx;if(age<SPLASH_MS){c.save();c.globalAlpha=1-t;this.animal(p.x,p.y+t*25*s,s*1.12,game.animal,{fall:t});c.restore();}this.splash(game,projection);if(age>=SPLASH_MS){if(game.fall.reason==='angler')this.angler(game,projection);else this.crocodile(game,projection);}
+  }
+  this.skillEffect(game,projection);
+  this.headAnchor={x:p.x+shake.x,y:p.y+shake.y-frog.lift*s-(game.animal==='bunny'?72:48)*s*(1-frog.squat*.24)};
   if(!this.reduced.matches&&this.effect&&game.clock-this.effect.at<260){const t=clamp((game.clock-this.effect.at)/260),spot=point(game.current),c=this.ctx;c.save();c.globalAlpha=(1-t)*.45;for(const sign of [-1,1]){const x=spot.x+sign*24*s;this.path(p=>{p.moveTo(x-sign*3*s,spot.y+4*s);p.quadraticCurveTo(x,spot.y+7*s,x+sign*(5+t*6)*s,spot.y+3*s);},null,'#f4efc2',1.5*s);}c.restore();}
  }
 }

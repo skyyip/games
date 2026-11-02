@@ -1,0 +1,1 @@
+{"indexes":[{"collectionGroup":"frogger_leaderboard","queryScope":"COLLECTION","fields":[{"fieldPath":"score","order":"DESCENDING"},{"fieldPath":"at","order":"ASCENDING"}]}],"fieldOverrides":[]}

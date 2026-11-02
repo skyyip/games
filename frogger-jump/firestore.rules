@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+  function player(uid) { return /databases/$(database)/documents/frogger_players/$(uid); }
+  function run(uid,id) { return /databases/$(database)/documents/frogger_players/$(uid)/runs/$(id); }
+  function species(id) { return id in ['frog','penguin','bunny','monkey','otter']; }
+  function price(id) { return {'frog':0,'penguin':80,'bunny':120,'monkey':160,'otter':200}[id]; }
+  function coins(score) { return 1 + score * 2 + int(score / 20) * 10; }
+  function valid(p) {
+   return p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun'])
+    && p.version == 2 && p.name is string && p.name.matches('^[A-Za-z0-9_\\-一-鿿㐀-䶿]{2,16}$') && p.nameKey == p.name.lower()
+    && p.coins is int && p.coins >= 0 && p.coins <= 2000000000
+    && p.owned is list && p.owned.size() >= 1 && p.owned.size() <= 5 && p.owned.toSet().size() == p.owned.size()
+    && p.owned.hasAll(['frog']) && p.owned.hasOnly(['frog','penguin','bunny','monkey','otter']) && p.selected in p.owned
+    && p.best is int && p.best >= 0 && p.best <= 1000000 && p.bestAnimal in p.owned
+    && p.bestAt is timestamp && p.createdAt is timestamp && p.updatedAt == request.time
+    && (p.activeRun == null || p.activeRun is string) && (p.lastSettledRun == null || p.lastSettledRun is string);
+  }
+  function selection(p,old) { return p.diff(old).affectedKeys().hasOnly(['selected','updatedAt']); }
+  function purchase(p,old) { return p.diff(old).affectedKeys().hasOnly(['owned','selected','coins','updatedAt']) && p.owned.size() == old.owned.size()+1 && p.owned.hasAll(old.owned) && !(p.selected in old.owned) && p.coins == old.coins-price(p.selected); }
+  function begin(p,old,uid) { return p.diff(old).affectedKeys().hasOnly(['activeRun','updatedAt']) && p.activeRun is string && p.activeRun != old.activeRun && getAfter(run(uid,p.activeRun)).data.status == 'playing' && getAfter(run(uid,p.activeRun)).data.startedAt == request.time && (old.activeRun == null || getAfter(run(uid,old.activeRun)).data.status == 'abandoned'); }
+  function abandon(p,old,uid) { return p.diff(old).affectedKeys().hasOnly(['activeRun','updatedAt']) && p.activeRun == null && old.activeRun is string && getAfter(run(uid,old.activeRun)).data.status == 'abandoned'; }
+  function finish(p,old,uid) {
+   let r=getAfter(run(uid,old.activeRun)).data;
+   return p.diff(old).affectedKeys().hasOnly(['coins','activeRun','lastSettledRun','best','bestAnimal','bestAt','updatedAt']) && p.activeRun == null && p.lastSettledRun == old.activeRun && old.activeRun is string && r.status == 'finished' && p.coins == old.coins+r.coinsEarned
+    && (r.score > old.best ? p.best == r.score && p.bestAnimal == r.animal && p.bestAt == request.time : p.best == old.best && p.bestAnimal == old.bestAnimal && p.bestAt == old.bestAt);
+  }
+  match /frogger_names/{key} {
+   allow get: if request.auth != null;
+   allow list, update, delete: if false;
+   allow create: if owner(request.resource.data.uid) && request.resource.data.keys().hasOnly(['uid','name']) && getAfter(player(request.auth.uid)).data.nameKey == key && getAfter(player(request.auth.uid)).data.name == request.resource.data.name;
+  }
+  match /frogger_players/{uid} {
+   allow get: if owner(uid);
+   allow list, delete: if false;
+   allow create: if owner(uid) && valid(request.resource.data) && request.resource.data.coins == 0 && request.resource.data.owned == ['frog'] && request.resource.data.selected == 'frog' && request.resource.data.best == 0 && request.resource.data.bestAnimal == 'frog' && request.resource.data.bestAt == request.time && request.resource.data.createdAt == request.time && request.resource.data.activeRun == null && request.resource.data.lastSettledRun == null && getAfter(/databases/$(database)/documents/frogger_names/$(request.resource.data.nameKey)).data.uid == uid;
+   allow update: if owner(uid) && valid(request.resource.data) && request.resource.data.name == resource.data.name && request.resource.data.nameKey == resource.data.nameKey && request.resource.data.createdAt == resource.data.createdAt && (selection(request.resource.data,resource.data) || purchase(request.resource.data,resource.data) || begin(request.resource.data,resource.data,uid) || abandon(request.resource.data,resource.data,uid) || finish(request.resource.data,resource.data,uid));
+   match /runs/{id} {
+    allow get: if owner(uid);
+    allow list, delete: if false;
+    allow create: if owner(uid) && request.resource.data.keys().hasOnly(['uid','animal','status','startedAt','endedAt','score','coinsEarned']) && request.resource.data.uid == uid && species(request.resource.data.animal) && request.resource.data.animal == get(player(uid)).data.selected && request.resource.data.status == 'playing' && request.resource.data.startedAt == request.time && request.resource.data.endedAt == null && request.resource.data.score == 0 && request.resource.data.coinsEarned == 0 && getAfter(player(uid)).data.activeRun == id;
+    allow update: if owner(uid) && resource.data.status == 'playing' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','endedAt','score','coinsEarned']) && request.resource.data.endedAt == request.time && (request.resource.data.status == 'abandoned' && request.resource.data.score == 0 && request.resource.data.coinsEarned == 0 && getAfter(player(uid)).data.activeRun != id || request.resource.data.status == 'finished' && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 1000000 && request.resource.data.score <= int((request.time.toMillis()-resource.data.startedAt.toMillis()+1000)/250) && request.resource.data.coinsEarned == coins(request.resource.data.score) && getAfter(player(uid)).data.lastSettledRun == id && getAfter(player(uid)).data.activeRun == null);
+   }
+  }
+  match /frogger_leaderboard/{uid} {
+   allow get: if true;
+   allow list: if request.query.limit != null && request.query.limit <= 10;
+   allow delete: if false;
+   allow create, update: if owner(uid) && request.resource.data.keys().hasOnly(['uid','name','score','animal','at']) && request.resource.data.uid == uid && request.resource.data.name == getAfter(player(uid)).data.name && request.resource.data.score == getAfter(player(uid)).data.best && request.resource.data.score > 0 && request.resource.data.animal == getAfter(player(uid)).data.bestAnimal && request.resource.data.at == getAfter(player(uid)).data.bestAt && request.resource.data.at == request.time;
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}
