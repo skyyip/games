@@ -1,0 +1,59 @@
+name: Build comedy studio and optionally deploy to GoDaddy
+on:
+  push:
+    branches: [main]
+    paths: [mo-lei-tau-studio/**, .github/workflows/studio-godaddy.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: comedy-studio-godaddy
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mo-lei-tau-studio
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mo-lei-tau-studio/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: comedy-studio
+          path: mo-lei-tau-studio/dist/
+  deploy:
+    if: vars.STUDIO_DEPLOY_ENABLED == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: godaddy-studio
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: comedy-studio
+          path: dist
+      - name: Verify the game-only destination is configured
+        env:
+          STUDIO_FTP_DIR: ${{ secrets.STUDIO_FTP_DIR }}
+        run: |
+          test -n "$STUDIO_FTP_DIR"
+          case "$STUDIO_FTP_DIR" in
+            */mo-lei-tau-studio/) ;;
+            *) echo "STUDIO_FTP_DIR must target the game folder, ending /mo-lei-tau-studio/."; exit 1 ;;
+          esac
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ${{ secrets.STUDIO_FTP_DIR }}
+          dangerous-clean-slate: false

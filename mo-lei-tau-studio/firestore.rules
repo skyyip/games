@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function boundedList() { return request.query.limit != null && request.query.limit <= 20; }
+    match /users/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+    match /movies_crew/{movieId} {
+      allow get: if signedIn();
+      allow list: if signedIn() && boundedList();
+      allow create, update, delete: if false;
+    }
+    match /movie_results/{movieId} {
+      allow get: if signedIn();
+      allow list: if signedIn() && boundedList();
+      allow create, update, delete: if false;
+    }
+    match /public_profiles/{uid} {
+      allow get: if signedIn();
+      allow list: if signedIn() && boundedList();
+      allow create, update, delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

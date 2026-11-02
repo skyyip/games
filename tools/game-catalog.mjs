@@ -3,6 +3,14 @@
 export const siteUrl = 'https://sky-playground.com/games/';
 export const games = [
   {
+    slug:'mo-lei-tau-studio',name:'Mo Lei Tau Studio',zh:'星爺宇宙：無厘頭片場',genre:'Simulation',players:[1,1],topic:'Cute Hong Kong Comedy Film Studio Game',listed:false,
+    description:'Build a little Hong Kong comedy film studio. Choose a movie, audition three actors, train, earn wages, collect props and create a funny movie poster.',
+    intro:'A local-first comedy studio game. Pick one of three movie worlds, reveal three free unique contracts, develop actors and fund a six-person production with clearly labelled local extras.',
+    chinese:'可愛 Q 版港式片場養成遊戲。選片、三次免費試鏡、打工及演藝修煉；招募本機街坊臨演，湊齊六人與資金自動開拍，經歷三場危機後保存電影海報。',
+    steps:['Choose a movie and open three free, non-repeating character contracts. Select one as your active actor.', 'Earn two currencies through timed jobs and reaction or rhythm training. Collect the actor’s three props to awaken their portrait.', 'Claim a role, recruit local extras and fund the production. Invite a cross-movie guest before filming, then review three event reports, your box-office score and a downloadable poster.'],
+    related:['beat-bad-luck','memory-trace'],
+  },
+  {
     slug: 'frogger-jump', name: 'Frogger Jump 2.5D', zh: '蓄力蛙：鱷口求生', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game', listed: false,
     description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, and survive zigzag stumps, thorn obstacles, anglerfish and a red crocodile.',
     intro: 'A solo isometric jumping game. Charge a ping-pong power meter and release to hop automatically towards the next log. Land accurately to keep your streak alive.',

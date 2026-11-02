@@ -1,0 +1,10 @@
+import {FIREBASE_CONFIG,FIREBASE_REGION} from './firebase-settings.js';
+export const cloudConfigured=!!FIREBASE_CONFIG?.projectId;
+let session;
+export async function connectCloud(){
+ if(!cloudConfigured)throw Error('目前使用本機片場。Firebase 專案及後端接好後才會開放全服功能。');
+ if(!session)session=(async()=>{const [{initializeApp},{getAuth,signInAnonymously},{getFunctions,httpsCallable},{getFirestore,doc,getDoc,collection,query,orderBy,limit,getDocs}]=await Promise.all([import('firebase/app'),import('firebase/auth'),import('firebase/functions'),import('firebase/firestore')]);const app=initializeApp(FIREBASE_CONFIG,'mo-lei-tau-studio'),auth=getAuth(app),user=auth.currentUser??(await signInAnonymously(auth)).user,db=getFirestore(app),functions=getFunctions(app,FIREBASE_REGION);return {uid:user.uid,async player(){return (await getDoc(doc(db,'users',user.uid))).data()??null;},async lobby(){const snapshots=await Promise.all(['soccer','scholar','kungfu'].map(id=>getDoc(doc(db,'movies_crew',id))));return snapshots.filter(d=>d.exists()).map(d=>({id:d.id,...d.data()}));},async rankings(type='boxOffice'){const allowed={boxOffice:['movie_results','boxOffice'],popularity:['public_profiles','applause'],anticipation:['movies_crew','hype']};if(!allowed[type])throw Error('Unknown ranking');const [name,field]=allowed[type];return (await getDocs(query(collection(db,name),orderBy(field,'desc'),limit(20)))).docs.map(d=>({id:d.id,...d.data()}));},async command(action){return (await httpsCallable(functions,'studioCommand')({action})).data;}};})();
+ try{return await session;}catch(error){session=null;throw error;}
+}
+// UI refresh is demand-driven. A failed request also uses the cooldown.
+export function cooldownLoader(load,ms=10000){let nextAt=0,pending=null;return {get remaining(){return Math.max(0,nextAt-Date.now());},async refresh(){if(pending)return pending;if(Date.now()<nextAt)throw Error('等 10 秒再刷新，俾片場抖一抖。');nextAt=Date.now()+ms;pending=Promise.resolve().then(load);try{return await pending;}finally{pending=null;}}};}
