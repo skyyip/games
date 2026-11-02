@@ -1,7 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {RitualGame} from '../src/game.js';
-import {BODY_PARTS,RING_ROUND_MS,RING_IDEAL_MS,pullDirection,createBurstChallenge,resolveBurstAction} from '../src/burst-challenges.js';
-function setup(random=()=>.4){let now=0;const g=new RitualGame({now:()=>now,random});g.start();g.next();g.next();return {g,step(ms){now+=ms;g.advance();},charge(){for(let i=0;i<88;i++){this.step(60);assert.ok(g.hit());}},second(){this.charge();g.startFinisher();this.step(10000);this.charge();g.startFinisher();}};}
+import {BODY_PARTS,RING_ROUND_MS,RING_IDEAL_MS,pullDirection,createBurstChallenge,resolveBurstAction,syncBurstChallenge} from '../src/burst-challenges.js';
+function triple(){let first=true;return ()=>{if(first){first=false;return .999;}return 0;};}
+function setup(random=()=>.4){let now=0;const g=new RitualGame({now:()=>now,random});g.start();g.next();g.next();return {g,step(ms){now+=ms;g.advance();},charge(){for(let i=0;i<88;i++){this.step(60);assert.ok(g.hit());}},second(random){this.charge();g.startFinisher();this.step(10000);this.charge();if(random)g.random=random;g.startFinisher();}};}
 test('first finisher randomly chooses the next valid body part after each hit, without immediate repeats',()=>{const s=setup();s.charge();s.g.startFinisher();assert.equal(s.g.finisher.challenge.mode,'targets');const seen=[];for(let i=0;i<15;i++){const part=s.g.finisher.challenge.target;seen.push(part);s.step(60);const hit=s.g.finisherAction(part);assert.equal(hit.challengePart,part);assert.equal(hit.points,225);assert.equal(s.g.finisherCharge,0);}assert.ok(seen.every(id=>BODY_PARTS.some(p=>p.id===id)));assert.equal(s.g.finisher.challenge.bag.length,0);for(let i=1;i<seen.length;i++)assert.notEqual(seen[i],seen[i-1]);});
 test('correct parts are mandatory; arbitrary gestures and wrong parts award no points or wear',()=>{const s=setup();s.charge();s.g.startFinisher();s.step(100);const score=s.g.score,hits=s.g.hits,part=s.g.finisher.challenge.target;assert.equal(s.g.hit(),null);assert.equal(s.g.finisherAction('timing'),null);assert.equal(s.g.finisherAction(BODY_PARTS.find(p=>p.id!==part).id),null);assert.equal(s.g.score,score);assert.equal(s.g.hits,hits);assert.equal(s.g.finisher.challenge.target,part);assert.ok(s.g.finisherAction(part));});
 test('three finisher challenges cycle in order while every use needs its own 88-hit chain',()=>{const s=setup();for(let use=1;use<=6;use++){s.g.phaseStarted=s.g.clock;s.charge();assert.ok(s.g.startFinisher());assert.equal(s.g.finisher.challenge.mode,['targets','timing','pull'][(use-1)%3]);assert.equal(s.g.startFinisher(),false);s.step(10000);assert.equal(s.g.finisherCharge,0);assert.equal(s.g.startFinisher(),false);}s.g.start();assert.equal(s.g.finisherUses,0);});
@@ -26,7 +27,7 @@ test('faster target tapping accepts a new valid hit at 35ms but still rejects du
 });
 test('rings start at staggered times, have unique live parts and expire individually within the three-ring cap',()=>{
  for(const roll of [0,.4,.9999]){const s=setup(()=>roll);s.second();const seen=new Map(),score=s.g.score;assert.equal(s.g.finisher.challenge.rings.length,1);
- for(let i=0;i<999;i++){const active=s.g.finisher.challenge.rings;assert(active.length>=1&&active.length<=3);assert.equal(new Set(active.map(r=>r.part)).size,active.length);assert.equal(new Set(active.map(r=>r.at)).size,active.length);for(const ring of active){assert(s.g.finisherTime-ring.at>=0&&s.g.finisherTime-ring.at<RING_ROUND_MS);if(seen.has(ring.id))assert.equal(seen.get(ring.id),ring.at);seen.set(ring.id,ring.at);}s.step(10);}assert(seen.size>10);assert.equal(s.g.score,score);}
+ for(let i=0;i<999;i++){const active=s.g.finisher.challenge.rings;assert(active.length>=1&&active.length<=3);assert.equal(new Set(active.map(r=>r.part)).size,active.length);assert.equal(new Set(active.map(r=>r.at)).size,active.length);for(const ring of active){assert(s.g.finisherTime-ring.at>=0&&s.g.finisherTime-ring.at<RING_ROUND_MS);if(seen.has(ring.id))assert.equal(seen.get(ring.id),ring.at);seen.set(ring.id,ring.at);}s.step(10);}assert(seen.size>=9);assert.equal(s.g.score,score);}
 });
 test('expired ring IDs and the finisher deadline cannot leak points',()=>{
  const s=setup();s.second();const first=s.g.finisher.challenge.rings[0],before=s.g.score;s.step(880);assert.equal(s.g.finisherAction('timing:'+first.id).points,675);s.step(220);assert.equal(s.g.finisherAction('timing:'+first.id),null);s.step(8900);assert.equal(s.g.finisherBusy,false);assert.equal(s.g.finisherAction('timing'),null);assert.equal(s.g.score-before,675);
@@ -38,15 +39,29 @@ test('each first-use target is sampled anew, all five parts are reachable and a 
 });
 
 test('each staggered ring can score Excellence at its own ideal time, even as older rings disappear',()=>{
- const s=setup(()=>0);s.second();s.step(720);const rings=[...s.g.finisher.challenge.rings],before=s.g.score;assert.equal(rings.length,3);assert.deepEqual(rings.map(r=>r.at),[0,320,640]);
+ const s=setup();s.second(triple());s.step(720);const rings=[...s.g.finisher.challenge.rings],before=s.g.score;assert.equal(rings.length,3);assert.deepEqual(rings.map(r=>r.at),[0,320,640]);
  for(const ring of rings){s.step(ring.at+RING_IDEAL_MS-s.g.finisherTime);assert.equal(s.g.finisherAction('timing:'+ring.id).points,675);assert.equal(s.g.finisherAction('timing:'+ring.id,{pointer:'other'}),null);}assert.equal(s.g.score-before,2025);assert.equal(s.g.finisher.hits,3);assert.equal(s.g.finisherCharge,0);
 });
 test('three existing rings can score separately with the same pointer at one instant, using their own ages',()=>{
- const s=setup(()=>0);s.second();s.step(1060);const rings=s.g.finisher.challenge.rings,before=s.g.score;assert.equal(rings.length,3);for(const [i,points]of [450,450,225].entries())assert.equal(s.g.finisherAction('timing:'+rings[i].id).points,points);assert.equal(s.g.score-before,1125);assert.equal(s.g.finisher.hits,3);assert.equal(s.g.finisherAction('timing:unknown'),null);
+ const s=setup();s.second(triple());s.step(1060);const rings=s.g.finisher.challenge.rings,before=s.g.score;assert.equal(rings.length,3);for(const [i,points]of [450,450,225].entries())assert.equal(s.g.finisherAction('timing:'+rings[i].id).points,points);assert.equal(s.g.score-before,1125);assert.equal(s.g.finisher.hits,3);assert.equal(s.g.finisherAction('timing:unknown'),null);
 });
 test('an early miss locks only its own ring while the other staggered rings remain playable',()=>{
- const s=setup(()=>0);s.second();const first=s.g.finisher.challenge.rings[0],before=s.g.score;assert.equal(s.g.finisherAction('timing:'+first.id).challengeGrade,'Miss');s.step(1060);assert.equal(s.g.finisherAction('timing:'+first.id),null);const other=s.g.finisher.challenge.rings.filter(r=>r.id!==first.id);assert.equal(s.g.finisherAction('timing:'+other[0].id).points,450);assert.equal(s.g.finisherAction('timing:'+other[1].id).points,225);assert.equal(s.g.score-before,675);
+ const s=setup();s.second(triple());const first=s.g.finisher.challenge.rings[0],before=s.g.score;assert.equal(s.g.finisherAction('timing:'+first.id).challengeGrade,'Miss');s.step(1060);assert.equal(s.g.finisherAction('timing:'+first.id),null);const other=s.g.finisher.challenge.rings.filter(r=>r.id!==first.id);assert.equal(s.g.finisherAction('timing:'+other[0].id).points,450);assert.equal(s.g.finisherAction('timing:'+other[1].id).points,225);assert.equal(s.g.score-before,675);
 });
 test('a delayed render catches up the schedule without resetting surviving rings to the same age',()=>{
  const a=setup(),b=setup();a.second();b.second();for(let i=0;i<500;i++)a.step(10);b.step(5000);assert.deepEqual(a.g.finisher.challenge.rings,b.g.finisher.challenge.rings);assert.equal(a.g.finisher.challenge.nextSpawnAt,b.g.finisher.challenge.nextSpawnAt);
+});
+
+ test('random batches contain one, two or three independently placed staggered rings',()=>{
+ for(const [roll,count]of [[0,1],[.4,2],[.999,3]]){
+  const state=createBurstChallenge(2,()=>roll),seen=new Map();
+  for(let t=0;t<10000;t+=10){syncBurstChallenge(state,t,()=>roll);assert(state.rings.length>=1&&state.rings.length<=count);for(const r of state.rings){assert(r.position.x>=0&&r.position.x<=1&&r.position.y>=0&&r.position.y<=1);seen.set(r.id,r);}}
+  const rings=[...seen.values()];assert.equal(rings[0].at,0);for(let i=0;i<count;i++)assert(rings[i].at<1100);assert.equal(rings[count].at,rings[count-1].at+1100);
+  const fresh=createBurstChallenge(2,()=>roll);syncBurstChallenge(fresh,1000,()=>roll);assert.equal(fresh.rings.length,count);
+ }
+});
+test('random positions vary independently of body parts and remain stable for each live ring',()=>{
+ let seed=9;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32),state=createBurstChallenge(2,random),positions=new Map();
+ for(let t=0;t<10000;t+=10){syncBurstChallenge(state,t,random);for(const ring of state.rings){if(positions.has(ring.id))assert.deepEqual(ring.position,positions.get(ring.id));else positions.set(ring.id,{...ring.position});}}
+ assert(new Set([...positions.values()].map(p=>p.x)).size>8);assert([...positions.values()].some(p=>p.x<.3));assert([...positions.values()].some(p=>p.x>.7));
 });

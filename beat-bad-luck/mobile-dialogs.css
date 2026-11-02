@@ -222,7 +222,7 @@ body .has-favorite>button.item-favorite{width:44px;height:44px;min-width:44px;mi
 .burst-pull-arrow{font:700 24px/1 var(--display);pointer-events:none}
 @media(max-height:500px){#burst-pull-zone{gap:2px}.burst-pull-arrow{font-size:18px}#burst-pull-zone .burst-pull-handle{width:44px;height:44px;font-size:28px}}
 @media(max-height:500px) and (min-aspect-ratio:4/3){#burst-pull-zone{inset:3px 12px;gap:0}}
-#burst-body-target{position:absolute;display:grid;place-items:center;min-width:44px;min-height:44px;width:44px;height:44px;padding:0;transform:translate(-50%,-50%);border:3px solid #ffe295;border-radius:50%;background:#255744ed;color:#fff6d2;font:700 12px/1.1 var(--display);pointer-events:auto;touch-action:manipulation;box-shadow:0 0 0 4px #fff2ba44!important}
+#burst-body-target,#burst-target-exit{position:absolute;display:grid;place-items:center;min-width:44px;min-height:44px;width:44px;height:44px;padding:0;transform:translate(-50%,-50%);border:3px solid #ffe295;border-radius:50%;background:#255744ed;color:#fff6d2;font:700 12px/1.1 var(--display);pointer-events:auto;touch-action:manipulation;box-shadow:0 0 0 4px #fff2ba44!important}
 #burst-challenge[data-mode=targets] #burst-body-target::after{content:"";position:absolute;inset:-3px;border:2px solid #ffe295;border-radius:50%;pointer-events:none;animation:burst-target-pulse .9s cubic-bezier(.2,.65,.3,1) infinite}
 #burst-challenge[data-paused=true] #burst-body-target::after{animation-play-state:paused}
 @keyframes burst-target-pulse{0%{transform:scale(1);opacity:.9}85%,100%{transform:scale(1.4);opacity:0}}
@@ -262,3 +262,5 @@ body .has-favorite>button.item-favorite{width:44px;height:44px;min-width:44px;mi
 
 #fortune-album .album-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
 #fortune-album .album-actions>button{width:100%;min-width:0;margin:0;white-space:normal;line-height:1.35}
+
+#burst-target-exit{pointer-events:none;will-change:opacity}
