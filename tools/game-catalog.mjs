@@ -3,6 +3,14 @@
 export const siteUrl = 'https://sky-playground.com/games/';
 export const games = [
   {
+    slug: 'frogger-jump', name: 'Frogger Jump 2.5D', zh: '蓄力蛙：鱷口求生', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game', listed: false,
+    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, and survive zigzag stumps, sinking logs and a red crocodile.',
+    intro: 'A solo isometric jumping game. Charge a ping-pong power meter and release to hop automatically towards the next log. Land accurately to keep your streak alive.',
+    chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按讓力度在 0–100% 來回，放手自動瞄準下一塊樹樁；預判 I 字與 Z 字路線，避開 2.5 秒沉木陷阱，挑戰最高連跳。',
+    steps: ['Hold the screen, mouse button or Space to charge. Release to jump towards the next stump.', 'Judge the changing gap and top radius. Read the current log and two upcoming logs as straight and zigzag routes alternate.', 'From jump 11, leave dark sinking logs within 2.5 seconds of landing. A fall brings out the crocodile; compare your locally saved best runs.'],
+    related: ['floating-balance', 'stone-skip'],
+  },
+  {
     slug: 'beat-bad-luck', name: 'Beat the Bad Luck', zh: '鵝頸橋下：小人退散！', genre: 'Casual', players: [1, 1],
     topic: 'Hong Kong Ritual Game',
     description: 'Play Beat the Bad Luck, a free Hong Kong-inspired browser game. Light incense, tap away a paper gremlin and decorate Master Yip’s stall.',

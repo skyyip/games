@@ -3,13 +3,16 @@ import {resolve,dirname,relative,extname,posix} from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {applySeo,writeDiscovery} from './seo.mjs';
-import {siteUrl} from './game-catalog.mjs';
+import {siteUrl,games} from './game-catalog.mjs';
 import {serviceWorkerSource} from './service-worker-source.mjs';
 const repo=resolve(import.meta.dirname,'..'),out=resolve(process.argv[2]||resolve(repo,'_site')),base=process.env.PLAYGROUND_BASE_PATH||'/',esbuild=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex').slice(0,12),slash=s=>s.replaceAll('\\','/');
 if(out===repo||!out.startsWith(repo+'/')&&!out.startsWith('/tmp/'))throw Error('Unsafe build directory');
 await rm(out,{recursive:true,force:true});await mkdir(resolve(out,'assets'),{recursive:true});
-let tracked;try{tracked=execFileSync('git',['ls-files'],{cwd:repo,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim().split('\n');}catch{tracked=(await allFiles(repo)).map(f=>slash(relative(repo,f))).filter(f=>!f.includes('node_modules/')&&!f.startsWith('_site/'));}const pages=tracked.filter(n=>n==='index.html'||/^[^/]+\/index\.html$/.test(n));
+let tracked;try{tracked=execFileSync('git',['ls-files'],{cwd:repo,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim().split('\n');}catch{tracked=(await allFiles(repo)).map(f=>slash(relative(repo,f))).filter(f=>!f.includes('node_modules/')&&!f.startsWith('_site/'));}
+// Registered new games must be previewable before their first commit.
+tracked=[...new Set([...tracked,...games.flatMap(game=>[game.slug+'/index.html',game.slug+'/manifest.webmanifest'])])];
+const pages=tracked.filter(n=>n==='index.html'||/^[^/]+\/index\.html$/.test(n));
 const assetFiles=tracked.filter(n=>/\.(png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|wav|mp3)$/i.test(n));
 // Also include newly introduced assets before their first commit.
 for(const n of ['grid-rush/assets/fonts/Iansui.woff2'])if(!assetFiles.includes(n))assetFiles.push(n);

@@ -1,0 +1,71 @@
+import {FroggerGame,CHARGE_UP_MS,SINK_MS,CAMERA_MS} from './game.js';
+import {RiverScene} from './scene.js';import {RECORD_KEY,readRecords,addRecord,mergeRecords} from './records.js';
+import {getLanguage} from '../../grid-rush/src/language.js';
+const $=id=>document.getElementById(id),game=new FroggerGame(),preview=new FroggerGame({random:()=>.43,now:()=>0}),scene=new RiverScene($('scene'));preview.start();preview.state='ready';
+const copy={
+ skip:['前往遊戲','Skip to game'],allGames:['← 所有遊戲','← All games'],titleA:['蓄力蛙：','Frogger Jump'],titleB:['鱷口求生。','2.5D.'],intro:['小小一躍，大大求生慾。<br>長按蓄力，放手，跳過今天的難關。','A little leap. A lot to live for.<br>Hold, release, and hop past today’s hurdles.'],streak:['連跳','JUMPS'],best:['歷史最高','PERSONAL BEST'],power:['蓄力','POWER'],threeLogs:['三樹樁視野','THREE LOGS AHEAD'],welcomeKicker:['一隻手指，跳出一條生路。','ONE FINGER. ONE WAY FORWARD.'],welcomeTitle:['準備好，蛙一聲！','Ready, steady… ribbit!'],welcomeNote:['青蛙會自動瞄準。看準距離，在剛好的力度放手。','Frog aims for you. Read the gap and release at just the right power.'],start:['開始跳躍 ↗','Let’s hop ↗'],hold:['按住蓄力 · 放手起跳','Hold to charge · release to hop'],controls:['手指／滑鼠長按畫面，或按住空白鍵。','Hold the screen, mouse button, or Space.'],pauseTitle:['休息一小下。','Take a little breather.'],pauseNote:['蓄力及沉木倒數已暫停。準備好再出發。','The river is on pause, including sinking logs. Continue when you’re ready.'],resume:['繼續跳躍 ↗','Keep hopping ↗'],quit:['返回河岸','Back to the riverbank'],resultKicker:['跳躍有盡時，求生無上限。','A LITTLE SPLASH. A FRESH START.'],you:['你','You'],jumps:['次連跳','jumps'],again:['再蛙一次 ↗','One more hop ↗'],fieldNotes:['河岸求生筆記','NOTES FROM THE RIVERBANK'],guideTitle:['跳得遠，不如跳得準。','Go for precision.'],guideHold:['按住，再放手','Hold. Then let go.'],guideHoldNote:['力度在 0–100% 來回。蓄得久，不一定跳得遠。','Power bounces from 0–100%. Holding longer doesn’t always mean further.'],guideRoute:['I 字直跳，Z 字斜跳','Straight I, zigzag Z'],guideRouteNote:['青蛙自動瞄準。一次看三塊樹樁，提前讀懂路線。','Frog aims automatically. Read three logs ahead to spot the next turn.'],guideSink:['深色沉木，2.5 秒！','Dark logs: 2.5 seconds!'],guideSinkNote:['第 11 跳起小心沉木，落地才倒數；跳走就安全。','From jump 11, watch for sinking logs. Your 2.5 seconds start on landing.'],recordsTitle:['最會跳的三次。','Your three best leaps.'],sideCaption:['水很清。鱷魚很餓。<br>今天就靠你這根手指。','Clear water. Hungry crocodile.<br>It all comes down to one finger.'],footer:['一跳一呼吸，慢慢過河。','One breath. One hop. Find your rhythm.']
+};
+const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en,put=(node,text)=>{if(node.textContent!==String(text))node.textContent=text;};
+let records=[],persistent=true,frame=0,lastDraw=-Infinity,pointer=null,keyboard=null,saved=false,flashUntil=0,lastRoute='',audioContext=null,audioTimer=0,sound=false;
+try{records=readRecords(localStorage.getItem(RECORD_KEY));sound=localStorage.getItem('frogger-jump.sound.v1')==='true';}catch{persistent=false;}
+const model=()=>game.state==='ready'?preview:game;
+function audio(pitch=380){if(!sound)return;try{audioContext??=new (window.AudioContext||window.webkitAudioContext)();audioContext.resume().catch(()=>{});clearTimeout(audioTimer);const o=audioContext.createOscillator(),v=audioContext.createGain(),at=audioContext.currentTime;o.type='sine';o.frequency.setValueAtTime(pitch,at);o.frequency.exponentialRampToValueAtTime(pitch*.55,at+.15);v.gain.setValueAtTime(.055,at);v.gain.exponentialRampToValueAtTime(.001,at+.18);o.connect(v);v.connect(audioContext.destination);o.start();o.stop(at+.2);audioTimer=setTimeout(()=>audioContext?.suspend().catch(()=>{}),600);}catch{}}
+function silence(){clearTimeout(audioTimer);audioContext?.suspend().catch(()=>{});}
+function buzz(value){try{navigator.vibrate?.(value);}catch{}}
+function announce(text){put($('announcements'),text);}
+function renderRecords(){
+ $('records').replaceChildren();if(!records.length){const li=document.createElement('li');li.textContent=local('下一次，就係你的代表作。','Your next hop could be the one.');$('records').append(li);}
+ for(const [index,record]of records.entries()){const li=document.createElement('li'),medal=document.createElement('span'),label=document.createElement('span'),value=document.createElement('b');medal.className='medal';medal.textContent=index+1;label.textContent=new Date(record.at).toLocaleDateString(getLanguage()==='zh-Hant'?'zh-Hant':'en',{month:'short',day:'numeric'});value.textContent=record.score;li.append(medal,label,value);$('records').append(li);}
+ put($('storage-note'),persistent?local('最高三次，保存在這部裝置。','Top three runs, saved on this device.'):local('此頁暫存紀錄；瀏覽器未允許永久儲存。','Records last for this visit; storage is unavailable.'));
+}
+function language(){
+ for(const node of document.querySelectorAll('[data-copy]')){const pair=copy[node.dataset.copy];if(!pair)continue;const target=node.querySelector('.champion-label')??node,targetText=pair[getLanguage()==='zh-Hant'?0:1];if(target.innerHTML!==targetText)target.innerHTML=targetText;}
+ $('sound-mark').setAttribute('d',sound?'M17 8q6 4 0 8M17 4q12 8 0 16':'m17 9 5 6m0-6-5 6');scene.zh=getLanguage()==='zh-Hant';$('pause').setAttribute('aria-label',local('暫停遊戲','Pause game'));$('sound').setAttribute('aria-label',sound?local('關閉音效','Mute sound'):local('開啟音效','Enable sound'));$('sound').setAttribute('aria-pressed',String(sound));$('jump-control').setAttribute('aria-label',local('按住蓄力，放手跳躍；空白鍵亦可操作。','Hold to charge, release to jump. Space works too.'));$('charge-meter').setAttribute('aria-label',local('蓄力百分比','Jump power percentage'));
+ for(const id of ['pause-close'])$(id).setAttribute('aria-label',local('繼續遊戲','Resume game'));$('result-close').setAttribute('aria-label',local('返回河岸','Back to the riverbank'));renderRecords();lastRoute='';paint();
+}
+function lock(value){document.body.classList.toggle('is-playing',value);for(const node of document.querySelectorAll('#site-header,#intro,#sidebar,#footer,.game-guide'))node.inert=value;}
+function resetInput(){const held=pointer;pointer=null;keyboard=null;game.cancelCharge();$('hold-button').classList.remove('is-held');if(held)try{held.node.releasePointerCapture(held.id);}catch{}}
+function start(){
+ resetInput();silence();if($('result-dialog').open)$('result-dialog').close();$('result-celebration').hidden=true;if($('pause-dialog').open)$('pause-dialog').close();game.start();scene.reset();saved=false;flashUntil=0;lastRoute='';$('welcome').hidden=true;lock(true);$('jump-control').disabled=false;$('hold-button').disabled=false;$('pause').disabled=false;put($('play-hint'),local('看準下一塊，按住，再放手。','Read the next gap. Hold, then release.'));resize();$('jump-control').focus({preventScroll:true});wake();
+}
+function home(){resetInput();cancelAnimationFrame(frame);frame=0;silence();if($('pause-dialog').open)$('pause-dialog').close();if($('result-dialog').open)$('result-dialog').close();$('result-celebration').hidden=true;game.reset();scene.reset();$('welcome').hidden=false;lock(false);$('jump-control').disabled=true;$('hold-button').disabled=true;$('pause').disabled=true;put($('play-hint'),local('蓄力會來回，不會一直變大喔。','Power goes up, then down. Find your moment.'));resize();$('start').focus({preventScroll:true});}
+function pause(){if(!game.pause())return;resetInput();cancelAnimationFrame(frame);frame=0;silence();paint();$('pause-dialog').showModal();$('resume').focus({preventScroll:true});}
+function resume(){if(!game.resume())return;$('pause-dialog').close();$('jump-control').focus({preventScroll:true});wake();}
+function result(){
+ if(saved)return;saved=true;resetInput();$('pause').disabled=true;$('jump-control').disabled=true;$('hold-button').disabled=true;let prior=records;
+ try{prior=mergeRecords(records,readRecords(localStorage.getItem(RECORD_KEY)));}catch{persistent=false;}
+ const best=prior[0]?.score??0,newBest=game.score>best;records=addRecord(prior,game.score);
+ if(game.score>0)try{localStorage.setItem(RECORD_KEY,JSON.stringify(records));}catch{persistent=false;}
+ renderRecords();put($('final-score'),game.score);put($('result-best'),records[0]?.score??0);put($('result-title'),newBest?local('蛙！新紀錄！','Ribbit! A new best!'):local('鱷魚：多謝款待！','Croc says: thanks for lunch!'));
+ const reason={short:['差少少！下次加多點力度。','A little short! Try a little more power.'],long:['跳過頭喇！下次早少少放手。','A little too far! Try a little less power.'],sunk:['沉木收工喇！下次要在 2.5 秒內跳走。','That log clocked off! Hop away within 2.5 seconds.']}[game.fall.reason];put($('result-reason'),local(...reason));put($('record-notice'),newBest?local('本機最高紀錄，靚！','A fresh personal best. Beautiful!'):'');$('result-celebration').classList.toggle('is-lost',game.score===0);$('result-celebration').hidden=false;$('result-dialog').showModal();$('again').focus({preventScroll:true});announce(local(`今次連跳 ${game.score} 次。`,`You made ${game.score} successful jumps.`));
+}
+function processEvents(){for(const event of game.drainEvents()){
+ if(event.type==='jump'){audio(300+event.power*150);put($('play-hint'),local('走你！','Here we go!'));}
+ if(event.type==='land'){scene.effect={at:game.clock,perfect:event.perfect};flashUntil=game.clock+650;audio(event.perfect?680:510);buzz(12);const message=event.perfect?local('正中心落地！＋1','Dead centre! +1'):local('跳得靚！＋1','Lovely landing! +1');put($('play-hint'),message);announce(message+(game.current.sinking?local(' 沉木，2.5 秒內跳走！',' Sinking log: hop away within 2.5 seconds!'):''));}
+ if(event.type==='fall'){resetInput();audio(115);buzz([12,35,18]);put($('play-hint'),local('糟糕，鱷魚開飯喇！','Uh-oh. Crocodile lunch break!'));}
+ if(event.type==='over')result();
+}}
+function paint(){
+ const m=model();$('play-shell').dataset.state=game.state;$('play-shell').dataset.paused=String(game.paused);put($('score'),game.score);put($('best'),Math.max(records[0]?.score??0,game.score));put($('stage'),local(`階段 ${m.current.id<=10?1:m.current.id<=30?2:3}`,`STAGE ${m.current.id<=10?1:m.current.id<=30?2:3}`));
+ const pct=Math.round((m.state==='charging'?m.power:m.state==='jumping'?m.jump.power:0)*100);put($('power'),pct+'%');if($('charge-meter').getAttribute('aria-valuenow')!==String(pct)){$('charge-meter').setAttribute('aria-valuenow',pct);$('charge-fill').style.transform=`scaleX(${pct/100})`;}
+ const dx=m.target.x-m.current.x,route=dx===0?'I ↑':dx<0?'Z ↖':'Z ↗';put($('route'),route);const trap=m.current.sinking&&['idle','charging'].includes(m.state);$('hazard').classList.toggle('is-danger',trap);put($('hazard'),trap?local(`沉木・${(m.sinkRemaining/1000).toFixed(1)} s`,`SINKING · ${(m.sinkRemaining/1000).toFixed(1)} s`):m.target.sinking?local('下一塊是沉木！','Next log sinks!'):local('瞄準下一塊樹樁','Eyes on the next log'));
+ const key=m.current.id+'|'+getLanguage();if(key!==lastRoute){lastRoute=key;$('route-description').replaceChildren();for(const [i,s]of m.stumps.entries()){const li=document.createElement('li');li.textContent=local(`${['腳下','下一跳','再下一跳'][i]}：${s.sinking?'沉木':'普通樹樁'}，${s.route==='I'?'直線':'斜向'}。`,`${['Current','Next','Following'][i]}: ${s.sinking?'sinking':'ordinary'} log, ${s.route==='I'?'straight':'diagonal'} route.`);$('route-description').append(li);}}
+ scene.draw(m);
+}
+function tick(at){frame=0;if(game.paused||document.hidden)return;game.update();processEvents();const moving=game.needsAnimation||game.state==='idle'&&game.clock<flashUntil;if(at-lastDraw>=1000/30||!moving){lastDraw=at;paint();}if(moving)frame=requestAnimationFrame(tick);}
+function wake(){if(!frame&&!game.paused&&!document.hidden){lastDraw=-Infinity;frame=requestAnimationFrame(tick);}}
+function resize(){const r=$('river').getBoundingClientRect();if(r.width&&r.height){scene.resize(r.width,r.height);paint();}wake();}
+function begin(){if(!game.beginCharge())return false;$('hold-button').classList.add('is-held');put($('play-hint'),local('看力度，鬆手就起跳。','Watch the power. Let go to hop.'));wake();return true;}
+for(const id of ['jump-control','hold-button']){
+ const node=$(id);node.addEventListener('pointerdown',e=>{if(e.button!==0||pointer||keyboard||game.paused)return;e.preventDefault();if(begin()){pointer={id:e.pointerId,node};node.setPointerCapture(e.pointerId);}});
+ node.addEventListener('pointerup',e=>{if(pointer?.id!==e.pointerId)return;e.preventDefault();const held=pointer;pointer=null;try{held.node.releasePointerCapture(held.id);}catch{}$('hold-button').classList.remove('is-held');game.release();processEvents();paint();wake();});
+ for(const type of ['pointercancel','lostpointercapture'])node.addEventListener(type,e=>{if(pointer?.id===e.pointerId){resetInput();paint();wake();}});
+ node.addEventListener('keydown',e=>{if(![' ','Enter'].includes(e.key))return;e.preventDefault();if(!e.repeat&&!pointer&&!keyboard&&begin())keyboard=e.code;});node.addEventListener('keyup',e=>{if(![' ','Enter'].includes(e.key))return;e.preventDefault();if(keyboard!==e.code)return;keyboard=null;$('hold-button').classList.remove('is-held');game.release();processEvents();paint();wake();});
+ node.addEventListener('contextmenu',e=>e.preventDefault());node.addEventListener('selectstart',e=>e.preventDefault());
+}
+for(const id of ['start','again'])$(id).addEventListener('click',start);for(const id of ['quit','result-home','result-close'])$(id).addEventListener('click',home);$('pause').addEventListener('click',pause);for(const id of ['resume','pause-close'])$(id).addEventListener('click',resume);
+$('pause-dialog').addEventListener('cancel',e=>{e.preventDefault();resume();});$('result-dialog').addEventListener('cancel',e=>{e.preventDefault();home();});
+$('sound').addEventListener('click',()=>{sound=!sound;try{localStorage.setItem('frogger-jump.sound.v1',String(sound));}catch{}$('sound-mark').setAttribute('d',sound?'M17 8q6 4 0 8M17 4q12 8 0 16':'m17 9 5 6m0-6-5 6');language();if(sound)audio(580);else silence();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});window.addEventListener('blur',()=>{if(pointer||keyboard){resetInput();paint();wake();}});document.addEventListener('languagechange',language);window.addEventListener('storage',event=>{if(event.key===RECORD_KEY){records=readRecords(event.newValue);renderRecords();paint();}});
+new ResizeObserver(resize).observe($('river'));document.fonts?.ready.then(()=>paint());language();put($('play-hint'),local('蓄力會來回，不會一直變大喔。','Power goes up, then down. Find your moment.'));resize();
+if('serviceWorker'in navigator)navigator.serviceWorker.register(new URL('../sw.js',import.meta.url)).catch(()=>{});
