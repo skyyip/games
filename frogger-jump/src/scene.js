@@ -1,19 +1,32 @@
 import {CAMERA_MS,SINK_MS,DROWN_MS,FISH_WARNING_MS} from './game.js';
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
 export class RiverScene{
- constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.zoom=null;this.currentId=null;this.effect=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
  resize(width,height){this.width=Math.max(1,width);this.height=Math.max(1,height);const dpr=Math.min(devicePixelRatio||1,2);this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;}
- reset(){this.zoom=null;this.currentId=null;this.effect=null;}
+ reset(){this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;}
  ellipse(x,y,rx,ry,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  path(points,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();points(c);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  projection(game){
   const span=game.stumps[2].y-game.current.y,fit=Math.min(this.width/425,(this.height*.7-12)/(span*.74+80),1.5);
   if(this.zoom===null){this.zoom=fit;this.zoomFrom=fit;this.zoomTarget=fit;this.currentId=game.current.id;}
   if(this.currentId!==game.current.id){this.zoomFrom=this.zoom;this.zoomTarget=fit;this.currentId=game.current.id;}
-  const t=clamp((game.clock-game.cameraAt)/CAMERA_MS);this.zoom=mix(this.zoomFrom,this.zoomTarget,1-(1-t)**3);
+  const t=clamp((game.clock-game.cameraAt)/CAMERA_MS);this.zoom=mix(this.zoomFrom,this.zoomTarget,t*t*(3-2*t));
   const s=this.zoom;return {s,point:p=>({x:this.width/2+p.x*s,y:this.height*.79-(p.y-game.camera)*s*.74})};
  }
  shake(game,stump){if(this.reduced.matches||stump.id!==game.current.id||!stump.sinking||game.deadline===null)return {x:0,y:0};const urgency=1-clamp(game.sinkRemaining/SINK_MS);return {x:Math.sin(game.clock*.042)*(1+urgency*2),y:Math.sin(game.clock*.056)*urgency*1.5};}
+ impact(game,stump){const age=game.clock-game.landedAt;return !this.reduced.matches&&stump===game.current&&age>=0&&age<420?Math.sin(Math.PI*age/420)*Math.exp(-age/180)*3:0;}
+ ripples(game,projection){
+  if(this.reduced.matches)return;
+  const c=this.ctx,{s,point}=projection;
+  for(const [effect,duration]of [[this.launch,380],[this.effect,650]]){
+   if(!effect)continue;const t=(game.clock-effect.at)/duration;if(t<0||t>=1)continue;
+   const p=point(effect.point),r=effect.r*s,waterY=p.y+r*.95+5*s;c.save();
+   for(let i=0;i<2;i++){const phase=clamp(t-i*.14);if(phase<=0)continue;c.globalAlpha=(1-t)*(.5-i*.15);this.ellipse(p.x,waterY,r*(1.06+phase*.65),r*.39*(1.06+phase*.65),null,'#e5f7df',1.5*s);}
+   if(effect===this.launch&&t<.75){c.globalAlpha=(1-t/.75)*.6;for(let i=0;i<4;i++){const side=i%2?-1:1;this.ellipse(p.x+side*r*(.7+t*(.5+i*.1)),waterY-(Math.sin(Math.PI*t/.75)*(8+i*2))*s,1.5*s,2*s,'#d9f2df');}}
+   c.restore();
+  }
+ }
+
  water(game){
   const c=this.ctx,w=this.width,h=this.height;c.clearRect(0,0,w,h);
   // Flat geometry and bounded wave strokes; no blur, particles or image textures.
@@ -21,7 +34,7 @@ export class RiverScene{
   for(let i=0;i<6;i++){const right=i%2,x=right?w-12-(i*23%26):13+i*7%19,y=h*(.15+i*.14);this.ellipse(x,y,15+i%3*3,7,'#649c78');this.path(p=>{p.moveTo(x,y);p.lineTo(x+14,y-5);p.lineTo(x+10,y+5);},'#83b18a');if(i%3===0)this.ellipse(x-2,y-2,3,2,'#f6d6a0');}
  }
  stump(game,stump,index,projection){
-  const c=this.ctx,{s,point}=projection,p=point(stump),shake=this.shake(game,stump),submerge=stump.id===game.current.id&&stump.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,r=stump.r*s,ry=r*.43,height=r*.95,x=p.x+shake.x,y=p.y+shake.y+submerge*65*s;c.save();c.globalAlpha=1-submerge;
+  const c=this.ctx,{s,point}=projection,p=point(stump),shake=this.shake(game,stump),submerge=stump.id===game.current.id&&stump.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,r=stump.r*s,ry=r*.43,height=r*.95,x=p.x+shake.x,y=p.y+shake.y+submerge*65*s+this.impact(game,stump)*s;c.save();c.globalAlpha=1-submerge;
   this.ellipse(x+5,y+height+8,r*1.13,ry*.8,'#306f6b26');
   c.strokeStyle='#d9eee0aa';c.lineWidth=1.5;this.ellipse(x,y+height+4,r*1.22,ry*.95,null,'#d8f2e099');
   const dark=stump.sinking,side=c.createLinearGradient(x-r,y,x+r,y);side.addColorStop(0,dark?'#553c35':'#86613f');side.addColorStop(.35,dark?'#94705c':'#c39a64');side.addColorStop(1,dark?'#4a3834':'#6b4d38');this.path(p=>{p.moveTo(x-r,y);p.bezierCurveTo(x-r,y+ry,x+r,y+ry,x+r,y);p.lineTo(x+r,y+height);p.bezierCurveTo(x+r,y+height+ry,x-r,y+height+ry,x-r,y+height);p.closePath();},side,dark?'#543b38':'#795b40',2);
@@ -43,19 +56,20 @@ export class RiverScene{
   const text=index===0?(this.zh?'腳下':'HERE'):stump.thorns?(this.zh?'跨過！':'SKIP!'):stump===game.target?(this.zh?'下一跳':'NEXT'):(this.zh?'再下一跳':'THEN');c.textAlign='center';c.font='700 11px "DM Sans",system-ui';c.fillStyle=stump.thorns?'#633d38':'#234e43';c.fillText(text,x,index>0?y-ry-23:y+height+ry+19);
   if(dark){c.font='700 14px system-ui';c.fillStyle='#fff0cf';c.fillText('!',x+r*.62,y+height*.7);}c.restore();
  }
- frog(x,y,scale,{squat=0,stretch=0,kick=0,lean=0,fall=0}={}){
+ frog(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,airborne=false,lean=0,fall=0}={}){
   const c=this.ctx;c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.2-stretch*.08)*(1-fall*.55),scale*(1-squat*.24+stretch*.12)*(1-fall*.55));
-  this.ellipse(0,2,23,5,'#31543733');
+  if(!airborne)this.ellipse(0,2,23+squat*3,5,'#31543733');
   // Hind legs extend after take-off and tuck back in before touchdown.
   for(const sign of [-1,1]){
-   this.path(p=>{p.moveTo(sign*14,-14);p.quadraticCurveTo(sign*(31+kick*4),-14+kick*10,sign*(20+kick*8),-2+kick*14);},null,'#3c7047',8);
-   this.ellipse(sign*(19+kick*10),kick*14,11,4,'#79ac50','#355d40');
+   this.path(p=>{p.moveTo(sign*14,-14);p.quadraticCurveTo(sign*(31+kick*8-tuck*10),-14+kick*14-tuck*4,sign*(20+kick*10-tuck*11),-2+kick*19-tuck*10);},null,'#3c7047',8);
+   const fx=sign*(19+kick*12-tuck*11),fy=kick*19-tuck*9;this.ellipse(fx,fy,11-tuck*2,4,'#79ac50','#355d40');
+   for(let toe=-1;toe<=1;toe++)this.path(p=>{p.moveTo(fx+sign*4,fy+toe*1.1);p.lineTo(fx+sign*(11-Math.abs(toe)*2),fy+toe*2.3);},null,'#3d6d42',1.2);
   }
   const body=c.createRadialGradient(-8,-28,2,4,-14,27);body.addColorStop(0,'#b4df83');body.addColorStop(.55,'#85bd5f');body.addColorStop(1,'#508d4b');
   this.ellipse(0,-17,22,19,body,'#355c42',2);this.ellipse(0,-12,13,10,'#dceaaa');this.ellipse(-6,-24,6,3,'#daeeaf77');
-  for(const sign of [-1,1]){const x=sign*11;this.ellipse(x,-32,10,11,body,'#355c42',2);this.ellipse(x,-34,5.5,6.5,'#fffce6');this.ellipse(x+1,-33,2.8,4,'#244435');this.ellipse(x,-35,1.3,1.6,'#fff');this.ellipse(sign*17,-19,4,2.5,'#f3b6a3');}
-  this.path(p=>{p.moveTo(-7,-18);p.quadraticCurveTo(0,-10,7,-18);},null,'#355c42',2);
-  this.path(p=>{p.moveTo(-19,-17);p.quadraticCurveTo(-27,-11,-26-stretch*5,-5+kick*5);p.moveTo(19,-17);p.quadraticCurveTo(27,-11,26+stretch*5,-5+kick*5);},null,'#4d8349',3);c.restore();
+  for(const sign of [-1,1]){const x=sign*11;this.ellipse(x,-32,10,11,body,'#355c42',2);this.ellipse(x,-34,5.5,6.5*(1-blink),'#fffce6');this.ellipse(x+1,-33-stretch,2.8,Math.max(.8,4*(1-blink)),'#244435');if(blink<.6)this.ellipse(x,-35-stretch,1.3,1.6,'#fff');this.ellipse(sign*17,-19,4,2.5,'#f3b6a3');}
+  if(airborne&&kick>.5)this.ellipse(0,-15,3,4,'#355c42');else this.path(p=>{p.moveTo(-7,-18);p.quadraticCurveTo(0,-10-squat*2,7,-18);},null,'#355c42',2);
+  this.path(p=>{p.moveTo(-19,-17);p.quadraticCurveTo(-27,-11-reach*10,-26-stretch*5,-5+kick*5-reach*16);p.moveTo(19,-17);p.quadraticCurveTo(27,-11-reach*10,26+stretch*5,-5+kick*5-reach*16);},null,'#4d8349',3);c.restore();
  }
  angler(game,projection){
   const c=this.ctx,{point,s}=projection,p=point(game.fall),t=clamp((game.clock-game.fall.at)/DROWN_MS),rise=Math.sin(Math.PI*clamp(t/.95)),open=Math.sin(Math.PI*clamp(t/.8)),k=Math.min(1.05,Math.max(.65,s*1.15));
@@ -83,13 +97,17 @@ export class RiverScene{
  }
  draw(game){
   this.water(game);const projection=this.projection(game),{s,point}=projection;
+  this.ripples(game,projection);
   for(let i=2;i>=0;i--)this.stump(game,game.stumps[i],i,projection);
   const frog=game.frog,p=point(frog),shake=['idle','charging','ready'].includes(game.state)?this.shake(game,game.current):{x:0,y:0};
   if(!['over','drowning'].includes(game.state)){
-   if(game.state==='jumping')this.ellipse(p.x,p.y,20*s*(1-frog.lift/300),7*s,'#2c6b6b2b');
-   this.frog(p.x+shake.x,p.y+shake.y-frog.lift*s,s*1.12,{squat:frog.squat,stretch:frog.stretch,kick:frog.kick,lean:frog.lean});
+   if(game.state==='jumping'){
+    const height=clamp(frog.lift/180),c=this.ctx;c.save();c.globalAlpha=.23-height*.12;this.ellipse(p.x,p.y,23*s*(1-height*.4),6*s*(1-height*.35),'#234d48');c.restore();
+   }
+   const pose=this.reduced.matches?{...frog,squat:game.state==='charging'?game.power:0,stretch:0,kick:0,tuck:0,reach:0,blink:0}:frog;
+   this.frog(p.x+shake.x,p.y+shake.y+this.impact(game,game.current)*s-frog.lift*s,s*1.12,{...pose,airborne:game.state==='jumping'});
   }else{const t=clamp((game.clock-game.fall.at)/DROWN_MS);if(t<.55)this.frog(p.x,p.y+t*18,s*1.12,{fall:t});if(game.fall.reason==='angler')this.angler(game,projection);else this.crocodile(game,projection);}
   this.headAnchor={x:p.x+shake.x,y:p.y+shake.y-frog.lift*s-48*s*(1-frog.squat*.24)};
-  if(this.effect&&game.clock-this.effect.at<650){const e=this.effect,t=clamp((game.clock-e.at)/650),spot=point(game.current);this.ctx.globalAlpha=1-t;this.ellipse(spot.x,spot.y,game.current.r*s*(1+t*.5),game.current.r*s*.43*(1+t*.5),null,e.perfect?'#fff4ad':'#fff8dc',3);this.ctx.globalAlpha=1;}
+  if(!this.reduced.matches&&this.effect&&game.clock-this.effect.at<260){const t=clamp((game.clock-this.effect.at)/260),spot=point(game.current),c=this.ctx;c.save();c.globalAlpha=(1-t)*.45;for(const sign of [-1,1]){const x=spot.x+sign*24*s;this.path(p=>{p.moveTo(x-sign*3*s,spot.y+4*s);p.quadraticCurveTo(x,spot.y+7*s,x+sign*(5+t*6)*s,spot.y+3*s);},null,'#f4efc2',1.5*s);}c.restore();}
  }
 }

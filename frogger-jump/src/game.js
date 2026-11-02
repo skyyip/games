@@ -1,7 +1,8 @@
 export const MAX_JUMP=540,CHARGE_UP_MS=950,SINK_MS=2500,FISH_WARNING_MS=2100,DROWN_MS=1550,CAMERA_MS=520;
-export const RIVER_RULES=Object.freeze({minGap:152,maxGap:208,normalRadius:48,smallChance:.3,sinkChance:.16,thornChance:.16,fishChance:.16});
+export const RIVER_RULES=Object.freeze({minGap:152,maxGap:208,normalRadius:54,smallChance:.12,sinkChance:.06,thornChance:.06,fishChance:.06});
 export const distance=(a,b)=>Math.hypot(b.x-a.x,b.y-a.y);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 export function chargePower(ms){const t=Math.max(0,ms)/CHARGE_UP_MS%2;return t<=1?t:2-t;}
 export function powerColor(power){const t=clamp(power),a=t<.5?[103,185,99]:[245,202,78],b=t<.5?[245,202,78]:[227,89,72],f=t<.5?t*2:(t-.5)*2;return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*f)).join(', ')})`;}
 export class FroggerGame{
@@ -16,12 +17,12 @@ export class FroggerGame{
  get sinkRemaining(){return this.deadline===null?null:Math.max(0,this.deadline-this.clock);}
  get fishRemaining(){return this.anglerDeadline===null?null:Math.max(0,this.anglerDeadline-this.clock);}
  randomUnit(){return Math.max(0,Math.min(.999999999,Number(this.random())||0));}
- start(){this.reset();this.state='idle';this.stumps=[{id:0,x:0,y:0,r:48,sinking:false,thorns:false,angler:false,small:false,route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));return this.current;}
+ start(){this.reset();this.state='idle';this.stumps=[{id:0,x:0,y:0,r:RIVER_RULES.normalRadius,sinking:false,thorns:false,angler:false,small:false,route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));return this.current;}
  generate(previous,index){
   if(this.run<=0){const proposed=this.randomUnit()<.5?'I':'Z';this.route=proposed===this.route?(proposed==='I'?'Z':'I'):proposed;this.run=1+Math.floor(this.randomUnit()*2);}
   this.run--;let x=previous.x;
   if(this.route==='Z'){const sign=previous.x>70?-1:previous.x< -70?1:this.randomUnit()<.5?-1:1,span=96+this.randomUnit()*60;x=Math.max(-145,Math.min(145,previous.x+sign*span));}
-  const y=previous.y+RIVER_RULES.minGap+this.randomUnit()*(RIVER_RULES.maxGap-RIVER_RULES.minGap),small=this.randomUnit()<RIVER_RULES.smallChance,r=small?28+Math.floor(this.randomUnit()*10):RIVER_RULES.normalRadius,hazard=this.randomUnit();
+  const y=previous.y+RIVER_RULES.minGap+this.randomUnit()*(RIVER_RULES.maxGap-RIVER_RULES.minGap),small=this.randomUnit()<RIVER_RULES.smallChance,r=small?38+Math.floor(this.randomUnit()*8):RIVER_RULES.normalRadius,hazard=this.randomUnit();
   const sinking=hazard<RIVER_RULES.sinkChance,thorns=hazard>=RIVER_RULES.sinkChance&&hazard<RIVER_RULES.sinkChance+RIVER_RULES.thornChance&&!previous.thorns,angler=hazard>=RIVER_RULES.sinkChance+RIVER_RULES.thornChance&&hazard<RIVER_RULES.sinkChance+RIVER_RULES.thornChance+RIVER_RULES.fishChance;
   return {id:index,x,y,r,small,sinking,thorns,angler,route:this.route};
  }
@@ -51,9 +52,13 @@ export class FroggerGame{
  resume(){if(!this.paused)return false;this.pausedTotal+=this.now()-this.pausedAt;this.pausedAt=null;return true;}
  drainEvents(){return this.events.splice(0);}
  get needsAnimation(){return !this.paused&&(['charging','jumping','drowning'].includes(this.state)||this.state==='idle'&&(this.deadline!==null||this.anglerDeadline!==null||this.clock<this.cameraAt+CAMERA_MS));}
- get camera(){if(this.state==='jumping'){const j=this.jump,t=clamp((this.clock-j.at)/j.duration);return j.cameraFrom+(j.cameraTo-j.cameraFrom)*t*t*(3-2*t);}const t=clamp((this.clock-this.cameraAt)/CAMERA_MS);return this.cameraFrom+(this.cameraTarget-this.cameraFrom)*(1-(1-t)**3);}
+ get camera(){if(this.state==='jumping'){const j=this.jump,t=clamp((this.clock-j.at)/j.duration);return j.cameraFrom+(j.cameraTo-j.cameraFrom)*t*t*(3-2*t);}const t=clamp((this.clock-this.cameraAt)/CAMERA_MS);return this.cameraFrom+(this.cameraTarget-this.cameraFrom)*smooth(t);}
  get frog(){
-  if(this.state==='jumping'){const j=this.jump,t=clamp((this.clock-j.at)/j.duration);return {x:j.from.x+(j.visualEnd.x-j.from.x)*t,y:j.from.y+(j.visualEnd.y-j.from.y)*t,lift:4*t*(1-t)*(92+j.power*62),stretch:Math.sin(Math.PI*t),kick:Math.sin(Math.PI*clamp(t/.55)),squat:j.power*(1-clamp(t/.16)),lean:Math.sign(j.visualEnd.x-j.from.x)*Math.sin(Math.PI*t)*.16};}
-  const p=this.state==='drowning'||this.state==='over'?this.fall:this.current,age=this.clock-this.landedAt,landing=age>=0&&age<240?Math.sin(Math.PI*age/240)*Math.exp(-age/200)*.35:0;return {...p,lift:0,stretch:0,kick:0,lean:0,squat:this.state==='charging'?this.power:landing};
+  if(this.state==='jumping'){
+   const j=this.jump,t=clamp((this.clock-j.at)/j.duration);
+   return {x:j.from.x+(j.visualEnd.x-j.from.x)*t,y:j.from.y+(j.visualEnd.y-j.from.y)*t,lift:4*t*(1-t)*(92+j.power*62),stretch:Math.sin(Math.PI*t)*.8,kick:Math.sin(Math.PI*clamp(t/.4)),tuck:Math.sin(Math.PI*smooth((t-.18)/.64)),reach:Math.sin(Math.PI*clamp((t-.65)/.35)),squat:j.power*(1-smooth(t/.18)),lean:Math.sign(j.visualEnd.x-j.from.x)*Math.sin(Math.PI*t)*.14,blink:0};
+  }
+  const p=this.state==='drowning'||this.state==='over'?this.fall:this.current,age=this.clock-this.landedAt,landing=age>=0&&age<390?.64*Math.sin(Math.PI*clamp(age/170))*Math.exp(-age/400)-.12*Math.sin(Math.PI*clamp((age-170)/220)):0;
+  return {...p,lift:0,stretch:0,kick:0,tuck:0,reach:0,lean:0,blink:age>=0&&age<150?Math.sin(Math.PI*age/150)*.85:0,squat:this.state==='charging'?this.power:landing};
  }
 }
