@@ -4,16 +4,26 @@ import * as cloud from './cloud.js';import {RiverScene} from './scene.js';
 const $=id=>document.getElementById(id);
 export class RiverPlayers{
  constructor({t,onChange,onPlay}){
-  this.t=t;this.onChange=onChange;this.onPlay=onPlay;this.guest=readProfile(null);this.cloudProfile=null;this.identity=null;this.authReady=!cloud.cloudConfigured;this.persistent=true;this.busy=false;this.wantPlay=false;this.board=[];this.boardAt=0;this.pending=null;
+  this.t=t;this.onChange=onChange;this.onPlay=onPlay;this.guest=readProfile(null);this.cloudProfile=null;this.identity=null;this.authReady=!cloud.cloudConfigured;this.persistent=true;this.busy=false;this.wantPlay=false;this.board=[];this.boardAt=0;this.pending=null;this.profileFailed=false;this.resetUntil=0;this.resetTimer=0;
   try{this.guest=readProfile(localStorage.getItem(PROFILE_KEY));const pending=JSON.parse(localStorage.getItem(PENDING_KEY));if(pending&&typeof pending.id==='string'&&typeof pending.uid==='string'&&Number.isInteger(pending.score)&&pending.score>=0&&pending.score<=1e6&&(pending.bonusCoins===undefined||Number.isSafeInteger(pending.bonusCoins)&&pending.bonusCoins>=0&&pending.bonusCoins<=pending.score*3))this.pending=pending;}catch{this.persistent=false;}
   for(const button of document.querySelectorAll('[data-close]'))button.addEventListener('click',()=>this.close(button.dataset.close));
-  for(const id of ['player-dialog','animal-dialog','leaderboard-dialog'])$(id).addEventListener('cancel',()=>{if(id==='player-dialog')this.wantPlay=false;});
+  for(const id of ['player-dialog','animal-dialog','leaderboard-dialog'])$(id).addEventListener('cancel',()=>{if(id==='player-dialog'){this.wantPlay=false;this.passwordVisibility(false);}});
   $('profile-open').addEventListener('click',()=>this.openPlayer());$('animal-open').addEventListener('click',()=>this.openShop());$('leaderboard-open').addEventListener('click',()=>this.openBoard());$('refresh-board').addEventListener('click',()=>this.refreshBoard());$('auth-action').addEventListener('change',()=>this.authView());
-  $('guest-form').addEventListener('submit',async e=>{e.preventDefault();try{const {name,key}=normalizeName($('guest-name').value);if(this.identity)await cloud.logout();this.cloudProfile=null;this.guest={...this.guest,name,nameKey:key};this.saveGuest();this.render();this.close('player-dialog');this.onChange?.();if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}catch(error){this.feedback('account-feedback',error);}});
+  $('guest-form').addEventListener('submit',async e=>{e.preventDefault();if(this.busy)return;try{const {name,key}=normalizeName($('guest-name').value);if(this.identity)await cloud.logout();this.cloudProfile=null;this.guest={...this.guest,name,nameKey:key};this.saveGuest();this.render();this.close('player-dialog');this.onChange?.();if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}catch(error){this.feedback('account-feedback',error);}});
   $('google-signin').addEventListener('click',()=>this.googleLogin());
-  $('cloud-form').addEventListener('submit',e=>{e.preventDefault();this.authenticate();});$('cloud-logout').addEventListener('click',async()=>{if(this.busy)return;try{await cloud.logout();this.identity=null;this.cloudProfile=null;$('player-password').value='';this.render();this.authView();this.onChange?.();}catch(error){this.feedback('account-feedback',error);}});
+  $('password-visibility').addEventListener('click',()=>this.passwordVisibility($('player-password').type==='password'));
+  $('password-reset').addEventListener('click',()=>this.forgotPassword());$('profile-retry').addEventListener('click',()=>this.retryProfile());
+  $('cloud-form').addEventListener('submit',e=>{e.preventDefault();this.authenticate();});$('cloud-logout').addEventListener('click',async()=>{if(this.busy)return;try{await cloud.logout();this.identity=null;this.cloudProfile=null;this.profileFailed=false;this.passwordVisibility(false);$('player-password').value='';this.render();this.authView();this.onChange?.();}catch(error){this.feedback('account-feedback',error);}});
   if(cloud.cloudConfigured)$('guest-form').before($('cloud-form'));
-  if(cloud.cloudConfigured)cloud.observeIdentity(async user=>{this.identity=user;if(this.busy)return;try{this.cloudProfile=user?await cloud.readCloudProfile():null;this.authReady=true;this.render();this.authView();this.onChange?.();if(user&&!this.cloudProfile){$('auth-action').value='claim';this.openPlayer();}}catch(error){this.authReady=true;this.authView();this.feedback('account-feedback',error);}}).then(unsubscribe=>this.unsubscribe=unsubscribe).catch(error=>{this.authReady=true;this.authView();this.feedback('account-feedback',error);});
+  if(cloud.cloudConfigured)cloud.observeIdentity(async user=>{
+   this.identity=user;if(this.busy)return;const uid=user?.uid;
+   if(this.cloudProfile?.uid!==uid)this.cloudProfile=null;
+   try{
+    const profile=user?await cloud.readCloudProfile():null;if(this.identity?.uid!==uid)return;
+    this.cloudProfile=profile;this.profileFailed=false;this.authReady=true;this.render();this.authView();this.onChange?.();
+    if(user&&!profile)this.openPlayer();
+   }catch(error){if(this.identity?.uid!==uid)return;this.profileFailed=!!user;this.authReady=true;this.authView();this.feedback('account-feedback',user?{message:'profile-load-failed',cause:error}:error);}
+  }).then(unsubscribe=>this.unsubscribe=unsubscribe).catch(error=>{this.authReady=true;this.authView();this.feedback('account-feedback',error);});
   document.addEventListener('visibilitychange',async()=>{if(document.hidden||!this.cloudProfile||this.busy)return;try{this.cloudProfile=await cloud.readCloudProfile();this.render();this.onChange?.();}catch{/* Keep the last verified cloud snapshot while offline. */}});
   this.render();
  }
@@ -35,27 +45,60 @@ export class RiverPlayers{
   'auth/unauthorized-domain':['請先在 Firebase Authentication 的授權網域加入此網站。','Add this website to Firebase Authentication authorized domains.'],
   'auth/email-already-in-use':['Email 已有帳戶，請選登入。','This email already has an account. Please sign in.'],
   'auth/invalid-credential':['Email 或密碼唔啱，請再試。','The email or password is incorrect.'],
+  'profile-load-failed':['帳戶已登入，但未能讀取雲端存檔。請按「重新讀取雲端存檔」，暫時毋須重新註冊。','You are signed in, but your cloud save could not be loaded. Retry loading it; there is no need to register again.'],
+  'auth/too-many-requests':['嘗試次數太多，請稍後再試。','Too many attempts. Please wait before trying again.'],
+  'auth/network-request-failed':['連線未完成，請檢查網絡後再試。','The request could not finish. Check your connection and retry.'],
+  'auth/web-storage-unsupported':['登入需要瀏覽器儲存空間。請允許網站儲存，並以 Safari 或 Chrome 開啟。','Sign-in needs browser storage. Allow site storage and open this page in Safari or Chrome.'],
   'auth/weak-password':['請使用最少 8 位密碼。','Use a password of at least 8 characters.'],
   'auth/invalid-email':['請填有效 Email。','Please enter a valid email address.'],
   'permission-denied':['雲端規則拒絕這次更新。成績仍保留，請確認 Firebase 設定後重試。','The cloud rejected this update. Your result is kept; check Firebase configuration and retry.'],
   'failed-precondition':['排行榜仍在準備；請確認已建立 Firestore 排序索引。','The leaderboard is not ready. Its Firestore index may still need to be created.'],
-  'wrong-player':['這份待同步成績屬於另一個帳戶，請登入原帳戶。','This pending result belongs to another account. Sign in to that account.']};const m=messages[raw];return m?this.t(...m):this.t('暫時未能連線，請檢查網絡後重試。','Connection unavailable. Check your network and try again.');}
- feedback(id,error){$(id).textContent=error?this.error(error):'';}
+  'wrong-player':['這份待同步成績屬於另一個帳戶，請登入原帳戶。','This pending result belongs to another account. Sign in to that account.']};const m=messages[raw],message=m?this.t(...m):this.t('暫時未能連線，請檢查網絡後重試。','Connection unavailable. Check your network and try again.'),code=error?.cause?.code??raw;return message+(/^(auth\/[a-z-]+|permission-denied|unavailable|failed-precondition)$/.test(code)?` (${code})`:'');}
+ feedback(id,error){$(id).textContent=error?this.error(error):'';if(error&&$('player-dialog').open)$(id).scrollIntoView({block:'nearest'});}
  saveGuest(){try{localStorage.setItem(PROFILE_KEY,JSON.stringify(this.guest));}catch{this.persistent=false;}}
  storePending(){try{if(this.pending)localStorage.setItem(PENDING_KEY,JSON.stringify(this.pending));else localStorage.removeItem(PENDING_KEY);}catch{this.persistent=false;}}
  show(id){if(!$(id).open)$(id).showModal();}
- close(id){if($(id).open)$(id).close();}
- openPlayer(wantPlay=false){this.wantPlay=wantPlay;$('guest-name').value=this.guest.name;$('account-feedback').textContent='';this.authView();this.show('player-dialog');}
- authView(){$('google-signin').hidden=!cloud.cloudConfigured||!!this.identity;$('google-signin').disabled=this.busy||!this.authReady;const action=$('auth-action').value,claim=this.identity&&!this.cloudProfile;const mode=claim?'claim':action==='claim'?'signin':action;$('auth-action').value=mode;$('auth-action').disabled=!!claim;$('cloud-name-row').hidden=mode==='signin';$('email-row').hidden=mode==='claim';$('password-row').hidden=mode==='claim';$('cloud-name').required=mode!=='signin';$('player-email').required=mode!=='claim';$('player-password').required=mode!=='claim';$('cloud-form').hidden=!cloud.cloudConfigured||!!this.cloudProfile;$('cloud-logout').hidden=!this.identity;$('guest-form').hidden=!!this.identity;$('cloud-status').textContent=!cloud.cloudConfigured?this.t('Firebase 專案尚未建立。可先本機試玩，這個名字不會保留到雲端。','Firebase is not configured. You can play locally; this does not reserve a cloud name.'):this.cloudProfile?this.t(`已登入 ${this.cloudProfile.name}；金幣與排行可跨裝置同步。`,`Signed in as ${this.cloudProfile.name}; coins and ranks sync across devices.`):this.t('建立 Firebase 帳戶，名字會在雲端唯一保留；同一帳戶可在其他裝置登入。','Create an account to reserve a unique cloud name and sign in on other devices.');$('cloud-submit').textContent=mode==='signin'?this.t('登入雲端 ↗','Sign in ↗'):mode==='claim'?this.t('保留這個名字 ↗','Reserve this name ↗'):this.t('建立帳戶並保留名字 ↗','Create account and reserve name ↗');}
+ close(id){if(id==='player-dialog')this.passwordVisibility(false);if($(id).open)$(id).close();}
+ openPlayer(wantPlay=false){this.passwordVisibility(false);this.wantPlay=wantPlay;$('guest-name').value=this.guest.name;$('account-feedback').textContent='';this.authView();this.show('player-dialog');}
+ passwordVisibility(show){const input=$('player-password'),type=show?'text':'password';if(input.type!==type)input.type=type;$('password-visibility').setAttribute('aria-pressed',String(show));$('password-visibility').setAttribute('aria-label',show?this.t('隱藏密碼','Hide password'):this.t('顯示密碼','Show password'));$('password-visibility-slash').toggleAttribute('hidden',!show);}
+ authView(){
+  this.passwordVisibility($('player-password').type==='text');$('password-visibility').disabled=this.busy;
+  const claim=!!this.identity&&!this.cloudProfile&&!this.profileFailed,action=$('auth-action').value,mode=claim?'claim':action==='claim'?'signin':action;
+  $('google-signin').hidden=!cloud.cloudConfigured||!!this.identity;$('google-signin').disabled=this.busy||!this.authReady;
+  $('profile-retry').hidden=!this.identity||!this.profileFailed;$('profile-retry').disabled=this.busy;
+  $('auth-action').value=mode;$('auth-action').disabled=claim||this.busy;
+  $('cloud-name-row').hidden=mode==='signin';$('email-row').hidden=mode==='claim';$('password-row').hidden=mode==='claim';
+  $('cloud-name').required=mode!=='signin';$('player-email').required=mode!=='claim';$('player-password').required=mode!=='claim';$('player-password').autocomplete=mode==='register'?'new-password':'current-password';
+  $('cloud-form').hidden=!cloud.cloudConfigured||!!this.cloudProfile||!!this.identity&&this.profileFailed;
+  $('cloud-submit').disabled=this.busy;$('cloud-logout').hidden=!this.identity;$('cloud-logout').disabled=this.busy;$('guest-form').hidden=!!this.identity;$('guest-form').querySelector('button').disabled=this.busy;
+  $('password-reset').hidden=mode!=='signin';$('password-reset').disabled=this.busy||!this.authReady||Date.now()<this.resetUntil;
+  $('cloud-status').textContent=!cloud.cloudConfigured?this.t('Firebase 專案尚未建立。可先本機試玩，這個名字不會保留到雲端。','Firebase is not configured. You can play locally; this does not reserve a cloud name.'):this.cloudProfile?this.t(`已登入 ${this.cloudProfile.name}；金幣與排行可跨裝置同步。`,`Signed in as ${this.cloudProfile.name}; coins and ranks sync across devices.`):this.profileFailed?this.t('帳戶已登入，雲端紀錄暫時未載入。','You are signed in. Your cloud save has not loaded yet.'):this.t('建立 Firebase 帳戶，名字會在雲端唯一保留；同一帳戶可在其他裝置登入。','Create an account to reserve a unique cloud name and sign in on other devices.');
+  $('cloud-submit').textContent=mode==='signin'?this.t('登入雲端 ↗','Sign in ↗'):mode==='claim'?this.t('保留這個名字 ↗','Reserve this name ↗'):this.t('建立帳戶並保留名字 ↗','Create account and reserve name ↗');
+ }
+ resetCooldown(){this.resetUntil=Date.now()+60000;clearTimeout(this.resetTimer);this.resetTimer=setTimeout(()=>this.authView(),60000);}
+ async forgotPassword(){
+  if(this.busy||Date.now()<this.resetUntil)return;const email=$('player-email');email.value=email.value.trim();
+  if(!email.value||!email.checkValidity()){email.focus();email.reportValidity();return;}
+  this.busy=true;this.authView();$('password-reset-feedback').textContent=this.t('正在送出重設密碼電郵…','Requesting a password reset email…');
+  try{await cloud.resetPassword(email.value,this.t('zh-TW','en'));this.resetCooldown();$('password-reset-feedback').textContent=this.t('如這個 Email 已註冊，你將會收到重設連結。請檢查收件匣及垃圾郵件。','If this email is registered, a reset link will arrive. Check your inbox and spam folder.');}
+  catch(error){if(error.code==='auth/too-many-requests')this.resetCooldown();$('password-reset-feedback').textContent=error.code==='auth/operation-not-allowed'?this.t('Email／密碼登入尚未啟用，暫時不能重設密碼。','Email/password sign-in is not enabled, so password reset is unavailable.')+' (auth/operation-not-allowed)':this.error(error);}
+  finally{this.busy=false;this.authView();$('password-reset-feedback').scrollIntoView({block:'nearest'});}
+ }
+ async retryProfile(){
+  if(this.busy)return;this.busy=true;this.authView();this.feedback('account-feedback',null);
+  try{this.cloudProfile=await cloud.readCloudProfile();this.profileFailed=false;this.render();this.onChange?.();if(this.cloudProfile){this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}else $('auth-action').value='claim';}
+  catch(cause){this.feedback('account-feedback',{message:'profile-load-failed',cause});}
+  finally{this.busy=false;this.authView();}
+ }
  async googleLogin(){
-  if(this.busy)return;this.busy=true;$('google-signin').disabled=true;$('cloud-submit').disabled=true;this.feedback('account-feedback',null);
-  try{const {user,profile}=await cloud.signInGoogle();this.identity=user;this.cloudProfile=profile;this.authReady=true;this.render();this.onChange?.();if(!profile){$('auth-action').value='claim';this.authView();$('cloud-name').focus();}else{this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}}
-  catch(error){this.feedback('account-feedback',error);}
+  if(this.busy)return;this.busy=true;this.authView();this.feedback('account-feedback',null);
+  try{const {user,profile}=await cloud.signInGoogle();this.identity=user;this.cloudProfile=profile;this.profileFailed=false;this.authReady=true;this.render();this.onChange?.();if(!profile){$('auth-action').value='claim';this.authView();$('cloud-name').focus();}else{this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}}
+  catch(error){if(error?.message==='profile-load-failed'){this.identity=error.user??this.identity;this.cloudProfile=null;this.profileFailed=true;}this.feedback('account-feedback',error);}
   finally{this.busy=false;$('cloud-submit').disabled=false;this.authView();}
  }
- async authenticate(){if(this.busy)return;this.busy=true;$('google-signin').disabled=true;$('cloud-submit').disabled=true;this.feedback('account-feedback',null);try{const mode=$('auth-action').value,email=$('player-email').value.trim(),password=$('player-password').value;let profile;if(mode==='register'){normalizeName($('cloud-name').value);if(password.length<8)throw Error('auth/weak-password');profile=await cloud.register(email,password,$('cloud-name').value);}else if(mode==='claim')profile=await cloud.claimName($('cloud-name').value);else profile=await cloud.signIn(email,password);this.authReady=true;this.cloudProfile=profile;this.identity=profile?{uid:profile.uid}:this.identity;$('player-password').value='';if(!profile){$('auth-action').value='claim';this.identity={uid:'pending'};this.authView();return;}this.render();this.onChange?.();this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}catch(error){this.feedback('account-feedback',error);if(error?.message==='name-taken'){this.identity={uid:'pending'};$('auth-action').value='claim';this.authView();}}finally{this.busy=false;$('cloud-submit').disabled=false;this.authView();}}
+ async authenticate(){if(this.busy)return;this.passwordVisibility(false);this.busy=true;this.authView();this.feedback('account-feedback',null);try{const mode=$('auth-action').value,email=$('player-email').value.trim(),password=$('player-password').value;let profile;if(mode==='register'){normalizeName($('cloud-name').value);if(password.length<8)throw Error('auth/weak-password');profile=await cloud.register(email,password,$('cloud-name').value);}else if(mode==='claim')profile=await cloud.claimName($('cloud-name').value);else profile=await cloud.signIn(email,password);this.authReady=true;this.profileFailed=false;this.cloudProfile=profile;this.identity=profile?{uid:profile.uid}:this.identity;$('player-password').value='';if(!profile){$('auth-action').value='claim';this.identity={uid:'pending'};this.authView();return;}this.render();this.onChange?.();this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}catch(error){if(error?.message==='profile-load-failed'){this.identity=error.user??this.identity;this.cloudProfile=null;this.profileFailed=true;}this.feedback('account-feedback',error);if(error?.message==='name-taken'){this.identity={uid:'pending'};$('auth-action').value='claim';this.authView();}}finally{this.busy=false;$('cloud-submit').disabled=false;this.authView();}}
  render(){const p=this.profile,a=animal(p.selected);$('player-name').textContent=p.name||this.t('河岸新朋友','A new river friend');$('player-animal').textContent=a.emoji;$('player-mode').textContent=p.mode==='cloud'?this.t('Firebase 雲端玩家','Firebase cloud player'):this.t('本機試玩 · 不列入雲端排行','Local practice · unranked');$('wallet-coins').textContent=p.coins.toLocaleString();$('shop-coins').textContent=p.coins.toLocaleString();}
- async prepareRun(){if(!this.authReady)throw Error('auth-loading');if(!this.profile.name){this.openPlayer(true);return null;}if(this.cloudProfile){if(this.pending)await this.retryPending();const run=await cloud.beginCloudRun();return {...run,mode:'cloud',name:this.profile.name};}return {id:crypto.randomUUID(),animal:this.guest.selected,mode:'guest',name:this.guest.name};}
+ async prepareRun(){if(!this.authReady)throw Error('auth-loading');if(this.identity&&!this.cloudProfile||!this.profile.name){this.openPlayer(true);return null;}if(this.cloudProfile){if(this.pending)await this.retryPending();const run=await cloud.beginCloudRun();return {...run,mode:'cloud',name:this.profile.name};}return {id:crypto.randomUUID(),animal:this.guest.selected,mode:'guest',name:this.guest.name};}
  async settle(run,score,bonusCoins=0){if(run.mode!=='cloud'){const result=settleLocal(this.guest,{...run,score,bonusCoins});this.guest=result.profile;this.saveGuest();this.render();return result;}this.pending={id:run.id,uid:run.uid,score,bonusCoins,animal:run.animal};this.storePending();return this.retryPending();}
  async retryPending(){if(!this.pending)return null;try{const done=await cloud.settleCloudRun(this.pending);this.cloudProfile=done.profile;this.pending=null;this.storePending();this.render();return done;}catch(error){if(['run-replaced','run-missing'].includes(error?.message)){this.pending=null;this.storePending();}throw error;}}
  async abandon(run){if(run?.mode==='cloud')try{await cloud.abandonCloudRun(run.id);}catch{/* A new online run atomically abandons an unfinished one. */}}

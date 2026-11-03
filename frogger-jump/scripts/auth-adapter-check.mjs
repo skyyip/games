@@ -1,0 +1,19 @@
+// Exercise the real cloud adapter with a fake Firebase SDK: no network or mail.
+import assert from 'node:assert/strict';import {resolve} from 'node:path';
+const esbuild=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
+const mocks={
+ 'firebase/app':`export const initializeApp=()=>({});`,
+ 'firebase/auth':`const h=globalThis.__froggerAuthHarness;const session={currentUser:{uid:'adapter-user'},languageCode:'en'};export const getAuth=()=>session;export const browserLocalPersistence={};export async function setPersistence(){}export function onAuthStateChanged(s,cb){cb(s.currentUser);return ()=>{};}export class GoogleAuthProvider{setCustomParameters(p){h.parameters=p;}}export function signInWithPopup(){h.popups++;if(h.googleCode)return Promise.reject({code:h.googleCode});return Promise.resolve({user:session.currentUser});}export async function signInWithEmailAndPassword(){return {user:session.currentUser};}export async function sendPasswordResetEmail(s,email){h.resets.push({email,language:s.languageCode});if(h.resetCode)throw {code:h.resetCode};}export async function signOut(){}export async function createUserWithEmailAndPassword(){return {user:session.currentUser};}`,
+ 'firebase/firestore':`const h=globalThis.__froggerAuthHarness;export const getFirestore=()=>{h.stores++;return {};};export const doc=(...args)=>args.slice(1).join('/');export async function getDoc(){h.reads++;if(h.readCode)throw {code:h.readCode};return {exists:()=>true,data:()=>({name:'AdapterRiver',coins:88,bestAt:{toMillis:()=>0}})};}`
+};
+const build=await esbuild.build({stdin:{contents:"export * from './frogger-jump/src/cloud.js';",resolveDir:resolve('.')},bundle:true,format:'esm',platform:'node',write:false,plugins:[{name:'fake-sdk',setup(b){b.onResolve({filter:/^firebase\//},args=>({path:args.path,namespace:'fake-sdk'}));b.onLoad({filter:/.*/,namespace:'fake-sdk'},args=>({contents:mocks[args.path],loader:'js'}));}}]});
+const previous=globalThis.__froggerAuthHarness,h={popups:0,resets:[],reads:0,stores:0};globalThis.__froggerAuthHarness=h;
+try{
+ const cloud=await import('data:text/javascript;base64,'+Buffer.from(build.outputFiles[0].text).toString('base64'));
+ await cloud.observeIdentity(()=>{});await cloud.resetPassword(' river@example.com ','zh-TW');assert.deepEqual(h.resets,[{email:'river@example.com',language:'zh-TW'}]);assert.equal(h.stores,0,'reset must not load Firestore');
+ h.resetCode='auth/user-not-found';await cloud.resetPassword('unknown@example.com');assert.equal(h.resets.at(-1).language,'en');h.resetCode='auth/too-many-requests';await assert.rejects(cloud.resetPassword('river@example.com'),e=>e.code==='auth/too-many-requests');h.resetCode=null;
+ h.googleCode='auth/operation-not-allowed';const rejected=cloud.signInGoogle();assert.equal(h.popups,1,'popup SDK call must happen before yielding the click');await assert.rejects(rejected,e=>e.code==='auth/operation-not-allowed');assert.equal(h.reads,0,'failed provider login must not read a wallet');
+ h.googleCode=null;h.readCode='permission-denied';await assert.rejects(cloud.signInGoogle(),e=>e.message==='profile-load-failed'&&e.user.uid==='adapter-user'&&e.cause.code==='permission-denied');h.readCode=null;assert.equal((await cloud.readCloudProfile()).coins,88);
+ const before=h.popups,pending=cloud.signInGoogle();assert.equal(h.popups,before+1);const result=await pending;assert.equal(result.user.uid,'adapter-user');assert.equal(result.profile.name,'AdapterRiver');assert.equal(h.stores,1);assert.equal(h.parameters.prompt,'select_account');
+ console.log('PASS real Auth adapter / fake SDK: localized reset, private account-existence response, rate limit, direct popup invocation, disabled provider, separate cloud-save failure and retry. No real email sent.');
+}finally{if(previous===undefined)delete globalThis.__froggerAuthHarness;else globalThis.__froggerAuthHarness=previous;}

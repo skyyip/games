@@ -61,3 +61,15 @@ For full Auth-emulator browser testing, run the configured Auth/Firestore emulat
 3. Publish this folder's updated Firestore rules for platform bonuses. No leaderboard index change is required.
 4. On the deployed game, choose **Player / sign in → Continue with Google**. A new account reserves a unique river name; returning users load their existing UID wallet. Canceling or blocking the popup leaves the current local wallet intact. If Firebase reports an account using another credential, the UI asks the player to use the original method instead of creating a replacement save.
 5. Verify a real Google login and top-ten update after configuration. This environment's browser checks cover the UI with a mock Auth adapter and do not certify live Google OAuth or deployed rules.
+
+## Password reset and the disabled-Google-provider error
+
+The reported message “Firebase 尚未啟用此登入方式” corresponds to `auth/operation-not-allowed`. In **sky-playground-3c5af → Authentication → Sign-in method**, add/enable **Google**, select the **Project support email**, and save. Client code cannot enable this Console setting. Also ensure the actual game hostname appears under **Settings → Authorized domains**. No extra Firestore rule or index change is needed for this Auth update.
+
+The password sign-in form now has **Forgot password?**. Enter the account email, then request a reset without entering the old password. The Firebase SDK sends the reset link using the project's default password-reset email template/action handler; the client requests Traditional Chinese (`zh-TW`) or English. **Email/Password** must be enabled for password accounts. The page never requests a user's current password to send the reset. The password field has an accessible show/hide eye button; the value stays unchanged when toggled and is concealed again on close, logout or sign-in submission.
+
+The confirmation does not disclose whether an address exists. An accepted request or rate-limit response starts a 60-second local resend cooldown. Invalid addresses are caught before the SDK call. Backend rate limits and network/configuration errors remain visible with their error codes.
+
+Google login now invokes the already-loaded popup SDK directly from the click handler. A successful Auth login followed by a failed Firestore profile read is shown as a **cloud-save loading failure**, with a retry button. It does not ask the player to register again or silently start an unranked guest run under the signed-in account.
+
+`auth-adapter-check.mjs` exercises the real cloud module with a fake Firebase SDK; `google-ui-check.mjs` covers small-phone/landscape UI with mock Auth/mail. These checks do not send real reset email, create real accounts, enable the Google provider or certify real OAuth. Public configuration probes remained blocked by the environment proxy (403 tunnel response).

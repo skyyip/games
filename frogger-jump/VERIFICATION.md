@@ -60,3 +60,11 @@ Compared the pre-optimization build (including the seven platforms/Google UI) ag
 After opening the leaderboard, script bytes rise from 440,119 to 1,005,314, confirming that Firestore is deferred rather than removed. Remote service requests are blocked in this measurement. Byte counts are decoded JavaScript, not gzip/Brotli transfer bytes. The fake-clock sample rendered 32 charging frames before versus 63 afterward; per-frame gradient counts distinguish cache savings from cadence changes. These are workload measurements, not real-device battery, thermal or FPS guarantees.
 
 Validation passed: **54 Node tests**; unchanged-resize/pixel-budget/cache invalidation and three-sprite memory bounds; four browser viewports completing 78 mixed-route jumps each; seven real-UI platform/reward scenarios; five animal skill/shop flows; offline reload and unavailable-storage handling; mock Google Auth UI checks; production build and 24-page metadata validation. Native Google OAuth/production Firestore remain outside this local performance verification. Source service worker is v7.
+
+## Password reset / Auth failure handling · 2026-11-03
+
+- Added password-reset email requests in Chinese/English, native email validation without requiring a password, account-existence-neutral confirmation and a 60-second resend cooldown. Added a show/hide password button with bilingual accessible labels; closing the dialog or submitting/signing out conceals the value again.
+- Preserved the exact Google disabled-provider error (`auth/operation-not-allowed`) and exposed safe error codes. User-provided error confirms the provider must be enabled in Firebase Console; no production project setting was changed here.
+- Separated successful account authentication from failed cloud-profile loading, with retry and a guard against accidentally starting a guest run while a signed-in wallet is unavailable.
+- Real cloud-adapter checks with a fake SDK pass for localized reset calls, non-disclosure of absent addresses, rate-limit forwarding, direct popup invocation, disabled-provider rejection and wallet-fetch failure/retry. No real email was sent.
+- Auth UI checks pass at 320×568, 390×844 and 812×375 with mocked services; the 54 existing game/rendering tests pass. Source worker is v8.

@@ -1,16 +1,16 @@
 import {FIREBASE_CONFIG} from './firebase-settings.js';
 import {normalizeName} from './profile.js';import {ANIMALS,animal,rewardCoins} from './animals.js';
 export const cloudConfigured=!!FIREBASE_CONFIG?.projectId;
-let authConnection,connection;
+let authConnection,connection,readyAuth;
 async function authClient(){
  if(!cloudConfigured)throw Error('cloud-not-configured');
  if(!authConnection)authConnection=(async()=>{
   const [a,auth]=await Promise.all([import('firebase/app'),import('firebase/auth')]);
   const app=a.initializeApp(FIREBASE_CONFIG,'frogger-jump'),session=auth.getAuth(app);
   if(globalThis.FROGGER_FIREBASE_EMULATORS&&['localhost','127.0.0.1'].includes(location.hostname))auth.connectAuthEmulator(session,'http://127.0.0.1:9098',{disableWarnings:true});
-  await auth.setPersistence(session,auth.browserLocalPersistence);return {...auth,app,session};
+  await auth.setPersistence(session,auth.browserLocalPersistence);readyAuth={...auth,app,session};return readyAuth;
  })();
- try{return await authConnection;}catch(error){authConnection=null;throw error;}
+ try{return await authConnection;}catch(error){authConnection=null;readyAuth=null;throw error;}
 }
 // A signed-out visitor only restores Auth; Firestore loads on first data use.
 async function client(){
@@ -25,8 +25,22 @@ const runRef=(c,uid,id)=>c.doc(c.db,'frogger_players',uid,'runs',id);
 function identity(c){const uid=c.session.currentUser?.uid;if(!uid)throw Error('login-required');return uid;}
 const shape=(doc,uid)=>doc?{...doc,uid,mode:'cloud',bestAt:doc.bestAt?.toMillis?.()??0}:null;
 export async function observeIdentity(callback){const c=await authClient();return c.onAuthStateChanged(c.session,callback);}
-export async function signIn(email,password){const c=await authClient();await c.signInWithEmailAndPassword(c.session,email,password);return readCloudProfile();}
-export async function signInGoogle(){const c=await authClient(),provider=new c.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});const result=await c.signInWithPopup(c.session,provider);return {user:result.user,profile:await readCloudProfile()};}
+async function signedInProfile(user){
+ try{return {user,profile:await readCloudProfile()};}
+ catch(cause){const error=Error('profile-load-failed',{cause});error.user=user;throw error;}
+}
+export async function signIn(email,password){const c=await authClient(),result=await c.signInWithEmailAndPassword(c.session,email,password);return (await signedInProfile(result.user)).profile;}
+function googleProvider(c){const provider=new c.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});return provider;}
+export function signInGoogle(){
+ // Called directly by the click handler, with no SDK-loading await before the popup.
+ const c=readyAuth;if(!c)return Promise.reject(Error('auth-loading'));
+ return c.signInWithPopup(c.session,googleProvider(c)).then(result=>signedInProfile(result.user));
+}
+export async function resetPassword(email,language='en'){
+ const c=await authClient();c.session.languageCode=language==='zh-TW'?'zh-TW':'en';
+ try{await c.sendPasswordResetEmail(c.session,String(email).trim());}
+ catch(error){if(error.code!=='auth/user-not-found')throw error;}
+}
 export async function register(email,password,name){const c=await authClient();await c.createUserWithEmailAndPassword(c.session,email,password);return claimName(name);}
 export async function logout(){const c=await authClient();await c.signOut(c.session);}
 export async function readCloudProfile(){const c=await client(),uid=identity(c),doc=await c.getDoc(playerRef(c,uid));return doc.exists()?shape(doc.data(),uid):null;}

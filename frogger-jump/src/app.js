@@ -14,7 +14,7 @@ const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en,put=(node,text)=>{if(node.t
 let activeRun=null,startBusy=false;
 let records=[],persistent=true,frame=0,frameTimer=0,lastDraw=-Infinity,pointer=null,keyboard=null,saved=false,flashUntil=0,lastRoute='',meterTransform='',audioContext=null,audioTimer=0,sound=false;
 try{records=readRecords(localStorage.getItem(RECORD_KEY));sound=localStorage.getItem('frogger-jump.sound.v1')==='true';}catch{persistent=false;}
-Object.assign(copy,{googleLogin:['使用 Google 登入','Continue with Google'],platformTitle:['七款河岸新朋友','Meet the river’s seven new pads'],
+Object.assign(copy,{forgotPassword:['忘記密碼？','Forgot password?'],retryProfile:['重新讀取雲端存檔','Retry loading cloud save'],googleLogin:['使用 Google 登入','Continue with Google'],platformTitle:['七款河岸新朋友','Meet the river’s seven new pads'],
 
  walletScope:['本機與雲端錢包分開保存；試玩金幣不會自動轉入雲端。','Local and cloud wallets are separate. Practice coins are not imported into a cloud account.'],
  coinRule:['完成一局 1 金幣；每次成功落地 +2；每 20 跳額外 +10；荷花中心 +2、貝殼中心 +3。','Earn 1 coin per run, 2 per landing, plus 10 every 20 hops. Lotus centres add 2 and shell centres add 3.'],
