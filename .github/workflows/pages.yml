@@ -2,7 +2,7 @@ name: Deploy Grid Rush to Pages
 on:
   push:
     branches: [main]
-    paths: [city-is-dying/**, mo-lei-tau-studio/**, frogger-jump/**, tools/**, index.html, sitemap.xml, llms.txt, .htaccess, grid-rush/**, grid-rush-in-order/**, tap-and-spill/**, line-up/**, pikmin-fling/**, just-a-sec/**, roach-rush/**, stone-skip/**, balance-bridge/**, pot-toss/**, marble-maze/**, floating-balance/**, flick-force/**, memory-trace/**, dice-party/**, poker-party/**, mahjong-match/**, beat-bad-luck/**, bun-rush/**, .github/workflows/pages.yml]
+    paths: [career-365/**, city-is-dying/**, mo-lei-tau-studio/**, frogger-jump/**, tools/**, index.html, sitemap.xml, llms.txt, .htaccess, grid-rush/**, grid-rush-in-order/**, tap-and-spill/**, line-up/**, pikmin-fling/**, just-a-sec/**, roach-rush/**, stone-skip/**, balance-bridge/**, pot-toss/**, marble-maze/**, floating-balance/**, flick-force/**, memory-trace/**, dice-party/**, poker-party/**, mahjong-match/**, beat-bad-luck/**, bun-rush/**, .github/workflows/pages.yml]
   workflow_dispatch:
 permissions:
   contents: read

@@ -3,6 +3,14 @@
 export const siteUrl = 'https://sky-playground.com/games/';
 export const games = [
   {
+    slug:'career-365',name:'365 Careers, One Little Life',zh:'365行，行行出狀元',genre:'Simulation',players:[1,1],topic:'Comic Life and Career Simulation',listed:false,
+    description:'Create a little comic life across 365 careers. Draw a random resume, learn with a mentor or simulated AI, work, start a business, switch careers and retire at 65 with a downloadable life book.',
+    intro:'A single-player, browser-local life simulation with 365 distinct careers, monthly actions, mentor and simulated AI learning, fictional investments and gambling, and a personal comic book ending.',
+    chinese:'以柔和漫畫分鏡記錄人生的單人模擬遊戲。18–26歲隨機履歷開局，從365種職業中選擇拜師或模擬AI自學，安排每月行動、經營事業、轉行與虛擬理財，65歲退休並下載完整人生繪本。',
+    steps:['Draw a resume, name your protagonist and choose one of 365 careers with a mentor or simulated AI learning route.', 'Spend three monthly actions on learning, work, rest, relationships or business. Manage fictional assets and resolve story choices; yearly plans stop at decisions.', 'Retire at 65, review achievements and locally assembled reflections, and export a complete offline comic book, PNG highlights or a JSON save.'],
+    related:['mo-lei-tau-studio','memory-trace'],
+  },
+  {
     slug:'city-is-dying',name:'The City is Dying',zh:'天與地：The City is Dying',genre:'Role-playing',players:[1,1],topic:'Hong Kong Psychological Survival RPG',listed:false,
     description:'Play The City is Dying, a three-chapter psychological survival story. Ration supplies, guide three intertwined Hong Kong lives and reunite for an original musical finale.',
     intro:'A local-first solo narrative RPG with snowbound supply decisions, three city viewpoints, linked social pressures, 54 memory fragments, original rhythm or untimed music and eight endings.',
