@@ -1,7 +1,7 @@
 import {animal} from './animals.js';
 import {VARIANTS,VARIANT_CHANCE,surface,dangerous} from './platforms.js';
-export const MAX_JUMP=540,CHARGE_UP_MS=950,SINK_MS=2500,FISH_WARNING_MS=2100,SPLASH_MS=420,DROWN_MS=1900,CAMERA_MS=520;
-export const RIVER_RULES=Object.freeze({minGap:152,maxGap:208,normalRadius:54,smallChance:.12,sinkChance:.06,thornChance:.06,fishChance:.06,lilyChance:.4});
+export const MAX_JUMP=540,CHARGE_UP_MS=1000,SINK_MS=2500,FISH_WARNING_MS=2100,SPLASH_MS=420,DROWN_MS=1900,CAMERA_MS=520;
+export const RIVER_RULES=Object.freeze({minGap:152,maxGap:208,normalRadius:58,smallChance:.09,sinkChance:.05,thornChance:.05,fishChance:.05,lilyChance:.4});
 export const distance=(a,b)=>Math.hypot(b.x-a.x,b.y-a.y);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -24,7 +24,7 @@ export class FroggerGame{
   if(this.run<=0){const proposed=this.randomUnit()<.5?'I':'Z';this.route=proposed===this.route?(proposed==='I'?'Z':'I'):proposed;this.run=1+Math.floor(this.randomUnit()*2);}
   this.run--;let x=previous.x;
   if(this.route==='Z'){const sign=previous.x>70?-1:previous.x< -70?1:this.randomUnit()<.5?-1:1,span=96+this.randomUnit()*60;x=Math.max(-145,Math.min(145,previous.x+sign*span));}
-  const y=previous.y+RIVER_RULES.minGap+this.randomUnit()*(RIVER_RULES.maxGap-RIVER_RULES.minGap),small=this.randomUnit()<RIVER_RULES.smallChance,r=small?38+Math.floor(this.randomUnit()*8):RIVER_RULES.normalRadius,hazard=this.randomUnit();
+  const y=previous.y+RIVER_RULES.minGap+this.randomUnit()*(RIVER_RULES.maxGap-RIVER_RULES.minGap),small=this.randomUnit()<RIVER_RULES.smallChance,r=small?42+Math.floor(this.randomUnit()*8):RIVER_RULES.normalRadius,hazard=this.randomUnit();
   const busy=this.stumps.some(dangerous)||dangerous(previous);
   const sinking=!busy&&hazard<RIVER_RULES.sinkChance,thorns=!busy&&hazard>=RIVER_RULES.sinkChance&&hazard<RIVER_RULES.sinkChance+RIVER_RULES.thornChance&&!previous.thorns,angler=!busy&&hazard>=RIVER_RULES.sinkChance+RIVER_RULES.thornChance&&hazard<RIVER_RULES.sinkChance+RIVER_RULES.thornChance+RIVER_RULES.fishChance;
   let kind=this.randomUnit()<RIVER_RULES.lilyChance?'lily':'stump';const variant=this.randomUnit();if(variant<VARIANT_CHANCE&&!sinking&&!thorns&&!angler){kind=VARIANTS[Math.min(6,Math.floor(variant/VARIANT_CHANCE*7))];if(kind==='ice'&&busy)kind='shell';}
@@ -40,6 +40,11 @@ export class FroggerGame{
   if(kind==='bunny'){next.thorns=false;widen(22);}
   if(kind==='monkey'){next.thorns=false;stabilize(next);widen(6);}
   if(kind==='otter'){current.angler=false;next.angler=false;widen(12);next.guarded=true;}
+  if(kind==='duck'){stabilize(current);next.thorns=false;widen(8);}
+  if(kind==='cat'){next.thorns=false;widen(8);this.softLanding=true;}
+  if(kind==='panda'){stabilize(current);stabilize(next);widen(14);}
+  if(kind==='fox'){next.thorns=false;stabilize(next);this.softLanding=true;}
+  if(kind==='capybara'){for(const pad of [current,next]){stabilize(pad);pad.thorns=false;}}
   if(!current.sinking)this.deadline=null;if(!current.angler)this.anglerDeadline=null;
   this.skillCharges--;this.skillSerial++;this.events.push({type:'skill',animal:kind,at:this.clock,point:{x:next.x,y:next.y},radius:next.r});return true;
  }
