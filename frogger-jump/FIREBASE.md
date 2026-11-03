@@ -84,3 +84,7 @@ Enable **Anonymous** in Firebase Console → Authentication → Sign-in method. 
 Google popup calls run directly from the click handler. For an anonymous player they use `linkWithPopup`, preserving the UID, nickname, wallet, animals and scores. Email registration from an anonymous account uses `linkWithCredential` with the same preservation. A credential already attached to another account is reported without switching or merging wallets; choosing that account requires an explicit sign-out first. Ordinary Email sign-in cannot silently replace an anonymous identity. Provider cancellation, disabled-provider errors and profile-load retries remain available.
 
 Provider availability is a Firebase setting, not a GitHub deployment setting. Live Google OAuth and anonymous account creation were not performed during local verification. The current rules already support Firebase anonymous UIDs; publish the latest rules separately for the new animal catalog and personal-rank aggregate.
+
+## Starmouse and price update · 2026-11-03
+
+Publish the updated rules before releasing cloud purchases: Fox costs 960, Capybara 1,000 and Mochi starmouse (`mochi`) 1,080 Frog Coins. The species list and maximum owned collection now allow eleven animals. Existing owned animals remain selected freely; no balance migration or retroactive charge is applied. The local catalog/rules contract test checks prices and species together. The expanded emulator harness includes the new animal, but live deployment and emulator certification have not been performed for this update.

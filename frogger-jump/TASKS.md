@@ -21,10 +21,33 @@ Updated: 2026-11-03
 - [x] Retain platform bonus coins through queue save/reload and settlement.
 - [x] Pass all 72 logic tests, browser sync regression, 25-page production build and built metadata checks.
 
+## Compact controls, airborne fish and starmouse · 2026-11-03
+
+- [x] Run charging at 30 fps while keeping flight at 60 fps and exact-clock power release.
+- [x] Add bounded gameplay-pose and shared portrait caches.
+- [x] Give names 10px separation from world ranks; shorten shop/rank actions and the skill control.
+- [x] Return the skill button to the lower controls next to Hold.
+- [x] Remove rain and rainbow artwork and animation; retain occasional static sunshine.
+- [x] Add advance warning and a high fish leap between pads, swept midair collision and immediate capture.
+- [x] Preserve fish warning/leap timing during pause and hidden-page pauses.
+- [x] Set Fox to 960 and Capybara to 1,000 Frog Coins; preserve existing unlocks.
+- [x] Add original Mochi starmouse at 1,080, with one-hop Star courage fish protection.
+- [x] Match the eleven-animal price/species contract in Firestore rules and expand the emulator fixture.
+- [x] Pass 81 logic checks, all eleven animal/skill/reward checks, and four-size fish/shield/shop/layout checks.
+- [x] Pass the 25-page release build, source/built metadata checks and production performance budgets.
+- [x] Pass final production gameplay at four sizes, with 22 seeded landings each, fish timing, hazards, pause/background recovery, replay and stored records.
+
+## Complete weather removal · 2026-11-03
+
+- [x] Remove all drizzle, sunshine and post-rain rainbow overlays, styles and lifecycle calls.
+- [x] Delete the weather scheduler and its obsolete tests; remove the module from the offline preload list.
+- [x] Bump the source worker to v25 and update documentation/browser assertions.
+- [x] Pass all 77 remaining logic tests, 25-page build/metadata checks and a 90-second no-weather browser smoke check with pause/resume.
+
 ## Remaining
 
 - [ ] Run the expanded Firestore emulator security harness. Previous verification recorded an emulator download restriction; these tests are not certified as passing.
-- [ ] Confirm Email/Password Auth, Firestore rules, and ranking index in the configured Firebase project.
+- [ ] Publish the updated eleven-animal Firestore rules and verify live Fox/Capybara/Starmouse purchases at the new prices. Confirm Email/Password Auth and ranking index in the configured Firebase project.
 - [ ] Verify real cloud registration, unique-name collisions, purchases, offline retry, and cross-device rankings against the configured backend.
 - [ ] Test touch controls, background/resume, and installed/offline play on physical iOS and Android devices.
 - [ ] Exercise simultaneous results in separate browser tabs; this continuation shares requests within one page and does not add cross-tab queue coordination.

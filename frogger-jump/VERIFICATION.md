@@ -1,5 +1,33 @@
 # River friends / Firebase interface verification · 2026-11-02
 
+## Complete weather removal · 2026-11-03
+
+- Removed all weather overlays, sunshine artwork/styles, application lifecycle calls, the weather module and its boundary timer. Source worker **v25** no longer preloads it.
+- Removed four obsolete weather tests. All **77 remaining logic tests**, the 25-page production build, built metadata and whitespace checks pass.
+- Chromium smoke check confirms no weather layers return after 90 simulated seconds of play and that pause/resume still works, with no runtime errors.
+
+
+## Compact controls, airborne fish and original starmouse · 2026-11-03
+
+- **81 Node tests pass.** Coverage includes the 1.2-second advance fish warning, midpoint/high arc, pre-landing collisions, delayed-frame swept collision, safe early/late crossing, standing-player safety, pause freezing, one-hop shield consumption, skill-based fish removal, eleven-animal wallet/rules consistency, cached pose reuse and cache bounds.
+- Actual game/controller browser checks pass at **320×568, 390×844, 812×375 (reduced motion) and 1280×900**: no rain/rainbow layers, compact action heights, name/rank spacing, skill next to Hold, paused warning, fish in midair, immediate capture, and Mochi's shield followed by a scored landing. This isolated source harness injects only an instance hook; it disables Firebase and leaves the game input, timing, renderer and collision code intact. Screenshots of warning/leap/capture/shield, new character artwork and mobile controls were inspected.
+- All **eleven** animals pass real-browser sprite, skill, landing, exactly-once reward and reload/purchase checks. Four-size shop/ranking checks verify the new exact prices, affordable/insufficient states, scrollable dialogs and no horizontal overflow. Rank fixtures are local.
+- Matched source measurements use the same 390×844 static-route/one-second charge workload and fake clock as the baseline:
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Charging draws / simulated second | 63 | 31 |
+| Charging HUD attribute mutations | 252 | 124 |
+| Charging gradient creations | 63 | 18 |
+| Moving-idle gradient creations / second | 31 | 0 |
+| Static idle and paused frame callbacks | 0 | 0 |
+
+- The production budget check passes: 32 charging draws/second in that run, zero static-idle/paused callbacks, 31 moving-idle callbacks/second, approximately two million maximum Canvas backing pixels, and deferred Firestore loading (466,875 initial decoded script bytes; 1,032,070 after opening the board). These are simulated local Chromium workload measurements, not physical-device battery/FPS measurements. Charge power uses the current game clock even between painted frames.
+- Gameplay caches hold at most 48 pose sprites per scene; shared portraits hold at most 48 species/size/display-scale variants. Source worker **v24** preloads the shared fish-path module. The **25-page build** and source/built metadata checks pass.
+- Final production gameplay passes at all four sizes above: **22 seeded mixed-route landings per viewport**, safe timing around fish, small/sinking/thorn platforms, keyboard/touch, pause/resume and background recovery, immediate crocodile capture, replay, stored records and idle frame suspension.
+- **Cloud release dependency:** publish the changed Firestore species/collection/price rules before cloud purchases use Fox 960, Capybara 1,000 and Starmouse 1,080. Existing owned animals remain owned. Local tests verify the catalog/rules contract; the expanded emulator harness and real cloud purchase flow are not certified by this update. No Firebase rules or production settings were deployed.
+
+
 ## Latest-main integration · 2026-11-03
 
 - Fast-forwarded to upstream `3e93afa` and restored the local pending-result work, resolving overlaps in app startup, player state and the source worker.

@@ -22,3 +22,11 @@ test('platform bitmaps stay bounded to the visible trio and reset releases them'
  s.resize(400,500);const g=new FroggerGame({random:()=>.75,now:()=>0});g.start();s.paintPlatform=()=>{};s.animal=()=>{};s.ripples=()=>{};s.skillEffect=()=>{};s.paintWater=()=>{};
  for(let i=0;i<100;i++){s.draw(g);assert(s.padCache.size<=3);const previous=g.stumps.at(-1);g.stumps.shift();g.stumps.push({...previous,id:previous.id+1,y:previous.y+180});}s.reset();assert.equal(s.padCache.size,0);
 }));
+
+test('repeated animal poses reuse sprites; species and animation changes invalidate them within a fixed bound',()=>withScene(s=>{
+ s.resize(400,500);let paints=0;s.paintAnimal=()=>paints++;
+ s.animal(20,30,1,'frog',{squat:.25});s.animal(40,60,.8,'frog',{squat:.25});assert.equal(paints,1);
+ s.animal(40,60,1,'mochi',{squat:.25});assert.equal(paints,2);
+ for(let i=0;i<100;i++)s.animal(0,0,1,'mochi',{squat:i/20});assert(s.animalCache.size<=48);
+ s.resize(401,500);assert.equal(s.animalCache.size,0);
+}));
