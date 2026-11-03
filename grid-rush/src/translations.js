@@ -1,6 +1,7 @@
 // English source messages and their Traditional Chinese translations.
 // Named placeholders preserve numbers and player names without interpreting HTML.
 export const messages = {
+  'The City is Dying': '天與地：The City is Dying',
   "Mo Lei Tau Studio": "星爺宇宙：無厘頭片場",
   "Frogger Jump 2.5D": "蓄力蛙：鱷口求生",
   "Feet Up Café": "茶記縮腳大亂鬥",

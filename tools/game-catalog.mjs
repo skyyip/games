@@ -3,6 +3,14 @@
 export const siteUrl = 'https://sky-playground.com/games/';
 export const games = [
   {
+    slug:'city-is-dying',name:'The City is Dying',zh:'天與地：The City is Dying',genre:'Role-playing',players:[1,1],topic:'Hong Kong Psychological Survival RPG',listed:false,
+    description:'Play The City is Dying, a three-chapter psychological survival story. Ration supplies, guide three intertwined Hong Kong lives and reunite for an original musical finale.',
+    intro:'A local-first solo narrative RPG with snowbound supply decisions, three city viewpoints, linked social pressures, 54 memory fragments, original rhythm or untimed music and eight endings.',
+    chinese:'非官方原創互動演繹：雪山物資抉擇、三位主角的城市行動、罪疚與理智管理、54 件碎片及最後合奏，導向八個結局。本機自動存檔與三個手動槽，可匯出與匯入。',
+    steps:['Share scarce supplies and make six nights of decisions, including responsibility for a terrible dinner.', 'Switch freely between three city viewpoints sharing three actions a day. Balance money, prices, solidarity, trust and a growing investigation; reconstruct memories and rehearse.', 'Arrange a final stage and choose what to reveal. Play original music using rhythm, slow or untimed controls, then discover an ending and replay using local save slots.'],
+    related:['beat-bad-luck','memory-trace'],
+  },
+  {
     slug:'mo-lei-tau-studio',name:'Mo Lei Tau Studio',zh:'星爺宇宙：無厘頭片場',genre:'Simulation',players:[1,1],topic:'Cute Hong Kong Comedy Film Studio Game',listed:false,
     description:'Build a little Hong Kong comedy film studio. Choose a movie, audition three actors, train, earn wages, collect props and create a funny movie poster.',
     intro:'A local-first comedy studio game. Pick one of three movie worlds, reveal three free unique contracts, develop actors and fund a six-person production with clearly labelled local extras.',

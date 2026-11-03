@@ -1,0 +1,8 @@
+import {CityGame} from './game.js';import {ENDINGS} from './content.js';
+export const SAVE_KEY='city-is-dying.save.v1',SLOTS_KEY='city-is-dying.slots.v1',META_KEY='city-is-dying.endings.v1';
+export function readGame(storage){try{const raw=storage.getItem(SAVE_KEY);return raw?CityGame.restore(raw):null;}catch{return null;}}
+export function saveGame(storage,game){try{storage.setItem(SAVE_KEY,JSON.stringify(game.snapshot()));return true;}catch{return false;}}
+export function readSlots(storage){try{const raw=JSON.parse(storage.getItem(SLOTS_KEY));return Array.from({length:3},(_,i)=>{try{const p=raw?.[i];if(!p)return null;return {at:Number(p.at)||0,state:CityGame.restore(p.state).snapshot()};}catch{return null;}});}catch{return [null,null,null];}}
+export function writeSlot(storage,index,game){if(!Number.isInteger(index)||index<0||index>2)throw Error('invalid-slot');const slots=readSlots(storage);slots[index]={at:Date.now(),state:game.snapshot()};storage.setItem(SLOTS_KEY,JSON.stringify(slots));return slots;}
+export function recordEnding(storage,id){if(!ENDINGS[id]&&id!=='whiteout')return [];let old=[];try{old=JSON.parse(storage.getItem(META_KEY))??[];}catch{}if(Array.isArray(old)&&old.includes(id))return old.filter(x=>ENDINGS[x]||x==='whiteout');const next=[...new Set([...(Array.isArray(old)?old:[]).filter(x=>ENDINGS[x]||x==='whiteout'),id])];try{storage.setItem(META_KEY,JSON.stringify(next));}catch{}return next;}
+export function readEndings(storage){try{const value=JSON.parse(storage.getItem(META_KEY));return Array.isArray(value)?value.filter(x=>ENDINGS[x]||x==='whiteout'):[];}catch{return [];}}
