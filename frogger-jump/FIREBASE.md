@@ -2,7 +2,7 @@
 
 ## Current state
 
-The application integration, Google and email/password Auth flows, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable the Email/Password provider, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
+The application integration, Google, Facebook, anonymous and email/password Auth flows, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable authentication providers, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
 
 ## Activate after creating the project
 
@@ -33,6 +33,10 @@ Coins use the same deterministic formula on client and in rules, including bound
 A disconnected finished run is retained under `frogger-jump.pending.v1` and can be retried. It remains unranked/unpaid until accepted by Firebase. Retrying the same finished receipt is idempotent. A run superseded by a different device is not paid twice; its stale pending receipt is cleared. No local guest wallet/score is promoted into a cloud account.
 
 The public leaderboard reads at most ten documents on demand, with a ten-second refresh cooldown. Identity restoration reads the signed-in player's profile. Wallets refresh on returning to the page. There are no per-frame or per-second database writes, global listeners, or high-frequency leaderboard polling.
+
+Signed-in players also see their own world rank, including positions outside the top ten. This reads their public leaderboard document from the server, then uses one `getCountFromServer` aggregate over the rows before its snapshot cursor. Ordering is score descending, achievement time ascending, then document ID ascending, matching the top-ten query's implicit final tie-break. No other players' records are downloaded to compute the count. The existing composite index supports this ordering; its final document-ID order is ascending.
+
+**Publish the updated `firestore.rules` before enabling personal ranks.** Authenticated users may query the public scores collection for the aggregate; anonymous queries remain limited to ten records. Firestore rules cannot distinguish aggregate counts from ordinary collection queries, so this permits authenticated queries over the public leaderboard generally. Private wallets, names registry enumeration and run receipts retain their existing restrictions. Signing in, returning to the page or rendering the wallet reuses a rank for up to one minute; a new personal best or explicit leaderboard refresh requests an update. Missing/zero-score records show unranked; network/rules failures show a retry control. There is no rank polling or extra write.
 
 ## Limits of client-side competition
 
@@ -73,3 +77,12 @@ The confirmation does not disclose whether an address exists. An accepted reques
 Google login now invokes the already-loaded popup SDK directly from the click handler. A successful Auth login followed by a failed Firestore profile read is shown as a **cloud-save loading failure**, with a retry button. It does not ask the player to register again or silently start an unranked guest run under the signed-in account.
 
 `auth-adapter-check.mjs` exercises the real cloud module with a fake Firebase SDK; `google-ui-check.mjs` covers small-phone/landscape UI with mock Auth/mail. These checks do not send real reset email, create real accounts, enable the Google provider or certify real OAuth. Public configuration probes remained blocked by the environment proxy (403 tunnel response).
+## Facebook and anonymous providers
+
+Enable **Anonymous** in Firebase Console → Authentication → Sign-in method. It creates a real Firebase UID, persists its session in this browser and uses the same owner-only wallet, unique nickname, run receipts and world ranking as registered players. It is separate from unranked local practice. A first-time anonymous player reserves a nickname before starting ranked play. Losing the anonymous session can make its UID inaccessible, so the account dialog offers linking and asks for confirmation before anonymous sign-out.
+
+For **Facebook**, create/configure a Meta app with Facebook Login, then enable Facebook in Firebase Authentication and enter its App ID and App Secret **in Firebase Console, never in this repository or client configuration**. Copy the exact OAuth redirect URL shown by Firebase into Meta's valid OAuth redirect URIs. For the default auth domain it is `https://sky-playground-3c5af.firebaseapp.com/__/auth/handler`. Ensure Firebase's authorized domains include the website host. A Meta app in development mode generally allows only its app roles/test users; configure its permitted audience before expecting public players to sign in.
+
+Facebook/Google popup calls run directly from the click handler. For an anonymous player they use `linkWithPopup`, preserving the UID, nickname, wallet, animals and scores. Email registration from an anonymous account uses `linkWithCredential` with the same preservation. A credential already attached to another account is reported without switching or merging wallets; choosing that account requires an explicit sign-out first. Ordinary Email sign-in cannot silently replace an anonymous identity. Provider cancellation, disabled-provider errors and profile-load retries remain available. No additional Facebook permissions are requested by the game.
+
+Provider availability is a Firebase/Meta setting, not a GitHub deployment setting. Live Facebook OAuth and anonymous account creation were not performed during local verification. The current rules already support Firebase anonymous UIDs; publish the latest rules separately for the new animal catalog and personal-rank aggregate.

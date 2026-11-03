@@ -73,7 +73,9 @@ service cloud.firestore {
   }
   match /frogger_leaderboard/{uid} {
    allow get: if true;
-   allow list: if request.query.limit != null && request.query.limit <= 10;
+   // Signed-in players use an aggregate count for their rank outside the top ten.
+   // This collection contains public scores only; private wallets remain owner-only.
+   allow list: if request.auth != null || (request.query.limit != null && request.query.limit <= 10);
    allow delete: if false;
    allow create, update: if owner(uid) && request.resource.data.keys().hasOnly(['uid','name','score','animal','at']) && request.resource.data.uid == uid && request.resource.data.name == getAfter(player(uid)).data.name && request.resource.data.score == getAfter(player(uid)).data.best && request.resource.data.score > 0 && request.resource.data.animal == getAfter(player(uid)).data.bestAnimal && request.resource.data.at == getAfter(player(uid)).data.bestAt && request.resource.data.at == request.time;
   }

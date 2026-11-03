@@ -29,19 +29,40 @@ async function signedInProfile(user){
  try{return {user,profile:await readCloudProfile()};}
  catch(cause){const error=Error('profile-load-failed',{cause});error.user=user;throw error;}
 }
-export async function signIn(email,password){const c=await authClient(),result=await c.signInWithEmailAndPassword(c.session,email,password);return (await signedInProfile(result.user)).profile;}
+export async function signIn(email,password){const c=await authClient();if(c.session.currentUser?.isAnonymous)throw Error('anonymous-existing-account');const result=await c.signInWithEmailAndPassword(c.session,email,password);return (await signedInProfile(result.user)).profile;}
 function googleProvider(c){const provider=new c.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});return provider;}
 export function signInGoogle(){
  // Called directly by the click handler, with no SDK-loading await before the popup.
  const c=readyAuth;if(!c)return Promise.reject(Error('auth-loading'));
- return c.signInWithPopup(c.session,googleProvider(c)).then(result=>signedInProfile(result.user));
+ return socialSignIn(c,googleProvider(c));
+}
+function socialSignIn(c,provider){
+ const request=c.session.currentUser?.isAnonymous?c.linkWithPopup(c.session.currentUser,provider):c.signInWithPopup(c.session,provider);
+ return request.then(result=>signedInProfile(result.user));
+}
+export function signInFacebook(){
+ const c=readyAuth;if(!c)return Promise.reject(Error('auth-loading'));
+ return socialSignIn(c,new c.FacebookAuthProvider());
+}
+export async function signInAnonymous(){
+ const c=await authClient();let user=c.session.currentUser;
+ if(user&&!user.isAnonymous)throw Error('already-signed-in');
+ if(!user)user=(await c.signInAnonymously(c.session)).user;
+ return signedInProfile(user);
 }
 export async function resetPassword(email,language='en'){
  const c=await authClient();c.session.languageCode=language==='zh-TW'?'zh-TW':'en';
  try{await c.sendPasswordResetEmail(c.session,String(email).trim());}
  catch(error){if(error.code!=='auth/user-not-found')throw error;}
 }
-export async function register(email,password,name){const c=await authClient();await c.createUserWithEmailAndPassword(c.session,email,password);return claimName(name);}
+export async function register(email,password,name){
+ const c=await authClient();
+ if(c.session.currentUser?.isAnonymous){
+  const {user}=await c.linkWithCredential(c.session.currentUser,c.EmailAuthProvider.credential(email,password));
+  try{return await claimName(name);}catch(cause){if(cause.message==='name-taken')throw cause;const error=Error('profile-load-failed',{cause});error.user=user;throw error;}
+ }
+ await c.createUserWithEmailAndPassword(c.session,email,password);return claimName(name);
+}
 export async function logout(){const c=await authClient();await c.signOut(c.session);}
 export async function readCloudProfile(){const c=await client(),uid=identity(c),doc=await c.getDoc(playerRef(c,uid));return doc.exists()?shape(doc.data(),uid):null;}
 export async function claimName(value){const c=await client(),uid=identity(c),{name,key}=normalizeName(value),ref=playerRef(c,uid),nameRef=c.doc(c.db,'frogger_names',key);await c.runTransaction(c.db,async t=>{const [existing,reserved]=await Promise.all([t.get(ref),t.get(nameRef)]);if(existing.exists())return;if(reserved.exists())throw Error('name-taken');const stamp=c.serverTimestamp();t.set(nameRef,{uid,name});t.set(ref,{version:2,name,nameKey:key,coins:0,owned:['frog'],selected:'frog',best:0,bestAnimal:'frog',bestAt:stamp,createdAt:stamp,updatedAt:stamp,activeRun:null,lastSettledRun:null});});return readCloudProfile();}
@@ -51,3 +72,11 @@ export async function abandonCloudRun(id){const c=await client(),uid=identity(c)
 export async function settleCloudRun({id,score,uid:owner,bonusCoins=0}){if(!Number.isSafeInteger(bonusCoins)||bonusCoins<0||bonusCoins>score*3||!Number.isSafeInteger(score)||score<0||score>1e6)throw Error('invalid-run');const c=await client(),uid=identity(c);if(owner!==uid)throw Error('wrong-player');const ref=playerRef(c,uid),r=runRef(c,uid,id),board=c.doc(c.db,'frogger_leaderboard',uid);let earned=0,duplicate=false;await c.runTransaction(c.db,async t=>{const [pDoc,runDoc]=await Promise.all([t.get(ref),t.get(r)]);if(!pDoc.exists()||!runDoc.exists())throw Error('run-missing');const p=pDoc.data(),run=runDoc.data();if(run.status==='finished'){earned=run.coinsEarned;duplicate=true;return;}if(run.status!=='playing'||p.activeRun!==id)throw Error('run-replaced');earned=rewardCoins(score,bonusCoins);const stamp=c.serverTimestamp(),record=score>p.best;t.update(r,{status:'finished',score,...(bonusCoins?{bonusCoins}:{}),coinsEarned:earned,endedAt:stamp});t.update(ref,{coins:p.coins+earned,activeRun:null,lastSettledRun:id,updatedAt:stamp,...(record?{best:score,bestAnimal:run.animal,bestAt:stamp}:{})});if(record)t.set(board,{uid,name:p.name,score,animal:run.animal,at:stamp});});return {profile:await readCloudProfile(),reward:earned,duplicate};}
 let refreshAfter=0,refreshing;
 export async function topTen(force=false){if(refreshing)return refreshing;if(!force&&Date.now()<refreshAfter)throw Error('refresh-cooldown');refreshAfter=Date.now()+10000;refreshing=(async()=>{const c=await client(),q=c.query(c.collection(c.db,'frogger_leaderboard'),c.orderBy('score','desc'),c.orderBy('at','asc'),c.limit(10)),snapshot=await c.getDocs(q);return snapshot.docs.map(doc=>({...doc.data(),uid:doc.id,at:doc.data().at?.toMillis?.()??0}));})();try{return await refreshing;}finally{refreshing=null;}}
+export async function playerRank(){
+ const c=await client(),uid=identity(c),entry=await c.getDocFromServer(c.doc(c.db,'frogger_leaderboard',uid));
+ if(!entry.exists())return {uid,rank:null,score:0};
+ // Snapshot cursors include the document ID, matching the leaderboard's final tie-break.
+ const ahead=c.query(c.collection(c.db,'frogger_leaderboard'),c.orderBy('score','desc'),c.orderBy('at','asc'),c.orderBy(c.documentId(),'asc'),c.endBefore(entry));
+ const count=await c.getCountFromServer(ahead);
+ return {uid,rank:count.data().count+1,score:entry.data().score};
+}
