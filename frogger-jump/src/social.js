@@ -12,7 +12,7 @@ export class RiverPlayers{
   for(const id of ['player-dialog','animal-dialog','leaderboard-dialog'])$(id).addEventListener('cancel',()=>{if(id==='player-dialog'){this.wantPlay=false;this.passwordVisibility(false);}});
   $('player-world-rank').addEventListener('click',()=>this.worldRank.status==='error'?this.syncWorldRank(true):this.openBoard());$('profile-open').addEventListener('click',()=>this.openPlayer());$('animal-open').addEventListener('click',()=>this.openShop());$('leaderboard-open').addEventListener('click',()=>this.openBoard());$('refresh-board').addEventListener('click',()=>this.refreshBoard());$('auth-action').addEventListener('change',()=>this.authView());
   $('guest-form').addEventListener('submit',async e=>{e.preventDefault();if(this.busy)return;try{const {name,key}=normalizeName($('guest-name').value);if(this.identity)await cloud.logout();this.cloudProfile=null;this.guest={...this.guest,name,nameKey:key};this.saveGuest();this.render();this.close('player-dialog');this.onChange?.();if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}catch(error){this.feedback('account-feedback',error);}});
-  $('google-signin').addEventListener('click',()=>this.providerLogin('google'));$('facebook-signin').addEventListener('click',()=>this.providerLogin('facebook'));$('anonymous-signin').addEventListener('click',()=>this.providerLogin('anonymous'));
+  $('google-signin').addEventListener('click',()=>this.providerLogin('google'));$('anonymous-signin').addEventListener('click',()=>this.providerLogin('anonymous'));
   $('password-visibility').addEventListener('click',()=>this.passwordVisibility($('player-password').type==='password'));
   $('password-reset').addEventListener('click',()=>this.forgotPassword());$('profile-retry').addEventListener('click',()=>this.retryProfile());
   $('cloud-form').addEventListener('submit',e=>{e.preventDefault();this.authenticate();});$('cloud-logout').addEventListener('click',async()=>{if(this.busy)return;if(this.identity?.isAnonymous&&!window.confirm(this.t('登出匿名帳戶後，未綁定的紀錄可能無法找回。建議先綁定登入方式。仍要登出？','Signing out of an anonymous account may make its progress unrecoverable. Link a sign-in method first. Sign out anyway?')))return;try{await cloud.logout();this.identity=null;this.cloudProfile=null;this.profileFailed=false;this.passwordVisibility(false);$('player-password').value='';this.render();this.authView();this.onChange?.();}catch(error){this.feedback('account-feedback',error);}});
@@ -70,10 +70,10 @@ export class RiverPlayers{
  authView(){
   this.passwordVisibility($('player-password').type==='text');$('password-visibility').disabled=this.busy;
   const anonymous=!!this.identity?.isAnonymous,claim=!!this.identity&&!this.cloudProfile&&!this.profileFailed,action=$('auth-action').value,mode=claim?'claim':anonymous?(action==='claim'||action==='signin'?'register':action):action==='claim'?'signin':action;
-  for(const id of ['google-signin','facebook-signin']){$(id).hidden=!cloud.cloudConfigured||!!this.identity&&!anonymous;$(id).disabled=this.busy||!this.authReady;}
-  $('google-signin').querySelector('b').textContent=anonymous?this.t('綁定 Google，保留進度','Link Google · keep progress'):this.t('使用 Google 登入','Continue with Google');$('facebook-signin').querySelector('b').textContent=anonymous?this.t('綁定 Facebook，保留進度','Link Facebook · keep progress'):this.t('使用 Facebook 登入','Continue with Facebook');
+  $('google-signin').hidden=!cloud.cloudConfigured||!!this.identity&&!anonymous;$('google-signin').disabled=this.busy||!this.authReady;
+  $('google-signin').querySelector('b').textContent=anonymous?this.t('綁定 Google，保留進度','Link Google · keep progress'):this.t('使用 Google 登入','Continue with Google');
   $('anonymous-signin').hidden=!cloud.cloudConfigured||!!this.identity;$('anonymous-signin').disabled=this.busy||!this.authReady;
-  $('anonymous-note').hidden=!anonymous;$('anonymous-note').textContent=this.t('匿名身分保存在目前瀏覽器。綁定 Google、Facebook 或 Email，可保留進度及跨裝置登入。','Your anonymous sign-in is saved in this browser. Link Google, Facebook or email to keep progress and sign in on another device.');
+  $('anonymous-note').hidden=!anonymous;$('anonymous-note').textContent=this.t('匿名身分保存在目前瀏覽器。綁定 Google 或 Email，可保留進度及跨裝置登入。','Your anonymous sign-in is saved in this browser. Link Google or email to keep progress and sign in on another device.');
   $('profile-retry').hidden=!this.identity||!this.profileFailed;$('profile-retry').disabled=this.busy;
   $('auth-action').value=mode;$('auth-action').disabled=claim||this.busy;$('auth-action').querySelector('[value=register]').textContent=anonymous?this.t('綁定 Email','Link email'):this.t('建立帳戶','Create account');
   $('auth-action').querySelector('[value=signin]').hidden=anonymous;$('cloud-name-row').hidden=mode==='signin'||anonymous&&!!this.cloudProfile;$('email-row').hidden=mode==='claim';$('password-row').hidden=mode==='claim';
@@ -101,7 +101,7 @@ export class RiverPlayers{
  }
  async providerLogin(provider){
   if(this.busy)return;this.busy=true;this.authView();this.feedback('account-feedback',null);
-  try{const {user,profile}=await (provider==='facebook'?cloud.signInFacebook():provider==='anonymous'?cloud.signInAnonymous():cloud.signInGoogle());this.identity=user;this.cloudProfile=profile;this.profileFailed=false;this.authReady=true;this.render();this.onChange?.();if(!profile){$('auth-action').value='claim';this.authView();$('cloud-name').focus();}else{this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}}
+  try{const {user,profile}=await (provider==='anonymous'?cloud.signInAnonymous():cloud.signInGoogle());this.identity=user;this.cloudProfile=profile;this.profileFailed=false;this.authReady=true;this.render();this.onChange?.();if(!profile){$('auth-action').value='claim';this.authView();$('cloud-name').focus();}else{this.close('player-dialog');if(this.wantPlay){this.wantPlay=false;this.onPlay?.();}}}
   catch(error){if(error?.message==='profile-load-failed'){this.identity=error.user??this.identity;this.cloudProfile=null;this.profileFailed=true;}this.feedback('account-feedback',error);}
   finally{this.busy=false;$('cloud-submit').disabled=false;this.authView();}
  }

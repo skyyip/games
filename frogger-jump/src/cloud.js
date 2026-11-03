@@ -40,10 +40,6 @@ function socialSignIn(c,provider){
  const request=c.session.currentUser?.isAnonymous?c.linkWithPopup(c.session.currentUser,provider):c.signInWithPopup(c.session,provider);
  return request.then(result=>signedInProfile(result.user));
 }
-export function signInFacebook(){
- const c=readyAuth;if(!c)return Promise.reject(Error('auth-loading'));
- return socialSignIn(c,new c.FacebookAuthProvider());
-}
 export async function signInAnonymous(){
  const c=await authClient();let user=c.session.currentUser;
  if(user&&!user.isAnonymous)throw Error('already-signed-in');
