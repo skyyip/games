@@ -39,17 +39,18 @@ service cloud.firestore {
    match /runs/{id} {
     allow get: if owner(uid);
     allow list, delete: if false;
-    allow create: if owner(uid) && request.resource.data.keys().hasOnly(['uid','animal','status','startedAt','endedAt','score','coinsEarned']) && request.resource.data.uid == uid && species(request.resource.data.animal) && request.resource.data.animal == get(player(uid)).data.selected && request.resource.data.status == 'playing' && request.resource.data.startedAt == request.time && request.resource.data.endedAt == null && request.resource.data.score == 0 && request.resource.data.coinsEarned == 0 && getAfter(player(uid)).data.activeRun == id;
+    allow create: if owner(uid) && request.resource.data.keys().hasOnly(['uid','animal','status','startedAt','endedAt','score','coinsEarned','bonusCoins']) && request.resource.data.uid == uid && species(request.resource.data.animal) && request.resource.data.animal == get(player(uid)).data.selected && request.resource.data.status == 'playing' && request.resource.data.startedAt == request.time && request.resource.data.endedAt == null && request.resource.data.score == 0 && request.resource.data.coinsEarned == 0 && request.resource.data.get('bonusCoins',0) == 0 && getAfter(player(uid)).data.activeRun == id;
     allow update: if owner(uid)
       && resource.data.status == 'playing'
       && request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['status', 'endedAt', 'score', 'coinsEarned'])
+        .hasOnly(['status', 'endedAt', 'score', 'coinsEarned', 'bonusCoins'])
       && request.resource.data.endedAt == request.time
       && (
         (
           request.resource.data.status == 'abandoned'
           && request.resource.data.score == 0
           && request.resource.data.coinsEarned == 0
+          && request.resource.data.get('bonusCoins',0) == 0
           && getAfter(player(uid)).data.activeRun != id
         )
         || (
@@ -60,7 +61,10 @@ service cloud.firestore {
           && request.time + duration.value(1000, 'ms')
             >= resource.data.startedAt
               + duration.value(request.resource.data.score * 250, 'ms')
-          && request.resource.data.coinsEarned == coins(request.resource.data.score)
+          && request.resource.data.get('bonusCoins',0) is int
+          && request.resource.data.get('bonusCoins',0) >= 0
+          && request.resource.data.get('bonusCoins',0) <= request.resource.data.score * 3
+          && request.resource.data.coinsEarned == coins(request.resource.data.score) + request.resource.data.get('bonusCoins',0)
           && getAfter(player(uid)).data.lastSettledRun == id
           && getAfter(player(uid)).data.activeRun == null
         )

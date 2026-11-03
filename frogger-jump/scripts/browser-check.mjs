@@ -6,7 +6,7 @@ try{for(const [width,height,lang]of JSON.parse(process.env.FROGGER_VIEWPORTS||'[
  const c=await browser.newContext({viewport:{width,height},isMobile:width<900,hasTouch:width<900,reducedMotion:width===812?'reduce':'no-preference',serviceWorkers:'block'});await c.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
  await c.addInitScript(({lang})=>{globalThis.FROGGER_FIREBASE_CONFIG=null;localStorage.setItem('playground.language.v1',lang);let seed=7;Math.random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32);window.frogFrames=0;const request=window.requestAnimationFrame;window.requestAnimationFrame=fn=>request.call(window,t=>{window.frogFrames++;fn(t);});},{lang});
  const p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.stack));await p.goto(base,{waitUntil:'networkidle'});await p.evaluate(()=>document.fonts.ready);assert.equal(await p.locator('#play-shell').getAttribute('data-state'),'ready');assert(!await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth));await p.screenshot({path:`${out}/home-${width}.png`,fullPage:true});
- await p.clock.install();await p.clock.pauseAt(new Date(Date.now()+1000));await p.locator('#start').click();await p.locator('#guest-name').fill('River'+width);await p.locator('#guest-form button').click();await p.clock.runFor(40);assert.equal(await p.locator('#play-shell').getAttribute('data-state'),'idle');assert.equal(await p.locator('#stage').count(),0);assert.equal(await p.locator('#power').count(),0);assert.equal(await p.locator('#route-description li').count(),3);
+ await p.clock.install();await p.clock.pauseAt(new Date(Date.now()+1000));await p.evaluate(()=>{const request=requestAnimationFrame;window.requestAnimationFrame=fn=>request(t=>{window.frogFrames++;fn(t);});});await p.locator('#start').click();await p.locator('#guest-name').fill('River'+width);await p.locator('#guest-form button').click();await p.clock.runFor(40);assert.equal(await p.locator('#play-shell').getAttribute('data-state'),'idle');assert.equal(await p.locator('#stage').count(),0);assert.equal(await p.locator('#power').count(),0);assert.equal(await p.locator('#route-description li').count(),3);
  let time=0,seed=7;const reference=new FroggerGame({random:()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32),now:()=>time});reference.start();
  const step=async ms=>{time+=ms;reference.update();await p.clock.runFor(ms);};
  // Head-level meter, distinct green/yellow/red power, cancellation, and no layout shift.
@@ -15,17 +15,17 @@ try{for(const [width,height,lang]of JSON.parse(process.env.FROGGER_VIEWPORTS||'[
  await p.locator('#hold-button').dispatchEvent('pointercancel',{pointerId:1});await p.mouse.up();assert.equal(await p.locator('#play-shell').getAttribute('data-state'),'idle');
  // Product clock advanced by the cancelled hold; keep the independent model aligned.
  time+=855;
- async function jump(kind='mouse',amount=null){const hold=amount??Math.round(distance(reference.current,reference.target)/MAX_JUMP*CHARGE_UP_MS);assert(reference.beginCharge());const b=await p.locator('#hold-button').boundingBox(),x=b.x+b.width/2,y=b.y+b.height/2;let touch;
+ async function jump(kind='mouse',amount=null){if(reference.clock<reference.slideUntil)await step(Math.ceil(reference.slideUntil-reference.clock)+20);const hold=amount??Math.round(distance(reference.frog,reference.target)/MAX_JUMP*CHARGE_UP_MS);assert(reference.beginCharge());const b=await p.locator('#hold-button').boundingBox(),x=b.x+b.width/2,y=b.y+b.height/2;let touch;
   if(kind==='touch'){touch=await c.newCDPSession(p);await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x,y},{id:1,x:x+8,y}]});}else if(kind==='keyboard'){await p.locator('#jump-control').focus();await p.keyboard.down('Space');}else{await p.mouse.move(x,y);await p.mouse.down();}
   await step(hold);assert(reference.release());const duration=reference.jump.duration;
   if(kind==='touch'){await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await touch.detach();}else if(kind==='keyboard')await p.keyboard.up('Space');else await p.mouse.up();assert(!await p.locator('#frog-charge').isVisible());await step(Math.ceil(duration)+100);assert.equal(Number(await p.locator('#score').textContent()),reference.score);
  }
  const seen=new Set();let idleChecked=false;
- for(let i=0;i<40;i++){
+ for(let i=0;i<100;i++){
   if(reference.targetIndex===2)seen.add('thorns');if(reference.target.small)seen.add('small');if(reference.target.sinking)seen.add('sink');if(reference.target.angler)seen.add('fish');
   await jump(width===390&&i===1?'touch':i===2?'keyboard':'mouse');
   if(reference.targetIndex===2)await p.screenshot({path:`${out}/thorns-${width}.png`});
-  if(!idleChecked&&!reference.current.sinking&&!reference.current.angler){await step(800);const frames=await p.evaluate(()=>frogFrames);await step(3000);assert.equal(await p.evaluate(()=>frogFrames),frames,'normal idle logs stop requesting frames');idleChecked=true;}
+  if(!idleChecked&&!reference.current.sinking&&!reference.current.angler&&!reference.stumps.some(p=>['lotus','turtle','spinner','duck'].includes(p.kind))){await step(800);const frames=await p.evaluate(()=>frogFrames);await step(3000);assert.equal(await p.evaluate(()=>frogFrames),frames,'normal idle logs stop requesting frames');idleChecked=true;}
   if(i>=18&&seen.size===4&&reference.current.angler)break;
  }
  assert.equal(seen.size,4);assert(reference.current.angler);assert(idleChecked);const score=reference.score;await p.screenshot({path:`${out}/fish-warning-${width}.png`});

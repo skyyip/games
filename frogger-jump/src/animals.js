@@ -6,4 +6,4 @@ export const ANIMALS=Object.freeze([
  {id:'otter',zh:'小水獺',en:'Otter',price:200,emoji:'🦦',color:'#bd9b7b',skillZh:'浪花護航',skillEn:'Splash guard',descriptionZh:'嚇走腳下及前方的燈籠魚，同時加大下一個落腳面。',descriptionEn:'Scare away fish underfoot and ahead, and widen your next landing.'}
 ]);
 export const animal=id=>ANIMALS.find(a=>a.id===id)??ANIMALS[0];
-export const rewardCoins=score=>1+Math.max(0,Math.floor(score))*2+Math.floor(Math.max(0,score)/20)*10;
+export const rewardCoins=(score,bonus=0)=>1+Math.max(0,Math.floor(score))*2+Math.floor(Math.max(0,score)/20)*10+Math.max(0,Math.min(Math.floor(bonus),Math.max(0,Math.floor(score))*3));

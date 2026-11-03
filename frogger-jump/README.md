@@ -5,7 +5,7 @@ An independent, bilingual, one-finger endless jumping game at `frogger-jump/`. I
 Hold the river, lower control, left mouse button or Space/Enter. The power meter floats above the frog’s head and blends green → yellow → red as power increases. It goes 0 → 100 → 0; release to jump. The frog automatically aims at the next stump. Power determines world-space distance, and landing tolerance uses the target's circular top radius. Successful hops count once, replace the oldest of three stumps and anchor the frog at the new top centre. A smooth following camera preserves the three-log view. The frog kicks off, tucks its hind legs, reaches forward before touchdown, then compresses and settles with a brief blink. Its landing gently nudges the log and sends two fading ripples across the water. These bounded effects stop after 650ms and are suppressed with reduced motion. Misses splash into the river and trigger a cartoon red crocodile before showing the score and best run.
 
 - No score-based stages: every generated stump has the same random rules. 12% have smaller tops (38–45 world units); normal tops have radius 54. Gaps range 152–208, with mixed I/Z routes.
-- Independent hazard roll: 6% sinking, 6% thorns (suppressed after another thorn), 6% anglerfish lure. Remaining logs are ordinary; top-size variation is independent.
+- Candidate hazard roll: 6% sinking, 6% thorns, 6% anglerfish lure. Additional hazards are suppressed while another remains in the three visible pads. Top-size variation is independent.
 - Thorns redirect auto-aim to the third log. Clear the thorn in one jump; it counts once and replaces two preview logs. Adjacent thorn logs are prevented so a safe target is always visible and reachable within the 540-unit maximum.
 - Glowing anglerfish lures start a 2.1-second warning on landing. Take off before the timer expires to evade the fish. Failure triggers a distinct cartoon anglerfish attack.
 - Dark logs start a 2.5-second active-time deadline on landing, not while previewed. Leave before the deadline, even if it expires during flight. Cancelling a hold does not reset it.
@@ -13,18 +13,44 @@ Hold the river, lower control, left mouse button or Space/Enter. The power meter
 
 The best three positive runs are stored under `frogger-jump.records.v1`, separately from every other game. Invalid saves are ignored; unavailable browser storage falls back to this visit. A completed result is recorded only once. Sound is off initially, opt-in, synthesised locally and suspended after brief feedback. No microphone, motion or location permission is requested.
 
-Canvas renders at up to 60 fps during active play (30 with reduced motion) with device pixel ratio capped at two. Normal idle stumps, setup and results stop requesting frames. The scene has three platforms, one selected animal, bounded ripples and one predator, with no external textures, filters or particle DOM. Reduced-motion mode suppresses decorative water drift and shaking while preserving essential jump timing. The local service worker preloads the game and shared UI; the site builder produces content-hashed assets, Apache cache rules and update-aware production workers.
+Canvas targets 60 fps during active play and 30 with reduced motion or while watching moving pads. Scheduling sleeps between frames instead of polling each display refresh. Device pixel ratio is capped at two and large backing stores stay near two million pixels. Normal idle stumps, setup and results stop requesting frames. The scene has three platforms, one selected animal, bounded ripples and one predator, with no external textures, filters or particle DOM. Water scenery is static and rasterized once per size. Stable wood/lily sprites are cached for the visible trio; moving pads, sinking warnings and landing reactions remain live. Font readiness, language, skill changes and resizes invalidate the appropriate artwork. Reduced-motion mode suppresses decorative shaking while preserving essential jump timing. The local service worker preloads the game and shared UI; the site builder produces content-hashed assets, Apache cache rules and update-aware production workers.
 
 Run `npm test` here or `node --test --test-isolation=none frogger-jump/tests/*.test.js` on Node 22+ when test subprocesses are restricted. Run the root static server with `PORT=5260 node grid-rush/scripts/serve.js` and open `/frogger-jump/`. Browser acceptance uses `scripts/browser-check.mjs`; `FROGGER_URL` selects a source or production preview and `GRID_RUSH_PLAYWRIGHT_MODULE` selects Playwright.
 
 ## River friends update
 
-Platforms now mix wood and water lilies (40% lilies), independently of the reduced 12% small-platform and 6% per-hazard probabilities. Both surface types have large and small variants. The meter above the animal has no visible percentage; its shape tapers from thin to thick while power changes green → yellow → red. Failed low-power hops finish in open water rather than falling through the starting log. A 420ms splash phase precedes the crocodile/fish attack.
+Base platforms mix wood and water lilies (40% lily candidates), with 12% small-platform candidates. Seven special platforms can replace safe candidates, as described below. Both surface types have large and small variants. The meter above the animal has no visible percentage; its shape tapers from thin to thick while power changes green → yellow → red. Failed low-power hops finish in open water rather than falling through the starting log. A 420ms splash phase precedes the crocodile/fish attack.
 
 Animal prices: frog free, penguin 80, bunny 120, monkey 160, otter 200 coins. One skill use starts every run; every twentieth **successful landing** adds one more, with no low fixed cap. Clearing a thorn and skipping a platform still counts as one landing, not two. Skills work while standing/charging, cancel an unfinished charge safely, and cannot be spent in flight, on pause or after falling. Frog clears thorns or enlarges a pad; penguin stabilizes timed hazards underfoot/ahead; bunny provides a big landing cushion; monkey clears all next-pad hazards; otter drives away fish and enlarges the next pad. Inactive situations still get the documented landing-size benefit.
 
 A completed run pays **1 + 2 × successful landings + 10 × floor(landings / 20)** coins. Results settle once per run. Leaving a live game earns no reward. Guest wallet key `frogger-jump.profile.v2` preserves name, animals, coins and best score separately from the old top-three records. Existing records remain available; no anonymous old score is silently uploaded to a named global account.
 
-The UI includes Firebase email/password sign-in, account creation, unique name reservation, a per-player wallet, cloud purchases, a top-ten leaderboard showing the winning animal, and a retryable pending-result queue. Cloud names accept 2–16 Chinese characters, Latin letters, digits, `_` and `-`; NFKC normalization and lowercase Latin keys prevent lookalike duplicates. Public ranks contain one personal best per UID, sorted by score descending and first achievement time ascending.
+The UI includes Google and Firebase email/password sign-in, account creation, unique name reservation, a per-player wallet, cloud purchases, a top-ten leaderboard showing the winning animal, and a retryable pending-result queue. Cloud names accept 2–16 Chinese characters, Latin letters, digits, `_` and `-`; NFKC normalization and lowercase Latin keys prevent lookalike duplicates. Public ranks contain one personal best per UID, sorted by score descending and first achievement time ascending.
 
 **Firebase web configuration is supplied:** `src/firebase-settings.js` targets `sky-playground-3c5af` and enables the cloud UI. Email/Password Auth, the Firestore database, published rules and the ranking index must also be configured in Firebase Console. No production account or rule/index deployment was created by the assistant. Local practice remains unranked with a separate wallet. See [FIREBASE.md](FIREBASE.md).
+
+## Seven new platforms
+
+Safe-pad candidates have a 12% chance of becoming one of seven variants; wood and lilies remain dominant. At most one dangerous pad (including ice) is present in the three-pad view.
+
+| Pad | Interaction |
+| --- | --- |
+| Blooming lotus | Top gradually opens/closes; centre landing adds 2 coins. |
+| Turtle | Slow lateral swimming; auto-aim predicts its centre at touchdown. The rider follows the shell. |
+| Mushroom | Landing squashes the cap; centre landing adds 12 units of tolerance to the next hop only. |
+| Duck | Squeaks and gently carries the rider forward for 440ms; charge becomes available after settling. |
+| Cracking ice | Three crack stages and a 3.5-second landing-triggered deadline; Penguin can reinforce it. |
+| Turning leaf | Slowly rotating veins and a changing safe radius; wait for the wider surface. |
+| Shy shell | Opens after landing; the centre awards 3 pearl coins; edge landings remain safe. |
+
+Surface rendering, character anchoring and landing checks share `src/platforms.js`. Moving surfaces use the paused game clock. Bonus coins settle exactly once with the base reward; Firestore accepts only integer bonus amounts between zero and three times the successful-landing count. Publish the updated rules before enabling cloud bonus payouts. Old receipts without bonus fields still work.
+
+Google sign-in uses Firebase Auth's popup flow and existing UID-owned wallets. New accounts must reserve a unique name before playing ranked games. Enable **Google** under Firebase Authentication's sign-in providers, select a support email and authorize the actual website domain; no Admin key is needed. See `FIREBASE.md`. Local practice and cloud wallets remain separate.
+
+## Rendering and startup performance
+
+- Static scenes and paused/backgrounded games stop the animation scheduler. Moving-pad waiting scenes use a timer-assisted 30 fps cadence; charging/jumps remain responsive, including on high-refresh displays.
+- Repeated HUD values do not rewrite attributes. The head-level power bubble moves with a transform instead of layout-affecting top/left writes.
+- Cached water and a maximum of three wood/lily sprites reduce repeated paths and gradient creation. Buffers reset only when size/resolution actually changes; the large-canvas resolution budget trades excess Retina pixels for lower rendering cost.
+- Cloud Auth restores on entry, while the larger Firestore module loads on the first actual cloud-data operation. Signed-in wallets still restore automatically; local practice does not need Firestore.
+- `scripts/performance-check.mjs` measures Canvas operations, DOM mutations, frame callbacks, backing-store size and initial script bytes. Set `FROGGER_EXPECT_OPTIMIZED=1` to assert budgets; `FROGGER_PERF_REPORT` writes a JSON report. Its startup check blocks remote services and does not create accounts or send scores. See `VERIFICATION.md` for the before/after measurements and their limits.

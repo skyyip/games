@@ -33,3 +33,30 @@ The user supplied the public web configuration for **`sky-playground-3c5af` on 2
 A **21-case security harness** is prepared for local Firebase emulators: atomic name reservation, case collisions, wallet privacy, unauthorized coin/animal changes, atomic run completion, duplicate payouts, other-user/forged scores, bounded public queries and exact-price purchases. It has **not passed or been certified**: downloading the required Firestore emulator JAR failed with **403 Domain forbidden** in this execution environment. It must be run after emulator access is available. See `FIREBASE.md` for activation and test commands.
 
 The Firestore rules enforce ownership, transactional consistency, server-timestamp duration bounds and deterministic coin rewards; they do not perform trusted server-side replay of client physics. Browser tests use Chromium, not physical iOS/Android hardware.
+
+## Seven-platform / Google UI update · 2026-11-03
+
+- **49 local tests pass**, including sparse seven-kind generation over 20,000 platforms, one danger per visible trio, shared dynamic landing radii, turtle prediction/rider anchoring, paused duck sliding, 3.5-second ice and Penguin rescue, one-hop mushroom protection and bounded/idempotent centre coin rewards.
+- Production gameplay checks pass at **320×568, 390×844, 812×375 and 1280×900**, in Chinese and English. Each profile completes **78 hops**, verifies mixed routes/hazards, mouse/keyboard/touch, pause, both predators, replay and records. Idle static scenes stop requesting animation frames.
+- `scripts/new-pads-check.mjs` plays all **seven** variants through the real mobile UI, with screenshot inspection and exact bonus settlement. All five animals, skill use, shop deductions and reload persistence pass the existing social checks.
+- Offline installed play, unavailable-storage fallback and hidden landing-page status pass.
+- `scripts/google-ui-check.mjs` uses an explicitly **mocked Auth adapter**, with no production account access: popup cancellation recovery, first-login name reservation, returning wallet restoration, logout, small-phone/landscape forms and close-button visibility while scrolling.
+- Production build and 24-page metadata checks pass. Source service worker is v6 and includes the new platform module.
+- Google provider activation/authorized domains and publication of the updated bonus-aware Firestore rules are still Firebase Console tasks. **Live Google OAuth, cloud bonus acceptance and the expanded rules emulator suite have not been certified here.** The existing environment restriction on emulator downloads remains relevant. Rules preserve old zero-bonus receipts and now also bound integer platform bonuses to at most three per successful landing. The security harness adds excessive/fractional bonus rejection cases.
+
+## Performance update · 2026-11-03
+
+Compared the pre-optimization build (including the seven platforms/Google UI) against the optimized production build in the same Chromium environment. The rendering sample is a settled, wood-platform scene charged for one simulated second; the moving-idle sample includes a turtle.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Initial decoded JS, configured but signed out | 1,003,177 bytes | 440,119 bytes (−56.1%) |
+| Gradient creations per rendered charging frame | 7 | 1 (−85.7%) |
+| Moving-idle RAF callbacks per simulated second | 62 | 31 (−50%) |
+| Moving-idle unchanged HUD attribute mutations | 105 | 0 |
+| 1280×900 / DPR 3 Canvas backing pixels | 3,535,360 | 2,000,075 (−43.4%) |
+| Static idle and paused animation callbacks | 0 | 0 |
+
+After opening the leaderboard, script bytes rise from 440,119 to 1,005,314, confirming that Firestore is deferred rather than removed. Remote service requests are blocked in this measurement. Byte counts are decoded JavaScript, not gzip/Brotli transfer bytes. The fake-clock sample rendered 32 charging frames before versus 63 afterward; per-frame gradient counts distinguish cache savings from cadence changes. These are workload measurements, not real-device battery, thermal or FPS guarantees.
+
+Validation passed: **54 Node tests**; unchanged-resize/pixel-budget/cache invalidation and three-sprite memory bounds; four browser viewports completing 78 mixed-route jumps each; seven real-UI platform/reward scenarios; five animal skill/shop flows; offline reload and unavailable-storage handling; mock Google Auth UI checks; production build and 24-page metadata validation. Native Google OAuth/production Firestore remain outside this local performance verification. Source service worker is v7.

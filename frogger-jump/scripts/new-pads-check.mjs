@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';import {mkdir} from 'node:fs/promises';
+import {VARIANTS} from '../src/platforms.js';import {PROFILE_KEY,freshProfile} from '../src/profile.js';
+const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true}),base=process.env.FROGGER_URL||'http://localhost:5297/games/frogger-jump/';await mkdir('/tmp/frogger-new-pads-check',{recursive:true});
+try{for(const [index,kind]of VARIANTS.entries()){
+ const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});await ctx.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
+ await ctx.addInitScript(({index,key,profile})=>{globalThis.FROGGER_FIREBASE_CONFIG=null;localStorage.setItem(key,JSON.stringify(profile));const values=[.25,.75,.5,.75,.75,.75,(index+.5)/7*.12];Math.random=()=>values.shift()??.75;},{index,key:PROFILE_KEY,profile:freshProfile('PadTester')});
+ const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.stack));await page.goto(base,{waitUntil:'networkidle'});await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await page.locator('#start').click();await page.clock.runFor(40);assert.match(await page.locator('#route-description').textContent(),{lotus:/荷花/,turtle:/海龜/,mushroom:/蘑菇/,duck:/小鴨/,ice:/冰塊/,spinner:/葉盤/,shell:/貝殼/}[kind]);
+ await page.screenshot({path:`/tmp/frogger-new-pads-check/${kind}-before.png`});
+ await page.locator('#jump-control').focus();await page.keyboard.down('Space');await page.clock.runFor(184/540*950);await page.keyboard.up('Space');await page.clock.runFor(720);assert.equal(await page.locator('#score').textContent(),'1');await page.screenshot({path:`/tmp/frogger-new-pads-check/${kind}-landed.png`});
+ if(kind==='duck'){assert(await page.locator('#hold-button').isDisabled());await page.clock.runFor(450);assert(await page.locator('#hold-button').isEnabled());}
+ if(kind==='ice'){assert.match(await page.locator('#hazard').textContent(),/下沉/);await page.locator('#pause').click();const text=await page.locator('#hazard').textContent();await page.clock.runFor(5000);assert.equal(await page.locator('#hazard').textContent(),text);await page.locator('#resume').click();}
+ await page.locator('#jump-control').focus();await page.keyboard.down('Space');await page.clock.runFor(1);await page.keyboard.up('Space');await page.clock.runFor(2600);assert(await page.locator('#result-dialog').isVisible());assert.equal(await page.locator('#earned-coins').textContent(),kind==='lotus'?'+5':kind==='shell'?'+6':'+3');assert.equal((await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PROFILE_KEY)).coins,kind==='lotus'?5:kind==='shell'?6:3);assert.deepEqual(errors,[]);console.log(`PASS ${kind}: actual mobile start, auto-aim, landing, bonus settlement and result`);await ctx.close();
+}}finally{await browser.close();}

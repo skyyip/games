@@ -2,12 +2,12 @@
 
 ## Current state
 
-The application integration, email/password Auth flow, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable the Email/Password provider, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
+The application integration, Google and email/password Auth flows, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable the Email/Password provider, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
 
 ## Activate after creating the project
 
 1. Create a Firebase project and add a **Web app**. Auth and Firestore work within the Spark plan's applicable quotas; this version does not require Cloud Functions or Admin credentials.
-2. Enable **Authentication → Email/Password**. Use the same account on different devices. Add the actual web domains, such as `skyyip.github.io` and `sky-playground.com`, to the authorized domains where required by your Auth configuration.
+2. Enable **Authentication → Sign-in method → Email/Password** and **Google**. For Google, choose a project support email and save the provider settings. Use the same account on different devices. Add the actual web domains, such as `skyyip.github.io` and `sky-playground.com`, to the authorized domains where required by your Auth configuration.
 3. Create a Cloud Firestore database, choose a suitable region, then deploy this folder's **rules and index**. Do not leave test-mode write permissions active.
 4. The supplied web app's public `firebaseConfig` is stored in `src/firebase-settings.js`. Update that file if changing projects. Alternatively set `window.FROGGER_FIREBASE_CONFIG` before the game module loads. These public web identifiers are not Admin credentials; never put a service-account/private key into the browser.
 5. Rebuild and deploy the game. Verify a name reservation, sign in from another device, purchase an animal and finish a ranked run. Wait for the leaderboard index to finish building before expecting its ordered query to work.
@@ -28,7 +28,7 @@ This command is a reference, **not an action performed by this task**. If reusin
 - `frogger_players/{uid}/runs/{id}` stores a server-timestamped start and immutable animal. Finishing changes status once, records the score/reward and updates the wallet atomically. Starting another run atomically abandons the old active run for the same account.
 - `frogger_leaderboard/{uid}` exposes only UID, reserved name, best score, animal used and achievement timestamp. Query: score descending, timestamp ascending, limit 10. One row per user; a lower/equal later run does not replace the record.
 
-Coins use the same deterministic formula on client and in rules. Purchases deduct the exact species price, grant one new owned animal and never charge again when switching an owned animal. Transaction conflicts retry against the latest balance. Clients cannot write someone else's wallet or record, forge name ownership, add a paid animal for free or settle an already completed run again.
+Coins use the same deterministic formula on client and in rules, including bounded integer platform bonuses (lotus centre +2, shell centre +3). Publish the updated `firestore.rules` before deploying this bonus-enabled build. Existing receipts without a bonus field default to zero. Purchases deduct the exact species price, grant one new owned animal and never charge again when switching an owned animal. Transaction conflicts retry against the latest balance. Clients cannot write someone else's wallet or record, forge name ownership, add a paid animal for free or settle an already completed run again.
 
 A disconnected finished run is retained under `frogger-jump.pending.v1` and can be retried. It remains unranked/unpaid until accepted by Firebase. Retrying the same finished receipt is idempotent. A run superseded by a different device is not paid twice; its stale pending receipt is cleared. No local guest wallet/score is promoted into a cloud account.
 
@@ -53,3 +53,11 @@ It covers unique names/case collisions, private wallet reads, unauthorized minti
 **These emulator checks were not executed successfully in this environment:** the required Firestore emulator JAR download returned **403 Domain forbidden**. The harness and rules are prepared, but they must not be represented as emulator-certified until run in an environment that can fetch it. No real Firebase rule/index deployment or production test-account creation has been performed by the assistant.
 
 For full Auth-emulator browser testing, run the configured Auth/Firestore emulators on 9098/8089. The browser may set `window.FROGGER_FIREBASE_EMULATORS=true` with demo web config **only on localhost/127.0.0.1**; production hosts cannot activate this path.
+
+## Google login activation and verification
+
+1. In project **sky-playground-3c5af**, open **Authentication → Sign-in method → Add new provider → Google**, enable it, choose the support email, and save.
+2. Under **Authentication → Settings → Authorized domains**, include `skyyip.github.io` and `sky-playground.com` (plus any actual alternate hosting domain). For development, add `localhost` only if testing there.
+3. Publish this folder's updated Firestore rules for platform bonuses. No leaderboard index change is required.
+4. On the deployed game, choose **Player / sign in → Continue with Google**. A new account reserves a unique river name; returning users load their existing UID wallet. Canceling or blocking the popup leaves the current local wallet intact. If Firebase reports an account using another credential, the UI asks the player to use the original method instead of creating a replacement save.
+5. Verify a real Google login and top-ten update after configuration. This environment's browser checks cover the UI with a mock Auth adapter and do not certify live Google OAuth or deployed rules.
