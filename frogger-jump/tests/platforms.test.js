@@ -7,7 +7,7 @@ function rig(kind='stump',species='frog'){
  return {g,step(ms){now+=ms;g.update();},hop(error=0){assert(g.beginCharge());this.step((distance(g.frog,g.target)+error)/MAX_JUMP*CHARGE_UP_MS);assert(g.release());this.step(g.jump.duration);}};
 }
 test('all seven special pads occur sparingly, while no visible trio has two dangers',()=>{
- let seed=55,seen=new Set(),special=0;const g=new FroggerGame({random:()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32)});g.start();
+ let seed=55,seen=new Set(),special=0;const g=new FroggerGame({random:()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32)});g.start();g.score=100;
  for(let i=0;i<20000;i++){assert(g.stumps.filter(dangerous).length<=1);const p=g.stumps.at(-1);if(VARIANTS.includes(p.kind)){special++;seen.add(p.kind);}g.stumps.shift();g.stumps.push(g.generate(p,p.id+1));}
  assert.equal(seen.size,7);assert(special/20000>.09&&special/20000<.15);
 });

@@ -4,6 +4,11 @@ import {fishPose,fishContact,jumpPoint} from './fish.js';
 export {FISH_WARNING_MS,FISH_LEAP_MS,FISH_REST_MS} from './fish.js';
 export const MAX_JUMP=540,CHARGE_UP_MS=1000,SINK_MS=2500,SPLASH_MS=420,DROWN_MS=1900,CAMERA_MS=520;
 export const RIVER_RULES=Object.freeze({minGap:152,maxGap:208,normalRadius:58,smallChance:.09,sinkChance:.05,thornChance:.05,fishChance:.05,lilyChance:.4});
+// Use the upcoming landing number, including pads already visible ahead.
+export function riverRules(jump=1){
+ const t=Math.max(0,Math.min(1,(jump-20)/80)),mix=(easy,normal)=>easy+(normal-easy)*t;
+ return {...RIVER_RULES,minGap:mix(144,152),maxGap:mix(196,208),normalRadius:mix(62,58),smallRadius:mix(46,42),smallChance:mix(.05,.09),sinkChance:mix(.025,.05),thornChance:mix(.025,.05),fishChance:mix(.025,.05),variantChance:mix(.08,VARIANT_CHANCE)};
+}
 export const distance=(a,b)=>Math.hypot(b.x-a.x,b.y-a.y);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -27,15 +32,16 @@ export class FroggerGame{
   if(this.fishHazard?.key!==key){this.fishHazard={key,x:(this.current.x+this.target.x)/2,y:(this.current.y+this.target.y)/2,at};this.events.push({type:'fish-warning'});}
  }
  randomUnit(){return Math.max(0,Math.min(.999999999,Number(this.random())||0));}
- start({animal:kind='frog'}={}){this.reset();this.animal=animal(kind).id;this.skillCharges=1;this.state='idle';this.stumps=[{id:0,x:0,y:0,r:RIVER_RULES.normalRadius,sinking:false,thorns:false,angler:false,small:false,kind:'stump',route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));this.syncFish();return this.current;}
+ start({animal:kind='frog'}={}){this.reset();this.animal=animal(kind).id;this.skillCharges=1;this.state='idle';this.stumps=[{id:0,x:0,y:0,r:riverRules().normalRadius,sinking:false,thorns:false,angler:false,small:false,kind:'stump',route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));this.syncFish();return this.current;}
  generate(previous,index){
+  const rules=riverRules(this.score+this.stumps.length);
   if(this.run<=0){const proposed=this.randomUnit()<.5?'I':'Z';this.route=proposed===this.route?(proposed==='I'?'Z':'I'):proposed;this.run=1+Math.floor(this.randomUnit()*2);}
   this.run--;let x=previous.x;
   if(this.route==='Z'){const sign=previous.x>70?-1:previous.x< -70?1:this.randomUnit()<.5?-1:1,span=96+this.randomUnit()*60;x=Math.max(-145,Math.min(145,previous.x+sign*span));}
-  const y=previous.y+RIVER_RULES.minGap+this.randomUnit()*(RIVER_RULES.maxGap-RIVER_RULES.minGap),small=this.randomUnit()<RIVER_RULES.smallChance,r=small?42+Math.floor(this.randomUnit()*8):RIVER_RULES.normalRadius,hazard=this.randomUnit();
+  const y=previous.y+rules.minGap+this.randomUnit()*(rules.maxGap-rules.minGap),small=this.randomUnit()<rules.smallChance,r=small?rules.smallRadius+Math.floor(this.randomUnit()*8):rules.normalRadius,hazard=this.randomUnit();
   const busy=this.stumps.some(dangerous)||dangerous(previous);
-  const sinking=!busy&&hazard<RIVER_RULES.sinkChance,thorns=!busy&&hazard>=RIVER_RULES.sinkChance&&hazard<RIVER_RULES.sinkChance+RIVER_RULES.thornChance&&!previous.thorns,angler=!busy&&hazard>=RIVER_RULES.sinkChance+RIVER_RULES.thornChance&&hazard<RIVER_RULES.sinkChance+RIVER_RULES.thornChance+RIVER_RULES.fishChance;
-  let kind=this.randomUnit()<RIVER_RULES.lilyChance?'lily':'stump';const variant=this.randomUnit();if(variant<VARIANT_CHANCE&&!sinking&&!thorns&&!angler){kind=VARIANTS[Math.min(6,Math.floor(variant/VARIANT_CHANCE*7))];if(kind==='ice'&&busy)kind='shell';}
+  const sinking=!busy&&hazard<rules.sinkChance,thorns=!busy&&hazard>=rules.sinkChance&&hazard<rules.sinkChance+rules.thornChance&&!previous.thorns,angler=!busy&&hazard>=rules.sinkChance+rules.thornChance&&hazard<rules.sinkChance+rules.thornChance+rules.fishChance;
+  let kind=this.randomUnit()<rules.lilyChance?'lily':'stump';const variant=this.randomUnit();if(variant<rules.variantChance&&!sinking&&!thorns&&!angler){kind=VARIANTS[Math.min(6,Math.floor(variant/rules.variantChance*7))];if(kind==='ice'&&busy)kind='shell';}
   return {id:index,x,y,r,small,kind,sinking:sinking||kind==='ice',thorns,angler,route:this.route};
  }
  useSkill(){
