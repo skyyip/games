@@ -27,3 +27,7 @@ CAREER_URL=http://localhost:5260/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/t
 PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs _site
 node tools/check-seo.mjs _site /games/
 ```
+
+## Life route update — 2026-11-04
+
+32 engine tests pass, including realistic adult height/BMI correlation across2,000 resumes, positive-PQ stress buffering, health-based energy, education fees/classes/graduation, resignation and business severance, travel expenses, overseas work pay, financial-freedom eligibility, old-save defaults and complete alternative lives ending at65. The expanded browser scenario verifies education → graduation → apprenticeship → resignation → travel → overseas work → early freedom and save reload at390px. Four viewport checks, a full357-panel life, book exports, unavailable storage and installed offline play also pass. Source and built SEO checks pass for26 pages. The game remains hidden from the landing page.

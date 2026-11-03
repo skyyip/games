@@ -6,12 +6,17 @@ const FAMILY=[['家徒四壁',1800,0],['勉強溫飽',8000,0],['街坊小康',30
 const EDUCATION=['家裡蹲大學','中學畢業','職業訓練學院','社區學院','本地大學','常春藤名校'];
 const MBTI=['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
 const NEWS=['機械狗成為咖啡師，科技股熱鬧起來','全球節能月，綠色企業受關注','航運停擺，企業成本上升','市場等待選舉結果，投資者觀望','研究室公布新電池，資金追逐新故事','監管加強，虛擬資產市場震盪','本月沒有大新聞，市場也有自己的脾氣'];
+export const LIFE_MODES={sabbatical:'人生探索',travel:'環遊世界',overseas:'海外打工', 'early-retired':'財務自由生活'};
 const STAT_KEYS=['iq','eq','pq','jq','health','stress','energy','contacts','reputation'];
 export class LifeGame{
  constructor({seed=(Date.now()>>>0),name='未命名主角'}={}){
-  this.s={version:VERSION,seed:seed>>>0,profile:null,stats:null,month:0,elapsed:0,status:'setup',career:null,route:'mentor',mastery:0,level:0,ap:3,cash:0,debt:0,skills:{craft:0,tech:0,care:0,art:0,people:0,analysis:0},assets:{bank:0,bonds:0,stock:0,etf:0,crypto:0},prices:{stock:100,etf:100,crypto:100},marketPlan:null,news:'人生還未開場，市場先喝杯茶。',signal:null,history:[],panels:[],pending:null,business:null,salaryFactor:1,crossBonus:0,metrics:{earned:0,spent:0,gambles:0,gamblingNet:0,aiErrors:0,mentorSecrets:0,bankruptcies:0,switches:0,promotions:0,work:0,businessMonths:0},lastBankruptcy:-100,lastLedger:null,unmotivatedUntil:0,housing:'stable'};
+  this.s={version:VERSION,seed:seed>>>0,profile:null,stats:null,month:0,elapsed:0,status:'setup',career:null,route:'mentor',mastery:0,level:0,ap:3,cash:0,debt:0,skills:{craft:0,tech:0,care:0,art:0,people:0,analysis:0},assets:{bank:0,bonds:0,stock:0,etf:0,crypto:0},prices:{stock:100,etf:100,crypto:100},marketPlan:null,news:'人生還未開場，市場先喝杯茶。',signal:null,history:[],panels:[],pending:null,business:null,educationPlan:null,lifestyleMonths:{travel:0,overseas:0,'early-retired':0,sabbatical:0},salaryFactor:1,crossBonus:0,metrics:{earned:0,spent:0,gambles:0,gamblingNet:0,aiErrors:0,mentorSecrets:0,bankruptcies:0,switches:0,promotions:0,work:0,businessMonths:0},lastBankruptcy:-100,lastLedger:null,unmotivatedUntil:0,housing:'stable'};
   const family=this.pick(FAMILY),education=this.pick(EDUCATION),major=this.pick(MAJORS),age=this.int(18,26);
-  const profile={name:String(name).trim().slice(0,20)||'未命名主角',gender:this.pick(['女','男','非二元']),startAge:age,height:this.int(145,195),weight:this.int(42,105),blood:this.pick(['A','B','O','AB']),zodiac:this.pick(['白羊','金牛','雙子','巨蟹','獅子','處女','天秤','天蠍','射手','摩羯','水瓶','雙魚']),family:family[0],support:family[2],education,major:major.name,mbti:this.pick(MBTI)};
+  const profile={name:String(name).trim().slice(0,20)||'未命名主角',gender:this.pick(['女','男','非二元']),startAge:age,height:0,weight:0,blood:this.pick(['A','B','O','AB']),zodiac:this.pick(['白羊','金牛','雙子','巨蟹','獅子','處女','天秤','天蠍','射手','摩羯','水瓶','雙魚']),family:family[0],support:family[2],education,major:major.name,mbti:this.pick(MBTI)};
+  // Average several draws for adult proportions, then derive weight from height and BMI.
+  const centre=profile.gender==='男'?174:profile.gender==='女'?162:168;
+  profile.height=Math.round(centre+(this.roll()+this.roll()+this.roll()-1.5)*16);
+  const bmi=19+(this.roll()+this.roll()+this.roll())/3*10;profile.weight=Math.round(bmi*(profile.height/100)**2*10)/10;
   const stats={iq:this.int(80,145),eq:this.int(30,90),pq:this.int(35,95),jq:this.int(25,85),health:100,stress:12,energy:0,contacts:0,reputation:0};
   Object.assign(this.s,{profile,stats,month:age*12,cash:family[1]});this.s.skills[major.skill]=this.int(8,18);stats.energy=this.energyMax;this.s.marketPlan=this.makeMarket();
   this.record('origin','人生履歷卡',`${age} 歲，${profile.family}，${profile.education}的${profile.major}畢業生。這次，由你決定下一格。`);
@@ -20,8 +25,12 @@ export class LifeGame{
  int(a,b){return a+Math.floor(this.roll()*(b-a+1));}pick(a){return a[this.int(0,a.length-1)];}
  get age(){return Math.floor(this.s.month/12);}get ageLabel(){return `${this.age} 歲 ${this.s.month%12} 個月`;}
  get job(){return JOBS.find(j=>j.id===this.s.career)??null;}
- get energyMax(){return Math.round(50+this.s.stats.pq*.7);}
+ get energyMax(){return Math.round(50+this.s.stats.health*.7);}
  get wealth(){return money(this.s.cash-this.s.debt+Object.keys(this.s.assets).reduce((n,k)=>n+this.assetValue(k),0));}
+ get livingCost(){return 2200+Math.floor(this.s.profile.startAge/2)*80;}
+ get freedomTarget(){return this.livingCost*12*25;}
+ get canWork(){return ['apprentice','employed','business','overseas'].includes(this.s.status);}
+ get canStudy(){return ['apprentice','employed','business','student'].includes(this.s.status);}
  get salary(){return Math.round((this.job?.salary??0)*(1+this.s.level*.24)*this.s.salaryFactor*(1+this.s.crossBonus));}
  assetValue(id){return ['bank','bonds'].includes(id)?this.s.assets[id]:this.s.assets[id]*(this.s.prices[id]??0);}
  get active(){return !['setup','retired'].includes(this.s.status)&&!this.s.pending;}
@@ -29,19 +38,41 @@ export class LifeGame{
  record(scene,title,text){const s=this.s;s.panels.push({id:s.panels.length,age:Math.floor(s.month/12),month:s.month%12,scene,title,text,career:this.job?.name??'',cash:Math.round(s.cash),stress:Math.round(s.stats?.stress??0),look:s.profile?.gender??'非二元',tone:this.int(0,3)});}
  pay(amount){amount=Math.max(0,amount);const paid=Math.min(this.s.cash,amount);this.s.cash=money(this.s.cash-paid);this.s.debt=money(this.s.debt+amount-paid);this.s.metrics.spent=money(this.s.metrics.spent+amount);}
  earn(amount){amount=Math.max(0,amount);this.s.cash=money(this.s.cash+amount);this.s.metrics.earned=money(this.s.metrics.earned+amount);}
- changeStats(effects){for(const [k,v]of Object.entries(effects)){if(!Number.isFinite(v))continue;if(k==='cash'){v>=0?this.earn(v):this.pay(-v);}else if(k==='mastery')this.s.mastery=clamp(this.s.mastery+v,0,100);else if(STAT_KEYS.includes(k))this.s.stats[k]=clamp(this.s.stats[k]+v,0,k==='iq'?170:k==='contacts'?999:k==='reputation'?10000:k==='energy'?this.energyMax:100);}this.s.stats.energy=Math.min(this.energyMax,this.s.stats.energy);}
+ changeStats(effects){for(const [k,v]of Object.entries(effects)){if(!Number.isFinite(v))continue;if(k==='cash'){v>=0?this.earn(v):this.pay(-v);}else if(k==='mastery')this.s.mastery=clamp(this.s.mastery+v,0,100);else if(STAT_KEYS.includes(k))this.s.stats[k]=clamp(this.s.stats[k]+(k==='stress'&&v>0?v*(1-this.s.stats.pq/250):v),0,k==='iq'?170:k==='contacts'?999:k==='reputation'?10000:k==='energy'?this.energyMax:100);}this.s.stats.energy=Math.min(this.energyMax,this.s.stats.energy);}
  spend(energy=0){this.s.ap--;this.s.stats.energy=Math.max(0,this.s.stats.energy-energy);}
+ enroll(){
+  const s=this.s,initial=s.status==='setup';if(s.pending||s.status==='retired'||s.status==='student'||!initial&&!this.can(1,0,6000)||initial&&s.cash<6000)return false;
+  if(!initial)this.spend();this.pay(6000);if(s.business){this.pay(s.business.staff*1000);s.business=null;}
+  s.status='student';s.educationPlan={remaining:12,credits:0};this.record('study','畢業之後，再讀一章','你選擇一年制進修：入學費 $6,000，每月學費 $1,800；至少完成 12 次課堂練習，修業滿一年後畢業，再選擇繼續進修或進入學徒階段。');return true;
+ }
+ quit(){
+  const s=this.s;if(!['apprentice','employed','business','overseas'].includes(s.status)||!this.can(1))return false;
+  this.spend();if(s.business){this.pay(s.business.staff*1000);s.business=null;}s.status='sabbatical';this.record('switch','辭職，為人生留一格空白','你離開目前的工作，保留技能和資產。接下來可以旅行、海外打工，或重新選擇職業；生活費仍會逐月計算。');return true;
+ }
+ changeLife(mode){
+  const s=this.s;if(!Object.hasOwn(LIFE_MODES,mode)||!this.can(1)||s.status==='student')return false;
+  if(mode==='early-retired'&&(s.debt>0||this.wealth<this.freedomTarget))return false;
+  const cost=mode==='travel'?5000:mode==='overseas'?8000:0;if(s.cash<cost||s.status===mode)return false;
+  this.spend();this.pay(cost);if(s.business){this.pay(s.business.staff*1000);s.business=null;}s.status=mode;
+  this.record('rest',LIFE_MODES[mode],mode==='travel'?'背起行囊，出發環遊世界。出發費 $5,000，每月旅費另加 $4,500。':mode==='overseas'?'啟程體驗異國生活，做當地短期工作。出發費 $8,000，每月住宿交通另加 $2,500；每次打工賺 $6,000。':mode==='early-retired'?'資產達到 25 年基本生活費且沒有債務，你選擇提早離開職場，做自己想做的事。仍需支付生活費，也可再度工作；人生在 65 歲才結算。':'先放慢腳步，為下一段人生留一點空間。');return true;
+ }
+ explore(){
+  const s=this.s;if(!Object.hasOwn(LIFE_MODES,s.status)||!this.can(1,8))return false;this.spend(8);
+  const place=s.status==='travel'?this.pick(['京都小巷','冰島海岸','葡萄牙小鎮','紐西蘭步道']):s.status==='overseas'?this.pick(['異國市集','當地社區廚房','週末語言交換角']):this.pick(['社區畫室','海邊釣魚小屋','義工服務站','一直想學的音樂課']);
+  this.changeStats({pq:2,eq:1,stress:-12,contacts:1});this.record('rest','把時間，花在想做的事',`今天走進${place}。沒有升職通知，卻多了一段自己的故事。`);return true;
+ }
  chooseCareer(id,route='mentor'){
   const job=JOBS.find(j=>j.id===id),s=this.s;if(!job||!['mentor','ai'].includes(route)||s.status==='retired'||s.pending)return false;
-  const initial=s.status==='setup';if(!initial&&!this.can(1,0,3000))return false;
+  const initial=s.history.length===0&&['setup','graduate'].includes(s.status);if(!initial&&!this.can(1,0,3000))return false;
   const previous=this.job;if(!initial){this.pay(3000);s.ap--;s.metrics.switches++;}
   if(s.business){this.pay(s.business.staff*1000);s.business=null;}
   const plumbing=previous?.name==='水電工'&&job.name==='YouTuber';s.crossBonus=Math.min(.5,s.history.length*.025+(plumbing?.25:0));
-  s.history.push({id,age:this.age,route});s.career=id;s.route=route;s.status='apprentice';s.mastery=Math.min(55,s.skills[job.skill]*.45);s.level=0;s.salaryFactor=1;
+  s.educationPlan=null;s.history.push({id,age:this.age,route});s.career=id;s.route=route;s.status='apprentice';s.mastery=Math.min(55,s.skills[job.skill]*.45);s.level=0;s.salaryFactor=1;
   this.record(initial?'start':'switch',initial?'第一份職業，第一格冒險':plumbing?'水管維修，也能拍出流量':'人生可以重新選科',`${previous?previous.name+' → ':''}${job.name}。${route==='mentor'?'拜師學藝，從掃地和買便當開始。':'打開 AI 模擬教室，先學會提問，也要學會驗證。'}${plumbing?'修水管的經驗變成搞笑維修頻道，跨界收入加成 25%。':''}`);return true;
  }
  study(verify=false){
-  const s=this.s;if(!this.can(1,14,verify?300:0))return false;this.spend(14);if(verify)this.pay(300);
+  const s=this.s;if(!this.canStudy||!this.can(1,14,verify?300:0))return false;this.spend(14);if(verify)this.pay(300);
+  if(s.status==='student'){s.educationPlan.credits++;this.changeStats({iq:.5,jq:.5,pq:.5,stress:3});const skill=MAJORS.find(m=>m.name===s.profile.major)?.skill??'analysis';s.skills[skill]=clamp(s.skills[skill]+2,0,100);this.record('study','課堂之外，也認識自己','進修讓專業累積，也替未來多開一扇窗。完成課堂 '+s.educationPlan.credits+' / 12 次。');return true;}
   const gain=(s.route==='mentor'?11:22)+s.stats.iq*.07+(verify?2:0);s.skills[this.job.skill]=clamp(s.skills[this.job.skill]+gain*.35,0,100);
   if(s.route==='mentor'){this.changeStats({eq:1.5,jq:1.8,contacts:1,stress:3});if(this.roll()<.09){s.metrics.mentorSecrets++;s.mastery=clamp(s.mastery+12,0,100);this.record('mentor','師傅沒有寫進課本的那一招','你留下來收拾工作間，師傅把壓箱底的手藝教給你。技能和人脈一起留下來。');}}
   else this.changeStats({iq:.5,eq:-.4,stress:5,jq:verify?1.5:0});
@@ -50,7 +81,8 @@ export class LifeGame{
   if(s.ap===2)this.record(s.route==='ai'?'ai':'mentor',verify?'先查證，才算學懂':s.route==='ai'?'今天的老師，是一個輸入框':'由小事學起',`${this.job.routine}。${verify?'你比對資料並做小型測試，這次沒有把流暢當成正確。':'專業能力慢慢增加，人生沒有白做的練習。'}`);return true;
  }
  work(overtime=false){
-  const s=this.s;if(!this.can(1,overtime?0:18))return false;this.spend(overtime?40:18);s.metrics.work++;
+  const s=this.s;if(!this.canWork||!this.can(1,overtime?0:18))return false;this.spend(overtime?40:18);s.metrics.work++;
+  if(s.status==='overseas'){this.earn(overtime?8500:6000);this.changeStats({eq:1,jq:1,stress:overtime?15:5,health:overtime&&s.stats.energy===0?-18:0});this.record('work','在異國，也學會好好生活','你完成當地的一班短期工作，練習語言與新的工作文化。這一站是遊戲內的海外生活體驗。');return true;}
   const apprentice=s.status==='apprentice',base=apprentice?(s.route==='mentor'?650:1100):this.salary/3;
   const business=s.status==='business'?1.1+(s.business.customers*.025)+(s.business.team?.reduce((sum,e)=>sum+e.efficiency,0)??s.business.staff*.18):1;const income=Math.round(base*business*(overtime?1.65:1)*(s.elapsed<s.unmotivatedUntil?.35:1));this.earn(income);this.changeStats({stress:overtime?15:6,reputation:apprentice?2:6,jq:.35,pq:overtime?-1.5:0});s.skills[this.job.skill]=clamp(s.skills[this.job.skill]+1,0,100);
   if(overtime&&s.stats.energy===0){this.changeStats({health:-18,stress:12,pq:-2});this.pay(1800);this.record('medical','身體按下了暫停鍵','加班把精力耗盡，診金 $1,800。今天的收入不是全部的代價；休息也算一種前進。');}
@@ -58,7 +90,7 @@ export class LifeGame{
   else if(s.metrics.work%6===1)this.record('work',apprentice?'學徒的便當與第一筆收入':'今天也有把事情做好',`${this.job.name}的一天：${this.job.routine}。這次賺了 $${income.toLocaleString('en')}。`);
   if(!s.pending&&this.roll()<.13)this.event();return true;
  }
- rest(social=false){const s=this.s;if(!this.can(1,social?8:0,social?120:0))return false;this.spend(social?8:0);const extrovert=s.profile.mbti[0]==='E';if(social){this.pay(120);this.changeStats({contacts:3,eq:1.5,stress:extrovert?-22:-8,energy:8});}else this.changeStats({health:8,stress:extrovert?-13:-23,energy:40});if(s.stats.stress<10&&s.elapsed%6===0)this.record('rest','人生不只有生產力',social?'你買了一輪飲料，聽見別人的故事。人脈不是名片，是下次還想再見。':'你關掉通知，給自己一個安靜的下午。沒有升職，但呼吸順了。');return true;}
+ rest(social=false){const s=this.s;if(!this.can(1,social?8:0,social?120:0))return false;this.spend(social?8:0);const extrovert=s.profile.mbti[0]==='E';if(social){this.pay(120);this.changeStats({contacts:3,eq:1.5,stress:extrovert?-22:-8,energy:8,pq:1});}else this.changeStats({health:8,stress:extrovert?-13:-23,energy:40,pq:1.5});if(s.stats.stress<10&&s.elapsed%6===0)this.record('rest','人生不只有生產力',social?'你買了一輪飲料，聽見別人的故事。人脈不是名片，是下次還想再見。':'你關掉通知，給自己一個安靜的下午。沒有升職，但呼吸順了。');return true;}
  negotiate(){if(!this.can(1,8)||this.s.status!=='employed')return false;this.spend(8);const success=this.roll()<.25+this.s.stats.eq/200+Math.min(.2,this.s.stats.reputation/500);if(success){this.s.salaryFactor=Math.min(2,this.s.salaryFactor+.08);this.changeStats({stress:-4,eq:1});}else this.changeStats({stress:7,jq:1});this.record('promotion',success?'這次，薪水跟上了努力':'主管說「下次一定」',success?'你帶著實績和清楚的提案談成加薪。單次工作收入增加。':'你沒有把承諾當成現金。先記下成果，再找下一個談判時機。');return true;}
  startBusiness(){const s=this.s;if(!this.can(1,12,40000)||s.status!=='employed')return false;this.spend(12);this.pay(40000);s.status='business';s.business={staff:0,customers:8,team:[]};this.record('business','招牌掛上去，你成了老闆',`你用 $40,000 開始${this.job.name}事業。每月店租 $9,000；每名員工月薪 $6,500。先顧現金流，再談夢想。`);return true;}
  businessAction(type){const s=this.s,cost=type==='hire'?3000:2000;if(!this.can(1,10,cost)||s.status!=='business'||!['hire','market'].includes(type)||type==='hire'&&s.business.staff>=8)return false;this.spend(10);this.pay(cost);if(type==='hire'){s.business.staff++;const person=this.pick([{trait:'默默修好所有東西',efficiency:.28},{trait:'先開會，再開會議的會議',efficiency:.1},{trait:'會替辦公室貓咪打卡',efficiency:.16},{trait:'細心核對每一張收據',efficiency:.22}]);(s.business.team??=[]).push({name:'夥伴 '+s.business.staff,...person});this.changeStats({eq:1,stress:4});}else{s.business.customers+=3;this.changeStats({reputation:3,stress:3});}this.record('business',type==='hire'?'團隊，多了一個名字':'讓更多人知道你的招牌',type==='hire'?`招聘費 $3,000；${s.business.team.at(-1).name}的特色是「${s.business.team.at(-1).trait}」。接單效率加成 ${Math.round(s.business.team.at(-1).efficiency*100)}%，每月薪酬另計。`:'行銷費 $2,000，客源增加。熱度是一時，交付要靠每天。');return true;}
@@ -79,25 +111,27 @@ export class LifeGame{
  endMonth(){const s=this.s;if(!this.active)return false;const cashBefore=s.cash;
   for(const id of ['stock','etf','crypto'])s.prices[id]=clamp(s.prices[id]*(1+s.marketPlan[id]),.01,1e7);
   s.assets.bank=money(s.assets.bank*1.002);s.assets.bonds=money(s.assets.bonds*1.003);s.news=s.marketPlan.news;s.marketPlan=this.makeMarket();s.signal=null;
-  const living=2200+Math.floor(s.profile.startAge/2)*80,business=s.business?9000+s.business.staff*6500:0;this.earn(s.profile.support);this.pay(living+business);s.debt=money(s.debt*1.015);
-  this.changeStats({energy:20+s.stats.pq*.2,stress:s.business?3:1,health:s.stats.stress>80?-8:2,pq:s.stats.stress>90?-1:0});
+  const living=this.livingCost,lifestyle=s.status==='travel'?4500:s.status==='overseas'?2500:0,education=s.status==='student'?1800:0,business=s.business?9000+s.business.staff*6500:0;this.earn(s.profile.support);this.pay(living+business+lifestyle+education);s.debt=money(s.debt*1.015);
+  this.changeStats({energy:20+s.stats.health*.2,stress:s.business?3:1,health:s.stats.stress>80?-8:2,pq:s.stats.stress>90?-1:0});
   if(s.stats.health<25){this.pay(6000);this.changeStats({health:30,energy:40,stress:-15,pq:-2});this.record('medical','先照顧這副身體','低健康讓你住院休養，醫療費 $6,000。沒有人能把生命當成無限加班券。');}
   s.month=Math.min(RETIRE_MONTH,s.month+1);s.elapsed++;s.ap=3;if(s.business)s.metrics.businessMonths++;
   if(s.housing==='temporary'&&s.cash>living*3&&s.debt<50000)s.housing='stable';
-  s.lastLedger={living,business,support:s.profile.support,cashChange:money(s.cash-cashBefore),debt:s.debt};
+  if(Object.hasOwn(s.lifestyleMonths,s.status))s.lifestyleMonths[s.status]++;
+  if(s.status==='student'){s.educationPlan.remaining=Math.max(0,s.educationPlan.remaining-1);if(!s.educationPlan.remaining&&s.educationPlan.credits>=12){s.status='graduate';s.educationPlan=null;this.record('graduate','畢業了，下一站由你選','完成進修課程。你可以繼續進修，也可以挑一份職業，進入學徒階段。');}}
+  s.lastLedger={living,business,lifestyle,education,support:s.profile.support,cashChange:money(s.cash-cashBefore),debt:s.debt};
   if(s.month>=RETIRE_MONTH){s.status='retired';s.pending=null;this.record('retire','65 歲，這次真的下班了',this.retirement().quote);return true;}
   if(s.debt>100000&&this.wealth<0&&s.cash<living&&s.elapsed-s.lastBankruptcy>=24){s.metrics.bankruptcies++;s.lastBankruptcy=s.elapsed;s.housing='temporary';s.pending={id:'comeback',title:'戶口見底，人生未完',text:'債務和房租追上來了。這一格可以是谷底，也可以是下一章的起點。',scene:'comeback',choices:[{label:'找社區支援，先穩住生活',effects:{cash:5000,stress:-12,jq:2}},{label:'整理技能，背水一戰',effects:{reputation:15,jq:5,stress:5}}]};}
-  else if(s.elapsed%12===0)this.record('year',`${this.age} 歲，這年的你`,`${this.job.name}，淨資產 $${Math.round(this.wealth).toLocaleString('en')}。${s.history.length>1?'轉過的彎，都成了下一段路的工具。':'生活沒有每天放煙花，但你仍在往前。'}`);return true;
+  else if(s.elapsed%12===0)this.record('year',`${this.age} 歲，這年的你`,`${LIFE_MODES[s.status]??(s.status==='student'?'進修中':s.status==='graduate'?'畢業待選':this.job?.name??'人生探索')}，淨資產 $${Math.round(this.wealth).toLocaleString('en')}。${s.history.length>1?'轉過的彎，都成了下一段路的工具。':'生活沒有每天放煙花，但你仍在往前。'}`);return true;
  }
  plan(months=12,focus='balanced'){if(!this.active||!['balanced','earn','learn','wellbeing'].includes(focus))return 0;let passed=0;for(let i=0;i<clamp(Math.floor(months)||1,1,12)&&this.active;i++){
-  const actions=this.s.status==='apprentice'?['study','work','rest']:focus==='earn'?['work','work','rest']:focus==='learn'?['study','work','rest']:focus==='wellbeing'?['rest','social','work']:['work','study','rest'];
-  for(const action of actions){if(!this.active)break;if(action==='work'){if(!this.work())this.rest();}else if(action==='study'){if(!this.study(this.s.route==='ai'))this.rest();}else this.rest(action==='social');}
-  if(this.s.pending)break;if(this.endMonth())passed++;
+  const actions=this.s.status==='student'?['study','rest','social']:Object.hasOwn(LIFE_MODES,this.s.status)?(this.s.status==='overseas'?['work','explore','rest']:['explore','rest','social']):this.s.status==='graduate'?['rest','social','rest']:this.s.status==='apprentice'?['study','work','rest']:focus==='earn'?['work','work','rest']:focus==='learn'?['study','work','rest']:focus==='wellbeing'?['rest','social','work']:['work','study','rest'];
+  for(const action of actions){if(!this.active)break;if(action==='work'){if(!this.work())this.rest();}else if(action==='study'){if(!this.study(this.s.status!=='student'&&this.s.route==='ai'))this.rest();}else if(action==='explore')this.explore();else this.rest(action==='social');}
+  if(this.s.pending)break;if(this.endMonth())passed++;if(this.s.status==='graduate')break;
  }return passed;}
  retirement(){const s=this.s,wealth=this.wealth,titles=[];if(wealth>=10000000)titles.push('華爾街之狼');if(s.metrics.bankruptcies&&wealth>200000)titles.push('屢敗屢戰的破產總裁');if(s.history.length>=4)titles.push('最強跨界斜槓王');if(s.stats.health>=80&&s.stats.stress<35)titles.push('看破紅塵的釣魚仙人');if(s.metrics.mentorSecrets>=3)titles.push('手藝有傳人的隱世高手');if(s.level===8)titles.push('由掃地做到 CEO');if(!titles.length)titles.push(s.stats.contacts>60?'朋友比名片更多的人':'把平凡過成故事的人');
-  const first=JOBS.find(j=>j.id===s.history[0]?.id)?.name??'生活',last=this.job?.name??'生活';const route=s.history[0]?.route==='ai'?'你以為一個好 Prompt 能解決所有事，後來才學會核實答案，也學會聽人說話。':'你從幫師傅買便當開始，最後明白了手藝之外，還有人情。';
-  return {titles,wealth:money(wealth),quote:`${s.profile.startAge} 歲時，你選了${first}。${route}${s.metrics.gamblingNet<0?`在運氣上花掉了 $${Math.round(-s.metrics.gamblingNet).toLocaleString('en')}，但人生沒有只剩輸贏。`:s.metrics.gamblingNet>0?'你曾贏過運氣，後來才知道守住節奏也需要本事。':''}${s.metrics.switches?`轉過 ${s.metrics.switches} 次行，你把舊技能帶進${last}的新故事。`:`你把${last}這條路，走成自己的樣子。`}65 歲了，存款不是唯一的成績；還肯照顧自己、還有人可以一起吃飯，也是狀元。`};}
- static restore(raw){try{const s=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(s?.version!==VERSION||!s.profile||!s.stats||!['setup','apprentice','employed','business','retired'].includes(s.status)||!Number.isInteger(s.seed)||!Number.isInteger(s.month)||s.month<18*12||s.month>RETIRE_MONTH||!Number.isInteger(s.ap)||s.ap<0||s.ap>3||s.career!==null&&!JOBS.some(j=>j.id===s.career)||!Array.isArray(s.panels)||s.panels.length>8000||!Array.isArray(s.history)||s.history.length>2000||s.profile.name.length>20||!Number.isFinite(s.cash)||s.cash<0||!Number.isFinite(s.debt)||s.debt<0)return null;
+  const first=JOBS.find(j=>j.id===s.history[0]?.id)?.name??'生活',last=this.job?.name??'生活';const route=!s.history.length?'你沒有急著把自己交給一份工作，而是留時間給學習與生活。':s.history[0]?.route==='ai'?'你以為一個好 Prompt 能解決所有事，後來才學會核實答案，也學會聽人說話。':'你從幫師傅買便當開始，最後明白了手藝之外，還有人情。';
+  return {titles,wealth:money(wealth),quote:`${s.profile.startAge} 歲時，你選了${first}。${route}${s.metrics.gamblingNet<0?`在運氣上花掉了 $${Math.round(-s.metrics.gamblingNet).toLocaleString('en')}，但人生沒有只剩輸贏。`:s.metrics.gamblingNet>0?'你曾贏過運氣，後來才知道守住節奏也需要本事。':''}${s.metrics.switches?`轉過 ${s.metrics.switches} 次行，你把舊技能帶進${last}的新故事。`:`你把${last}這條路，走成自己的樣子。`}${s.lifestyleMonths.travel?`你用 ${s.lifestyleMonths.travel} 個月看世界。`:''}${s.lifestyleMonths.overseas?`你在異國生活工作了 ${s.lifestyleMonths.overseas} 個月。`:''}${s.lifestyleMonths['early-retired']?`你把 ${s.lifestyleMonths['early-retired']} 個月留給財務自由後的興趣。`:''}65 歲了，存款不是唯一的成績；還肯照顧自己、還有人可以一起吃飯，也是狀元。`};}
+ static restore(raw){try{const s=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(s?.version!==VERSION||!s.profile||!s.stats||!['setup','apprentice','employed','business','student','graduate',...Object.keys(LIFE_MODES),'retired'].includes(s.status)||!Number.isInteger(s.seed)||!Number.isInteger(s.month)||s.month<18*12||s.month>RETIRE_MONTH||!Number.isInteger(s.ap)||s.ap<0||s.ap>3||s.career!==null&&!JOBS.some(j=>j.id===s.career)||!Array.isArray(s.panels)||s.panels.length>8000||!Array.isArray(s.history)||s.history.length>2000||s.profile.name.length>20||!Number.isFinite(s.cash)||s.cash<0||!Number.isFinite(s.debt)||s.debt<0)return null;
   for(const key of STAT_KEYS){const max=key==='iq'?170:key==='contacts'?999:key==='reputation'?10000:key==='energy'?120:100;if(!Number.isFinite(s.stats[key])||s.stats[key]<0||s.stats[key]>max)return null;}
   if(!Number.isInteger(s.profile.startAge)||s.profile.startAge<18||s.profile.startAge>26||!MBTI.includes(s.profile.mbti)||!['mentor','ai'].includes(s.route)||!Number.isFinite(s.mastery)||s.mastery<0||s.mastery>100||!Number.isInteger(s.level)||s.level<0||s.level>8||!Number.isInteger(s.elapsed)||s.elapsed!==s.month-s.profile.startAge*12||s.status==='retired'&&s.month!==RETIRE_MONTH||s.month===RETIRE_MONTH&&s.status!=='retired')return null;
   for(const key of ['craft','tech','care','art','people','analysis'])if(!Number.isFinite(s.skills?.[key])||s.skills[key]<0||s.skills[key]>100)return null;
@@ -109,7 +143,10 @@ export class LifeGame{
   for(const key of ['bank','bonds','stock','etf','crypto'])if(!Number.isFinite(s.assets?.[key])||s.assets[key]<0)return null;
   for(const key of ['stock','etf','crypto'])if(!Number.isFinite(s.prices?.[key])||s.prices[key]<=0||!Number.isFinite(s.marketPlan?.[key]))return null;
   if(s.status==='business'&&(!Array.isArray(s.business?.team)||s.business.team.length!==s.business.staff||s.business.team.some(e=>typeof e.name!=='string'||typeof e.trait!=='string'||!Number.isFinite(e.efficiency)||e.efficiency<0||e.efficiency>1)))return null;
-  if(s.status!=='setup'&&!s.career||s.status==='business'&&(!s.business||!Number.isInteger(s.business.staff)||s.business.staff<0||s.business.staff>8)||s.pending&&(!Array.isArray(s.pending.choices)||!s.pending.choices.length||s.pending.choices.length>4))return null;
+  if(['apprentice','employed','business'].includes(s.status)&&!s.career||s.status==='business'&&(!s.business||!Number.isInteger(s.business.staff)||s.business.staff<0||s.business.staff>8)||s.pending&&(!Array.isArray(s.pending.choices)||!s.pending.choices.length||s.pending.choices.length>4))return null;
+  s.lifestyleMonths??={travel:0,overseas:0,'early-retired':0,sabbatical:0};
+  for(const key of Object.keys(LIFE_MODES))if(!Number.isInteger(s.lifestyleMonths[key])||s.lifestyleMonths[key]<0||s.lifestyleMonths[key]>600)return null;
+  s.educationPlan??=null;if(s.status==='student'&&(!s.educationPlan||!Number.isInteger(s.educationPlan.remaining)||s.educationPlan.remaining<0||s.educationPlan.remaining>12||!Number.isInteger(s.educationPlan.credits)||s.educationPlan.credits<0||s.educationPlan.credits>1800))return null;
   const game=Object.create(LifeGame.prototype);game.s=s;return game;
  }catch{return null;}}
 }

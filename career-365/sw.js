@@ -1,4 +1,4 @@
-const CACHE='career-365-app-v1',BASE=new URL('./',self.location.href).href;
+const CACHE='career-365-app-v2',BASE=new URL('./',self.location.href).href;
 const FILES=['./','./index.html','./styles.css','./manifest.webmanifest','./src/app.js','./src/game.js','./src/content.js','./src/comics.js','../grid-rush/comic-chinese.css','../grid-rush/assets/fonts/Iansui.woff2','../grid-rush/assets/fonts/DMSans.woff2','../grid-rush/src/site-updates.js','../grid-rush/src/language.js','../grid-rush/src/translations.js','../beat-bad-luck/assets/icons/website-logo-64.png','../beat-bad-luck/assets/icons/website-logo-192.png','../beat-bad-luck/assets/icons/website-logo-512.png'].map(x=>new URL(x,BASE).href);
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(url=>new Request(url,{cache:'reload'}))))));
 self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith('career-365-app-')&&k!==CACHE)await caches.delete(k);await self.clients.claim();})()));

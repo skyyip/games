@@ -29,3 +29,38 @@ test('recruited staff have individual productivity and preserve the save contrac
 test('unsafe or malformed pending-save payloads are rejected',()=>{const g=setup();g.s.pending=structuredClone(EVENT_DECK[0]);g.s.pending.choices[0].effects['<img onerror=alert(1)>']=1;assert.equal(LifeGame.restore(JSON.stringify(g.s)),null);});
 
 test('debt alone does not label a solvent household bankrupt',()=>{const rich=setup();rich.s.cash=1000000;rich.s.debt=150000;rich.endMonth();assert.equal(rich.s.metrics.bankruptcies,0);const poor=setup();poor.s.cash=0;poor.s.debt=150000;poor.endMonth();assert.equal(poor.s.pending.id,'comeback');assert.equal(poor.s.metrics.bankruptcies,1);});
+
+test('adult height clusters realistically and weight is correlated through a plausible BMI',()=>{
+ const heights=[];for(let seed=0;seed<2000;seed++){const g=new LifeGame({seed}),p=g.s.profile,bmi=p.weight/(p.height/100)**2;heights.push(p.height);assert(p.height>=138&&p.height<=198);assert(bmi>=18.9&&bmi<=29.1);assert(g.s.stats.pq>=0&&g.s.stats.pq<=100);}
+ assert(heights.filter(h=>h>=150&&h<=185).length>1800);
+});
+test('PQ buffers stress while health determines physical energy capacity; recovery improves PQ',()=>{
+ const low=setup(),high=setup();low.s.stats.pq=0;high.s.stats.pq=100;
+ assert.equal(low.energyMax,high.energyMax);low.changeStats({stress:20});high.changeStats({stress:20});assert(low.s.stats.stress>high.s.stats.stress);
+ high.s.stats.health=40;assert(high.energyMax<low.energyMax);low.rest();assert(low.s.stats.pq>0);low.changeStats({pq:200});assert.equal(low.s.stats.pq,100);
+});
+test('graduates can study for a year, complete classes and choose more education or an apprenticeship',()=>{
+ const g=new LifeGame({seed:123});g.s.cash=100000;assert(g.enroll());assert.equal(g.s.status,'student');assert.equal(g.work(),false);
+ assert(LifeGame.restore(g.s));const before=g.s.cash;assert(g.study());assert.equal(g.s.cash,before);
+ assert.equal(g.plan(12),12);assert.equal(g.s.status,'graduate');assert.equal(g.s.educationPlan,null);assert.equal(g.s.lastLedger.education,1800);
+ assert(LifeGame.restore(g.s));assert(g.enroll());assert.equal(g.s.status,'student');g.s.cash=10000;assert(g.chooseCareer(JOBS[0].id));assert.equal(g.s.status,'apprentice');assert.equal(g.s.educationPlan,null);
+ const poor=new LifeGame({seed:1});poor.s.cash=5999;const raw=JSON.stringify(poor.s);assert.equal(poor.enroll(),false);assert.equal(JSON.stringify(poor.s),raw);
+});
+test('a year without classes does not confer a qualification',()=>{const g=new LifeGame({seed:123});g.s.cash=100000;g.enroll();for(let i=0;i<12;i++)g.endMonth();assert.equal(g.s.status,'student');assert.equal(g.s.educationPlan.remaining,0);assert.equal(g.s.educationPlan.credits,0);});
+test('quitting closes a business, retains skills and assets, and stops regular work income',()=>{
+ const g=setup();g.s.status='employed';g.s.cash=100000;g.startBusiness();g.businessAction('hire');ready(g);const craft=g.s.skills.craft,cash=g.s.cash;assert(g.quit());assert.equal(g.s.status,'sabbatical');assert.equal(g.s.cash,cash-1000);assert.equal(g.s.business,null);assert.equal(g.s.skills.craft,craft);assert.equal(g.work(),false);assert.equal(g.study(),false);assert(g.explore());assert(LifeGame.restore(g.s));
+});
+test('travel has monthly costs, overseas work pays income, and returning to a career preserves prior skills',()=>{
+ const g=setup();g.s.cash=200000;assert(g.quit());assert(g.changeLife('travel'));assert(g.explore());g.endMonth();assert.equal(g.s.lastLedger.lifestyle,4500);assert.equal(g.s.lifestyleMonths.travel,1);assert.equal(g.work(),false);assert(LifeGame.restore(g.s));
+ assert(g.changeLife('overseas'));const cash=g.s.cash;assert(g.work());assert.equal(g.s.cash,cash+6000);g.endMonth();assert.equal(g.s.lastLedger.lifestyle,2500);assert.equal(g.s.lifestyleMonths.overseas,1);assert(LifeGame.restore(g.s));assert(g.chooseCareer(JOBS[1].id));assert.equal(g.s.status,'apprentice');
+});
+test('financial freedom permits a lifestyle change without ending life before65',()=>{
+ const g=setup();g.s.cash=g.freedomTarget-1;assert.equal(g.changeLife('early-retired'),false);g.s.cash=g.freedomTarget+10000;g.s.debt=1;assert.equal(g.changeLife('early-retired'),false);g.s.debt=0;assert(g.changeLife('early-retired'));assert.equal(g.s.status,'early-retired');assert.equal(g.work(),false);assert(g.explore());assert.equal(g.plan(12),12);assert.equal(g.s.lifestyleMonths['early-retired'],12);assert(g.age<65);assert(LifeGame.restore(g.s));
+ for(const mode of ['travel','overseas','early-retired']){ready(g);g.s.status=mode;g.s.month=RETIRE_MONTH-1;g.s.elapsed=g.s.month-g.s.profile.startAge*12;g.plan(12);assert.equal(g.s.status,'retired');assert.equal(g.age,65);assert(LifeGame.restore(g.s));}
+});
+test('old saves gain lifestyle defaults while malformed education and lifestyle fields are rejected',()=>{
+ const g=setup();delete g.s.educationPlan;delete g.s.lifestyleMonths;assert(LifeGame.restore(g.s));g.s.status='student';g.s.educationPlan={remaining:-1,credits:0};assert.equal(LifeGame.restore(g.s),null);g.s.status='sabbatical';g.s.educationPlan=null;g.s.lifestyleMonths={travel:-1};assert.equal(LifeGame.restore(g.s),null);
+});
+test('each alternative lifestyle can complete an entire life and retains its ending in the comic book',()=>{
+ for(const mode of ['travel','overseas','early-retired']){const g=setup();g.s.cash=20000000;assert(g.changeLife(mode));for(let i=0;i<1000&&g.s.status!=='retired';i++){if(g.s.pending)g.resolve(0);else g.plan(12);}assert.equal(g.age,65);assert.equal(g.s.status,'retired');assert(g.s.lifestyleMonths[mode]>0);assert(LifeGame.restore(g.s));assert(bookDocument(g.s,g.retirement()).includes('65 歲'));}
+});
