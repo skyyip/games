@@ -1,3 +1,4 @@
+import {PendingResults} from './pending.js';
 import {ANIMALS,animal,rewardCoins} from './animals.js';
 import {PROFILE_KEY,PENDING_KEY,readProfile,normalizeName,buyAnimal,settleLocal} from './profile.js';
 import * as cloud from './cloud.js';import {paintAnimalPortrait,renderAnimalIcon} from './animal-icons.js';
@@ -5,10 +6,10 @@ import {FROG_COIN,rankBadge} from './badges.js';
 const $=id=>document.getElementById(id);
 export class RiverPlayers{
  constructor({t,onChange,onPlay}){
-  this.t=t;this.onChange=onChange;this.onPlay=onPlay;this.guest=readProfile(null);this.cloudProfile=null;this.identity=null;this.authReady=!cloud.cloudConfigured;this.persistent=true;this.busy=false;this.wantPlay=false;this.board=[];this.boardAt=0;this.pending=null;this.profileFailed=false;this.resetUntil=0;this.resetTimer=0;this.worldRank={key:'',status:'idle',value:null,at:0};this.rankRequest=0;
+  this.t=t;this.onChange=onChange;this.onPlay=onPlay;this.guest=readProfile(null);this.cloudProfile=null;this.identity=null;this.authReady=!cloud.cloudConfigured;this.persistent=true;this.busy=false;this.wantPlay=false;this.board=[];this.boardAt=0;this.pendingResults=new PendingResults();this.profileFailed=false;this.resetUntil=0;this.resetTimer=0;this.worldRank={key:'',status:'idle',value:null,at:0};this.rankRequest=0;
   for(const icon of document.querySelectorAll('[data-frog-coin]'))icon.innerHTML=FROG_COIN;
   for(const icon of document.querySelectorAll('[data-animal-icon]'))renderAnimalIcon(icon,icon.dataset.animalIcon,Number(icon.dataset.iconSize)||26);
-  try{this.guest=readProfile(localStorage.getItem(PROFILE_KEY));const pending=JSON.parse(localStorage.getItem(PENDING_KEY));if(pending&&typeof pending.id==='string'&&typeof pending.uid==='string'&&Number.isInteger(pending.score)&&pending.score>=0&&pending.score<=1e6&&(pending.bonusCoins===undefined||Number.isSafeInteger(pending.bonusCoins)&&pending.bonusCoins>=0&&pending.bonusCoins<=pending.score*3))this.pending=pending;}catch{this.persistent=false;}
+  try{this.guest=readProfile(localStorage.getItem(PROFILE_KEY));this.pendingResults=new PendingResults(localStorage.getItem(PENDING_KEY));}catch{this.persistent=false;}
   for(const button of document.querySelectorAll('[data-close]'))button.addEventListener('click',()=>this.close(button.dataset.close));
   for(const id of ['player-dialog','animal-dialog','leaderboard-dialog'])$(id).addEventListener('cancel',()=>{if(id==='player-dialog'){this.wantPlay=false;this.passwordVisibility(false);}});
   $('player-world-rank').addEventListener('click',()=>this.worldRank.status==='error'?this.syncWorldRank(true):this.openBoard());$('profile-open').addEventListener('click',()=>this.openPlayer());$('animal-open').addEventListener('click',()=>this.openShop());$('leaderboard-open').addEventListener('click',()=>this.openBoard());$('refresh-board').addEventListener('click',()=>this.refreshBoard());$('auth-action').addEventListener('change',()=>this.authView());
@@ -31,6 +32,7 @@ export class RiverPlayers{
   this.render();
  }
  get profile(){return this.cloudProfile??this.guest;}
+ get pending(){return this.pendingResults.get(this.cloudProfile?.uid);}
  error(error){const raw=error?.code??error?.message??'',messages={
   'auth-loading':['正在恢復雲端登入，請稍候再開始。','Restoring your cloud session. Please try again in a moment.'],
   'name-format':['名字請用 2–16 個中文字、英文字母、數字、_ 或 -。','Use 2–16 Chinese characters, letters, numbers, _ or -.'],
@@ -63,7 +65,7 @@ export class RiverPlayers{
   'wrong-player':['這份待同步成績屬於另一個帳戶，請登入原帳戶。','This pending result belongs to another account. Sign in to that account.']};const m=messages[raw],message=m?this.t(...m):this.t('暫時未能連線，請檢查網絡後重試。','Connection unavailable. Check your network and try again.'),code=error?.cause?.code??raw;return message+(/^(auth\/[a-z-]+|permission-denied|unavailable|failed-precondition)$/.test(code)?` (${code})`:'');}
  feedback(id,error){$(id).textContent=error?this.error(error):'';if(error&&$('player-dialog').open)$(id).scrollIntoView({block:'nearest'});}
  saveGuest(){try{localStorage.setItem(PROFILE_KEY,JSON.stringify(this.guest));}catch{this.persistent=false;}}
- storePending(){try{if(this.pending)localStorage.setItem(PENDING_KEY,JSON.stringify(this.pending));else localStorage.removeItem(PENDING_KEY);}catch{this.persistent=false;}}
+ storePending(){try{if(this.pendingResults.runs.length)localStorage.setItem(PENDING_KEY,JSON.stringify(this.pendingResults.runs));else localStorage.removeItem(PENDING_KEY);}catch{this.persistent=false;}}
  show(id){if(!$(id).open)$(id).showModal();}
  close(id){if(id==='player-dialog')this.passwordVisibility(false);if($(id).open)$(id).close();}
  openPlayer(wantPlay=false){this.passwordVisibility(false);this.wantPlay=wantPlay;$('guest-name').value=this.guest.name;$('account-feedback').textContent='';this.authView();this.show('player-dialog');}
@@ -132,9 +134,9 @@ export class RiverPlayers{
   $('player-world-rank').setAttribute('aria-label',status==='error'?this.t('重新讀取我的世界排行','Retry my world rank'):text+this.t('，查看世界排行榜',', view world leaderboard'));
   $('player-world-rank').title=status==='unranked'?this.t('完成一局並取得分數，就可以上榜。','Finish a run with at least one landing to join the rankings.'):text;
  }
- async prepareRun(){if(!this.authReady)throw Error('auth-loading');if(this.identity&&!this.cloudProfile||!this.profile.name){this.openPlayer(true);return null;}if(this.cloudProfile){if(this.pending)await this.retryPending();const run=await cloud.beginCloudRun();return {...run,mode:'cloud',name:this.profile.name};}return {id:crypto.randomUUID(),animal:this.guest.selected,mode:'guest',name:this.guest.name};}
- async settle(run,score,bonusCoins=0){if(run.mode!=='cloud'){const result=settleLocal(this.guest,{...run,score,bonusCoins});this.guest=result.profile;this.saveGuest();this.render();return result;}this.pending={id:run.id,uid:run.uid,score,bonusCoins,animal:run.animal};this.storePending();return this.retryPending();}
- async retryPending(){if(!this.pending)return null;try{const done=await cloud.settleCloudRun(this.pending);this.cloudProfile=done.profile;this.pending=null;this.storePending();this.render();return done;}catch(error){if(['run-replaced','run-missing'].includes(error?.message)){this.pending=null;this.storePending();}throw error;}}
+ async prepareRun(){if(!this.authReady)throw Error('auth-loading');if(this.identity&&!this.cloudProfile||!this.profile.name){this.openPlayer(true);return null;}if(this.cloudProfile){while(this.pending)await this.retryPending();const run=await cloud.beginCloudRun();return {...run,mode:'cloud',name:this.profile.name};}return {id:crypto.randomUUID(),animal:this.guest.selected,mode:'guest',name:this.guest.name};}
+ async settle(run,score,bonusCoins=0){if(run.mode!=='cloud'){const result=settleLocal(this.guest,{...run,score,bonusCoins});this.guest=result.profile;this.saveGuest();this.render();return result;}this.pendingResults.add({id:run.id,uid:run.uid,score,bonusCoins,animal:run.animal});this.storePending();return this.retryPending(run.uid);}
+ async retryPending(uid=this.cloudProfile?.uid){if(!this.pendingResults.get(uid))return null;try{const done=await this.pendingResults.settle(uid,run=>cloud.settleCloudRun(run));if(this.cloudProfile?.uid===uid){this.cloudProfile=done.profile;this.render();}return done;}finally{this.storePending();}}
  async abandon(run){if(run?.mode==='cloud')try{await cloud.abandonCloudRun(run.id);}catch{/* A new online run atomically abandons an unfinished one. */}}
  async chooseAnimal(id){if(this.busy)return;this.busy=true;try{this.cloudProfile?this.cloudProfile=await cloud.selectOrBuy(id):this.guest=buyAnimal(this.guest,id);if(!this.cloudProfile)this.saveGuest();this.render();this.renderShop();this.onChange?.();$('shop-feedback').textContent=this.t(`出發！${animal(id).zh} 陪你過河。`,`Let's go! ${animal(id).en} is ready.`);}catch(error){this.feedback('shop-feedback',error);}finally{this.busy=false;}}
  openShop(){this.renderShop();$('shop-feedback').textContent='';this.show('animal-dialog');}

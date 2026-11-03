@@ -27,6 +27,8 @@ A completed run pays **1 + 2 × successful landings + 10 × floor(landings / 20)
 
 The UI includes Google and Firebase email/password sign-in, account creation, unique name reservation, a per-player wallet, cloud purchases, a top-ten leaderboard showing the winning animal, and a retryable pending-result queue. Cloud names accept 2–16 Chinese characters, Latin letters, digits, `_` and `-`; NFKC normalization and lowercase Latin keys prevent lookalike duplicates. Public ranks contain one personal best per UID, sorted by score descending and first achievement time ascending.
 
+Pending cloud results are kept per account, including when another account plays on the same device. The original single-result save is read automatically. Concurrent retries for a run share one request; replay settles the signed-in account's pending results first. A delayed settlement cannot replace a different account's displayed wallet. See [TASKS.md](TASKS.md) for completed and remaining work. The isolated browser sync regression is `FROGGER_URL=http://localhost:5260/frogger-jump/ node scripts/sync-check.mjs` when run from this directory with Playwright configured as above; it replaces the cloud boundary and does not use production accounts.
+
 **Firebase web configuration is supplied:** `src/firebase-settings.js` targets `sky-playground-3c5af` and enables the cloud UI. Email/Password Auth, the Firestore database, published rules and the ranking index must also be configured in Firebase Console. No production account or rule/index deployment was created by the assistant. Local practice remains unranked with a separate wallet. See [FIREBASE.md](FIREBASE.md).
 
 ## Seven new platforms

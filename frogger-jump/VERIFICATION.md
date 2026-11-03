@@ -1,5 +1,28 @@
 # River friends / Firebase interface verification · 2026-11-02
 
+## Latest-main integration · 2026-11-03
+
+- Fast-forwarded to upstream `3e93afa` and restored the local pending-result work, resolving overlaps in app startup, player state and the source worker.
+- Preserved upstream authentication, world ranks, weather, shared animal icons and platform bonus rewards. Pending-result migration now retains and validates `bonusCoins` as well.
+- All **72 Node tests**, the isolated Chromium sync regression, the **25-page production build** and built metadata validation pass after integration. Source worker is **v23**, retaining every upstream cached module plus `pending.js`.
+
+
+## Pending-result reliability update · 2026-11-03
+
+- **49 Node tests pass**, including seven new queue regressions: legacy-save migration, invalid/duplicate saves, concurrent retries, account isolation, retryable failures, permanent run failures, and results added during an in-flight settlement.
+- `scripts/sync-check.mjs` passes in Chromium against source with the cloud module replaced at the network boundary. It verifies shared retries, account switching during settlement, persisted per-account queues, settlement before replay, and preservation of another account's result. It does not contact Firebase or certify live cloud behavior.
+- Source browser checks pass for all five animals: skill consumption, jump/landing, exactly-once local rewards, exact-price purchases, insufficient funds, and selection persistence after reload.
+- The 24-page production build passes, with source and built metadata checks passing. The build still reports pre-existing duplicate translation-key warnings in the shared translation file.
+- Production gameplay passes at **320×568 Traditional Chinese** and **812×375 English/reduced motion**: 29 mixed-route landings per viewport, hazards, paused deadlines, splash/predator sequence, replay, saved records, and idle frame suspension.
+- Source service-worker cache version is now v6 and includes `src/pending.js`. Cross-tab queue coordination and physical-device testing remain open in [TASKS.md](TASKS.md).
+
+Reproduction additions (from the repository root, with Playwright configured):
+
+```
+node --test --test-isolation=none frogger-jump/tests/*.test.js
+FROGGER_URL=http://localhost:5260/frogger-jump/ node frogger-jump/scripts/sync-check.mjs
+```
+
 ## Passed
 
 - **42 Node tests**: original jump/aim/pause/trap/record behavior, random wood/lily size variants, all five skills, safe charge cancellation, every-20-landings replenishment including a 1,000-use counter, normalized names, coin arithmetic, duplicate local settlement, exact-price animal purchase and wallet restoration.

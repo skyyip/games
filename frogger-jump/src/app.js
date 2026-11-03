@@ -48,7 +48,7 @@ function resetInput(){const held=pointer;pointer=null;keyboard=null;game.cancelC
 async function start(){
  if(startBusy)return;startBusy=true;$('start').disabled=true;$('again').disabled=true;
  try{const run=await players.prepareRun();if(!run)return;activeRun=run;attr($('play-hint'),'data-advice','');resetInput();silence();if($('result-dialog').open)$('result-dialog').close();$('result-celebration').hidden=true;if($('pause-dialog').open)$('pause-dialog').close();game.start({animal:run.animal});weather.start();scene.reset();saved=false;flashUntil=0;lastRoute='';$('welcome').hidden=true;lock(true);$('jump-control').disabled=false;$('hold-button').disabled=false;$('pause').disabled=false;put($('play-hint'),local('看準下一塊，按住，再放手。','Read the next gap. Hold, then release.'));resize();$('jump-control').focus({preventScroll:true});wake();}
- catch(error){put($('play-hint'),players.error(error));}
+ catch(error){put($('play-hint'),players.error(error));if($('result-dialog').open){put($('reward-state'),players.error(error));$('retry-sync').hidden=!players.pending;}}
  finally{startBusy=false;$('start').disabled=false;$('again').disabled=false;}
 }
 
