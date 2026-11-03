@@ -66,3 +66,7 @@ body.is-playing{overflow:hidden;overscroll-behavior:none}.is-playing .play-shell
 @media(max-width:650px){.river-profile .river-actions .river-action{min-height:52px;padding:6px 8px}.river-action-icon{flex-basis:30px;width:30px;height:32px}.play-controls #skill-button{min-width:104px;max-width:126px;padding:5px 7px}}
 @media(max-width:360px){.play-controls #skill-button{min-width:100px;max-width:108px;gap:3px}.play-controls #skill-button #skill-name{font-size:10px}.river-action-label{font-size:12px}}
 @media(max-height:500px) and (min-aspect-ratio:4/3){.is-playing .play-controls{align-items:stretch}.play-controls #skill-button{max-width:none;min-height:44px}}
+
+/* Animal and name form one identity row; the rank owns the row below. */
+.river-profile>.player-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:start;min-width:0}.river-profile .player-identity{display:flex;align-items:center;gap:8px;min-width:0}.river-profile .player-identity #player-animal{width:32px;height:32px}.river-profile .player-identity #player-name{min-width:0;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}.river-profile .player-summary #player-world-rank{display:flex;grid-column:1;margin:0;max-width:100%;min-width:0}.river-profile .player-summary #player-mode{margin:0}.river-profile>.coin-wallet{align-self:start;margin-top:4px}
+.animal-card[data-animal=shimajiro] h3{font-size:clamp(15px,4.3vw,19px);white-space:nowrap}

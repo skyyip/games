@@ -1,6 +1,6 @@
 # Frogger Jump tasks
 
-Updated: 2026-11-03
+Updated: 2026-11-04
 
 ## Completed in this continuation
 
@@ -44,10 +44,31 @@ Updated: 2026-11-03
 - [x] Bump the source worker to v25 and update documentation/browser assertions.
 - [x] Pass all 77 remaining logic tests, 25-page build/metadata checks and a 90-second no-weather browser smoke check with pause/resume.
 
+## Chiikawa-inspired comic friends · 2026-11-03
+
+- [x] Add separate Chiikawa, Hachiware and Usagi catalog entries with recognizable round-ear, blue/white-cat and long-ear manga artwork.
+- [x] Share cached portraits and animated charge/jump/landing poses across shop, player, skills and rankings.
+- [x] Add Courage cheer (1,200), Friendship bridge (1,360) and Yaha bounce (1,520), preserving the prior animals and prices.
+- [x] Extend exact-price/species/owned-collection Firestore rules to fourteen animals.
+- [x] Pass 82 logic tests, all fourteen source animal/skill/coin flows and the 25-page production build/metadata checks.
+- [x] Pass the three new animals in the production build and four-size shop/rank checks, including their leaderboard portraits.
+
+## Player profile rows and island cast · 2026-11-04
+
+- [x] Put the selected animal and player name on one identity row, with personal world rank in its own row below.
+- [x] Preserve account/practice notes, wallet placement and long-name overflow handling.
+- [x] Add Kurimanju, Rakko, Momonga, Shisa, Shimajiro, Mermaid, Hitoha and Futaba as eight selectable characters, with distinct portraits and skills.
+- [x] Keep Hitoha and Futaba separate and distinguish them by one/two head leaves; use the Siren-inspired interpretation for Mermaid.
+- [x] Share existing sprite/portrait caches, animation poses, skills/rewards, player/rank icons and wallet persistence.
+- [x] Extend the catalog/price/rules/owned-collection contract to 22 characters and update purchase fixtures.
+- [x] Pass 91 logic tests, all eight source character flows, four-size shop/rank checks and three-size signed-in profile/rank regressions.
+- [x] Build the 25-page production release and pass source/built metadata checks.
+- [x] Pass all eight new character flows in the production build and four-size production-markup profile/rank checks, including the new two-row layout.
+
 ## Remaining
 
 - [ ] Run the expanded Firestore emulator security harness. Previous verification recorded an emulator download restriction; these tests are not certified as passing.
-- [ ] Publish the updated eleven-animal Firestore rules and verify live Fox/Capybara/Starmouse purchases at the new prices. Confirm Email/Password Auth and ranking index in the configured Firebase project.
+- [ ] Publish the updated 22-character Firestore rules and verify live purchases for the comic friends and the updated Fox/Capybara/Starmouse prices. Confirm Email/Password Auth and ranking index in the configured Firebase project.
 - [ ] Verify real cloud registration, unique-name collisions, purchases, offline retry, and cross-device rankings against the configured backend.
 - [ ] Test touch controls, background/resume, and installed/offline play on physical iOS and Android devices.
 - [ ] Exercise simultaneous results in separate browser tabs; this continuation shares requests within one page and does not add cross-tab queue coordination.

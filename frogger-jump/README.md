@@ -21,7 +21,7 @@ Run `npm test` here or `node --test --test-isolation=none frogger-jump/tests/*.t
 
 Base platforms mix wood and water lilies (40% lily candidates), with 9% small-platform candidates. Seven special platforms can replace safe candidates, as described below. Both surface types have large and small variants. The meter above the animal has no visible percentage; its shape tapers from thin to thick while power changes green → yellow → red. Failed low-power hops finish in open water rather than falling through the starting log. Crocodile capture starts immediately on a missed landing; an airborne fish collision captures the selected animal immediately at the collision point.
 
-Animal prices in **golden Frog Coins**: frog free, penguin 280, bunny 320, monkey 360, otter 400, duckling 440, tabby cat 480, panda 520, fox 960, capybara 1,000 and Mochi starmouse 1,080. Existing unlocks remain owned; no extra payment is requested for an already-owned friend. Existing wallet balances and rewards are unchanged; the currency now uses a small, static gold frog-face SVG in the wallet, shop and results. One skill use starts every run; every twentieth **successful landing** adds one more, with no low fixed cap. Clearing a thorn and skipping a platform still counts as one landing, not two. Skills work while standing/charging, cancel an unfinished charge safely, and cannot be spent in flight, on pause or after falling. Frog clears thorns or enlarges a pad; penguin stabilizes timed hazards underfoot/ahead; bunny provides a big landing cushion; monkey clears all next-pad hazards; otter drives away fish and enlarges the next pad. Duckling stabilizes its occupied timed pad and clears/widens the next thorn pad; Cat cushions the next landing and clears/widens thorns; Panda stabilizes timed hazards underfoot/ahead and widens the next pad; Fox clears next-pad hazards and cushions one hop; Capybara clears timed hazards/thorns underfoot and ahead. Mochi starmouse clears/widens the next pad and gives one fish collision shield for the next hop. The shield is used by the next hop whether or not a fish is encountered, and cannot carry into a later jump. Each skill remains available while standing or charging. The charge climbs to full in 1,000ms (previously 950ms), giving a slightly wider release-time window.
+Animal prices in **golden Frog Coins**: frog free, penguin 280, bunny 320, monkey 360, otter 400, duckling 440, tabby cat 480, panda 520, fox 960, capybara 1,000 Mochi starmouse 1,080, Chiikawa 1,200, Hachiware 1,360 and Usagi 1,520. Existing unlocks remain owned; no extra payment is requested for an already-owned friend. Existing wallet balances and rewards are unchanged; the currency now uses a small, static gold frog-face SVG in the wallet, shop and results. One skill use starts every run; every twentieth **successful landing** adds one more, with no low fixed cap. Clearing a thorn and skipping a platform still counts as one landing, not two. Skills work while standing/charging, cancel an unfinished charge safely, and cannot be spent in flight, on pause or after falling. Frog clears thorns or enlarges a pad; penguin stabilizes timed hazards underfoot/ahead; bunny provides a big landing cushion; monkey clears all next-pad hazards; otter drives away fish and enlarges the next pad. Duckling stabilizes its occupied timed pad and clears/widens the next thorn pad; Cat cushions the next landing and clears/widens thorns; Panda stabilizes timed hazards underfoot/ahead and widens the next pad; Fox clears next-pad hazards and cushions one hop; Capybara clears timed hazards/thorns underfoot and ahead. Mochi starmouse clears/widens the next pad and gives one fish collision shield for the next hop. The shield is used by the next hop whether or not a fish is encountered, and cannot carry into a later jump. Each skill remains available while standing or charging. The charge climbs to full in 1,000ms (previously 950ms), giving a slightly wider release-time window.
 
 A completed run pays **1 + 2 × successful landings + 10 × floor(landings / 20)** coins. Results settle once per run. Leaving a live game earns no reward. Guest wallet key `frogger-jump.profile.v2` preserves name, animals, coins and best score separately from the old top-three records. Existing records remain available; no anonymous old score is silently uploaded to a named global account.
 
@@ -62,7 +62,7 @@ Google sign-in uses Firebase Auth's popup flow and existing UID-owned wallets. N
 
 The top ten keep the existing Firebase ordering and one personal best per player. Ranks 1–3 have gold, silver and bronze cup SVGs; ranks 4–10 have individually colored numbered ribbons. Local top-three records use the same cups. Icons are static, and rank numbers have accessible labels. New animals use small Canvas paths with the existing jump/landing poses; the update adds no idle animation loops or image downloads.
 
-**Publish the updated `firestore.rules` to `sky-playground-3c5af` before releasing the new cloud animal purchases.** The rules expand the allowed species, exact price map and maximum owned collection to eleven without altering existing wallets, names, scores, rewards or public ranking queries. A GitHub Pages deployment does not publish Firebase rules. Local purchases and skills work without this cloud step.
+**Publish the updated `firestore.rules` to `sky-playground-3c5af` before releasing the new cloud animal purchases.** The rules expand the allowed species, exact price map and maximum owned collection to twenty-two without altering existing wallets, names, scores, rewards or public ranking queries. A GitHub Pages deployment does not publish Firebase rules. Local purchases and skills work without this cloud step.
 
 ## Compact riverbank layout
 
@@ -75,8 +75,39 @@ The account dialog supports Google, anonymous and Email/password sign-in. Anonym
 Missed jumps now show the same directional coaching immediately in the play footer and in the result panel: hold a little longer for an undershoot, or release earlier for an overshoot. The text explicitly refers to the rising half of the ping-pong power bar. Thorns, sinking pads and fish retain obstacle-specific advice. Restarting clears the previous hint.
 ## Compact controls and matching animal portraits
 
-All weather overlays are removed: no drizzle, sunshine or post-rain rainbow. The weather module and its timer are removed as well. The skill button is back beside the bottom hold-to-charge control with a 44px touch target. Shop/world-ranking actions are 52px on phones and 56px on larger screens. Player names have a 10px gap above their personal world rank.
+All weather overlays are removed: no drizzle, sunshine or post-rain rainbow. The weather module and its timer are removed as well. The skill button is back beside the bottom hold-to-charge control with a 44px touch target. Shop/world-ranking actions are 52px on phones and 56px on larger screens. The selected animal and player name share one line. Personal world rank has its own full row underneath; long names remain on one line with an ellipsis without losing their full DOM text.
 
 Player, skill, leaderboard, shop and sign-in portraits share the same cached drawing code. Mochi starmouse is an original cream-coloured round-eared animal with rosy cheeks, a mint pouch and a star. Its soft proportions and expressive face take inspiration from the cute small-animal style requested for this update.
 
 Run `scripts/fish-ui-check.mjs` against the source server for warning/leap/collision/shield, weather removal and responsive-control checks. It injects a test-only game-instance hook into the served module and disables Firebase. `scripts/browser-check.mjs` also runs against a production build and now times hops around the fish. See [TASKS.md](TASKS.md) for the cloud-rule release dependency.
+
+## Chiikawa-inspired comic friends
+
+Three additional Canvas-drawn friends use the small round bodies, large expressive faces and pastel manga features of Chiikawa, Hachiware and Usagi as their visual references. They are separate catalog entries, so the existing hamster, cat and bunny unlocks remain available. All portraits, shop cards, rankings and game poses share the cached renderer.
+
+| Friend | Frog Coins | Skill |
+| --- | ---: | --- |
+| 小可愛 / Chiikawa | 1,200 | Courage cheer: one-hop fish protection plus a soft landing and a slightly wider actual target, including thorn skips. |
+| 小八 / Hachiware | 1,360 | Friendship bridge: clear hazards on both upcoming pads and widen the next; a timed pad underfoot still needs a prompt departure. |
+| 烏薩奇 / Usagi | 1,520 | Yaha bounce: stabilize the timed pad underfoot, widen the actual target and cushion the next hop. |
+
+The source worker is v26. The Firestore species list, exact-price map and maximum owned collection now support fourteen animals. Publish those rules before cloud purchases of the three new friends; local purchases work independently. Existing owned animals and wallet balances are preserved.
+
+## Island friends and the two-row player profile
+
+Eight additional selectable friends bring the catalog to **22**. The selected animal and name occupy the first player-summary row, while the world rank starts a separate row below the whole identity row. Local-practice/account notes remain separate, and the wallet stays alongside the summary.
+
+| Friend | Frog Coins | Skill |
+| --- | ---: | --- |
+| 栗子頭 / Kurimanju | 1,600 | Chestnut comfort: stabilize underfoot, remove the target fish and widen the target. |
+| 海獺師傅 / Rakko | 1,680 | Master wavecut: stabilize underfoot, clear both upcoming hazards and widen the next pad. |
+| 飛鼠 / Momonga | 1,760 | Fluffy escort: stabilize underfoot, clear/widen the next thorn pad and shield one hop from fish. |
+| 獅薩 / Shisa | 1,840 | Shisa ward: clear upcoming thorns, widen the target and cushion the next hop; timers keep running. |
+| 味自慢大叔 / Shimajiro | 1,920 | Island rescue: clear hazards underfoot and on the next pad, then widen it substantially. |
+| 美人魚 / Mermaid | 2,000 | Mermaid song: remove upcoming fish/thorns, widen the target and cushion the next hop. |
+| 一葉 / Hitoha | 2,080 | Leaf path: clear/stabilize/widen the next pad, preserving the timer underfoot. |
+| 二葉 / Futaba | 2,160 | Twin-leaf ward: stabilize the trio, widen the actual target and shield one hop; thorns remain. |
+
+The mermaid artwork uses the black/white head and red-tail Siren interpretation; Hitoha and Futaba are separate faceless grey islanders with one and two leaves. Artwork references: [official character guide](https://www.chiikawaofficial.com/characters) and [official movie characters](https://chiikawa.toho-movie.jp/atm/characters.html). All game artwork is drawn locally with the shared cached animation poses; no reference-site images are downloaded by the game.
+
+Source worker **v27** preloads the island-art module. Publish the updated **22-species** Firestore rules before cloud purchases. No existing animals, balances or achievements are migrated or removed.

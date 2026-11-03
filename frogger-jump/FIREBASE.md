@@ -88,3 +88,11 @@ Provider availability is a Firebase setting, not a GitHub deployment setting. Li
 ## Starmouse and price update · 2026-11-03
 
 Publish the updated rules before releasing cloud purchases: Fox costs 960, Capybara 1,000 and Mochi starmouse (`mochi`) 1,080 Frog Coins. The species list and maximum owned collection now allow eleven animals. Existing owned animals remain selected freely; no balance migration or retroactive charge is applied. The local catalog/rules contract test checks prices and species together. The expanded emulator harness includes the new animal, but live deployment and emulator certification have not been performed for this update.
+
+## Comic friends expansion · 2026-11-03
+
+The updated catalog/rules now add `chiikawa` (1,200), `hachiware` (1,360) and `usagi` (1,520); the maximum owned collection is fourteen. Publish the new rules before cloud purchases of these animals. The previous Fox 960, Capybara 1,000 and Starmouse 1,080 prices remain in force. The catalog contract test and emulator purchase fixture follow the complete catalog. These checks do not publish rules or certify the live Firebase backend.
+
+## Island friends expansion · 2026-11-04
+
+Rules now allow 22 animals, adding `kurimanju` 1,600; `rakko` 1,680; `momonga` 1,760; `shisa` 1,840; `shimajiro` 1,920; `mermaid` 2,000; `hitoha` 2,080; and `futaba` 2,160. The maximum owned collection and exact-price map are updated together. Publish these rules before cloud purchase acceptance; the local catalog/rules contract and complete-collection emulator fixture track the expanded roster. No rule deployment or live purchase certification is performed by this update.

@@ -54,6 +54,18 @@ export class FroggerGame{
   if(kind==='fox'){next.thorns=false;stabilize(next);this.softLanding=true;}
   if(kind==='capybara'){for(const pad of [current,next]){stabilize(pad);pad.thorns=false;}}
   if(kind==='mochi'){this.fishShield=true;next.thorns=false;widen(10);}
+  if(kind==='chiikawa'){this.fishShield=true;this.softLanding=true;this.target.r=Math.min(90,this.target.r+6);this.target.small=false;}
+  if(kind==='hachiware'){for(const pad of this.stumps.slice(1)){pad.thorns=false;stabilize(pad);}widen(8);}
+  if(kind==='usagi'){stabilize(current);this.softLanding=true;this.target.r=Math.min(90,this.target.r+16);this.target.small=false;}
+  const widenTarget=amount=>{this.target.r=Math.min(90,this.target.r+amount);this.target.small=false;};
+  if(kind==='kurimanju'){stabilize(current);this.target.angler=false;widenTarget(14);}
+  if(kind==='rakko'){stabilize(current);for(const pad of this.stumps.slice(1)){pad.thorns=false;stabilize(pad);}widen(6);}
+  if(kind==='momonga'){stabilize(current);next.thorns=false;widen(8);this.fishShield=true;}
+  if(kind==='shisa'){for(const pad of this.stumps.slice(1))pad.thorns=false;widenTarget(18);this.softLanding=true;}
+  if(kind==='shimajiro'){for(const pad of [current,next]){stabilize(pad);pad.thorns=false;}widen(18);}
+  if(kind==='mermaid'){for(const pad of this.stumps.slice(1)){pad.angler=false;pad.thorns=false;}widenTarget(12);this.softLanding=true;}
+  if(kind==='hitoha'){next.thorns=false;stabilize(next);widen(20);}
+  if(kind==='futaba'){for(const pad of this.stumps)stabilize(pad);this.fishShield=true;widenTarget(6);}
   if(!current.sinking)this.deadline=null;if(!current.angler)this.anglerDeadline=null;
   this.syncFish();this.skillCharges--;this.skillSerial++;this.events.push({type:'skill',animal:kind,at:this.clock,point:{x:next.x,y:next.y},radius:next.r});return true;
  }

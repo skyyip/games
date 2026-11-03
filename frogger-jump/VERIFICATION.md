@@ -1,5 +1,26 @@
 # River friends / Firebase interface verification · 2026-11-02
 
+## Player profile rows and island cast · 2026-11-04
+
+- The player animal and name now share a single identity row. The world rank occupies its own row below the whole identity row, rather than sharing an icon spanning multiple lines. Account/practice notes stay separate; long names remain one line with their complete text retained in the DOM.
+- Eight additions bring the roster to **22**: Kurimanju, Rakko, Momonga, Shisa, Shimajiro (味自慢大叔), Mermaid, Hitoha and Futaba. Hitoha/Futaba are separate one-/two-leaf grey islanders. Mermaid uses the black/white-head, red-tail Siren interpretation. Reference links are recorded in the README; the game renders its own Canvas art and fetches no source-site artwork.
+- **91 logic tests pass**, including each new skill's hazard/target behavior, current-deadline preservation or rescue, a real Momonga fish-shield collision, Futaba's thorn skip, all eight exact-price purchase/reload/settlement flows and the 22-species Firestore contract.
+- All eight source-browser character flows pass: shared icon/sprite, charge/jump/landing, one skill charge, exactly-once coin award and saved selection. Four-size shop/rank fixtures pass for 22 characters, exact purchases, all eight new leaderboard portraits, readable controls and no horizontal overflow. Shop artwork for all eight plus representative in-play poses were inspected.
+- Source account/rank fixture passes at 320×568, 390×844 and 812×375, explicitly asserting aligned animal/name centres, a separate lower rank row, cached rank reads, best refresh, error/retry, logout and stale-account protection. The 320px signed-in profile screenshot was inspected.
+- Source worker **v27** preloads the new island-art module. The **25-page production build** and source/built metadata checks pass. No weather module or animation is reintroduced.
+- Final production validation passes all eight new character/skill/landing/reward flows plus purchase/reload persistence. The production-markup account/rank fixture passes at all four sizes, including 1280×900, with the identity-row and separate-rank-row assertions. Firebase is disabled or mocked in these fixtures.
+- The Firestore collection/species/price contract supports all 22 characters; the complete-collection emulator fixture uses a catalog-derived test balance. No live cloud purchase, emulator certification or rules deployment is claimed. Updated rules must be published for cloud purchases.
+
+
+## Chiikawa-inspired comic friends · 2026-11-03
+
+- Added Chiikawa / 小可愛 (1,200 Frog Coins), Hachiware / 小八 (1,360) and Usagi / 烏薩奇 (1,520) as separate animals. The original round-eared hamster and existing cat/bunny remain available. Canvas artwork uses white round ears, a blue/white split cat face and cream long rabbit ears, with manga cheeks, expressions and shared animated limbs.
+- **82 logic tests pass**, including Courage cheer's real airborne fish block and thorn-skip target, Friendship bridge clearing both upcoming pads while preserving a live current deadline, Usagi rescuing a timed current pad and widening the actual thorn-skip target, and exact-price purchase/reload/settlement for all three.
+- All **fourteen** animals pass the source-browser sprite, skill, landing, exactly-once reward and purchase/reload regression. Shop artwork and charge/jump screenshots for the new three were visually inspected, including Usagi's ears and the head-level power meter. Source and built metadata checks and the **25-page production build** pass. Source worker is **v26**.
+- The generated production build passes all three new animal/skill/landing/reward flows and shop persistence. The four-size shop/rank fixture passes at 320×568, 390×844, 812×375 and 1280×900, with exact purchases, readable dialogs, no horizontal overflow and an asserted leaderboard portrait for each new animal. Firebase is disabled/mocked in these fixtures.
+- The Firestore species list, price map and owned-collection limit now support fourteen animals. The catalog/rules contract passes locally; no emulator certification, live cloud purchases or rule deployment is claimed. Publish the updated rules before releasing cloud purchases of the new three.
+
+
 ## Complete weather removal · 2026-11-03
 
 - Removed all weather overlays, sunshine artwork/styles, application lifecycle calls, the weather module and its boundary timer. Source worker **v25** no longer preloads it.

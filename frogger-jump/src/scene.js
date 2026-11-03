@@ -1,3 +1,4 @@
+import {ISLAND_HEAD_HEIGHT,paintIslandFriend} from './island-friends.js';
 import {VARIANTS,surface} from './platforms.js';
 import {CAMERA_MS,SINK_MS,DROWN_MS,FISH_WARNING_MS,SPLASH_MS} from './game.js';
 import {animal as species} from './animals.js';
@@ -159,6 +160,8 @@ export class RiverScene{
  paintAnimal(x,y,scale,kind,pose){
   if(kind==='frog'){this.frog(x,y,scale,pose);return;}
   if(kind==='mochi'){this.mochi(x,y,scale,pose);return;}
+  if(ISLAND_HEAD_HEIGHT[kind]){paintIslandFriend(this,x,y,scale,kind,pose);return;}
+  if(['chiikawa','hachiware','usagi'].includes(kind)){this.comicFriend(x,y,scale,kind,pose);return;}
   const {squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}=pose,c=this.ctx,ink='#4b514b';c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.15-stretch*.07)*(1-fall*.55),scale*(1-squat*.2+stretch*.1)*(1-fall*.55));
   if(!airborne)this.ellipse(0,2,23,5,'#31543733');
   if(kind==='monkey'||kind==='cat')this.path(p=>{p.moveTo(16,-8);p.bezierCurveTo(44,0,41,-36,30,-30);p.quadraticCurveTo(24,-26,32,-22);},null,kind==='cat'?'#b57d4f':'#9f7655',5);
@@ -177,6 +180,34 @@ export class RiverScene{
   if(kind==='cat')for(const x of [-6,0,6])this.path(p=>{p.moveTo(x,-45);p.lineTo(x*.7,-38);},null,'#9e6a43',2);
   for(const sign of [-1,1])this.path(p=>{p.moveTo(sign*18,-19);p.quadraticCurveTo(sign*(29+kick*2),-15-reach*8,sign*(24+stretch*4),-6+kick*5-reach*14);},null,penguin?'#59768c':panda?'#535952':body,penguin?7:6);
   if(penguin){this.path(p=>{p.moveTo(-14,-17);p.quadraticCurveTo(0,-11,14,-17);},null,'#b6dbe4',5);this.path(p=>{p.moveTo(10,-16);p.lineTo(15,-3);},null,'#b6dbe4',5);}c.restore();
+ }
+ comicFriend(x,y,scale,kind,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}={}){
+  const c=this.ctx,ink='#675861',cat=kind==='hachiware',rabbit=kind==='usagi',body=rabbit?'#fff0b8':'#fffaf4',blue='#a9cceb',pink=rabbit?'#efbd9f':'#efb8c9';
+  c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.16-stretch*.06)*(1-fall*.55),scale*(1-squat*.21+stretch*.1)*(1-fall*.55));
+  if(!airborne)this.ellipse(0,2,23,5,'#31543722');
+  if(cat)this.path(p=>{p.moveTo(13,-5);p.bezierCurveTo(35,0,37,-19,28,-23);},null,blue,6);
+  for(const side of [-1,1]){
+   this.ellipse(side*(10+kick*7-tuck*4),kick*11-tuck*4,7,4,body,ink,1.3);
+   if(cat){this.path(p=>{p.moveTo(side*13,-44);p.lineTo(side*26,-65);p.quadraticCurveTo(side*32,-53,side*27,-34);p.closePath();},blue,ink,1.6);this.path(p=>{p.moveTo(side*20,-47);p.lineTo(side*25,-58);p.lineTo(side*27,-43);p.closePath();},pink);}
+   else{this.ellipse(side*(rabbit?11:20),rabbit?-61:-52,rabbit?7:8,rabbit?20:9,body,ink,1.6);this.ellipse(side*(rabbit?11:20),rabbit?-62:-52,rabbit?3.4:4,rabbit?13:4.5,pink);}
+  }
+  this.ellipse(0,-15,17,20,body,ink,1.6);
+  for(const side of [-1,1])this.path(p=>{p.moveTo(side*16,-19);p.quadraticCurveTo(side*(27+kick*2),-15-reach*9,side*21,-7+kick*5-reach*12);},null,body,6);
+  this.ellipse(0,-34,28,23,cat?blue:body,ink,1.8);
+  if(cat){this.ellipse(0,-27,25,17,body);this.path(p=>{p.moveTo(0,-53);p.quadraticCurveTo(-4,-42,-13,-34);p.lineTo(13,-34);p.quadraticCurveTo(4,-42,0,-53);p.closePath();},body);}
+  for(const side of [-1,1]){
+   const eye=side*10;this.ellipse(eye,-35,rabbit?3.2:3,Math.max(.8,(rabbit?3.8:4.6)*(1-blink)),ink);
+   if(blink<.6)this.ellipse(eye-.8,-37,1.1,1.3,'#fff');
+   this.ellipse(side*18,-27,5,2.8,pink);
+   for(let i=0;i<2;i++)this.path(p=>{p.moveTo(side*(16+i*3),-28);p.lineTo(side*(17+i*3),-25);},null,'#ce8fa3',.65);
+   if(rabbit)this.path(p=>{p.moveTo(side*6,-44);p.quadraticCurveTo(side*11,-48,side*15,-43);},null,ink,1.5);
+   else if(!cat)this.path(p=>{p.moveTo(side*6,-44);p.quadraticCurveTo(side*11,-45-squat*2,side*15,-42);},null,ink,1);
+  }
+  if(cat){this.path(p=>{p.moveTo(-6,-27);p.quadraticCurveTo(0,-23,6,-27);p.quadraticCurveTo(3,-15,0,-16);p.quadraticCurveTo(-3,-15,-6,-27);p.closePath();},'#b37685',ink,1.2);this.ellipse(0,-20,3,1.6,'#efb4c4');}
+  else{this.path(p=>{p.moveTo(-5,-27);p.quadraticCurveTo(-2,-22,0,-26);p.quadraticCurveTo(2,-22,5,-27);},null,ink,1.4);if(rabbit&&airborne)this.ellipse(0,-20,3,3.5,'#bd7e77',ink,1);}
+  if(!cat&&!rabbit){for(const side of [-1,1])this.ellipse(side*14,-32,1.6,2.7,'#d4e9ee');this.ellipse(0,-7,4,3,'#f0c8d3');}
+  if(rabbit){this.path(p=>{p.moveTo(-4,-9);p.quadraticCurveTo(0,-4,4,-9);},null,'#d7ae63',1.2);}
+  c.restore();
  }
  mochi(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}={}){
   const c=this.ctx,ink='#725b61';c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.15-stretch*.06)*(1-fall*.55),scale*(1-squat*.2+stretch*.1)*(1-fall*.55));
@@ -277,7 +308,7 @@ export class RiverScene{
   if((game.fishShield||game.state==='jumping'&&game.jump.shield)&&!['drowning','over'].includes(game.state))this.ellipse(p.x,p.y-frog.lift*s-24*s,34*s,38*s,null,'#f8dd84',2.5*s);
   this.skillEffect(game,projection);
   if(this.effect?.bonus&&game.clock-this.effect.at<650){const t=clamp((game.clock-this.effect.at)/650),p=point(game.frog),c=this.ctx;c.save();c.globalAlpha=1-t;c.textAlign='center';c.font='700 17px system-ui';c.fillStyle='#fff3b5';c.strokeStyle='#76613d';c.lineWidth=3;const text=`+${this.effect.bonus}`;c.strokeText(text,p.x-10*s,p.y-(65+t*24)*s);c.fillText(text,p.x-10*s,p.y-(65+t*24)*s);this.coin(p.x+17*s,p.y-(71+t*24)*s,.5*s);c.restore();}
-  const headHeight=game.animal==='bunny'?80:['fox','cat'].includes(game.animal)?66:game.animal==='duck'?64:game.animal==='mochi'?72:60;
+  const headHeight=ISLAND_HEAD_HEIGHT[game.animal]??(game.animal==='usagi'?91:['chiikawa','hachiware'].includes(game.animal)?75:game.animal==='bunny'?80:['fox','cat'].includes(game.animal)?66:game.animal==='duck'?64:game.animal==='mochi'?72:60);
   this.headAnchor={x:p.x+shake.x,y:p.y+shake.y-frog.lift*s-headHeight*s*(1-frog.squat*.24)};
   if(!this.reduced.matches&&this.effect&&game.clock-this.effect.at<260){const t=clamp((game.clock-this.effect.at)/260),spot=point(game.current),c=this.ctx;c.save();c.globalAlpha=(1-t)*.45;for(const sign of [-1,1]){const x=spot.x+sign*24*s;this.path(p=>{p.moveTo(x-sign*3*s,spot.y+4*s);p.quadraticCurveTo(x,spot.y+7*s,x+sign*(5+t*6)*s,spot.y+3*s);},null,'#f4efc2',1.5*s);}c.restore();}
  }
