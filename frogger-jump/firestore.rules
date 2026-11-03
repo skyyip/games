@@ -5,7 +5,7 @@ service cloud.firestore {
   function player(uid) { return /databases/$(database)/documents/frogger_players/$(uid); }
   function run(uid,id) { return /databases/$(database)/documents/frogger_players/$(uid)/runs/$(id); }
   function species(id) { return id in ['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara']; }
-  function price(id) { return {'frog':0,'penguin':80,'bunny':120,'monkey':160,'otter':200,'duck':240,'cat':280,'panda':320,'fox':360,'capybara':400}[id]; }
+  function price(id) { return {'frog':0,'penguin':280,'bunny':320,'monkey':360,'otter':400,'duck':440,'cat':480,'panda':520,'fox':560,'capybara':600}[id]; }
   function coins(score) { return 1 + score * 2 + int(score / 20) * 10; }
   function valid(p) {
    return p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun'])

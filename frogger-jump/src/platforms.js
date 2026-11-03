@@ -13,7 +13,7 @@ export const PLATFORM_COPY=Object.freeze({
 export const dangerous=p=>!!(p.sinking||p.thorns||p.angler);
 export function surface(p,time){
  let {x,y,r}=p;const phase=time/1000+(p.id||0)*1.7;
- if(p.kind==='turtle')x+=Math.sin(phase*.65)*12;
+ if(p.kind==='turtle')x+=Math.sin(phase*.75)*12;
  if(p.kind==='lotus')r*=.88+.12*Math.sin(phase*1.1);
  if(p.kind==='spinner')r*=.88+.12*Math.cos(phase*.8);
  if(p.slideAt!==undefined){const t=Math.max(0,Math.min(1,(time-p.slideAt)/440)),ease=t*t*(3-2*t);x+=(p.slideX||0)*ease;y+=18*ease;}

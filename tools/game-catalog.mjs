@@ -19,7 +19,7 @@ export const games = [
     related:['beat-bad-luck','memory-trace'],
   },
   {
-    slug: 'frogger-jump', name: 'Frogger Jump 2.5D', zh: '蓄力蛙：鱷口求生', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game', listed: false,
+    slug: 'frogger-jump', name: 'Frogger Jump 2.5D', zh: '蓄力連連跳', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game', listed: false,
     description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, earn Frog Coins, unlock ten cute animals and leap across logs and water lilies while avoiding thorns and hungry river creatures.',
     intro: 'A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins and use a species-specific skill. Firebase rankings activate after project setup.',
     chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按蓄力，放手自動瞄準木樁或睡蓮；落地賺青蛙幣解鎖企鵝、兔子、猴子、水獺、小鴨、花貓、熊貓、狐狸與水豚，每 20 跳補充一次技能。Firebase 設定完成後可保留唯一名字，參加顯示所用動物的世界前十名排行。',

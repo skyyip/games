@@ -3,7 +3,7 @@
 export const messages = {
   'The City is Dying': '天與地：The City is Dying',
   "Mo Lei Tau Studio": "星爺宇宙：無厘頭片場",
-  "Frogger Jump 2.5D": "蓄力蛙：鱷口求生",
+  "Frogger Jump 2.5D": "蓄力連連跳",
   "Feet Up Café": "茶記縮腳大亂鬥",
   "Shout, mop and chase gold guests. Or dodge from all four sides and save your sneakers!": "利姐喊縮腳追金圈客人；食客四方避拖，保住波鞋！",
   "Café comic action": "茶記漫畫大亂鬥",
