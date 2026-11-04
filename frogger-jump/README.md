@@ -119,3 +119,10 @@ Rakko now uses white fur, a warm-brown head cap with white forehead tufts, a cro
 The static river artwork is displayed on a separate, non-interactive Canvas layer instead of copied onto the scene every frame. Stable special-pad sprites now share the pad cache; turtles are positioned from the live surface each frame, while breathing/spinning pads, sinking traps and landing reactions retain dynamic rendering. Frequently reused animal poses use bounded LRU caching, and same-DPR resizes retain their sprites. Power colour and meter positioning update together to reduce DOM mutations. The main Canvas pixel budget,30Hz charging/idle animation and60Hz jump cadence are retained. Source worker isv30.
 
 In the matched390×844 one-second source workload, charging still rendered32 frames: HUD attribute mutations decreased128→96 and drawImage calls160→128. Settled turtle idle still rendered31 frames but issued0 ellipse calls instead of372. These are operation counts, not a measured guarantee of higher FPS or battery life on every device.
+
+
+## 技能可用次數累積
+
+技能次數在同一局累積：開局1次，每成功落地20次加1次，發動一次只扣1次，未用次數不被新獎勵覆蓋。若一直不用，20／40／60跳時分別有2／3／4次，可連續發動到用完。重新開始一局仍由1次起步，沒有跨局轉存。
+
+原有運算已支援這種累積。本輪補上20跳里程碑的「＋1／目前可用總數」、發動後剩餘數、按鈕提示及讀屏文字，讓獲得技能的訊息不被同一次落地回饋蓋掉。護盾及軟綿保護的強度／消耗維持原有規則。使用者要求的是可用次數，而非所有動物技能同時發動。Source worker v31；不改錢包、Firestore欄位或規則。

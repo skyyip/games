@@ -81,3 +81,13 @@ See [VERIFICATION.md](VERIFICATION.md) for evidence and [FIREBASE.md](FIREBASE.m
 - [x] Bounded LRU animal poses and reuse across same-DPR resizes.
 - [x] Combined power-meter styles;128→96 charging HUD mutations per benchmark second.
 - [x]96 engine/render tests,7 platform UI flows,4 viewports with73 hops each and production performance budgets.
+
+
+## 技能可用次數累積 — 2026-11-04
+
+- [x] 明示同局開局1次、每20跳加1次、發動扣1次，未用次數可累積。
+- [x] 里程碑顯示增加次數及當時總數，避免被落地提示覆蓋；發動後顯示剩餘數。
+- [x] 按鈕title及讀屏標籤說明可用總數與累積／消耗規則。
+- [x] 全22種動物80跳累積、事件餘額、連續使用、歸零／再獲得、暫停及新局重設的規則檢查。
+- [x] 保留原有技能效果、初始次數、20跳門檻及跨局重設；不改Firestore規則。
+- [x]101青蛙測試＋152行行出狀元回歸；來源與正式版四尺寸各60跳，含英文桌面流程。
