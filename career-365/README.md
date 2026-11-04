@@ -126,7 +126,7 @@ Quiet-month planning completes routine work and focus activities until an import
 
 Event eligibility/weights follow occupation, assets, relationships, stress and previous choices, with8–18-month repeat cooldowns, delayed consequences and positive opportunities. Exposed scam losses cannot take an arbitrary fraction of a wealthy player's full cash or create fictitious borrowed scam payments. Fictional global shocks have warning and cooldown intervals. Every route ends at65; personal goals and non-work contributions affect the reflection.
 
-Private cloud snapshots use revision-checked Firestore transactions, optional gzip compression and strict load validation; local progress is preserved on errors. They are manually reconciled across devices. Deploy the **combined** shared-project rules in `frogger-jump/firestore.rules`; see [FIREBASE.md](./FIREBASE.md). A14-case emulator security harness is prepared, not certified in this environment. [PLAYTEST.md](./PLAYTEST.md) provides the5–10-player human review protocol; automated checks cannot establish that the game is fun.
+Private cloud snapshots use revision-checked Firestore transactions, optional gzip compression and strict load validation; local progress is preserved on errors. They are manually reconciled across devices. Deploy this game’s independent `career-365/firestore.rules` and Firebase project; see [FIREBASE.md](./FIREBASE.md). A14-case emulator security harness is prepared, not certified in this environment. [PLAYTEST.md](./PLAYTEST.md) provides the5–10-player human review protocol; automated checks cannot establish that the game is fun.
 
 ## Professional knowledge and occupation-wide stories
 
@@ -169,3 +169,8 @@ CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/
 - 預算顯示例行／額外流入、固定必要／其他支出，並提供最多12個月推算，65歲停止。首期扣除本月已入帳工資，防止重複計算；不假設升職、未知事件、投資增值或額外接案。原先存檔缺少的本月交易無法完整回溯，更新後開始累積完整月度分類。
 
 詳細模型、遷移及驗收見 [REVIEW-UPDATE.md](./REVIEW-UPDATE.md)。
+
+
+## Firebase 專案拆分
+
+本遊戲現在只讀取本資料夾的`src/firebase-settings.js`、SDK入口、Firebase套件與`firestore.rules`；不再從青蛙遊戲取得設定或發布合併規則。已填入獨立專案`sky-playground-career-365`的公開設定；青蛙保留`sky-playground-3c5af`。正式登入／雲端仍須在新專案啟用Provider、設定授權網域及部署本資料夾的規則。本機遊玩與備份維持可用；相同projectId搭配另一個appId仍會被視為同一專案。登入標記、本機帳戶及回顧依新projectId隔離，舊資料提供明確匯出遷移，沒有刪除或自動搬移雲端資料。詳見 [FIREBASE.md](./FIREBASE.md)。

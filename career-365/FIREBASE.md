@@ -1,46 +1,66 @@
-# Career365 player authentication
+# 《行行出狀元》獨立 Firebase 設定
 
-The game reuses the public `sky-playground-3c5af` Firebase web configuration. `src/firebase-settings.js` supports an explicit `CAREER_FIREBASE_CONFIG` override (including `null` for local fixtures). Firebase runs as the named app `career-365`; Frogger's wallet/profile code is not called. Both games share the lazy Auth SDK loader and the existing installed Firebase dependency.
+本遊戲不再使用青蛙遊戲的 Firebase 專案或設定檔。所有 Firebase 設定、SDK 載入入口、依賴、規則、索引與部署／模擬器設定均在 `career-365/` 內。
 
-## Firebase Console setup
+已填入玩家提供的獨立Web App設定：專案`sky-playground-career-365`，Auth網域`sky-playground-career-365.firebaseapp.com`，Web App ID`1:818739784781:web:9a29d661e718a6fdf2c004`。青蛙繼續使用`sky-playground-3c5af`，兩者projectId不同。本機遊玩、IndexedDB、每日回顧及JSON備份維持可用；正式登入與私人雲端仍須完成下列Console設定及規則部署。
 
-In [Authentication → Sign-in method](https://console.firebase.google.com/project/sky-playground-3c5af/authentication/providers), enable Email/Password, Google and Anonymous if they are not already enabled for the existing games. Configure Google's project support email as required by the Console. Add the actual published hostname to Authentication → Settings → Authorized domains, for example `sky-playground.com` or `skyyip.github.io`; add `localhost` only when testing that origin. Existing provider/domain settings are shared at project level.
+`projectId: sky-playground-3c5af`仍會被拒絕；不同appId不代表不同Firebase專案。如需停用雲端作本機測試，可將`projectConfig`設為`null`或使用`CAREER_FIREBASE_CONFIG=null`，不會退回青蛙專案。
 
-Authentication identifies a player. Local life progress remains available; the optional private `career365_saves/{uid}` collection stores a manually uploaded snapshot. The new collection requires the combined project rules described below. This code update does not publish provider settings or test a real user's Google account.
+## 建立自己的專案
 
-## Behaviour
+1. 在 [Firebase Console](https://console.firebase.google.com/project/sky-playground-career-365/overview) 選擇`sky-playground-career-365`。本遊戲的公開設定已填入，無需重建專案或再新增Web App。
+2. 如日後更換專案，在本資料夾的`src/firebase-settings.js`更新`projectConfig`並同步`.firebaserc`；格式見`src/firebase-settings.example.js`。至少需apiKey、authDomain、projectId及appId；不能填入Admin金鑰／密碼。
+3. 在新專案 Authentication → Sign-in method 啟用Email/Password、Google及Anonymous；Google需設定專案支援Email。
+4. Authentication → Settings → Authorized domains 加入實際網站網域，例如`sky-playground.com`；只在需要本機測試時加入`localhost`。
+5. 在同一新專案建立預設Cloud Firestore資料庫，選正式模式。發布本資料夾的`firestore.rules`及`firestore.indexes.json`。不要使用青蛙遊戲的規則或部署設定。
+6. 重建並發布網站。在遊戲登入後，存檔選單依次「檢查雲端」→「上傳目前人生」；換裝置登入同一新專案帳戶，再檢查並載入。
 
-- Email login and account creation; registration requires at least8 characters in the UI. Password inputs clear after completion/error and are not saved by game code. Password reset uses a generic response.
-- Google popup is invoked directly from a click after SDK readiness. Cancelled, blocked, unauthorized-domain, provider-disabled and network errors permit retry.
-- Anonymous login has persistent Firebase identity where browser storage permits. Email/Google linking retains the anonymous UID and its local life. Logging into an existing Email account explicitly switches identities; an anonymous player receives a backup warning first. Credential conflicts do not silently merge lives.
-- Returning-account bootstrap verifies the Firebase identity before enabling resume/new-life controls. Signing out restores the separate local guest life. A pending backup import is cancelled if the active player changes.
-- Existing guest saves retain `career-365.save.v1`; accounts use a UID-specific local slot. A guest life can be explicitly copied into an empty account slot. The original local guest copy remains. JSON export/import remains available; private cloud upload/download provides an additional explicit device-transfer mechanism.
-- Daily growth is scoped per player and life, while the existing12-skip allowance stays shared per browser. Initial play establishes the growth baseline; each real UTC+9 day shows one recap. It reports observed changes and never grants free stats.
+無需手動建立`career365_saves`或文件，首次上傳會建立。按UID直接讀取不需複合索引；此資料夾的索引清單為空。登入不會自動覆蓋／上傳本機人生。
 
-## Verification
+## 本資料夾的檔案與部署
 
-`tests/auth-adapter.test.js` runs the real adapter against a mocked SDK and checks persistence, login/create, Google popup timing, anonymous linking, password reset and setup retry. `scripts/account-growth-browser.mjs` uses a routed test-only Auth module; it never creates an actual account or sends mail. `scripts/account-production-check.mjs` loads the real bundled SDK with all remote services blocked, verifies lazy readiness and tests offline growth/save reload. Live provider completion requires a configured project and an end-user interaction on an authorized origin.
+| 檔案 | 用途 |
+| --- | --- |
+| `src/firebase-settings.js` | 本遊戲唯一的實際專案公開設定，支援獨立的`CAREER_FIREBASE_CONFIG`runtime override |
+| `src/firebase-settings.example.js` | 不啟用的填寫範例 |
+| `src/firebase-auth-sdk.js`、`src/firebase-firestore-sdk.js` | 本遊戲的lazy SDK入口，套件由本資料夾的package-lock安裝 |
+| `firebase.json` | 本遊戲規則／索引及獨立模擬器連接埠 |
+| `.firebaserc` | 本遊戲default為`sky-playground-career-365`；部署工具仍明確使用公開設定中的projectId |
+| `firestore.rules` | 只有私人Career365快照，其他路徑預設拒絕 |
+| `firestore.indexes.json` | 本遊戲自己的索引清單 |
 
-## Private cloud activation and shared rules
+從儲存庫根目錄執行：
 
-The Firebase project is shared with Frogger. Publish the **complete updated** [frogger-jump/firestore.rules](../frogger-jump/firestore.rules) in [Firestore → Rules](https://console.firebase.google.com/project/sky-playground-3c5af/firestore/rules). Do not replace the project rules with a career-only fragment, because that would remove other games' access. Existing Frogger rules are preserved; the only addition is an owner-only `career365_saves/{uid}` match. No database/provider setting or rule has been deployed by this change.
-
-The save menu exposes **inspect**, **upload current life**, and **load cloud life**. No automatic last-writer-wins merge occurs. An upload uses the inspected revision inside a transaction; if another device changes it, the operation fails until the player inspects again. A UID/epoch guard discards delayed responses after identity changes. Existing local/guest lives are never silently adopted. Anonymous players should link Email/Google to recover their UID on another device.
-
-Snapshots contain `version`, `revision`, `payload` and a server `updatedAt`. Payloads are plain JSON or `gz:`-prefixed gzip/base64. Compressed payloads may be at most850KB, with a4MiB decoded limit; invalid or oversized data cannot replace the local life. Cloud uploads deliberately contain no Email/password, identity-provider credential or public player profile. Firebase Auth remains responsible for authentication. Owner reads/deletes are allowed, list/foreign/unauthenticated access is denied. This is a personal simulation save, not an authoritative competitive score.
-
-Offline cloud reads report unavailable instead of treating an old cache as the latest server version. Offline local play and JSON backups still work. Rules not yet published produce a clear service-unavailable message without deleting local progress.
-
-## Emulator security checks
-
-With the Firestore emulator running at127.0.0.1:8089, run:
-
-```
-node career-365/scripts/firestore-check.mjs
-node frogger-jump/scripts/firestore-check.mjs
+```bash
+npm ci --prefix career-365
+npm run firebase:check --prefix career-365
+npm run firebase:deploy --prefix career-365
 ```
 
-The career harness uses the shared installed `@firebase/rules-unit-testing` dependency and a demo project only. It covers owner creation/read/update/delete, cross-user and unauthenticated reads, collection enumeration, foreign writes, stale/skipped revisions, unexpected fields, invalid schema/timestamps and oversized payloads. There is no emulator JAR installed here; these checks are prepared but have not been run or certified. Real cross-device cloud completion still requires rule publication and an authorized end-user session. Cloud controller tests and browser fixtures are isolated mocks and do not claim live service certification.
+`firebase:check`只顯示部署目標，不連線或發佈；未設定／設定不完整時會拒絕繼續。`firebase:deploy`需要已安裝並登入的Firebase CLI，固定以本資料夾的firebase.json和設定中的projectId部署規則及索引，不依賴全域active project。以上是操作指引，本次程式修改沒有代為建立專案、開啟Provider或部署。
 
+## 私人資料及跨裝置行為
 
-本機保存更新：完整人生改用帳戶隔離的IndexedDB，localStorage只留摘要／設定。雲端仍上傳完整壓縮JSON快照，沿用相同私人UID集合與版本交易，無需因這次本機保存更新新增Firestore規則。資料庫交易解決本機分頁競爭，與雲端裝置衝突檢查分開處理；正式服務設定與部署仍需獨立驗證。
+- Firebase Auth使用命名app`career-365`，並檢查既有app的projectId；不重用另一專案的session。支援Email、Google及匿名登入，匿名可綁定Email／Google保留同一個新專案UID。
+- `career365_saves/{uid}`只允許本人單筆讀取／刪除，不允許列出集合或存取他人資料。第一次revision=1，以後每次加1；updatedAt須為serverTimestamp。
+- 快照只有version、revision、payload和updatedAt。payload是JSON或`gz:` gzip/base64，客戶端上限850KB，解壓上限4MiB，載入後仍驗證遊戲狀態。不寫入Email、密碼或Provider憑證。
+- 雲端以版本交易防止不同裝置覆蓋新進度；離線不把舊快取當成最新雲端版本。這是私人模擬遊戲存檔，不是競賽分數權威。
+- 本機帳戶、登入標記和每日回顧以Firebase projectId＋UID分開；訪客人生維持原key。Firebase兩個專案的登入帳戶、UID及雲端資料不會因Email相同而自動合併。
+
+## 舊共用專案遷移
+
+先保留舊資料，不刪除舊Firebase帳戶或文件。若可使用舊版本，先登入原Career365帳戶，將人生匯出JSON。拆分後，本機舊登入標記及舊UID存檔仍保留；帳戶視窗可按「匯出舊專案在此裝置的人生備份」，這只讀取本機資料，不連回青蛙專案，也不自動採納到新帳戶。
+
+在新Career365專案登入／註冊後，明確匯入JSON，再檢查並上傳至新專案。舊雲端快照和Auth帳戶不會自動搬移，必須以備份或受控管理員遷移處理。青蛙資料夾的新規則不再包含career365_saves；**發布青蛙新規則前，先完成所需舊Career365雲端備份**。修改程式不會刪掉伺服器上的舊資料。
+
+## 模擬器與驗證
+
+本遊戲獨立使用Auth9099／Firestore8090，青蛙維持9098／8089，可分開測試：
+
+```bash
+firebase emulators:exec --project demo-career365 --only firestore \
+  --config career-365/firebase.json \
+  "npm run test:rules --prefix career-365"
+```
+
+模擬器安全測試涵蓋owner、他人／未登入、列舉、版本、時間戳、額外欄位、超大payload及青蛙路徑隔離。這些測試需要可用的Firestore emulator；沒有執行時不可宣稱已通過。一般Node與瀏覽器測試採用隔離fixture，不建立真實帳戶、不寄Email，也不證明新專案已建立或Provider已啟用。

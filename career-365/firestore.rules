@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+  // Private Career365 snapshots. Client validates the life payload after reading.
+  match /career365_saves/{uid} {
+   allow get, delete: if owner(uid);
+   allow list: if false;
+   function validSnapshot() { return request.resource.data.keys().hasOnly(['version','payload','revision','updatedAt'])
+    && request.resource.data.version == 1
+    && request.resource.data.payload is string && request.resource.data.payload.size() <= 850000
+    && request.resource.data.revision is int
+    && request.resource.data.updatedAt == request.time; }
+   allow create: if owner(uid) && validSnapshot() && request.resource.data.revision == 1;
+   allow update: if owner(uid) && validSnapshot() && request.resource.data.revision == resource.data.revision + 1;
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}

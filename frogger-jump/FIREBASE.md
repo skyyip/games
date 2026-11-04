@@ -19,7 +19,7 @@ firebase deploy --only firestore:rules,firestore:indexes \
   --project YOUR_PROJECT_ID --config frogger-jump/firebase.json
 ```
 
-This command is a reference, **not an action performed by this task**. If reusing a project with other games, merge collection rules first instead of replacing unrelated rules.
+This command is a reference, **not an action performed by this task**. This game now owns its Firebase project. Do not publish Career365 rules here; back up any old Career365 cloud saves before deploying the Frogger-only rules.
 
 ## Data and privacy
 
@@ -96,3 +96,12 @@ The updated catalog/rules now add `chiikawa` (1,200), `hachiware` (1,360) and `u
 ## Island friends expansion · 2026-11-04
 
 Rules now allow 22 animals, adding `kurimanju` 1,600; `rakko` 1,680; `momonga` 1,760; `shisa` 1,840; `shimajiro` 1,920; `mermaid` 2,000; `hitoha` 2,080; and `futaba` 2,160. The maximum owned collection and exact-price map are updated together. Publish these rules before cloud purchase acceptance; the local catalog/rules contract and complete-collection emulator fixture track the expanded roster. No rule deployment or live purchase certification is performed by this update.
+
+
+## 獨立專案與資料夾設定
+
+青蛙遊戲保留`sky-playground-3c5af`及本資料夾內的`src/firebase-settings.js`、`firebase.json`、`.firebaserc`、`firestore.rules`、`firestore.indexes.json`、SDK依賴與lockfile。《行行出狀元》的設定已獨立放在自己的資料夾，並已填入另一個專案`sky-playground-career-365`的公開設定；正式登入／雲端仍須完成該專案的Provider啟用及規則部署。
+
+本規則現在只包含`frogger_names`、`frogger_players`／runs及`frogger_leaderboard`，其他路徑預設拒絕。原`career365_saves`資料不會因修改本地檔案而刪除，但發布青蛙專用規則後不再開放該集合；先完成所需舊Career365備份，再部署。青蛙既有帳戶、錢包及排行榜繼續使用原專案。
+
+可在儲存庫根目錄執行`npm run firebase:check --prefix frogger-jump`核對明確目標（不部署），再由已登入的Firebase CLI執行`npm run firebase:deploy --prefix frogger-jump`。部署工具只使用本資料夾設定的projectId及firebase.json，不依賴全域active project。沒有代為部署或驗證正式Provider。

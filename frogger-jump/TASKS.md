@@ -91,3 +91,10 @@ See [VERIFICATION.md](VERIFICATION.md) for evidence and [FIREBASE.md](FIREBASE.m
 - [x] 全22種動物80跳累積、事件餘額、連續使用、歸零／再獲得、暫停及新局重設的規則檢查。
 - [x] 保留原有技能效果、初始次數、20跳門檻及跨局重設；不改Firestore規則。
 - [x]101青蛙測試＋152行行出狀元回歸；來源與正式版四尺寸各60跳，含英文桌面流程。
+
+
+## Firebase專案獨立 — 2026-11-04
+
+- [x] 青蛙保留原sky-playground-3c5af設定；各自folder保存規則、索引、CLI設定及部署目標。
+- [x] 移除Career365規則，青蛙預設拒絕其他遊戲路徑；現有玩家規則及錢包格式不變。
+- [x] 發布前先備份舊Career365雲端資料的遷移指引；不自動刪除帳戶或文件。

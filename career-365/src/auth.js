@@ -1,11 +1,14 @@
-import {FIREBASE_CONFIG} from './firebase-settings.js';
-import {loadAuthSDK} from '../../frogger-jump/src/firebase-auth-sdk.js';
+import {FIREBASE_CONFIG,FIREBASE_CONFIG_ERROR} from './firebase-settings.js';
+import {loadAuthSDK} from './firebase-auth-sdk.js';
 export const configured=!!FIREBASE_CONFIG?.projectId;
+export const configurationError=FIREBASE_CONFIG_ERROR;
 let ready,pending;
 export function initAuth(){
- if(!configured)return Promise.reject(Error('auth-disabled'));
+ if(!configured)return Promise.reject(Error(configurationError??'auth-disabled'));
  if(!pending)pending=loadAuthSDK().then(async([app,sdk])=>{
-  const instance=app.getApps().find(a=>a.name==='career-365')??app.initializeApp(FIREBASE_CONFIG,'career-365'),session=sdk.getAuth(instance);
+  const instance=app.getApps().find(a=>a.name==='career-365')??app.initializeApp(FIREBASE_CONFIG,'career-365');
+  if(instance.options?.projectId!==FIREBASE_CONFIG.projectId)throw Error('auth-project-conflict');
+  const session=sdk.getAuth(instance);
   await sdk.setPersistence(session,sdk.browserLocalPersistence);ready={...sdk,session};return ready;
  }).catch(e=>{pending=null;ready=null;throw e;});return pending;
 }

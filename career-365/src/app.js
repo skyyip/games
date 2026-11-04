@@ -1,7 +1,7 @@
 import {LearningUI} from './learning-ui.js';
 import {careerBrief,careerBands} from './career-briefs.js';
 import {LifeRepository} from './life-repository.js';
-import {accountSaveKey} from './account-store.js';
+import {accountSaveKey,accountScope} from './account-store.js';
 import {budgetForecast} from './budget.js';
 import {businessPreview} from './business.js';
 import {html} from './dom.js';
@@ -26,7 +26,7 @@ async function main(){
 const $=id=>document.getElementById(id),fmt=n=>Math.round(n).toLocaleString('zh-HK'),dollars=n=>'$'+fmt(n);
 let skipStorage=null;try{skipStorage=localStorage;}catch{}
 const skipBudget=new MonthSkipBudget({storage:skipStorage}),accountStore=new AccountStore(skipStorage);let currentUid=null,importCandidate=null;const repository=new LifeRepository(accountStore);let saving=null,conflicted=false,identityLoading=false,identityVersion=0;
-const dailyGrowth=new DailyGrowth({store:accountStore,scope:()=>currentUid});let skipRefreshTimer;
+const dailyGrowth=new DailyGrowth({store:accountStore,scope:()=>accountScope(currentUid)});let skipRefreshTimer;
 let game=null,draft=null,selectedJob=null,jobPage=0,bookPage=0,noticeTimer,persistent=true,allocationMode='amount',allocationDraft={};
 try{game=await repository.load(null);}catch{conflicted=true;}persistent=repository.persistent;
 $('continue').hidden=!game;
@@ -186,6 +186,7 @@ for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener(
 const account=new CareerAccount({store:accountStore,onIdentity:switchIdentity,onAdopt:adoptLocalLife,hasCandidate:()=>!!importCandidate&&!game,onRestoring:loading=>{$('continue').disabled=loading||identityLoading;$('new-cover').disabled=loading||identityLoading;if(loading)$('account-open').textContent='還原玩家中…';},show,notify:inform});
 
 $('reload-life').onclick=async()=>{if(saving)await saving;try{const latest=await repository.load(currentUid);if(!latest)throw Error('empty');game=latest;conflicted=false;$('save-conflict').hidden=true;for(const d of document.querySelectorAll('dialog[open]'))d.close();await startView();inform('已載入最新進度。');}catch{inform('暫時未能讀取最新進度，請先匯出目前版本備份。');}};
+const legacyUid=accountStore.read('career-365.identity.v1');$('account-export-legacy').hidden=!legacyUid;$('account-export-legacy').onclick=async()=>{try{const prior=await repository.readLegacy(legacyUid);if(!prior){inform('此裝置沒有可讀取的舊專案人生；原有JSON備份仍可匯入。');return;}download(JSON.stringify(prior.s,null,2),'application/json','行行出狀元舊專案人生備份.json');inform('已匯出舊專案本機人生；登入新專案後可自行匯入。');}catch{inform('暫時未能讀取舊專案人生，原有資料未刪除。');}};
 $('export-recovery').onclick=()=>{const raw=repository.recoveries.get(accountSaveKey(currentUid));if(raw)download(raw,'application/json','舊分頁人生回復檔.json');};
 $('export-conflict').onclick=()=>{if(game)download(JSON.stringify(game.s,null,2),'application/json','目前分頁人生備份.json');};if(conflicted)conflict();
 

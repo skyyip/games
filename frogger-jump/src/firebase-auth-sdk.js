@@ -1,2 +1,2 @@
-// Shared lazy SDK loader; both games use the existing Firebase dependency.
+// Frogger Jump's own lazy Firebase SDK entry point.
 export const loadAuthSDK=()=>Promise.all([import('firebase/app'),import('firebase/auth')]);

@@ -1,5 +1,6 @@
+import {identityStorageKey} from './account-store.js';
 const $=id=>document.getElementById(id);
-export function authMessage(e){return ({'auth/popup-closed-by-user':'Google 登入已取消，可以再試。','auth/cancelled-popup-request':'已有登入視窗，請先完成或關閉它。','auth/popup-blocked':'瀏覽器阻擋了登入視窗，請允許彈出視窗後再試。','auth/unauthorized-domain':'這個網站網域尚未獲 Firebase 授權，請在專案設定加入網站網域。','auth/operation-not-allowed':'這個登入方式尚未在 Firebase 啟用。','auth/invalid-email':'請輸入有效的 Email。','auth/invalid-credential':'Email 或密碼不正確。','auth/wrong-password':'Email 或密碼不正確。','auth/user-not-found':'Email 或密碼不正確。','auth/email-already-in-use':'這個 Email 已有帳戶，請改用登入。','auth/weak-password':'密碼至少需要 8 個字元。','auth/network-request-failed':'暫時連不到登入服務，請檢查網絡後重試。','auth/too-many-requests':'嘗試次數較多，請稍後再試。','auth/credential-already-in-use':'此登入方式已連結其他帳戶。請先備份匿名人生，再登出並登入既有帳戶。','auth/account-exists-with-different-credential':'這個 Email 已使用其他方式註冊，請使用原有登入方式。','auth-disabled':'目前未設定帳戶服務，仍可使用本機遊玩與備份。','auth-loading':'登入服務仍在準備，請稍候。'})[e?.code??e?.message]??'登入暫時未完成，請稍後再試；目前人生仍保存在本機。';}
+export function authMessage(e){return ({'auth/popup-closed-by-user':'Google 登入已取消，可以再試。','auth/cancelled-popup-request':'已有登入視窗，請先完成或關閉它。','auth/popup-blocked':'瀏覽器阻擋了登入視窗，請允許彈出視窗後再試。','auth/unauthorized-domain':'這個網站網域尚未獲 Firebase 授權，請在專案設定加入網站網域。','auth/operation-not-allowed':'這個登入方式尚未在 Firebase 啟用。','auth/invalid-email':'請輸入有效的 Email。','auth/invalid-credential':'Email 或密碼不正確。','auth/wrong-password':'Email 或密碼不正確。','auth/user-not-found':'Email 或密碼不正確。','auth/email-already-in-use':'這個 Email 已有帳戶，請改用登入。','auth/weak-password':'密碼至少需要 8 個字元。','auth/network-request-failed':'暫時連不到登入服務，請檢查網絡後重試。','auth/too-many-requests':'嘗試次數較多，請稍後再試。','auth/credential-already-in-use':'此登入方式已連結其他帳戶。請先備份匿名人生，再登出並登入既有帳戶。','auth/account-exists-with-different-credential':'這個 Email 已使用其他方式註冊，請使用原有登入方式。','auth-disabled':'行行出狀元的獨立登入服務尚未設定，仍可本機遊玩及匯出備份。','auth-config-invalid':'行行出狀元的 Firebase 公開設定尚未完整填寫，請檢查本遊戲的設定檔。','auth-project-conflict':'行行出狀元需要獨立 Firebase 專案，不能使用青蛙遊戲的專案設定。','auth-loading':'登入服務仍在準備，請稍候。'})[e?.code??e?.message]??'登入暫時未完成，請稍後再試；目前人生仍保存在本機。';}
 export class CareerAccount{
  constructor({store,onIdentity,onAdopt,hasCandidate,onRestoring=()=>{},show,notify,load=()=>import('./auth.js')}){
   Object.assign(this,{store,onIdentity,onAdopt,hasCandidate,onRestoring,show,notify,load});this.user=null;this.ready=false;this.busy=false;this.auth=null;this.starting=null;this.revision=0;
@@ -10,16 +11,16 @@ export class CareerAccount{
   $('account-signout').onclick=()=>{if(this.user?.isAnonymous&&!confirm('匿名帳戶登出後可能無法重新取得相同身分。請先綁定 Email／Google 或匯出人生備份。確定登出？'))return;this.run(()=>this.auth.signOut());};
   $('account-reset').onclick=()=>{const email=$('account-email').value.trim();if(!email){this.feedback('先填寫要重設密碼的 Email。');$('account-email').focus();return;}this.run(()=>this.auth.resetPassword(email),'若此 Email 可用，重設密碼的指示已送出。');};
   $('account-adopt').onclick=()=>{Promise.resolve(this.onAdopt()).then(()=>this.render());};this.render();
-  if(store.read('career-365.identity.v1')){this.restoring=true;this.onRestoring(true);this.start().catch(()=>{});}
+  if(store.read(identityStorageKey())){this.restoring=true;this.onRestoring(true);this.start().catch(()=>{});}
  }
  feedback(text){$('account-feedback').textContent=text;}
  async start(){
   if(this.ready)return;if(this.starting)return this.starting;
-  this.starting=(async()=>{try{this.auth=await this.load();if(!this.auth.configured)throw Error('auth-disabled');await this.auth.observeIdentity(user=>this.identity(user),e=>this.feedback(authMessage(e)));this.ready=true;this.render();}catch(e){if(this.restoring){this.restoring=false;this.onRestoring(false);this.notify('暫時未能還原登入身分。原有存檔已保留，可先使用本機遊玩或重新登入。');}this.feedback(authMessage(e));this.render();throw e;}finally{this.starting=null;}})();return this.starting;
+  this.starting=(async()=>{try{this.auth=await this.load();if(!this.auth.configured)throw Error(this.auth.configurationError??'auth-disabled');await this.auth.observeIdentity(user=>this.identity(user),e=>this.feedback(authMessage(e)));this.ready=true;this.render();}catch(e){if(this.restoring){this.restoring=false;this.onRestoring(false);this.notify('暫時未能還原登入身分。原有存檔已保留，可先使用本機遊玩或重新登入。');}this.feedback(authMessage(e));this.render();throw e;}finally{this.starting=null;}})();return this.starting;
  }
  open(){this.show('account-dialog');this.feedback(this.ready?'':'正在準備登入服務…');this.start().catch(()=>{});this.render();}
  async identity(user){
-  this.user=user??null;const revision=++this.revision;this.switching=true;this.render();this.store.write('career-365.identity.v1',user?.uid??'');try{await this.onIdentity(this.user);}finally{if(revision!==this.revision)return;this.switching=false;}if(this.restoring){this.restoring=false;this.onRestoring(false);}$('account-password').value='';this.render();
+  this.user=user??null;const revision=++this.revision;this.switching=true;this.render();this.store.write(identityStorageKey(),user?.uid??'');try{await this.onIdentity(this.user);}finally{if(revision!==this.revision)return;this.switching=false;}if(this.restoring){this.restoring=false;this.onRestoring(false);}$('account-password').value='';this.render();
  }
  async run(operation,message){
   if(!this.ready||this.busy)return;this.busy=true;this.feedback('處理中…');this.render();const revision=this.revision;
