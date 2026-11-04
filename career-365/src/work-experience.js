@@ -1,3 +1,4 @@
+import {arcCases,workContext} from './career-arcs.js';
 // Fictional workplace exercises. Requirements describe this game's assignment,
 // not a real licence, qualification, medical protocol or safety certification.
 const track=(requirements,day,cases)=>({requirements,day,cases});
@@ -123,10 +124,11 @@ const SPECIAL={
  '神秘顧客':{requirements:['事前閱讀委託規範與觀察指標','合法、獲授權且不誘導的觀察','時序、證據及利益衝突申報'],day:['核對情境、預算及服務觀察指標','依規範完成一般顧客體驗並記錄時序','提交客觀報告，分開觀察與推測'],cases:[['服務表現與你的印象不同','你對店員印象很好，但等待時間與服務步驟卻沒有達到委託標準。','神秘評核應依觀察與指標，不應把喜好寫成事實或故意誘導失誤。','依時序與原定指標記錄，分開客觀事實和個人感受','核實模糊項目，向研究負責人說明證據與限制','因為印象好就全部打滿分，刪去等待紀錄']]},
 
 };
-export function workProfile(job){if(!job)return null;const common=WORK_TRACKS[job.category];return {requirements:SPECIAL[job.name]?.requirements??common.requirements,day:SPECIAL[job.name]?.day??common.day,cases:[...(SPECIAL[job.name]?.cases??[]),...common.cases],specific:!!SPECIAL[job.name]};}
-export function makeWorkCase(job,index,randomInt){
- const p=workProfile(job),i=index%p.cases.length,[title,brief,clue,check,talk,rush]=p.cases[i];
- const options=[{label:check,approach:'check',effects:{stress:4,jq:1}},{label:talk,approach:'talk',effects:{stress:2,eq:1,contacts:1}},{label:rush,approach:'rush',effects:{stress:8}}];
+export function workProfile(job){if(!job)return null;const common=WORK_TRACKS[job.category];return {requirements:SPECIAL[job.name]?.requirements??common.requirements,day:SPECIAL[job.name]?.day??common.day,cases:[...arcCases(job),...(SPECIAL[job.name]?.cases??[]),...common.cases],specific:!!SPECIAL[job.name]};}
+export function makeWorkCase(job,index,randomInt,scenarioOverride=null){
+ const p=workProfile(job),serial=scenarioOverride===null?workContext(job,index):null,i=scenarioOverride!==null?scenarioOverride:serial?serial.stage:p.cases.length>4&&workContext(job,0)?3+Math.floor(index/4)%(p.cases.length-3):index%p.cases.length,[title,brief,clue,check,talk]=p.cases[i];
+ const scoped=serial?p.cases[i][5]:'暫停有疑慮部分，縮小交付範圍或轉介合資格同事；保留必要核對';
+ const options=[{label:check+'（深入覆核：多用精力與成本）',approach:'check',effects:{cash:-180,energy:-8,stress:3,jq:.2}},{label:talk+'（協作：需要人際與信任）',approach:'talk',effects:{energy:-4,stress:2,eq:.2,contacts:1}},{label:scoped+'（有限交付：收入較少、保留界線）',approach:'rush',effects:{cash:-90,stress:-1}}];
  const rotation=randomInt(0,2),choices=options.slice(rotation).concat(options.slice(0,rotation));
- return {id:'work-case',scene:'work',title:`${job.name}｜${title}`,text:brief,work:{career:job.id,scenario:i,clue,requirements:p.requirements,topic:title},choices};
+ return {id:'work-case',scene:'work',title:`${job.name}｜${title}`,text:brief+(serial?` ${serial.npc}會記得這次的決定。「${serial.project}」第 ${serial.stage+1}/3 章，第 ${serial.cycle} 次委託。`:''),work:{storyVersion:2,career:job.id,scenario:i,clue,requirements:p.requirements,topic:title,...(serial?{serial}:{}),pressure:['quality','people','deadline'][index%3]},choices};
 }

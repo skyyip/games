@@ -1,25 +1,25 @@
 # 365行，行行出狀元
 
-A new independent, Traditional Chinese life/career simulation at `career-365/`, integrated with the existing Sky Playground static build. It remains unlisted on the landing-page cards, like the other newly developed standalone games; open its route directly. No account, paid API or server is required.
+A new independent, Traditional Chinese life/career simulation at `career-365/`, integrated with the existing Sky Playground static build. It remains unlisted on the landing-page cards, like the other newly developed standalone games; open its route directly. Local play requires no account or paid API. Optional Email, Google and anonymous Firebase sign-in identifies players.
 
 The paper-like cream/sage/coral interface uses locally drawn Q-style SVG characters, illustrated panels and speech bubbles. Every important career, financial and story decision records a dated frame. Recent panels appear on the dashboard; the full book is paginated without dropping older frames. There are no perpetual animation loops, remote character images or external AI calls.
 
 ## A playable life
 
-- Draw a seeded resume with gender, starting age18–26, adult height clustered around gender-specific population centres, height-correlated weight generated from BMI19–29, blood type, zodiac, family, school, major, MBTI and IQ/EQ/PQ/JQ. Appearance and gender do not gate professions. The major grants a starting skill.
+- Draw a seeded resume with gender, starting age18–26, illustratively generated adult height clusters, height-correlated weight generated from BMI19–29, blood type, zodiac, family, school, major, MBTI and IQ/EQ/PQ/JQ. Appearance and gender do not gate professions. The major grants a starting skill.
 - Search **405 distinct named jobs** across **25 categories**, including chef, plumber, YouTuber, pet communicator, blockchain engineer, metaverse architect and AI prompt specialist. These are curated career names; category-based routines and shared events provide the initial career scenarios rather than405 bespoke story campaigns.
-- Mentor study is slower, builds EQ/JQ/contacts, can uncover secrets and passes along contacts on graduation. Simulated AI study is faster and develops IQ, with reduced EQ and a hallucination branch. A $300 checked lesson avoids that branch. Learning is a game mechanic rather than an actual training service.
-- Each month offers three actions. Study/work consume energy; rest and social time restore the player differently for I/E personalities. Social events also offer a personality-specific choice. PQ means Positive Intelligence Quotient (0–100% positive mental time), buffers stress growth and improves through rest/exploration. Health sets the energy cap; overtime and high pressure can cause illness and bills.
+- Mentor study is slower, builds EQ/JQ/contacts, can uncover secrets and passes along contacts on graduation. Simulated AI study is faster and develops IQ, without an automatic EQ penalty, and with a hallucination branch. A $300 checked lesson avoids that branch. Learning is a game mechanic rather than an actual training service.
+- Each month offers three focus actions in addition to regular employment and persistent habits. Study/work consume energy; rest and social time restore the player differently for I/E personalities. Social events also offer a personality-specific choice. PQ means Positive Intelligence Quotient (0–100% positive mental time), buffers stress growth and improves through rest/exploration. Health sets the energy cap; overtime and high pressure can cause illness and bills.
 - After the opening graduation, choose an apprenticeship or a one-year further-education course ($6,000 admission, $1,800/month and at least12 study actions). Completing it returns to a graduate decision; annual plans stop there.
 - Players can resign, preserving skills/assets and settling business staff costs. Choose world travel ($5,000 departure plus $4,500/month), overseas short-term work ($8,000 departure, $2,500/month plus living costs; $6,000/work action), or a sabbatical. Travel and interests generate comic panels and improve PQ. Debt-free wealth of25 years of basic living costs unlocks financial freedom; this remains a playable lifestyle until65, with ongoing expenses and the option to re-enter work. This threshold is a fictional game unlock, not a financial forecast.
-- Graduates work, negotiate pay and rise through eight levels toward CEO. JQ can redirect adverse workplace events into opportunities. Switching costs $3,000 and one action, preserves prior skills and enters a new apprenticeship. Plumber → YouTuber has an explicit cross-field bonus.
+- Graduates work, negotiate pay and rise through eight levels on separate specialist or management tracks. JQ can redirect adverse workplace events into opportunities. Switching costs $3,000 and one action, preserves prior skills and enters a new apprenticeship. Plumber → YouTuber has an explicit cross-field bonus.
 - Starting a business costs $40,000. Rent is $9,000/month, staff cost $15,400/month plus $3,000 recruiting fees. Staff have individual quirks and productivity; marketing builds customers. Closing or changing careers settles departure costs and ends recurring payroll.
 - Bank/bonds, stock, ETF and crypto are entirely fictional. Bank/bonds accrue simulated monthly growth; risky assets respond to generated news and prices. IQ affects an imperfect forecast. Trades, repayment and research consume actions.
 - Lottery, scratchcard, horse betting and a Macau-style table use virtual currency only. Lottery jackpots can trigger a12-month work-income penalty if the player chooses to coast. Losing the last funds or accumulating heavy debt triggers recovery/support choices. Cash does not go negative; unpaid obligations become debt with1.5% monthly game interest.
 - One-year planning runs the same monthly rules, stopping at an unresolved story or retirement. Mentor lessons in plans are free; AI plans choose the $300 checked lesson when affordable.
 - At65 the game retires the player once. Achievements and reflections combine actual career, finances, relationships and setbacks locally. **The retirement reflection is a compositional local narrator, not a live language-model response.**
 
-All salary, economic and qualification values are fictional game balancing. No real trading, betting, payment, account login or contemporary-news API is connected.
+Salaries are dated official industry/occupational-group proxies, not individually measured role averages. Other economic and qualification values are explicitly simplified simulation assumptions. No real trading, betting, payment or contemporary-news API is connected. Optional Firebase Authentication is connected for player identity; progress is saved locally, with optional explicit private cloud upload/download after project rules are deployed.
 
 ## Saves and exports
 
@@ -27,7 +27,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v6` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v7` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -45,7 +45,7 @@ The browser script covers phone/landscape/desktop layouts, a complete life throu
 
 ## Follow-up scope
 
-A live generative-AI reflection endpoint, per-job authored campaigns, cloud accounts, cross-device sync, cloud ranking and a landing-page card are not added by this initial local game. Existing GitHub Pages publication remains the repository's deployment workflow; the game is not separately registered with Sites hosting.
+Optional Firebase accounts now identify players and keep separate local lives. JSON backups provide device transfer. Existing GitHub Pages publication remains the deployment workflow; the game is not separately registered with Sites hosting.
 
 ## Daily life, risk and economic expansion
 
@@ -102,3 +102,46 @@ Each category has three authored work problems. Eight additional named-role case
 The month control distinguishes normal progression from skipping unused actions. With actions remaining, it skips one month and consumes one of12 daily uses; after all three actions are used it advances normally without a quota charge. Skips still settle expenses, markets, health, family and age. Pending choices must be resolved first. Annual plans complete remaining actions as rest rather than silently skipping unused actions.
 
 The day resets at midnight Japan time (UTC+9), matching the session's client time zone. Quota storage (`career-365.month-skips.v1`) is independent of life saves, so reload, new life and JSON import do not replenish it. Same-origin tabs use Web Locks when available. Offline play works. With blocked storage the UI labels the session-only fallback; the limit is browser-local and does not claim server-enforced cross-device protection.
+
+## Accounts and daily growth
+
+See [FIREBASE.md](./FIREBASE.md) for Email/password, Google and anonymous sign-in, anonymous account linking, project/domain setup and the limits of live-provider verification. The SDK loads on opening accounts or restoring a prior identity. Each account uses an independent local life slot; returning to local play preserves the original guest life. A local life can be copied explicitly into an empty signed-in slot. Private cloud storage is available through the save dialog: inspect, upload or load a version explicitly; login alone does not overwrite either copy.
+
+The daily modal displays the preceding recorded day's net gains in IQ/EQ/PQ/JQ, health, contacts, reputation and professional skills, with declines shown separately. First play establishes a baseline. A summary opens once per real day (UTC+9), waits for other dialogs, survives reload and never modifies attributes or grants rewards. New lives/account changes do not mix snapshots. Blocked storage uses the existing memory/backup fallback.
+
+```
+CAREER_URL=http://localhost:5273/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node career-365/scripts/account-growth-browser.mjs
+CAREER_URL=http://localhost:5275/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node career-365/scripts/account-production-check.mjs
+```
+
+## Life design and replayability — 2026-11-04
+
+The five-part review is implemented in [DESIGN.md](./DESIGN.md). Twelve professions retain dedicated three-chapter projects. The other393 roles now receive personalised shared projects from25 sector templates (75 additional scenes), interleaved with prior everyday cases, for202 authored workplace case entries overall. Recurring colleagues/clients retain trust and choices create delayed, foreshadowed referrals or follow-ups. All three approaches can succeed or need improvement depending on skill, task pressure and relationships, while keeping necessary safety/consent checks. Deep verification costs energy/cash, coordination uses social capability, and scoped delivery offers lower rewards.
+
+Training now requires elapsed months, supervised practice and mastery; selected regulated professions also require a final simulated assessment with a three-month retake interval. AI cannot bypass the training route. Previously acquired credentials survive career changes. Legacy saves are migrated without revoking existing employment or mastery.
+
+Monthly arrangements combine full/part-time employment or freelance retainers with a side career and part-time study. Housing, recurring exercise/diet/sleep, medical coverage, simplified2025/26 salary-tax reserves and MPF are visible. Ordinary rest restores energy; long-term habits still determine health. MPF is unavailable for early-retirement spending and is included in the final65-year result.
+
+Quiet-month planning completes routine work and focus activities until an important work decision or story interrupts. Daily short occupational exercises cost an ordinary focus action, pay no duplicate monthly salary and do not skip chapters. Optional Monday-based weekly goals, continuing hobbies, friendship, caring and volunteering give returns beyond money. The decision journal remains available after a daily recap closes. No game time advances or absence penalty applies while away.
+
+Event eligibility/weights follow occupation, assets, relationships, stress and previous choices, with8–18-month repeat cooldowns, delayed consequences and positive opportunities. Exposed scam losses cannot take an arbitrary fraction of a wealthy player's full cash or create fictitious borrowed scam payments. Fictional global shocks have warning and cooldown intervals. Every route ends at65; personal goals and non-work contributions affect the reflection.
+
+Private cloud snapshots use revision-checked Firestore transactions, optional gzip compression and strict load validation; local progress is preserved on errors. They are manually reconciled across devices. Deploy the **combined** shared-project rules in `frogger-jump/firestore.rules`; see [FIREBASE.md](./FIREBASE.md). A14-case emulator security harness is prepared, not certified in this environment. [PLAYTEST.md](./PLAYTEST.md) provides the5–10-player human review protocol; automated checks cannot establish that the game is fun.
+
+## Professional knowledge and occupation-wide stories
+
+All405 jobs now receive a recurring three-chapter work project, trust and delayed follow-ups. Twelve named-role campaigns override the25 shared sector campaigns; a shared campaign inserts the selected job's routine and keeps its own per-job progress and trust. This is broad sector coverage, not405 independently authored campaigns. Existing ordinary cases remain reachable between chapters. Pending older cases are remapped by topic/clue, and prior non-campaign jobs begin at chapter1 rather than inheriting an unrelated old work count.
+
+The knowledge bank contains **216 three-answer items**:150 foundational questions (six per sector) plus66 specialty items across33 role groups. Every job has at least six eligible questions; additional items cover fields such as pharmacy, aviation, accounting, cybersecurity, databases, baking, rehabilitation, digital forensics and usability research. Questions shuffle answer positions and prioritise unseen material. Correctness follows the player's chosen answer, not a stat-based die roll. The explanation and correct concept appear after answering, with a further-reading reference; these are locally authored learning questions, not official certification exams.
+
+Knowledge practice costs one monthly focus action and10 energy. It pays no monthly wage and does not count as supervised practice or fulfil a professional assessment. Correct answers and corrections give modest skill growth. Per-job answered/correct totals survive career changes; the latest24 reviews are available in the notebook, while full comic history retains earlier decisions.
+
+**75 occupation events** (three per sector) cover professional development, disruptions and limited opportunities. Selection is restricted to the current working career and weights knowledge needs, stress, world conditions, business status and reputation. Eight/ten-month cooldowns prevent immediate repeats. Choices trade cash, energy, growth and relationships; accepted opportunities or unfinished scope can create delayed follow-ups. Follow-ups retain the originating profession and event after a career switch, and do not grant permission to perform unqualified work. The latest12 event reviews are preserved.
+
+The work desk and career picker display learning coverage. The professional notebook shows corrections, reference links and the latest career event result, with keyboard focus moving to the result after answering. All content works locally/offline. See [PROFESSIONAL-CONTENT.md](./PROFESSIONAL-CONTENT.md) for sector coverage and reference entry points.
+
+```
+node --test --test-isolation=none career-365/tests/*.test.js frogger-jump/tests/*.test.js
+CAREER_URL=http://localhost:5281/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node career-365/scripts/professional-practice-browser.mjs
+CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node career-365/scripts/professional-practice-production.mjs
+```

@@ -11,7 +11,7 @@ export function salaryReference(category,name){
 }
 export const ASSET_INFO={
  bank:{name:'銀行定期',icon:'🏦',hint:'每月模擬 +0.2%',minimum:100,fee:0},
- bonds:{name:'國債',icon:'📜',hint:'每月模擬 +0.3%',minimum:100,fee:0},
+ bonds:{name:'國債',icon:'📜',hint:'每月模擬 +0.3%・買賣各1%流動性成本，短期未必勝過存款',minimum:100,fee:.01},
  stock:{name:'股票',icon:'📈',hint:'虛構新聞與市場波動',minimum:100,fee:0},
  etf:{name:'ETF',icon:'🧺',hint:'分散模擬，仍可下跌',minimum:100,fee:0},
  crypto:{name:'加密貨幣',icon:'🪙',hint:'高波動，沒有保證',minimum:100,fee:0},
