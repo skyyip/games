@@ -5,7 +5,7 @@ service cloud.firestore {
   function player(uid) { return /databases/$(database)/documents/frogger_players/$(uid); }
   function run(uid,id) { return /databases/$(database)/documents/frogger_players/$(uid)/runs/$(id); }
   function species(id) { return id in ['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba']; }
-  function price(id) { return {'frog':0,'penguin':280,'bunny':320,'monkey':360,'otter':400,'duck':440,'cat':480,'panda':520,'fox':960,'capybara':1000,'mochi':1080,'chiikawa':1200,'hachiware':1360,'usagi':1520,'kurimanju':1600,'rakko':1680,'momonga':1760,'shisa':1840,'shimajiro':1920,'mermaid':2000,'hitoha':2080,'futaba':2160}[id]; }
+  function price(id) { return {'frog':0,'penguin':280,'bunny':320,'monkey':360,'otter':400,'duck':440,'cat':480,'panda':520,'fox':960,'capybara':1000,'mochi':1080,'chiikawa':1200,'hachiware':1360,'usagi':1520,'kurimanju':1600,'rakko':1880,'momonga':1760,'shisa':1840,'shimajiro':1920,'mermaid':2000,'hitoha':2080,'futaba':2160}[id]; }
   function coins(score) { return 1 + score * 2 + int(score / 20) * 10; }
   function valid(p) {
    return p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun'])

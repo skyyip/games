@@ -1,4 +1,5 @@
-// Local, curated career catalogue. Salaries are monthly amounts in game currency.
+import {salaryReference} from './economy.js';
+// Local career catalogue; salaries are HKD reference proxies with source metadata.
 export const SKILLS = {
   craft: '實作', tech: '科技', care: '照護', art: '創意', people: '人際', analysis: '分析',
 };
@@ -46,17 +47,26 @@ const catalogue = [
     '健身教練|瑜伽老師|皮拉提斯老師|游泳教練|潛水教練|衝浪教練|攀岩教練|登山嚮導|籃球教練|足球教練|棒球教練|網球教練|羽球教練|運動防護員|運動裁判|電競選手|電競教練|棋藝老師'],
   ['newventures', '新興與創業', 'New ventures', 'tech', 48000, '🚀', '驗證點子、測試產品並回應市場',
     '元宇宙建築師|AI詠唱師|雞排店老闆|無人機飛手|永續發展顧問'],
+  ['ai', 'AI與智能應用', 'AI & intelligent applications', 'tech', 33000, '🤖', '界定任務、核對資料並驗證智能系統的輸出',
+    'AI應用工程師|生成式AI工程師|AI代理工程師|大型語言模型工程師|RAG知識庫工程師|AI模型評測員|AI安全測試員|AI資料標註師|AI訓練資料策展員|AI治理專員|AI倫理研究員|AI產品經理|AI自動化顧問|AI對話設計師|合成資料工程師|AI算力營運工程師'],
+  ['funeral', '殯儀與善終服務', 'Funeral & end-of-life services', 'care', 24724, '🕯️', '確認家屬意願、核對授權並尊重地完成告別服務',
+    '殯儀統籌師|遺體修復師|遺體化妝師|入殮師|殯儀司儀|火化場技術員|骨灰安置顧問|寵物善終服務員'],
+  ['forensics', '法醫與鑑證', 'Forensic science', 'analysis', 33000, '🔎', '核對個案授權、保全證據紀錄並審慎表達鑑證結論',
+    '法醫|法醫毒理分析員|鑑證科學主任|數碼鑑證分析員|法醫人類學研究員|法醫昆蟲學研究員'],
+  ['experience', '品評與體驗研究', 'Sensory & experience research', 'people', 16500, '📝', '依研究規範記錄觀察，分清個人感受與可驗證證據',
+    '試吃員|神秘顧客|感官品評員|香氛評測員|寢具試睡員|遊戲在地化測試員|無障礙體驗測試員|主題樂園體驗評測員|旅宿品質稽核員|產品使用者研究員'],
+
 ];
 
 export const CATEGORIES = catalogue.map(([id, zh, en, skill, salary, emoji, routine]) => ({
-  id, zh, en, skill, salary, emoji, routine,
+  id, zh, en, skill, salary:salaryReference(id,zh).salary, emoji, routine,
 }));
 
 export const JOBS = catalogue.flatMap(([category, , , skill, salary, emoji, routine, names]) =>
   names.split('|').map((name, index) => ({
     id: `${category}-${String(index + 1).padStart(2, '0')}`,
     name, en: '', category, skill,
-    salary: Math.round(salary * (0.88 + (index % 7) * 0.04)),
+    ...salaryReference(category,name),
     emoji, routine,
   })),
 );

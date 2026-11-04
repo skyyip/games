@@ -31,3 +31,29 @@ node tools/check-seo.mjs _site /games/
 ## Life route update — 2026-11-04
 
 32 engine tests pass, including realistic adult height/BMI correlation across2,000 resumes, positive-PQ stress buffering, health-based energy, education fees/classes/graduation, resignation and business severance, travel expenses, overseas work pay, financial-freedom eligibility, old-save defaults and complete alternative lives ending at65. The expanded browser scenario verifies education → graduation → apprenticeship → resignation → travel → overseas work → early freedom and save reload at390px. Four viewport checks, a full357-panel life, book exports, unavailable storage and installed offline play also pass. Source and built SEO checks pass for26 pages. The game remains hidden from the landing page.
+
+## Daily-life systems — 2026-11-04
+
+- 47 engine tests pass, including related/unrelated transfer costs and retained skills, salary provenance, monthly pay idempotence, promotion, habit decay, illness despite healthy habits, treatment and income penalties.
+- Each extended event choice round-trips through save validation, including no-cash outcomes. Scam losses, recruitment captivity/rescue, dependence/recovery, romance/marriage/children/infidelity and child support are covered.
+- Property/card trading friction, rental cash flow, derivative principal wipeout, all three persistent world shocks and legacy-save migration are verified.
+- Source and production browser scenarios pass at320×568,390×844,812×375 and1280×900: all three habit actions, treatment, career-loss preview, official salary links, dating/marriage/parenthood, investment fraud, drug consequences, recovery support, recruitment rescue, world effects and purchases of all three new assets. No page errors or horizontal overflow.
+- Full existing browser regression passes, including a65-year ending with562 panels, complete HTML/PNG/JSON exports, offline saved work and denied-storage fallback. Education/lifestyle controls still work with interrupting monthly events.
+- 26-page production build and source/built SEO checks pass; release `df3cc2ff8206956e`.
+- Salary figures are dated industry means/occupational medians used as role proxies, not365 independently verified role averages. Probabilities, medical/family costs and market shocks are fictional balancing values. The game remains hidden from landing-page cards. No push was performed in this update.
+
+## Work focus, action UX and allocation — 2026-11-04
+
+- 57 career-engine tests pass. Every one of365 roles can open, resolve and round-trip a work assignment. Additional cases verify evidence checking vs rushing, once-monthly pay, blocked time advancement, per-career history, malformed work saves, eight-asset batch buying, sell-funded buying, target weights, fees and atomic rejection of invalid plans.
+- Source and production browser checks at320×568,390×844,812×375 and1280×900 pass for the work desk, compulsory job choices, post-delivery review, action priorities and explanations, amount allocations, percentage rebalance and overspending rejection.
+- Existing four-size gameplay/exports and health/family/risk controls pass. A complete UI-driven life reaches65 with1,192 comic panels and exports them all; denied storage and installed offline work also pass. Full-life test automation now reads only status/pending flags and uses native clicks on actual controls, avoiding unnecessary transfer of the entire comic history per step.
+- 150 combined logic tests pass across Career365 (57) and Frogger Jump (93). Source and production metadata checks cover26 pages.
+- The work library comprises63 industry scenarios plus8 authored profession-specific cases, with rotating industry cases for other roles. It does not claim365 bespoke training campaigns. No push performed in this update.
+
+## Emerging/niche catalogue — 2026-11-04
+
+- 40 careers appended to405 across25 categories; all365 original IDs/names compared against the committed catalogue and preserved.
+- 59 engine tests pass, including all405 first workplace scenarios and every choice in the new named-role cases.
+- New groups contain16AI,8funeral,6forensic and10experience/sensory roles. New material adds12 category cases and8 named-role cases, bringing the work library to91 scenarios.
+- Four viewport browser checks pass: full405-job list; all four category filters and counts; category-aware AI/RAG search; selection and work problem for AI agent engineering, forensic medicine, tasting, mystery shopping and funeral coordination; result/review, save restoration and no horizontal overflow.
+- Source and26-page production SEO checks pass; build release `fca9221d1ad71504`. Source worker advances tov5. Landing visibility remains unlisted. No push performed.

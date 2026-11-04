@@ -89,7 +89,7 @@ Three additional Canvas-drawn friends use the small round bodies, large expressi
 | --- | ---: | --- |
 | 小可愛 / Chiikawa | 1,200 | Courage cheer: one-hop fish protection plus a soft landing and a slightly wider actual target, including thorn skips. |
 | 小八 / Hachiware | 1,360 | Friendship bridge: clear hazards on both upcoming pads and widen the next; a timed pad underfoot still needs a prompt departure. |
-| 烏薩奇 / Usagi | 1,520 | Yaha bounce: stabilize the timed pad underfoot, widen the actual target and cushion the next hop. |
+| 兔兔 / Usagi | 1,520 | Yaha bounce: stabilize the timed pad underfoot, widen the actual target and cushion the next hop. |
 
 The source worker is v26. The Firestore species list, exact-price map and maximum owned collection now support fourteen animals. Publish those rules before cloud purchases of the three new friends; local purchases work independently. Existing owned animals and wallet balances are preserved.
 
@@ -100,7 +100,7 @@ Eight additional selectable friends bring the catalog to **22**. The selected an
 | Friend | Frog Coins | Skill |
 | --- | ---: | --- |
 | 栗子頭 / Kurimanju | 1,600 | Chestnut comfort: stabilize underfoot, remove the target fish and widen the target. |
-| 海獺師傅 / Rakko | 1,680 | Master wavecut: stabilize underfoot, clear both upcoming hazards and widen the next pad. |
+| 海獺師傅 / Rakko | 1,880 | Master wavecut: stabilize underfoot, clear both upcoming hazards and widen the next pad. |
 | 飛鼠 / Momonga | 1,760 | Fluffy escort: stabilize underfoot, clear/widen the next thorn pad and shield one hop from fish. |
 | 獅薩 / Shisa | 1,840 | Shisa ward: clear upcoming thorns, widen the target and cushion the next hop; timers keep running. |
 | 味自慢大叔 / Shimajiro | 1,920 | Island rescue: clear hazards underfoot and on the next pad, then widen it substantially. |
@@ -110,4 +110,6 @@ Eight additional selectable friends bring the catalog to **22**. The selected an
 
 The mermaid artwork uses the black/white head and red-tail Siren interpretation; Hitoha and Futaba are separate faceless grey islanders with one and two leaves. Artwork references: [official character guide](https://www.chiikawaofficial.com/characters) and [official movie characters](https://chiikawa.toho-movie.jp/atm/characters.html). All game artwork is drawn locally with the shared cached animation poses; no reference-site images are downloaded by the game.
 
-Source worker **v27** preloads the island-art module. Publish the updated **22-species** Firestore rules before cloud purchases. No existing animals, balances or achievements are migrated or removed.
+Source worker **v29** preloads the island-art module. Publish the updated **22-species** Firestore rules before cloud purchases. No existing animals, balances or achievements are migrated or removed.
+
+Rakko now uses white fur, a warm-brown head cap with white forehead tufts, a cross-shaped scar, white cape, gold collar clasp and a sword. The reference is the [official character page](https://www.chiikawaofficial.com/characters/). Kurimanju carries a foamy amber beer mug. Usagi’s Traditional Chinese display name is 兔兔; persistent species IDs stay stable. Publish the updated Firestore price rule for new Rakko cloud purchases at1,880 coins.
