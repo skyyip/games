@@ -10,3 +10,12 @@ export async function installLifeHelpers(browser){
 async function browserRead(key){for(let i=0;i<500&&document.getElementById('save-state')?.textContent==='儲存中…';i++)await new Promise(r=>setTimeout(r,10));const raw=localStorage.getItem(key);if(!raw)return null;const value=JSON.parse(raw);if(!key.startsWith('career-365.save.v1'))return value;const db=await new Promise((ok,no)=>{const r=indexedDB.open('career-365.lives.v2',1);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});try{const tx=db.transaction(['lives','panels'],'readonly'),meta=await new Promise(ok=>{const r=tx.objectStore('lives').get(key);r.onsuccess=()=>ok(r.result);});if(!meta)return value;const panels=await new Promise(ok=>{const r=tx.objectStore('panels').getAll(IDBKeyRange.bound([key,meta.run,0],[key,meta.run,8000]));r.onsuccess=()=>ok(r.result);});return {...meta.state,panels};}finally{db.close();}}
 async function browserWrite(key,value){let state;try{state=JSON.parse(value);}catch{}if(key.startsWith('career-365.save.v1')&&Array.isArray(state?.panels)){const db=await new Promise((ok,no)=>{const r=indexedDB.open('career-365.lives.v2',1);r.onupgradeneeded=()=>{r.result.createObjectStore('lives');r.result.createObjectStore('panels');};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});await new Promise((ok,no)=>{const tx=db.transaction(['lives','panels'],'readwrite');tx.objectStore('lives').delete(key);tx.objectStore('panels').delete(IDBKeyRange.bound([key,'',0],[key,'\uffff',8000]));tx.oncomplete=ok;tx.onerror=()=>no(tx.error);});db.close();}localStorage.setItem(key,value);}
 export async function clickAndWait(locator,options){await locator.click(options);await locator.page().waitForFunction(()=>document.getElementById('save-state')?.textContent!=='儲存中…');}
+export async function openLifeControl(page,selector){
+ const control=page.locator(selector);
+ if(!await control.isVisible()){
+  const dialog=await control.evaluate(n=>n.closest('dialog')?.id);
+  if(dialog==='life-choices-dialog'&&!await page.locator('#life-choices-dialog').isVisible())await clickAndWait(page.locator('#life-choices-open'));
+  const parents=await control.locator('xpath=ancestor::details').all(),summary=await control.evaluate(n=>n.tagName==='SUMMARY');for(const details of parents.slice(0,summary?-1:undefined))if(await details.getAttribute('open')===null)await clickAndWait(details.locator(':scope > summary'));
+ }
+ await clickAndWait(control);
+}

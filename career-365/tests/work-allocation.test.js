@@ -21,14 +21,14 @@ test('work save validation rejects unknown approaches, altered clues and malform
  const g=rig();g.work();const raw=JSON.stringify(g.s);g.s.pending.choices[0].approach='cheat';assert.equal(LifeGame.restore(g.s),null);const good=LifeGame.restore(raw);good.s.pending.work.clue='<img>';assert.equal(LifeGame.restore(good.s),null);good.s.pending=null;good.s.profession.counts.hack=1;assert.equal(LifeGame.restore(good.s),null);
 });
 test('one free allocation buys all eight assets with a single action and visible costs',()=>{
- const g=rig(),entries=Object.fromEntries(Object.keys(ASSET_INFO).map(k=>[k,k==='property'?10000:1000]));const prior=JSON.stringify(g.s),preview=g.allocationPreview(entries);assert(preview.ok);assert.equal(JSON.stringify(g.s),prior);assert.equal(preview.orders.length,8);assert.equal(preview.fees,440);assert(g.allocate(entries));assert.equal(g.s.ap,2);assert.equal(g.s.cash,83000);for(const k of Object.keys(ASSET_INFO))assert(g.assetValue(k)>0);assert(LifeGame.restore(g.s));
+ const g=rig(),entries=Object.fromEntries(Object.keys(ASSET_INFO).map(k=>[k,k==='property'?10000:1000]));const prior=JSON.stringify(g.s),preview=g.allocationPreview(entries);assert(preview.ok);assert.equal(JSON.stringify(g.s),prior);assert.equal(preview.orders.length,8);assert.equal(preview.fees,440);assert(g.allocate(entries));assert.equal(g.s.ap,1);assert.equal(g.s.cash,83000);for(const k of Object.keys(ASSET_INFO))assert(g.assetValue(k)>0);assert(LifeGame.restore(g.s));
 });
 test('selling one asset can fund other purchases in the same atomic transaction',()=>{
  const g=rig();g.s.cash=0;g.s.assets.stock=100;const preview=g.allocationPreview({stock:-10000,etf:5000,bank:5000});assert(preview.ok);assert(g.allocate({stock:-10000,etf:5000,bank:5000}));assert.equal(g.s.cash,0);assert.equal(g.s.assets.stock,0);assert.equal(g.assetValue('etf'),5000);assert.equal(g.assetValue('bank'),5000);
 });
 test('weight allocation reserves residual cash and scales buys to account for selling costs',()=>{
  const g=rig();assert(g.allocate({bank:30,stock:20,crypto:10},'weights'));assert.equal(g.s.cash,40000);assert.equal(g.assetValue('bank'),30000);assert.equal(g.assetValue('stock'),20000);
- g.s.ap=3;g.s.assets.cards=100;g.s.cash=0;const before=g.s.assets.stock,plan=g.allocationPreview({stock:100},'weights');assert(plan.ok);assert(plan.fees>0);assert(plan.cashAfter>=0);assert(g.allocate({stock:100},'weights'));assert(g.s.assets.stock>before);assert.equal(g.s.assets.cards,0);
+ g.s.ap=2;g.s.assets.cards=100;g.s.cash=0;const before=g.s.assets.stock,plan=g.allocationPreview({stock:100},'weights');assert(plan.ok);assert(plan.fees>0);assert(plan.cashAfter>=0);assert(g.allocate({stock:100},'weights'));assert(g.s.assets.stock>before);assert.equal(g.s.assets.cards,0);
 });
 test('invalid allocations are rejected without changing cash, holdings, RNG or action count',()=>{
  const g=rig();for(const [entries,mode]of [[{bank:100001},'amount'],[{property:9999},'amount'],[{stock:-1},'amount'],[{hack:100},'amount'],[{bank:NaN},'amount'],[{bank:60,etf:50},'weights'],[{bank:-1},'weights'],[{},'amount']]){const before=JSON.stringify(g.s);assert.equal(g.allocate(entries,mode),false);assert.equal(JSON.stringify(g.s),before);}

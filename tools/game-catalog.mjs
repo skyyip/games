@@ -7,7 +7,7 @@ export const games = [
     description:'Create a little comic life across 405 careers. Draw a random resume, learn with a mentor or simulated AI, work, start a business, switch careers and retire at 65 with a downloadable life book.',
     intro:'A single-player, browser-local life simulation with 405 distinct careers, monthly actions, mentor and simulated AI learning, fictional investments and gambling, and a personal comic book ending.',
     chinese:'以柔和漫畫分鏡記錄人生的單人模擬遊戲。18–26歲隨機履歷開局，從405種職業中選擇拜師或模擬AI自學，安排每月行動、經營事業、轉行與虛擬理財，65歲退休並下載完整人生繪本。',
-    steps:['Draw a resume, name your protagonist and choose one of 405 careers with a mentor or simulated AI learning route.', 'Regular employment continues monthly. Spend three focus actions on workplace projects, learning, rest, relationships or business. Manage fictional assets and resolve story choices; yearly plans stop at decisions.', 'Retire at 65, review achievements and locally assembled reflections, and export a complete offline comic book, PNG highlights or a JSON save.'],
+    steps:['Draw a resume, name your protagonist and choose one of 405 careers with a mentor or simulated AI learning route.', 'Regular employment continues monthly. Choose a monthly focus and one free arrangement for learning, rest, relationships or business. Manage fictional assets and resolve story choices; yearly plans stop at decisions.', 'Retire at 65, review achievements and locally assembled reflections, and export a complete offline comic book, PNG highlights or a JSON save.'],
     related:['mo-lei-tau-studio','memory-trace'],
   },
   {

@@ -1,3 +1,4 @@
+import {claimMonthlyEvent} from './monthly-play.js';
 import {JOBS} from './content.js';
 import {occupationEventById} from './occupation-events.js';
 import {journal,progressGoal} from './life-design.js';
@@ -16,7 +17,7 @@ export function eventWeight(e,s){let w=1;
 }
 export function weightedPick(g,list){if(!list.length)return null;const total=list.reduce((n,e)=>n+eventWeight(e,g.s),0);let n=g.roll()*total;for(const e of list){n-=eventWeight(e,g.s);if(n<=0)return e;}return list.at(-1);}
 export function queueFollowup(g,id,delay=2,context=null){const l=g.s.life;if(l.queue.length<50&&!l.queue.some(q=>q.id===id)){l.queue.push({id,due:g.s.elapsed+delay,...(context?{sourceCareer:context.career,sourceEvent:context.event}:{})});journal(g,`伏線：${{referral:'客戶可能再聯絡你',repair:'交付還有一項後續待辦',community:'朋友正在籌備社區活動'}[id]}，約 ${delay} 個月後有消息。`);}}
-export function dueFollowup(g){const l=g.s.life,i=l.queue.findIndex(q=>q.due<=g.s.elapsed);if(i<0)return false;const [next]=l.queue.splice(i,1);g.s.pending=structuredClone(FOLLOWUPS[next.id]);if(next.sourceCareer){const job=JOBS.find(j=>j.id===next.sourceCareer),event=occupationEventById(job,next.sourceEvent);if(job&&event){g.s.pending.title=job.name+'｜'+g.s.pending.title;g.s.pending.text=`「${event.title}」的後續消息。`+g.s.pending.text+'即使已轉職，仍需核對對應資格、授權與現有負荷；未具資格時只參與受督導或教育性範圍。';}}return true;}
+export function dueFollowup(g){if(g.s.pending)return false;const l=g.s.life,i=l.queue.findIndex(q=>q.due<=g.s.elapsed);if(i<0||!claimMonthlyEvent(g.s))return false;const [next]=l.queue.splice(i,1);g.s.pending=structuredClone(FOLLOWUPS[next.id]);if(next.sourceCareer){const job=JOBS.find(j=>j.id===next.sourceCareer),event=occupationEventById(job,next.sourceEvent);if(job&&event){g.s.pending.title=job.name+'｜'+g.s.pending.title;g.s.pending.text=`「${event.title}」的後續消息。`+g.s.pending.text+'即使已轉職，仍需核對對應資格、授權與現有負荷；未具資格時只參與受督導或教育性範圍。';}}return true;}
 export function recordDecision(g,e,c,index){const l=g.s.life;l.cooldowns[e.id]=g.s.elapsed+(/scam|temptation|affair/.test(e.id)?18:8);journal(g,`${e.title}：${c.label}。`);
  if(e.id==='romance'||e.group==='family'||e.scene==='relationship')progressGoal(g,'connection');
  if(e.id==='follow-community')progressGoal(g,'service');

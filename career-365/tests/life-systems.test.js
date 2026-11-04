@@ -3,8 +3,9 @@ import {LifeGame,RETIRE_MONTH} from '../src/game.js';import {JOBS} from '../src/
 import {ASSET_INFO,SALARY_SOURCES,WORLD_EVENTS} from '../src/economy.js';import {LIFE_EVENTS,eventEligible} from '../src/life-events.js';
 function rig(){const g=new LifeGame({seed:123,name:'測試人生'});g.chooseCareer(JOBS[0].id);g.roll=()=>.95;g.s.cash=1000000;return g;}
 function finish(g){if(g.s.pending)g.resolve(Math.max(0,g.s.pending.choices.findIndex(c=>c.approach==='check')));}
-function ready(g){g.s.ap=3;g.s.pending=null;g.s.stats.energy=g.energyMax;}
-function choose(g,id,index=0){assert(g.triggerLifeEvent(id));assert(LifeGame.restore(g.s));assert(g.resolve(index));assert(LifeGame.restore(g.s));}
+function ready(g){g.s.ap=2;g.s.pending=null;g.s.stats.energy=g.energyMax;}
+// Isolate event effects here; monthly interruption limits have their own behavioural tests.
+function choose(g,id,index=0){g.s.life.extraEventMonth=-1;assert(g.triggerLifeEvent(id));assert(LifeGame.restore(g.s));assert(g.resolve(index));assert(LifeGame.restore(g.s));}
 test('all405 salaries use a dated, named HKD reference and never claim unsupported individual averages',()=>{
  assert.equal(JOBS.length,405);for(const j of JOBS){assert(j.salary>=14900&&j.salary<=33000);assert(j.salaryInfo.estimatedRole);assert(SALARY_SOURCES.some(s=>s.id===j.salaryInfo.source));assert(j.salaryInfo.note.includes('並非'));}
  assert.equal(JOBS.find(j=>j.name==='咖啡師').salary,17995);assert.equal(JOBS.find(j=>j.name==='貨車司機').salary,26300);

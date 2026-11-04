@@ -9,7 +9,7 @@ The paper-like cream/sage/coral interface uses locally drawn Q-style SVG charact
 - Draw a seeded resume with gender, starting age18–26, illustratively generated adult height clusters, height-correlated weight generated from BMI19–29, blood type, zodiac, family, school, major, MBTI and IQ/EQ/PQ/JQ. Appearance and gender do not gate professions. The major grants a starting skill.
 - Search **405 distinct named jobs** across **25 categories**, including chef, plumber, YouTuber, pet communicator, blockchain engineer, metaverse architect and AI prompt specialist. These are curated career names; category-based routines and shared events provide the initial career scenarios rather than405 bespoke story campaigns.
 - Mentor study is slower, builds EQ/JQ/contacts, can uncover secrets and passes along contacts on graduation. Simulated AI study is faster and develops IQ, without an automatic EQ penalty, and with a hallucination branch. A $300 checked lesson avoids that branch. Learning is a game mechanic rather than an actual training service.
-- Each month offers three focus actions in addition to regular employment and persistent habits. Study/work consume energy; rest and social time restore the player differently for I/E personalities. Social events also offer a personality-specific choice. PQ means Positive Intelligence Quotient (0–100% positive mental time), buffers stress growth and improves through rest/exploration. Health sets the energy cap; overtime and high pressure can cause illness and bills.
+- Each month offers two arrangements: a recommended focus and one free choice, in addition to regular employment and persistent habits. Study/work consume energy; rest and social time restore the player differently for I/E personalities. Social events also offer a personality-specific choice. PQ means Positive Intelligence Quotient (0–100% positive mental time), buffers stress growth and improves through rest/exploration. Health sets the energy cap; overtime and high pressure can cause illness and bills.
 - After the opening graduation, choose an apprenticeship or a one-year further-education course ($6,000 admission, $1,800/month and at least12 study actions). Completing it returns to a graduate decision; annual plans stop there.
 - Players can resign, preserving skills/assets and settling business staff costs. Choose world travel ($5,000 departure plus $4,500/month), overseas short-term work ($8,000 departure, $2,500/month plus living costs; $6,000/work action), or a sabbatical. Travel and interests generate comic panels and improve PQ. Debt-free wealth of25 years of basic living costs unlocks financial freedom; this remains a playable lifestyle until65, with ongoing expenses and the option to re-enter work. This threshold is a fictional game unlock, not a financial forecast.
 - Graduates work, negotiate pay and rise through eight levels on separate specialist or management tracks. JQ can redirect adverse workplace events into opportunities. Switching costs $3,000 and one action, preserves prior skills and enters a new apprenticeship. Plumber → YouTuber has an explicit cross-field bonus.
@@ -174,3 +174,16 @@ CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/
 ## Firebase 專案拆分
 
 本遊戲現在只讀取本資料夾的`src/firebase-settings.js`、SDK入口、Firebase套件與`firestore.rules`；不再從青蛙遊戲取得設定或發布合併規則。已填入獨立專案`sky-playground-career-365`的公開設定；青蛙保留`sky-playground-3c5af`。正式登入／雲端仍須在新專案啟用Provider、設定授權網域及部署本資料夾的規則。本機遊玩與備份維持可用；相同projectId搭配另一個appId仍會被視為同一專案。登入標記、本機帳戶及回顧依新projectId隔離，舊資料提供明確匯出遷移，沒有刪除或自動搬移雲端資料。詳見 [FIREBASE.md](./FIREBASE.md)。
+
+
+## 簡化後的每月玩法
+
+每月先選一個重點，再作一次自由安排。推薦內容會跟隨工作、學生、旅行、海外打工或財務自由生活改變；也可在「其他人生選擇」改選活動，並不強迫每月工作。兩次安排完成後查看月結，不消耗每日12次跳月額度；未完成而略過其餘安排才使用額度。舊存檔保留資產、待決故事、職涯與漫畫，剩餘安排轉為最多兩次。
+
+主畫面聚焦目前職業、故事、現金、健康和壓力。主角與完整履歷可展開IQ／EQ／PQ／JQ、專業技能及其成長說明。工作主要提供三個選擇，用短句說明取捨，完成後直接解釋交付結果；較早存檔或時代企劃的額外回應仍可展開，不刪除選項或改動既有選擇的索引。
+
+月結集中顯示收入、開支、收支差額、健康／壓力與技能變化；例行薪金、持續習慣及生活費自動計算。詳細帳本、生活安排、進修、時代企劃、感情、創業、轉行與旅居均從同一入口開啟，原有資格與資金要求仍適用。自動突發故事每月最多一個，跨類型及重新登入共享限制；延後跟進保留在隊列。玩家主動參與時代企劃、職業練習或高風險活動所引發的必要結果另行處理。
+
+投資可先選「現金為主／均衡配置／高波動配置」，只產生預覽，需確認才交易。三種預設以20–80%現金為目標，交易成本會令實際比例不同，市場風險仍存在；亦可展開手動金額／目標比例和全部八種資產。預設不會每月自動重配或收費，現有持倉會繼續保留。
+
+職業選單先展示8種代表職業，可隨時查看或搜尋全部405種。人物信任、工作連載、延後委託、65歲結局及完整人生繪本均保留。

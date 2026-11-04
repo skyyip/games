@@ -1,3 +1,4 @@
+import {claimMonthlyEvent} from './monthly-play.js';
 import {JOBS} from './content.js';
 import {CAREER_ARCS} from './career-arcs.js';
 import {questionsFor,questionById,makeKnowledgeCase,KNOWLEDGE_SOURCES} from './professional-knowledge.js';
@@ -25,9 +26,9 @@ export const professionalMethods={
   s.pending=null;const text=`你選擇「${q.options[choice]}」。${correct?'答對了。':'這次需要修正觀念。'}正確觀念：${q.options[q.answer]}。${q.explanation} 延伸閱讀：${KNOWLEDGE_SOURCES[q.source][0]}。本題是知識練習，不計作受督導實習或正式資格考核。`;
   journal(this,`${this.job.name}｜${q.prompt} ${correct?'答對':'答後訂正'}：${q.explanation}`);this.record('study',`${this.job.name}｜${correct?'常識累積':'訂正也是進步'}`,text);return true;
  },
- triggerOccupationEvent(id=null){const s=this.s;if(!this.job||!['apprentice','employed','business'].includes(s.status)||!this.active||s.risks.captivity||s.risks.delay)return false;const available=occupationEventsFor(this.job).filter(e=>!(s.life.cooldowns[e.id]>s.elapsed));let item=id?available.find(e=>e.id===id):null;
+ triggerOccupationEvent(id=null){const s=this.s;if(!this.job||!['apprentice','employed','business'].includes(s.status)||!this.active||s.risks.captivity||s.risks.delay||s.life.extraEventMonth===s.elapsed)return false;const available=occupationEventsFor(this.job).filter(e=>!(s.life.cooldowns[e.id]>s.elapsed));let item=id?available.find(e=>e.id===id):null;
   if(!id){const knowledge=s.life.learning.byJob[s.career],weights=available.map(e=>e.kind==='development'?1+(knowledge&&knowledge.correct/Math.max(1,knowledge.answered)<.6?2:0):e.kind==='disruption'?1+(s.stats.stress>65?1:0)+(s.world?2:0)+(s.status==='business'?1:0):1+Math.min(2,s.stats.reputation/100));let n=this.roll()*weights.reduce((a,b)=>a+b,0);item=available.find((e,i)=>(n-=weights[i])<=0)??available.at(-1);}
-  if(!item)return false;s.pending=makeOccupationEvent(this.job,item);if(s.status==='apprentice'&&this.entryRequirement.regulated)s.pending.text='你仍在受督導訓練，所有工作須符合資格及授權界線。'+s.pending.text;return true;
+  if(!item||!claimMonthlyEvent(s))return false;s.pending=makeOccupationEvent(this.job,item);if(s.status==='apprentice'&&this.entryRequirement.regulated)s.pending.text='你仍在受督導訓練，所有工作須符合資格及授權界線。'+s.pending.text;return true;
  },
  resolveOccupationEvent(index){const s=this.s,e=s.pending,item=occupationEventById(this.job,e?.careerEvent?.event),c=item?.choices[index];if(e?.id!=='occupation-event'||!item||!c||e.careerEvent.career!==s.career)return false;this.changeStats(c.effects);const skill=s.skills[this.job.skill];s.skills[this.job.skill]=clamp(skill+c.skillGain*Math.max(.12,1-skill/110),0,100);const key=index===1?'colleague':'client';s.life.npc[key]=clamp(s.life.npc[key]+(index===2?0:2),0,100);s.life.cooldowns[item.id]=s.elapsed+(item.kind==='opportunity'?10:8);progressGoal(this,'craft',c.skillGain);
   let after='';if(item.kind==='opportunity'&&index<2){queueFollowup(this,'referral',3,{career:s.career,event:item.id});after='對方可能在3個月後再次聯絡，伏線已記下。';}else if(item.kind==='disruption'&&index===2){queueFollowup(this,'repair',2,{career:s.career,event:item.id});after='縮小範圍留下了後續待辦，約2個月後會跟進。';}

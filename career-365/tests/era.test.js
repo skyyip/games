@@ -8,7 +8,7 @@ import {ERA_QUESTIONS} from '../src/era-knowledge.js';
 import {questionsFor} from '../src/professional-knowledge.js';
 const job=name=>JOBS.find(j=>j.name===name);
 function game(name='咖啡師'){const g=new LifeGame({seed:123,name:'把時代走成自己的路'});g.chooseCareer(job(name).id);g.s.cash=1000000;g.setEraAuto(false);g.roll=()=>.95;return g;}
-function ready(g){assert.equal(g.s.pending,null);g.s.ap=3;g.s.stats.energy=g.energyMax;}
+function ready(g){assert.equal(g.s.pending,null);g.s.ap=2;g.s.stats.energy=g.energyMax;}
 function advance(g,n){for(let i=0;i<n;i++){if(g.s.pending)g.resolve(g.s.pending.choices.length-1);assert(g.endMonth());}if(g.s.pending)g.resolve(g.s.pending.choices.length-1);ready(g);}
 function move(g,n){g.s.elapsed+=n;g.s.month+=n;ready(g);}
 function themeGame(t){return game(JOBS.find(j=>t.categories.includes(j.category)).name);}
@@ -37,7 +37,7 @@ test('an unrelated old project remains reachable after switching, without changi
  const g=game('寵物溝通師');g.exploreEra('pets');g.resolve(0);move(g,2);g.chooseCareer(job('航空機師').id);ready(g);assert(relevantEraTopics(g.s).some(t=>t.id==='pets'));const demand=eraDemand(g.s);const copy=structuredClone(g.s);delete copy.era.threads.pets;assert.equal(eraDemand(copy),demand);assert(g.exploreEra('pets'));assert.match(g.s.pending.text,/寵物溝通師/);assert.equal(g.s.pending.choices[0].reward,0);
 });
 test('stories respect action, recovery, due dates, two-project capacity and per-cycle opt-out',()=>{
- const g=game();g.s.ap=0;let old=JSON.stringify(g.s);assert.equal(g.exploreEra('ai'),false);assert.equal(JSON.stringify(g.s),old);ready(g);g.s.risks.delay=1;old=JSON.stringify(g.s);assert.equal(g.exploreEra('ai'),false);assert.equal(JSON.stringify(g.s),old);g.s.risks.delay=0;g.exploreEra('ai');assert.equal(g.s.ap,2);g.resolve(1);assert.equal(g.exploreEra('ai'),false);ready(g);assert(g.exploreEra('pets'));g.resolve(1);ready(g);assert.equal(g.exploreEra('climate'),false);move(g,2);assert(g.exploreEra('ai'));g.resolve(3);ready(g);assert.equal(eraCandidate(g.s,'ai'),false);assert(g.exploreEra('climate'));g.resolve(3);move(g,24);assert(eraCandidate(g.s,'ai'));
+ const g=game();g.s.ap=0;let old=JSON.stringify(g.s);assert.equal(g.exploreEra('ai'),false);assert.equal(JSON.stringify(g.s),old);ready(g);g.s.risks.delay=1;old=JSON.stringify(g.s);assert.equal(g.exploreEra('ai'),false);assert.equal(JSON.stringify(g.s),old);g.s.risks.delay=0;g.exploreEra('ai');assert.equal(g.s.ap,1);g.resolve(1);assert.equal(g.exploreEra('ai'),false);ready(g);assert(g.exploreEra('pets'));g.resolve(1);ready(g);assert.equal(g.exploreEra('climate'),false);move(g,2);assert(g.exploreEra('ai'));g.resolve(3);ready(g);assert.equal(eraCandidate(g.s,'ai'),false);assert(g.exploreEra('climate'));g.resolve(3);move(g,24);assert(eraCandidate(g.s,'ai'));
 });
 test('automatic encounters can be disabled; active follow-ups have priority and do not spend a focus action',()=>{
  const g=game();move(g,6);assert.equal(g.triggerEraEvent(),false);g.setEraAuto(true);g.roll=()=>0;const ap=g.s.ap;assert(g.triggerEraEvent());const id=g.s.pending.eraEvent.theme;assert.equal(g.s.ap,ap);g.resolve(1);assert.equal(g.triggerEraEvent(),false);move(g,3);assert(g.triggerEraEvent());assert.equal(g.s.pending.eraEvent.theme,id);assert.equal(g.s.pending.eraEvent.stage,1);
