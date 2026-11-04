@@ -14,6 +14,17 @@ service cloud.firestore {
    allow create: if owner(uid) && validSnapshot() && request.resource.data.revision == 1;
    allow update: if owner(uid) && validSnapshot() && request.resource.data.revision == resource.data.revision + 1;
   }
+  // Multiplayer social data is served through authenticated callable Functions.
+  // Clients never write balances, memberships, answers, escrow or moderation reports.
+  match /career365_social_accounts/{id} { allow read, write: if false; }
+  match /career365_cards/{id} { allow read, write: if false; }
+  match /career365_handles/{id} { allow read, write: if false; }
+  match /career365_companies/{id} { allow read, write: if false; }
+  match /career365_invites/{id} { allow read, write: if false; }
+  match /career365_tasks/{id} { allow read, write: if false; }
+  match /career365_notes/{id} { allow read, write: if false; }
+  match /career365_social_ledger/{id} { allow read, write: if false; }
+  match /career365_social_reports/{id} { allow read, write: if false; }
   match /{document=**} { allow read, write: if false; }
  }
 }

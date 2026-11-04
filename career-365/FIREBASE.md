@@ -15,7 +15,7 @@
 5. 在同一新專案建立預設Cloud Firestore資料庫，選正式模式。發布本資料夾的`firestore.rules`及`firestore.indexes.json`。不要使用青蛙遊戲的規則或部署設定。
 6. 重建並發布網站。在遊戲登入後，存檔選單依次「檢查雲端」→「上傳目前人生」；換裝置登入同一新專案帳戶，再檢查並載入。
 
-無需手動建立`career365_saves`或文件，首次上傳會建立。按UID直接讀取不需複合索引；此資料夾的索引清單為空。登入不會自動覆蓋／上傳本機人生。
+無需手動建立`career365_saves`或文件，首次上傳會建立。私人存檔按UID直接讀取不需複合索引；此資料夾另有四個玩家社交索引，供邀請、短訊、招募板及過期委託清理使用。登入不會自動覆蓋／上傳本機人生。
 
 ## 本資料夾的檔案與部署
 
@@ -27,7 +27,7 @@
 | `firebase.json` | 本遊戲規則／索引及獨立模擬器連接埠 |
 | `.firebaserc` | 本遊戲default為`sky-playground-career-365`；部署工具仍明確使用公開設定中的projectId |
 | `firestore.rules` | 只有私人Career365快照，其他路徑預設拒絕 |
-| `firestore.indexes.json` | 本遊戲自己的索引清單 |
+| `firestore.indexes.json` | 私人存檔及玩家社交各自所需索引（目前四個社交複合索引） |
 
 從儲存庫根目錄執行：
 
@@ -64,3 +64,10 @@ firebase emulators:exec --project demo-career365 --only firestore \
 ```
 
 模擬器安全測試涵蓋owner、他人／未登入、列舉、版本、時間戳、額外欄位、超大payload及青蛙路徑隔離。這些測試需要可用的Firestore emulator；沒有執行時不可宣稱已通過。一般Node與瀏覽器測試採用隔離fixture，不建立真實帳戶、不寄Email，也不證明新專案已建立或Provider已啟用。
+
+
+## 玩家社交與合作公司後端
+
+社交功能另外需要部署本資料夾 `functions/` 的Cloud Functions第二代及四個索引；只部署既有規則不會自動啟用多人服務。詳見 [SOCIAL.md](./SOCIAL.md) 的功能、合作點帳本、部署與雙帳戶驗收步驟。正式專案仍是`sky-playground-career-365`，區域`asia-east1`；合作點不接收本機現金充值。
+
+`npm run social:check --prefix career-365`核對Functions＋規則／索引目標，`npm run social:deploy --prefix career-365`才會發布。Functions需具備可用的Blaze計劃及部署權限，本次未代為部署。

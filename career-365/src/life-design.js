@@ -23,6 +23,8 @@ export function restoreLife(s){
  if(s.life===undefined){s.life=lifeDefaults(s,true);return true;}const l=s.life;
  if(!l||l.version!==1||!Object.hasOwn(HOMES,l.home)||!['public','private'].includes(l.insurance)||!Object.hasOwn(GOALS,l.goal)||!['full','part','freelance'].includes(l.schedule)||!['specialist','manager'].includes(l.track)||!['art','nature','music','volunteer'].includes(l.hobby))return false;
  l.selfIncome??=0;l.flow??={income:l.gross+l.selfIncome,expenses:l.mpf+l.tax,regular:l.gross+l.selfIncome,regularNet:Math.max(0,l.gross+l.selfIncome-l.mpf-l.tax)};l.flow.regularNet??=Math.max(0,l.flow.regular-l.mpf-l.tax);if(!l.flow||!['income','expenses','regular','regularNet'].every(k=>Number.isFinite(l.flow[k])&&l.flow[k]>=0&&l.flow[k]<=Number.MAX_SAFE_INTEGER))return false;const finite=(x,a=0,b=2e9)=>Number.isFinite(x)&&x>=a&&x<=b;
+ if(l.socialRunId!==undefined&&(typeof l.socialRunId!=='string'||!/^[A-Za-z0-9_-]{16,64}$/.test(l.socialRunId)))return false;
+ if(l.socialClaims!==undefined&&(!Array.isArray(l.socialClaims)||l.socialClaims.length>1600||new Set(l.socialClaims).size!==l.socialClaims.length||l.socialClaims.some(id=>typeof id!=='string'||!/^[A-Za-z0-9_-]{16,100}$/.test(id))))return false;
  l.extraEventMonth??=s.pending&&s.pending.id!=='work-case'?s.elapsed:-1;l.monthStart??=monthSnapshot(s);
  if(!Number.isInteger(l.extraEventMonth)||l.extraEventMonth< -1||l.extraEventMonth>s.elapsed||!l.monthStart||!finite(l.monthStart.health,0,100)||!finite(l.monthStart.stress,0,100)||!Object.keys(s.skills).every(k=>finite(l.monthStart.skills?.[k],0,100)))return false;
  for(const k of ['pension','gross','selfIncome','mpf','tax','sideEarned','hobbyProgress','careMonths','friendship','careerMonths','overseasMonths'])if(!finite(l[k]))return false;

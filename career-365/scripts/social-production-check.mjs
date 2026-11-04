@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
+import {LifeGame,SAVE_KEY} from '../src/game.js';import {JOBS} from '../src/content.js';
+import {installLifeHelpers,clickAndWait,openLifeControl} from './browser-state.mjs';
+const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
+const base=process.env.CAREER_URL||'http://localhost:5323/games/career-365/',dir=process.env.CAREER_BUILD_DIR||'/tmp/work/career-social-build',manifest=JSON.parse(await readFile(dir+'/build-manifest.json','utf8'));
+const browser=await chromium.launch({headless:true});await installLifeHelpers(browser);
+try{
+ const origin=new URL(base).origin,g=new LifeGame({seed:123,name:'離線也能繼續'});g.chooseCareer(JOBS[0].id);
+ for(const offline of [false,true]){
+  const c=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:offline?'allow':'block'});await c.route('**/*',r=>new URL(r.request().url()).origin===origin?r.continue():r.abort());await c.addInitScript(({key,s})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(s));},{key:SAVE_KEY,s:g.s});
+  const p=await c.newPage(),errors=[],requests=[];p.on('pageerror',e=>errors.push(e.stack));p.on('request',r=>requests.push(r.url()));await p.goto(base,{waitUntil:'networkidle'});await clickAndWait(p.locator('#continue'));if(await p.locator('#growth-dialog').isVisible())await clickAndWait(p.locator('#growth-dialog .primary'));
+  if(offline){await p.evaluate(()=>navigator.serviceWorker.ready);await p.reload({waitUntil:'networkidle'});await p.waitForFunction(()=>!!navigator.serviceWorker.controller);await c.setOffline(true);await p.reload({waitUntil:'domcontentloaded'});await clickAndWait(p.locator('#continue'));}
+  await openLifeControl(p,'#social-open');await p.locator('#social-content [data-social-action=login]').waitFor();assert.match(await p.locator('#social-content').textContent(),/匿名玩家|登入/);
+  if(!offline){const sdkEntry=manifest.entries['career-365/src/firebase-functions-sdk.js'];assert(!requests.some(url=>url.endsWith(sdkEntry)));const result=await p.evaluate(async({root,entries})=>{const auth=await import(new URL(entries['career-365/src/auth.js'],root).href),{session}=await auth.initAuth(),{loadFunctionsSDK}=await import(new URL(entries['career-365/src/firebase-functions-sdk.js'],root).href),sdk=await loadFunctionsSDK(),client=sdk.getFunctions(session.app,'asia-east1');return {projectId:client.app.options.projectId,region:client.region,callable:typeof sdk.httpsCallable(client,'careerSocial')};},{root:new URL('../',base).href,entries:manifest.entries});assert.deepEqual(result,{projectId:'sky-playground-career-365',region:'asia-east1',callable:'function'});}
+  await clickAndWait(p.locator('[data-close=social-dialog]'));await clickAndWait(p.locator('#actions [data-action=rest]'));const state=await p.evaluate(async key=>globalThis.__careerTestRead(key),SAVE_KEY);assert.equal(state.ap,1);assert.equal(state.cash,g.s.cash);assert.equal(state.life.socialClaims,undefined);assert.deepEqual(errors,[]);assert(!await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth));await c.close();console.log(JSON.stringify({production:true,offline,guestSocialView:true,localSaveContinues:true,realFunctionsSDK:!offline,providerCalls:false}));
+ }
+}finally{await browser.close();}

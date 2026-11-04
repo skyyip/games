@@ -1,3 +1,4 @@
+import {socialContext,applySocialReceipt} from './social-game.js';
 import {MONTHLY_CHOICES,INVESTMENT_PRESETS,featuredJobs,choiceSummary} from './monthly-play.js';
 import {LearningUI} from './learning-ui.js';
 import {careerBrief,careerBands} from './career-briefs.js';
@@ -26,7 +27,7 @@ import {avatar,panelSVG,bookDocument,posterSVG,esc} from './comics.js';
 async function main(){
 const $=id=>document.getElementById(id),fmt=n=>Math.round(n).toLocaleString('zh-HK'),dollars=n=>'$'+fmt(n);
 let skipStorage=null;try{skipStorage=localStorage;}catch{}
-const skipBudget=new MonthSkipBudget({storage:skipStorage}),accountStore=new AccountStore(skipStorage);let currentUid=null,importCandidate=null;const repository=new LifeRepository(accountStore);let saving=null,conflicted=false,identityLoading=false,identityVersion=0;
+const skipBudget=new MonthSkipBudget({storage:skipStorage}),accountStore=new AccountStore(skipStorage);let currentUid=null,importCandidate=null,social=null;const repository=new LifeRepository(accountStore);let saving=null,conflicted=false,identityLoading=false,identityVersion=0;
 const dailyGrowth=new DailyGrowth({store:accountStore,scope:()=>accountScope(currentUid)});let skipRefreshTimer;
 let game=null,draft=null,selectedJob=null,jobPage=0,showAllJobs=false,bookPage=0,noticeTimer,persistent=true,allocationMode='amount',allocationDraft={};
 try{game=await repository.load(null);}catch{conflicted=true;}persistent=repository.persistent;
@@ -48,7 +49,7 @@ async function switchIdentity(user){
  const next=user?.uid??null;if(next===currentUid)return;const version=++identityVersion;identityLoading=true;$('continue').disabled=true;$('new-cover').disabled=true;
  if(saving)await saving;if(version!==identityVersion)return;
  const previousUid=currentUid,previousGame=game,wasPlaying=!$('game').hidden;for(const dialog of document.querySelectorAll('dialog[open]'))if(dialog.id!=='account-dialog')dialog.close();draft=null;
- currentUid=next;cloud.identity(next);conflicted=false;$('save-conflict').hidden=true;$('game').hidden=true;$('cover').hidden=false;
+ currentUid=next;cloud.identity(next);social?.identity(next);conflicted=false;$('save-conflict').hidden=true;$('game').hidden=true;$('cover').hidden=false;
  try{const loaded=await repository.load(next);if(version!==identityVersion)return;game=loaded;}catch{if(version!==identityVersion)return;game=null;conflict();}
  identityLoading=false;$('continue').disabled=false;$('new-cover').disabled=false;importCandidate=next&&previousUid===null&&previousGame&&!game?JSON.stringify(previousGame.s):null;
  if(game&&wasPlaying){$('cover').hidden=true;$('game').hidden=false;render();}else{document.body.classList.remove('is-playing');}$('continue').hidden=!game;
@@ -199,6 +200,8 @@ refreshSkipDay();window.addEventListener('storage',e=>{if(e.key===SKIP_KEY&&game
 
 for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',()=>queueMicrotask(maybeGrowth));
 const account=new CareerAccount({store:accountStore,onIdentity:switchIdentity,onAdopt:adoptLocalLife,hasCandidate:()=>!!importCandidate&&!game,onRestoring:loading=>{$('continue').disabled=loading||identityLoading;$('new-cover').disabled=loading||identityLoading;if(loading)$('account-open').textContent='還原玩家中…';},show,notify:inform});
+let socialOpening=false;$('social-open').onclick=async()=>{if(socialOpening)return;socialOpening=true;try{const {CareerSocial}=await import('./social-ui.js');social=new CareerSocial({getGame:()=>game,getUid:()=>currentUid,getUser:()=>account.user,act,show,notify:inform,login:()=>account.open(),applyReceipt:receipt=>applySocialReceipt(game,receipt,currentUid),ensureContext:async()=>{const g=game,uid=currentUid;if(!g)throw Error('life-required');if(!uid)throw Error('signin');if(!g.s.life.socialRunId){const done=await act(()=>{if(game!==g||currentUid!==uid)return false;g.s.life.socialRunId=crypto.randomUUID();return true;});if(done===false)throw Error('identity-changed');}if(game!==g||currentUid!==uid)throw Error('identity-changed');return socialContext(g);}});social.identity(currentUid);await social.open();}catch{inform('社交畫面暫時未能載入，請稍後再試；目前人生已保留。');}finally{socialOpening=false;}};
+
 
 $('reload-life').onclick=async()=>{if(saving)await saving;try{const latest=await repository.load(currentUid);if(!latest)throw Error('empty');game=latest;conflicted=false;$('save-conflict').hidden=true;for(const d of document.querySelectorAll('dialog[open]'))d.close();await startView();inform('已載入最新進度。');}catch{inform('暫時未能讀取最新進度，請先匯出目前版本備份。');}};
 const legacyUid=accountStore.read('career-365.identity.v1');$('account-export-legacy').hidden=!legacyUid;$('account-export-legacy').onclick=async()=>{try{const prior=await repository.readLegacy(legacyUid);if(!prior){inform('此裝置沒有可讀取的舊專案人生；原有JSON備份仍可匯入。');return;}download(JSON.stringify(prior.s,null,2),'application/json','行行出狀元舊專案人生備份.json');inform('已匯出舊專案本機人生；登入新專案後可自行匯入。');}catch{inform('暫時未能讀取舊專案人生，原有資料未刪除。');}};
