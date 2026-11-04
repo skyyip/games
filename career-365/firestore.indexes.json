@@ -1,6 +1,51 @@
-{"indexes":[
- {"collectionGroup":"career365_invites","queryScope":"COLLECTION","fields":[{"fieldPath":"parties","arrayConfig":"CONTAINS"},{"fieldPath":"createdAt","order":"DESCENDING"}]},
- {"collectionGroup":"career365_notes","queryScope":"COLLECTION","fields":[{"fieldPath":"parties","arrayConfig":"CONTAINS"},{"fieldPath":"createdAt","order":"DESCENDING"}]},
- {"collectionGroup":"career365_companies","queryScope":"COLLECTION","fields":[{"fieldPath":"listed","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"}]},
- {"collectionGroup":"career365_tasks","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"expiresAt","order":"ASCENDING"}]}
-],"fieldOverrides":[]}
+{
+  "indexes": [
+    {
+      "collectionGroup": "career365_spark_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "parties",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "career365_spark_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "companyId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "career365_spark_companies",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "listed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

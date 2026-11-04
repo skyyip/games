@@ -3,29 +3,12 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "functions": {
-    "source": "functions",
-    "codebase": "career-social",
-    "runtime": "nodejs22",
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run build"
-    ],
-    "ignore": [
-      "node_modules",
-      ".git",
-      "src",
-      "*.log"
-    ]
-  },
   "emulators": {
     "auth": {
       "port": 9099
     },
     "firestore": {
       "port": 8090
-    },
-    "functions": {
-      "port": 5002
     },
     "ui": {
       "enabled": false

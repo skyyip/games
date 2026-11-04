@@ -1,68 +1,80 @@
-# 玩家社群與合作公司
+# 玩家社群與合作公司：Spark 版
 
-入口：「其他人生選擇」→「玩家社群與合作公司」。採用非同步合作，各自的人生月份不需一致。此更新包含前端、後端、索引及規則；正式連線需完成下方部署，並非只發布靜態網頁即可啟用。
+入口：「其他人生選擇」→「玩家社群與合作公司」。此版本適用 Firebase **Spark**，只使用 Authentication、Cloud Firestore 及靜態網站，不需要 Cloud Functions、Cloud Scheduler 或 Blaze。
 
 ## 玩家可以做甚麼
 
-- 用 Email 或 Google 帳戶建立動物名片、固定玩家代號、介紹及最多三項自述專長。匿名帳戶需先綁定登入方式，原有人生保留。
-- 決定是否公開名片供代號搜尋、顯示職業、接受邀請及同意好友推薦。公開資料不包含現金、健康、IQ／EQ／PQ／JQ、Email或私人劇情。專長是自述，並非正式資格證明。
-- 好友邀請需本人接受；可用三種快捷短訊互動、移除好友、封鎖或舉報。好友名單最多50人，封鎖最多100人；不設打卡獎勵或連續登入懲罰。
-- 建立合作公司、發布招募、邀請玩家、接受公開申請，或由第三位好友推薦候選人。推薦需候選人先同意，再由公司接受；可商議每份委託最低報酬，再由雙方確認。
-- 每位玩家同時擁有或加入一間合作公司。負責人之外共有八個合作席位，可預留NPC席位；真人與預留合計不超過八。線上合作公司與本局單人事業分開，不會強制轉職或轉移單人NPC薪酬。
-- 公司發布六類協作／教育委託：製作設備、科技資料、照顧服務、設計創作、溝通行銷、研究規劃。負責人選重點及報酬，夥伴選處理方式並回答三個常識問題。正式資格與授權界線仍須遵守；這些情境不提供現實執業資格。
-- 完成委託累積個人／公司合作聲望、公告與作品紀錄。完成三份成為資深合作夥伴，六份顯示協作組長；基金管理權仍只屬負責人。推薦人於被推薦者在該公司首次完成交付後獲一次聲望，不發現金推薦獎金。
-- 好口碑會留下兩天後可選的後續委託；不必按時登入，只有負責人再次確認發布才預留基金。
-- 夥伴可離職，負責人可移除成員、提出交接或結束公司。交接需對方接受，才轉移基金及管理權；新負責人自己未完成的夥伴委託會取消退款。
+- Email／Google 帳戶可建立動物名片、固定玩家代號、介紹及最多三項自述專長。匿名帳戶先綁定登入方式，原有人生保留。
+- 決定是否公開名片、顯示職業、接受邀請及同意好友推薦。不公開現金、健康、IQ／EQ／PQ／JQ、Email、人生識別或私人劇情。未公開名片仍可由已接受的好友及目前公司夥伴查看；公開公司資料包含團隊UID。
+- 好友邀請需本人接受。提供三種快捷訊息、移除好友、封鎖、解除封鎖及舉報。每對玩家的訊息只保留發訊者最近一則，至少相隔60秒；已結束好友關係需等24小時才能再次邀請。
+- 建立一間合作公司，負責人之外最多八位真人夥伴。這是單人職業之外的合作，不強制轉職、不收費，也不調整單人NPC或薪金。
+- 刊登六類工種、合作條件、公告，邀請或接受玩家申請。公司確認條件後，候選人仍須最後接受才能加入。候選人可提出新條件；好友推薦先由候選人同意，再由公司邀請。已處理公司邀請需等24小時才能重新提出。
+- 負責人發布文字委託，夥伴認領、提交處理建議，由負責人人工確認或要求補充。完成紀錄不代表專業認證、伺服器評分或排名。
+- 可離職、移除成員、提出交接及結束公司。接任者必須本人接受，原負責人才退出公司；不能單方面把管理權交給其他玩家。
+- 換人生或65歲退休後，下次開啟社群會同步：夥伴離職，負責人的公司暫停，等待交接或結束。好友及原有紀錄保留。已離職夥伴未完成的委託由負責人手動取消；沒有資金被鎖住或到期扣款。公司結束後，其他夥伴在下次開啟社群時解除舊職位。
 
-## 合作點與人生進度
+## 與先前 Functions 方案的差別
 
-合作點是伺服器管理的獨立遊戲帳本，不能兌換現金，不會自動加進本局薪金或退休資產。首次建立社交帳戶發5,000點一次；換人生、重新載入或改動本機存檔不會重新發放。
+已移除合作點、首次點數、公司基金、報酬協商、預留款、支付、自動評分、自動退款、排程清理、自動聲望／資歷及定時後續委託。合作條件是純文字約定，不是金錢合約。
 
-建立公司時從個人合作點移入500–5,000點基金，之後可自行補充。發布每份委託預留100–2,500點，最多同時20份；只有同公司、對應工種及符合議定最低報酬的夥伴可認領，負責人不能承接自己的委託。
+合作不增加單人人生的現金、技能、人脈、聲望、資格、每月安排或退休資產；沒有可領取的交付獎勵。舊存檔的歷史合作紀錄仍可讀取，但不能再新增本機獎勵。玩家自行提交的文字不被當成可信的成績。
 
-伺服器依常識答案與事前公布的重點評分，70分通過，最多兩次提交。通過後才把預留報酬轉入夥伴帳戶；第二次未通過、取消或到期，報酬退回公司。委託有效14個實際日；公司重新整理時會退回過期報酬，另有每小時清理工作，每次最多100份。重複提交、兩人同時認領和取消／結算競爭均由交易保護。基金、預留、退款及支付均留伺服器紀錄。
+舊 `career365_social_*`／`career365_cards` 等 Functions 集合保持禁止客戶端存取；新資料使用 `career365_spark_*` 集合，沒有自動搬移。此專案先前尚未成功部署 Functions。儲存庫已移除 Functions 原始碼、依賴和部署設定；若曾自行另外部署過舊 Functions，需由管理員在Console另行確認停用，這次靜態更新不會替你刪除雲端資源。
 
-已結算交付可用一次本月安排及8精力，把專業、人脈與聲望成長記入對應人生；同一份交付只能記入一次，不增加單人現金、不增加正式實習計數，也不授予資格。退休、待決故事、安排用盡或不同人生都不能領取本局成長。可在之後有空的月份再記入。
+## 部署：只需要 Spark
 
-名片公開後，人生識別會保存在該帳戶的本機／JSON／雲端存檔。換人生或65歲退休，下次開啟社交時同步：夥伴離職及取消其未完成委託，負責人的公司暫停招募並等待交接／結束；好友、合作點與既有合作紀錄保留。退休名片顯示為導師，不繼續改動65歲人生。跨裝置請載入同一份最新私人雲端人生，避免把舊備份當成另一局。
+唯一專案：`sky-playground-career-365`。青蛙專案不受影響。
 
-目前招募板顯示最近30間公開公司、邀請最近40條、短訊最近30條、本人交付最近30份；公司保留近期交付及公告。累積交付次數／聲望仍保留。頁面只在開啟、手動重新整理或操作後讀取，沒有背景輪詢或真實郵件／推播。
-
-## 後端部署
-
-唯一專案是 `sky-playground-career-365`；青蛙遊戲不使用這些Functions或集合。
-
-1. Firebase專案需可部署Cloud Functions第二代（Blaze計劃），並啟用Email／Google登入及既有Firestore。部署帳戶需具備所需Functions、Cloud Run、Cloud Build、Scheduler與Firestore權限；Firebase CLI會提示需要啟用的API。
-2. 在儲存庫根目錄安裝並檢查：
+1. [Firebase Console](https://console.firebase.google.com/project/sky-playground-career-365/overview)：確認已建立預設Firestore，並啟用Email／Password、Google登入及網站的Authorized domains。毋須升級Blaze或啟用Functions。
+2. 在自己的電腦安裝Node.js22或以上，於儲存庫根目錄執行：
 
 ```bash
-npm ci --prefix tools
+npm install -g firebase-tools
+firebase login
+firebase projects:list
 npm ci --prefix career-365
-npm ci --prefix career-365/functions
-npm run social:build --prefix career-365
 npm run social:check --prefix career-365
 ```
 
-3. 使用已登入正確Firebase帳戶的CLI部署：
+3. 檢查輸出專案為`sky-playground-career-365`，範圍只有`firestore:rules,firestore:indexes`，然後執行：
 
 ```bash
 npm run social:deploy --prefix career-365
 ```
 
-這個指令固定使用 `career-365/firebase.json` 及本資料夾公開設定的projectId，發布 `career-social` codebase、自己的Firestore規則及索引。後端會在本機predeploy先打包到`functions/dist/index.mjs`；`gcp-build`留空，避免Cloud Build再執行位於儲存庫外層的建置腳本。包括 `careerSocial` callable與 `careerSocialCleanup` scheduler，區域均為 `asia-east1`。`firebase:deploy`仍只部署規則及索引；原有指令不會偷偷部署Functions。`social:check`只輸出目標，不連線或發布。
+這個指令固定使用`career-365/firebase.json`及本遊戲設定的projectId。`firebase:deploy`亦部署同一組規則／索引。不能只部署索引：新的社交規則需要一起發布，否則操作會被拒絕。不要把社交集合改成公開讀寫，也不用執行`firebase init`覆寫設定。
 
-4. 等待四個複合索引完成，再發布靜態網站。使用兩個註冊帳戶驗收：建立名片、好友接受、公司職位及協商、預留報酬、認領／提交、重複提交、離職／交接及退款。
+4. 到[Firestore索引頁](https://console.firebase.google.com/project/sky-playground-career-365/firestore/indexes)等待三個複合索引可用：
 
-`functions/src/index.js` 驗證callable Auth與呼叫時的actorUid；UID取自驗證後的Auth，actorUid只防止登入切換期間把舊操作套到新帳戶。匿名及未登入不能存取社交後端。每個註冊帳戶每分鐘最多40次服務操作，包括服務邏輯拒絕的操作；身分或格式不符的請求在入口拒絕；Functions另有執行個體上限。預設不強制App Check；如要啟用，先設定前端App Check，再將Functions環境變數 `SOCIAL_REQUIRE_APP_CHECK=true`。
+| 集合 | 欄位 |
+| --- | --- |
+| `career365_spark_requests` | parties陣列包含、updatedAt降序 |
+| `career365_spark_requests` | companyId升序、updatedAt降序 |
+| `career365_spark_companies` | listed升序、status升序、updatedAt降序 |
 
-Firebase Admin僅在後端，使用部署環境的預設憑證；不要把服務帳戶金鑰放入瀏覽器或儲存庫。本機生活資料不是社交帳本的資金來源，修改本機現金不能充值公司。
+5. 發布最新版靜態網站。使用兩個Email／Google帳戶驗收：名片、好友接受、公司邀請與條件協商、認領／提交／負責人確認、離職／交接、封鎖及舉報。驗證不會出現合作點，也不會增加單人人生屬性。
 
-## 規則、管理與驗證
+## 權限、用量與管理
 
-`career365_saves/{uid}`仍保留原本私人存檔權限。所有社交集合的直接客戶端讀寫均拒絕，經callable按本人／公司／公開名片的權限回傳資料。伺服器保留題目答案，回傳的題目只有題幹及選項；提交後才提供解析。
+規則以Firebase Auth UID判斷操作者；支援已綁定Email／Google、但登入token仍標為anonymous的帳戶。直接匿名或未登入無法使用社群。玩家不能任意修改他人名片、私人人生識別、公司職位或委託狀態。
 
-集合：`career365_social_accounts`、`career365_cards`、`career365_handles`、`career365_companies`、`career365_invites`、`career365_tasks`、`career365_notes`、`career365_social_ledger`、`career365_social_reports`。舉報只供管理員在Firestore Console檢視，依 `status: open` 處理；不會自動因單一舉報停權。正式營運需安排管理員處理舉報。公開介紹與公司公告是純文字，介面會轉義，不執行玩家HTML。
+好友的兩份對稱文件、加入公司時的邀請／名額／私人職位、公司交接均以原子交易及`getAfter`規則共同驗證，不能只改其中一份。只有負責人可以確認委託，亦不能把已完成委託改回進行中。規則拒絕額外的餘額、分數或獎勵欄位。私人雲端存檔規則維持原有版本檢查及本人權限。
 
-`tests/social-server.test.js`使用可序列化記憶體交易模型測試實際服務邏輯；`tests/social-client.test.js`測試帳戶切換及人生領取。`scripts/social-browser.mjs`以隔離Auth／Functions傳輸fixture執行真實服務的雙玩家流程；可設定 `CAREER_BUILD_DIR` 對應打包版manifest。`scripts/social-production-check.mjs`載入實際Functions SDK而不呼叫後端，並測試離線本機遊玩。這些檢查不等於正式Firebase部署驗收。
+畫面與Firestore SDK延後載入；只有開啟、手動重新整理或操作後才讀取，沒有背景輪詢。每次列表有規則與客戶端上限：公司30、委託30、公司邀請40、好友關係50、訊息30、封鎖100；顯示的是最近紀錄，不代表全帳戶總量。封鎖即使未列在最近100筆，規則仍會阻止直接互動。公共資料同樣需要註冊帳戶，私人名片不可列舉。
 
-Firestore模擬器安全測試現在另包含九個社交集合的直接讀寫拒絕；需要Firestore emulator才可執行。本次未部署Functions、索引、規則或網站，亦未建立真實玩家或發送真實邀請。
+Spark仍有Firestore免費配額；本版本不保證無限用量。額度耗盡時社交暫停，本機人生與離線存檔可繼續。查詢上限及每對玩家冷卻不等於伺服器級全域限流。
+
+舉報位於`career365_spark_reports`，只允許舉報者寫入及本人單筆查看，其他客戶端不能讀取或列舉。同一對玩家24小時內只記一次；由管理員使用Console人工處理，不會自動停權。介紹、公告及交付內容均按純文字轉義顯示。
+
+## 本機驗證
+
+```bash
+npm ci --prefix career-365
+firebase emulators:exec --project demo-career365 --only firestore \
+  --config career-365/firebase.json \
+  "npm run test:rules --prefix career-365 && npm run test:social:rules --prefix career-365"
+```
+
+`test:rules`保留原有私人存檔及舊Functions集合拒絕測試；`test:social:rules`使用真實Firebase客戶端和實際Spark adapter，驗證名片私隱、同意、條件協商、推薦、八人名額競爭、認領競爭、手動交付、禁止獎勵、退休／交接、封鎖／舉報及查詢上限。只連接本機8090的demo專案，不建立正式帳戶或發送正式訊息。
+
+`scripts/social-browser.mjs`同樣需要本機Firestore模擬器，以實際Web SDK及安全規則執行四尺寸雙玩家流程；Auth是測試身份。`scripts/social-production-check.mjs`驗證打包版訪客社群畫面及安裝後離線本機遊玩，不呼叫正式Firebase。

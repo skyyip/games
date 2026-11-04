@@ -14,8 +14,8 @@ service cloud.firestore {
    allow create: if owner(uid) && validSnapshot() && request.resource.data.revision == 1;
    allow update: if owner(uid) && validSnapshot() && request.resource.data.revision == resource.data.revision + 1;
   }
-  // Multiplayer social data is served through authenticated callable Functions.
-  // Clients never write balances, memberships, answers, escrow or moderation reports.
+  // Legacy Blaze data stays inaccessible; Spark uses separate collections.
+  // No client can read, write or migrate this legacy server-owned ledger.
   match /career365_social_accounts/{id} { allow read, write: if false; }
   match /career365_cards/{id} { allow read, write: if false; }
   match /career365_handles/{id} { allow read, write: if false; }
@@ -25,6 +25,133 @@ service cloud.firestore {
   match /career365_notes/{id} { allow read, write: if false; }
   match /career365_social_ledger/{id} { allow read, write: if false; }
   match /career365_social_reports/{id} { allow read, write: if false; }
+  // Spark social data: no Functions, money, automated score or rewards.
+  function signed() { return request.auth != null && (request.auth.token.firebase.sign_in_provider in ['password','google.com'] || request.auth.token.firebase.identities.keys().hasAny(['email','google.com'])); }
+  function me() { return request.auth.uid; }
+  function accountPath(u) { return /databases/$(database)/documents/career365_spark_accounts/$(u); }
+  function cardPath(u) { return /databases/$(database)/documents/career365_spark_profiles/$(u); }
+  function companyPath(c) { return /databases/$(database)/documents/career365_spark_companies/$(c); }
+  function peerPath(u,v) { return /databases/$(database)/documents/career365_spark_links/$(u)/peers/$(v); }
+  function blocked(u,v) { return exists(/databases/$(database)/documents/career365_spark_blocks/$(u)/users/$(v)) || exists(/databases/$(database)/documents/career365_spark_blocks/$(v)/users/$(u)); }
+  function friends(u,v) { return exists(peerPath(u,v)) && get(peerPath(u,v)).data.state == 'accepted'; }
+  function hasCompany(c,u) { let d=get(companyPath(c)).data; return d.owner == u || u in d.memberIds; }
+  function colleague(u) { let a=get(accountPath(me())).data; return a.companyId != null && hasCompany(a.companyId,u); }
+  function visible(u) { return u == me() || (!blocked(me(),u) && (get(cardPath(u)).data.discoverable || friends(me(),u) || colleague(u))); }
+  function role(r) { return r in ['craft','tech','care','art','people','analysis']; }
+  function text(v,n) { return v is string && v.size() <= n; }
+  function stamp(d) { return d.updatedAt == request.time; }
+  function manager(c) { return get(companyPath(c)).data.owner == me(); }
+  function active(c) { return get(companyPath(c)).data.status == 'active'; }
+  function activeLife() { return get(accountPath(me())).data.retired == false; }
+  match /career365_spark_profiles/{uid} {
+   allow get: if signed() && (resource == null || visible(uid));
+   allow list: if false;
+   function valid() { let d=request.resource.data; return d.keys().hasOnly(['uid','handle','name','avatar','bio','status','skills','career','discoverable','allowInvites','allowReferrals','retired','updatedAt']) && d.uid == uid && d.handle.matches('[a-z0-9_]{3,16}') && text(d.name,20) && d.name.size()>0 && d.avatar in ['🐸','🐱','🐰','🦦','🐻','🦊','🐹','🐧'] && text(d.bio,100) && d.status in ['available','hiring','settled'] && d.skills is list && d.skills.size()<=3 && d.skills.hasOnly(['craft','tech','care','art','people','analysis']) && text(d.career,100) && d.discoverable is bool && d.allowInvites is bool && d.allowReferrals is bool && d.retired is bool && stamp(d); }
+   allow create: if signed() && owner(uid) && valid() && getAfter(/databases/$(database)/documents/career365_spark_handles/$(request.resource.data.handle)).data.uid == uid;
+   allow update: if signed() && owner(uid) && valid() && request.resource.data.handle == resource.data.handle;
+  }
+  match /career365_spark_handles/{handle} {
+   allow get: if signed() && (resource == null || visible(resource.data.uid));
+   allow list: if false;
+   allow create: if signed() && request.resource.data.keys().hasOnly(['uid','handle']) && request.resource.data.uid == me() && request.resource.data.handle == handle && getAfter(cardPath(me())).data.handle == handle;
+  }
+  match /career365_spark_accounts/{uid} {
+   allow get: if signed() && owner(uid);
+   function valid() { let d=request.resource.data; return d.keys().hasOnly(['uid','companyId','runId','retired','updatedAt']) && d.uid == uid && (d.companyId == null || text(d.companyId,64)) && d.runId.matches('[A-Za-z0-9_-]{16,64}') && d.retired is bool && stamp(d); }
+   allow create: if signed() && owner(uid) && valid() && request.resource.data.companyId == null;
+   allow update: if signed() && valid() && (
+    (owner(uid) && (request.resource.data.companyId == null && (resource.data.companyId == null || !hasAfter(resource.data.companyId,uid) || get(companyPath(resource.data.companyId)).data.status == 'closed') || request.resource.data.companyId != null && hasAfter(request.resource.data.companyId,uid))) ||
+    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['companyId','updatedAt']) && request.resource.data.companyId == null && resource.data.companyId != null && !hasAfter(resource.data.companyId,uid) && (manager(resource.data.companyId) || getAfter(companyPath(resource.data.companyId)).data.owner == me()))
+   );
+  }
+  function hasAfter(c,u) { let d=getAfter(companyPath(c)).data; return d.status != 'closed' && (d.owner == u || u in d.memberIds); }
+  match /career365_spark_links/{uid}/peers/{other} {
+   allow get: if signed() && owner(uid);
+   allow list: if signed() && owner(uid) && request.query.limit<=50;
+   function valid() { let d=request.resource.data; return d.keys().hasOnly(['from','to','state','updatedAt']) && d.from != d.to && ((d.from==uid && d.to==other)||(d.from==other && d.to==uid)) && d.state in ['pending','accepted','closed'] && stamp(d) && getAfter(peerPath(other,uid)).data == d; }
+   function invite() { let d=request.resource.data; return d.from == me() && d.state=='pending' && !blocked(uid,other) && get(cardPath(d.to)).data.allowInvites && exists(cardPath(me())); }
+   allow create: if signed() && me() in [uid,other] && valid() && invite();
+   allow update: if signed() && me() in [uid,other] && valid() && (
+    (request.resource.data.state == 'closed' && request.resource.data.from==resource.data.from && request.resource.data.to==resource.data.to) ||
+    (resource.data.state=='pending' && request.resource.data.state=='accepted' && resource.data.to==me() && request.resource.data.from==resource.data.from && request.resource.data.to==resource.data.to && !blocked(uid,other)) ||
+    (resource.data.state=='closed' && request.time>resource.data.updatedAt+duration.value(24,'h') && invite())
+   );
+  }
+  match /career365_spark_blocks/{uid}/users/{other} {
+   allow get, delete: if signed() && owner(uid);
+   allow list: if signed() && owner(uid) && request.query.limit<=100;
+   allow create, update: if signed() && owner(uid) && uid!=other && request.resource.data.keys().hasOnly(['uid','other','updatedAt']) && request.resource.data.uid==uid && request.resource.data.other==other && stamp(request.resource.data);
+  }
+  match /career365_spark_companies/{cid} {
+   allow get: if signed() && (resource == null || resource.data.listed && resource.data.status=='active' || hasCompany(cid,me()) || exists(/databases/$(database)/documents/career365_spark_requests/$(cid+'_'+me())) && get(/databases/$(database)/documents/career365_spark_requests/$(cid+'_'+me())).data.state in ['offered','requested','referred']);
+   allow list: if signed() && request.query.limit<=30 && resource.data.listed && resource.data.status=='active';
+   function valid() { let d=request.resource.data; return d.keys().hasOnly(['id','owner','name','description','listed','status','roles','terms','announcement','memberIds','createdAt','updatedAt']) && d.id==cid && text(d.owner,128) && text(d.name,30) && d.name.size()>0 && text(d.description,160) && d.listed is bool && d.status in ['active','paused','closed'] && d.roles is list && d.roles.size()<=6 && d.roles.toSet().size()==d.roles.size() && d.roles.hasOnly(['craft','tech','care','art','people','analysis']) && text(d.terms,160) && text(d.announcement,400) && d.memberIds is list && d.memberIds.size()<=8 && d.memberIds.toSet().size()==d.memberIds.size() && !(d.owner in d.memberIds) && stamp(d); }
+   allow create: if signed() && valid() && request.resource.data.owner==me() && request.resource.data.memberIds==[] && request.resource.data.status=='active' && request.resource.data.createdAt==request.time && activeLife() && get(accountPath(me())).data.companyId==null && getAfter(accountPath(me())).data.companyId==cid;
+   function joining() { let d=request.resource.data; let before=get(/databases/$(database)/documents/career365_spark_requests/$(cid+'_'+me())).data; let after=getAfter(/databases/$(database)/documents/career365_spark_requests/$(cid+'_'+me())).data; return d.diff(resource.data).affectedKeys().hasOnly(['memberIds','updatedAt']) && resource.data.status=='active' && !(me() in resource.data.memberIds) && me()!=resource.data.owner && d.memberIds==resource.data.memberIds.concat([me()]) && before.state=='offered' && before.role in resource.data.roles && after.state=='accepted' && getAfter(accountPath(me())).data.companyId==cid && get(accountPath(me())).data.companyId==null && activeLife() && !blocked(me(),resource.data.owner); }
+   function leaving() { let d=request.resource.data; let removed=resource.data.memberIds.removeAll(d.memberIds); return d.diff(resource.data).affectedKeys().hasOnly(['memberIds','updatedAt']) && removed.size()==1 && d.memberIds==resource.data.memberIds.removeAll(removed) && (me()==removed[0] || me()==resource.data.owner) && getAfter(accountPath(removed[0])).data.companyId==null; }
+   function handing() { let d=request.resource.data; let h=getAfter(/databases/$(database)/documents/career365_spark_companies/$(cid)/handover/current).data; return d.diff(resource.data).affectedKeys().hasOnly(['owner','memberIds','status','updatedAt']) && d.owner==me() && me() in resource.data.memberIds && d.memberIds==resource.data.memberIds.removeAll([me()]) && d.status=='active' && h.from==resource.data.owner && h.to==me() && h.state=='accepted' && getAfter(accountPath(resource.data.owner)).data.companyId==null; }
+   allow update: if signed() && valid() && request.resource.data.createdAt==resource.data.createdAt && (
+    (resource.data.owner==me() && resource.data.status!='closed' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','description','listed','status','roles','terms','announcement','updatedAt']) && (request.resource.data.status!='closed' || !request.resource.data.listed && getAfter(accountPath(me())).data.companyId==null)) || joining() || leaving() || handing()
+   );
+   match /handover/{id} {
+    allow read: if signed() && hasCompany(cid,me());
+    function validH() { let d=request.resource.data; return id=='current' && d.keys().hasOnly(['from','to','state','updatedAt']) && d.from==get(companyPath(cid)).data.owner && d.to in get(companyPath(cid)).data.memberIds && d.state in ['pending','accepted','declined'] && stamp(d); }
+    allow create: if signed() && manager(cid) && validH() && request.resource.data.state=='pending' && !blocked(me(),request.resource.data.to);
+    allow update: if signed() && validH() && (
+     (manager(cid) && request.resource.data.state=='pending') ||
+     (resource.data.state=='pending' && request.resource.data.from==resource.data.from && request.resource.data.to==resource.data.to && (me()==resource.data.to && request.resource.data.state=='accepted' && getAfter(companyPath(cid)).data.owner==me() && activeLife() && !blocked(me(),resource.data.from) || me() in [resource.data.from,resource.data.to] && request.resource.data.state=='declined'))
+    );
+   }
+   match /tasks/{tid} {
+    allow get: if signed() && hasCompany(cid,me());
+    allow list: if signed() && hasCompany(cid,me()) && request.query.limit<=30;
+    function validT() { let d=request.resource.data; return d.keys().hasOnly(['id','companyId','title','description','role','status','assignee','delivery','feedback','createdAt','updatedAt']) && d.id==tid && d.companyId==cid && text(d.title,80) && d.title.size()>0 && text(d.description,300) && role(d.role) && d.status in ['open','claimed','submitted','completed','cancelled'] && (d.assignee==null || text(d.assignee,128)) && text(d.delivery,300) && text(d.feedback,200) && stamp(d); }
+    allow create: if signed() && manager(cid) && active(cid) && validT() && request.resource.data.status=='open' && request.resource.data.assignee==null && request.resource.data.delivery=='' && request.resource.data.feedback=='' && request.resource.data.createdAt==request.time;
+    allow update: if signed() && validT() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','assignee','delivery','feedback','updatedAt']) && (
+     (resource.data.status=='open' && request.resource.data.status=='claimed' && request.resource.data.assignee==me() && request.resource.data.delivery==resource.data.delivery && request.resource.data.feedback==resource.data.feedback && me() in get(companyPath(cid)).data.memberIds && get(accountPath(me())).data.companyId==cid && activeLife() && active(cid) && !blocked(me(),get(companyPath(cid)).data.owner)) ||
+     (resource.data.status=='claimed' && request.resource.data.status=='submitted' && resource.data.assignee==me() && request.resource.data.assignee==me() && request.resource.data.feedback==resource.data.feedback && me() in get(companyPath(cid)).data.memberIds && activeLife() && active(cid)) ||
+     (manager(cid) && resource.data.status=='submitted' && request.resource.data.status in ['claimed','completed'] && request.resource.data.assignee==resource.data.assignee && request.resource.data.delivery==resource.data.delivery && resource.data.assignee in get(companyPath(cid)).data.memberIds && active(cid)) ||
+     (!(resource.data.status in ['completed','cancelled']) && request.resource.data.status=='cancelled' && (manager(cid) || resource.data.assignee==me()) && request.resource.data.assignee==resource.data.assignee && request.resource.data.delivery==resource.data.delivery && request.resource.data.feedback==resource.data.feedback)
+    );
+   }
+  }
+  match /career365_spark_requests/{id} {
+   allow get: if signed() && (resource == null || me() in resource.data.parties || manager(resource.data.companyId));
+   allow list: if signed() && request.query.limit<=40 && (me() in resource.data.parties || manager(resource.data.companyId));
+   function validR() { let d=request.resource.data; return d.keys().hasOnly(['id','companyId','candidate','proposer','parties','kind','role','terms','state','updatedAt']) && id==d.companyId+'_'+d.candidate && d.id==id && role(d.role) && text(d.terms,160) && d.kind in ['invite','application','referral'] && d.state in ['referred','requested','offered','accepted','declined'] && d.parties is list && d.parties.size()<=3 && stamp(d); }
+   function newR() { let d=request.resource.data; let c=get(companyPath(d.companyId)).data; return c.status=='active' && d.role in c.roles && d.proposer==me() && !blocked(c.owner,d.candidate) && get(cardPath(d.candidate)).data.retired==false && (
+    (d.kind=='invite' && c.owner==me() && d.candidate!=me() && d.state=='offered' && get(cardPath(d.candidate)).data.allowInvites && d.parties==[c.owner,d.candidate]) ||
+    (d.kind=='application' && d.candidate==me() && c.listed && d.state=='requested' && d.parties==[c.owner,me()]) ||
+    (d.kind=='referral' && d.candidate!=me() && c.owner!=me() && c.listed && d.state=='referred' && friends(me(),d.candidate) && get(cardPath(d.candidate)).data.allowReferrals && !blocked(me(),d.candidate) && !blocked(me(),c.owner) && d.parties==[c.owner,d.candidate,me()])
+   ); }
+   allow create: if signed() && validR() && newR();
+   allow update: if signed() && validR() && (
+    (resource.data.state in ['declined','accepted'] && request.time>resource.data.updatedAt+duration.value(24,'h') && newR()) ||
+    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state','role','terms','updatedAt']) && (
+     (request.resource.data.state=='declined' && (me()==resource.data.candidate || manager(resource.data.companyId) || me()==resource.data.proposer && resource.data.state=='referred')) ||
+     (active(resource.data.companyId) && !blocked(get(companyPath(resource.data.companyId)).data.owner,resource.data.candidate) && (
+      (me()==resource.data.candidate && resource.data.state in ['referred','offered'] && request.resource.data.state=='requested') ||
+      (manager(resource.data.companyId) && resource.data.state=='requested' && request.resource.data.state=='offered' && request.resource.data.role in get(companyPath(resource.data.companyId)).data.roles) ||
+      (me()==resource.data.candidate && resource.data.state=='offered' && request.resource.data.state=='accepted' && request.resource.data.role==resource.data.role && request.resource.data.terms==resource.data.terms && getAfter(accountPath(me())).data.companyId==resource.data.companyId && me() in getAfter(companyPath(resource.data.companyId)).data.memberIds)
+     ))
+    ))
+   );
+  }
+  match /career365_spark_inbox/{uid}/notes/{sender} {
+   allow get: if signed() && owner(uid);
+   allow list: if signed() && owner(uid) && request.query.limit<=30;
+   allow delete: if signed() && owner(uid);
+   function validN() { let d=request.resource.data; return signed() && me()==sender && uid!=sender && d.keys().hasOnly(['from','to','kind','updatedAt']) && d.from==sender && d.to==uid && d.kind in ['thanks','again','help'] && stamp(d) && !blocked(sender,uid) && (friends(sender,uid) || colleague(uid)); }
+   allow create: if validN();
+   allow update: if validN() && request.time>resource.data.updatedAt+duration.value(60,'s');
+  }
+  match /career365_spark_reports/{id} {
+   allow get: if signed() && resource.data.from==me();
+   allow list: if false;
+   function validReport() { let d=request.resource.data; return signed() && d.keys().hasOnly(['from','to','reason','updatedAt']) && d.from==me() && text(d.to,128) && d.to!=me() && exists(cardPath(d.to)) && id==me()+'_'+d.to && d.reason in ['spam','harassment','scam','other'] && stamp(d); }
+   allow create: if validReport();
+   allow update: if validReport() && request.time>resource.data.updatedAt+duration.value(24,'h');
+  }
   match /{document=**} { allow read, write: if false; }
  }
 }

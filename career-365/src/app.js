@@ -1,4 +1,4 @@
-import {socialContext,applySocialReceipt} from './social-game.js';
+import {socialContext} from './social-game.js';
 import {MONTHLY_CHOICES,INVESTMENT_PRESETS,featuredJobs,choiceSummary} from './monthly-play.js';
 import {LearningUI} from './learning-ui.js';
 import {careerBrief,careerBands} from './career-briefs.js';
@@ -200,7 +200,7 @@ refreshSkipDay();window.addEventListener('storage',e=>{if(e.key===SKIP_KEY&&game
 
 for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',()=>queueMicrotask(maybeGrowth));
 const account=new CareerAccount({store:accountStore,onIdentity:switchIdentity,onAdopt:adoptLocalLife,hasCandidate:()=>!!importCandidate&&!game,onRestoring:loading=>{$('continue').disabled=loading||identityLoading;$('new-cover').disabled=loading||identityLoading;if(loading)$('account-open').textContent='還原玩家中…';},show,notify:inform});
-let socialOpening=false;$('social-open').onclick=async()=>{if(socialOpening)return;socialOpening=true;try{const {CareerSocial}=await import('./social-ui.js');social=new CareerSocial({getGame:()=>game,getUid:()=>currentUid,getUser:()=>account.user,act,show,notify:inform,login:()=>account.open(),applyReceipt:receipt=>applySocialReceipt(game,receipt,currentUid),ensureContext:async()=>{const g=game,uid=currentUid;if(!g)throw Error('life-required');if(!uid)throw Error('signin');if(!g.s.life.socialRunId){const done=await act(()=>{if(game!==g||currentUid!==uid)return false;g.s.life.socialRunId=crypto.randomUUID();return true;});if(done===false)throw Error('identity-changed');}if(game!==g||currentUid!==uid)throw Error('identity-changed');return socialContext(g);}});social.identity(currentUid);await social.open();}catch{inform('社交畫面暫時未能載入，請稍後再試；目前人生已保留。');}finally{socialOpening=false;}};
+let socialOpening=false;$('social-open').onclick=async()=>{if(socialOpening)return;socialOpening=true;try{const {CareerSocial}=await import('./social-ui.js');social=new CareerSocial({getGame:()=>game,getUid:()=>currentUid,getUser:()=>account.user,act,show,notify:inform,login:()=>account.open(),ensureContext:async()=>{const g=game,uid=currentUid;if(!g)throw Error('life-required');if(!uid)throw Error('signin');if(!g.s.life.socialRunId){const done=await act(()=>{if(game!==g||currentUid!==uid)return false;g.s.life.socialRunId=crypto.randomUUID();return true;});if(done===false)throw Error('identity-changed');}if(game!==g||currentUid!==uid)throw Error('identity-changed');return socialContext(g);}});social.identity(currentUid);await social.open();}catch{inform('社交畫面暫時未能載入，請稍後再試；目前人生已保留。');}finally{socialOpening=false;}};
 
 
 $('reload-life').onclick=async()=>{if(saving)await saving;try{const latest=await repository.load(currentUid);if(!latest)throw Error('empty');game=latest;conflicted=false;$('save-conflict').hidden=true;for(const d of document.querySelectorAll('dialog[open]'))d.close();await startView();inform('已載入最新進度。');}catch{inform('暫時未能讀取最新進度，請先匯出目前版本備份。');}};
