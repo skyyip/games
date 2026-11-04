@@ -132,7 +132,7 @@ Private cloud snapshots use revision-checked Firestore transactions, optional gz
 
 All405 jobs now receive a recurring three-chapter work project, trust and delayed follow-ups. Twelve named-role campaigns override the25 shared sector campaigns; a shared campaign inserts the selected job's routine and keeps its own per-job progress and trust. This is broad sector coverage, not405 independently authored campaigns. Existing ordinary cases remain reachable between chapters. Pending older cases are remapped by topic/clue, and prior non-campaign jobs begin at chapter1 rather than inheriting an unrelated old work count.
 
-The knowledge bank contains **216 three-answer items**:150 foundational questions (six per sector) plus66 specialty items across33 role groups. Every job has at least six eligible questions; additional items cover fields such as pharmacy, aviation, accounting, cybersecurity, databases, baking, rehabilitation, digital forensics and usability research. Questions shuffle answer positions and prioritise unseen material. Correctness follows the player's chosen answer, not a stat-based die roll. The explanation and correct concept appear after answering, with a further-reading reference; these are locally authored learning questions, not official certification exams.
+The knowledge bank contains **243 three-answer items**:150 foundational questions (six per sector),66 specialty items across33 role groups and27 dated era-topic questions. Every job has at least six eligible questions; additional items cover fields such as pharmacy, aviation, accounting, cybersecurity, databases, baking, rehabilitation, digital forensics and usability research. Questions shuffle answer positions and prioritise unseen material. Correctness follows the player's chosen answer, not a stat-based die roll. The explanation and correct concept appear after answering, with a further-reading reference; these are locally authored learning questions, not official certification exams.
 
 Knowledge practice costs one monthly focus action and10 energy. It pays no monthly wage and does not count as supervised practice or fulfil a professional assessment. Correct answers and corrections give modest skill growth. Per-job answered/correct totals survive career changes; the latest24 reviews are available in the notebook, while full comic history retains earlier decisions.
 
@@ -145,3 +145,12 @@ node --test --test-isolation=none career-365/tests/*.test.js frogger-jump/tests/
 CAREER_URL=http://localhost:5281/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node career-365/scripts/professional-practice-browser.mjs
 CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node career-365/scripts/professional-practice-production.mjs
 ```
+
+
+## 時代熱潮與新專精（2026-11-04）
+
+新增時代小誌：九個主題按遊戲月份經過新芽、成長、擁擠高峰、冷卻和日常化。AI、深偽信任、算力能源、數碼支付、IP收藏、盛事旅遊、銀髮、寵物及氣候成本融入原有職業，各有三章故事與可免費拒絕的選擇；咖啡師另有AI無人咖啡街情節。可主動探索或關閉自動遇見，舊職故事與原職務一起保留。
+
+12項新專精可與本業並行，相關／跨領域分別需至少3／6個月及3／6課，最多兩項，可暫停並跨轉職保留。完成不取代實習、授權或正式資格；有償委託只限合適且具資格的角色。熱度影響交付獎金、議薪機會與小幅虛構市場／創業成本，不自動提高薪酬代理值。
+
+資料快照截至2026-11-04，介面列來源日期；2027年以後清楚標成虛構演化，離線不推進時鐘。27題主題常識加入原題庫，共243題。時代選擇收進本機／帳戶／私人雲端快照、漫畫與65歲結算。舊檔補預設值，沒有新的Firestore集合。詳見 [ERA.md](./ERA.md)。

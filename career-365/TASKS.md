@@ -102,3 +102,15 @@ Updated:2026-11-04
 - [x] Stable old work-case mapping and separate sequence counts for newly introduced sector stories.
 - [x] All405 role coverage, all216 answer paths, all75×3 event choices, migration and malformed-state checks.
 - [x] Four-size source/production flows, installed offline question continuation and existing account/life regressions.
+
+
+## 時代熱潮與新專精（2026-11-04）
+
+- [x] 九個當代主題、五階段生命週期、遊戲世界年月與有日期來源；虛構未來清楚標示。
+- [x] 九主題27章、咖啡街專用情節；保留路線、信任、原職業、冷卻與免費退出。
+- [x] 全405職業按領域融入新方向，12項專精與本業並行、3／6月及課堂雙門檻、最多兩項、可暫停和跨職保留。
+- [x] 需求、工作交付、議薪、投資和創業成本連動；不自動改月薪、不跳過資格、不重複發薪。
+- [x] 新增27題時代專業常識，總題庫243題，沿用作答解析與相關職業配對。
+- [x] 時代小誌、故事紀錄、漫畫、65歲稱號感言及舊檔遷移。
+- [x] 234項自動檢查、來源與正式版各四種螢幕測試、正式版離線續玩及26頁SEO驗證。
+- [ ] 依真人／業界試玩調整長期故事重複度與事件頻率；未宣稱已驗證留存率。

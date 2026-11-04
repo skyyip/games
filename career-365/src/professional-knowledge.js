@@ -1,3 +1,4 @@
+import {ERA_QUESTIONS,ERA_KNOWLEDGE_SOURCES} from './era-knowledge.js';
 // Foundational learning cards, not licensing examinations. References are further-reading sources.
 // Question IDs are persisted in saves: append entries rather than reordering existing rows.
 export const KNOWLEDGE_SOURCES={
@@ -309,9 +310,10 @@ const SPECIALTIES=[
  ['大量重複同樣練習是否必然最有效？','不是，需有目標、回饋及恢復','必然，時間越長越好','只需取消所有休息','有目的的練習需針對弱點並檢視結果，也要考慮負荷與健康。']]],
 ];
 export const SPECIALTY_QUESTIONS=SPECIALTIES.flatMap(([key,category,jobs,rows])=>rows.map(([prompt,answer,a,b,explanation],i)=>({id:`special.${key}.${i+1}`,category,jobs,prompt,options:[answer,a,b],answer:0,explanation,source:category})));
-export const ALL_QUESTIONS=[...Object.values(CATEGORY_QUESTIONS).flat(),...SPECIALTY_QUESTIONS];
+Object.assign(KNOWLEDGE_SOURCES,ERA_KNOWLEDGE_SOURCES);
+export const ALL_QUESTIONS=[...Object.values(CATEGORY_QUESTIONS).flat(),...SPECIALTY_QUESTIONS,...ERA_QUESTIONS];
 const byId=new Map(ALL_QUESTIONS.map(q=>[q.id,q]));
 export const questionById=id=>byId.get(id)??null;
-export function questionsFor(job){return job?[...(CATEGORY_QUESTIONS[job.category]??[]),...SPECIALTY_QUESTIONS.filter(q=>q.jobs.includes(job.name))]:[];}
+export function questionsFor(job){return job?[...(CATEGORY_QUESTIONS[job.category]??[]),...SPECIALTY_QUESTIONS.filter(q=>q.jobs.includes(job.name)),...ERA_QUESTIONS.filter(q=>q.categories.includes(job.category))]:[];}
 export function makeKnowledgeCase(job,question,randomInt){const order=[0,1,2];for(let i=2;i>0;i--){const j=randomInt(0,i);[order[i],order[j]]=[order[j],order[i]];}return {id:'knowledge-case',scene:'study',title:`${job.name}｜專業常識`,text:`${question.prompt} 這是職業基礎概念練習；答題後會解釋理由，不代替專業訓練或牌照。`,knowledge:{career:job.id,question:question.id,order},choices:order.map(index=>({label:question.options[index],effects:{}}))};}
 export function validKnowledgeCase(e,job){const q=questionById(e.knowledge?.question),order=e.knowledge?.order;return !!q&&questionsFor(job).some(item=>item.id===q.id)&&e.knowledge.career===job.id&&Array.isArray(order)&&order.length===3&&new Set(order).size===3&&order.every(n=>Number.isInteger(n)&&n>=0&&n<3)&&e.choices?.length===3&&e.choices.every((c,i)=>c.label===q.options[order[i]]&&c.effects&&Object.keys(c.effects).length===0);}

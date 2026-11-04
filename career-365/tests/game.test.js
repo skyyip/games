@@ -40,13 +40,13 @@ test('PQ buffers stress while health determines physical energy capacity; recove
  high.s.stats.health=40;assert(high.energyMax<low.energyMax);low.rest();assert(low.s.stats.pq>0);low.changeStats({pq:200});assert.equal(low.s.stats.pq,100);
 });
 test('graduates can study for a year, complete classes and choose more education or an apprenticeship',()=>{
- const g=new LifeGame({seed:123});g.roll=()=>.95;g.s.cash=150000;assert(g.enroll());assert.equal(g.s.status,'student');assert.equal(g.work(),false);
+ const g=new LifeGame({seed:123});g.roll=()=>.95;g.s.cash=150000;assert(g.enroll());g.setEraAuto(false);assert.equal(g.s.status,'student');assert.equal(g.work(),false);
  assert(LifeGame.restore(g.s));const before=g.s.cash;assert(g.study());assert.equal(g.s.cash,before);
  assert.equal(g.plan(12),12);assert.equal(g.s.status,'graduate');assert.equal(g.s.educationPlan,null);assert.equal(g.s.lastLedger.education,1800);
  assert(LifeGame.restore(g.s));assert(g.enroll());assert.equal(g.s.status,'student');g.s.cash=10000;assert(g.chooseCareer(JOBS[0].id));assert.equal(g.s.status,'apprentice');assert.equal(g.s.educationPlan,null);
  const poor=new LifeGame({seed:1});poor.s.cash=5999;const raw=JSON.stringify(poor.s);assert.equal(poor.enroll(),false);assert.equal(JSON.stringify(poor.s),raw);
 });
-test('a year without classes does not confer a qualification',()=>{const g=new LifeGame({seed:123});g.roll=()=>.95;g.s.cash=100000;g.enroll();for(let i=0;i<12;i++)g.endMonth();assert.equal(g.s.status,'student');assert.equal(g.s.educationPlan.remaining,0);assert.equal(g.s.educationPlan.credits,0);});
+test('a year without classes does not confer a qualification',()=>{const g=new LifeGame({seed:123});g.roll=()=>.95;g.s.cash=100000;g.enroll();g.setEraAuto(false);for(let i=0;i<12;i++)g.endMonth();assert.equal(g.s.status,'student');assert.equal(g.s.educationPlan.remaining,0);assert.equal(g.s.educationPlan.credits,0);});
 test('quitting closes a business, retains skills and assets, and stops regular work income',()=>{
  const g=setup();g.s.status='employed';g.s.cash=100000;g.startBusiness();g.businessAction('hire');ready(g);const craft=g.s.skills.craft,cash=g.s.cash;assert(g.quit());assert.equal(g.s.status,'sabbatical');assert.equal(g.s.cash,cash-1000);assert.equal(g.s.business,null);assert.equal(g.s.skills.craft,craft);assert.equal(g.work(),false);assert.equal(g.study(),false);assert(g.explore());assert(LifeGame.restore(g.s));
 });
