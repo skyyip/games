@@ -200,3 +200,20 @@ Validation passed: **54 Node tests**; unchanged-resize/pixel-budget/cache invali
 ## Character update — 2026-11-04
 
 Kurimanju now carries a handled amber beer mug with foam and glass highlights. Usagi is displayed as 兔兔. Rakko costs1,880 coins in the catalog and Firestore price map, with white fur, brown cap/forehead tufts, cross scar, white cape, collar clasp and sword/strap. A local Chromium render of all three characters was visually inspected. All93 Frogger tests pass, including exact catalog/Firestore price consistency, purchased-species persistence and cached scene/skill behavior. Source cache version is29. Cloud rules have been edited locally; they have not been published to Firebase. No push performed.
+
+## Rendering cache and HUD update — 2026-11-04
+
+Matched source benchmark:390×844, same browser/fake clock, one-second charging and settled turtle-idle workloads. The moving-pad fixture now derives the opening variant chance from the game's difficulty rules.
+
+| Workload measurement | Before | After |
+| --- | ---: | ---: |
+| Charging rendered frames |32|32|
+| Charging HUD attribute mutations |128|96|
+| Charging drawImage calls |160|128|
+| Turtle-idle rendered frames |31|31|
+| Turtle-idle ellipse calls |372|0|
+| Static idle / paused frames |0 / 0|0 / 0|
+
+Static river geometry now sits on a separate non-interactive Canvas layer. Stable special-pad bitmaps follow live surface coordinates, while breathing/spinning surfaces, sinking pads and landing reactions remain dynamic. Animal poses use a48-entry LRU cache and survive same-DPR resize; different DPR invalidates them. Power colour/position styles share one update. Canvas pixel budgets and animation cadence remain bounded.
+
+96 Frogger tests pass. All seven platform UI scenarios pass, including turtle drift, duck sliding, ice timing and flower/shell bonuses. Four viewports each complete73 mixed-route hops, covering input methods, hazards, pause, predators, replay and idle suspension. The rendered river/power-meter screenshot was visually inspected. Production performance-budget checks pass, with Firestore still loading on demand:478,762 decoded initial JS bytes versus1,043,957 after opening the leaderboard. Source startup module counts are not a validation of bundled Firebase behaviour. Operation-count savings are not a real-device FPS/battery guarantee. Source worker isv30. No push performed.

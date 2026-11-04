@@ -13,7 +13,7 @@ Updated:2026-11-04
 - [x] Monthly actions, interruptible yearly plans and once-only retirement at65.
 - [x] Dynamic comic history, local retirement narration, complete HTML book and PNG highlights.
 - [x] Autosave, validated JSON backups/import, denied-storage fallback and offline worker.
-- [x]59 meaningful logic tests,405 job-selection save checks and six seeded complete-life simulations.
+- [x]62 meaningful logic tests,405 job-selection save checks and six seeded complete-life simulations.
 
 - [x] Four-size source/production UI checks and a full306-panel retirement through actual controls.
 - [x] Complete HTML/PNG/JSON exports, safe backup import, denied storage and installed offline work.
@@ -56,3 +56,10 @@ Updated:2026-11-04
 - [x]12 new category problems and8 new named-role cases;91 workplace scenarios overall.
 - [x]Category-aware search, accurate405-career guide/metadata and source cachev5.
 - [x]New job selection, work choices and save restoration verified.
+
+## Daily skip allowance
+
+- [x]12 direct month skips per real day; normal completed-action progression remains free.
+- [x]Client-zone midnight reset (UTC+9), independent quota storage and cross-tab locking where supported.
+- [x]Expense/market/health settlement, pending-choice guard and planner action completion.
+- [x]Quota exhaustion, normal progression, reload/new-life persistence, next-day reset and offline verification.

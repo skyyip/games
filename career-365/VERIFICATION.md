@@ -57,3 +57,9 @@ node tools/check-seo.mjs _site /games/
 - New groups contain16AI,8funeral,6forensic and10experience/sensory roles. New material adds12 category cases and8 named-role cases, bringing the work library to91 scenarios.
 - Four viewport browser checks pass: full405-job list; all four category filters and counts; category-aware AI/RAG search; selection and work problem for AI agent engineering, forensic medicine, tasting, mystery shopping and funeral coordination; result/review, save restoration and no horizontal overflow.
 - Source and26-page production SEO checks pass; build release `fca9221d1ad71504`. Source worker advances tov5. Landing visibility remains unlisted. No push performed.
+
+## Daily month skipping — 2026-11-04
+
+62 career tests pass, including twelve-use exhaustion, shared storage instances, reload persistence, UTC+9 midnight reset and unavailable-storage session fallback. Quota lives outside life JSON saves. The month control charges only when actions remain; normal completion stays free, pending choices remain blocking, and yearly plans finish unused actions as rest.
+
+Source and production UI checks pass at320×568,390×844,812×375 and1280×900: twelve months skip with expenses, then the limit blocks another skip; three rest actions still permit normal advancement; reload and a new life preserve the exhausted allowance; a new day restores12. Production offline skipping and quota/save reload also pass. Together with Frogger's96 tests,158 logic tests pass. Source and built SEO checks cover26 pages; build release `cf78ebdb0bf18144`. No push performed.

@@ -113,3 +113,9 @@ The mermaid artwork uses the black/white head and red-tail Siren interpretation;
 Source worker **v29** preloads the island-art module. Publish the updated **22-species** Firestore rules before cloud purchases. No existing animals, balances or achievements are migrated or removed.
 
 Rakko now uses white fur, a warm-brown head cap with white forehead tufts, a cross-shaped scar, white cape, gold collar clasp and a sword. The reference is the [official character page](https://www.chiikawaofficial.com/characters/). Kurimanju carries a foamy amber beer mug. Usagi’s Traditional Chinese display name is 兔兔; persistent species IDs stay stable. Publish the updated Firestore price rule for new Rakko cloud purchases at1,880 coins.
+
+## Rendering performance update
+
+The static river artwork is displayed on a separate, non-interactive Canvas layer instead of copied onto the scene every frame. Stable special-pad sprites now share the pad cache; turtles are positioned from the live surface each frame, while breathing/spinning pads, sinking traps and landing reactions retain dynamic rendering. Frequently reused animal poses use bounded LRU caching, and same-DPR resizes retain their sprites. Power colour and meter positioning update together to reduce DOM mutations. The main Canvas pixel budget,30Hz charging/idle animation and60Hz jump cadence are retained. Source worker isv30.
+
+In the matched390×844 one-second source workload, charging still rendered32 frames: HUD attribute mutations decreased128→96 and drawImage calls160→128. Settled turtle idle still rendered31 frames but issued0 ellipse calls instead of372. These are operation counts, not a measured guarantee of higher FPS or battery life on every device.

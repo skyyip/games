@@ -74,3 +74,10 @@ Updated: 2026-11-04
 - [ ] Exercise simultaneous results in separate browser tabs; this continuation shares requests within one page and does not add cross-tab queue coordination.
 
 See [VERIFICATION.md](VERIFICATION.md) for evidence and [FIREBASE.md](FIREBASE.md) for backend setup and emulator commands.
+
+## Performance update — 2026-11-04
+
+- [x] Independent static-water layer, stable special-pad bitmaps with live turtle positions.
+- [x] Bounded LRU animal poses and reuse across same-DPR resizes.
+- [x] Combined power-meter styles;128→96 charging HUD mutations per benchmark second.
+- [x]96 engine/render tests,7 platform UI flows,4 viewports with73 hops each and production performance budgets.

@@ -2,8 +2,11 @@ import {LifeGame,SAVE_KEY,LIFE_MODES} from './game.js';
 import {JOBS,CATEGORIES,SKILLS} from './content.js';
 import {ASSET_INFO,SALARY_SOURCES} from './economy.js';
 import {workProfile} from './work-experience.js';
+import {MonthSkipBudget,SKIP_KEY,DAILY_SKIPS} from './skip-budget.js';
 import {avatar,panelSVG,bookDocument,posterSVG,esc} from './comics.js';
 const $=id=>document.getElementById(id),fmt=n=>Math.round(n).toLocaleString('zh-HK'),dollars=n=>'$'+fmt(n);
+let skipStorage=null;try{skipStorage=localStorage;}catch{}
+const skipBudget=new MonthSkipBudget({storage:skipStorage});let skipRefreshTimer;
 let game=null,draft=null,selectedJob=null,bookPage=0,noticeTimer,persistent=true,allocationMode='amount',allocationDraft={};
 try{const raw=localStorage.getItem(SAVE_KEY);if(raw){game=LifeGame.restore(raw);if(!game)$('storage-note').textContent='舊存檔無法讀取，可以重新抽一張人生履歷。';}}catch{persistent=false;}
 $('continue').hidden=!game;
@@ -59,7 +62,7 @@ function render(){if(!game)return;const s=game.s,p=s.profile,q=s.stats,job=game.
  $('actions').innerHTML=`<p class="action-help">每月 3 次行動。先安排工作與休息，再為想做的事留一點時間。</p><div class="daily-actions">${primary.map(actionCard).join('')}</div>${[['career','職涯與額外工作',business],['change','旅行、辭職與人生轉向',changes]].filter(([, ,items])=>items.length).map(([key,title,items])=>`<details class="more-actions" data-group="${key}" ${expanded.has(key)?'open':''}><summary>${title}<span>${items.length} 個選擇</span></summary><div class="daily-actions">${items.map(actionCard).join('')}</div></details>`).join('')}`;
 
  document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>act(()=>b.dataset.action.startsWith('habit-')?game.habit(b.dataset.action.slice(6)):b.dataset.action.startsWith('family-')?game.relationshipAction(b.dataset.action.slice(7)):b.dataset.action.startsWith('life-')?game.changeLife(b.dataset.action.slice(5)):({treat:()=>game.treat(),support:()=>game.support(),quit:()=>game.quit(),explore:()=>game.explore(),study:()=>game.study(),verify:()=>game.study(true),work:()=>game.work(),rest:()=>game.rest(),social:()=>game.rest(true),overtime:()=>game.work(true),negotiate:()=>game.negotiate(),business:()=>game.startBusiness(),hire:()=>game.businessAction('hire'),market:()=>game.businessAction('market'),close:()=>game.closeBusiness()}[b.dataset.action])()));
- $('ap').textContent=`本月還有 ${s.ap} / 3 行動`;$('month').disabled=!game.active;$('year').disabled=!game.active;$('plan-box').hidden=s.status==='retired';$('retirement').hidden=s.status!=='retired';
+ $('ap').textContent=`本月還有 ${s.ap} / 3 行動`;const skips=skipBudget.remaining,skipping=s.ap>0;$('month').disabled=!game.active||skipping&&skips===0;$('month').textContent=skipping?'跳過本月 →':'下一個月 →';$('month').setAttribute('aria-label',skipping?`跳過本月，今日剩餘 ${skips} 次，仍會結算開支與健康`:'本月行動已完成，正常進入下一個月');$('month-skip-note').textContent=`今日可跳月 ${skips} / ${DAILY_SKIPS} 次${skipBudget.persistent?'':'（本次瀏覽）'}`;$('year').disabled=!game.active;$('plan-box').hidden=s.status==='retired';$('retirement').hidden=s.status!=='retired';
  if(s.status==='retired'){const r=game.retirement();$('retirement').innerHTML=`<p class="eyebrow">65 歲・這次，真的下班了。</p><h2>${esc(p.name)}，恭喜退休。</h2><div class="titles">${r.titles.map(t=>`<span>${esc(t)}</span>`).join('')}</div><p>${esc(r.quote)}</p><div class="career-meta"><span>淨資產 ${dollars(r.wealth)}</span><span>${s.panels.length} 格漫畫</span><span>${s.metrics.switches} 次轉行</span></div><button id="retire-book" class="primary">把這一生，收成一本書 ↗</button>`;$('retire-book').onclick=openBook;}
  $('comic-strip').innerHTML=s.panels.slice(-6).map(card).join('');if($('finance-dialog').open)renderFinance();if($('book-dialog').open)renderBook();
 }
@@ -77,7 +80,10 @@ function renderSelection(){
 }
 
 $('job-search').oninput=renderJobs;$('job-category').onchange=renderJobs;$('career-confirm').onclick=()=>{const route=document.querySelector('input[name=route]:checked').value;if(act(()=>game.chooseCareer(selectedJob,route))!==false)close('career-dialog');};
-$('month').onclick=()=>act(()=>game.endMonth(),'下一個月，還有新的可能。');$('year').onclick=()=>{const count=act(()=>game.plan(12,$('plan-focus').value));if(count!==false)inform(`已推進 ${count} 個月${game.s.pending?'，遇到一個需要你決定的故事。':'。'}`);};
+$('month').onclick=async()=>{
+ const advance=()=>{if(game.s.ap===0)return act(()=>game.endMonth(),'下一個月，還有新的可能。');if(skipBudget.remaining===0){inform('今天的 12 次跳月已用完；完成本月行動後仍可正常前進。');return false;}return act(()=>{if(!game.endMonth())return false;skipBudget.consume();return true;},`已跳過一個月，開支、市場與健康仍照常結算。`);};
+ if(navigator.locks)await navigator.locks.request('career-365.month-skips',advance);else advance();
+};$('year').onclick=()=>{const count=act(()=>game.plan(12,$('plan-focus').value));if(count!==false)inform(`已推進 ${count} 個月${game.s.pending?'，遇到一個需要你決定的故事。':'。'}`);};
 const ASSETS=Object.fromEntries(Object.entries(ASSET_INFO).map(([k,v])=>[k,[v.icon,v.name,v.hint]]));
 function renderAllocation(){
  $('allocation-rows').innerHTML=Object.entries(ASSET_INFO).map(([id,info])=>`<div class="allocation-row"><label for="allocate-${id}"><span>${info.icon} ${info.name}</span><small>持有 ${dollars(game.assetValue(id))}</small></label><div class="allocation-input"><input id="allocate-${id}" data-allocate="${id}" type="number" inputmode="decimal" step="${allocationMode==='weights'?'.1':'.01'}" ${allocationMode==='weights'?'min="0" max="100"':''} value="${allocationDraft[id]??0}" aria-label="${esc(info.name)}${allocationMode==='weights'?'目標百分比':'投入或提取金額'}"><span>${allocationMode==='weights'?'%':'HK$'}</span></div></div>`).join('');
@@ -107,3 +113,6 @@ for(const b of document.querySelectorAll('[data-close]'))b.onclick=()=>close(b.d
 $('resume-dialog').addEventListener('close',()=>{if(draft)draft=null;});
 if(!persistent)$('storage-note').textContent='瀏覽器未允許永久儲存；開始後可匯出 JSON 備份。';
 if('serviceWorker'in navigator)navigator.serviceWorker.register(new URL('../sw.js',import.meta.url)).catch(()=>{});
+
+function refreshSkipDay(){clearTimeout(skipRefreshTimer);if(game)render();const next=(Math.floor((Date.now()+9*3600000)/86400000)+1)*86400000-9*3600000;skipRefreshTimer=setTimeout(refreshSkipDay,Math.max(1000,next-Date.now()+100));}
+refreshSkipDay();window.addEventListener('storage',e=>{if(e.key===SKIP_KEY&&game)render();});document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshSkipDay();});

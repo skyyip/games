@@ -27,7 +27,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v5` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v6` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -96,3 +96,9 @@ The catalogue now contains405 unique jobs across25 categories, retaining all ori
 - Sensory/experience research:10 roles including food taster, mystery shopper, fragrance evaluator, bedding tester, game localisation, accessibility testing, theme-park/visitor experience, hospitality audit and user research.
 
 Each category has three authored work problems. Eight additional named-role cases cover AI agents, RAG, model evaluation, annotation, funeral coordination, forensic medicine, food tasting and mystery shopping. They emphasise consent/authorisation, evidence, confidentiality, transparent limitations and concrete handovers without graphic material or real professional certification. Salary figures keep the existing explicit group-proxy labelling. Search also matches category names, so searching AI includes RAG roles.
+
+## Daily month skipping
+
+The month control distinguishes normal progression from skipping unused actions. With actions remaining, it skips one month and consumes one of12 daily uses; after all three actions are used it advances normally without a quota charge. Skips still settle expenses, markets, health, family and age. Pending choices must be resolved first. Annual plans complete remaining actions as rest rather than silently skipping unused actions.
+
+The day resets at midnight Japan time (UTC+9), matching the session's client time zone. Quota storage (`career-365.month-skips.v1`) is independent of life saves, so reload, new life and JSON import do not replenish it. Same-origin tabs use Web Locks when available. Offline play works. With blocked storage the UI labels the session-only fallback; the limit is browser-local and does not claim server-enforced cross-device protection.
