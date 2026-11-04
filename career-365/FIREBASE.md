@@ -41,3 +41,6 @@ node frogger-jump/scripts/firestore-check.mjs
 ```
 
 The career harness uses the shared installed `@firebase/rules-unit-testing` dependency and a demo project only. It covers owner creation/read/update/delete, cross-user and unauthenticated reads, collection enumeration, foreign writes, stale/skipped revisions, unexpected fields, invalid schema/timestamps and oversized payloads. There is no emulator JAR installed here; these checks are prepared but have not been run or certified. Real cross-device cloud completion still requires rule publication and an authorized end-user session. Cloud controller tests and browser fixtures are isolated mocks and do not claim live service certification.
+
+
+本機保存更新：完整人生改用帳戶隔離的IndexedDB，localStorage只留摘要／設定。雲端仍上傳完整壓縮JSON快照，沿用相同私人UID集合與版本交易，無需因這次本機保存更新新增Firestore規則。資料庫交易解決本機分頁競爭，與雲端裝置衝突檢查分開處理；正式服務設定與部署仍需獨立驗證。

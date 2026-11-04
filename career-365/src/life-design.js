@@ -16,15 +16,15 @@ export function entryPath(job){
  if(/水電|電工|焊接|機械|維修|星級主廚/.test(name))return {months:12,practice:6,label:'學徒訓練、實作與安全考核',regulated:false};
  return {months:3,practice:3,label:'入職訓練、作品／服務實作及評核',regulated:false};
 }
-export function lifeDefaults(s,legacy=false){return {version:1,home:'family',insurance:'public',pension:0,gross:0,selfIncome:0,mpf:0,tax:0,goal:'craft',goalProgress:{craft:0,connection:0,freedom:0,discovery:0,service:0},routine:{exercise:false,diet:false,sleep:false},schedule:'full',sideJob:null,sideEarned:0,study:{active:false,months:0,credits:0},entry:{career:s.career,months:0,practice:0,assessed:false,nextAssessment:0,grandfathered:legacy},track:'specialist',careerMonths:0,overseasMonths:0,hobby:'art',hobbyProgress:0,careMonths:0,friendship:0,npc:{mentor:45,colleague:45,client:40},arcs:{},credentials:legacy&&s.career&&['employed','business'].includes(s.status)?{[s.career]:true}:{},cooldowns:{},queue:[],journal:[],lastWorld:-24,returnVisits:[],lastReturnDay:null,lastWeekly:null,challenge:null,dailyCases:{lastDay:null,completed:0}};}
+export function lifeDefaults(s,legacy=false){return {version:1,flow:{income:0,expenses:0,regular:0,regularNet:0},home:'family',insurance:'public',pension:0,gross:0,selfIncome:0,mpf:0,tax:0,goal:'craft',goalProgress:{craft:0,connection:0,freedom:0,discovery:0,service:0},routine:{exercise:false,diet:false,sleep:false},schedule:'full',sideJob:null,sideEarned:0,study:{active:false,months:0,credits:0},entry:{career:s.career,months:0,practice:0,theory:0,assessed:false,nextAssessment:0,grandfathered:legacy},track:'specialist',careerMonths:0,overseasMonths:0,hobby:'art',hobbyProgress:0,careMonths:0,friendship:0,npc:{mentor:45,colleague:45,client:40},arcs:{},credentials:legacy&&s.career&&['employed','business'].includes(s.status)?{[s.career]:true}:{},cooldowns:{},queue:[],journal:[],lastWorld:-24,returnVisits:[],lastReturnDay:null,lastWeekly:null,challenge:null,dailyCases:{lastDay:null,completed:0}};}
 export function initLife(g){g.s.life=lifeDefaults(g.s);}
 export function restoreLife(s){
  if(s.life===undefined){s.life=lifeDefaults(s,true);return true;}const l=s.life;
  if(!l||l.version!==1||!Object.hasOwn(HOMES,l.home)||!['public','private'].includes(l.insurance)||!Object.hasOwn(GOALS,l.goal)||!['full','part','freelance'].includes(l.schedule)||!['specialist','manager'].includes(l.track)||!['art','nature','music','volunteer'].includes(l.hobby))return false;
- l.selfIncome??=0;const finite=(x,a=0,b=2e9)=>Number.isFinite(x)&&x>=a&&x<=b;
+ l.selfIncome??=0;l.flow??={income:l.gross+l.selfIncome,expenses:l.mpf+l.tax,regular:l.gross+l.selfIncome,regularNet:Math.max(0,l.gross+l.selfIncome-l.mpf-l.tax)};l.flow.regularNet??=Math.max(0,l.flow.regular-l.mpf-l.tax);if(!l.flow||!['income','expenses','regular','regularNet'].every(k=>Number.isFinite(l.flow[k])&&l.flow[k]>=0&&l.flow[k]<=Number.MAX_SAFE_INTEGER))return false;const finite=(x,a=0,b=2e9)=>Number.isFinite(x)&&x>=a&&x<=b;
  for(const k of ['pension','gross','selfIncome','mpf','tax','sideEarned','hobbyProgress','careMonths','friendship','careerMonths','overseasMonths'])if(!finite(l[k]))return false;
  if(l.sideJob!==null&&typeof l.sideJob!=='string'||!l.routine||!['exercise','diet','sleep'].every(k=>typeof l.routine[k]==='boolean')||!l.study||typeof l.study.active!=='boolean'||!finite(l.study.months,0,600)||!finite(l.study.credits,0,1800))return false;
- if(l.entry){l.entry.assessed??=false;l.entry.nextAssessment??=0;}if(!l.entry||typeof l.entry.assessed!=='boolean'||!Number.isInteger(l.entry.nextAssessment)||l.entry.nextAssessment<0||l.entry.nextAssessment>1000||typeof l.entry.grandfathered!=='boolean'||!finite(l.entry.months,0,600)||!finite(l.entry.practice,0,4000)||l.entry.career!==null&&typeof l.entry.career!=='string')return false;
+ if(l.entry){l.entry.theory??=0;l.entry.assessed??=false;l.entry.nextAssessment??=0;}if(!l.entry||typeof l.entry.assessed!=='boolean'||!Number.isInteger(l.entry.nextAssessment)||l.entry.nextAssessment<0||l.entry.nextAssessment>1000||typeof l.entry.grandfathered!=='boolean'||!finite(l.entry.months,0,600)||!finite(l.entry.theory,0,4000)||!finite(l.entry.practice,0,4000)||l.entry.career!==null&&typeof l.entry.career!=='string')return false;
  if(!Object.keys(GOALS).every(k=>finite(l.goalProgress?.[k],0,10000))||!['mentor','colleague','client'].every(k=>finite(l.npc?.[k],0,100)))return false;
  l.credentials??={};if(!l.credentials||Array.isArray(l.credentials)||Object.entries(l.credentials).some(([k,v])=>typeof k!=='string'||v!==true))return false;
  for(const key of ['arcs','cooldowns'])if(!l[key]||Array.isArray(l[key])||Object.keys(l[key]).length>500)return false;
@@ -39,11 +39,11 @@ export function restoreLife(s){
 }
 const cap=(n,a,b)=>Math.max(a,Math.min(b,n));
 export function progressiveTax(annual){let income=Math.max(0,annual-132000),tax=0;for(const rate of [.02,.06,.1,.14,.17]){const band=rate===.17?income:Math.min(50000,income);tax+=band*rate;income-=band;}return Math.min(tax,annual*.15);}
-export function payWage(g,amount){
- const l=g.s.life,gross=Math.max(0,Math.round(amount));
- if(l.schedule==='freelance'){g.earn(gross);l.selfIncome+=gross;return {gross,mpf:0,tax:0,net:gross};}
+export function payWage(g,amount,kind='regular'){
+ const l=g.s.life,gross=Math.max(0,Math.round(amount));if(kind==='regular')l.flow.regular+=gross;
+ if(l.schedule==='freelance'){if(kind==='regular')l.flow.regularNet+=gross;g.earn(gross);l.selfIncome+=gross;return {gross,mpf:0,tax:0,net:gross};}
  const before=l.gross,total=before+gross,oldEmployer=Math.min(1500,before*.05),employer=Math.min(1500,total*.05),mpfTotal=total<7100?0:Math.min(1500,total*.05),taxTotal=Math.round(progressiveTax((total-mpfTotal)*12)/12),mpf=mpfTotal-l.mpf,tax=taxTotal-l.tax;
- g.earn(gross);g.pay(Math.max(0,mpf+tax));l.pension+=mpf+employer-oldEmployer;l.gross=total;l.mpf=mpfTotal;l.tax=taxTotal;
+ if(kind==='regular')l.flow.regularNet+=gross-mpf-tax;g.earn(gross);g.pay(Math.max(0,mpf+tax));l.pension+=mpf+employer-oldEmployer;l.gross=total;l.mpf=mpfTotal;l.tax=taxTotal;
  return {gross,mpf,tax,net:gross-mpf-tax};
 }
 export function lifeCost(g){return Math.round((4000+HOMES[g.s.life.home].rent)*(1.02**Math.floor(g.s.elapsed/12)));}
@@ -51,7 +51,7 @@ export function journal(g,text){const l=g.s.life;l.journal.push({month:g.s.month
 export function progressGoal(g,key,n=1){g.s.life.goalProgress[key]=Math.min(10000,g.s.life.goalProgress[key]+n);const c=g.s.life.challenge;if(c&&!c.done&&({work:'craft',care:'connection',explore:'discovery',service:'service',budget:'freedom'}[c.kind]===key)){c.progress+=n;if(c.progress>=c.target){c.done=true;journal(g,'完成本週小目標：這段經歷已收進回顧。沒有連續登入獎勵或缺席懲罰。');}}}
 export function settleLife(g){
  const s=g.s,l=s.life;
- if(l.entry.career!==s.career){l.entry={career:s.career,months:0,practice:0,assessed:false,nextAssessment:0,grandfathered:l.entry.grandfathered};}
+ if(l.entry.career!==s.career){l.entry={career:s.career,months:0,practice:0,theory:0,assessed:false,nextAssessment:0,grandfathered:l.entry.grandfathered};}
  if(s.career&&['apprentice','employed','business'].includes(s.status)){l.entry.months++;l.careerMonths++;}
  if(s.status==='overseas')l.overseasMonths++;
  let routineCost=0;

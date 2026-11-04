@@ -116,7 +116,7 @@ CAREER_URL=http://localhost:5275/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/
 
 ## Life design and replayability — 2026-11-04
 
-The five-part review is implemented in [DESIGN.md](./DESIGN.md). Twelve professions retain dedicated three-chapter projects. The other393 roles now receive personalised shared projects from25 sector templates (75 additional scenes), interleaved with prior everyday cases, for202 authored workplace case entries overall. Recurring colleagues/clients retain trust and choices create delayed, foreshadowed referrals or follow-ups. All three approaches can succeed or need improvement depending on skill, task pressure and relationships, while keeping necessary safety/consent checks. Deep verification costs energy/cash, coordination uses social capability, and scoped delivery offers lower rewards.
+The five-part review is implemented in [DESIGN.md](./DESIGN.md). Twelve professions retain dedicated three-chapter projects. The other393 roles now receive personalised shared projects from25 sector templates (75 additional scenes), interleaved with prior everyday cases, for226 authored workplace case entries overall (including24 additional representative-role problems). Recurring colleagues/clients retain trust and choices create delayed, foreshadowed referrals or follow-ups. All three approaches can succeed or need improvement depending on skill, task pressure and relationships, while keeping necessary safety/consent checks. Deep verification costs energy/cash, coordination uses social capability, and scoped delivery offers lower rewards.
 
 Training now requires elapsed months, supervised practice and mastery; selected regulated professions also require a final simulated assessment with a three-month retake interval. AI cannot bypass the training route. Previously acquired credentials survive career changes. Legacy saves are migrated without revoking existing employment or mastery.
 
@@ -154,3 +154,18 @@ CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/
 12項新專精可與本業並行，相關／跨領域分別需至少3／6個月及3／6課，最多兩項，可暫停並跨轉職保留。完成不取代實習、授權或正式資格；有償委託只限合適且具資格的角色。熱度影響交付獎金、議薪機會與小幅虛構市場／創業成本，不自動提高薪酬代理值。
 
 資料快照截至2026-11-04，介面列來源日期；2027年以後清楚標成虛構演化，離線不推進時鐘。27題主題常識加入原題庫，共243題。時代選擇收進本機／帳戶／私人雲端快照、漫畫與65歲結算。舊檔補預設值，沒有新的Firestore集合。詳見 [ERA.md](./ERA.md)。
+
+
+## 整體檢視後的更新（2026-11-04）
+
+- 人生改用 IndexedDB：漫畫逐格追加，狀態與版本原子保存；原有本機／帳戶 JSON 自動遷移，匯出和雲端快照仍是完整人生。localStorage 只留小型摘要與通知。瀏覽器不支援時退回原有保存方式並保留備份提示。
+- 同一人生用跨分頁鎖及 IndexedDB 比較版本，舊分頁須明確載入最新進度，亦可先匯出目前版本。不把舊狀態覆蓋新進度；無 Web Locks 時仍由資料庫交易阻止兩筆相同版本同時提交。
+- 介面保留既有節點、焦點、展開狀態及未變動的 SVG。漫畫與角色圖像快取；職業清單每頁30種，搜尋索引預先建立，仍可找到全部405份職業。每日成長沒有變化時不重複寫入。
+- 受規管職業的理論／AI學習不再增加受督導實習。工作情境才累積相應實作；舊存檔已取得的實績和資格保留。理論練習另外顯示。
+- 創業按需求及有限產能在月結收營業額，材料、店租、薪酬分列；主人解難增加留客，不重複派同一筆營業額。招聘增加產能，客源有上限／流失，行銷有遞減效果。全部是可比較的遊戲模型。
+- 時代三條路線留下作品、固定服務關係或合作網絡；後續輪次承接過去，跨職保留。作品改善相關交付，夥伴改善成功機會，具資格及相關工作範圍的固定服務每月合計最多$480；不符合條件不派收入。退休仍可唯讀回顧。
+- 學習中心比較一年制進修、保留本業兼讀、技能／受督導實作及12項專精，顯示費用、年期、成果與資格界線。每種原有入口仍可作快捷操作。
+- 12種代表職業另加24個日常個案與官方閱讀入口，工作案例總數226。薪酬初級／第4級／第8級範圍明示為同一官方組別代理值套用遊戲職級，沒有冒稱新增個別職位薪酬調查。
+- 預算顯示例行／額外流入、固定必要／其他支出，並提供最多12個月推算，65歲停止。首期扣除本月已入帳工資，防止重複計算；不假設升職、未知事件、投資增值或額外接案。原先存檔缺少的本月交易無法完整回溯，更新後開始累積完整月度分類。
+
+詳細模型、遷移及驗收見 [REVIEW-UPDATE.md](./REVIEW-UPDATE.md)。

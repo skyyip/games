@@ -1,0 +1,6 @@
+// Fictional monthly operating model: finite demand, paid staff and actual capacity.
+import {eraDemand} from './era.js';
+const cap=(n,a,b)=>Math.max(a,Math.min(b,n));
+export function businessPreview(g){const s=g.s,b=s.business;if(!b)return null;const clients=cap(b.customers,0,60),capacity=12+b.staff*10,orders=Math.min(clients,capacity),price=Math.round(Math.max(900,g.salary*.16)),efficiency=1+(b.team??[]).reduce((n,p)=>n+p.efficiency,0)/Math.max(1,b.staff),sales=Math.round(orders*price*efficiency*eraDemand(s)*(s.healthData.illness?.8:1)*(s.world?.income??1)),materials=Math.round(sales*.32),overhead=9000+b.staff*15400;return {clients,capacity,orders,price,sales,materials,overhead,profit:sales-materials-overhead};}
+export function settleBusiness(g){const b=g.s.business,p=businessPreview(g);if(!p)return null;g.earn(p.sales);g.pay(p.materials);b.customers=cap(b.customers*(b.retention??.95)+(b.service??0),0,60);b.service=0;b.months=(b.months??0)+1;b.last=p;return p;}
+export function restoreBusiness(s){const b=s.business;if(!b)return true;b.retention??=.95;b.service??=0;b.months??=0;if(!Number.isFinite(b.customers)||b.customers<0)return false;b.customers=Math.min(60,b.customers);return Number.isFinite(b.retention)&&b.retention>=.8&&b.retention<=1&&Number.isFinite(b.service)&&b.service>=0&&b.service<=12&&Number.isInteger(b.months)&&b.months>=0;}

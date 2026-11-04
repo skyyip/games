@@ -16,7 +16,7 @@ export class DailyGrowth{
   else if(record.day!==day){const changes=Object.keys(snapshot).map(key=>({key,value:Math.round((record.latest[key]-record.baseline[key])*10)/10}));record={version:1,day,run,baseline:snapshot,latest:snapshot,shown:record.shown,pending:{first:false,period:record.day,gains:changes.filter(c=>c.value>0),declines:changes.filter(c=>c.value<0)}};}
   else record.latest=snapshot;
   let summary=null;if(claim&&record.shown!==day){summary=record.pending??{first:true,period:day,gains:[],declines:[]};record.shown=day;record.pending=null;}
-  this.store.write(this.key,JSON.stringify(record));return summary;
+  const encoded=JSON.stringify(record);if(this.store.read(this.key)!==encoded)this.store.write(this.key,encoded);return summary;
  }
  capture(state){this.update(state);}
  claim(state){return this.update(state,true);}

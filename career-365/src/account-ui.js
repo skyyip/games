@@ -9,7 +9,7 @@ export class CareerAccount{
   $('account-anonymous').onclick=()=>this.run(()=>this.auth.anonymousSignIn());
   $('account-signout').onclick=()=>{if(this.user?.isAnonymous&&!confirm('匿名帳戶登出後可能無法重新取得相同身分。請先綁定 Email／Google 或匯出人生備份。確定登出？'))return;this.run(()=>this.auth.signOut());};
   $('account-reset').onclick=()=>{const email=$('account-email').value.trim();if(!email){this.feedback('先填寫要重設密碼的 Email。');$('account-email').focus();return;}this.run(()=>this.auth.resetPassword(email),'若此 Email 可用，重設密碼的指示已送出。');};
-  $('account-adopt').onclick=()=>{this.onAdopt();this.render();};this.render();
+  $('account-adopt').onclick=()=>{Promise.resolve(this.onAdopt()).then(()=>this.render());};this.render();
   if(store.read('career-365.identity.v1')){this.restoring=true;this.onRestoring(true);this.start().catch(()=>{});}
  }
  feedback(text){$('account-feedback').textContent=text;}
@@ -18,8 +18,8 @@ export class CareerAccount{
   this.starting=(async()=>{try{this.auth=await this.load();if(!this.auth.configured)throw Error('auth-disabled');await this.auth.observeIdentity(user=>this.identity(user),e=>this.feedback(authMessage(e)));this.ready=true;this.render();}catch(e){if(this.restoring){this.restoring=false;this.onRestoring(false);this.notify('暫時未能還原登入身分。原有存檔已保留，可先使用本機遊玩或重新登入。');}this.feedback(authMessage(e));this.render();throw e;}finally{this.starting=null;}})();return this.starting;
  }
  open(){this.show('account-dialog');this.feedback(this.ready?'':'正在準備登入服務…');this.start().catch(()=>{});this.render();}
- identity(user){
-  this.user=user??null;this.revision++;this.store.write('career-365.identity.v1',user?.uid??'');this.onIdentity(this.user);if(this.restoring){this.restoring=false;this.onRestoring(false);}$('account-password').value='';this.render();
+ async identity(user){
+  this.user=user??null;const revision=++this.revision;this.switching=true;this.render();this.store.write('career-365.identity.v1',user?.uid??'');try{await this.onIdentity(this.user);}finally{if(revision!==this.revision)return;this.switching=false;}if(this.restoring){this.restoring=false;this.onRestoring(false);}$('account-password').value='';this.render();
  }
  async run(operation,message){
   if(!this.ready||this.busy)return;this.busy=true;this.feedback('處理中…');this.render();const revision=this.revision;
@@ -29,15 +29,15 @@ export class CareerAccount{
   finally{this.busy=false;$('account-password').value='';this.render();}
  }
  render(){
-  const u=this.user,registered=!!u&&!u.isAnonymous,disabled=!this.ready||this.busy;
+  const u=this.user,registered=!!u&&!u.isAnonymous,disabled=!this.ready||this.busy||this.switching;
   $('account-open').textContent=u?(u.isAnonymous?'匿名玩家':u.displayName||u.email||'玩家帳戶'):'玩家登入';
   $('account-open').title=u?(u.isAnonymous?'匿名帳戶':u.email||u.displayName||'玩家帳戶'):'玩家登入';
-  $('account-status').textContent=u?(u.isAnonymous?'目前以匿名帳戶登入。可綁定 Email 或 Google，保留同一個玩家身分。':`已登入：${u.displayName||u.email||'玩家'}`):'可使用 Email、Google 或匿名帳戶；也可繼續本機遊玩。';
+  $('account-status').textContent=this.switching?'正在切換玩家與人生進度…':u?(u.isAnonymous?'目前以匿名帳戶登入。可綁定 Email 或 Google，保留同一個玩家身分。':`已登入：${u.displayName||u.email||'玩家'}`):'可使用 Email、Google 或匿名帳戶；也可繼續本機遊玩。';
   $('account-form').hidden=registered;$('account-google').hidden=registered;$('account-anonymous').hidden=!!u;$('account-signout').hidden=!u;
-  $('account-password').minLength=$('account-mode').value==='register'?8:1;$('account-password').autocomplete=$('account-mode').value==='register'?'new-password':'current-password';$('account-mode').disabled=this.busy;$('account-email').disabled=this.busy;$('account-password').disabled=this.busy;
+  $('account-password').minLength=$('account-mode').value==='register'?8:1;$('account-password').autocomplete=$('account-mode').value==='register'?'new-password':'current-password';$('account-mode').disabled=this.busy||this.switching;$('account-email').disabled=this.busy||this.switching;$('account-password').disabled=this.busy||this.switching;
   $('account-submit').textContent=$('account-mode').value==='register'?(u?.isAnonymous?'綁定 Email，保留匿名身分':'建立 Email 帳戶'):'以 Email 登入';
   $('account-google').textContent=u?.isAnonymous?'綁定 Google，保留匿名身分':'使用 Google 登入';
   for(const id of ['account-submit','account-google','account-anonymous','account-reset','account-signout'])$(id).disabled=disabled;
-  $('account-adopt').hidden=!u||!this.hasCandidate();$('account-adopt').disabled=this.busy;
+  $('account-adopt').hidden=!u||!this.hasCandidate();$('account-adopt').disabled=this.busy||this.switching;
  }
 }
