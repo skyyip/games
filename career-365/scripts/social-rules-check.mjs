@@ -20,8 +20,8 @@ try{
  await env.clearFirestore();
  await check('registered profiles and immutable handle reservations are created atomically',async()=>{for(const u of ['alice','bob','carol','david','erin','mallory'])await profile(u);const s=await call('alice','bootstrap');assert.equal(s.mode,'spark');assert.equal(s.profile.handle,'alice');assert(!('balance' in s));});
  await check('all expanded comic avatars persist, old avatar IDs remain valid and invalid IDs are rejected',async()=>{
-  for(let i=8;i<20;i++){await profile('portrait'+i,{avatar:'comic-'+i});assert.equal((await call('portrait'+i,'bootstrap')).profile.avatar,'comic-'+i);}
-  await denied(()=>sdk.updateDoc(ref('alice','profiles','alice'),{avatar:'comic-20',updatedAt:sdk.serverTimestamp()}));
+  for(let i=8;i<40;i++){await profile('portrait'+i,{avatar:'comic-'+i});assert.equal((await call('portrait'+i,'bootstrap')).profile.avatar,'comic-'+i);}
+  await denied(()=>sdk.updateDoc(ref('alice','profiles','alice'),{avatar:'comic-40',updatedAt:sdk.serverTimestamp()}));
   assert.equal((await call('alice','bootstrap')).profile.avatar,'🐸');
  });
  await check('guests and anonymous users cannot access Spark social data',async()=>{await denied(()=>read(null,'profiles','alice'));await denied(()=>read('anon','profiles','alice'));});

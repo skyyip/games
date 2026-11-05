@@ -72,4 +72,4 @@ firebase emulators:exec --project demo-career365 --only firestore \
 
 `npm run social:check --prefix career-365`核對目標，`npm run social:deploy --prefix career-365`發布規則及三個新社交索引；沒有Functions部署。專案仍固定為`sky-playground-career-365`。先部署規則、等待索引可用，再發布靜態網站及用兩個註冊帳戶驗收。免費配額耗盡時社交暫停，本機人生仍可繼續。
 
-頭像擴充至20款的版本需重新部署本資料夾的`firestore.rules`：名片avatar新增`comic-8`至`comic-19`安全值，原有八個值繼續支援。使用既有`npm run social:deploy --prefix career-365`指令；不用新增索引、Cloud Functions或升級Blaze。
+頭像擴充至40款的版本需重新部署本資料夾的`firestore.rules`：名片avatar支援`comic-8`至`comic-39`安全值，原有八個值繼續支援。使用既有`npm run social:deploy --prefix career-365`指令；不用新增索引、Cloud Functions或升級Blaze。
