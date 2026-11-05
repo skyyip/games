@@ -1,3 +1,4 @@
+import {industryProfile} from './industry-scenarios.js';
 import {workProfile} from './work-experience.js';
 import {careerArc,CAREER_ARCS} from './career-arcs.js';
 import {questionsFor,questionById} from './professional-knowledge.js';
@@ -40,7 +41,7 @@ const CORE_QUESTIONS={
 const profiles=new Map();
 export function vocationalCourse(job){
  if(!job)return null;if(profiles.has(job.id))return profiles.get(job.id);
- const work=workProfile(job),authored=VOCATIONAL_COURSES[job.name],arc=careerArc(job),own=questionsFor(job).filter(q=>q.jobs?.includes(job.name)),questions=[...own,...questionsFor(job).filter(q=>!own.includes(q))];
- const value={...authored,skills:authored?.skills??[...work.requirements,'交付溝通與檢討'].slice(0,4),lessons:authored?.lessons??['觀察工作流程，辨識授權、安全及資料需求。','協助整理材料、文件、時程與驗收條件。','在合適督導下處理工作問題，保留依據及交接。','找出失誤、影響與補強方法，修訂交付安排。','以完整實作說明判斷、溝通及職務界線。'],mentor:arc?.npc??'帶教同事',project:arc?.project??'本職業的實作委託',cases:work.cases,questions:CORE_QUESTIONS[job.name]?.map(questionById)??questions,depth:authored?'完整學徒與工作章節':CAREER_ARCS[job.name]?'領域課程＋專屬工作連載':'領域課程與共通情境'};
+ const expanded=industryProfile(job),work=workProfile(job),authored=VOCATIONAL_COURSES[job.name],arc=careerArc(job),own=questionsFor(job).filter(q=>!q.id.startsWith('industry.')).filter(q=>q.jobs?.includes(job.name)),questions=[...own,...questionsFor(job).filter(q=>!q.id.startsWith('industry.')&&!own.includes(q))];
+ const value={...authored,industry:expanded,skills:authored?.skills??[...work.requirements,'交付溝通與檢討'].slice(0,4),lessons:authored?.lessons??['觀察工作流程，辨識授權、安全及資料需求。','協助整理材料、文件、時程與驗收條件。','在合適督導下處理工作問題，保留依據及交接。','找出失誤、影響與補強方法，修訂交付安排。','以完整實作說明判斷、溝通及職務界線。'],mentor:arc?.npc??'帶教同事',project:arc?.project??'本職業的實作委託',cases:work.cases,questions:CORE_QUESTIONS[job.name]?.map(questionById)??questions,depth:authored?'完整學徒與工作章節':expanded?'三組專屬工作情境＋領域課程':CAREER_ARCS[job.name]?'領域課程＋專屬工作連載':'領域課程與共通情境'};
  profiles.set(job.id,value);return value;
 }

@@ -50,7 +50,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v35` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v36` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -284,3 +284,34 @@ Modal依目前進度提供免費初次入行、進修、職業任務、故事選
 六個虛構案例每週輪換推薦，全部常開可補玩，沒有倒數或缺席懲罰。保存玩家方案與解析，重玩不扣資源、不增屬性或發薪。NPC合作演練另有三個專案、每個三段角色交接；可以保存、續玩及重新演練，不發真人合作獎勵。公司委託可選相同專案範本填草稿，再按工種拆分、人工發布和驗收；已有取消／重新分配流程保留。NPC不會自動認領、替真人提交或確認雲端委託。
 
 完成代表作會在本機按玩家保留最多40種職涯收藏，開新人生後仍可查看，僅改變職涯卡配色；它不解鎖牌照、屬性或薪金，也不提供跨裝置同步。案例、專長、NPC進度和作品隨人生存檔；收藏獨立保存，雲端人生仍用原有私人payload。新增資料有數量上限、舊資料可選缺省；舊任務保留原實作版本。無新增Firestore規則、索引、Functions或付費服務。
+
+## 熱門／新興職業具體情境擴充（2026-11-06）
+
+新增18種職業、每種3個具體情境，共54組工作情境及54道職業觀念題；總題庫為297題。前端、後端、全端（全棧／Full-stack）保留原職業ID，搜尋支援全棧開發及英文別名。
+
+| 職業 | 具體工作情境 |
+| --- | --- |
+| 前端工程師 | 結帳彈窗鍵盤操作、送出逾時與重複訂單、手機首屏圖片效能 |
+| 後端工程師 | 重複付款通知、跨帳戶訂單授權、N+1與查詢負載 |
+| 全端工程師 | 金額單位契約、前後端相容遷移、一般角色端到端驗證 |
+| 軟體測試工程師 | 風險式排序、間歇性缺陷重現、業務斷言與負面案例 |
+| DevOps工程師 | 密鑰曝露、資料遷移回退、小比例部署停止門檻 |
+| 雲端工程師 | 成本拆帳、還原演練、區域故障與有限服務 |
+| 資安工程師 | 授權測試範圍、登入異常處理、權限修補回歸 |
+| 資料工程師 | 管線重跑去重、上游資料契約、遲到事件補算 |
+| 機器學習工程師 | 資料洩漏、類別失衡、輸入漂移與結果驗證 |
+| RAG知識庫工程師 | 過期政策、檢索時文件權限、引用支持程度 |
+| AI模型評測員 | 評測代表性、評分者校準、分組表現與限制 |
+| 生成式AI工程師 | 摘要幻覺、客戶資料使用權、重試與人工成本 |
+| AI應用工程師 | 對外回覆覆核、工具逾時、試點成功指標 |
+| AI治理專員 | 模型變更、責任分工、實際用途偏移 |
+| 產品經理 | 功能排序、完整漏斗、失敗與支援驗收 |
+| 使用者體驗設計師 | 研究代表性、表單可及性、錄影及研究同意 |
+| 電商營運專員 | 折扣後毛利、超賣與履約、退貨與素材描述 |
+| 社群經理 | 素材商用權、公開客訴與個資、社群健康 |
+
+每個職業一併接上五項玩法：六項專長的職業名稱與既有代價／支持；三段故事、跟進與代表作；三個專屬每週推薦及永久案例；三段可續玩的專屬NPC交接與公司合作範本；直接顯示必要線索及modal補充內容。學徒與工作階段都使用專屬情境，保留原評核、精力、一次安排及月薪規則。深入方案的比較也會寫入任務結果；不是執行真實部署、付款、資安掃描或外部AI。
+
+公司合作範本從3種增至6種，新增網站結帳整合、電商活動與社群、資料與AI品質覆核。範本僅填草稿，仍需真人發布、認領、交付及確認。NPC不自動代替真人。
+
+新開任務使用明確的內容包標記。既有未完成任務保留舊題目、選項、觀念與實作模式，完成後才進入新情境。新增專屬練習紀錄仍為可選、有上限的私人存檔欄位；沒有新增職業ID、登入／雲端專案設定、Firestore集合、規則、索引或Functions。

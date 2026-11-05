@@ -1,3 +1,4 @@
+import {industryProfile,industryScenario,industryCaseRow,INDUSTRY_QUESTIONS} from './industry-scenarios.js';
 import {validPlaybook,playbookMethods,specialtyEffects,finishEpisode} from './career-playbook.js';
 import {validPlay,playMaterial,playResult} from './work-play.js';
 import {mindWorkSupport,completeMind} from './pq.js';
@@ -40,26 +41,27 @@ export function vocationBlocker(g,extraEnergy=0,kind=g.s.pending?.vocation?.kind
  return s.stats.energy<need?`這次處理需要 ${need} 精力，目前 ${Math.floor(s.stats.energy)}；可先返回休息，任務不會自動扣資源。`:'';
 }
 export function taskMaterial(g,event=g.s.pending){
- const m=event?.vocation;if(!m)return null;const s=g.s,r=vocationRecord(s),course=vocationalCourse(g.job),apprentice=m.role==='apprentice',phase=apprentice?Math.min(r.phase,4):null;
+ const m=event?.vocation;if(!m)return null;const s=g.s,r=vocationRecord(s),baseCourse=vocationalCourse(g.job),industry=m.scenarioPack===1?industryScenario(g.job,m.attempt):null,expanded=industry?industryProfile(g.job):null,course=expanded?{...baseCourse,skills:expanded.skills,questions:INDUSTRY_QUESTIONS.filter(q=>q.jobs.includes(g.job.name)),lessons:[`觀察${expanded.skills[0]}，先整理需求及限制。`,`協助準備${expanded.skills[1]}的證據與測試。`,`在督導下處理${expanded.skills[2]}，保留工作紀錄。`,`覆盤${expanded.skills[3]}，補上失敗與邊界案例。`,'整合交付、驗收、後續與回退安排。']}:baseCourse,apprentice=m.role==='apprentice',phase=apprentice?Math.min(r.phase,4):null;
  const skill=m.kind==='drill'?r.skills.indexOf(Math.min(...r.skills)):apprentice?phase%4:r.employeeDone%4;
- const index=apprentice?[0,1,3,2,4][phase]%course.cases.length:r.employeeDone%course.cases.length,row=course.cases[index],pressure=PRESSURES[(r.attempts+(apprentice?phase:Math.max(0,s.level-1)))%3],question=course.questions[skill%course.questions.length];
+ const index=apprentice?[0,1,3,2,4][phase]%course.cases.length:r.employeeDone%course.cases.length,row=industry?industryCaseRow(industry):course.cases[index],pressure=PRESSURES[(r.attempts+(apprentice?phase:Math.max(0,s.level-1)))%3],question=course.questions[(industry?m.attempt:skill)%course.questions.length];
  const rotation=(r.attempts+Array.from(g.job.id).reduce((n,c)=>n+c.charCodeAt(0),0))%3;
  const actions=[{approach:'check',label:row[3],cost:180,energy:8,tradeoff:'多投入覆核成本與精力，保留較完整的交付依據。'},
   {approach:'talk',label:row[4],cost:0,energy:4,tradeoff:'協調需求、責任及時程，仍須保留必要核對。'},
-  {approach:'rush',label:course.project&&index<3?row[5]:'只交付已核實且獲授權的部分，明列限制並轉介其餘事項',cost:90,energy:0,tradeoff:'縮小本次交付範圍，獎金較少，留下明確後續事項。'}];
- for(const c of actions){const effect=specialtyEffects(r,m,c.approach,false);if(m.modeVersion===2&&m.kind==='work'&&r.last&&!r.last.passed){c.energy+=1;c.tradeoff+=' 上次仍有缺口，本次另用1精力補核實。';}else if(m.modeVersion===2&&m.kind==='work'&&r.last?.approach==='rush'){c.cost+=20;c.tradeoff+=' 上次有限交付，本次另用$20整理待交接事項。';}c.cost+=effect.cost;c.energy+=effect.energy;}
+  {approach:'rush',label:industry?row[5]:course.project&&index<3?row[5]:'只交付已核實且獲授權的部分，明列限制並轉介其餘事項',cost:90,energy:0,tradeoff:'縮小本次交付範圍，獎金較少，留下明確後續事項。'}];
+ for(const [actionIndex,c]of actions.entries()){if(industry)c.tradeoff=industry.feedback[actionIndex]+' '+c.tradeoff;const effect=specialtyEffects(r,m,c.approach,false);if(m.modeVersion===2&&m.kind==='work'&&r.last&&!r.last.passed){c.energy+=1;c.tradeoff+=' 上次仍有缺口，本次另用1精力補核實。';}else if(m.modeVersion===2&&m.kind==='work'&&r.last?.approach==='rush'){c.cost+=20;c.tradeoff+=' 上次有限交付，本次另用$20整理待交接事項。';}c.cost+=effect.cost;c.energy+=effect.energy;}
  const choices=actions.slice(rotation).concat(actions.slice(0,rotation)),qRotation=(r.attempts+1)%3,order=[0,1,2].slice(qRotation).concat([0,1,2].slice(0,qRotation));
- return {course,phase,skill,row,pressure,question,order,choices,threshold:apprentice?[55,58,62,62,68][phase]:62+Math.min(8,Math.max(0,s.level-1)*2),stage:apprentice?TRAINING_STAGES[phase]:s.level>=4?'資深工作・跨方責任':s.level>=2?'工作階段・複雜交付':'工作階段・初次獨立交付'};
+ return {course,phase,skill,row,pressure,industry,question,order,choices,threshold:apprentice?[55,58,62,62,68][phase]:62+Math.min(8,Math.max(0,s.level-1)*2),stage:apprentice?TRAINING_STAGES[phase]:s.level>=4?'資深工作・跨方責任':s.level>=2?'工作階段・複雜交付':'工作階段・初次獨立交付'};
 }
-function makeTask(g,kind){const s=g.s,r=vocationRecord(s),vocation={career:s.career,role:s.status==='apprentice'?'apprentice':'employee',kind,attempt:r.attempts,month:s.month,modeVersion:2,clue:false,mentor:false,ai:false,answer:null,revised:false},event={id:'vocational-task',scene:'work',title:'',text:'',vocation,choices:[]};const material=taskMaterial(g,event);vocation.pressure=material.pressure.id;
+function makeTask(g,kind,expanded=true){const s=g.s,r=vocationRecord(s),vocation={career:s.career,role:s.status==='apprentice'?'apprentice':'employee',kind,attempt:r.attempts,month:s.month,modeVersion:2,clue:false,mentor:false,ai:false,answer:null,revised:false},event={id:'vocational-task',scene:'work',title:'',text:'',vocation,choices:[]};if(expanded&&industryProfile(g.job))vocation.scenarioPack=1;const material=taskMaterial(g,event);vocation.pressure=material.pressure.id;
  event.title=`${g.job.name}｜${kind==='drill'?'針對弱項補練':material.stage}：${material.row[0]}`;
  event.text=material.row[1];event.choices=material.choices.map(c=>({label:c.label,effects:{}}));return event;
 }
 export function validVocationalTask(e,s){
  try{const m=e.vocation,r=vocationRecord(s),job=JOBS.find(j=>j.id===s.career);if(!['apprentice','employed','business'].includes(s.status)||e.id!=='vocational-task'||!m||m.career!==s.career||!job||!r||!['apprentice','employee'].includes(m.role)||m.role!==(s.status==='apprentice'?'apprentice':'employee')||!['work','drill'].includes(m.kind)||m.attempt!==r.attempts||m.month!==s.month||!['clue','mentor','ai','revised'].every(k=>typeof m[k]==='boolean')||m.answer!==null&&!integer(m.answer,2)||m.revised&&m.answer===null)return false;
+  if(m.scenarioPack!==undefined&&(m.scenarioPack!==1||!industryProfile(job)))return false;
   if(m.modeVersion!==undefined&&m.modeVersion!==2)return false;
   if(m.play!==undefined&&!validPlay(m.play))return false;
-  const expected=makeTask({s,job},m.kind);return m.pressure===expected.vocation.pressure&& e.title===expected.title&&e.text===expected.text&&JSON.stringify(e.choices)===JSON.stringify(expected.choices);
+  const expected=makeTask({s,job},m.kind,m.scenarioPack===1);return m.pressure===expected.vocation.pressure&& e.title===expected.title&&e.text===expected.text&&JSON.stringify(e.choices)===JSON.stringify(expected.choices);
  }catch{return false;}
 }
 export const vocationalMethods={
@@ -87,7 +89,7 @@ export const vocationalMethods={
   const adjustment=m.kind==='work'?(passed?Math.round(this.job.salary*(choice.approach==='rush'?.003:.008)):0):0;if(adjustment)this.earn(adjustment);
   const problem=passed?'你保留了必要核對，並能說明這次選擇的依據。'+(mindSupport?`整理思路契合做法，評分支持 +${mindSupport.toFixed(1)}。`:''):!m.clue?'尚未確認現場線索，處理依據不足。':!correct?'這次基礎觀念需要補強，先訂正再嘗試。':'做法與本次限制尚未充分配合，可請教師傅或補練相關能力。';
   const interaction=play?`${play.done?(play.correct?'實作卡完成，評分支持+2；':'實作卡需補強，已提供正確依據；'):'保留尚未完成的實作練習；'}你追問了${play.asked}項需求。`:'';
-  const impact=interaction+(passed?`${choice.approach==='rush'?'本次範圍縮小，未完成部分需跟進。':'本次範圍完成，交接仍須留下紀錄。'}合作信任提高。`:'保留原有訓練與技能，本章尚未完成；已留下返工與覆核事項，沒有額外重扣一次安排。');
+  const impact=interaction+(t.industry?'方案取捨：'+t.industry.feedback[['check','talk','rush'].indexOf(choice.approach)]:'')+(passed?`${choice.approach==='rush'?'本次範圍縮小，未完成部分需跟進。':'本次範圍完成，交接仍須留下紀錄。'}合作信任提高。`:'保留原有訓練與技能，本章尚未完成；已留下返工與覆核事項，沒有額外重扣一次安排。');
   const next=`${t.question.explanation} 下次重點：${t.row[2]}。${m.role==='apprentice'?'涉及資格或受規管工序，仍須由合資格人員覆核。':''}`;
   r.last={month:s.month,passed,skill:t.skill,title:e.title,problem,impact,next,approach:choice.approach,question:t.question.id,answer:m.answer===null?null:t.order[m.answer],score};
   if(m.kind==='work'){s.life.arcs[s.career]={stage:(s.life.arcs[s.career]?.stage??0)+1,trust:r.trust};s.life.projectCounts[s.career]=(s.life.projectCounts[s.career]??0)+1;if(!passed||choice.approach==='rush')queueFollowup(this,'repair',2);else if(r.employeePassed>0&&r.employeePassed%3===0)queueFollowup(this,'referral',3);s.profession.quality=score;s.profession.last={month:s.month,career:s.career,title:t.row[0],approach:choice.approach,score,passed,feedback:`${problem}${impact}${next}`,adjustment};}
