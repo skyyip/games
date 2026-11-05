@@ -50,7 +50,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v38` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v40` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -332,3 +332,13 @@ Modal依目前進度提供免費初次入行、進修、職業任務、故事選
 獨立每週題庫、重複NPC演練及邊框配色收藏入口不再顯示，停止寫入獨立收藏快取；原有作品、技能及練習存檔不刪除，舊API與舊任務仍相容。合併後「作品與人物故事」提供最近作品、人物回顧及每週一件可選特別委託；特別委託直接使用職業流程，交付花一次安排及明示成本，沒有連續登入或缺席懲罰，也不替真人提交公司委託。原有真人公司合作、邀請、交付、驗收及紀錄仍可使用。
 
 具資格的學徒可沿用訓練摘要；工作／創業玩家可先預覽三個月例行生活的收入、支出、現金及債務，再確認。逐月結算，遇未決故事、病況或65歲退休便停下，不代答決定，也不扣每日跳月額度。尚未完成學徒證據不能藉此略過要求。一般存檔仍到65歲總結，新增故事欄位可選且有上限，不需Firestore規則、索引或Functions更新。
+
+## 全職業故事玩法擴展（2026-11-06）
+
+四段故事、固定角色、人物記憶、有限同事支援、兩種操作專精、作品回顧、每週委託及普通月份安排，現在適用全部405種職業。原先前端、後端、全端和主廚四條獨立連載內容與版本保留；其餘401種職業使用新版故事內容包，結合既有職業個案、專屬／行業項目及25個行業課程。這不是405份從零撰寫的獨立劇本；畫面會標明「職業個案＋行業連載」或「行業課程連載」。
+
+25個行業各有四組工作台，共100組行業實作：首段找出兩項待處理紀錄、第二段排序工作與交接、第三段配對依據與用途、第四段核對回訪及驗收。題材隨行業變化，例如水電的尺寸／授權與驗收、AI的來源／工具權限與人工接手、護理的身分／私隱與交接、殯儀的意願／流程與透明費用、法醫的材料識別／證據與結論限制、試吃的參與條件／觀察與研究限制。原四職業的四種專屬操作不變。
+
+其他熱門及新興職業已有的54組具體情境，會接成「接手 → 跟進 → 分歧 → 回訪」故事，保留實際需求、授權及成本取捨。固定同事會根據上一個做法回應；協作專精能使用累積的支持先完成一步，核對專精顯示本職業的核對資料，均不另發數值獎勵。各職業作品、支援及專精按原有職業紀錄隔離，轉職不會把他行的資格或證據當作新職業成果。
+
+新內容使用`storyVersion:2`；舊四職業使用原版本1。舊版簡化任務及更早的未完成任務保留原題目、選項、觀念與實作模式，完成後才使用新故事；舊存檔不會因更新而突然多一道必做實作。學徒／工作／創業仍共用既有安排、精力、月薪、升職、受規管資格及65歲結算規則。沒有新增Firebase設定、規則、索引、Functions或付費服務。
