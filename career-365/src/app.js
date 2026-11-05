@@ -1,3 +1,4 @@
+import {archiveCareerCollection,careerCollection} from './career-playbook.js';
 import {openReading} from './reading-modal.js';
 import {installReadingModals,closeReadings} from './reading-modal.js';
 import {VocationUI} from './vocation-ui.js';
@@ -155,7 +156,7 @@ function effectLabel(e){const names={cash:'現金',stress:'壓力',health:'健�
 async function act(fn,message,options={}){
  if(saving||identityLoading)return false;if(conflicted){inform('另一分頁已有新進度，請先載入最新人生；目前版本仍可匯出備份。');return false;}
  const prior=game?.s.pending?.id,scope=currentUid,focused=document.activeElement,focusId=focused?.id,action=focused?.dataset?.action;
- const execute=async()=>{try{return await repository.exclusive(scope,async()=>{const result=fn();if(result===false){inform('這個行動暫時做不到。請檢查行動數、精力與現金。');return false;}render();await save(options);
+ const execute=async()=>{try{return await repository.exclusive(scope,async()=>{const result=fn();if(result===false){inform('這個行動暫時做不到。請檢查行動數、精力與現金。');return false;}render();await save(options);archiveCareerCollection(game,accountStore,'career-365.collection.v1.'+(accountScope(currentUid)??'guest'));
  if(game.s.pending){close('finance-dialog');if(game.s.pending.id!==prior)$('story').querySelector('h2')?.focus();}else if(prior==='era-event'){$('story').querySelector('h2')?.focus();}else if(['knowledge-case','occupation-event'].includes(prior)){$('professional-notebook').parentElement.open=true;$('story').querySelector('h2')?.focus();}else if(['work-case','vocational-task'].includes(prior)){$('story').querySelector('h2')?.focus();}else if(document.contains(focused)&&!focused.disabled)focused.focus({preventScroll:true});else if(focusId)$(focusId)?.focus({preventScroll:true});else if(action)document.querySelector(`[data-action="${action}"]:not(:disabled)`)?.focus({preventScroll:true});
  if(message)inform(message);return result;});}catch(e){if(e.message==='local-conflict'){conflict();return false;}$('save-state').textContent='尚未儲存';$('storage-note').textContent='未能保存這次變更，請匯出 JSON 備份；先前已存進度保留。';inform('儲存未完成，目前畫面仍可匯出備份。');return false;}finally{saving=null;if($('save-state').textContent==='儲存中…')$('save-state').textContent=persistent?'已儲存':'請匯出備份';queueMicrotask(maybeGrowth);}};
  $('save-state').textContent='儲存中…';saving=execute();return saving;
@@ -225,7 +226,7 @@ const eraUI=new EraUI({getGame:()=>game,act,show});
 const learningUI=new LearningUI({getGame:()=>game,act,show,eraUI});
 const lifeUI=new LifeDesignUI({getGame:()=>game,act,show});
 const pqUI=new PQCoach({getGame:()=>game,act,show});
-const vocationUI=new VocationUI({getGame:()=>game,act,show,openCareer});
+const vocationUI=new VocationUI({getGame:()=>game,act,show,openCareer,getCollection:()=>careerCollection(game,accountStore,'career-365.collection.v1.'+(accountScope(currentUid)??'guest'))});
 const cloud=new CareerCloud({getGame:()=>game,getUid:()=>currentUid,restore:async restored=>{if(await act(()=>{game=restored;return true;},null,{replace:true})===false)throw Error('local-conflict');await startView();inform('已載入私人雲端人生，可以繼續下一格。');},notify:inform});
 function refreshSkipDay(){clearTimeout(skipRefreshTimer);if(game)render();const next=(Math.floor((Date.now()+9*3600000)/86400000)+1)*86400000-9*3600000;skipRefreshTimer=setTimeout(refreshSkipDay,Math.max(1000,next-Date.now()+100));}
 refreshSkipDay();window.addEventListener('storage',e=>{if(e.key===SKIP_KEY&&game)render();if(e.key===accountSaveKey(currentUid)&&game){try{const m=JSON.parse(e.newValue);if(m?.revision!==repository.tokens.get(e.key)?.revision)conflict();}catch{conflict();}}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshSkipDay();});

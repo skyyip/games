@@ -10,11 +10,29 @@ const activities={
  ['沙盒試點工作卡','按次序安排試點，不會呼叫真實AI或上傳資料。',['確認需求、資料與工具權限','測試失敗、越權、成本及人工接手','覆核結果與回退方案後才試行'],'老闆說「只要加一點AI」；營運同事默默搬來三箱例外個案。'],
  ['測試報告找問題','點出上線前必須處理的問題。',['成功率只測理想輸入，沒有失敗與權限測試','代理的名字不夠有氣勢','簡報沒有使用漸層背景'],'代理自信地回答了不存在的公司規則；你決定先查來源，再談語氣。']],
 };
+
+// After the first guided exercise, concrete workstation choices replace generic joke answers.
+const benches={
+ '星級主廚':[
+ ['出餐批次安排','現有12份已核實餐點；原訂12人，客人新增6人，其中2人有待確認的過敏原。先安排哪一批？',['先交12份原訂餐點，另外6份確認需求及過敏原後另訂批次','先暫停全部出餐，取得新增需求後重新安排18人的同批時程','與客人協商先交10份，保留人手核對餘下8份'],['既有訂單可交付，另批核實避免拖延全部餐點。','可減少批次差異，但原訂客人也會等待，須先取得同意。','人手較充裕，但原訂也改了範圍，需要先協商。']],
+ ['備料與損耗','預計18份，已核實配方每份用100g；可用食材2kg。為已確認訂單備料多少？',['1,800g，保留200g作未承諾餘量','2,000g全數備好，須接受額外損耗風險','1,500g先做15份，須先協商餘下3份交付'],['符合已確認需求；餘量仍須適當保存。','多備未必有需求，需考慮保存與損耗。','可以分批，但不能默默少交已承諾份量。']]],
+ '水電工':[
+ ['比對現勘紀錄','紀錄顯示只在樓上用水後滲漏；照片拍攝日期早於報修，檢測欄仍空白。選下一步工作安排。',['交由合資格團隊核對現況及檢測，再確認分項報價','先給有明確假設與限制的估算，再安排現場檢測','先協商臨時保護及轉介，列明尚未確定的原因'],['先取得證據，避免把舊照片當成現況。','有助預算安排，但不是確定診斷或承諾完工價。','可降低等待影響，仍需合適團隊確認原因。']],
+ ['報價與變更','原報價只含一處維修，客人新增三處；本日工時只夠原項。怎樣安排？',['保留原項交付，新增項目另核對授權、報價與日期','先重新現勘全部四處，再協商原項延後','轉介新增項目，先確認客人同意及交接責任'],['範圍清楚，新增項目不會默默變成免費追加。','整體規劃較完整，但原定時程會延後。','可較快分工，但需要可靠交接與明確責任。']]],
+ 'AI代理工程師':[
+ ['配置失敗測試','工具可以讀取訂單，但退款必須人工批准。只剩兩個測試名額，先選哪組？',['越權退款要求＋工具逾時後人工接手','常見查詢＋多語輸入，列明退款與失敗仍未驗證','重複訂單＋成本上限，暫停涉及退款的試點範圍'],['優先覆蓋高風險邊界，常見查詢仍須補測。','可了解一般品質，但不可據此宣稱退款流程安全。','也有價值；須縮小試點並標示剩餘風險。']],
+ ['核對執行成本','每次呼叫$0.02；100個任務，每個最多3次呼叫。預算上限應先怎樣列？',['最高$6，另列人工覆核及其他費用','先以一次呼叫估$2，明確標示重試另計並設停用門檻','先以20個任務試點，上限$1.20，另計人工'],['100×3×0.02=$6；這仍非整個專案的完整成本。','可作基準，但不能把$2當成完整最壞情況預算。','較小範圍可控，但尚未交付全部100個任務。']]],
+ '神秘顧客':[
+ ['重建服務時序','收據14:12、入座筆記14:05、首次回應14:09，付款照片14:15。哪個結論最有依據？',['入座至首次回應約4分鐘，分開記錄付款時間','收據到照片相隔3分鐘，可記錄但不能當作等候服務時間','先核對各設備時間再計算，暫不提交分鐘數'],['使用與問題相符的時間點；仍要標明計時限制。','兩個時間點屬不同事件，需清楚限制結論。','精確度較穩妥，但需要更多核實時間。']],
+ ['報告證據選擇','觀察到兩次未主動介紹優惠，但不知道完整內部指引。如何寫？',['記錄兩次對話與時序，標示未知指引，暫不推論動機','先向委託方確認評分指標，再補交分數','只交客觀紀錄，把是否符合指引交由委託方覆核'],['證據與推論分開，不能由兩次觀察推定員工態度。','比較容易按一致標準評分，但交付可能延後。','範圍清楚，但報告的判定部分仍未完成。']]],
+};
+
 export const MENTOR_STYLES=[{name:'嚴謹派',line:'先別急著答對，告訴我你的依據。'},{name:'嘴硬心軟派',line:'問清楚很好，少猜一次就少返工一次。'},{name:'示範派',line:'先看我怎樣拆問題，下一次換你帶著做。'}];
 export function playMaterial(g,t){
  const attempt=g.s.pending.vocation.attempt,items=activities[g.job.name],row=items?.[attempt%items.length]??(attempt%2===0?['交付工作卡','按次序安排本次工作。',['先核對需求、同意及職務界線','在合適督導下比對資料與處理','留下覆核、限制及後續交接'],['health','funeral','forensics','support'].includes(g.job.category)?'交接表印了兩個「最新版」；同事請你先核對正式版本。':'客人說「很簡單」，同事笑著翻開了需求清單。']:['找出交接的缺口','點選最需要先處理的一項。',['交付尚未核實依據、授權及後續責任','封面沒有加上可愛貼紙','檔案名稱不夠有氣勢'],'同事送來一張寫著「只改一點點」的紙，背面還有一整頁。']);
  const mode=attempt%2===0?'order':'spot',rotation=(attempt+1)%3,order=[0,1,2].slice(rotation).concat([0,1,2].slice(0,rotation));
- return {title:row[0],instruction:row[1],cards:row[2],humour:row[3],mode,order,mentor:MENTOR_STYLES[Array.from(g.job.id).reduce((n,c)=>n+c.charCodeAt(0),0)%3],questions:[['need','你真正需要解決甚麼？',`先回到這次任務：${t.row[1]} ${t.row[2]}`],['scope','有哪些不能越過的界線？',`${t.course.skills.join('、')}。涉及資格、同意及授權的要求，不能用速度交換。`],['time','期限或預算可以怎樣商量？',`${t.pressure.detail} 可提出分批、縮小範圍或轉介，先確認對方接受的交付。`]]};
+ const bench=g.s.pending.vocation.modeVersion===2&&attempt>0?benches[g.job.name]?.[(attempt-1)%benches[g.job.name].length]:null;
+ return {feedback:bench?.[3],solution:0,title:row[0],instruction:row[1],cards:row[2],humour:row[3],mode,order,...(bench?{title:bench[0],instruction:bench[1],cards:bench[2],mode:'decision'}:{}),mentor:MENTOR_STYLES[Array.from(g.job.id).reduce((n,c)=>n+c.charCodeAt(0),0)%3],questions:[['need','你真正需要解決甚麼？',`先回到這次任務：${t.row[1]} ${t.row[2]}`],['scope','有哪些不能越過的界線？',`${t.course.skills.join('、')}。涉及資格、同意及授權的要求，不能用速度交換。`],['time','期限或預算可以怎樣商量？',`${t.pressure.detail} 可提出分批、縮小範圍或轉介，先確認對方接受的交付。`]]};
 }
 export function validPlay(p){return p&&p.version===1&&Array.isArray(p.picks)&&p.picks.length<=3&&p.picks.every(n=>Number.isInteger(n)&&n>=0&&n<3)&&new Set(p.picks).size===p.picks.length&&Array.isArray(p.questions)&&p.questions.length<=3&&p.questions.every(k=>['need','scope','time'].includes(k))&&new Set(p.questions).size===p.questions.length;}
-export function playResult(g,t){const p=g.s.pending.vocation.play;if(!p)return null;const x=playMaterial(g,t),done=x.mode==='order'?p.picks.length===3:p.picks.length===1,correct=done&&(x.mode==='order'?p.picks.every((n,i)=>n===i):p.picks[0]===0);return {done,correct,asked:p.questions.length};}
+export function playResult(g,t){const p=g.s.pending.vocation.play;if(!p)return null;const x=playMaterial(g,t),done=x.mode==='order'?p.picks.length===3:p.picks.length===1,correct=done&&(x.mode==='order'?p.picks.every((n,i)=>n===i):p.picks[0]===(x.solution??0));return {done,correct,asked:p.questions.length};}

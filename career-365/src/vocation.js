@@ -1,3 +1,4 @@
+import {validPlaybook,playbookMethods,specialtyEffects,finishEpisode} from './career-playbook.js';
 import {validPlay,playMaterial,playResult} from './work-play.js';
 import {mindWorkSupport,completeMind} from './pq.js';
 import {queueFollowup} from './context-events.js';
@@ -10,6 +11,7 @@ export function restoreVocation(s){
  if(s.life.vocation===undefined)s.life.vocation={version:1,jobs:{}};const v=s.life.vocation;
  if(!v||v.version!==1||!v.jobs||Array.isArray(v.jobs)||Object.keys(v.jobs).length>JOBS.length)return false;
  for(const [id,r]of Object.entries(v.jobs)){
+  if(!validPlaybook(r?.playbook))return false;
   if(!JOBS.some(j=>j.id===id)||!r||!integer(r.phase,5)||!integer(r.attempts)||!integer(r.workDone,r.attempts)||!integer(r.workPassed,r.workDone)||!integer(r.employeeDone,r.workDone)||!integer(r.employeePassed,r.employeeDone)||!integer(r.drills,r.attempts)||r.workDone+r.drills!==r.attempts||!Array.isArray(r.skills)||r.skills.length!==4||r.skills.some(n=>!integer(n,12))||!Array.isArray(r.concepts)||r.concepts.length!==4||r.concepts.some(b=>typeof b!=='boolean')||!Number.isFinite(r.trust)||r.trust<0||r.trust>100)return false;
   const l=r.last;if(l&&(!integer(l.month,780)||l.month<216||typeof l.passed!=='boolean'||!integer(l.skill,3)||!integer(l.score,100)||l.answer!==null&&!integer(l.answer,2)||!['check','talk','rush'].includes(l.approach)||!['title','problem','impact','next'].every(k=>typeof l[k]==='string'&&l[k].length<=800)||!questionById(l.question)))return false;
  }
@@ -45,20 +47,23 @@ export function taskMaterial(g,event=g.s.pending){
  const actions=[{approach:'check',label:row[3],cost:180,energy:8,tradeoff:'多投入覆核成本與精力，保留較完整的交付依據。'},
   {approach:'talk',label:row[4],cost:0,energy:4,tradeoff:'協調需求、責任及時程，仍須保留必要核對。'},
   {approach:'rush',label:course.project&&index<3?row[5]:'只交付已核實且獲授權的部分，明列限制並轉介其餘事項',cost:90,energy:0,tradeoff:'縮小本次交付範圍，獎金較少，留下明確後續事項。'}];
+ for(const c of actions){const effect=specialtyEffects(r,m,c.approach,false);if(m.modeVersion===2&&m.kind==='work'&&r.last&&!r.last.passed){c.energy+=1;c.tradeoff+=' 上次仍有缺口，本次另用1精力補核實。';}else if(m.modeVersion===2&&m.kind==='work'&&r.last?.approach==='rush'){c.cost+=20;c.tradeoff+=' 上次有限交付，本次另用$20整理待交接事項。';}c.cost+=effect.cost;c.energy+=effect.energy;}
  const choices=actions.slice(rotation).concat(actions.slice(0,rotation)),qRotation=(r.attempts+1)%3,order=[0,1,2].slice(qRotation).concat([0,1,2].slice(0,qRotation));
  return {course,phase,skill,row,pressure,question,order,choices,threshold:apprentice?[55,58,62,62,68][phase]:62+Math.min(8,Math.max(0,s.level-1)*2),stage:apprentice?TRAINING_STAGES[phase]:s.level>=4?'資深工作・跨方責任':s.level>=2?'工作階段・複雜交付':'工作階段・初次獨立交付'};
 }
-function makeTask(g,kind){const s=g.s,r=vocationRecord(s),vocation={career:s.career,role:s.status==='apprentice'?'apprentice':'employee',kind,attempt:r.attempts,month:s.month,clue:false,mentor:false,ai:false,answer:null,revised:false},event={id:'vocational-task',scene:'work',title:'',text:'',vocation,choices:[]};const material=taskMaterial(g,event);vocation.pressure=material.pressure.id;
+function makeTask(g,kind){const s=g.s,r=vocationRecord(s),vocation={career:s.career,role:s.status==='apprentice'?'apprentice':'employee',kind,attempt:r.attempts,month:s.month,modeVersion:2,clue:false,mentor:false,ai:false,answer:null,revised:false},event={id:'vocational-task',scene:'work',title:'',text:'',vocation,choices:[]};const material=taskMaterial(g,event);vocation.pressure=material.pressure.id;
  event.title=`${g.job.name}｜${kind==='drill'?'針對弱項補練':material.stage}：${material.row[0]}`;
  event.text=material.row[1];event.choices=material.choices.map(c=>({label:c.label,effects:{}}));return event;
 }
 export function validVocationalTask(e,s){
  try{const m=e.vocation,r=vocationRecord(s),job=JOBS.find(j=>j.id===s.career);if(!['apprentice','employed','business'].includes(s.status)||e.id!=='vocational-task'||!m||m.career!==s.career||!job||!r||!['apprentice','employee'].includes(m.role)||m.role!==(s.status==='apprentice'?'apprentice':'employee')||!['work','drill'].includes(m.kind)||m.attempt!==r.attempts||m.month!==s.month||!['clue','mentor','ai','revised'].every(k=>typeof m[k]==='boolean')||m.answer!==null&&!integer(m.answer,2)||m.revised&&m.answer===null)return false;
+  if(m.modeVersion!==undefined&&m.modeVersion!==2)return false;
   if(m.play!==undefined&&!validPlay(m.play))return false;
   const expected=makeTask({s,job},m.kind);return m.pressure===expected.vocation.pressure&& e.title===expected.title&&e.text===expected.text&&JSON.stringify(e.choices)===JSON.stringify(expected.choices);
  }catch{return false;}
 }
 export const vocationalMethods={
+ ...playbookMethods,
  enableVocationalCourse(){if(!this.job||!['apprentice','employed','business'].includes(this.s.status)||vocationRecord(this.s))return false;ensure(this);return true;},
  openVocationalTask(kind='work'){
   if(!['work','drill'].includes(kind)||this.s.pending||vocationBlocker(this,0,kind)||this.s.life.vocation.jobs[this.s.career]?.attempts>=4000)return false;
@@ -73,7 +78,7 @@ export const vocationalMethods={
   const s=this.s,e=s.pending;if(e?.id!=='vocational-task'||!validVocationalTask(e,s)||!integer(index,2))return false;const t=taskMaterial(this),choice=t.choices[index],r=vocationRecord(s),m=e.vocation;if(vocationBlocker(this,choice.energy))return false;
   const correct=m.revised||m.answer!==null&&t.order[m.answer]===t.question.answer,fit=choice.approach===t.pressure.fit,help=m.mentor||m.ai;
   const play=playResult(this,t),playSupport=play?.correct?2:0;
-  const mindSupport=mindWorkSupport(s,choice.approach),score=Math.round(clamp(playSupport+mindSupport+38+Math.min(20,r.skills[t.skill]*2)+(m.clue?8:0)+(help?8:0)+(correct?12:0)+(fit?15:4)+(r.trust-40)*.04,0,100)),passed=score>=t.threshold&&correct&&m.clue;
+  const mindSupport=mindWorkSupport(s,choice.approach),score=Math.round(clamp(specialtyEffects(r,m,choice.approach,play?.correct).score+playSupport+mindSupport+38+Math.min(20,r.skills[t.skill]*2)+(m.clue?8:0)+(help?8:0)+(correct?12:0)+(fit?15:4)+(r.trust-40)*.04,0,100)),passed=score>=t.threshold&&correct&&m.clue;
   s.pending=null;if(m.kind==='work'){if(!this.work(false,false)){s.pending=e;return false;}}else{this.spend(14);s.life.entry.theory++;s.mastery=clamp(s.mastery+8,0,100);}
   this.changeStats({energy:-choice.energy});this.pay(choice.cost);r.attempts++;if(m.kind==='drill')r.drills++;else{r.workDone++;if(passed)r.workPassed++;if(m.role==='employee'){r.employeeDone++;if(passed)r.employeePassed++;}s.life.entry.practice++;s.life.entry.theory++;s.profession.completed++;if(passed)s.profession.passed++;s.profession.counts[s.career]=(s.profession.counts[s.career]??0)+1;s.mastery=clamp(s.mastery+(passed?16:6),0,100);}
   r.skills[t.skill]=clamp(r.skills[t.skill]+(passed?2:1),0,12);if(passed)r.skills[(t.skill+1)%4]=clamp(r.skills[(t.skill+1)%4]+1,0,12);if(correct)r.concepts[t.skill]=true;
@@ -86,6 +91,7 @@ export const vocationalMethods={
   const next=`${t.question.explanation} 下次重點：${t.row[2]}。${m.role==='apprentice'?'涉及資格或受規管工序，仍須由合資格人員覆核。':''}`;
   r.last={month:s.month,passed,skill:t.skill,title:e.title,problem,impact,next,approach:choice.approach,question:t.question.id,answer:m.answer===null?null:t.order[m.answer],score};
   if(m.kind==='work'){s.life.arcs[s.career]={stage:(s.life.arcs[s.career]?.stage??0)+1,trust:r.trust};s.life.projectCounts[s.career]=(s.life.projectCounts[s.career]??0)+1;if(!passed||choice.approach==='rush')queueFollowup(this,'repair',2);else if(r.employeePassed>0&&r.employeePassed%3===0)queueFollowup(this,'referral',3);s.profession.quality=score;s.profession.last={month:s.month,career:s.career,title:t.row[0],approach:choice.approach,score,passed,feedback:`${problem}${impact}${next}`,adjustment};}
+  if(m.kind==='work')finishEpisode(this,t,choice,passed);
   progressGoal(this,'craft',passed?1:.3);journal(this,`${e.title}：${passed?'完成':'補練'}；${problem}${impact}`);this.record('work',passed?'把一項要求，做成自己的能力':'這次遇到困難，下一步仍然清楚',`${e.title}。你選擇：${choice.label}。${problem}${impact}${next} ${m.kind==='work'?'本次含一次工作安排，例行月薪不重複發放。':'補練不計受督導實作，不額外發整月薪酬。'}`);completeMind(this,e,{approach:choice.approach,effects:{}});this.graduateCareer();return true;
  },
  vocationalPromotionReady(){const r=vocationRecord(this.s);return !r||r.employeePassed>=this.s.level*3&&r.skills.every(n=>n>=Math.min(10,3+this.s.level));},

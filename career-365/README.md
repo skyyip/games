@@ -50,7 +50,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v24` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v35` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -272,3 +272,15 @@ Modal依目前進度提供免費初次入行、進修、職業任務、故事選
 「其他人生選擇」改為生活、職涯與遠行、財務、社群四個分頁，活動直接顯示，不必逐組打開accordion。技能練習、工作及副業集中在職涯頁；生活頁保留興趣、陪伴、朋友及社區活動。查看與切換分類不扣安排，原有條件、成本及65歲結算維持。
 
 生活安排提供「輕鬆生活」「照顧健康」「專注學習」三種預設，先填入習慣與兼讀，再按儲存生效。住房、工作節奏、副業、醫療及目標保留在更多設定中，不會被預設覆蓋；全日制學生不重複安排兼讀。
+
+## 短篇職涯、專長組合與每週案例（2026-11-06）
+
+保留每月兩次安排及65歲人生結算。職業主按鈕仍是下一步入口；任務直接顯示必要現場摘要，詳細線索、師傅提示和補充教材沿用modal。第一個任務保留引導式練習，其後主廚、水電工、AI代理工程師及神秘顧客各有兩組具體工作情境：出餐／備料、現勘／變更、失敗測試／成本、時序／證據。選擇後可比較三個合理方案的取捨，實作支持最多2分，不替代資格要求。其他職業繼續使用既有領域課程與實作。
+
+每通過一次工作可三選一學專長，最多學六項、啟用三項。覆核、協商、範圍管理、流程、帶教筆記及交叉查證提供小幅評分支持，也有精力或成本代價；所有實際成本在最後確認選項列明。切換免費，進行中的任務不能更換。專長按職業保留，轉職不清除。
+
+每三次工作形成一篇代表作，涵蓋了解需求、試行、覆盤三段。客人偏好、團隊新人、工具／供應變化與提前交付輪換出現，依人生造型和職業決定起點；上一份有限交付的待辦或未完成核實會影響下一份新工作的小額準備成本，明示後才收取。補練不加這項後續成本。近期12篇代表作可查看，全部重要經歷仍保存在人生繪本。這是現有個案的連續脈絡，不是405份新編長篇劇情。
+
+六個虛構案例每週輪換推薦，全部常開可補玩，沒有倒數或缺席懲罰。保存玩家方案與解析，重玩不扣資源、不增屬性或發薪。NPC合作演練另有三個專案、每個三段角色交接；可以保存、續玩及重新演練，不發真人合作獎勵。公司委託可選相同專案範本填草稿，再按工種拆分、人工發布和驗收；已有取消／重新分配流程保留。NPC不會自動認領、替真人提交或確認雲端委託。
+
+完成代表作會在本機按玩家保留最多40種職涯收藏，開新人生後仍可查看，僅改變職涯卡配色；它不解鎖牌照、屬性或薪金，也不提供跨裝置同步。案例、專長、NPC進度和作品隨人生存檔；收藏獨立保存，雲端人生仍用原有私人payload。新增資料有數量上限、舊資料可選缺省；舊任務保留原實作版本。無新增Firestore規則、索引、Functions或付費服務。
