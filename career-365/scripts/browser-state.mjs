@@ -12,6 +12,7 @@ async function browserWrite(key,value){let state;try{state=JSON.parse(value);}ca
 export async function clickAndWait(locator,options){await locator.click(options);await locator.page().waitForFunction(()=>document.getElementById('save-state')?.textContent!=='儲存中…');}
 export async function openLifeControl(page,selector){
  const control=page.locator(selector);
+ while(await page.locator('.reading-dialog[open]').count()&&!await control.evaluate(n=>!!n.closest('.reading-dialog[open]')))await page.keyboard.press('Escape');
  if(!await control.isVisible()){
   const dialog=await control.evaluate(n=>n.closest('dialog')?.id);
   if(dialog==='life-choices-dialog'&&!await page.locator('#life-choices-dialog').isVisible())await clickAndWait(page.locator('#life-choices-open'));
@@ -24,10 +25,10 @@ export async function openLifeControl(page,selector){
 export async function prepareVocationalTask(page){
  const {LifeGame}=await import('../src/game.js'),{taskMaterial}=await import('../src/vocation.js');
  let state=await readLife(page),g=LifeGame.restore(state);if(g?.s.pending?.id!=='vocational-task')throw Error('Expected vocational task');
- for(const kind of ['clue','mentor'])if(!state.pending.vocation[kind])await clickAndWait(page.locator(`[data-vocation-inspect="${kind}"]`));
+ for(const kind of ['clue','mentor'])if(!state.pending.vocation[kind]){await clickAndWait(page.locator(`[data-vocation-inspect="${kind}"]`));if(await page.locator('.reading-dialog').count())await page.locator('.reading-dialog .dialog-close').last().click();}
  state=await readLife(page);g=LifeGame.restore(state);const material=taskMaterial(g);
- if(state.pending.vocation.answer===null)await clickAndWait(page.locator(`[data-vocation-answer="${material.order.indexOf(material.question.answer)}"]`));
- if(await page.locator('#vocation-revise').count())await clickAndWait(page.locator('#vocation-revise'));
+ if(state.pending.vocation.answer===null){await clickAndWait(page.locator(`[data-vocation-answer="${material.order.indexOf(material.question.answer)}"]`));if(await page.locator('.reading-dialog').count())await page.locator('.reading-dialog .dialog-close').last().click();}
+ if(await page.locator('#vocation-revise').count()){if(!await page.locator('#vocation-revise').isVisible())await page.locator('#vocation-answer-open').click();await clickAndWait(page.locator('#vocation-revise'));}
  return material;
 }
 export async function completeVocationalTask(page,approach=null){const material=await prepareVocationalTask(page),index=material.choices.findIndex(c=>c.approach===(approach??material.pressure.fit));await clickAndWait(page.locator(`[data-vocation-choice="${index}"]`));return readLife(page);}

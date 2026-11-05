@@ -85,3 +85,16 @@ button{white-space:normal}textarea{resize:vertical}
 .starter-heading>div{flex:1 1 180px;min-width:0}
 
 .guide-footer{display:flex;flex-direction:column;align-items:center;gap:12px}.guide-footer>p{margin:0}.guide-footer>#guide-open{min-height:44px;font-size:var(--text-body)}#guide-dialog .guide-notes{font-size:var(--text-small);line-height:1.85}#guide-dialog :is(.guide-notes,.starter-notes)>summary{min-height:44px;cursor:pointer;align-content:center}#guide-dialog .dialog-actions{justify-content:flex-end}
+
+/* Keep optional reading in dialogs and the decision surface compact. */
+#vocation-cancel{margin-top:1.5rem}
+.extension-reference{display:block;margin-top:.85rem;overflow-wrap:anywhere}
+.reading-dialog{max-height:85dvh;overflow:auto;padding:1.5rem}
+.reading-dialog>h2{padding-right:2rem}
+.reading-dialog>div{min-width:0}
+.reading-dialog [hidden]{display:none}
+.work-play{padding:1rem;margin:1rem 0;border:1px solid var(--line,#bcc9ab);border-radius:14px;background:#f5f7ed}
+.work-play button{white-space:normal;overflow-wrap:anywhere}
+.reading-dialog a{overflow-wrap:anywhere}
+
+#game a[target="_blank"],dialog a[target="_blank"]{display:block;margin-block:.85rem;overflow-wrap:anywhere}

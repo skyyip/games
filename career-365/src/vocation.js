@@ -1,3 +1,4 @@
+import {validPlay,playMaterial,playResult} from './work-play.js';
 import {mindWorkSupport,completeMind} from './pq.js';
 import {queueFollowup} from './context-events.js';
 import {JOBS} from './content.js';
@@ -53,6 +54,7 @@ function makeTask(g,kind){const s=g.s,r=vocationRecord(s),vocation={career:s.car
 }
 export function validVocationalTask(e,s){
  try{const m=e.vocation,r=vocationRecord(s),job=JOBS.find(j=>j.id===s.career);if(!['apprentice','employed','business'].includes(s.status)||e.id!=='vocational-task'||!m||m.career!==s.career||!job||!r||!['apprentice','employee'].includes(m.role)||m.role!==(s.status==='apprentice'?'apprentice':'employee')||!['work','drill'].includes(m.kind)||m.attempt!==r.attempts||m.month!==s.month||!['clue','mentor','ai','revised'].every(k=>typeof m[k]==='boolean')||m.answer!==null&&!integer(m.answer,2)||m.revised&&m.answer===null)return false;
+  if(m.play!==undefined&&!validPlay(m.play))return false;
   const expected=makeTask({s,job},m.kind);return m.pressure===expected.vocation.pressure&& e.title===expected.title&&e.text===expected.text&&JSON.stringify(e.choices)===JSON.stringify(expected.choices);
  }catch{return false;}
 }
@@ -62,6 +64,7 @@ export const vocationalMethods={
   if(!['work','drill'].includes(kind)||this.s.pending||vocationBlocker(this,0,kind)||this.s.life.vocation.jobs[this.s.career]?.attempts>=4000)return false;
   ensure(this);this.s.pending=makeTask(this,kind);return true;
  },
+ interactVocationalTask(kind,value){const e=this.s.pending;if(e?.id!=='vocational-task'||!['pick','ask','retry'].includes(kind))return false;const t=taskMaterial(this),x=playMaterial(this,t),p=e.vocation.play??{version:1,picks:[],questions:[]};if(kind==='pick'){if(!integer(value,2)||p.picks.includes(value)||p.picks.length>=(x.mode==='order'?3:1))return false;p.picks.push(value);}else if(kind==='ask'){if(!x.questions.some(q=>q[0]===value)||p.questions.includes(value))return false;p.questions.push(value);}else{if(!p.picks.length)return false;p.picks=[];}e.vocation.play=p;return true;},
  inspectVocationalTask(kind){const e=this.s.pending;if(e?.id!=='vocational-task'||!['clue','mentor','ai'].includes(kind)||e.vocation[kind])return false;e.vocation[kind]=true;return true;},
  answerVocationalTask(index){const e=this.s.pending;if(e?.id!=='vocational-task'||e.vocation.answer!==null||!integer(index,2))return false;e.vocation.answer=index;return true;},
  reviewVocationalConcept(){const e=this.s.pending;if(e?.id!=='vocational-task'||e.vocation.answer===null||e.vocation.revised)return false;e.vocation.revised=true;return true;},
@@ -69,7 +72,8 @@ export const vocationalMethods={
  resolveVocationalTask(index){
   const s=this.s,e=s.pending;if(e?.id!=='vocational-task'||!validVocationalTask(e,s)||!integer(index,2))return false;const t=taskMaterial(this),choice=t.choices[index],r=vocationRecord(s),m=e.vocation;if(vocationBlocker(this,choice.energy))return false;
   const correct=m.revised||m.answer!==null&&t.order[m.answer]===t.question.answer,fit=choice.approach===t.pressure.fit,help=m.mentor||m.ai;
-  const mindSupport=mindWorkSupport(s,choice.approach),score=Math.round(clamp(mindSupport+38+Math.min(20,r.skills[t.skill]*2)+(m.clue?8:0)+(help?8:0)+(correct?12:0)+(fit?15:4)+(r.trust-40)*.04,0,100)),passed=score>=t.threshold&&correct&&m.clue;
+  const play=playResult(this,t),playSupport=play?.correct?2:0;
+  const mindSupport=mindWorkSupport(s,choice.approach),score=Math.round(clamp(playSupport+mindSupport+38+Math.min(20,r.skills[t.skill]*2)+(m.clue?8:0)+(help?8:0)+(correct?12:0)+(fit?15:4)+(r.trust-40)*.04,0,100)),passed=score>=t.threshold&&correct&&m.clue;
   s.pending=null;if(m.kind==='work'){if(!this.work(false,false)){s.pending=e;return false;}}else{this.spend(14);s.life.entry.theory++;s.mastery=clamp(s.mastery+8,0,100);}
   this.changeStats({energy:-choice.energy});this.pay(choice.cost);r.attempts++;if(m.kind==='drill')r.drills++;else{r.workDone++;if(passed)r.workPassed++;if(m.role==='employee'){r.employeeDone++;if(passed)r.employeePassed++;}s.life.entry.practice++;s.life.entry.theory++;s.profession.completed++;if(passed)s.profession.passed++;s.profession.counts[s.career]=(s.profession.counts[s.career]??0)+1;s.mastery=clamp(s.mastery+(passed?16:6),0,100);}
   r.skills[t.skill]=clamp(r.skills[t.skill]+(passed?2:1),0,12);if(passed)r.skills[(t.skill+1)%4]=clamp(r.skills[(t.skill+1)%4]+1,0,12);if(correct)r.concepts[t.skill]=true;
@@ -77,7 +81,8 @@ export const vocationalMethods={
   r.trust=clamp(r.trust+(passed?4:-2),0,100);this.changeStats({jq:passed?.3:.1,reputation:passed?4:-1,stress:passed?-2:3});s.skills[this.job.skill]=clamp(s.skills[this.job.skill]+(passed?1.4:.6)*Math.max(.12,1-s.skills[this.job.skill]/110),0,100);
   const adjustment=m.kind==='work'?(passed?Math.round(this.job.salary*(choice.approach==='rush'?.003:.008)):0):0;if(adjustment)this.earn(adjustment);
   const problem=passed?'你保留了必要核對，並能說明這次選擇的依據。'+(mindSupport?`整理思路契合做法，評分支持 +${mindSupport.toFixed(1)}。`:''):!m.clue?'尚未確認現場線索，處理依據不足。':!correct?'這次基礎觀念需要補強，先訂正再嘗試。':'做法與本次限制尚未充分配合，可請教師傅或補練相關能力。';
-  const impact=passed?`${choice.approach==='rush'?'本次範圍縮小，未完成部分需跟進。':'本次範圍完成，交接仍須留下紀錄。'}合作信任提高。`:'保留原有訓練與技能，本章尚未完成；已留下返工與覆核事項，沒有額外重扣一次安排。';
+  const interaction=play?`${play.done?(play.correct?'實作卡完成，評分支持+2；':'實作卡需補強，已提供正確依據；'):'保留尚未完成的實作練習；'}你追問了${play.asked}項需求。`:'';
+  const impact=interaction+(passed?`${choice.approach==='rush'?'本次範圍縮小，未完成部分需跟進。':'本次範圍完成，交接仍須留下紀錄。'}合作信任提高。`:'保留原有訓練與技能，本章尚未完成；已留下返工與覆核事項，沒有額外重扣一次安排。');
   const next=`${t.question.explanation} 下次重點：${t.row[2]}。${m.role==='apprentice'?'涉及資格或受規管工序，仍須由合資格人員覆核。':''}`;
   r.last={month:s.month,passed,skill:t.skill,title:e.title,problem,impact,next,approach:choice.approach,question:t.question.id,answer:m.answer===null?null:t.order[m.answer],score};
   if(m.kind==='work'){s.life.arcs[s.career]={stage:(s.life.arcs[s.career]?.stage??0)+1,trust:r.trust};s.life.projectCounts[s.career]=(s.life.projectCounts[s.career]??0)+1;if(!passed||choice.approach==='rush')queueFollowup(this,'repair',2);else if(r.employeePassed>0&&r.employeePassed%3===0)queueFollowup(this,'referral',3);s.profession.quality=score;s.profession.last={month:s.month,career:s.career,title:t.row[0],approach:choice.approach,score,passed,feedback:`${problem}${impact}${next}`,adjustment};}
