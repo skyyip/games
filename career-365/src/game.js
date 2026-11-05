@@ -183,9 +183,21 @@ export class LifeGame{
   const place=s.status==='travel'?this.pick(['京都小巷','冰島海岸','葡萄牙小鎮','紐西蘭步道']):s.status==='overseas'?this.pick(['異國市集','當地社區廚房','週末語言交換角']):this.pick(['社區畫室','海邊釣魚小屋','義工服務站','一直想學的音樂課']);
   progressGoal(this,'discovery');this.changeStats({pq:.4,eq:.2,stress:-12,contacts:1});this.record('rest','把時間，花在想做的事',`今天走進${place}。沒有升職通知，卻多了一段自己的故事。`);return true;
  }
+ careerEligibility(id,route='mentor'){
+  const s=this.s,initial=s.history.length===0&&['setup','graduate'].includes(s.status),cost=initial?0:3000,actions=initial?0:1,blockers=[];
+  if(!JOBS.some(j=>j.id===id))blockers.push('job');
+  if(!['mentor','ai'].includes(route))blockers.push('route');
+  if(s.status==='retired')blockers.push('retired');
+  if(s.pending)blockers.push('story');
+  if(s.risks.captivity)blockers.push('captivity');
+  if(s.risks.delay)blockers.push('recovery');
+  if(!initial&&s.ap<actions)blockers.push('actions');
+  if(s.cash<cost)blockers.push('cash');
+  return {ok:blockers.length===0,initial,cost,actions,blockers};
+ }
  chooseCareer(id,route='mentor'){
-  const job=JOBS.find(j=>j.id===id),s=this.s;if(!job||!['mentor','ai'].includes(route)||s.status==='retired'||s.pending||s.risks.captivity||s.risks.delay)return false;
-  const initial=s.history.length===0&&['setup','graduate'].includes(s.status);if(!initial&&!this.can(1,0,3000))return false;
+  const eligibility=this.careerEligibility(id,route);if(!eligibility.ok)return false;
+  const job=JOBS.find(j=>j.id===id),s=this.s,{initial}=eligibility;
   const preview=this.transferPreview(id),previous=this.job;if(!initial){this.pay(3000);s.ap--;s.metrics.switches++;}
   if(s.business){this.pay(s.business.staff*1000);s.business=null;}
   const plumbing=previous?.name==='水電工'&&job.name==='YouTuber';s.crossBonus=preview.bonus;s.transfer=previous?{from:previous.name,to:job.name,related:preview.related,at:s.month}:null;if(previous)this.changeStats({contacts:-preview.contactsLoss,reputation:-preview.reputationLoss,stress:preview.stress});
