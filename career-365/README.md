@@ -50,7 +50,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v36` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v37` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 

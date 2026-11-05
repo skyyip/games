@@ -32,7 +32,8 @@ const faqs = [
   ['Which languages are available?', 'Use 中 / EN on the playground to choose Traditional Chinese or English. The selection carries into the games.'],
 ];
 
-const styles = `.game-guide{box-sizing:border-box;width:100%;max-width:860px;min-width:0;margin:28px auto;padding:16px 18px;border:1px solid currentColor;border-radius:16px;color:inherit;font:400 14px/1.7 system-ui,sans-serif;text-align:left;white-space:normal;overflow-wrap:anywhere;user-select:text;touch-action:pan-y pinch-zoom}.game-guide summary{cursor:pointer;min-height:44px;align-content:center;font-weight:700;list-style:revert}.game-guide h2,.game-guide h3{font-family:inherit;font-size:18px;line-height:1.4;letter-spacing:normal;color:inherit;margin:20px 0 8px}.game-guide p{font:inherit;color:inherit;margin:10px 0;max-width:75ch}.game-guide a{color:inherit;text-decoration:underline;text-underline-offset:3px}.game-guide a:focus-visible,.game-guide summary:focus-visible{outline:3px solid currentColor;outline-offset:4px}.game-guide li{margin:6px 0}.game-guide nav{display:block;position:static;margin:16px 0}.game-guide [lang=zh-Hant]{font-family:system-ui,'PingFang TC','Noto Sans TC',sans-serif}.game-guide .guide-facts{font-weight:600}.is-playing .game-guide{display:none}@media(max-width:640px){.game-guide{margin:20px auto;padding:12px 14px;font-size:14px}}`;
+const guideFocusStyles = '.game-guide a:focus-visible,.game-guide summary:focus-visible{outline:3px solid currentColor;outline-offset:4px}';
+const styles = `.game-guide{box-sizing:border-box;width:100%;max-width:860px;min-width:0;margin:28px auto;padding:16px 18px;border:1px solid currentColor;border-radius:16px;color:inherit;font:400 14px/1.7 system-ui,sans-serif;text-align:left;white-space:normal;overflow-wrap:anywhere;user-select:text;touch-action:pan-y pinch-zoom}.game-guide summary{cursor:pointer;min-height:44px;align-content:center;font-weight:700;list-style:revert}.game-guide h2,.game-guide h3{font-family:inherit;font-size:18px;line-height:1.4;letter-spacing:normal;color:inherit;margin:20px 0 8px}.game-guide p{font:inherit;color:inherit;margin:10px 0;max-width:75ch}.game-guide a{color:inherit;text-decoration:underline;text-underline-offset:3px}${guideFocusStyles}.game-guide li{margin:6px 0}.game-guide nav{display:block;position:static;margin:16px 0}.game-guide [lang=zh-Hant]{font-family:system-ui,'PingFang TC','Noto Sans TC',sans-serif}.game-guide .guide-facts{font-weight:600}.is-playing .game-guide{display:none}@media(max-width:640px){.game-guide{margin:20px auto;padding:12px 14px;font-size:14px}}`;
 
 function guide(game) {
   if (!game) return `<section class="game-guide" id="about-games" aria-labelledby="about-games-title" lang="en" translate="no">
@@ -101,7 +102,7 @@ export function applySeo(source, page) {
 <meta name="twitter:image" content="${imageUrl}">
 <meta name="twitter:image:alt" content="Sky Playground mascot">
 <script type="application/ld+json">${json({ '@context': 'https://schema.org', '@graph': graph })}</script>
-<style>${styles}</style>`;
+<style>${game?.slug === 'career-365' ? styles.replace(guideFocusStyles, '') : styles}</style>`;
   html = html.replace(/<\/head>/i, block('seo', metadata) + '\n</head>');
   const content = block('game-guide', guide(game));
   if (game?.slug === 'tap-and-spill') {
