@@ -15,7 +15,7 @@
 5. 在同一新專案建立預設Cloud Firestore資料庫，選正式模式。發布本資料夾的`firestore.rules`及`firestore.indexes.json`。不要使用青蛙遊戲的規則或部署設定。
 6. 重建並發布網站。在遊戲登入後，存檔選單依次「檢查雲端」→「上傳目前人生」；換裝置登入同一新專案帳戶，再檢查並載入。
 
-無需手動建立`career365_saves`或文件，首次上傳會建立。私人存檔按UID直接讀取不需複合索引；此資料夾另有三個玩家社交索引，供邀請、短訊、招募板及過期委託清理使用。登入不會自動覆蓋／上傳本機人生。
+無需手動建立`career365_saves`或文件，首次上傳會建立。私人存檔按UID直接讀取不需複合索引；此資料夾另有三個玩家社交索引，供玩家／公司邀請及招募板查詢使用。登入不會自動覆蓋／上傳本機人生。
 
 ## 本資料夾的檔案與部署
 
@@ -68,6 +68,6 @@ firebase emulators:exec --project demo-career365 --only firestore \
 
 ## 玩家社交與合作公司後端
 
-社交功能現已改為 **Spark相容**：只使用Authentication及Firestore，不需要Cloud Functions或Blaze。名片、好友、公司招募／申請／推薦、合作條件、文字委託、人工確認及交接均由直接Firestore交易及安全規則驗證；不設合作點或單人人生獎勵。詳見 [SOCIAL.md](./SOCIAL.md)。
+社交功能現已改為 **Spark相容**：只使用Authentication及Firestore，不需要Cloud Functions或Blaze。名片、好友、公司招募／申請／推薦、合作條件、文字委託、人工確認及交接均由直接Firestore交易及安全規則驗證；不設合作點；新版完成委託後可自願領取有限的IQ／EQ／PQ／JQ成長。合作紀錄及每日領取配額也由Firestore規則驗證，必須部署最新版`firestore.rules`。本次沒有新增複合索引，也不用啟用Blaze。詳見 [SOCIAL.md](./SOCIAL.md)。
 
 `npm run social:check --prefix career-365`核對目標，`npm run social:deploy --prefix career-365`發布規則及三個新社交索引；沒有Functions部署。專案仍固定為`sky-playground-career-365`。先部署規則、等待索引可用，再發布靜態網站及用兩個註冊帳戶驗收。免費配額耗盡時社交暫停，本機人生仍可繼續。

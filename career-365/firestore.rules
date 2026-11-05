@@ -25,7 +25,7 @@ service cloud.firestore {
   match /career365_notes/{id} { allow read, write: if false; }
   match /career365_social_ledger/{id} { allow read, write: if false; }
   match /career365_social_reports/{id} { allow read, write: if false; }
-  // Spark social data: no Functions, money, automated score or rewards.
+  // Spark social data: no Functions, money or automated score. Bounded cooperation growth is opt-in.
   function signed() { return request.auth != null && (request.auth.token.firebase.sign_in_provider in ['password','google.com'] || request.auth.token.firebase.identities.keys().hasAny(['email','google.com'])); }
   function me() { return request.auth.uid; }
   function accountPath(u) { return /databases/$(database)/documents/career365_spark_accounts/$(u); }
@@ -105,15 +105,54 @@ service cloud.firestore {
    match /tasks/{tid} {
     allow get: if signed() && hasCompany(cid,me());
     allow list: if signed() && hasCompany(cid,me()) && request.query.limit<=30;
-    function validT() { let d=request.resource.data; return d.keys().hasOnly(['id','companyId','title','description','role','status','assignee','delivery','feedback','createdAt','updatedAt']) && d.id==tid && d.companyId==cid && text(d.title,80) && d.title.size()>0 && text(d.description,300) && role(d.role) && d.status in ['open','claimed','submitted','completed','cancelled'] && (d.assignee==null || text(d.assignee,128)) && text(d.delivery,300) && text(d.feedback,200) && stamp(d); }
-    allow create: if signed() && manager(cid) && active(cid) && validT() && request.resource.data.status=='open' && request.resource.data.assignee==null && request.resource.data.delivery=='' && request.resource.data.feedback=='' && request.resource.data.createdAt==request.time;
-    allow update: if signed() && validT() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','assignee','delivery','feedback','updatedAt']) && (
+    function validT() { let d=request.resource.data; return d.keys().hasOnly(['id','companyId','title','description','role','status','assignee','assigneeRunId','delivery','feedback','createdAt','updatedAt']) && d.id==tid && d.companyId==cid && text(d.title,80) && d.title.size()>0 && text(d.description,300) && role(d.role) && d.status in ['open','claimed','submitted','completed','cancelled'] && (d.assignee==null || text(d.assignee,128)) && (d.get('assigneeRunId',null)==null || d.assigneeRunId.matches('[A-Za-z0-9_-]{16,64}')) && text(d.delivery,300) && text(d.feedback,200) && stamp(d); }
+    allow create: if signed() && manager(cid) && active(cid) && validT() && request.resource.data.status=='open' && request.resource.data.assignee==null && request.resource.data.get('assigneeRunId',null)==null && request.resource.data.delivery=='' && request.resource.data.feedback=='' && request.resource.data.createdAt==request.time;
+    allow update: if signed() && validT() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','assignee','assigneeRunId','delivery','feedback','updatedAt']) && (resource.data.status=='open' && request.resource.data.status=='claimed' ? request.resource.data.assigneeRunId==get(accountPath(me())).data.runId : request.resource.data.get('assigneeRunId',null)==resource.data.get('assigneeRunId',null)) && (
      (resource.data.status=='open' && request.resource.data.status=='claimed' && request.resource.data.assignee==me() && request.resource.data.delivery==resource.data.delivery && request.resource.data.feedback==resource.data.feedback && me() in get(companyPath(cid)).data.memberIds && get(accountPath(me())).data.companyId==cid && activeLife() && active(cid) && !blocked(me(),get(companyPath(cid)).data.owner)) ||
-     (resource.data.status=='claimed' && request.resource.data.status=='submitted' && resource.data.assignee==me() && request.resource.data.assignee==me() && request.resource.data.feedback==resource.data.feedback && me() in get(companyPath(cid)).data.memberIds && activeLife() && active(cid)) ||
-     (manager(cid) && resource.data.status=='submitted' && request.resource.data.status in ['claimed','completed'] && request.resource.data.assignee==resource.data.assignee && request.resource.data.delivery==resource.data.delivery && resource.data.assignee in get(companyPath(cid)).data.memberIds && active(cid)) ||
+     (resource.data.status=='claimed' && request.resource.data.status=='submitted' && resource.data.assignee==me() && request.resource.data.assignee==me() && request.resource.data.feedback==resource.data.feedback && me() in get(companyPath(cid)).data.memberIds && (resource.data.get('assigneeRunId',null)==null || resource.data.assigneeRunId==get(accountPath(me())).data.runId) && activeLife() && active(cid)) ||
+     (manager(cid) && resource.data.status=='submitted' && request.resource.data.status in ['claimed','completed'] && request.resource.data.assignee==resource.data.assignee && request.resource.data.delivery==resource.data.delivery && resource.data.assignee in get(companyPath(cid)).data.memberIds && activeLife() && active(cid) && (request.resource.data.status!='completed' || resource.data.get('assigneeRunId',null)==null || completionRecords(cid,tid,resource.data.assignee))) ||
      (!(resource.data.status in ['completed','cancelled']) && request.resource.data.status=='cancelled' && (manager(cid) || resource.data.assignee==me()) && request.resource.data.assignee==resource.data.assignee && request.resource.data.delivery==resource.data.delivery && request.resource.data.feedback==resource.data.feedback)
     );
    }
+  }
+  function receiptPath(u,id) { return /databases/$(database)/documents/career365_spark_rewards/$(u)/receipts/$(id); }
+  function taskPath(c,t) { return /databases/$(database)/documents/career365_spark_companies/$(c)/tasks/$(t); }
+  function quotaPath(u,day) { return /databases/$(database)/documents/career365_spark_rewards/$(u)/days/$(day); }
+  function today() { return string(int((request.time.toMillis() + 32400000) / 86400000)); }
+  function completionRecords(c,t,u) { let id=c+'_'+t; return getAfter(receiptPath(u,id)).data.createdAt==request.time && getAfter(receiptPath(me(),id)).data.createdAt==request.time; }
+  match /career365_spark_rewards/{uid}/receipts/{rid} {
+   allow get: if signed() && owner(uid);
+   allow list: if signed() && owner(uid) && request.query.limit<=20;
+   function validReceipt() {
+    let d=request.resource.data;
+    let before=get(taskPath(d.companyId,d.taskId)).data;
+    let after=getAfter(taskPath(d.companyId,d.taskId)).data;
+    let c=get(companyPath(d.companyId)).data;
+    return d.keys().hasOnly(['id','companyId','taskId','companyName','title','role','delivery','feedback','uid','peer','peerName','runId','kind','state','createdAt','grantedAt'])
+     && d.id==rid && rid==d.companyId+'_'+d.taskId && text(rid,129) && d.uid==uid && uid!=d.peer
+     && c.owner==me() && before.status=='submitted' && after.status=='completed' && after.updatedAt==request.time
+     && d.peerName==get(cardPath(d.peer)).data.name && d.companyName==c.name && d.title==before.title && d.role==before.role && d.delivery==before.delivery && d.feedback==after.feedback
+     && d.state=='pending' && d.createdAt==request.time && d.grantedAt==null
+     && (d.kind=='delivery' && uid==before.assignee && d.peer==me() && d.runId==before.assigneeRunId
+      || d.kind=='review' && uid==me() && d.peer==before.assignee && d.runId==get(accountPath(me())).data.runId);
+   }
+   allow create: if signed() && validReceipt();
+   allow update: if signed() && owner(uid) && resource.data.state=='pending' && request.resource.data.state=='granted'
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state','grantedAt']) && request.resource.data.grantedAt==request.time
+    && get(accountPath(uid)).data.runId==resource.data.runId && get(accountPath(uid)).data.retired==false
+    && getAfter(quotaPath(uid,today())).data.receipt==rid && getAfter(quotaPath(uid,today())).data.updatedAt==request.time;
+  }
+  match /career365_spark_rewards/{uid}/days/{day} {
+   allow get: if signed() && owner(uid);
+   function validQuota() {
+    let d=request.resource.data;
+    let before=get(receiptPath(uid,d.receipt)).data;
+    let after=getAfter(receiptPath(uid,d.receipt)).data;
+    return day==today() && d.keys().hasOnly(['count','receipt','updatedAt']) && d.count is int && d.count>=1 && d.count<=3 && stamp(d)
+     && before.state=='pending' && after.state=='granted' && after.grantedAt==request.time;
+   }
+   allow create: if signed() && owner(uid) && validQuota() && request.resource.data.count==1;
+   allow update: if signed() && owner(uid) && validQuota() && request.resource.data.count==resource.data.count+1;
   }
   match /career365_spark_requests/{id} {
    allow get: if signed() && (resource == null || me() in resource.data.parties || manager(resource.data.companyId));

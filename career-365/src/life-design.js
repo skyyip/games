@@ -4,10 +4,10 @@ import {monthSnapshot} from './monthly-play.js';
 export const HOMES={family:{name:'與家人／親友同住',rent:1500,deposit:0},shared:{name:'合租房間',rent:5000,deposit:10000},studio:{name:'獨立小單位',rent:11000,deposit:22000}};
 export const GOALS={craft:'精進專業',connection:'陪伴與連結',freedom:'財務與時間自由',discovery:'探索世界',service:'回饋社區'};
 export const QUALIFICATION_SOURCES=[
- ['香港醫務委員會：註冊與專科資格','https://www.mchk.org.hk/english/registration/'],
- ['香港護士管理局：註冊要求','https://www.nchk.org.hk/en/registration_and_enrolment/'],
- ['強積金管理局：供款','https://www.mpfa.org.hk/en/mpf-system/mandatory-contributions'],
- ['香港稅務局：稅率與免稅額','https://www.ird.gov.hk/eng/tax/ind_st.htm'],
+ ['香港醫務委員會：註冊與專科資格','https://www.mchk.org.hk/tc_chi/registration/index.html'],
+ ['香港護士管理局：註冊要求','https://www.nchk.org.hk/tc/the_nursing_council_of_hong_kong/registration_and_enrolment_requirements/'],
+ ['強積金管理局：供款','https://www.mpfa.org.hk/mpf-system/mandatory-contributions/employees'],
+ ['香港稅務局：稅率與免稅額','https://www.ird.gov.hk/chi/pdf/pam61c.pdf'],
 ];
 export function entryPath(job){
  const name=job?.name??'';
@@ -26,7 +26,8 @@ export function restoreLife(s){
  if(l.guideDismissed===undefined)l.guideDismissed=false;if(typeof l.guideDismissed!=='boolean')return false;
  l.selfIncome??=0;l.flow??={income:l.gross+l.selfIncome,expenses:l.mpf+l.tax,regular:l.gross+l.selfIncome,regularNet:Math.max(0,l.gross+l.selfIncome-l.mpf-l.tax)};l.flow.regularNet??=Math.max(0,l.flow.regular-l.mpf-l.tax);if(!l.flow||!['income','expenses','regular','regularNet'].every(k=>Number.isFinite(l.flow[k])&&l.flow[k]>=0&&l.flow[k]<=Number.MAX_SAFE_INTEGER))return false;const finite=(x,a=0,b=2e9)=>Number.isFinite(x)&&x>=a&&x<=b;
  if(l.socialRunId!==undefined&&(typeof l.socialRunId!=='string'||!/^[A-Za-z0-9_-]{16,64}$/.test(l.socialRunId)))return false;
- if(l.socialClaims!==undefined&&(!Array.isArray(l.socialClaims)||l.socialClaims.length>1600||new Set(l.socialClaims).size!==l.socialClaims.length||l.socialClaims.some(id=>typeof id!=='string'||!/^[A-Za-z0-9_-]{16,100}$/.test(id))))return false;
+ if(l.socialClaims!==undefined&&(!Array.isArray(l.socialClaims)||l.socialClaims.length>2000||new Set(l.socialClaims).size!==l.socialClaims.length||l.socialClaims.some(id=>typeof id!=='string'||!/^[A-Za-z0-9_-]{1,129}$/.test(id))))return false;
+ if(l.cooperation!==undefined&&(!l.cooperation||!Number.isInteger(l.cooperation.month)||l.cooperation.month<0||l.cooperation.month>s.elapsed||!Number.isInteger(l.cooperation.count)||l.cooperation.count<0||l.cooperation.count>3||Object.keys(l.cooperation).some(k=>!['month','count'].includes(k))))return false;
  l.extraEventMonth??=s.pending&&s.pending.id!=='work-case'?s.elapsed:-1;l.monthStart??=monthSnapshot(s);l.monthStart.pq??=s.stats.pq;
  if(!Number.isInteger(l.extraEventMonth)||l.extraEventMonth< -1||l.extraEventMonth>s.elapsed||!l.monthStart||!finite(l.monthStart.pq,0,100)||!finite(l.monthStart.health,0,100)||!finite(l.monthStart.stress,0,100)||!Object.keys(s.skills).every(k=>finite(l.monthStart.skills?.[k],0,100)))return false;
  for(const k of ['pension','gross','selfIncome','mpf','tax','sideEarned','hobbyProgress','careMonths','friendship','careerMonths','overseasMonths'])if(!finite(l[k]))return false;

@@ -1,7 +1,7 @@
 // Frozen HKD reference snapshot; role estimates are explicitly separated from observations.
 export const SALARY_SOURCES=[
- {id:'industry',title:'香港政府統計處：2025年12月工資及薪金總額按季統計報告，表2.4',period:'2025-12',released:'2026-03-27',url:'https://www.censtatd.gov.hk/wbr/B1050009/B10500092025QQ04/att/en/B10500092025QQ04.pdf',scope:'主管級及以下選定職業的行業平均月薪；不等同每個職位的平均數'},
- {id:'occupation',title:'香港政府統計處：2025年收入及工時按年統計調查，表3.1',period:'2025-05/06',released:'2026-03-23',url:'https://www.censtatd.gov.hk/wbr/B1050014/B10500142025AN25/att/en/B10500142025AN25.pdf',scope:'全職僱員職業組別工資中位數；並非算術平均數'},
+ {id:'industry',title:'香港政府統計處：2025年12月工資及薪金總額按季統計報告，表2.4',period:'2025-12',released:'2026-03-27',url:'https://www.censtatd.gov.hk/wbr/B1050009/B10500092025QQ04/att/tc/B10500092025QQ04.pdf',scope:'主管級及以下選定職業的行業平均月薪；不等同每個職位的平均數'},
+ {id:'occupation',title:'香港政府統計處：2025年收入及工時按年統計調查，表3.1',period:'2025-05/06',released:'2026-03-23',url:'https://www.censtatd.gov.hk/wbr/B1050014/B10500142025AN25/att/tc/B10500142025AN25.pdf',scope:'全職僱員職業組別工資中位數；並非算術平均數'},
 ];
 const REFERENCE={funeral:[24724,'industry','個人服務業平均'],experience:[16500,'occupation','服務及銷售全職中位數'],food:[17995,'industry','餐飲住宿行業平均'],hardware:[18629,'industry','製造業平均'],transport:[26300,'industry','運輸業平均'],commerce:[22372,'industry','進出口批發零售業平均'],finance:[26546,'industry','金融保險業平均'],service:[24724,'industry','個人服務業平均'],trades:[25700,'occupation','工藝及機器操作全職中位數'],nature:[15400,'occupation','非技術全職中位數']};
 export function salaryReference(category,name){

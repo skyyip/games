@@ -1,5 +1,6 @@
 // Spark-only transport. Every mutation is independently validated by Firestore rules.
 import {SOCIAL_ROLES,SOCIAL_AVATARS} from './social-content.js';
+import {rewardDay,COOP_LIMIT} from './social-game.js';
 const C='career365_spark_',clean=(v,n)=>String(v??'').trim().slice(0,n),check=(yes,code='invalid-input')=>{if(!yes)throw Error(code);};
 export function createSparkAdapter({sdk,db,currentUser,newId=()=>crypto.randomUUID()}){
  const ref=(kind,id,...rest)=>sdk.doc(db,C+kind,id,...rest),data=s=>s.exists()?{...s.data(),id:s.id}:null,stamp=()=>sdk.serverTimestamp();
@@ -33,8 +34,39 @@ export function createSparkAdapter({sdk,db,currentUser,newId=()=>crypto.randomUU
  async function respond(input){return transaction(async(t,get)=>{const r=await get(ref('requests',input.id));check(r,'not-found');const c=await get(ref('companies',r.companyId));check(c,'not-found');const state=input.state;if(state==='accepted'){const a=await get(ref('accounts',actor));check(actor===r.candidate&&r.state==='offered','forbidden');check(a&&!a.companyId,'already-employed');check(c.memberIds.length<8,'company-full');t.update(ref('companies',c.id),{memberIds:[...c.memberIds,actor],updatedAt:stamp()});t.update(ref('accounts',actor),{companyId:c.id,updatedAt:stamp()});}const d={state,updatedAt:stamp()};if(input.terms!==undefined)d.terms=clean(input.terms,160);if(input.role)d.role=input.role;t.update(ref('requests',r.id),d);});}
  async function leave(input){return transaction(async(t,get)=>{const c=await get(ref('companies',input.company));check(c,'not-found');const uid=input.uid??actor;check(c.owner!==uid,'handover-required');check(uid===actor||c.owner===actor,'forbidden');if(c.status!=='closed')t.update(ref('companies',c.id),{memberIds:c.memberIds.filter(u=>u!==uid),updatedAt:stamp()});t.update(ref('accounts',uid),{companyId:null,updatedAt:stamp()});});}
  async function handover(input){return transaction(async(t,get)=>{const c=await get(ref('companies',input.company));check(c,'not-found');const hr=ref('companies',c.id,'handover','current'),h=await get(hr);if(!input.state){check(c.owner===actor,'forbidden');t.set(hr,{from:actor,to:input.uid,state:'pending',updatedAt:stamp()});return;}check(h?.state==='pending','not-found');if(input.state==='accepted'){check(h.to===actor,'forbidden');t.update(ref('companies',c.id),{owner:actor,memberIds:c.memberIds.filter(u=>u!==actor),status:'active',updatedAt:stamp()});t.update(ref('accounts',h.from),{companyId:null,updatedAt:stamp()});}t.update(hr,{state:input.state,updatedAt:stamp()});});}
- async function task(input){const id=input.id??newId(),tr=ref('companies',input.company,'tasks',id);return transaction(async(t,get)=>{const c=await get(ref('companies',input.company)),old=input.id?await get(tr):null;check(c,'not-found');if(!input.id){t.set(tr,{id,companyId:c.id,title:clean(input.title,80),description:clean(input.description,300),role:input.role,status:'open',assignee:null,delivery:'',feedback:'',createdAt:stamp(),updatedAt:stamp()});return;}check(old,'not-found');const d={status:input.status,updatedAt:stamp()};if(input.status==='claimed'&&old.status==='open')d.assignee=actor;if(input.delivery!==undefined)d.delivery=clean(input.delivery,300);if(input.feedback!==undefined)d.feedback=clean(input.feedback,200);t.update(tr,d);});}
- const actions={bootstrap,publishProfile:profile,syncLife,findCard:i=>find(i.handle),friend,createCompany:company,updateCompany:companyUpdate,request,respond,leaveCompany:leave,handover,task,
+ async function task(input){const id=input.id??newId(),tr=ref('companies',input.company,'tasks',id);return transaction(async(t,get)=>{
+  const c=await get(ref('companies',input.company)),old=input.id?await get(tr):null;check(c,'not-found');
+  if(!input.id){t.set(tr,{id,companyId:c.id,title:clean(input.title,80),description:clean(input.description,300),role:input.role,status:'open',assignee:null,assigneeRunId:null,delivery:'',feedback:'',createdAt:stamp(),updatedAt:stamp()});return;}
+  check(old,'not-found');const d={status:input.status,updatedAt:stamp()};
+  if(input.status==='claimed'&&old.status==='open'){const a=await get(ref('accounts',actor));check(a&&!a.retired,'life-required');d.assignee=actor;d.assigneeRunId=a.runId;}
+  if(input.delivery!==undefined)d.delivery=clean(input.delivery,300);if(input.feedback!==undefined)d.feedback=clean(input.feedback,200);
+  if(input.status==='completed'&&old.assigneeRunId){
+   check(c.owner===actor&&old.status==='submitted'&&old.assignee!==actor,'forbidden');
+   const [a,reviewer,worker]=await Promise.all([get(ref('accounts',actor)),get(ref('profiles',actor)),get(ref('profiles',old.assignee))]);check(a&&!a.retired&&reviewer&&worker,'life-required');
+   const rid=c.id+'_'+id,base={id:rid,companyId:c.id,taskId:id,companyName:c.name,title:old.title,role:old.role,delivery:old.delivery,feedback:d.feedback??old.feedback,state:'pending',createdAt:stamp(),grantedAt:null};
+   t.set(ref('rewards',old.assignee,'receipts',rid),{...base,uid:old.assignee,peer:actor,peerName:reviewer.name,runId:old.assigneeRunId,kind:'delivery'});
+   t.set(ref('rewards',actor,'receipts',rid),{...base,uid:actor,peer:old.assignee,peerName:worker.name,runId:a.runId,kind:'review'});
+  }
+  t.update(tr,d);
+ });}
+ async function history(input={}){
+  guard();const constraints=[sdk.orderBy('createdAt','desc'),sdk.orderBy(sdk.documentId(),'desc')];
+  if(input.after){const cursor=await sdk.getDocFromServer(ref('rewards',actor,'receipts',input.after));guard();check(cursor.exists(),'not-found');constraints.push(sdk.startAfter(cursor));}
+  const result=await sdk.getDocsFromServer(sdk.query(sdk.collection(db,C+'rewards',actor,'receipts'),...constraints,sdk.limit(20)));guard();return result.docs.map(data);
+ }
+ async function claimReward(input){try{return await transaction(async(t,get)=>{
+  const rr=ref('rewards',actor,'receipts',input.id),r=await get(rr),a=await get(ref('accounts',actor));check(r,'not-found');check(a&&!a.retired&&a.runId===r.runId,'reward-life');
+  if(r.state==='granted')return r;
+  const day=rewardDay(),qr=ref('rewards',actor,'days',String(day)),q=await get(qr);check((q?.count??0)<COOP_LIMIT,'reward-limit');
+  t.update(rr,{state:'granted',grantedAt:stamp()});t.set(qr,{count:(q?.count??0)+1,receipt:r.id,updatedAt:stamp()});return {...r,state:'granted'};
+ });}catch(error){
+  // A competing commit may be rejected by rules after the other grant wins.
+  // Re-read the authoritative result; never turn a denied pending claim into growth.
+  if(error.code!=='permission-denied')throw error;
+  const [r,a]=await Promise.all([read(ref('rewards',actor,'receipts',input.id)),read(ref('accounts',actor))]);
+  if(r?.state==='granted'&&a&&!a.retired&&a.runId===r.runId)return r;throw error;
+ }}
+ const actions={bootstrap,history,claimReward,publishProfile:profile,syncLife,findCard:i=>find(i.handle),friend,createCompany:company,updateCompany:companyUpdate,request,respond,leaveCompany:leave,handover,task,
   async note(i){guard();await sdk.setDoc(ref('inbox',i.uid,'notes',actor),{from:actor,to:i.uid,kind:i.kind,updatedAt:stamp()});},
   async block(i){await transaction(async(t,get)=>{const p=await get(ref('links',actor,'peers',i.uid));t.set(ref('blocks',actor,'users',i.uid),{uid:actor,other:i.uid,updatedAt:stamp()});if(p){const d={from:p.from,to:p.to,state:'closed',updatedAt:stamp()};t.set(ref('links',actor,'peers',i.uid),d);t.set(ref('links',i.uid,'peers',actor),d);}});},
   async unblock(i){guard();await sdk.deleteDoc(ref('blocks',actor,'users',i.uid));},
