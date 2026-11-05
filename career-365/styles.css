@@ -150,3 +150,8 @@ summary[data-reading-trigger]:active{background:#dce8cc}
 .life-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin-block:1rem}
 .life-presets button{display:grid;gap:.4rem;text-align:left}.life-presets small{font-weight:400;color:var(--muted)}
 @media(max-width:480px){.life-hub-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.life-presets,#other-actions .hub-actions .daily-actions{grid-template-columns:minmax(0,1fr)}}
+
+.notifications-button{position:relative;display:grid;place-items:center;width:48px;height:48px;padding:.5rem;flex:none}
+.notification-count{position:absolute;top:-.25rem;right:-.25rem;display:grid;place-items:center;min-width:20px;height:20px;padding:0 .25rem;border-radius:20px;background:#b94f43;color:#fff;font-size:.75rem;font-weight:700;line-height:1}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.notification-item{padding:1rem;margin-block:1rem;border:1px solid #bcc9ac;border-radius:13px;background:#f3f5e9}.notification-item h3{font-size:var(--text-lead);margin-bottom:.5rem}.notification-item p{font-size:var(--text-body)}.notification-item small{display:block;margin-top:.5rem;color:var(--muted)}.notification-empty{margin-block:1.5rem}

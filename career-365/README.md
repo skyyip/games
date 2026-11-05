@@ -4,6 +4,12 @@ A new independent, Traditional Chinese life/career simulation at `career-365/`, 
 
 The paper-like cream/sage/coral interface uses locally drawn Q-style SVG characters, illustrated panels and speech bubbles. Every important career, financial and story decision records a dated frame. Recent panels appear on the dashboard; the full book is paginated without dropping older frames. There are no perpetual animation loops, remote character images or external AI calls.
 
+## 好友與邀請通知
+
+右上角鈴鐺顯示未讀數字；收到好友申請、公司邀請、好友推薦或負責人收到加入申請時，會即時更新。點擊鈴鐺可查看，再前往社交收件箱決定是否接受；查看通知不代表接受。尚未建立或載入人生時，先完成這一步再處理社交邀請。匿名及未登入玩家點擊後會開啟登入畫面。
+
+已讀紀錄按 Firebase 專案及玩家分開保存在目前裝置，不同步到其他裝置。僅在已登入且頁面可見時監聽最近50筆好友關係及40筆公司申請；切換帳戶或隱藏頁面會停止監聽，回到頁面後重新連線。讀取失敗保留上次內容，提供重試。沿用現有 Spark 規則及索引，無需 Cloud Functions 或新部署。
+
 ## 職業體驗主流程（最新版）
 
 主畫面以目前身份、眼前任務與專業成長為主；「開始本章學徒任務／接一個職業任務」直接放在下一步目標旁。每月仍有兩次安排，也可選擇休息或其他人生。投資、社交、感情、生活與進修保留在次要入口，IQ／EQ／PQ／JQ詳細資料沿用履歷的收合說明。
