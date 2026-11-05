@@ -19,6 +19,11 @@ async function hire(owner,candidate,c){await call(owner,'request',{company:c,uid
 try{
  await env.clearFirestore();
  await check('registered profiles and immutable handle reservations are created atomically',async()=>{for(const u of ['alice','bob','carol','david','erin','mallory'])await profile(u);const s=await call('alice','bootstrap');assert.equal(s.mode,'spark');assert.equal(s.profile.handle,'alice');assert(!('balance' in s));});
+ await check('all expanded comic avatars persist, old avatar IDs remain valid and invalid IDs are rejected',async()=>{
+  for(let i=8;i<20;i++){await profile('portrait'+i,{avatar:'comic-'+i});assert.equal((await call('portrait'+i,'bootstrap')).profile.avatar,'comic-'+i);}
+  await denied(()=>sdk.updateDoc(ref('alice','profiles','alice'),{avatar:'comic-20',updatedAt:sdk.serverTimestamp()}));
+  assert.equal((await call('alice','bootstrap')).profile.avatar,'🐸');
+ });
  await check('guests and anonymous users cannot access Spark social data',async()=>{await denied(()=>read(null,'profiles','alice'));await denied(()=>read('anon','profiles','alice'));});
  await check('linked anonymous tokens with a permanent Email identity remain supported',async()=>{const linked=env.authenticatedContext('linked',{firebase:{sign_in_provider:'anonymous',identities:{email:['linked@example.test']}}}).firestore();await assertSucceeds(sdk.getDocFromServer(sdk.doc(linked,'career365_spark_profiles','alice')));});
  await check('foreign edits, private fields, fake rewards and forged handles are rejected',async()=>{await denied(()=>update('mallory','profiles','alice',{name:'hacked'}));await denied(()=>update('alice','profiles','alice',{cash:99999}));await denied(()=>update('alice','accounts','alice',{balance:99999}));await denied(()=>sdk.setDoc(ref('mallory','handles','fake'),{uid:'alice',handle:'fake'}));await denied(()=>update('alice','profiles','alice',{handle:'other'}));});

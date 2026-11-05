@@ -71,3 +71,5 @@ firebase emulators:exec --project demo-career365 --only firestore \
 社交功能現已改為 **Spark相容**：只使用Authentication及Firestore，不需要Cloud Functions或Blaze。名片、好友、公司招募／申請／推薦、合作條件、文字委託、人工確認及交接均由直接Firestore交易及安全規則驗證；不設合作點；新版完成委託後可自願領取有限的IQ／EQ／PQ／JQ成長。合作紀錄及每日領取配額也由Firestore規則驗證，必須部署最新版`firestore.rules`。本次沒有新增複合索引，也不用啟用Blaze。詳見 [SOCIAL.md](./SOCIAL.md)。
 
 `npm run social:check --prefix career-365`核對目標，`npm run social:deploy --prefix career-365`發布規則及三個新社交索引；沒有Functions部署。專案仍固定為`sky-playground-career-365`。先部署規則、等待索引可用，再發布靜態網站及用兩個註冊帳戶驗收。免費配額耗盡時社交暫停，本機人生仍可繼續。
+
+頭像擴充至20款的版本需重新部署本資料夾的`firestore.rules`：名片avatar新增`comic-8`至`comic-19`安全值，原有八個值繼續支援。使用既有`npm run social:deploy --prefix career-365`指令；不用新增索引、Cloud Functions或升級Blaze。
