@@ -9,7 +9,7 @@ The paper-like cream/sage/coral interface uses locally drawn Q-style SVG charact
 - Draw a seeded resume with gender, starting age18–26, illustratively generated adult height clusters, height-correlated weight generated from BMI19–29, blood type, zodiac, family, school, major, MBTI and IQ/EQ/PQ/JQ. Appearance and gender do not gate professions. The major grants a starting skill.
 - Search **405 distinct named jobs** across **25 categories**, including chef, plumber, YouTuber, pet communicator, blockchain engineer, metaverse architect and AI prompt specialist. These are curated career names; category-based routines and shared events provide the initial career scenarios rather than405 bespoke story campaigns.
 - Mentor study is slower, builds EQ/JQ/contacts, can uncover secrets and passes along contacts on graduation. Simulated AI study is faster and develops IQ, without an automatic EQ penalty, and with a hallucination branch. A $300 checked lesson avoids that branch. Learning is a game mechanic rather than an actual training service.
-- Each month offers two arrangements: a recommended focus and one free choice, in addition to regular employment and persistent habits. Study/work consume energy; rest and social time restore the player differently for I/E personalities. Social events also offer a personality-specific choice. PQ means Positive Intelligence Quotient (0–100% positive mental time), buffers stress growth and improves through rest/exploration. Health sets the energy cap; overtime and high pressure can cause illness and bills.
+- Each month offers two arrangements: a recommended focus and one free choice, in addition to regular employment and persistent habits. Study/work consume energy; rest and social time restore the player differently for I/E personalities. Social events also offer a personality-specific choice. PQ is an article-inspired, fictional Positive Intelligence Quotient (0–100%), complements IQ/EQ/JQ, buffers stress growth and develops through rest, exploration and optional reflection. It is not a player psychological assessment. Health sets the energy cap; overtime and high pressure can cause illness and bills.
 - After the opening graduation, choose an apprenticeship or a one-year further-education course ($6,000 admission, $1,800/month and at least12 study actions). Completing it returns to a graduate decision; annual plans stop there.
 - Players can resign, preserving skills/assets and settling business staff costs. Choose world travel ($5,000 departure plus $4,500/month), overseas short-term work ($8,000 departure, $2,500/month plus living costs; $6,000/work action), or a sabbatical. Travel and interests generate comic panels and improve PQ. Debt-free wealth of25 years of basic living costs unlocks financial freedom; this remains a playable lifestyle until65, with ongoing expenses and the option to re-enter work. This threshold is a fictional game unlock, not a financial forecast.
 - Graduates work, negotiate pay and rise through eight levels on separate specialist or management tracks. JQ can redirect adverse workplace events into opportunities. Switching costs $3,000 and one action, preserves prior skills and enters a new apprenticeship. Plumber → YouTuber has an explicit cross-field bonus.
@@ -194,3 +194,25 @@ CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/
 「其他人生選擇」加入Spark相容的玩家社群，可建立動物名片、好友邀請、快捷訊息、公司招募／申請／推薦、合作條件協商、文字委託、負責人人工確認及退休交接。支援Email／Google帳戶，匿名可先綁定。只需要Authentication及Firestore，不需要Cloud Functions或Blaze；不設合作點、自動評分或單人人生獎勵。
 
 部署本遊戲的規則及三個Spark社交索引後，再發布網站。設定、權限、免費配額與驗收步驟見 [SOCIAL.md](./SOCIAL.md)。原有單人玩法及離線存檔保留。
+
+## PQ：辨認反應、練習五力與選擇下一步
+
+依玩家提供的[文章節錄](https://melodyliao.cc/215/eq%E4%B8%8D%E6%B5%81%E8%A1%8C%E4%BA%86%EF%BC%8Cpq%E6%89%8D%E6%98%AF%E4%BA%BA%E7%94%9F%E6%88%90%E5%8A%9F%E5%B9%B8%E7%A6%8F%E7%9A%84%E9%97%9C%E9%8D%B5)，把「批判＋九種心魔」轉為十種可自行留意的自動反應，並加入同理、探索、開創、領航、啟動五力。這些不是人格分類、診斷或道德分數，亦不由性別、MBTI決定；「受害者」模式以「陷入無力感」呈現，明確保留承認痛苦、求助及保護自己的選擇。
+
+入口：「其他人生選擇 → PQ心智練習與心聖五力」。感官覺察可以由約10秒開始，一次安排代表本月留出練習時間。每個遊戲月可練習一次，消耗一次安排及6精力，基礎PQ成長2.2按現有小幅成長遞減計算，壓力下降6；不收費、不直接加薪，不增加專業技能或資格。五力與反應記錄由玩家自選，沒有真實倒數、每天100次或21天連續打卡門檻；漏練不扣分，也不清除過去經驗。
+
+405種職業的工作情境及職場突發事件、部分家庭／人際故事會提供可收合的「先整理感受，再回應」。每月一次，消耗4精力、不另佔安排；準備後仍須選擇原有做法，完成有效決定後才記錄。職場中，同理對應協作、探索／開創對應覆核、啟動對應有限交付、領航依本次重點選擇做法；契合時可有1–3分支持，仍可能不通過。契合的回應另有小幅PQ成長與減壓；不契合時只有少量減壓，沒有額外PQ。職業原有費用、資格、安全與後續保留。家庭中，已同意的正向互動可獲最多1點親密度支持，拒絕交往及不婚不育仍是有效選項；不會自動建立或修復感情。
+
+不在騙案、被困、成癮誘惑等危險情境提供「把傷害當成禮物」的按鈕。壓力仍透過既有系統影響健康，醫療與支援功能保留。PQ不是永遠樂觀或忽略風險，EQ也沒有被移除。原文所述研究數字未在此獨立核實，不套用37%銷量、延壽10年、3:1臨界點等固定倍率或保證；人生仍在65歲結算。
+
+月結顯示實際PQ淨變化、練習及回應次數；每日成長回顧沿用既有PQ差額。最近12份練習紀錄保存在自己的本機／JSON／私人雲端人生中，退休總結會回顧常用五力；不公開到社交名片。舊存檔保留原有PQ及隨機種子，只補空白紀錄。無額外Firebase服務、資料集合或規則需求，仍適用Spark。
+
+`src/pq.js`處理資料、遷移及遊戲規則，`src/pq-ui.js`處理說明與操作。`tests/pq.test.js`驗證成本、月限、儲存／恢復、職場支持、家庭同意、危險情境界線及65歲結局；`scripts/pq-browser.mjs`以真實本機人生流程驗證四尺寸及200%文字放大。測試不呼叫正式Firebase。
+
+## 新手上路與勾選操作
+
+首頁用三步說明「抽履歷 → 選方向 → 過一個月」，履歷與職業選擇視窗也補上具體操作提示。首次確認履歷後，畫面會帶到入門指引，先呈現目前下一步及入口，再顯示三階段流程。指引依實際狀態區分免費初次入行、繼續進修、上工／課堂、待決故事、剩餘安排及正常月結；僅導向既有控制項，不替玩家作決定或花費資源。低精力與退休後手動查看亦有對應提示。
+
+首月預設顯示，完成後自動收起；可以先收起並保存偏好，也可隨時從現況卡的「玩法指引」重看。舊存檔補上私人`guideDismissed`布林值，不改變現金、安排或隨機種子。剛建立、尚未選方向的新人生會靜默建立每日成長基準，避免先出現沒有提升的基準彈窗；之後的實際每日成長回顧保留。
+
+生活設定、社交名片、公司公開設定與招募工種的checkbox文字採獨立span，使用flex垂直置中；多行標籤同樣以整塊文字的中心對齊。沿用原生checkbox與label，點文字、空白鍵及FormData提交均保持原有行為；職業學習路線的radio也採一致對齊。主要字級13–16px、輔助文字最小約10px及兩欄性別／MBTI佈局保留。

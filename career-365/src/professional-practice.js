@@ -1,3 +1,4 @@
+import {completeMind} from './pq.js';
 import {claimMonthlyEvent} from './monthly-play.js';
 import {JOBS} from './content.js';
 import {CAREER_ARCS} from './career-arcs.js';
@@ -32,6 +33,6 @@ export const professionalMethods={
  },
  resolveOccupationEvent(index){const s=this.s,e=s.pending,item=occupationEventById(this.job,e?.careerEvent?.event),c=item?.choices[index];if(e?.id!=='occupation-event'||!item||!c||e.careerEvent.career!==s.career)return false;this.changeStats(c.effects);const skill=s.skills[this.job.skill];s.skills[this.job.skill]=clamp(skill+c.skillGain*Math.max(.12,1-skill/110),0,100);const key=index===1?'colleague':'client';s.life.npc[key]=clamp(s.life.npc[key]+(index===2?0:2),0,100);s.life.cooldowns[item.id]=s.elapsed+(item.kind==='opportunity'?10:8);progressGoal(this,'craft',c.skillGain);
   let after='';if(item.kind==='opportunity'&&index<2){queueFollowup(this,'referral',3,{career:s.career,event:item.id});after='對方可能在3個月後再次聯絡，伏線已記下。';}else if(item.kind==='disruption'&&index===2){queueFollowup(this,'repair',2,{career:s.career,event:item.id});after='縮小範圍留下了後續待辦，約2個月後會跟進。';}
-  s.life.occupationReviews.push({career:s.career,event:item.id,choice:index,month:s.month});s.life.occupationReviews=s.life.occupationReviews.slice(-12);s.pending=null;journal(this,`${this.job.name}｜${item.title}：${c.label}。${after}`);this.record('work',`${this.job.name}｜${item.title}`,`${item.text} 你選擇：${c.label}。${after} 專業成長、費用及精力已記入本局；這次不重複發整月薪酬。`);return true;
+  s.life.occupationReviews.push({career:s.career,event:item.id,choice:index,month:s.month});s.life.occupationReviews=s.life.occupationReviews.slice(-12);s.pending=null;journal(this,`${this.job.name}｜${item.title}：${c.label}。${after}`);this.record('work',`${this.job.name}｜${item.title}`,`${item.text} 你選擇：${c.label}。${after} 專業成長、費用及精力已記入本局；這次不重複發整月薪酬。`);completeMind(this,e,c);return true;
  },
 };
