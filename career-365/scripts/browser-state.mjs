@@ -13,9 +13,10 @@ export async function clickAndWait(locator,options){await locator.click(options)
 export async function openLifeControl(page,selector){
  const control=page.locator(selector);
  while(await page.locator('.reading-dialog[open]').count()&&!await control.evaluate(n=>!!n.closest('.reading-dialog[open]')))await page.keyboard.press('Escape');
+ if(await page.locator('#life-choices-dialog[open]').count()){const panel=await control.evaluate(n=>n.closest('[data-hub-panel]')?.dataset.hubPanel);if(panel)await clickAndWait(page.locator(`[data-hub-tab="${panel}"]`));}
  if(!await control.isVisible()){
   const dialog=await control.evaluate(n=>n.closest('dialog')?.id);
-  if(dialog==='life-choices-dialog'&&!await page.locator('#life-choices-dialog').isVisible())await clickAndWait(page.locator('#life-choices-open'));
+  if(dialog==='life-choices-dialog'&&!await page.locator('#life-choices-dialog').isVisible()){await clickAndWait(page.locator('#life-choices-open'));const panel=await control.evaluate(n=>n.closest('[data-hub-panel]')?.dataset.hubPanel);if(panel)await clickAndWait(page.locator(`[data-hub-tab="${panel}"]`));}
   const parents=await control.locator('xpath=ancestor::details').all(),summary=await control.evaluate(n=>n.tagName==='SUMMARY');for(const details of parents.slice(0,summary?-1:undefined))if(await details.getAttribute('open')===null)await clickAndWait(details.locator(':scope > summary'));
  }
  await clickAndWait(control);
