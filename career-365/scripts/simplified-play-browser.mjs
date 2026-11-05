@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {LifeGame,SAVE_KEY,RETIRE_MONTH} from '../src/game.js';
 import {JOBS} from '../src/content.js';
-import {installLifeHelpers,clickAndWait} from './browser-state.mjs';
+import {completeVocationalTask,installLifeHelpers,clickAndWait} from './browser-state.mjs';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const base=process.env.CAREER_URL||'http://localhost:5320/career-365/';
 const browser=await chromium.launch({headless:true});await installLifeHelpers(browser);
@@ -15,7 +15,7 @@ try{for(const [width,height]of [[320,568],[390,844],[812,375],[1280,900]]){
  const state=()=>p.evaluate(async key=>globalThis.__careerTestRead(key),SAVE_KEY);
  assert.equal(await p.locator('#gauges [role=meter]').count(),2);assert(await p.locator('#profile .trait-chip').last().isHidden());assert.equal(await p.locator('#actions [data-action]').count(),2);assert.match(await p.locator('#ap').textContent(),/本月重點/);assert.equal(await p.locator('#work-details').getAttribute('open'),null);
  await clickAndWait(p.locator('#resume-open'));await clickAndWait(p.locator('#resume-detail .attribute-guide summary'));assert.equal(await p.locator('#resume-detail .attribute-guide article').count(),4);await clickAndWait(p.locator('[data-close=resume-dialog]'));
- await clickAndWait(p.locator('#actions [data-action=work]'));assert.equal(await p.locator('#story [data-choice]').count(),3);assert(await p.locator('#month').isDisabled());const pending=(await state()).pending,index=pending.choices.findIndex(o=>o.approach==='check');await clickAndWait(p.locator(`[data-choice="${index}"]`));assert(await p.locator('.inline-work-review').isVisible());assert.match(await p.locator('#ap').textContent(),/自由安排/);assert.equal((await state()).ap,1);
+ await clickAndWait(p.locator('#actions [data-action=work]'));assert.equal(await p.locator('#story [data-vocation-choice]').count(),3);assert(await p.locator('#month').isDisabled());await completeVocationalTask(p);assert(await p.locator('.inline-work-review').isVisible());assert.match(await p.locator('#ap').textContent(),/自由安排/);assert.equal((await state()).ap,1);
  await clickAndWait(p.locator('#actions [data-action=rest]'));assert.equal((await state()).ap,0);const skips=await p.locator('#month-skip-note').textContent();await clickAndWait(p.locator('#month'));await p.locator('#monthly-recap').waitFor({state:'visible'});assert.equal(await p.locator('#month-skip-note').textContent(),skips);assert(await p.locator('#monthly-recap').isVisible());assert.match(await p.locator('#monthly-recap').textContent(),/收入.*開支.*收支差額/s);assert.equal((await state()).lastLedger.routineCost,600);
  if((await state()).pending)await clickAndWait(p.locator('#story [data-choice]').first());
  await clickAndWait(p.locator('#life-choices-open'));assert(await p.locator('#life-choices-dialog').isVisible());assert(await p.locator('#finance-open').isVisible());await clickAndWait(p.locator('#life-family-open'));assert(await p.locator('#life-panel [data-action=family-date]').isVisible());assert.equal(await p.locator('#other-actions [data-action^="life-"]').count(),4);

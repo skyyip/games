@@ -4,6 +4,23 @@ A new independent, Traditional Chinese life/career simulation at `career-365/`, 
 
 The paper-like cream/sage/coral interface uses locally drawn Q-style SVG characters, illustrated panels and speech bubbles. Every important career, financial and story decision records a dated frame. Recent panels appear on the dashboard; the full book is paginated without dropping older frames. There are no perpetual animation loops, remote character images or external AI calls.
 
+## 職業體驗主流程（最新版）
+
+主畫面以目前身份、眼前任務與專業成長為主；「開始本章學徒任務／接一個職業任務」直接放在下一步目標旁。每月仍有兩次安排，也可選擇休息或其他人生。投資、社交、感情、生活與進修保留在次要入口，IQ／EQ／PQ／JQ詳細資料沿用履歷的收合說明。
+
+1. 選擇職業與起步學習偏好。任務中可同時請教師傅、查看AI輔助教材，並非只能二選一；教材由遊戲內容提供，不連接外部AI服務。
+2. 接任務後免費查看現場線索、帶教提示及相關觀念題。答錯可閱讀解析並訂正，沒有額外扣安排或即時刷取屬性獎勵。
+3. 最後選擇具體處理方式才使用一次安排。工作基礎18精力；深入覆核另8精力及$180，協作另4精力，有限交付另$90；成本與取捨在選項旁列明。月薪沿用既有規則，不重複發放。未確認前可返回本月安排；另選的PQ整理仍按其明示成本結算。
+4. 收到「哪一步、帶來影響、下次怎樣做」回饋，累積本職業四項能力、觀念與實作證據。需要補強可選一次安排的14精力弱項補練，做法成本另列；補練不算受督導實作，也不另發月薪。
+
+星級主廚、水電工、AI代理工程師、YouTuber、護理師、殯儀統籌師、試吃員、神秘顧客各有五章帶教目標與專業能力：「跟著觀察 → 協助準備 → 受督導實作 → 檢討與補練 → 整合評核」。使用現有職業個案、工作連載及官方來源觀念題，讓不同階段有明確學習要求。其他職業提供領域課程；選職業時明示內容深度，不把405種職業全部稱為完整專屬劇情。
+
+出師清單同時列出章節、能力與觀念、實作、訓練月數、熟練度，以及受規管職業的模擬資格程序。新流程的考核依已具備的證據，不再抽籤決定；認可訓練、受督導年期及資格界線仍保留，AI教材不授予牌照。工作階段逐步提高交付要求，合作信任與返工／轉介伏線會延續。升職所需的新實績取自當前職業，轉職保留原職業紀錄及已取得的遊戲資格。
+
+完成五章及能力要求後，可以先預覽最多3／12個月例行訓練的收入、必要支出、現金與債務，再確認安排。它逐月完成受督導訓練與休息，照常結算市場、健康和生活費；遇故事、病況、出師或資格考核便停下；一般年度規劃也會在待確認考核前停下，不代答重要決定，也不使用每日跳月額度。所有人生路線仍到65歲總結。
+
+私人存檔新增有上限的 `life.vocation.jobs` 與可續接的任務狀態；舊存檔只補空白容器，不改變資產、種子、技能及已取得資格。相容本機、JSON及既有私人雲端payload，沒有新Firestore集合、索引、Functions或規則部署要求。
+
 ## A playable life
 
 - Draw a seeded resume with gender, starting age18–26, illustratively generated adult height clusters, height-correlated weight generated from BMI19–29, blood type, zodiac, family, school, major, MBTI and IQ/EQ/PQ/JQ. Appearance and gender do not gate professions. The major grants a starting skill.
@@ -27,7 +44,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v7` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v24` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -41,7 +58,7 @@ PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs _site
 node tools/check-seo.mjs _site /games/
 ```
 
-The browser script covers phone/landscape/desktop layouts, a complete life through actual planner/choice controls, HTML/PNG/JSON downloads, invalid/valid backup import, denied storage and installed offline play. See [VERIFICATION.md](VERIFICATION.md).
+The current vocational browser check is `scripts/vocation-browser.mjs`. The broader browser scripts cover phone/landscape/desktop layouts, a complete life through actual planner/choice controls, HTML/PNG/JSON downloads, invalid/valid backup import, denied storage and installed offline play. See [VERIFICATION.md](VERIFICATION.md).
 
 ## Follow-up scope
 
@@ -211,9 +228,9 @@ CAREER_URL=http://localhost:5283/games/career-365/ GRID_RUSH_PLAYWRIGHT_MODULE=/
 
 ## 新手上路與勾選操作
 
-首頁用三步說明「抽履歷 → 選方向 → 過一個月」，履歷與職業選擇視窗也補上具體操作提示。首次確認履歷後，畫面會帶到入門指引，先呈現目前下一步及入口，再顯示三階段流程。指引依實際狀態區分免費初次入行、繼續進修、上工／課堂、待決故事、剩餘安排及正常月結；僅導向既有控制項，不替玩家作決定或花費資源。低精力與退休後手動查看亦有對應提示。
+首頁保留三步開局摘要，履歷與職業視窗保留具體操作提示。「玩法指引」入口統一放在頁尾，點擊後以modal顯示詳細內容；主畫面不再插入整張指引卡，側欄的「人生玩法筆記」也移入同一modal。開始、繼續或重新載入人生時不自動打開指引。
 
-首月預設顯示，完成後自動收起；可以先收起並保存偏好，也可隨時從現況卡的「玩法指引」重看。舊存檔補上私人`guideDismissed`布林值，不改變現金、安排或隨機種子。剛建立、尚未選方向的新人生會靜默建立每日成長基準，避免先出現沒有提升的基準彈窗；之後的實際每日成長回顧保留。
+Modal依目前進度提供免費初次入行、進修、職業任務、故事選擇、剩餘安排、月結或退休提示。導向按鈕先關閉modal，再開啟相關視窗或將焦點帶到現有控制項；查看與關閉不修改存檔、不花資源。開局前亦可查看一般說明。支援Tab／Shift+Tab在modal內移動、Escape關閉及返回頁尾入口焦點，重開時從頂部閱讀。舊`guideDismissed`欄位保留相容，但不再用它自動顯示指引。每日成長回顧維持原有規則。
 
 生活設定、社交名片、公司公開設定與招募工種的checkbox文字採獨立span，使用flex垂直置中；多行標籤同樣以整塊文字的中心對齊。沿用原生checkbox與label，點文字、空白鍵及FormData提交均保持原有行為；職業學習路線的radio也採一致對齊。主要字級13–16px、輔助文字最小約10px及兩欄性別／MBTI佈局保留。
 

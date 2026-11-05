@@ -19,3 +19,15 @@ export async function openLifeControl(page,selector){
  }
  await clickAndWait(control);
 }
+
+// Exercise the real task controls. Expected choices come from the saved task's published materials.
+export async function prepareVocationalTask(page){
+ const {LifeGame}=await import('../src/game.js'),{taskMaterial}=await import('../src/vocation.js');
+ let state=await readLife(page),g=LifeGame.restore(state);if(g?.s.pending?.id!=='vocational-task')throw Error('Expected vocational task');
+ for(const kind of ['clue','mentor'])if(!state.pending.vocation[kind])await clickAndWait(page.locator(`[data-vocation-inspect="${kind}"]`));
+ state=await readLife(page);g=LifeGame.restore(state);const material=taskMaterial(g);
+ if(state.pending.vocation.answer===null)await clickAndWait(page.locator(`[data-vocation-answer="${material.order.indexOf(material.question.answer)}"]`));
+ if(await page.locator('#vocation-revise').count())await clickAndWait(page.locator('#vocation-revise'));
+ return material;
+}
+export async function completeVocationalTask(page,approach=null){const material=await prepareVocationalTask(page),index=material.choices.findIndex(c=>c.approach===(approach??material.pressure.fit));await clickAndWait(page.locator(`[data-vocation-choice="${index}"]`));return readLife(page);}

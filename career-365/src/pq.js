@@ -25,7 +25,7 @@ const counter=o=>Object.fromEntries(Object.keys(o).map(k=>[k,0]));
 export function mindDefaults(){return {version:1,practices:0,responses:0,powers:counter(MIND_POWERS),patterns:counter(MIND_PATTERNS),lastPractice:-1,lastResponse:-1,prepared:null,history:[]};}
 export function mindContext(s){
  const e=s.pending;if(!e||['setup','retired'].includes(s.status)||s.risks.captivity)return null;
- if(e.id==='work-case'||e.id==='occupation-event')return {title:e.title,kind:'work'};
+ if(e.id==='work-case'||e.id==='occupation-event'||e.id==='vocational-task')return {title:e.title,kind:'work'};
  if(['blame','credit','layoff','supplier','inventory','reunion','classgap','crush','family-care','family-dinner','family-tension','romance','marriage','parenthood'].includes(e.id))return {title:e.title,kind:e.scene==='relationship'||e.group==='family'?'relationship':'life'};
  return null;
 }
@@ -43,9 +43,9 @@ export function restoreMind(s){
 }
 function remember(g,kind,power,pattern,title,before){const s=g.s,m=s.life.mind;m[kind==='practice'?'practices':'responses']++;m.powers[power]++;if(pattern!=='none')m.patterns[pattern]++;const r={kind,power,pattern,title,month:s.month,elapsed:s.elapsed,pq:s.stats.pq-before.pq,stress:s.stats.stress-before.stress};m.history.push(r);m.history=m.history.slice(-12);return r;}
 export function mindMonth(s,elapsed=s.elapsed){const records=s.life.mind.history.filter(r=>r.elapsed===elapsed);return {practices:records.filter(r=>r.kind==='practice').length,responses:records.filter(r=>r.kind==='response').length,powers:[...new Set(records.map(r=>r.power))]};}
-function workFits(event,power,approach){const fit={empathy:'talk',explore:'check',innovate:'check',navigate:({quality:'check',people:'talk',deadline:'rush'})[event.work.pressure??'quality'],activate:'rush'};return fit[power]===approach;}
-export function mindWorkSupport(s,approach){const p=s.life.mind.prepared;if(!p||p.eventKey!==mindEventKey(s)||s.pending?.id!=='work-case')return 0;return workFits(s.pending,p.power,approach)?Math.min(3,1+s.stats.pq*.02):0;}
-export function completeMind(g,event,choice){const s=g.s,m=s.life.mind,p=m.prepared;if(!p||p.eventKey!==mindEventKey(s,event))return;const before={pq:s.stats.pq,stress:s.stats.stress},aligned=event.work?workFits(event,p.power,choice.approach):!(choice.effects.affection<0);m.prepared=null;g.changeStats(aligned?{pq:.8,stress:-3}:{stress:-1});
+function workFits(event,power,approach){const pressure=event.work?.pressure??event.vocation?.pressure??'quality',fit={empathy:'talk',explore:'check',innovate:'check',navigate:({quality:'check',people:'talk',deadline:'rush'})[pressure],activate:'rush'};return fit[power]===approach;}
+export function mindWorkSupport(s,approach){const p=s.life.mind.prepared;if(!p||p.eventKey!==mindEventKey(s)||!['work-case','vocational-task'].includes(s.pending?.id))return 0;return workFits(s.pending,p.power,approach)?Math.min(3,1+s.stats.pq*.02):0;}
+export function completeMind(g,event,choice){const s=g.s,m=s.life.mind,p=m.prepared;if(!p||p.eventKey!==mindEventKey(s,event))return;const before={pq:s.stats.pq,stress:s.stats.stress},aligned=event.work||event.vocation?workFits(event,p.power,choice.approach):!(choice.effects.affection<0);m.prepared=null;g.changeStats(aligned?{pq:.8,stress:-3}:{stress:-1});
  // Supportive decisions can strengthen an existing relationship, never force consent.
  if(['empathy','navigate'].includes(p.power)&&s.family.status>0&&choice.effects.affection>0)s.family.affection=Math.min(100,s.family.affection+1);
  const r=remember(g,'response',p.power,p.pattern,event.title,before);g.record('rest','先看見情緒，再選下一步',`你以「${MIND_POWERS[p.power].name}」回應「${event.title}」。${p.pattern==='none'?'你先留意感受，不替自己貼標籤。':`你留意到「${MIND_PATTERNS[p.pattern].name}」的反應，改選具體做法。`}PQ +${r.pq.toFixed(2)}、壓力 ${r.stress.toFixed(1)}；${aligned?'你把整理過的方向帶進了具體回應。':'這次做法與練習方向仍有距離，PQ未額外增加；下次仍可再試。'}原有選擇的費用、風險與後續仍保留。`);
