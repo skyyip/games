@@ -50,7 +50,7 @@ The current life autosaves under `career-365.save.v1`. Invalid saves are rejecte
 
 Download the complete book as a standalone offline HTML file with all frames, captions and a print/Save-PDF control. A900×1200 PNG captures up to six turning points. Active lives export a clearly labelled work-in-progress book; only retirement uses the final reflection. Downloads stay on the visitor's device.
 
-Source service worker `career-365-app-v37` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
+Source service worker `career-365-app-v38` preloads the game and shared language/update/font modules. The production site builder supplies content-hashed assets and an update-aware offline worker. No existing game's cache or progress is cleared.
 
 ## Development
 
@@ -315,3 +315,20 @@ Modal依目前進度提供免費初次入行、進修、職業任務、故事選
 公司合作範本從3種增至6種，新增網站結帳整合、電商活動與社群、資料與AI品質覆核。範本僅填草稿，仍需真人發布、認領、交付及確認。NPC不自動代替真人。
 
 新開任務使用明確的內容包標記。既有未完成任務保留舊題目、選項、觀念與實作模式，完成後才進入新情境。新增專屬練習紀錄仍為可選、有上限的私人存檔欄位；沒有新增職業ID、登入／雲端專案設定、Firestore集合、規則、索引或Functions。
+
+## 趣味職場故事與玩法減法（2026-11-06）
+
+主流程改為單一「繼續故事」入口，其他人生選擇不再重複放一個工作入口或每日小委託。必要現場資訊、實作及交付直接在同一頁顯示；師傅和教材留作可選modal。新任務中，已在本職業掌握的觀念不用重答，首次學習及學徒整合評核仍須理解／訂正。四個試行職業有完整的一季四章、固定師傅／同事／客戶及可續玩的角色記憶：
+
+- 前端工程師：小表單、需求增加、低速手機、客戶回訪；點選介面障礙。
+- 後端工程師：重複出貨、狀態未知重試、高峰查詢、正式交接；排序處理卡。
+- 全端／全棧工程師：金額契約、舊端相容、一般角色、整合驗收；逐章配對不同資料契約。
+- 星級主廚：午市加單、模糊便條、真實產能、熟客回訪；輸入已核實／未核實／待確認的批次數量。
+
+互動可用鍵盤完成，沒有倒數，實作可以修改、重排及保存續玩。實作有缺口時可以如實交付，付出明示成本並留下補救線索，主線仍繼續；未達標不會取得章節、資格或完整交付證據。NPC會記得上次覆核、協商或有限交付；協商可累積最多三份同事支持，使用後在確認交付時才扣一份。每四段主線形成一篇角色與作品紀錄，收進可分享的人生繪本；補練及每週委託不跳過主線章節。
+
+移除六項數值專長的學習／裝備入口，以兩種操作型專精供四個試行職業選擇：診斷工具或同事協作。兩次實作後解鎖，進行任務時鎖定；工具揭示診斷資料，同事可先協助一步，兩者都不額外加分。其他職業採用精簡任務畫面，沿用原有領域內容，不聲稱全部405行都有四章專屬連載。
+
+獨立每週題庫、重複NPC演練及邊框配色收藏入口不再顯示，停止寫入獨立收藏快取；原有作品、技能及練習存檔不刪除，舊API與舊任務仍相容。合併後「作品與人物故事」提供最近作品、人物回顧及每週一件可選特別委託；特別委託直接使用職業流程，交付花一次安排及明示成本，沒有連續登入或缺席懲罰，也不替真人提交公司委託。原有真人公司合作、邀請、交付、驗收及紀錄仍可使用。
+
+具資格的學徒可沿用訓練摘要；工作／創業玩家可先預覽三個月例行生活的收入、支出、現金及債務，再確認。逐月結算，遇未決故事、病況或65歲退休便停下，不代答決定，也不扣每日跳月額度。尚未完成學徒證據不能藉此略過要求。一般存檔仍到65歲總結，新增故事欄位可選且有上限，不需Firestore規則、索引或Functions更新。
