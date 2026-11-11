@@ -102,7 +102,7 @@ export function applySeo(source, page) {
 <meta name="twitter:image" content="${imageUrl}">
 <meta name="twitter:image:alt" content="Sky Playground mascot">
 <script type="application/ld+json">${json({ '@context': 'https://schema.org', '@graph': graph })}</script>
-<style>${game?.slug === 'career-365' ? styles.replace(guideFocusStyles, '') : styles}</style>`;
+<style>${['career-365','your-dream-career'].includes(game?.slug) ? styles.replace(guideFocusStyles, '') : styles}</style>`;
   html = html.replace(/<\/head>/i, block('seo', metadata) + '\n</head>');
   const content = block('game-guide', guide(game));
   if (game?.slug === 'tap-and-spill') {

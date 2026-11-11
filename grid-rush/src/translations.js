@@ -1,6 +1,7 @@
 // English source messages and their Traditional Chinese translations.
 // Named placeholders preserve numbers and player names without interpreting HTML.
 export const messages = {
+  'Your Dream Career': '我的夢想職涯',
   '365 Careers, One Little Life': '365行，行行出狀元',
   'The City is Dying': '天與地：The City is Dying',
   "Mo Lei Tau Studio": "星爺宇宙：無厘頭片場",

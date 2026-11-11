@@ -1,0 +1,25 @@
+{
+  "name": "your-dream-career",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node ../grid-rush/scripts/serve.js",
+    "test": "node --test --test-isolation=none tests/*.test.js",
+    "test:rules": "node scripts/firestore-check.mjs",
+    "firebase:check": "node scripts/firebase-deploy.mjs --dry-run",
+    "firebase:deploy": "node scripts/firebase-deploy.mjs",
+    "social:check": "node scripts/firebase-deploy.mjs --social --dry-run",
+    "social:deploy": "node scripts/firebase-deploy.mjs --social",
+    "test:social:rules": "node scripts/social-rules-check.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "firebase": "^12.5.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0"
+  }
+}

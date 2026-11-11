@@ -3,6 +3,14 @@
 export const siteUrl = 'https://sky-playground.com/games/';
 export const games = [
   {
+    slug:'your-dream-career',name:'Your Dream Career',zh:'我的夢想職涯',genre:'Simulation',players:[1,1],topic:'Comic Career Experience Game',listed:false,
+    description:'Experience 405 careers through hands-on workplace stories. Learn job skills, choose tools, handle realistic dilemmas, switch professions and retire at 65 with your own comic career book.',
+    intro:'A browser-local career simulation with 405 occupations, practical work puzzles, mentor support, tool choices, workplace topic dilemmas, gradual skill growth and an age-65 retirement ending. Online community features require separate Firebase setup.',
+    chinese:'專注職業體驗的漫畫模擬遊戲。405種職業、受督導學徒訓練、具體工作難題、工具卡與同事接力；每月安排工作與休整，技能循序成長，保留轉職並在65歲退休。真人好友、公司及委託待獨立Firebase設定後開放。',
+    steps:['Name your character and choose a career. Read its actual work, training requirements and salary reference notes.', 'Solve hands-on work tasks, ask your mentor, choose an approach and use optional tools. Spend two monthly arrangements on practice, recovery, career changes or workplace dilemmas; decisions leave follow-up records.', 'Grow skills, qualify and progress, switch careers while keeping experience, and retire at 65. Export your career comic or an independent JSON save.'],
+    related:['career-365','mo-lei-tau-studio'],
+  },
+  {
     slug:'career-365',name:'365 Careers, One Little Life',zh:'365行，行行出狀元',genre:'Simulation',players:[1,1],topic:'Comic Life and Career Simulation',listed:false,
     description:'Create a little comic life across 405 careers. Draw a random resume, learn with a mentor or simulated AI, work, start a business, switch careers and retire at 65 with a downloadable life book.',
     intro:'A single-player, browser-local life simulation with 405 distinct careers, monthly actions, mentor and simulated AI learning, fictional investments and gambling, and a personal comic book ending.',
