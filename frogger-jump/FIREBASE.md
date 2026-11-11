@@ -105,3 +105,23 @@ Rules now allow 22 animals, adding `kurimanju` 1,600; `rakko` 1,680; `momonga` 1
 本規則現在只包含`frogger_names`、`frogger_players`／runs及`frogger_leaderboard`，其他路徑預設拒絕。原`career365_saves`資料不會因修改本地檔案而刪除，但發布青蛙專用規則後不再開放該集合；先完成所需舊Career365備份，再部署。青蛙既有帳戶、錢包及排行榜繼續使用原專案。
 
 可在儲存庫根目錄執行`npm run firebase:check --prefix frogger-jump`核對明確目標（不部署），再由已登入的Firebase CLI執行`npm run firebase:deploy --prefix frogger-jump`。部署工具只使用本資料夾設定的projectId及firebase.json，不依賴全域active project。沒有代為部署或驗證正式Provider。
+
+## 2026-11-11 收藏與裝備規則
+
+最新規則仍為本資料夾 [firestore.rules](firestore.rules)，使用青蛙遊戲原有專案；與Career 365及Your Dream Career無關。
+
+新增8位動物並將允許收藏上限調至30。`frogger_players/{uid}` 新增可選的 `ownedSkills`、`equippedSkill`、`ownedCompanions`、`companion`；舊文件缺少時以空收藏／不裝備處理，毋須批次遷移。技能價格640／800／1,000；夥伴價格1,200／1,440／1,680。永久購買一次一項，須扣準確價錢、保留既有收藏；重選已購項目不扣款。新局紀錄保存技能與夥伴快照，開局後不可篡改。
+
+花心改為額外1（加基礎2＝合計3），貝殼額外3（合計5）。路線／郵差獎勵受每跳最多額外3幣限制；舊待同步紀錄及結算公式保留相容。
+
+先執行 `npm run firebase:check --prefix frogger-jump` 確認目標，再執行 `npm run firebase:deploy --prefix frogger-jump`。不需要新增索引或Cloud Functions。新的購買規則必須先部署，再發布前端。
+
+本次本機模擬器測試因環境無法下載Google Storage上的Firestore emulator JAR而未能執行。已擴充 `scripts/firestore-check.mjs`，包含免費領取、錯價、重複收藏、刪除既有收藏、跨UID寫入、同UID第二裝置讀取與局內裝備篡改等檢查。可在能啟動模擬器的環境執行：
+
+```sh
+firebase emulators:exec --only firestore --project demo-frogger --config frogger-jump/firebase.json 'node frogger-jump/scripts/firestore-check.mjs'
+```
+
+正式Google登入、正式跨裝置操作及新規則部署尚未由本次本機測試驗證；原有登入方式及已購角色保持相容。
+
+未裝備新物品的帳戶，客戶端保留舊版run文件格式（不寫空白裝備欄位），因此更新網站後仍可使用原規則遊玩既有動物。新動物與裝備購買仍需要新版規則。

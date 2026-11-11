@@ -1,21 +1,22 @@
+import {NEW_FRIENDS,paintNewFriend,paintRiverCompanion,paintRiverVisitor} from './new-friends.js';
 import {ISLAND_HEAD_HEIGHT,paintIslandFriend} from './island-friends.js';
 import {VARIANTS,surface} from './platforms.js';
 import {CAMERA_MS,SINK_MS,DROWN_MS,FISH_WARNING_MS,SPLASH_MS} from './game.js';
-import {animal as species} from './animals.js';
+import {animal as species,motionFor} from './animals.js';
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
 const ANIMAL_ART={
  penguin:['#6d8797','#fff2d7','#506b7f'],bunny:['#efded8','#fff5e7','#d6bab8'],monkey:['#b48b65','#f4d6ad','#917354'],otter:['#b49b7d','#f4d6ad','#917354'],
  duck:['#f4d879','#fff3b7','#c89a45'],cat:['#d5a06d','#ffe8c9','#ad794d'],panda:['#eeeadd','#fff9eb','#babeb3'],fox:['#dc935d','#fff0d5','#b36d47'],capybara:['#b7a083','#e4ceb0','#8d775e'],mochi:['#f6eee8','#fffaf0','#e8cfc9']
 };
-export const MAX_CANVAS_PIXELS=2000000;
+export const MAX_CANVAS_PIXELS=1400000;
 export class RiverScene{
- constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.pixelRatio=0;this.waterLayer=null;this.padCache=new Map();this.animalCache=new Map();this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.pixelRatio=0;this.waterLayer=null;this.padCache=new Map();this.animalCache=new Map();this.companionCache=new Map();this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
  resize(width,height){
   width=Math.max(1,width);height=Math.max(1,height);
-  const dpr=Math.min(devicePixelRatio||1,2,Math.sqrt(MAX_CANVAS_PIXELS/(width*height)));
+  const dpr=Math.min(devicePixelRatio||1,1.75,Math.sqrt(MAX_CANVAS_PIXELS/(width*height)));
   if(width===this.width&&height===this.height&&dpr===this.pixelRatio)return false;
   const scaleChanged=dpr!==this.pixelRatio;
-  this.waterLayer?.canvas.remove?.();this.width=width;this.height=height;this.pixelRatio=dpr;this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;this.waterLayer=null;this.padCache.clear();if(scaleChanged)this.animalCache.clear();return true;
+  this.waterLayer?.canvas.remove?.();this.width=width;this.height=height;this.pixelRatio=dpr;this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;this.waterLayer=null;this.padCache.clear();if(scaleChanged){this.animalCache.clear();this.companionCache.clear();}return true;
  }
  reset(){this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.padCache.clear();}
  layer(width,height){
@@ -149,9 +150,13 @@ export class RiverScene{
   this.surfaceMarks(game,pad,index,{s,r,ry,height:12*s,x,y});c.restore();
  }
  animal(x,y,scale,kind,pose={}){
-  // Reuse bounded pose sprites through repeated charge cycles and idle frames.
-  const quantized={};for(const key of ['squat','stretch','kick','tuck','reach','blink','lean','fall'])quantized[key]=Math.round((pose[key]||0)*20)/20;
-  quantized.airborne=!!pose.airborne;const key=kind+'|'+Object.values(quantized).join('|');let sprite=this.animalCache.get(key);
+  // A bounded phase atlas: continuous transforms are cheap; full vector art is cached.
+  const motion=motionFor(kind);let stage='idle',frame=0,quantized={};
+  if(pose.airborne){stage='flight';frame=Math.round((pose.flightPhase??.5)*11);const t=frame/11;quantized={squat:.5*(1-clamp(t/.18)),stretch:Math.sin(Math.PI*t)*.8,kick:Math.sin(Math.PI*clamp(t/.4))*motion.kick,tuck:Math.sin(Math.PI*clamp((t-.18)/.64)),reach:Math.sin(Math.PI*clamp((t-.65)/.35)),lean:Math.sin(Math.PI*t)*motion.sway,airborne:true};}
+  else if(pose.fall){stage='fall';frame=Math.round(pose.fall*7);quantized={fall:frame/7,lean:(pose.direction==='long'?1:-1)*frame*.065,airborne:true};}
+  else if(pose.landingPhase!==null&&pose.landingPhase!==undefined){stage='land';frame=Math.round(pose.landingPhase*5);quantized={squat:Math.sin(Math.PI*frame/5)*.5*motion.settle,blink:frame<2?.6:0};}
+  else{frame=Math.round((pose.squat||0)*7);stage=frame?'charge':'idle';quantized={squat:frame/7*motion.spring};}
+  const key=kind+'|'+stage+'|'+frame+(stage==='fall'?'|'+pose.direction:'');let sprite=this.animalCache.get(key);
   if(!sprite){
    sprite=this.layer(128,144);const previous=this.ctx;this.ctx=sprite.ctx;
    try{this.paintAnimal(64,100,1,kind,quantized);}finally{this.ctx=previous;}
@@ -162,7 +167,11 @@ export class RiverScene{
   this.animalCache.delete(key);this.animalCache.set(key,sprite);
   this.ctx.drawImage(sprite.canvas,x-64*scale,y-100*scale,128*scale,144*scale);
  }
+ paintRiverCompanion(x,y,scale,id){paintRiverCompanion(this,x,y,scale,id);}
+ riverCompanion(game,projection){if(!game.companion)return;let sprite=this.companionCache.get(game.companion);if(!sprite){sprite=this.layer(100,80);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverCompanion(this,50,40,1,game.companion);}finally{this.ctx=prev;}this.companionCache.set(game.companion,sprite);}const {s,point}=projection,p=point(game.current),c=this.ctx;c.save();c.globalAlpha=game.companionReady?.85:.35;c.drawImage(sprite.canvas,p.x-110*s,p.y-10*s,75*s,60*s);c.restore();}
+ prepareAnimal(kind){for(let i=0;i<12;i++)this.animal(-1000,-1000,1,kind,{airborne:true,flightPhase:i/11});for(let i=0;i<8;i++)this.animal(-1000,-1000,1,kind,{squat:i/7});for(let i=0;i<6;i++)this.animal(-1000,-1000,1,kind,{landingPhase:i/5});}
  paintAnimal(x,y,scale,kind,pose){
+  if(NEW_FRIENDS.has(kind)){paintNewFriend(this,x,y,scale,kind,pose);return;}
   if(kind==='frog'){this.frog(x,y,scale,pose);return;}
   if(kind==='mochi'){this.mochi(x,y,scale,pose);return;}
   if(ISLAND_HEAD_HEIGHT[kind]){paintIslandFriend(this,x,y,scale,kind,pose);return;}
@@ -294,7 +303,9 @@ export class RiverScene{
 
  draw(game){
   this.water();for(const id of this.padCache.keys())if(!game.stumps.some(p=>p.id===id))this.padCache.delete(id);const projection=this.projection(game),{s,point}=projection;
-  this.ripples(game,projection);
+  this.ripples(game,projection);this.riverCompanion(game,projection);
+  if(game.routeOffer){const alternate=point(game.routeOffer),c=this.ctx;c.save();c.globalAlpha=.5;this.ellipse(alternate.x,alternate.y,game.target.r*s*.8,game.target.r*s*.35,'#e9ce83','#8c784f',2*s);c.restore();}
+  if(game.riverFriend){const c=this.ctx,q=point(game.target),key='visitor-'+game.riverFriend;let sprite=this.companionCache.get(key);if(!sprite){sprite=this.layer(64,64);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverVisitor(this,32,32,1,game.riverFriend);}finally{this.ctx=prev;}this.companionCache.set(key,sprite);}c.drawImage(sprite.canvas,q.x+game.target.r*s+3*s,q.y-46*s,48*s,48*s);if(game.riverFriend==='firefly'||game.target.mailChallenge)this.ellipse(q.x,q.y,6*s,3*s,'#f8e7a4');if(game.riverFriend==='dragonfly'&&game.target.kind==='turtle'){c.save();c.font=`${16*s}px system-ui`;c.fillStyle='#466a58';c.fillText(surface(game.target,game.clock+100).x>surface(game.target,game.clock).x?'→':'←',q.x+game.target.r*s+15*s,q.y+18*s);c.restore();}}
   for(let i=2;i>=0;i--)this.stump(game,game.stumps[i],i,projection);
   if(!['over','drowning'].includes(game.state))this.fishHazard(game,projection);
   const frog=game.frog,p=point(frog),shake=['idle','charging','ready'].includes(game.state)?this.shake(game,game.current):{x:0,y:0};
@@ -308,12 +319,12 @@ export class RiverScene{
    const age=game.clock-game.fall.at,t=clamp(age/SPLASH_MS),c=this.ctx;
    if(game.fall.reason==='angler'&&game.fall.airborne){this.angler(game,projection);}
    else if(game.fall.reason==='angler'){if(age<SPLASH_MS){c.save();c.globalAlpha=1-t;this.animal(p.x,p.y+t*25*s,s*1.12,game.animal,{fall:t});c.restore();}this.splash(game,projection);if(age>=SPLASH_MS)this.angler(game,projection);}
-   else{this.splash(game,projection);this.crocodile(game,projection);}
+   else{if(age<SPLASH_MS){c.save();c.globalAlpha=1-t;const v=game.fall.velocity??{x:0,y:0},drift=age*(1-t*.5);this.animal(p.x+v.x*drift*s,p.y-v.y*drift*s*.74+t*25*s,s*1.12,game.animal,{fall:t,direction:game.fall.reason});c.restore();}this.splash(game,projection);if(age>=SPLASH_MS)this.crocodile(game,projection);}
   }
   if((game.fishShield||game.state==='jumping'&&game.jump.shield)&&!['drowning','over'].includes(game.state))this.ellipse(p.x,p.y-frog.lift*s-24*s,34*s,38*s,null,'#f8dd84',2.5*s);
   this.skillEffect(game,projection);
-  if(this.effect?.bonus&&game.clock-this.effect.at<650){const t=clamp((game.clock-this.effect.at)/650),p=point(game.frog),c=this.ctx;c.save();c.globalAlpha=1-t;c.textAlign='center';c.font='700 17px system-ui';c.fillStyle='#fff3b5';c.strokeStyle='#76613d';c.lineWidth=3;const text=`+${this.effect.bonus}`;c.strokeText(text,p.x-10*s,p.y-(65+t*24)*s);c.fillText(text,p.x-10*s,p.y-(65+t*24)*s);this.coin(p.x+17*s,p.y-(71+t*24)*s,.5*s);c.restore();}
-  const headHeight=ISLAND_HEAD_HEIGHT[game.animal]??(game.animal==='usagi'?91:['chiikawa','hachiware'].includes(game.animal)?75:game.animal==='bunny'?80:['fox','cat'].includes(game.animal)?66:game.animal==='duck'?64:game.animal==='mochi'?72:60);
+  if(this.effect?.coins&&game.clock-this.effect.at<650){const t=clamp((game.clock-this.effect.at)/650),p=point(this.effect.point),c=this.ctx;c.save();c.globalAlpha=1-t;c.textAlign='center';c.font='700 17px system-ui';c.fillStyle='#fff3b5';c.strokeStyle='#76613d';c.lineWidth=3;const text=`+${this.effect.coins}`;c.strokeText(text,p.x-10*s,p.y-(65+t*24)*s);c.fillText(text,p.x-10*s,p.y-(65+t*24)*s);this.coin(p.x+17*s,p.y-(71+t*24)*s,.5*s);if(this.effect.milestone){c.font='700 12px system-ui';const label=this.zh?'里程碑 +10':'Milestone +10';c.strokeText(label,p.x,p.y-(90+t*24)*s);c.fillText(label,p.x,p.y-(90+t*24)*s);}c.restore();}
+  const headHeight=ISLAND_HEAD_HEIGHT[game.animal]??(NEW_FRIENDS.has(game.animal)?105:game.animal==='usagi'?91:['chiikawa','hachiware'].includes(game.animal)?75:game.animal==='bunny'?80:['fox','cat'].includes(game.animal)?66:game.animal==='duck'?64:game.animal==='mochi'?72:60);
   this.headAnchor={x:p.x+shake.x,y:p.y+shake.y-frog.lift*s-headHeight*s*(1-frog.squat*.24)};
   if(!this.reduced.matches&&this.effect&&game.clock-this.effect.at<260){const t=clamp((game.clock-this.effect.at)/260),spot=point(game.current),c=this.ctx;c.save();c.globalAlpha=(1-t)*.45;for(const sign of [-1,1]){const x=spot.x+sign*24*s;this.path(p=>{p.moveTo(x-sign*3*s,spot.y+4*s);p.quadraticCurveTo(x,spot.y+7*s,x+sign*(5+t*6)*s,spot.y+3*s);},null,'#f4efc2',1.5*s);}c.restore();}
  }

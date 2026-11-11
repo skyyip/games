@@ -7,7 +7,7 @@ function withScene(run){
  try{const scene=new RiverScene(canvas());return run(scene,()=>resets);}finally{for(const [key,value]of Object.entries(original)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}
 }
 test('large high-DPR scenes have a bounded backing store; identical resize does not reset Canvas',()=>withScene((s,resets)=>{
- assert(s.resize(1280,900));assert(s.canvas.width*s.canvas.height<=MAX_CANVAS_PIXELS+2000);const before=resets();assert.equal(s.resize(1280,900),false);assert.equal(resets(),before);assert(s.resize(390,600));assert.equal(s.pixelRatio,2);
+ assert(s.resize(1280,900));assert(s.canvas.width*s.canvas.height<=MAX_CANVAS_PIXELS+2000);const before=resets();assert.equal(s.resize(1280,900),false);assert.equal(resets(),before);assert(s.resize(390,600));assert.equal(s.pixelRatio,1.75);
 }));
 test('unchanged water is rasterized once and resized water invalidates the layer',()=>withScene(s=>{
  s.resize(400,500);let paints=0;s.paintWater=()=>paints++;s.water();s.water();assert.equal(paints,1);s.resize(401,500);s.water();assert.equal(paints,2);

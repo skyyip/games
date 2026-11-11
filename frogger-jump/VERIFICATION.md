@@ -234,3 +234,13 @@ Frogger retains its existing `sky-playground-3c5af` Web App configuration, walle
 All101 Frogger tests and160 Career365 tests pass (261 total), including deployment target and cross-game configuration contracts. The26-page build and source/built SEO checks pass; release `bc06b13d49b68999`. Career365 isolation, legacy IndexedDB export, account and mocked cloud regressions pass at four viewports; its real bundled SDK/offline check uses an independent fixture with external services blocked. See `../career-365/VERIFICATION.md` for details. Emulator harnesses now include cross-game collection-denial cases, but emulator execution and live Firebase providers were not certified. The actual independent Career365 project configuration is still outstanding; different Web Apps in the original project are rejected. No push, provider changes or hosting deployment performed.
 
 The user subsequently supplied Career365's independent `sky-playground-career-365` configuration, which is now installed in its own folder. Both deployment dry-runs resolve their different projects correctly. All261 Node checks pass again, and the26-page build/built SEO pass with release `cb0715e6d7e9a8e8`. Frogger's public configuration and player data are unchanged by that follow-up; no deployment or push performed. See Career365's latest verification entry for client SDK and setup boundaries.
+
+## 2026-11-11 更新驗證
+
+- `node --test --test-isolation=none frogger-jump/tests/*.test.js`：113項通過。包含30位動物、各系列價錢排序、裝備購買與舊存檔、兩格目標、有限修正、救援一次性、方向與慣性、真實腳位、烏龜+20%、花心3／貝殼5、路線獎勵及暫停。
+- Chromium：八位新角色逐一驗證繪圖、技能、起跳、落地、結算與購買重載；320／390／812／1280寬度驗證系列篩選、購買動物與裝備、tooltip／詳情、空中暫停、跨兩格與控制項可操作。
+- 既有browser-check：四種尺寸各73跳，驗證I／Z路線、小平台、限時／荊棘／燈籠魚、輸入、暫停時鐘、落水、重玩、紀錄及靜止停止繪圖。
+- performance-check：靜止及暫停0繪圖；移動平台約31幀／秒，測試期間0HUD屬性變更；蓄力約32幀／秒，0漸層及橢圓重建、96次HUD變更。高DPR大畫布約140萬像素。此為受控瀏覽器測量，不保證所有裝置固定FPS。
+- Auth／provider adapter：既有Google、Email、匿名登入、同UID綁定、錯誤處理與原錢包保留檢查通過。使用模擬SDK，沒有建立正式帳戶。
+- 原始及建置SEO、網站建置及diff空白檢查通過。
+- Firestore emulator JAR下載受環境網絡限制，未能執行規則模擬器驗證；測試腳本已補新裝備與跨UID檢查。正式規則尚未部署，正式兩裝置驗收尚未執行。

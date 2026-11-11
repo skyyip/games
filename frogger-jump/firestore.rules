@@ -4,18 +4,34 @@ service cloud.firestore {
   function owner(uid) { return request.auth != null && request.auth.uid == uid; }
   function player(uid) { return /databases/$(database)/documents/frogger_players/$(uid); }
   function run(uid,id) { return /databases/$(database)/documents/frogger_players/$(uid)/runs/$(id); }
-  function species(id) { return id in ['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba']; }
-  function price(id) { return {'frog':0,'penguin':280,'bunny':320,'monkey':360,'otter':400,'duck':440,'cat':480,'panda':520,'fox':960,'capybara':1000,'mochi':1080,'chiikawa':1200,'hachiware':1360,'usagi':1520,'kurimanju':1600,'rakko':1880,'momonga':1760,'shisa':1840,'shimajiro':1920,'mermaid':2000,'hitoha':2080,'futaba':2160}[id]; }
+  function species(id) { return id in ['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba','elf-mage','violet-mage','red-warrior','red-sprout','blue-sprout','yellow-sprout','bloom-bunny','mage-otter']; }
+  function price(id) { return {'frog':0,'penguin':280,'bunny':320,'monkey':360,'otter':400,'duck':440,'cat':480,'panda':520,'fox':960,'capybara':1000,'mochi':1080,'chiikawa':1200,'hachiware':1360,'usagi':1520,'kurimanju':1600,'rakko':1880,'momonga':1760,'shisa':1840,'shimajiro':1920,'mermaid':2000,'hitoha':2080,'futaba':2160,'elf-mage':2240,'violet-mage':2320,'red-warrior':2400,'red-sprout':560,'blue-sprout':600,'yellow-sprout':680,'bloom-bunny':2480,'mage-otter':2560}[id]; }
   function coins(score) { return 1 + score * 2 + int(score / 20) * 10; }
   function valid(p) {
-   return p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun'])
+   return validGear(p) && p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun','ownedSkills','equippedSkill','ownedCompanions','companion'])
     && p.version == 2 && p.name is string && p.name.matches('^[A-Za-z0-9_\\-一-鿿㐀-䶿]{2,16}$') && p.nameKey == p.name.lower()
     && p.coins is int && p.coins >= 0 && p.coins <= 2000000000
-    && p.owned is list && p.owned.size() >= 1 && p.owned.size() <= 22 && p.owned.toSet().size() == p.owned.size()
-    && p.owned.hasAll(['frog']) && p.owned.hasOnly(['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba']) && p.selected in p.owned
+    && p.owned is list && p.owned.size() >= 1 && p.owned.size() <= 30 && p.owned.toSet().size() == p.owned.size()
+    && p.owned.hasAll(['frog']) && p.owned.hasOnly(['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba','elf-mage','violet-mage','red-warrior','red-sprout','blue-sprout','yellow-sprout','bloom-bunny','mage-otter']) && p.selected in p.owned
     && p.best is int && p.best >= 0 && p.best <= 1000000 && p.bestAnimal in p.owned
     && p.bestAt is timestamp && p.createdAt is timestamp && p.updatedAt == request.time
     && (p.activeRun == null || p.activeRun is string) && (p.lastSettledRun == null || p.lastSettledRun is string);
+  }
+  function validGear(p) {
+   let skills=p.get('ownedSkills',[]); let friends=p.get('ownedCompanions',[]);
+   return skills is list && skills.size() <= 3 && skills.toSet().size() == skills.size() && skills.hasOnly(['double','adjust','rescue'])
+    && friends is list && friends.size() <= 3 && friends.toSet().size() == friends.size() && friends.hasOnly(['hippo','ray','shark'])
+    && (p.get('equippedSkill','') == '' || p.get('equippedSkill','') in skills) && (p.get('companion','') == '' || p.get('companion','') in friends);
+  }
+  function gearChange(p,old) {
+   let skills=p.get('ownedSkills',[]); let beforeSkills=old.get('ownedSkills',[]);
+   let friends=p.get('ownedCompanions',[]); let beforeFriends=old.get('ownedCompanions',[]);
+   let skill=p.get('equippedSkill',''); let friend=p.get('companion','');
+   return p.diff(old).affectedKeys().hasOnly(['ownedSkills','equippedSkill','ownedCompanions','companion','coins','updatedAt']) && (
+    (skills == beforeSkills && friends == beforeFriends && p.coins == old.coins)
+    || (skills.size() == beforeSkills.size()+1 && skills.hasAll(beforeSkills) && !(skill in beforeSkills) && friends == beforeFriends && friend == old.get('companion','') && p.coins == old.coins-{'double':640,'adjust':800,'rescue':1000}[skill])
+    || (friends.size() == beforeFriends.size()+1 && friends.hasAll(beforeFriends) && !(friend in beforeFriends) && skills == beforeSkills && skill == old.get('equippedSkill','') && p.coins == old.coins-{'hippo':1200,'ray':1440,'shark':1680}[friend])
+   );
   }
   function selection(p,old) { return p.diff(old).affectedKeys().hasOnly(['selected','updatedAt']); }
   function purchase(p,old) { return p.diff(old).affectedKeys().hasOnly(['owned','selected','coins','updatedAt']) && p.owned.size() == old.owned.size()+1 && p.owned.hasAll(old.owned) && !(p.selected in old.owned) && p.coins == old.coins-price(p.selected); }
@@ -34,12 +50,12 @@ service cloud.firestore {
   match /frogger_players/{uid} {
    allow get: if owner(uid);
    allow list, delete: if false;
-   allow create: if owner(uid) && valid(request.resource.data) && request.resource.data.coins == 0 && request.resource.data.owned == ['frog'] && request.resource.data.selected == 'frog' && request.resource.data.best == 0 && request.resource.data.bestAnimal == 'frog' && request.resource.data.bestAt == request.time && request.resource.data.createdAt == request.time && request.resource.data.activeRun == null && request.resource.data.lastSettledRun == null && getAfter(/databases/$(database)/documents/frogger_names/$(request.resource.data.nameKey)).data.uid == uid;
-   allow update: if owner(uid) && valid(request.resource.data) && request.resource.data.name == resource.data.name && request.resource.data.nameKey == resource.data.nameKey && request.resource.data.createdAt == resource.data.createdAt && (selection(request.resource.data,resource.data) || purchase(request.resource.data,resource.data) || begin(request.resource.data,resource.data,uid) || abandon(request.resource.data,resource.data,uid) || finish(request.resource.data,resource.data,uid));
+   allow create: if owner(uid) && valid(request.resource.data) && request.resource.data.coins == 0 && request.resource.data.get('ownedSkills',[]) == [] && request.resource.data.get('ownedCompanions',[]) == [] && request.resource.data.owned == ['frog'] && request.resource.data.selected == 'frog' && request.resource.data.best == 0 && request.resource.data.bestAnimal == 'frog' && request.resource.data.bestAt == request.time && request.resource.data.createdAt == request.time && request.resource.data.activeRun == null && request.resource.data.lastSettledRun == null && getAfter(/databases/$(database)/documents/frogger_names/$(request.resource.data.nameKey)).data.uid == uid;
+   allow update: if owner(uid) && valid(request.resource.data) && request.resource.data.name == resource.data.name && request.resource.data.nameKey == resource.data.nameKey && request.resource.data.createdAt == resource.data.createdAt && (gearChange(request.resource.data,resource.data) || selection(request.resource.data,resource.data) || purchase(request.resource.data,resource.data) || begin(request.resource.data,resource.data,uid) || abandon(request.resource.data,resource.data,uid) || finish(request.resource.data,resource.data,uid));
    match /runs/{id} {
     allow get: if owner(uid);
     allow list, delete: if false;
-    allow create: if owner(uid) && request.resource.data.keys().hasOnly(['uid','animal','status','startedAt','endedAt','score','coinsEarned','bonusCoins']) && request.resource.data.uid == uid && species(request.resource.data.animal) && request.resource.data.animal == get(player(uid)).data.selected && request.resource.data.status == 'playing' && request.resource.data.startedAt == request.time && request.resource.data.endedAt == null && request.resource.data.score == 0 && request.resource.data.coinsEarned == 0 && request.resource.data.get('bonusCoins',0) == 0 && getAfter(player(uid)).data.activeRun == id;
+    allow create: if owner(uid) && request.resource.data.keys().hasOnly(['uid','animal','skill','companion','status','startedAt','endedAt','score','coinsEarned','bonusCoins']) && request.resource.data.uid == uid && species(request.resource.data.animal) && request.resource.data.animal == get(player(uid)).data.selected && request.resource.data.get('skill','') == get(player(uid)).data.get('equippedSkill','') && request.resource.data.get('companion','') == get(player(uid)).data.get('companion','') && request.resource.data.status == 'playing' && request.resource.data.startedAt == request.time && request.resource.data.endedAt == null && request.resource.data.score == 0 && request.resource.data.coinsEarned == 0 && request.resource.data.get('bonusCoins',0) == 0 && getAfter(player(uid)).data.activeRun == id;
     allow update: if owner(uid)
       && resource.data.status == 'playing'
       && request.resource.data.diff(resource.data).affectedKeys()

@@ -13,3 +13,5 @@ export function renderAnimalIcon(node,id,size=40){
  id=animal(id).id;const key=`${id}|${size}|${Math.min(globalThis.devicePixelRatio||1,2)}`;if(node.dataset.portraitKey===key&&node.firstChild)return;
  const canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');paintAnimalPortrait(canvas,id,size);node.replaceChildren(canvas);node.dataset.animalIcon=id;node.dataset.portraitKey=key;node.classList.add('animal-portrait');node.style.setProperty('--animal-icon-size',`${size}px`);
 }
+
+export function paintCompanionPortrait(canvas,id,size=120){const painter=new RiverScene(canvas);painter.resize(size,size);painter.paintRiverCompanion(size/2,size/2,size/100,id);}
