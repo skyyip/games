@@ -20,10 +20,15 @@ try{
   assert.equal(await p.locator('#prepare-worry-title').textContent(),'阿明<img src=x>！今日有咩令你心塞？');
   assert.equal(await p.locator('#prepare-worry-title img').count(),0);
   if(!blocked){await p.reload({waitUntil:'networkidle'});assert.equal(await p.locator('#bbl-name-dialog[open]').count(),0);assert.equal(await p.locator('#prepare-worry-title strong').textContent(),'阿明<img src=x>');}
-  await p.locator('#bbl-account-open').click();
+  await p.locator('#settings-open').click();
+  assert.equal(await p.locator('#settings-dialog[open]').count(),1);
+  assert.equal(await p.locator('dialog[open]').count(),1);
+  assert.equal(await p.locator('#bbl-account-dialog,#bbl-account-open').count(),0);
+  for(const selector of ['#bbl-account-form','#settings-sound','#settings-voice','#settings-export','#settings-import'])assert.equal(await p.locator('#settings-dialog '+selector).count(),1);
   assert(await p.locator('#bbl-google').isDisabled());
   assert.match(await p.locator('#bbl-account-feedback').textContent(),/Firebase/);
-  await p.locator('[data-bbl-close="bbl-account-dialog"]').click();
+  if(!blocked){const pending=p.waitForEvent('download');await p.locator('#settings-export').click();assert.match((await pending).suggestedFilename(),/\.bblsave$/);}
+  await p.locator('#settings-dialog .dialog-x').click();
   await p.locator('#worry-select').selectOption('noise');
   await p.locator('#start').click();
   await p.locator('#play-panel[data-phase="incense"]').waitFor();

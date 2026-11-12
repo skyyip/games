@@ -1,3 +1,4 @@
+import {DECOR_SETS} from './decor-sets.js';
 import {pruneAltar} from './altar-layout.js';
 import {oilGain,meritGain,DAILY_OIL,DAILY_MERIT} from './economy.js';
 import {SKINS,SKIN_USES} from './skins.js';
@@ -16,9 +17,10 @@ export const STORAGE_KEY='beat-bad-luck.stall.v1';
 export const WEAPON_USES=3,MAX_WEAPON_USES=999999;
 export const weaponUses=(state,id)=>id==='bare-hand'?Infinity:state.owned.includes(id)?cap(state.weaponUses?.[id]??WEAPON_USES,MAX_WEAPON_USES):0;
 export function weaponCondition(state,id){const remaining=weaponUses(state,id),capacity=weaponDurability(id);return {remaining,capacity,current:capacity===Infinity?Infinity:remaining>0&&capacity>0?(remaining-1)%capacity+1:0};}
-export function fresh(now=Date.now()){return {version:1,favoriteWeapons:[],favoriteSkins:[],altarDecor:[],altarMissing:[],ownedSkins:['plain'],skinUses:{},selectedSkin:'plain',coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],coupons:[],discovered:[],lastDaily:'',records:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
+export function fresh(now=Date.now()){return {version:1,favoriteWeapons:[],favoriteSkins:[],altarDecor:[],altarMissing:[],ownedSkins:['plain'],skinUses:{},selectedSkin:'plain',coins:0,merit:0,rituals:0,owned:['bare-hand'],weaponUses:{},equipped:'bare-hand',decor:Object.fromEntries(DECOR.map(d=>[d.id,0])),decorExpires:{},friends:[],coupons:[],discovered:[],lastDaily:'',records:[],decorSetClaims:[],lastSeen:now,idleCarry:0,lastReceipt:null,neighbourhood:freshNeighbourhood()};}
 export function readProgress(raw,now=Date.now()){
   const state=fresh(now);try{const x=JSON.parse(raw);if(!x||x.version!==1)return state;
+    state.decorSetClaims=DECOR_SETS.filter(set=>Array.isArray(x.decorSetClaims)&&x.decorSetClaims.includes(set.id)).map(set=>set.id);
     for(const [field,items]of [['favoriteWeapons',WEAPONS],['favoriteSkins',SKINS]])state[field]=[...new Set((Array.isArray(x[field])?x[field]:[]).filter(id=>items.some(item=>item.id===id)))];
     state.ownedSkins=[...new Set(['plain',...(Array.isArray(x.ownedSkins)?x.ownedSkins:[]).filter(id=>SKINS.some(s=>s.id===id))])];
     for(const id of state.ownedSkins.filter(id=>id!=='plain')){const value=x.skinUses?.[id];state.skinUses[id]=Number.isFinite(value)?cap(value,SKIN_USES):SKIN_USES;}
@@ -82,7 +84,7 @@ export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   const merit=meritGain(Math.round((12+cap(result.papers)*6+cap(result.qte)*4)*(1+buffs.merit)));const available=FRIENDS.filter(f=>!state.friends.includes(f.id));let friend=null;
   if(available.length&&random()<.3)friend=weightedPatron(available,random);
   const records=[...state.records,{score:cap(result.score),hits:cap(result.hits),weapon:result.weapon,date:now}].sort((a,b)=>b.score-a.score||a.date-b.date).slice(0,3);
-  const journey=finishNeighbourhood(state.neighbourhood??freshNeighbourhood(),result,{id,now});
+  const journey=finishNeighbourhood(state.neighbourhood??freshNeighbourhood(),result,{id,now,decorSetCount:(state.decorSetClaims??[]).length});
   const completion=journey.completed,chapter=completion?STORIES.find(s=>s.id===completion.story)?.chapters[completion.chapter-1]:null,story=completion?commissionPay(chapter,completion.finished,completion.replay,completion.bonusMet):{oil:0,merit:0};
   let couponGift=friend?.discount&&(state.coupons?.length??0)<MAX_COUPONS?{patron:friend.id,discount:friend.discount,uses:1}:null,couponSource=couponGift?'welcome':null;
   let next={...state,neighbourhood:journey.state,coins:cap(state.coins+earned+story.oil),merit:cap(state.merit+merit+story.merit),rituals:cap(state.rituals+1),friends:friend?[...state.friends,friend.id]:state.friends,coupons:couponGift?[...(state.coupons??[]),couponGift]:state.coupons??[],records,lastReceipt:id};
@@ -112,3 +114,6 @@ export function buySkin(state,id,{coupon=null}={}){const skin=SKINS.find(s=>s.id
 export function consumeSkin(state,id){if(!SKINS.some(s=>s.id===id)||!state.ownedSkins.includes(id))return null;if(id==='plain')return state;const remaining=skinUses(state,id)-1,uses={...state.skinUses};if(remaining)uses[id]=remaining;else delete uses[id];return {...state,skinUses:uses,ownedSkins:remaining?state.ownedSkins:state.ownedSkins.filter(s=>s!==id),selectedSkin:!remaining&&state.selectedSkin===id?'plain':state.selectedSkin};}
 
 export function toggleFavorite(state,kind,id){const field=kind==='weapon'?'favoriteWeapons':kind==='skin'?'favoriteSkins':null,items=kind==='weapon'?WEAPONS:SKINS;if(!field||!items.some(item=>item.id===id))return null;const favorites=state[field]??[];return {...state,[field]:favorites.includes(id)?favorites.filter(value=>value!==id):[...favorites,id]};}
+
+export function decorSetReady(state,set,now=Date.now()){return set.needs.every(id=>decorDurability(state,id,now)>0);}
+export function claimDecorSet(state,id,now=Date.now()){const set=DECOR_SETS.find(s=>s.id===id);if(!set||state.decorSetClaims?.includes(id)||!decorSetReady(state,set,now))return null;return {...state,coins:cap(state.coins+set.oil),merit:cap(state.merit+set.merit),decorSetClaims:[...(state.decorSetClaims??[]),id]};}

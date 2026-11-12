@@ -1,3 +1,23 @@
+## Combined settings and real friend-rule verification (v140)
+
+The original rules were reproduced against the real Firestore v1.22.0 emulator: publishing cards and creating an invitation succeeded, but the first friends query failed with `Property to is undefined on object` / `permission-denied`. Replacing constructed-list membership checks with direct participant-field comparisons fixed both friend and gift queries. All **46 local Firestore security checks now pass**, including empty/incoming/outgoing participant queries, outsider and signed-out denial, live notification listeners, consent, stock transfer, claim/refund rules, the resend cooldown and public score permissions. The packaged JAR's SHA-256 matches Firebase CLI metadata (`9b6498b7f62714d67f48f59b3818883cd682dbcd46b9f59511de81c97bb5166c`). No production Firebase writes were made.
+
+All **267 unit tests pass**, including current-name invitation transactions and friendly handling of already processed invites and cooldowns. The separate account launcher/dialog are removed; sign-in, cloud controls, preferences and backups share the existing settings dialog. Signed-in imports stay disabled. The friend UI explains handle creation, searching, sending and accepting invitations, and exposes current relationship state.
+
+The combined dialog passes real production-entry checks for a single modal, all account/settings controls, encrypted export and storage-denied play. A fresh configured browser initializes the real Firebase Auth SDK and enables sign-in controls. Four viewport sizes pass the combined account/profile/invite/accept/gift flow with an injected transport, plus friend instructions, copyable handles, pending-request controls and signed-in import restrictions. Collection/world-score checks still pass at all four sizes. No live sign-in or database mutation was attempted. All 27 source and built SEO checks pass.
+
+Production rules need republishing. The environment has no authorized Firebase CLI account; pushing website code does not apply the Firestore rules. The earlier emulator-download limitation recorded below was resolved in this version with a checksum-verified packaged artifact.
+
+## Decoration sets and world score board (v139)
+
+All **265 unit tests pass**. Twelve categorized recipes reference real catalog pieces; the requested tiger/pig and tree/coin pairs pay once, with exact wallet changes and no item consumption. Missing/expired pieces cannot qualify. Receipts survive portable saves, cloud serialization and round-trip gifting; six claimed sets unlock the migrated collection title. Album retention is tested at the 30-day boundary, including 20-day-old photos, through reload, idle settlement and backup import.
+
+The actual built game passes at 320×568, 390×844, 812×375 and 1280×900: no scene playback or About accordion, correctly positioned cheer, exact two-recipe rewards and persistent disabled claim controls, 30-day album text/content, and selected favorite stars exceeding 4.5:1 glyph/background contrast. All four sizes also pass the actual leaderboard UI with the real client API over a memory transport: opt-in, top rank, synchronized new best, withdrawal and signed-out viewing. No production database writes were made. The memory transport is not a security-rule emulator.
+
+The existing four-size account/friend/gift regression also passes with the added save field. A complete 390px ritual passes all three finishers, the 87/88-hit unlock boundary, pause, score multipliers and persisted results. Source and built SEO checks pass for all 27 pages, and the release generator preserves removal of the About accordion.
+
+The updated rules and fifth composite index are included for `bbl_scores`. The Firestore security-rule suite includes bounded public reads, owner-only submissions/removal, score bounds and public-field privacy, but it has not run because the environment cannot download the emulator JAR. The project owner must deploy these updated rules/indexes for online scores. Existing Firebase provider setup is retained.
+
 ## Player accounts and gift update (v138)
 
 Local name persistence and the highlighted personalized greeting pass against the built application. Four Playwright layouts (320px, 390px, 812px landscape, 1280px) pass the real account/social UI with an injected auth and in-memory Firestore transport: explicit first-account adoption, public card, search, invitation, acceptance, one-use stock debit, recipient claim, history and preservation of the separate guest save. No uncaught browser errors or horizontal overflow were observed. These checks do not authenticate against a real Firebase project.

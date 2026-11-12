@@ -14,7 +14,7 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
   if(pending)put('#import-summary',`${pending.coins.toLocaleString(undefined,{maximumFractionDigits:2})} 香油錢 · ${pending.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德 · ${pending.rituals} 次儀式 · ${pending.records.length} 項紀錄`,`${pending.coins.toLocaleString(undefined,{maximumFractionDigits:2})} oil · ${pending.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit · ${pending.rituals} rituals · ${pending.records.length} records`);
  }
  function note(zh,en){put('#save-tools-status',zh,en);if($('#settings-dialog').open)put('#settings-save-status',zh,en);}
- function working(value){busy=value;for(const id of ['#export-save','#import-save','#settings-export','#settings-import'])$(id).disabled=value;}
+ function working(value){busy=value;for(const id of ['#export-save','#import-save','#settings-export','#settings-import'])$(id).disabled=value||id.includes('import')&&!canImport();}
  $('#export-save').addEventListener('click',async()=>{
   if(isPlaying()||busy)return;working(true);note('正在加密存檔…','Encrypting your save…');
   try{beforeExport();note('正在加密存檔…','Encrypting your save…');const raw=await createBackup(getState()),blob=new Blob([raw],{type:'application/octet-stream'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`beat-bad-luck-${new Date().toISOString().slice(0,10)}.bblsave`;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);

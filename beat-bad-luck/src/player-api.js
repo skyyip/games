@@ -15,8 +15,21 @@ export function createPlayerAPI({sdk:s,db,uid,currentUser=()=>({uid}),now=()=>Da
  async publish(handle,name){social();handle=String(handle).trim().toLowerCase();if(!/^[a-z][a-z0-9_]{2,15}$/.test(handle)||!playerName(name))throw Error('invalid-profile');await s.runTransaction(db,async tx=>{const ref=doc('cards',uid),h=doc('handles',handle),[old,taken]=await Promise.all([tx.get(ref),tx.get(h)]);if(old.exists()&&old.data().handle!==handle)throw Error('handle-fixed');if(taken.exists()&&taken.data().uid!==uid)throw Error('handle-taken');if(!taken.exists())tx.set(h,{uid});tx.set(ref,{uid,handle,name:playerName(name),updatedAt:stamp()});});return api.card();},
  async find(handle){social();handle=String(handle).trim().toLowerCase();if(!/^[a-z][a-z0-9_]{2,15}$/.test(handle))throw Error('invalid-profile');const h=await get(doc('handles',handle));if(!h.exists())throw Error('not-found');const d=await get(doc('cards',h.data().uid));if(!d.exists())throw Error('not-found');return {uid:d.id,...d.data()};},
  async friends(){social();const [outgoing,incoming]=await Promise.all([list('friends','from',uid),list('friends','to',uid)]);return [...new Map([...outgoing,...incoming].map(x=>[x.id,x])).values()];},
- async request(to){social();if(!to||to.uid===uid)throw Error('invalid-friend');const from=await api.card();if(!from)throw Error('profile-required');const id=uid+'__'+to.uid;await s.runTransaction(db,async tx=>{const ref=doc('friends',id),reverse=doc('friends',to.uid+'__'+uid),[a,b]=await Promise.all([tx.get(ref),tx.get(reverse)]);if([a,b].some(d=>d.exists()&&['pending','accepted'].includes(d.data().status)))throw Error('already-requested');tx.set(ref,{from:uid,to:to.uid,fromName:from.name,toName:to.name,status:'pending',createdAt:stamp(),updatedAt:stamp()});});},
- async respond(id,status){social();if(!['accepted','rejected','removed'].includes(status))throw Error('invalid-friend');await s.runTransaction(db,async tx=>{const ref=doc('friends',id),d=await tx.get(ref);if(!d.exists()||![d.data().from,d.data().to].includes(uid)||status!=='removed'&&d.data().to!==uid)throw Error('forbidden');tx.update(ref,{status,updatedAt:stamp()});});},
+ async request(to){
+  social();if(!to?.uid||to.uid===uid)throw Error('invalid-friend');const id=uid+'__'+to.uid;
+  await s.runTransaction(db,async tx=>{
+   const ref=doc('friends',id),reverse=doc('friends',to.uid+'__'+uid);
+   const [a,b,fromCard,toCard]=await Promise.all([tx.get(ref),tx.get(reverse),tx.get(doc('cards',uid)),tx.get(doc('cards',to.uid))]);
+   if(!fromCard.exists())throw Error('profile-required');if(!toCard.exists())throw Error('not-found');
+   if([a,b].some(d=>d.exists()&&['pending','accepted'].includes(d.data().status)))throw Error('already-requested');
+   if(a.exists()&&now()-(a.data().updatedAt?.toMillis?.()??0)<86400000)throw Error('friend-cooldown');
+   tx.set(ref,{from:uid,to:to.uid,fromName:fromCard.data().name,toName:toCard.data().name,status:'pending',createdAt:stamp(),updatedAt:stamp()});
+  });
+ },
+ async respond(id,status){
+  social();if(!['accepted','rejected','removed'].includes(status))throw Error('invalid-friend');
+  await s.runTransaction(db,async tx=>{const ref=doc('friends',id),d=await tx.get(ref);if(!d.exists()||![d.data().from,d.data().to].includes(uid)||status!=='removed'&&d.data().to!==uid)throw Error('forbidden');if(d.data().status!==(status==='removed'?'accepted':'pending'))throw Error('friend-unavailable');tx.update(ref,{status,updatedAt:stamp()});});
+ },
  async gifts(){social();const [outgoing,incoming]=await Promise.all([list('gifts','sender',uid,50),list('gifts','receiver',uid,50)]);return {outgoing,incoming};},
  watchNotifications(callback,onError){social();if(typeof s.onSnapshot!=='function')return ()=>{};const counts=[0,0],watch=(kind,field,index,status)=>s.onSnapshot(s.query(s.collection(db,'bbl_'+kind),s.where(field,'==',uid),s.orderBy('updatedAt','desc'),s.limit(40)),snap=>{if(currentUser()?.uid!==uid)return;counts[index]=snap.docs.filter(d=>d.data().status===status).length;callback(counts[0]+counts[1]);},onError);const a=watch('friends','to',0,'pending'),b=watch('gifts','receiver',1,'pending');return ()=>{a();b();};},
  async quota(){social();const d=await get(doc('limits',uid));return d.exists()&&d.data().day===hkDay(now())?d.data().sent:0;},

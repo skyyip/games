@@ -1,10 +1,10 @@
 import {WEAPONS} from './catalog.js';
 export const PREFERENCES_KEY='beat-bad-luck.preferences.v1';
-const sections=['stories','challenges','scenes','album'];
+const sections=['stories','challenges','sets','album'];
 export function readPreferences(raw){
  const p={sound:false,voice:false,randomEvents:false,learned:[],section:'stories',positions:{}};
  try{const x=JSON.parse(raw);if(!x||x.version!==1)return p;if(typeof x.sound==='boolean')p.sound=x.sound;if(typeof x.voice==='boolean')p.voice=x.voice;if(typeof x.randomEvents==='boolean')p.randomEvents=x.randomEvents;
- p.learned=WEAPONS.filter(w=>Array.isArray(x.learned)&&x.learned.includes(w.id)).map(w=>w.id);if(sections.includes(x.section))p.section=x.section;
+ p.learned=WEAPONS.filter(w=>Array.isArray(x.learned)&&x.learned.includes(w.id)).map(w=>w.id);if(x.section==='scenes')p.section='sets';else if(sections.includes(x.section))p.section=x.section;
  for(const id of sections)if(Number.isFinite(x.positions?.[id]))p.positions[id]=Math.max(0,Math.min(100000,x.positions[id]));
  }catch{}return p;
 }

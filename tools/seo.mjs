@@ -104,6 +104,7 @@ export function applySeo(source, page) {
 <script type="application/ld+json">${json({ '@context': 'https://schema.org', '@graph': graph })}</script>
 <style>${['career-365','your-dream-career'].includes(game?.slug) ? styles.replace(guideFocusStyles, '') : styles}</style>`;
   html = html.replace(/<\/head>/i, block('seo', metadata) + '\n</head>');
+  if(game?.guide===false)return html;
   const content = block('game-guide', guide(game));
   if (game?.slug === 'tap-and-spill') {
     html = html.replace(/(<button\b[^>]*\bid="start"[\s\S]*?<\/button>)/i, '$1\n' + content);

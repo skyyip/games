@@ -1,0 +1,38 @@
+import {firebaseLeaderboardAPI,bestScoreRecord,LEADERBOARD_LIMIT} from './leaderboard.js';
+import {PLAYER_PREFIX} from './player-state.js';
+import {FIREBASE_CONFIG} from './firebase-settings.js';
+import {getLanguage} from '../../grid-rush/src/language.js';
+
+export function createLeaderboardUI({getUser,getName,getState,flush,loadAPI=firebaseLeaderboardAPI,storage}={}){
+ const $=id=>document.getElementById(id),dialog=$('bbl-leaderboard-dialog'),open=$('bbl-scores-open'),body=$('bbl-leaderboard-body'),status=$('bbl-leaderboard-status');
+ const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
+ let apiPromise,rows=[],mine=null,request=0,busy=false,pending=false;
+ const api=()=>apiPromise??=(loadAPI().catch(e=>{apiPromise=null;throw e;}));
+ const key=uid=>PLAYER_PREFIX+'.scores.'+(FIREBASE_CONFIG?.projectId??'local')+'.'+uid;
+ const remember=value=>{try{if(getUser()?.uid)storage?.setItem(key(getUser().uid),value?'yes':'no');}catch{}};
+ const optedIn=()=>{try{return getUser()?.uid&&storage?.getItem(key(getUser().uid))==='yes';}catch{return false;}};
+ function feedback(error){status.textContent=error?.message==='score-required'?local('先完成一局得分並同步進度，便可參加。','Finish a scoring ritual and sync your save first.'):error?.message==='save-conflict'?local('先到玩家帳戶處理進度衝突，再提交。','Resolve the save conflict in your account before submitting.'):error?.code==='permission-denied'?local('排行榜暫未開放，請更新 Firestore 規則。','Leaderboard unavailable. Update the Firestore rules.'):error?.code==='failed-precondition'?local('排行榜索引建立中，請稍後再試。','Leaderboard index is building. Try again shortly.'):error?.message==='auth-disabled'?local('暫時未連接排行榜，本機遊玩不受影響。','The leaderboard is not connected. Local play is available.'):local('暫時未能更新排行榜，進度仍保留，請稍後重試。','Could not update the leaderboard. Progress is retained; try again later.');}
+ function render(){
+  open.textContent=local('🏆 世界排行榜','🏆 World scores');$('bbl-leaderboard-title').textContent=local('世界得分排行榜','World high scores');$('bbl-leaderboard-refresh').textContent=local('重新整理','Refresh');
+  body.replaceChildren();const info=document.createElement('p');info.textContent=local(`最高單局得分前 ${LEADERBOARD_LIMIT} 名；同分以較早提交者優先。只有主動參加才公開名字、得分、命中次數及法寶。`,`Top ${LEADERBOARD_LIMIT} single-ritual scores. Earlier submissions win ties. Your name, score, hits and kit are public only after you join.`);body.append(info);
+  const user=getUser(),own=rows.find(r=>r.uid===user?.uid),personal=document.createElement('p');personal.className='leaderboard-personal';
+  personal.textContent=mine?local(`我的已公開紀錄：${mine.score.toLocaleString()} 分 · ${own?'世界第 '+own.rank+' 名':'未進前 '+LEADERBOARD_LIMIT+' 名'}`,`My published best: ${mine.score.toLocaleString()} · ${own?'World #'+own.rank:'Outside the top '+LEADERBOARD_LIMIT}`):local('尚未公開成績。','No score published yet.');body.append(personal);
+  const controls=document.createElement('div');controls.className='leaderboard-actions';
+  if(user){const record=bestScoreRecord(getState()),submit=document.createElement('button');submit.type='button';submit.id='bbl-score-submit';submit.textContent=local(mine?'更新我的最佳成績':`參加排行榜${record?'・'+record.score.toLocaleString()+'分':''}`,mine?'Update my high score':`Join the leaderboard${record?' · '+record.score.toLocaleString():''}`);submit.disabled=busy||!record;submit.onclick=()=>publish();controls.append(submit);
+   if(mine){const remove=document.createElement('button');remove.type='button';remove.id='bbl-score-remove';remove.disabled=busy;remove.textContent=local('退出排行榜','Leave leaderboard');remove.onclick=()=>leave();controls.append(remove);}
+   if(user.isAnonymous){const tip=document.createElement('p');tip.textContent=local('匿名玩家也可參加；綁定 Email 或 Google 可保留跨裝置身分。','Anonymous players can join; link Email or Google to retain your identity across devices.');controls.append(tip);}
+  }else{const login=document.createElement('button');login.type='button';login.id='bbl-score-login';login.textContent=local('登入後提交我的成績','Sign in to submit my score');login.onclick=()=>{dialog.close();$('settings-open').click();};controls.append(login);}
+  body.append(controls);
+  if(!rows.length){const empty=document.createElement('p');empty.textContent=local('暫時沒有已公開的成績，來做第一位參加者！','No published scores yet. Be the first to join!');body.append(empty);return;}
+  const table=document.createElement('table');table.className='leaderboard-table';const head=document.createElement('thead'),tr=document.createElement('tr');for(const title of [local('名次','Rank'),local('玩家','Player'),local('得分','Score')]){const th=document.createElement('th');th.scope='col';th.textContent=title;tr.append(th);}head.append(tr);const tbody=document.createElement('tbody');
+  for(const row of rows){const tr=document.createElement('tr');if(row.uid===user?.uid)tr.className='leaderboard-me';for(const value of [row.rank,row.name,row.score.toLocaleString()]){const td=document.createElement('td');td.textContent=String(value);tr.append(td);}tbody.append(tr);}table.append(head,tbody);body.append(table);
+ }
+ async function refresh(){const serial=++request,uid=getUser()?.uid;status.textContent=local('讀取排行榜…','Loading scores…');try{const client=await api(),[top,own]=await Promise.all([client.top(),uid?client.mine():null]);if(serial!==request||uid!==getUser()?.uid)return;rows=top;mine=own;remember(!!own);render();status.textContent=local('已更新。參加後的新高分會在進度同步後更新。','Updated. After joining, new best scores update when your progress syncs.');}catch(e){if(serial===request)feedback(e);}}
+ async function publish(automatic=false){if(busy){pending=true;return;}if(!getUser())return;busy=true;const uid=getUser().uid;render();try{await flush();if(uid!==getUser()?.uid)return;const client=await api(),score=await client.submit(getName(),{requireExisting:automatic});if(uid!==getUser()?.uid)return;mine=score;remember(true);if(dialog.open&&!automatic)await refresh();else if(dialog.open){rows=await client.top();if(uid!==getUser()?.uid)return;render();}status.textContent=local('最佳成績已公開。','High score published.');}catch(e){if(uid===getUser()?.uid){if(e.message==='score-opted-out'){remember(false);mine=null;status.textContent=local('已在另一裝置退出排行榜。','You left the leaderboard on another device.');}else feedback(e);}}finally{busy=false;render();if(pending){pending=false;const next=bestScoreRecord(getState());if(optedIn()&&next&&(!mine||next.score>mine.score))publish(true);}}}
+ async function leave(){if(busy)return;busy=true;const uid=getUser()?.uid;remember(false);render();try{await (await api()).remove();if(uid!==getUser()?.uid)return;mine=null;await refresh();status.textContent=local('已退出，遊戲進度及本機紀錄保留。','Removed from the leaderboard. Game progress and local records are retained.');}catch(e){if(uid===getUser()?.uid){remember(!!mine);feedback(e);}}finally{busy=false;render();}}
+ open.onclick=()=>{render();dialog.showModal();refresh();};$('bbl-leaderboard-refresh').onclick=refresh;
+ $('bbl-leaderboard-close').onclick=()=>{request++;dialog.close();};
+ document.addEventListener('bbl:cloudsaved',()=>{const record=bestScoreRecord(getState());if(optedIn()&&record&&(!mine||record.score>mine.score))publish(true);});
+ document.addEventListener('bbl:identitychange',()=>{request++;mine=null;pending=false;rows=[];status.textContent='';if(dialog.open)refresh();else render();});
+ document.addEventListener('languagechange',render);render();return {refresh,render};
+}

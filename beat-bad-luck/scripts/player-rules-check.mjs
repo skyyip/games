@@ -1,12 +1,13 @@
 // Local emulator only. No production project or credentials are used.
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';
 import {createPlayerAPI} from '../src/player-api.js';import {fresh} from '../src/progress.js';import {GIFT_ITEMS,inventory} from '../src/player-state.js';
+import {createLeaderboardAPI} from '../src/leaderboard.js';
 const require=createRequire(new URL('../package.json',import.meta.url)),{initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing'),sdk=require('firebase/firestore');
 const env=await initializeTestEnvironment({projectId:'demo-beat-bad-luck',firestore:{host:'127.0.0.1',port:8087,rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
 const clients=new Map(),dbs=new Map(),db=uid=>{if(!dbs.has(uid))dbs.set(uid,uid?env.authenticatedContext(uid,{firebase:{sign_in_provider:uid==='anon'?'anonymous':'password'}}).firestore():env.unauthenticatedContext().firestore());return dbs.get(uid);},api=uid=>{if(!clients.has(uid))clients.set(uid,createPlayerAPI({sdk,db:db(uid),uid,currentUser:()=>({uid,isAnonymous:uid==='anon'})}));return clients.get(uid);};
 const ref=(uid,collection,id)=>sdk.doc(db(uid),'bbl_'+collection,id),weapon=GIFT_ITEMS.find(i=>i.kind==='weapon');let count=0;
 const check=async(label,fn)=>{await fn();count++;console.log('PASS '+label);};
-try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);state.weaponUses[weapon.id]=30;
+try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);state.weaponUses[weapon.id]=30;state.records=[{score:1234,hits:20,weapon:'bare-hand',date:Date.now()}];
  await check('anonymous player can keep private cloud progress',()=>assertSucceeds(api('anon').save(fresh(),'匿名玩家',0)));
  await check('owner creates a private progress snapshot',()=>assertSucceeds(api('alice').save(state,'阿明',0)));
  await check('second account has separate progress',()=>assertSucceeds(api('bob').save(fresh(),'阿花',0)));
@@ -16,6 +17,9 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('stale progress cannot overwrite a newer revision',()=>assertFails(sdk.updateDoc(ref('alice','saves','alice'),{revision:1,updatedAt:sdk.serverTimestamp()})));
  await check('public card and unique handle are created atomically',()=>assertSucceeds(api('alice').publish('alice_friend','阿明')));
  await check('second public card is independent',()=>assertSucceeds(api('bob').publish('bob_friend','阿花')));
+ await check('empty incoming and outgoing friend lists are readable by their owner',async()=>{assert.deepEqual(await api('alice').friends(),[]);assert.deepEqual(await api('bob').friends(),[]);});
+ await check('a query cannot enumerate another player friend list',()=>assertFails(sdk.getDocs(sdk.query(sdk.collection(db('charlie'),'bbl_friends'),sdk.where('from','==','alice'),sdk.limit(40)))));
+ await check('signed-out players cannot list friend relationships',()=>assertFails(sdk.getDocs(sdk.query(sdk.collection(db(null),'bbl_friends'),sdk.where('to','==','bob'),sdk.limit(40)))));
  await check('a non-owner cannot change another player card',()=>assertFails(sdk.updateDoc(ref('bob','cards','alice'),{name:'冒認',updatedAt:sdk.serverTimestamp()})));
  await check('anonymous users cannot publish gift profiles',()=>assertFails(sdk.setDoc(ref('anon','cards','anon'),{uid:'anon',handle:'anon_friend',name:'匿名',updatedAt:sdk.serverTimestamp()})));
  await check('friend request is participant-only',()=>assertSucceeds(api('alice').request({uid:'bob',name:'阿花'})));
@@ -23,8 +27,10 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('sender cannot accept their own invitation',()=>assertFails(sdk.updateDoc(ref('alice','friends',request.id),{status:'accepted',updatedAt:sdk.serverTimestamp()})));
  await check('recipient can accept',()=>assertSucceeds(api('bob').respond(request.id,'accepted')));
  await check('outsider cannot view a private friend relationship',()=>assertFails(sdk.getDoc(ref('charlie','friends',request.id))));
+ await check('both participants can query the accepted relationship',async()=>{assert.equal((await api('alice').friends())[0].status,'accepted');assert.equal((await api('bob').friends())[0].status,'accepted');});
  let revision=1;const sent=await api('alice').send(request.id,weapon.token,revision);revision=sent.revision;
  await check('sending deducts one real use and creates one pending gift',async()=>{assert.equal(inventory((await api('alice').load()).state)[weapon.token],29);assert.equal((await api('alice').quota()),1);assert.equal((await api('bob').gifts()).incoming[0].id,sent.giftId);});
+ await check('real-time friend/gift notification queries can read participant documents',()=>new Promise((resolve,reject)=>{let stop=()=>{};const timer=setTimeout(()=>{stop();reject(Error('notification-timeout'));},5000);stop=api('bob').watchNotifications(count=>{if(count===1){clearTimeout(timer);stop();resolve();}},e=>{clearTimeout(timer);stop();reject(e);});}));
  await check('outsider cannot claim gift',()=>assertFails(sdk.updateDoc(ref('charlie','gifts',sent.giftId),{status:'claimed',updatedAt:sdk.serverTimestamp()})));
  await check('gift cannot be marked claimed without crediting the recipient snapshot',()=>assertFails(sdk.updateDoc(ref('bob','gifts',sent.giftId),{status:'claimed',updatedAt:sdk.serverTimestamp()})));
  await check('recipient claim credits one use atomically',()=>assertSucceeds(api('bob').claim(sent.giftId,1)));
@@ -38,5 +44,20 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('client cannot delete its quota',()=>assertFails(sdk.deleteDoc(ref('alice','limits','alice'))));
  await check('client cannot forge a gift from a third party',()=>assertFails(sdk.setDoc(ref('charlie','gifts','forged'),{sender:'alice',receiver:'charlie',status:'pending'})));
  for(const collection of ['frogger_players','career365_saves','dreamcareer_saves'])await check(collection+' remains inaccessible',()=>assertFails(sdk.getDoc(sdk.doc(db('alice'),collection,'alice'))));
+ const board=createLeaderboardAPI({sdk,db:db('alice'),currentUser:()=>({uid:'alice'})});
+ await check('owner explicitly publishes a saved best score',()=>assertSucceeds(board.submit('阿明')));
+ await check('signed-out players can read a bounded public scoreboard',()=>assertSucceeds(sdk.getDocs(sdk.query(sdk.collection(db(null),'bbl_scores'),sdk.orderBy('score','desc'),sdk.orderBy('achievedAt','asc'),sdk.limit(50)))));
+ await check('unbounded score enumeration is refused',()=>assertFails(sdk.getDocs(sdk.collection(db(null),'bbl_scores'))));
+ await check('another user cannot change a public score',()=>assertFails(sdk.updateDoc(ref('bob','scores','alice'),{score:2000,achievedAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()})));
+ await check('a score cannot be lowered',()=>assertFails(sdk.updateDoc(ref('alice','scores','alice'),{score:1,updatedAt:sdk.serverTimestamp()})));
+ await check('scores above the game maximum are refused',()=>assertFails(sdk.updateDoc(ref('alice','scores','alice'),{score:1000001,achievedAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()})));
+ await check('private email cannot be added to a public score',()=>assertFails(sdk.updateDoc(ref('alice','scores','alice'),{email:'private@example.test',updatedAt:sdk.serverTimestamp()})));
+ await check('renaming a score preserves its achievement time',()=>assertSucceeds(board.submit('阿明改名')));
+ await check('another player cannot remove an entry',()=>assertFails(sdk.deleteDoc(ref('bob','scores','alice'))));
+ await check('owner can leave without removing private progress',()=>assertSucceeds(board.remove()));
+ await api('bob').respond(request.id,'removed');
+ await check('client exposes the re-invitation cooldown before a rejected write',()=>assert.rejects(()=>api('alice').request({uid:'bob'}),/friend-cooldown/));
+ await check('rules enforce the cooldown even if the client is bypassed',()=>assertFails(sdk.updateDoc(ref('alice','friends',request.id),{status:'pending',createdAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()})));
+ assert.ok((await api('alice').load()).state.records.length);
  console.log(count+' local Firestore security checks passed.');
 }finally{await env.cleanup();}

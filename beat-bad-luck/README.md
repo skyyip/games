@@ -2,6 +2,24 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm ci` and `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. Local play works without Firebase configuration. A production release uses the repository’s `tools/build-site.mjs` to resolve the optional Firebase SDK, hash resources and generate Apache cache rules.
 
+## Combined account/settings and friend-query fix (cache v140)
+
+One **Account & settings** launcher now opens sign-in/binding, nickname, cloud progress, sound/voice and portable backup controls in a single dialog. Signed-in imports stay disabled; exports remain available. The friends dialog includes a four-step invitation guide, a copyable player handle, clear pending/already-friend states and recoverable cooldown messages.
+
+The real Firestore emulator reproduced `permission-denied` while listing friends: membership checks against a constructed list of document fields could not be proved by the query engine. Friend and gift list rules now compare each participant field directly to the authenticated UID. They retain owner/participant restrictions and query limits. Invitation transactions read both current profile cards, preventing stale searched names from failing validation. Processed invitations and the 24-hour resend cooldown are caught before a denied write.
+
+**267 unit tests and 46 real Firestore security checks pass.** The official v1.22.0 emulator artifact was extracted from a package image and verified against Firebase CLI's SHA-256 metadata. Republish the updated rules to **beat-bad-luck** to fix the live service; a website push does not publish Firebase rules. The current environment has no authorized Firebase CLI account, so no production rules deployment or live account writes were performed.
+
+## Decoration sets and world scores (cache v139)
+
+Stall scene playback and its collection launcher are replaced by **12 categorized decoration sets**. Own all unexpired pieces, then claim the displayed oil and merit reward once. No adjacency, placement or level requirement applies; claiming keeps the pieces. Claim receipts survive accounts, portable saves, gifts, expiry and repurchases, so reacquiring a piece never pays the same reward again. The six-collection title now tracks six claimed sets, retaining previously unlocked titles and legacy scene history.
+
+Fortune photos now last **30 days**, with the existing 24-card limit. The opening cheer follows Master's comforting line, selected favorite stars use a dark glyph on a solid cream background, and the About accordion is removed from source and regenerated releases.
+
+The **world score board** shows the top 50 personal best single-ritual scores, with earlier public submissions winning ties. Viewing is public. Signed-in players (including anonymous accounts) explicitly join before any score is public; new local bests update after a successful cloud save on that device. Leaving removes the public entry, retains private progress and blocks stale automatic submissions from other devices. Names are published as text; Email, worry text and private inventory stay private. This remains a client-managed casual-game leaderboard, without server-authoritative score verification.
+
+Deploy the updated `firestore.rules` and `firestore.indexes.json` to the independent **beat-bad-luck** project. The additional `bbl_scores` composite index is `score DESC, achievedAt ASC`. No Cloud Functions or Blaze plan is needed. `scripts/collection-world-check.mjs` exercises four viewports against the built game and the real ranking UI with a memory transport; the security-rule suite still requires a functioning Firestore emulator.
+
 ## Player accounts, gifts and second-finisher assistance (cache v138)
 
 The first visit asks for a nickname, saved locally and highlighted before 「！今日有咩令你心塞？」. The account panel supports Email, Google and anonymous sign-in once this game's independent Firebase project is configured. Anonymous accounts can bind credentials while retaining their UID. Accounts and the original local stall have separate storage; a new cloud account explicitly chooses whether to copy the local stall. Active rituals save locally, then upload when finished. Stale revisions never silently overwrite newer cloud progress; export the local copy before loading the latest cloud save.

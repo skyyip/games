@@ -36,8 +36,8 @@ for (const [index, page] of pages.entries()) {
     const entity = schema['@graph'].find(item => item['@type'] === 'VideoGame');
     assert.equal(entity.name, game.name); assert.equal(entity.url, urls[index]);
     assert.deepEqual([entity.numberOfPlayers.minValue, entity.numberOfPlayers.maxValue], game.players);
-    assert.ok(html.includes(game.intro.replaceAll('&', '&amp;')), `${page}: game facts in static HTML`);
-    assert.ok(html.includes(game.chinese), `${page}: Traditional Chinese guide in static HTML`);
+    if(game.guide!==false)assert.ok(html.includes(game.intro.replaceAll('&', '&amp;')), `${page}: game facts in static HTML`);
+    if(game.guide!==false)assert.ok(html.includes(game.chinese), `${page}: Traditional Chinese guide in static HTML`);
   } else {
     const list = schema['@graph'].find(item => item['@type'] === 'ItemList');
     const visible = [...html.matchAll(/<article\b([^>]*\bdata-game="([^"]+)"[^>]*)>/g)]
@@ -46,8 +46,8 @@ for (const [index, page] of pages.entries()) {
     assert.deepEqual(new Set(list.itemListElement.map(item => item.url)), new Set(visible), 'Collection matches visible cards, including hidden-game policy');
   }
   const guide = html.match(/<!-- game-guide:start -->([\s\S]*?)<!-- game-guide:end -->/)?.[1];
-  assert.ok(guide, `${page}: readable guide`);
-  for (const match of guide.matchAll(/href="([^"]+)"/g)) {
+  if(game?.guide===false){assert.equal(guide,undefined,`${page}: About accordion remains removed`);}else assert.ok(guide, `${page}: readable guide`);
+  for (const match of (guide??'').matchAll(/href="([^"]+)"/g)) {
     const target = resolve(dirname(resolve(directory, page)), match[1], 'index.html');
     await access(target);
   }

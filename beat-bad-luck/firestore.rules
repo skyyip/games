@@ -44,7 +44,7 @@ service cloud.firestore {
   function reverseOpen(d) { return exists(friend(d.to+'__'+d.from)) && get(friend(d.to+'__'+d.from)).data.status in ['pending','accepted']; }
   match /bbl_friends/{id} {
    allow get: if registered() && (!exists(friend(id)) || request.auth.uid in [resource.data.from,resource.data.to]);
-   allow list: if registered() && request.query.limit <= 40 && request.auth.uid in [resource.data.from,resource.data.to];
+   allow list: if registered() && request.query.limit <= 40 && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
    allow delete: if false;
    allow create: if registered() && request.resource.data.from == request.auth.uid && validFriend(request.resource.data,id) && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && !reverseOpen(request.resource.data);
    allow update: if registered() && request.auth.uid in [resource.data.from,resource.data.to] && request.resource.data.from == resource.data.from && request.resource.data.to == resource.data.to && request.resource.data.updatedAt == request.time && (
@@ -58,7 +58,7 @@ service cloud.firestore {
   function quotaLinked(g,id) { let c=getAfter(counter(g.sender)).data; return c.day == day() && c.sent is int && c.sent >= 1 && c.sent <= 10 && c.lastGift == id && c.updatedAt == request.time; }
   match /bbl_gifts/{id} {
    allow get: if registered() && request.auth.uid in [resource.data.sender,resource.data.receiver];
-   allow list: if registered() && request.query.limit <= 50 && request.auth.uid in [resource.data.sender,resource.data.receiver];
+   allow list: if registered() && request.query.limit <= 50 && (resource.data.sender == request.auth.uid || resource.data.receiver == request.auth.uid);
    allow delete: if false;
    allow create: if registered() && request.resource.data.sender == request.auth.uid && validGift(request.resource.data) && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && acceptedFriend(request.resource.data) && linkedSave(request.auth.uid,id,'send') && inventoryMove(getAfter(save(request.auth.uid)).data,get(save(request.auth.uid)).data,request.resource.data,-1) && quotaLinked(request.resource.data,id);
    allow update: if registered() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.updatedAt == request.time && (
@@ -72,6 +72,25 @@ service cloud.firestore {
    allow list, delete: if false;
    allow create: if registered() && owner(uid) && validLimit(request.resource.data,uid) && request.resource.data.sent == 1;
    allow update: if registered() && owner(uid) && validLimit(request.resource.data,uid) && request.resource.data.sent == (resource.data.day == day()?resource.data.sent+1:1);
+  }
+  function validScore(d,uid) {
+   return d.keys().hasAll(['uid','name','score','hits','weapon','achievedAt','updatedAt'])
+    && d.keys().hasOnly(['uid','name','score','hits','weapon','achievedAt','updatedAt'])
+    && d.uid == uid && d.name is string && d.name.size() > 0 && d.name.size() <= 40
+    && d.score is int && d.score > 0 && d.score <= 1000000
+    && d.hits is int && d.hits >= 0 && d.hits <= 1000000
+    && d.weapon is string && (d.weapon == 'bare-hand' || ('w_' + d.weapon) in tokens())
+    && d.achievedAt is timestamp && d.updatedAt == request.time;
+  }
+  match /bbl_scores/{uid} {
+   allow get: if true;
+   allow list: if request.query.limit <= 50;
+   allow create: if owner(uid) && exists(save(uid)) && validScore(request.resource.data,uid) && request.resource.data.achievedAt == request.time;
+   allow update: if owner(uid) && exists(save(uid)) && validScore(request.resource.data,uid) && (
+    (request.resource.data.score > resource.data.score && request.resource.data.achievedAt == request.time)
+    || (request.resource.data.score == resource.data.score && request.resource.data.achievedAt == resource.data.achievedAt && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','updatedAt']))
+   );
+   allow delete: if owner(uid);
   }
   match /{document=**} { allow read, write: if false; }
  }

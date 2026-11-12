@@ -1,3 +1,4 @@
+import {DECOR_SETS} from './decor-sets.js';
 import {WEAPONS,DECOR,FRIENDS,MAX_DECOR_LEVEL} from './catalog.js';
 import {SKINS,SKIN_USES} from './skins.js';
 import {MAX_WEAPON_USES,MAX_COUPONS} from './progress.js';
@@ -21,6 +22,7 @@ export function validateBackupProgress(p){
  for(const [id,level]of Object.entries(p.decor)){if(!decorIds.has(id))fail();integer(level,MAX_DECOR_LEVEL);}
  if(p.decorExpires!==undefined){if(!object(p.decorExpires))fail();for(const [id,at]of Object.entries(p.decorExpires)){if(!decorIds.has(id)||!p.decor[id])fail();timestamp(at);}}
  for(const [key,ids]of [['friends',friendIds],['discovered',secretIds],['favoriteWeapons',weaponIds],['favoriteSkins',skinIds],['altarMissing',decorIds]])if(p[key]!==undefined)list(p[key],ids);
+ if(p.decorSetClaims!==undefined)list(p.decorSetClaims,new Set(DECOR_SETS.map(s=>s.id)));
  if(p.altarDecor!==undefined){list(p.altarDecor,decorIds,5);if(p.altarDecor.some(id=>!p.decor[id]))fail();}
  if(p.idleCarry!==undefined&&(!Number.isFinite(p.idleCarry)||p.idleCarry<0||p.idleCarry>=1))fail();
  if(p.coupons!==undefined){if(!Array.isArray(p.coupons)||p.coupons.length>MAX_COUPONS)fail();for(const c of p.coupons){const patron=PATRONS.find(i=>i.id===c?.patron);if(!patron||c.uses!==1||c.discount<=0||![patron.discount,patron.legacyDiscount].includes(c.discount))fail();}}

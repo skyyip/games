@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import {resolve} from 'node:path';
+import {fresh,STORAGE_KEY} from '../src/progress.js';
+import {hkDay} from '../src/ritual-rewards.js';
+const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
+const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
+const base=process.env.BBL_URL||'http://127.0.0.1:5436/games/beat-bad-luck/';
+const browser=await chromium.launch({headless:true});
+const harness=`import {createLeaderboardUI} from './beat-bad-luck/src/leaderboard-ui.js';import {createLeaderboardAPI} from './beat-bad-luck/src/leaderboard.js';import {createPlayerAPI} from './beat-bad-luck/src/player-api.js';import {createMemoryFirestore} from './beat-bad-luck/tests/fixtures/player-memory.js';import {fresh} from './beat-bad-luck/src/progress.js';
+(async()=>{const mem=createMemoryFirestore();let user={uid:'alice',isAnonymous:false},state=fresh(),revision=0,dirty=false;state.records=[{score:900,hits:10,weapon:'bare-hand',date:Date.now()}];const privateAPI=createPlayerAPI({...mem,uid:'alice',currentUser:()=>user}),board=createLeaderboardAPI({...mem,currentUser:()=>user});
+const bobPrivate=createPlayerAPI({...mem,uid:'bob',currentUser:()=>({uid:'bob'})}),bobBoard=createLeaderboardAPI({...mem,currentUser:()=>({uid:'bob'})}),bobState=fresh();bobState.records=[{score:500,hits:5,weapon:'bare-hand',date:Date.now()}];await bobPrivate.save(bobState,'阿花',0);await bobBoard.submit('阿花');revision=(await privateAPI.save(state,'阿明',0)).revision;
+async function flush(){if(!dirty)return;revision=(await privateAPI.save(state,'阿明',revision)).revision;dirty=false;document.dispatchEvent(new CustomEvent('bbl:cloudsaved'));}
+createLeaderboardUI({getUser:()=>user,getName:()=>'阿明',getState:()=>state,flush,loadAPI:async()=>board,storage:localStorage});globalThis.worldHarness={board,async score(score){state.records=[{score,hits:20,weapon:'bare-hand',date:Date.now()}];dirty=true;await flush();},logout(){user=null;document.dispatchEvent(new CustomEvent('bbl:identitychange'));}};})();`;
+const bundle=await build({stdin:{contents:harness,resolveDir:resolve('.')},bundle:true,format:'iife',write:false,logLevel:'silent'});
+try{
+ for(const [width,height]of [[320,568],[390,844],[812,375],[1280,900]]){
+  const c=await browser.newContext({viewport:{width,height},serviceWorkers:'block',reducedMotion:'reduce'});
+  await c.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
+  const now=Date.now(),seed=fresh(now);seed.lastDaily=hkDay(now);seed.selectedSkin='duck';seed.ownedSkins.push('duck');seed.skinUses.duck=10;seed.favoriteSkins=['duck'];
+  for(const id of ['tiger','lucky-roast-pig','money-tree','lucky-coins']){seed.decor[id]=1;seed.decorExpires[id]=now+86400000;}
+  seed.neighbourhood.album=[0,20,30,31].map(days=>({id:'card-'+days,at:now-days*86400000,weapon:'bare-hand',kind:'work',score:100,hits:1,wear:0,move:'tap',perfect:0}));
+  await c.addInitScript(({seed,key})=>{window.BBL_FIREBASE_CONFIG=null;if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(seed));localStorage.setItem('beat-bad-luck.players.v1.name.local','阿明');localStorage.setItem('playground.language.v1','zh-Hant');},{seed,key:STORAGE_KEY});
+  const p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(base,{waitUntil:'networkidle'});
+  assert.equal(await p.locator('#about-game,#stall-skit,#journey-tab-scenes,#worry-required').count(),0);
+  const intro=await p.locator('.fong-intro>div:last-child>p:last-child').textContent();assert.match(intro,/心事交低，師傅陪你慢慢打走。.*衰嘢死開！/);
+  await p.locator('#journey-tab-sets').click();await p.locator('#collection-dialog-sets[open]').waitFor();assert.equal(await p.locator('[data-decor-set]').count(),12);
+  await p.locator('[data-claim-set=guardian-feast]').click();assert(await p.locator('[data-claim-set=guardian-feast]').isDisabled());await p.locator('[data-claim-set=growing-fortune]').click();
+  const saved=await p.evaluate(key=>JSON.parse(localStorage.getItem(key)),STORAGE_KEY);assert.equal(saved.coins,770);assert.equal(saved.merit,420);assert.deepEqual(saved.decorSetClaims,['guardian-feast','growing-fortune']);assert.equal(saved.decor.tiger,1);assert.equal(saved.decor['money-tree'],1);
+  await p.locator('#collection-dialog-sets .collection-close').click();await p.locator('#journey-tab-album').click();assert.match(await p.locator('#album-title').textContent(),/保存 30 天/);assert.equal(await p.locator('#fortune-album [data-entry-id]').count(),2);await p.locator('#collection-dialog-album .collection-close').click();
+  await p.locator('#prepare-skin>summary').click();const star=p.locator('#prepare-skin .item-favorite[data-favorite-id=duck][aria-pressed=true]').first();assert(await star.isVisible());
+  const colors=await star.evaluate(n=>({fill:getComputedStyle(n.querySelector('path')).fill,background:getComputedStyle(n).backgroundColor}));assert.equal(colors.fill,'rgb(113, 68, 27)');assert.equal(colors.background,'rgb(255, 242, 184)');
+  const luminance=color=>{const rgb=color.match(/\d+/g).map(Number).slice(0,3).map(n=>{const v=n/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;};assert.ok((luminance(colors.background)+.05)/(luminance(colors.fill)+.05)>4.5);
+  await p.reload({waitUntil:'networkidle'});await p.locator('#journey-tab-sets').click();assert(await p.locator('[data-claim-set=guardian-feast]').isDisabled());assert.ok(!await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth));await p.screenshot({path:'/tmp/bbl-sets-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);await c.close();console.log('PASS '+width+': actual game set rewards, exact wallet changes, one-time persistence, thirty-day album, cheer placement, high-contrast selected star, removed scenes and About accordion.');
+  const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block'});await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));const page=await context.newPage(),boardErrors=[];page.on('pageerror',e=>boardErrors.push(e.message));
+  await page.route(url=>url.href.split('?')[0]===base,async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace(/<script\b[^>]*type=["']module["'][^>]*>[\s\S]*?<\/script>/gi,'')});});
+  await page.goto(base,{waitUntil:'networkidle'});await page.addScriptTag({content:bundle.outputFiles[0].text});await page.waitForFunction(()=>!!window.worldHarness);await page.locator('#bbl-scores-open').click();await page.waitForFunction(()=>document.querySelectorAll('.leaderboard-table tbody tr').length===1);assert.equal(await page.locator('.leaderboard-table tbody').textContent(),'1阿花500');
+  await page.locator('#bbl-score-submit').click();await page.waitForFunction(()=>document.querySelectorAll('.leaderboard-table tbody tr').length===2);assert.match(await page.locator('.leaderboard-me').textContent(),/1阿明900/);
+  await page.evaluate(()=>worldHarness.score(1200));await page.waitForFunction(()=>document.querySelector('.leaderboard-me')?.textContent.includes('1,200'));
+  await page.locator('#bbl-score-remove').click();await page.waitForFunction(()=>!document.querySelector('#bbl-score-remove'));await page.evaluate(()=>worldHarness.score(1600));assert.equal(await page.evaluate(()=>worldHarness.board.mine()),null);
+  await page.evaluate(()=>worldHarness.logout());await page.locator('#bbl-score-login').waitFor();await page.waitForFunction(()=>document.querySelectorAll('.leaderboard-table tbody tr').length===1);assert.match(await page.locator('.leaderboard-table tbody').textContent(),/阿花500/);assert.ok(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));assert.deepEqual(boardErrors,[]);await page.screenshot({path:'/tmp/bbl-scores-'+width+'.png'});await context.close();console.log('PASS '+width+': actual leaderboard UI/client API with memory transport, explicit publication, rank, automatic new best, withdrawal and signed-out viewing. No production writes.');
+ }
+}finally{await browser.close();}

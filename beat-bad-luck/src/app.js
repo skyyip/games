@@ -1,3 +1,6 @@
+import {createLeaderboardUI} from './leaderboard-ui.js';
+import {claimDecorSet} from './progress.js';
+import {DECOR_SETS} from './decor-sets.js';
 import {createPlayerHub} from './player-hub.js';
 import {scopeKey} from './player-state.js';
 import {createFavorites} from './favorites.js';
@@ -223,7 +226,7 @@ function cancelGestures(){
  $('.tiger-tray').classList.remove('is-smearing');$('#pork-piece').style.translate='';$('#striking-weapon').style.transform='';$('#paper-tiger').classList.remove('is-ready');
 }
 function start(){
- if(playerHub?.uid&&!playerHub.ready&&!playerHub.loading){message('請先確認新帳戶的起點或重試載入雲端。');document.getElementById('bbl-account-open').click();return;}
+ if(playerHub?.uid&&!playerHub.ready&&!playerHub.loading){message('請先確認新帳戶的起點或重試載入雲端。');document.getElementById('settings-open').click();return;}
  if(playerHub?.loading){message('正在還原玩家進度，請稍候。');return;}
  if(PHASES.includes(game.phase)||document.querySelector('dialog[open]'))return;if(!updateStartReadiness()){if(preparationUI)preparationUI.focusStep('worry');else $('#worry-select').focus();return;}if(preparationUI&&!preparationUI.validate())return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
  const preset=WORRIES.find(w=>w.id===kind)||WORRIES[0];game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:preparationUI?preparationUI.commission():state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preparationUI?preparationUI.events():preferences.value.randomEvents});neighbourhoodUI?.reset();
@@ -407,7 +410,7 @@ function openShop(name){const button=$(`#tab-${name}`);if(!button)return;const f
 for(const shortcut of document.querySelectorAll('[data-shortcut]'))shortcut.addEventListener('click',()=>openShop(shortcut.dataset.shortcut));
 for(const button of document.querySelectorAll('[data-tab]'))button.addEventListener('click',()=>openShop(button.dataset.tab));
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(PHASES.includes(game.phase))pause();else audio.stop();syncProgress();}else{settle();if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen)renderStall();purchaseUI.render();if(audio.context&&game.pausedAt===null)unlockSound();}});window.addEventListener('pagehide',()=>{if(PHASES.includes(game.phase))pause();audio.stop();stopMicrophone();syncProgress();});window.addEventListener('resize',()=>{statCache.clear();cancelGestures();polishCollections();});reduced.addEventListener('change',()=>{paperPaintKey='';clearHitAnimations();});
-neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:(gesture,direction)=>whack({gesture,direction,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onPreviewScene:async()=>{await collectionUI?.closeActive({returnFocus:false});await stallShowcaseUI?.open();const scene=$('#stall-skit');scene.tabIndex=-1;scene.focus({preventScroll:true});scene.scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});},onAccept:()=>{preparationUI?.acceptSavedCommission();}});
+neighbourhoodUI=createNeighbourhoodUI({game,audio,getState:()=>state,setNeighbourhood:next=>{state={...state,neighbourhood:next};save();},refresh:renderStall,cancelGestures,onGesture:(gesture,direction)=>whack({gesture,direction,pointer:'comic-event-button'}),onExtraScore:spendKitOnce,onClaimSet:id=>{settle();const next=claimDecorSet(state,id);if(!next)return;state=next;save();renderStall();audio.chime();const set=DECOR_SETS.find(s=>s.id===id);message(getLanguage()==='zh-Hant'?`已領取：香油錢 +${set.oil} · 功德 +${set.merit}`:`Claimed: Oil +${set.oil} · Merit +${set.merit}`);},onAccept:()=>{preparationUI?.acceptSavedCommission();}});
 $('#kit-skill')?.remove();
 $('#open-journey').addEventListener('click',()=>uxUI?.openCollection());
 for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.innerHTML=fongCostumeArt();for(const id of illustratedDecor)$('#stall-'+id).innerHTML=decorArt(id);for(const ghost of document.querySelectorAll('[data-ghost]'))ghost.innerHTML=ghostArt(ghost.dataset.ghost);for(const master of document.querySelectorAll('[data-fong]')){const icon=$('.fong-logo').cloneNode(true);icon.className='fong-logo master-avatar';master.append(icon);}drawWorries();settle();renderStall();updateSound();enableOffline($('#offline-status'));
@@ -450,3 +453,5 @@ observeDecorativeVisibility();
 document.fonts?.ready.then(()=>statCache.clear());
 
 playerHub=createPlayerHub({getState:()=>state,setState:next=>{state=readProgress(JSON.stringify(next));renderStall();preparationUI?.render();backupUI.render();},switchScope:scope=>{currentSaveKey=scopeKey(scope);try{storedRaw=storage?.getItem(currentSaveKey)??null;}catch{storedRaw=null;persistent=false;}state=readProgress(storedRaw);renderStall();preparationUI?.render();backupUI.render();},saveLocal:()=>{try{const raw=JSON.stringify(state);storage?.setItem(currentSaveKey,raw);storedRaw=raw;}catch{persistent=false;}},isPlaying:()=>PHASES.includes(game.phase),onInterrupt:backToStall,notice:message,storage});
+
+createLeaderboardUI({getUser:()=>playerHub?.user,getName:()=>playerHub?.getName()??'',getState:()=>state,flush:()=>playerHub?.flush(),storage});

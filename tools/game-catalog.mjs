@@ -43,7 +43,7 @@ export const games = [
     related: ['floating-balance', 'stone-skip'],
   },
   {
-    slug: 'beat-bad-luck', name: 'Beat the Bad Luck', zh: '鵝頸橋下：小人退散！', genre: 'Casual', players: [1, 1],
+    slug: 'beat-bad-luck', guide: false, name: 'Beat the Bad Luck', zh: '鵝頸橋下：小人退散！', genre: 'Casual', players: [1, 1],
     topic: 'Hong Kong Ritual Game',
     description: 'Play Beat the Bad Luck, a free Hong Kong-inspired browser game. Light incense, tap away a paper gremlin and decorate Master Yip’s stall.',
     intro: 'A single-player game inspired by Hong Kong’s villain-hitting folk ritual. Complete a playful ritual and brighten Master Yip’s stall.',

@@ -4,7 +4,7 @@ import {animateDialog} from './stall-polish.js';
 import {decorArt,weaponArt} from './art.js';
 import {patronArt,recordMedal} from './celebration-art.js';
 const comicIcon=(body)=>`<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><g stroke="#675365" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
-const scenesIcon=comicIcon('<rect x="7" y="19" width="34" height="23" rx="5" fill="#a7d4c0"/><path d="m5 13 33-8 3 9-34 8Z" fill="#ffe2a2"/><path d="m12 12 7 6m5-9 7 6M17 28v1m14-1v1m-12 5q5 5 10 0" fill="none"/>');
+const setsIcon=comicIcon('<rect x="5" y="10" width="22" height="26" rx="5" fill="#f1c476"/><rect x="23" y="18" width="20" height="25" rx="5" fill="#a7d4c0"/><path d="m11 24 4 4 7-9m7 14 3 3 6-7" fill="none"/>');
 const albumIcon=comicIcon('<path d="M8 6h29v36H10q-7-4 0-9h27" fill="#f1b5c6"/><path d="M13 6v27m5-18h13m-10 6v1m7-1v1m-7 5q4 4 8 0" fill="none"/>');
 const secretIcon=comicIcon('<path d="M8 21h32v22H8Z" fill="#b8c8ed"/><path d="M5 15h38v10H5Z" fill="#ffe3a3"/><path d="M24 15V43m-1-28Q5 12 12 4q10-3 12 11 2-14 12-11 7 8-11 11" fill="none"/><path d="m14 31 3-1m13 0 3 1m-14 5q5 5 10 0" fill="none"/>');
 const entries=[
@@ -12,7 +12,7 @@ const entries=[
  ['shop-kits','#panel-kits','#tab-kits',['除厄法寶庫','Ritual helpers'],()=>weaponArt('flipflop')],
  ['shop-friends','#panel-friends','#tab-friends',['貴人圖鑑','Good company'],()=>patronArt('kungfu-sing')],
  ['challenges','#journey-panel-challenges','#journey-tab-challenges',['趣味稱號','Fun titles'],()=>recordMedal(1)],
- ['scenes','#journey-panel-scenes','#journey-tab-scenes',['攤位名場面','Stall scenes'],()=>scenesIcon],
+ ['sets','#journey-panel-sets','#journey-tab-sets',['物件組合獎勵','Decoration set rewards'],()=>setsIcon],
  ['album','#journey-panel-album','#journey-tab-album',['平安籤冊','Fortune album'],()=>albumIcon],
  ['backup','#save-tools-panel','#save-tools-title',['帶住攤位周圍去','Take your stall with you'],()=>stallIcon],
  ['secret','#secret-collection',null,['神秘片場收藏','Secret film-set collection'],()=>secretIcon]
@@ -21,7 +21,7 @@ const entries=[
 export function createCollectionDialogs({preferences,canOpen=()=>true}){
  const records=new Map();let active=null,serial=0;
  const local=pair=>pair[getLanguage()==='zh-Hant'?0:1];
- const remember=record=>{record.position=record.scroll.scrollTop;if(['challenges','scenes','album'].includes(record.id))preferences.update({positions:{...preferences.value.positions,[record.id]:record.position}});};
+ const remember=record=>{record.position=record.scroll.scrollTop;if(['challenges','sets','album'].includes(record.id))preferences.update({positions:{...preferences.value.positions,[record.id]:record.position}});};
  for(const [id,panelSelector,triggerSelector,label,art]of entries){
   const panel=document.querySelector(panelSelector);if(!panel)continue;
   let trigger=triggerSelector&&document.querySelector(triggerSelector);
@@ -47,7 +47,7 @@ export function createCollectionDialogs({preferences,canOpen=()=>true}){
  // One two-column menu keeps all five destinations together, retaining their handlers.
  const menu=document.createElement('div');menu.id='collection-menu';menu.className='collection-launchers collection-menu';menu.setAttribute('role','group');
  const hub=document.querySelector('#neighbourhood-hub .neighbourhood-inner')??document.querySelector('#neighbourhood-hub');hub.prepend(menu);
- for(const id of ['shop-friends','secret','album','challenges','scenes']){const record=records.get(id);if(record)menu.append(record.trigger);}
+ for(const id of ['shop-friends','secret','album','challenges','sets']){const record=records.get(id);if(record)menu.append(record.trigger);}
  for(const group of document.querySelectorAll('.stall-tabs,.journey-tabs')){group.setAttribute('role','group');group.classList.add('collection-launchers');if(![...group.children].some(child=>!child.hidden))group.hidden=true;}
  const legend=document.querySelector('#rarity-legend');if(legend)records.get('shop-stall').scroll.prepend(legend);
  function render(){menu.setAttribute('aria-label',local(['貴人及收藏','Patrons and collections']));for(const record of records.values()){
@@ -61,7 +61,7 @@ export function createCollectionDialogs({preferences,canOpen=()=>true}){
   const request=++serial;if(active&&active!==record){active.returnFocus=false;await active.dialog.close();if(request!==serial)return false;}
   if(record.dialog.open)return true;active=record;record.opener=opener??record.trigger;record.returnFocus=true;
   if(id.startsWith('shop-')&&legend)record.scroll.prepend(legend);
-  if(['challenges','scenes','album'].includes(id)){const notice=document.querySelector('#neighbour-note');if(notice)record.scroll.append(notice);}
+  if(['challenges','sets','album'].includes(id)){const notice=document.querySelector('#neighbour-note');if(notice)record.scroll.append(notice);}
   render();record.dialog.showModal();record.scroll.scrollTop=record.position;record.close.focus({preventScroll:true});return true;
  }
  async function closeActive({returnFocus=true}={}){if(!active)return;active.returnFocus=returnFocus;await active.dialog.close();}

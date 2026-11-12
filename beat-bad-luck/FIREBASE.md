@@ -42,7 +42,9 @@ npm run firebase:check --prefix beat-bad-luck
 npm run firebase:deploy --prefix beat-bad-luck
 ```
 
-`firebase:check` 只顯示目標和指令；`firebase:deploy` 明確使用本遊戲設定裡的 projectId，僅部署 `firestore:rules,firestore:indexes`。設定缺漏、仍有佔位文字或指向上述其他遊戲時會停止。部署後等四個索引狀態變成 **Enabled**。
+`firebase:check` 只顯示目標和指令；`firebase:deploy` 明確使用本遊戲設定裡的 projectId，僅部署 `firestore:rules,firestore:indexes`。設定缺漏、仍有佔位文字或指向上述其他遊戲時會停止。部署後等五個索引狀態變成 **Enabled**。
+
+**世界排行榜更新需要重新部署規則及索引**，即使之前已完成 Firebase 設定。新增的 `bbl_scores` 索引：Query scope 選 **Collection**，欄位 `score` 選 **Descending**、`achievedAt` 選 **Ascending**。沒有這次新增規則會顯示權限錯誤；索引未完成會顯示建立中。物件組合獎勵包含在原有私有進度內，不需另開 Collection。
 
 檔案：[`firebase.json`](./firebase.json)、[`firestore.rules`](./firestore.rules)、[`firestore.indexes.json`](./firestore.indexes.json)。沒有共用 `.firebaserc`，不會依賴 CLI 上次選過的專案。
 
@@ -55,7 +57,9 @@ npm test --prefix beat-bad-luck
 firebase emulators:exec --only firestore --project demo-beat-bad-luck --config beat-bad-luck/firebase.json 'node beat-bad-luck/scripts/player-rules-check.mjs'
 ```
 
-規則測試使用 `demo-beat-bad-luck` 及 `127.0.0.1:8087`，不接觸正式資料。涵蓋私有存檔、匿名限制、好友同意、實際扣庫存、原子領取／退回、防重複操作與每日送禮限制。本次環境無法從 Google Storage 下載 Firestore 模擬器，因此**尚未執行規則測試，亦未驗證真實 Firebase 登入**。單元測試與四個螢幕尺寸的介面流程已以記憶體傳輸替身驗證；替身不能代替安全規則驗證。
+規則測試使用 `demo-beat-bad-luck` 及 `127.0.0.1:8087`，不接觸正式資料。**本輪46項真正 Firestore 模擬器安全測試全部通過**，涵蓋私有存檔、匿名限制、好友清單及通知查詢、邀請／接受、實際扣庫存、原子領取／退回、每日送禮限制及排行榜。直接下載受限後，已從套件容器取出官方 v1.22.0 模擬器，SHA-256 與 Firebase CLI 官方中繼資料一致，再於本機執行。仍未驗證正式專案的真實 Google／Email 登入。
+
+**好友操作出現「未獲允許」的修正：** 舊規則用 `request.auth.uid in [resource.data.from, resource.data.to]` 驗證好友清單，查詢引擎會回報欄位未定義並拒絕讀取。新版改為明確的 `resource.data.from == request.auth.uid || resource.data.to == request.auth.uid`；禮物清單也作相同修正。請將最新 `firestore.rules` 整份貼到 **beat-bad-luck → Firestore Database → Rules → 發布**，或用上面的 CLI 指令重新部署。網站 push 不會部署規則。本環境 `firebase login:list` 沒有已授權帳戶，未代為更新正式專案。
 
 若舊版規則在 `day()` 出現 `Missing 'match' keyword before path` 或 `Unexpected '/86400000'`，請使用目前更新的規則檔。除法 `/` 必須與後面的數字留有空格，避免被 lexer 當成 `/86400000` 路徑 token。函式應為 `return int((request.time.toMillis() + 28800000) / 86400000);`；此修正保留香港午夜的每日送禮重設邏輯。
 
@@ -70,6 +74,9 @@ firebase emulators:exec --only firestore --project demo-beat-bad-luck --config b
 | `bbl_friends/{from}__{to}` | 邀請與好友同意狀態；雙方可讀 |
 | `bbl_gifts/{id}` | 物品、雙方名字、狀態與時間；雙方可讀 |
 | `bbl_limits/{uid}` | 香港午夜重設的送禮計數；本人可讀，規則限制遞增 |
+| `bbl_scores/{uid}` | 主動參加的玩家名字、最高單局得分、命中次數、法寶及時間；公眾可讀，每次最多50筆 |
+
+排行榜每個 UID 只保留一筆最佳得分，同分以較早公開者優先；未進前50名時不會捏造世界名次。匿名玩家也可參加，綁定帳戶可保留跨裝置身分。參加後，這部裝置的新紀錄會在進度成功同步後更新；可退出並刪除公開成績，私人進度不受影響。排行榜是玩家端產生的休閒遊戲紀錄，安全規則限制擁有者、欄位、分數範圍及不可降分，並不驗證實際每一下打擊，沒有伺服器防作弊或真金獎品。
 
 送禮每次最多一份：小人紙一次、法寶一次、小攤物件整件連同等級及剩餘耐用時間。保管期間物件耐用時間暫停；與同款合併使用較早到期日，超過持有上限會拒絕領取，可先使用庫存或婉拒。逾七日不能領取，寄件人可取回；取消／退回都不退每日次數。只有已註冊、互相同意的好友可互贈；匿名玩家需先綁定 Email 或 Google。
 
