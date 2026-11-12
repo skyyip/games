@@ -1,3 +1,4 @@
+import {renderPlayerGreeting} from './player-name.js';
 import {createWorryDialog} from './mobile-dialogs.js';
 import {formatNumber} from './number-format.js';
 import {WORRIES,WORRY_GROUPS,WEAPONS,compareCatalogueValue,weaponScoreMultiplier} from './catalog.js';
@@ -55,6 +56,7 @@ export function createPreparationUI({favorites,onCatalogChange=()=>{},weaponInsp
  document.body.classList.add('preparation-ready');
  const text=(id,zh,en)=>{const node=$('#'+id),value=local(zh,en);if(node.textContent!==value)node.textContent=value;};
  const currentStory=()=>{const n=getState().neighbourhood,story=STORIES.find(s=>s.id===n.active);if(!story)return null;const index=n.replay?story.chapters.length-1:n.chapters[story.id];return {story,index,chapter:story.chapters[index]};};
+ document.addEventListener('bbl:namechange',()=>renderPlayerGreeting($('#prepare-worry-title'),getLanguage()==='zh-Hant'));
  const name=item=>local(item.nameZh??translate(item.name),item.name);
  function focusStep(id='worry') {
   const step=$('#prepare-'+id);if(step.tagName==='DETAILS')step.open=true;
@@ -119,12 +121,13 @@ export function createPreparationUI({favorites,onCatalogChange=()=>{},weaponInsp
   const commissionText=commissionEnabled&&current?local(`${current.story.name[0]}・第 ${current.index+1} 章`,`${current.story.name[1]} · chapter ${current.index+1}`):commissionEnabled?local('請選一個委託，或今局先唔接','Choose a commission, or skip it this ritual'):local('今次專心處理自己','Just my own worry');
   const eventText=events?local('加入隨機挑戰','Random challenges on'):local('輕鬆除厄・事件關閉','Relaxed · events off');
   for(const [id,zhText,enText] of [
-  ['prepare-worry-title','今日有咩令你心很累？','What is weighing on you?'],['worry-required','衰嘢死開！','Bad luck, get lost!'],
+  ['worry-required','衰嘢死開！','Bad luck, get lost!'],
    ['worry-question','心塞原因','Worry to release'],['worry-privacy','心事只留在這次儀式，不會存入紀錄。','Your words stay in this ritual and are never saved.'],
    ['prepare-commission-title','順便幫街坊一個忙？','Help a neighbour along the way?'],['commission-choice-label','今局是否接委託','Commission for this ritual'],['commission-none-label','今次專心處理自己','Just my own worry'],['commission-yes-label','順便接個委託','Help with a commission'],['commission-help','完成儀式即可過章；額外挑戰只影響報酬。今局不接，已接故事及進度會保留。','Finishing the ritual advances the chapter; bonus targets affect pay. Skipping this ritual preserves your accepted story and progress.'],
    ['prepare-events-title','今局想輕鬆，定刺激啲？','A relaxed ritual, or an extra challenge?'],['events-choice-label','選擇隨機事件','Random event choice'],['events-off-label','輕鬆除厄','Relaxed ritual'],['events-off-help','不加突發事件，照樣完成儀式和故事。','No surprise event. Rituals and stories still progress.'],['events-on-label','加入隨機挑戰','Add a random challenge'],['events-on-help','今局加入一次事件，可挑戰額外分數與稱號。','One event this ritual, with optional bonus points and titles.'],
    ['prepare-skin-title','揀個小人，代表今日嘅煩惱','Choose a look for your worry'],['prepare-kit-title','揀件除惡法寶','Choose a ritual helper'],['all-skins-label','查看全部款式／購買','All looks / buy'],['all-kits-label','查看全部法寶／購買','All helpers / buy'],['preparation-kit-help','免費及已擁有法寶可直接選用；首次得分才扣次數。','Equip a free or owned helper. A use is spent only on the first score.'],
   ])text(id,zhText,enText);
+  renderPlayerGreeting($('#prepare-worry-title'),getLanguage()==='zh-Hant');
   stall.setAttribute('aria-label',local('我的小攤','My stall'));
   for(const [type,zh,en]of [['skin','全部小人款式／購買','All worry looks / buy'],['kit','全部除厄法寶／購買','All ritual helpers / buy']]){text(type+'-catalog-title',zh,en);const dialog=$('#'+type+'-catalog-dialog');dialog.querySelector('.catalog-close').textContent=local('關閉 ✕','Close ✕');dialog.querySelector('.catalog-scroll').setAttribute('aria-label',local(zh,en));}
   $('.custom-label').textContent=local('或寫低你的小心事','Or write your worry');input.placeholder='';

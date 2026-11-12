@@ -1,0 +1,42 @@
+// Local emulator only. No production project or credentials are used.
+import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';
+import {createPlayerAPI} from '../src/player-api.js';import {fresh} from '../src/progress.js';import {GIFT_ITEMS,inventory} from '../src/player-state.js';
+const require=createRequire(new URL('../package.json',import.meta.url)),{initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing'),sdk=require('firebase/firestore');
+const env=await initializeTestEnvironment({projectId:'demo-beat-bad-luck',firestore:{host:'127.0.0.1',port:8087,rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
+const clients=new Map(),dbs=new Map(),db=uid=>{if(!dbs.has(uid))dbs.set(uid,uid?env.authenticatedContext(uid,{firebase:{sign_in_provider:uid==='anon'?'anonymous':'password'}}).firestore():env.unauthenticatedContext().firestore());return dbs.get(uid);},api=uid=>{if(!clients.has(uid))clients.set(uid,createPlayerAPI({sdk,db:db(uid),uid,currentUser:()=>({uid,isAnonymous:uid==='anon'})}));return clients.get(uid);};
+const ref=(uid,collection,id)=>sdk.doc(db(uid),'bbl_'+collection,id),weapon=GIFT_ITEMS.find(i=>i.kind==='weapon');let count=0;
+const check=async(label,fn)=>{await fn();count++;console.log('PASS '+label);};
+try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);state.weaponUses[weapon.id]=30;
+ await check('anonymous player can keep private cloud progress',()=>assertSucceeds(api('anon').save(fresh(),'匿名玩家',0)));
+ await check('owner creates a private progress snapshot',()=>assertSucceeds(api('alice').save(state,'阿明',0)));
+ await check('second account has separate progress',()=>assertSucceeds(api('bob').save(fresh(),'阿花',0)));
+ await check('foreign private progress cannot be read',()=>assertFails(sdk.getDoc(ref('bob','saves','alice'))));
+ await check('signed-out private progress cannot be read',()=>assertFails(sdk.getDoc(ref(null,'saves','alice'))));
+ await check('private collection cannot be enumerated',()=>assertFails(sdk.getDocs(sdk.collection(db('alice'),'bbl_saves'))));
+ await check('stale progress cannot overwrite a newer revision',()=>assertFails(sdk.updateDoc(ref('alice','saves','alice'),{revision:1,updatedAt:sdk.serverTimestamp()})));
+ await check('public card and unique handle are created atomically',()=>assertSucceeds(api('alice').publish('alice_friend','阿明')));
+ await check('second public card is independent',()=>assertSucceeds(api('bob').publish('bob_friend','阿花')));
+ await check('a non-owner cannot change another player card',()=>assertFails(sdk.updateDoc(ref('bob','cards','alice'),{name:'冒認',updatedAt:sdk.serverTimestamp()})));
+ await check('anonymous users cannot publish gift profiles',()=>assertFails(sdk.setDoc(ref('anon','cards','anon'),{uid:'anon',handle:'anon_friend',name:'匿名',updatedAt:sdk.serverTimestamp()})));
+ await check('friend request is participant-only',()=>assertSucceeds(api('alice').request({uid:'bob',name:'阿花'})));
+ const request=(await api('bob').friends())[0];
+ await check('sender cannot accept their own invitation',()=>assertFails(sdk.updateDoc(ref('alice','friends',request.id),{status:'accepted',updatedAt:sdk.serverTimestamp()})));
+ await check('recipient can accept',()=>assertSucceeds(api('bob').respond(request.id,'accepted')));
+ await check('outsider cannot view a private friend relationship',()=>assertFails(sdk.getDoc(ref('charlie','friends',request.id))));
+ let revision=1;const sent=await api('alice').send(request.id,weapon.token,revision);revision=sent.revision;
+ await check('sending deducts one real use and creates one pending gift',async()=>{assert.equal(inventory((await api('alice').load()).state)[weapon.token],29);assert.equal((await api('alice').quota()),1);assert.equal((await api('bob').gifts()).incoming[0].id,sent.giftId);});
+ await check('outsider cannot claim gift',()=>assertFails(sdk.updateDoc(ref('charlie','gifts',sent.giftId),{status:'claimed',updatedAt:sdk.serverTimestamp()})));
+ await check('gift cannot be marked claimed without crediting the recipient snapshot',()=>assertFails(sdk.updateDoc(ref('bob','gifts',sent.giftId),{status:'claimed',updatedAt:sdk.serverTimestamp()})));
+ await check('recipient claim credits one use atomically',()=>assertSucceeds(api('bob').claim(sent.giftId,1)));
+ await check('a claimed gift cannot be changed or refunded',()=>assertFails(sdk.updateDoc(ref('alice','gifts',sent.giftId),{status:'cancelled',updatedAt:sdk.serverTimestamp()})));
+ await check('gift content cannot be rewritten after sending',()=>assertFails(sdk.updateDoc(ref('alice','gifts',sent.giftId),{amount:20,updatedAt:sdk.serverTimestamp()})));
+ const returned=await api('alice').send(request.id,weapon.token,revision);revision=returned.revision;await api('bob').reject(returned.giftId);const refund=await api('alice').cancel(returned.giftId,revision);revision=refund.revision;
+ await check('rejected gift can be reclaimed once, with no quota refund',async()=>{assert.equal(inventory(refund.state)[weapon.token],29);assert.equal(await api('alice').quota(),2);assert.equal((await sdk.getDoc(ref('alice','gifts',returned.giftId))).data().status,'returned');});
+ for(let i=2;i<10;i++){const g=await api('alice').send(request.id,weapon.token,revision);revision=g.revision;}
+ await check('ten gifts exhaust the daily quota',async()=>assert.equal(await api('alice').quota(),10));
+ await check('client cannot reset its quota',()=>assertFails(sdk.updateDoc(ref('alice','limits','alice'),{sent:0,updatedAt:sdk.serverTimestamp()})));
+ await check('client cannot delete its quota',()=>assertFails(sdk.deleteDoc(ref('alice','limits','alice'))));
+ await check('client cannot forge a gift from a third party',()=>assertFails(sdk.setDoc(ref('charlie','gifts','forged'),{sender:'alice',receiver:'charlie',status:'pending'})));
+ for(const collection of ['frogger_players','career365_saves','dreamcareer_saves'])await check(collection+' remains inaccessible',()=>assertFails(sdk.getDoc(sdk.doc(db('alice'),collection,'alice'))));
+ console.log(count+' local Firestore security checks passed.');
+}finally{await env.cleanup();}

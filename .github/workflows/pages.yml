@@ -27,6 +27,7 @@ jobs:
       - run: npm ci --prefix tools
       - run: npm ci --prefix mo-lei-tau-studio
       - run: npm ci --prefix frogger-jump
+      - run: npm ci --prefix beat-bad-luck
       - run: npm ci --prefix career-365
       - run: npm ci --prefix your-dream-career
       - run: npm run check:seo --prefix tools

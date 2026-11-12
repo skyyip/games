@@ -59,12 +59,12 @@ export function createBurstUI({game,onHit}){
   if(!busy){resetPull();if(current){stop();for(const view of rings)show(view.node,false);show(target,false);show(pull,false);data(root,'ringCount',0);current=null;targetKey='';}return;}
   if(current!==f){resetPull();stop();current=f;data(root,'mode',f.challenge.mode);place();}
   const c=f.challenge,time=game.finisherTime,zh=getLanguage()==='zh-Hant',isTarget=c.mode==='targets',isPull=c.mode==='pull',timing=c.mode==='timing',hold=game.pausedAt!==null||document.hidden;
-  show(target,isTarget);show(pull,isPull);data(root,'paused',hold);if(drag&&(hold||!isPull))resetPull();
+  show(target,isTarget);show(pull,isPull);data(root,'paused',hold);data(root,'assisted',c.use===2);if(drag&&(hold||!isPull))resetPull();
   if(isTarget){
    const part=BODY_PARTS.find(p=>p.id===c.target),key=part.id+'|'+getLanguage();put(title,zh?`點擊${part.name[0]}！`:`Tap the ${part.name[1].toLowerCase()}!`);
    if(key!==targetKey){fadeTarget();targetKey=key;const point=points.find(p=>p.id===part.id);target.style.left=point.x+'px';target.style.top=point.y+'px';data(target,'part',part.id);put(target,local(part.short));attr(target,'aria-label',zh?`點擊指定部位：${part.name[0]}`:`Tap the named body part: ${part.name[1]}`);}
   }else if(isPull){put(title,zh?'向上拉／向下拉！':'Pull up or down!');attr(pull,'aria-label',zh?'上下拉動區：向上或向下拉至少 40px 後放手。鍵盤可用上下方向鍵。':'Pull area: drag up or down at least 40px, then release. Keyboard: up or down arrow.');}
-  else{put(title,zh?'縮圈挑戰：最多三個圈，分別點擊！':'Timing challenge: up to three independently judged rings.');assignRings(c.rings);data(root,'ringProgress',((time-(c.rings[0]?.at??time))/RING_ROUND_MS).toFixed(3));data(root,'ringCount',c.rings.length);}
+  else{put(title,zh?(c.use===2?'第二次必殺：縮圈命中判定已放寬！':'縮圈挑戰：最多三個圈，分別點擊！'):(c.use===2?'Second burst: wider timing windows!':'Timing challenge: up to three independently judged rings.'));assignRings(c.rings);data(root,'ringProgress',((time-(c.rings[0]?.at??time))/RING_ROUND_MS).toFixed(3));data(root,'ringCount',c.rings.length);}
   for(const fade of [targetFade,exitFade])if(fade&&fade.playState!=='finished'){if(hold&&fade.playState!=='paused')fade.pause();else if(!hold&&fade.playState==='paused')fade.play();}
   if(exitFade?.playState==='finished')show(exit,false);
   for(const view of rings){

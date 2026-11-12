@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+  function registered() { return request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+  function save(uid) { return /databases/$(database)/documents/bbl_saves/$(uid); }
+  function gift(id) { return /databases/$(database)/documents/bbl_gifts/$(id); }
+  function counter(uid) { return /databases/$(database)/documents/bbl_limits/$(uid); }
+  function friend(id) { return /databases/$(database)/documents/bbl_friends/$(id); }
+  function card(uid) { return /databases/$(database)/documents/bbl_cards/$(uid); }
+  function day() {
+   return int((request.time.toMillis() + 28800000) / 86400000);
+  }
+  function tokens() { return ['s_paper','s_straw','s_duck','s_piglet','s_rabbit','s_panda','s_brain','s_wolf','s_worker','s_shark','s_punch','s_retriever','s_blame-magistrate','s_fake-master','s_unready-extra','s_chick-detective','s_promise-prince','s_screen-villain','s_movie-kwan','s_movie-crow','s_karate-senior','s_movie-aobai','s_history-heshen','s_history-qin-hui','s_history-zhao-gao','s_history-qin-shi-huang','s_history-dong-zhuo','s_history-king-zhou','s_history-wang-jingwei','s_history-hitler','s_film-ho-kam-ngan','s_film-fight-scholar','s_film-tong-pak-fu','s_film-school-agent','s_film-god-cook','s_film-landlady','s_film-joker','s_film-firecloud','w_film-magic-brush','w_film-football-whistle','w_film-ghost-chocolate','w_film-turtle-shield','w_film-judge-abacus','w_film-taichi-dough','w_film-rubber-chicken','w_film-moon-pass','w_secret-loudspeaker','w_secret-lollipop','w_secret-drumstick','w_secret-zero-knife','w_secret-flower','w_secret-rubber','w_secret-taxi','w_secret-shoe','w_secret-fan','w_secret-coconut','w_secret-sausage','w_secret-remote','w_secret-umbrella','w_secret-gong','w_secret-tram','w_secret-comb-3001','w_secret-wig-lion','w_secret-rice-spoon','w_secret-court-gavel','w_secret-chicken-feather','w_secret-clockoff-key','w_flipflop','w_paper','w_bag','w_stool','w_sword','w_stamp','w_mace','w_record','w_pinwheel','w_iron-hammer','w_fortune-child','w_triple-trio','w_marksix-snowball','w_rebirth-paper','w_chalk-eraser','w_spanner','w_solar-torch','w_hairdryer-shaver','w_plunger-nunchucks','w_pepper-spray','w_pork-cleaver','w_flying-dagger','w_meteor-hammer','w_overlord-spear','w_fish-gut-sword','w_jing-ke-dagger','w_scholar-sword','w_smiling-half-step','w_one-day-powder','w_cotton-palm','w_beauty-fist','w_oboi-guillotine','w_thunder-beads','w_fire-wheels','w_royal-salted-fish','w_prank-box','w_peace-pistol','w_ufo-rifle','w_gadget-3000','w_eiffel-flip','w_purple-green-sword','w_golden-headband','w_lassie','w_immunity-token','d_secret-wonton','d_secret-bus','d_secret-duck','d_secret-bowl','d_secret-rose','d_secret-lion','d_secret-moon','d_secret-pig','d_secret-goose','d_secret-seal','d_secret-tv','d_secret-fish','d_secret-star','d_secret-pineapple','d_secret-chair','d_secret-soy-witness','d_secret-landlord-chair','d_secret-time-clock','d_secret-piano-no-rent','d_secret-bun-rocket','d_secret-stunt-fish','d_movie-fishball-fountain','d_movie-rent-lion-bell','d_movie-court-gavel','d_movie-scholar-chickens','d_movie-lingling-fridge','d_movie-hat-rack','d_movie-kungfu-estate','d_movie-moonlight-box','d_movie-royal-inventor','d_movie-god-cook-canteen','d_film-cockroach-pavilion','d_film-lily-lamp','d_film-football-goal','d_film-evidence-bin','d_film-cj7-charger','d_film-inventor-fan','d_film-mermaid-footbath','d_film-prank-lift','d_radio','d_neon','d_incense','d_cat','d_tiger','d_aquarium','d_three-stars','d_money-tree','d_amethyst','d_beef-balls','d_street-wings','d_sweet-mantou','d_jigong-chicken','d_beggar-dog-rice','d_honest-red-bean-bun','d_shy-lollipop','d_melancholy-rice','d_butter-guillotine','d_electric-banana','d_lucky-coins','d_paper-doll','d_bagua-array','d_lucky-roast-pig','d_paper-iphone-duo','d_landscape-rock','d_sushi-1000','d_dragon-throne','d_clockoff-seal']; }
+  function validSave(p) { return p.keys().hasAll(['version','name','payload','inventory','revision','operation','giftId','updatedAt']) && p.keys().hasOnly(['version','name','payload','inventory','revision','operation','giftId','updatedAt']) && p.version == 1 && p.name is string && p.name.size() >= 1 && p.name.size() <= 40 && p.payload is string && p.payload.size() <= 750000 && p.inventory is map && p.inventory.keys().hasOnly(tokens()) && p.revision is int && p.revision > 0 && p.revision < 1000000000 && p.updatedAt == request.time && p.giftId is string; }
+  function inventoryMove(p,old,g,direction) { return old.inventory.get(g.token,0) is int && p.inventory.get(g.token,0) is int && p.inventory.diff(old.inventory).affectedKeys().hasOnly([g.token]) && p.inventory.get(g.token,0) == old.inventory.get(g.token,0)+direction*g.amount && p.inventory.get(g.token,0) >= 0; }
+  function saveGift(p,old,uid) {
+   let g=getAfter(gift(p.giftId)).data;
+   return registered() && p.giftId.size() > 0 && (
+    (p.operation == 'send' && g.sender == uid && g.status == 'pending' && g.createdAt == request.time && inventoryMove(p,old,g,-1))
+    || (p.operation == 'claim' && g.receiver == uid && g.status == 'claimed' && get(gift(p.giftId)).data.status == 'pending' && g.updatedAt == request.time && inventoryMove(p,old,g,1))
+    || (p.operation == 'return' && g.sender == uid && g.status in ['returned','cancelled'] && get(gift(p.giftId)).data.status in ['pending','rejected'] && g.updatedAt == request.time && inventoryMove(p,old,g,1))
+   );
+  }
+  match /bbl_saves/{uid} {
+   allow get: if owner(uid);
+   allow list, delete: if false;
+   allow create: if owner(uid) && validSave(request.resource.data) && request.resource.data.revision == 1 && request.resource.data.operation == 'save' && request.resource.data.giftId == '';
+   allow update: if owner(uid) && validSave(request.resource.data) && request.resource.data.revision == resource.data.revision+1 && ((request.resource.data.operation == 'save' && request.resource.data.giftId == '') || saveGift(request.resource.data,resource.data,uid));
+  }
+  function validCard(d,uid) { return d.keys().hasOnly(['uid','name','handle','updatedAt']) && d.uid == uid && d.name is string && d.name.size() >= 1 && d.name.size() <= 40 && d.handle is string && d.handle.matches('^[a-z][a-z0-9_]{2,15}$') && d.updatedAt == request.time; }
+  match /bbl_cards/{uid} {
+   allow get: if registered();
+   allow list, delete: if false;
+   allow create: if registered() && owner(uid) && validCard(request.resource.data,uid) && getAfter(/databases/$(database)/documents/bbl_handles/$(request.resource.data.handle)).data.uid == uid;
+   allow update: if registered() && owner(uid) && validCard(request.resource.data,uid) && request.resource.data.handle == resource.data.handle;
+  }
+  match /bbl_handles/{handle} {
+   allow get: if registered();
+   allow list, update, delete: if false;
+   allow create: if registered() && owner(request.resource.data.uid) && request.resource.data.keys().hasOnly(['uid']) && getAfter(card(request.auth.uid)).data.handle == handle;
+  }
+  function validFriend(d,id) { return d.keys().hasOnly(['from','to','fromName','toName','status','createdAt','updatedAt']) && d.from is string && d.to is string && d.from != d.to && id == d.from+'__'+d.to && d.fromName == get(card(d.from)).data.name && d.toName == get(card(d.to)).data.name && d.updatedAt == request.time; }
+  function reverseOpen(d) { return exists(friend(d.to+'__'+d.from)) && get(friend(d.to+'__'+d.from)).data.status in ['pending','accepted']; }
+  match /bbl_friends/{id} {
+   allow get: if registered() && (!exists(friend(id)) || request.auth.uid in [resource.data.from,resource.data.to]);
+   allow list: if registered() && request.query.limit <= 40 && request.auth.uid in [resource.data.from,resource.data.to];
+   allow delete: if false;
+   allow create: if registered() && request.resource.data.from == request.auth.uid && validFriend(request.resource.data,id) && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && !reverseOpen(request.resource.data);
+   allow update: if registered() && request.auth.uid in [resource.data.from,resource.data.to] && request.resource.data.from == resource.data.from && request.resource.data.to == resource.data.to && request.resource.data.updatedAt == request.time && (
+    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.createdAt == resource.data.createdAt && ((resource.data.status == 'pending' && request.auth.uid == resource.data.to && request.resource.data.status in ['accepted','rejected']) || (resource.data.status == 'accepted' && request.resource.data.status == 'removed')))
+    || (resource.data.status in ['removed','rejected'] && request.auth.uid == resource.data.from && request.time >= resource.data.updatedAt+duration.value(24,'h') && validFriend(request.resource.data,id) && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && !reverseOpen(request.resource.data))
+   );
+  }
+  function validGift(g) { return g.keys().hasOnly(['sender','receiver','friendId','senderName','receiverName','token','kind','itemId','amount','lifeMs','status','createdAt','updatedAt']) && g.sender is string && g.receiver is string && g.sender != g.receiver && g.senderName is string && g.senderName.size() <= 40 && g.receiverName is string && g.receiverName.size() <= 40 && g.token in tokens() && g.itemId is string && g.token == (g.kind == 'skin'?'s_':g.kind == 'weapon'?'w_':'d_')+g.itemId && g.amount is int && g.amount >= 1 && g.lifeMs is int && ((g.kind in ['skin','weapon'] && g.amount == 1 && g.lifeMs == 0) || (g.kind == 'decor' && g.amount <= 8 && g.lifeMs > 0 && g.lifeMs <= 2592000000)) && g.updatedAt == request.time; }
+  function linkedSave(uid,id,op) { let next=getAfter(save(uid)).data; return next.giftId == id && next.operation == op && next.revision == get(save(uid)).data.revision+1 && next.updatedAt == request.time; }
+  function acceptedFriend(g) { let f=get(friend(g.friendId)).data; return f.status == 'accepted' && g.sender in [f.from,f.to] && g.receiver in [f.from,f.to] && g.senderName == (f.from == g.sender?f.fromName:f.toName) && g.receiverName == (f.from == g.receiver?f.fromName:f.toName); }
+  function quotaLinked(g,id) { let c=getAfter(counter(g.sender)).data; return c.day == day() && c.sent is int && c.sent >= 1 && c.sent <= 10 && c.lastGift == id && c.updatedAt == request.time; }
+  match /bbl_gifts/{id} {
+   allow get: if registered() && request.auth.uid in [resource.data.sender,resource.data.receiver];
+   allow list: if registered() && request.query.limit <= 50 && request.auth.uid in [resource.data.sender,resource.data.receiver];
+   allow delete: if false;
+   allow create: if registered() && request.resource.data.sender == request.auth.uid && validGift(request.resource.data) && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && acceptedFriend(request.resource.data) && linkedSave(request.auth.uid,id,'send') && inventoryMove(getAfter(save(request.auth.uid)).data,get(save(request.auth.uid)).data,request.resource.data,-1) && quotaLinked(request.resource.data,id);
+   allow update: if registered() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.updatedAt == request.time && (
+    (resource.data.status == 'pending' && request.auth.uid == resource.data.receiver && ((request.resource.data.status == 'claimed' && request.time < resource.data.createdAt+duration.value(7,'d') && linkedSave(request.auth.uid,id,'claim')) || request.resource.data.status == 'rejected'))
+    || (request.auth.uid == resource.data.sender && ((resource.data.status == 'pending' && request.resource.data.status == 'cancelled') || (resource.data.status == 'rejected' && request.resource.data.status == 'returned')) && linkedSave(request.auth.uid,id,'return'))
+   );
+  }
+  function validLimit(c,uid) { let g=getAfter(gift(c.lastGift)).data; return c.keys().hasOnly(['day','sent','lastGift','updatedAt']) && c.day == day() && c.sent is int && c.sent >= 1 && c.sent <= 10 && c.updatedAt == request.time && g.sender == uid && g.status == 'pending' && g.createdAt == request.time && linkedSave(uid,c.lastGift,'send'); }
+  match /bbl_limits/{uid} {
+   allow get: if owner(uid);
+   allow list, delete: if false;
+   allow create: if registered() && owner(uid) && validLimit(request.resource.data,uid) && request.resource.data.sent == 1;
+   allow update: if registered() && owner(uid) && validLimit(request.resource.data,uid) && request.resource.data.sent == (resource.data.day == day()?resource.data.sent+1:1);
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}

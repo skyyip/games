@@ -1,3 +1,5 @@
+import {createPlayerHub} from './player-hub.js';
+import {scopeKey} from './player-state.js';
 import {createFavorites} from './favorites.js';
 import {createWeaponInspector} from './skin-inspector.js';
 import {createAltarUI} from './altar-ui.js';
@@ -47,10 +49,11 @@ let rigAnimations=[],cryDuration=1100,firstWhack=true,paperPaintKey='',weaponRow
 const statCache=new Map(),textMeasure=document.createElement('canvas').getContext('2d');
 let pickChant=createChantPicker();
 const gestures=new Map();let pinch=null,gestureSerial=0;let incenseGesture=null,porkGesture=null,micRevision=0,micStream=null,micContext=null,micFrame=0;
-try{storage=localStorage;state=readProgress(storage.getItem(STORAGE_KEY));}catch{state=readProgress(null);persistent=false;}
-let storedRaw=null;try{storedRaw=storage?.getItem(STORAGE_KEY)??null;}catch{}
+let currentSaveKey=STORAGE_KEY,playerHub=null;
+try{storage=localStorage;state=readProgress(storage.getItem(currentSaveKey));}catch{state=readProgress(null);persistent=false;}
+let storedRaw=null;try{storedRaw=storage?.getItem(currentSaveKey)??null;}catch{}
 function syncProgress(){
- if(!storage)return false;try{const raw=storage.getItem(STORAGE_KEY);if(raw===storedRaw)return false;storedRaw=raw;state=readProgress(raw);return true;}catch{persistent=false;return false;}
+ if(!storage)return false;try{const raw=storage.getItem(currentSaveKey);if(raw===storedRaw)return false;storedRaw=raw;state=readProgress(raw);return true;}catch{persistent=false;return false;}
 }
 const itemName=item=>item.nameZh?(getLanguage()==='zh-Hant'?item.nameZh:item.name):translate(item.name);
 const worryLabel=worry=>worry.labelZh&&getLanguage()==='zh-Hant'?worry.labelZh:translate(worry.label);
@@ -95,7 +98,8 @@ function renderRitualTiming(){
  literal($('#rules ol li:first-child'),zh?'奉神：輕掃或點亮三炷香，輕吹或按鈕熄去明火。':'Offer incense: swipe or tap to light three sticks, then blow gently or use the button.');
  literal($('#ritual-timing-note'),zh?`打小人 ${DURATIONS.beat/1000} 秒，預設無隨機挑戰；開啟後每局一次事件，一招即可解決。祭白虎後依序火化小人及衣紙、灑米或豆、焚燒綠馬紙，只需打杯一次，師傅會自動補打至聖杯。化解及打杯不催時，可隨時暫停。`:`Whack for ${DURATIONS.beat/1000} seconds with random challenges off by default; enable them for one single-action event per ritual. Feed the tiger, burn the worry and offering papers, scatter rice or beans, burn the green horse paper, then cast once; Master automatically retries until sacred blocks. Purification and divination are untimed. Pause whenever you need.`);
 }
-function save(){try{if(storage){if(!syncProgress()){const raw=JSON.stringify(state);storage.setItem(STORAGE_KEY,raw);storedRaw=raw;}}}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';}
+function save(){let changed=true;try{if(storage){if(!syncProgress()){const raw=JSON.stringify(state);storage.setItem(currentSaveKey,raw);storedRaw=raw;}else changed=false;}}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';if(changed)playerHub?.changed();}
+
 function settle(){syncProgress();const idle=collectIdle(state);state=idle.state;if(idle.earned){$('#idle-welcome').hidden=false;$('#idle-welcome').textContent=`Your stall earned ${idle.earned} oil money while you were away.`;}if(idle.lost.length){$('#decor-loss-note').hidden=false;literal($('#decor-loss-note'),translate(`Worn-out decorations removed: ${idle.lost.map(id=>itemName(DECOR.find(d=>d.id===id))).join('、')}`));say('A decoration wore out. You can replace it in the stall.');}save();return idle;}
 function message(text){$('#shop-message').textContent=text;clearTimeout(shopTimer);shopTimer=setTimeout(()=>$('#shop-message').textContent='',4500);say(text);}
 function drawWorries(){
@@ -219,6 +223,8 @@ function cancelGestures(){
  $('.tiger-tray').classList.remove('is-smearing');$('#pork-piece').style.translate='';$('#striking-weapon').style.transform='';$('#paper-tiger').classList.remove('is-ready');
 }
 function start(){
+ if(playerHub?.uid&&!playerHub.ready&&!playerHub.loading){message('請先確認新帳戶的起點或重試載入雲端。');document.getElementById('bbl-account-open').click();return;}
+ if(playerHub?.loading){message('正在還原玩家進度，請稍候。');return;}
  if(PHASES.includes(game.phase)||document.querySelector('dialog[open]'))return;if(!updateStartReadiness()){if(preparationUI)preparationUI.focusStep('worry');else $('#worry-select').focus();return;}if(preparationUI&&!preparationUI.validate())return;settle();recorded=false;kitUseCommitted=false;receipt=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++sequence}`;
  const preset=WORRIES.find(w=>w.id===kind)||WORRIES[0];game.start({kind,worry:$('#worry-input').value.trim()||worryLabel(preset),weapon:state.equipped,commission:preparationUI?preparationUI.commission():state.neighbourhood.active,skin:state.selectedSkin,randomEvents:preparationUI?preparationUI.events():preferences.value.randomEvents});neighbourhoodUI?.reset();
  lastPhase='';lastChant=-1;pickChant=createChantPicker();lastBeat=-1;$('#welcome').hidden=true;$('#result').hidden=true;$('#ritual-stage').hidden=false;$('#ritual-stage').inert=false;$('#pause-overlay').hidden=true;lock(true);
@@ -226,7 +232,7 @@ function start(){
 }
 function clearHitAnimations(){paperAnimation?.cancel();shoeAnimation?.cancel();paperAnimation=shoeAnimation=null;for(const animation of rigAnimations)animation.cancel();rigAnimations=[];lastVisualHitAt=-Infinity;}
 function renderPhase(){
- if(game.phase===lastPhase)return;if(game.phase!=='beat'){clearCriticalHit();impactSwitch.clear();clearHitAnimations();}lastPhase=game.phase;$('#play-panel').dataset.phase=game.phase;cancelGestures();stopMicrophone();$('#effects').replaceChildren();
+ if(game.phase===lastPhase)return;playerHub?.render();if(game.phase!=='beat'){clearCriticalHit();impactSwitch.clear();clearHitAnimations();}lastPhase=game.phase;$('#play-panel').dataset.phase=game.phase;cancelGestures();stopMicrophone();$('#effects').replaceChildren();
  if(game.phase==='results'){finish();return;}
  $('#phase-title').textContent=phaseNames[game.phase];$('#fong-line').textContent=({incense:'三枝香，慢慢呼一口氣，唔使急。',worry:'寫低心塞，今晚唔使再揹返屋企。',beat:'拍走加班，留返個胃食菠蘿包！',tiger:'白虎食飽飽，是非嘴放大假！',blessing:'衰氣走開，貴人入嚟，留返啲溫柔俾自己。',divination:'一正一反就圓滿，貴人就快到！'})[game.phase];
  for(const item of document.querySelectorAll('.phase-panel'))item.hidden=item.id!==`phase-${game.phase}`;
@@ -302,7 +308,7 @@ function finish(){
  $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);
  uxUI?.showResult(kitUseCommitted);$('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');ritualUI?.rewards(received,game.result);polishCollections();
 }
-function backToStall(){clearCriticalHit();impactSwitch.clear();clearHitAnimations();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();ritualUI?.render();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
+function backToStall(){clearCriticalHit();impactSwitch.clear();clearHitAnimations();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();ritualUI?.render();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();playerHub?.render();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
 function pause(){if(!PHASES.includes(game.phase))return;game.pause();clearTimeout(frame);frame=0;for(const animation of [paperAnimation,shoeAnimation,...rigAnimations])if(animation?.playState==='running')animation.pause();cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;uxUI?.renderPause();polishCollections();$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}
 function resume(){if(!game.resume())return;for(const animation of [paperAnimation,shoeAnimation,...rigAnimations])if(animation?.playState==='paused')animation.play();$('#pause-overlay').hidden=true;$('#ritual-stage').inert=false;if(audio.enabled)audio.unlock().then(()=>{if(game.pausedAt===null&&PHASES.includes(game.phase))audio.ambience(true);});$('#phase-title').focus({preventScroll:true});scheduleTick();}
 function updateSound(){
@@ -409,8 +415,8 @@ for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.in
 renderRitualTiming();
 document.addEventListener('languagechange',()=>{drawWorries();renderStall();renderRitualTiming();purchaseUI.render();});
 
-const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();renderStall();},onImport:next=>{syncProgress();state=next;save();settle();renderStall();},isPlaying:()=>PHASES.includes(game.phase),isPersistent:()=>persistent});
-window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event.key!==STORAGE_KEY&&event.key!==null))return;if(syncProgress()){if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen){settle();renderStall();}purchaseUI.render();}});
+const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();renderStall();},onImport:next=>{syncProgress();state=next;save();settle();renderStall();},isPlaying:()=>PHASES.includes(game.phase),isPersistent:()=>persistent,canImport:()=>!playerHub?.uid});
+window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event.key!==currentSaveKey&&event.key!==null))return;if(syncProgress()){if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen){settle();renderStall();}purchaseUI.render();}});
 window.addEventListener('pageshow',event=>{if(event.persisted&&syncProgress()&&!PHASES.includes(game.phase)){settle();renderStall();}});
 document.addEventListener('languagechange',()=>backupUI.render());
 uxUI=createUX({game,audio,preferences,itemName,getState:()=>state,isPersistent:()=>persistent,onStart:start,onHome:backToStall,onChooseWorry:()=>{kind='';$('#worry-input').value='';backToStall();preparationUI?.focusStep('worry');},onShop:openShop,onOpenCollection:(id,opener)=>collectionUI?.open(id,opener),onChoosePreparation:()=>preparationUI?.focusStep('worry'),onRenderPreparation:()=>preparationUI?.render(),onToggleSound:toggleSound,onVoice:value=>{$('#voice').checked=value;audio.voice=value;preferences.update({voice:value});},onBackup:(type,opener)=>{if(type==='export')$('#export-save').click();else backupUI.requestImport(opener);},onQuit:backToStall,onRepair:id=>repairItem(id,{focus:false}),onDecorAction:(action,id)=>{returnToDecor=id;if(action==='discard')askDiscard(id);else $(`[data-decor="${id}"]`).click();},pause,resume,openUltimateGuide:()=>ritualUI?.openFinisherGuide()});
@@ -442,3 +448,5 @@ for(const type of ['contextmenu','selectstart','dragstart'])document.addEventLis
 document.querySelector('.ghost-parade')?.remove();
 observeDecorativeVisibility();
 document.fonts?.ready.then(()=>statCache.clear());
+
+playerHub=createPlayerHub({getState:()=>state,setState:next=>{state=readProgress(JSON.stringify(next));renderStall();preparationUI?.render();backupUI.render();},switchScope:scope=>{currentSaveKey=scopeKey(scope);try{storedRaw=storage?.getItem(currentSaveKey)??null;}catch{storedRaw=null;persistent=false;}state=readProgress(storedRaw);renderStall();preparationUI?.render();backupUI.render();},saveLocal:()=>{try{const raw=JSON.stringify(state);storage?.setItem(currentSaveKey,raw);storedRaw=raw;}catch{persistent=false;}},isPlaying:()=>PHASES.includes(game.phase),onInterrupt:backToStall,notice:message,storage});

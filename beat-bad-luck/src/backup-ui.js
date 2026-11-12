@@ -1,6 +1,6 @@
 import {createBackup,parseBackup,BACKUP_LIMIT} from './backup.js';
 import {getLanguage} from '../../grid-rush/src/language.js';
-export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersistent}){
+export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersistent,canImport=()=>true}){
  const $=s=>document.querySelector(s),dialog=$('#import-dialog'),file=$('#import-save-file');let pending=null,busy=false,opener=null,requestedOpener=null;
  const local=(zh,en)=>getLanguage()==='zh-Hant'?zh:en;
  const put=(id,zh,en)=>{const node=$(id),target=id==='#save-tools-title'?(node.querySelector('.collection-launch-label')??node):node;target.textContent=local(zh,en);};
@@ -22,16 +22,16 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
   }catch(error){if(error.message==='backup-sanity'){note('存檔資料未通過合理性檢查，未有匯出；目前進度未被修改。','Save data failed validation and was not exported. Your progress is unchanged.');return;}note(error.message==='backup-crypto'?'無法加密存檔。請以 HTTPS 網址或支援加密的新版本瀏覽器開啟遊戲，再試一次。':'未能匯出加密存檔，請稍後再試；目前進度未改變。',error.message==='backup-crypto'?'Encryption is unavailable. Open the game over HTTPS in an up-to-date browser and try again.':'Unable to export the encrypted save. Try again; your progress is unchanged.');}
   finally{working(false);}
  });
- $('#import-save').addEventListener('click',()=>{if(!isPlaying()&&!busy)file.click();});
+ $('#import-save').addEventListener('click',()=>{if(!canImport()){note('登入帳戶請使用雲端進度；本機備份可登出後匯入，不會覆蓋已送禮的庫存。','Use cloud progress while signed in. Sign out to import a local backup.');return;}if(!isPlaying()&&!busy)file.click();});
  file.addEventListener('change',async()=>{
-  const selected=file.files?.[0];file.value='';if(!selected||busy||isPlaying())return;working(true);note('正在驗證及解密存檔…','Verifying and decrypting your save…');
+  const selected=file.files?.[0];file.value='';if(!selected||busy||isPlaying()||!canImport())return;working(true);note('正在驗證及解密存檔…','Verifying and decrypting your save…');
   try{if(selected.size>BACKUP_LIMIT)throw new Error('size');const next=await parseBackup(await selected.text());if(isPlaying())return;if($('#settings-dialog').open)await $('#settings-dialog').close();if(isPlaying())return;pending=next;opener=requestedOpener??$('#import-save');requestedOpener=null;render();dialog.showModal();$('#cancel-import').focus();}
   catch(error){note((error.message==='backup-sanity'?'存檔數據超出允許範圍。':'檔案驗證失敗。')+'讀不到這份加密存檔。請選擇本遊戲匯出的 .bblsave 文件（最多 256 KB）；舊版明文 JSON、被修改或損壞的文件不接受。目前進度未改變。',(error.message==='backup-sanity'?'Save values are outside the allowed limits. ':'Save verification failed. ')+'Unable to read this encrypted save. Choose a .bblsave file exported by this game (up to 256 KB). Plain JSON, modified or damaged files are not accepted. Your progress is unchanged.');}
   finally{working(false);}
  });
  $('#cancel-import').addEventListener('click',()=>dialog.close());
- $('#confirm-import').addEventListener('click',()=>{if(!pending||isPlaying())return;const next=pending;pending=null;dialog.close();onImport(next);note(isPersistent()?'存檔已載入，繼續經營你的小攤！':'存檔已載入；目前無法永久儲存，離開前請再匯出備份。',isPersistent()?'Save loaded. Your stall is ready!':'Save loaded for this visit. Storage is unavailable; export again before leaving.');});
+ $('#confirm-import').addEventListener('click',()=>{if(!pending||isPlaying()||!canImport())return;const next=pending;pending=null;dialog.close();onImport(next);note(isPersistent()?'存檔已載入，繼續經營你的小攤！':'存檔已載入；目前無法永久儲存，離開前請再匯出備份。',isPersistent()?'Save loaded. Your stall is ready!':'Save loaded for this visit. Storage is unavailable; export again before leaving.');});
  dialog.addEventListener('close',()=>{pending=null;opener?.focus({preventScroll:true});});
  dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const first=$('#cancel-import'),last=$('#confirm-import');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
- render();return {render,requestImport(from){if(isPlaying()||busy)return;requestedOpener=from;file.click();}};
+ render();return {render,requestImport(from){if(!canImport()){note('帳戶進度請從雲端載入；登出後可匯入本機備份。','Load account progress from the cloud; sign out to import a local backup.');return;}if(isPlaying()||busy)return;requestedOpener=from;file.click();}};
 }

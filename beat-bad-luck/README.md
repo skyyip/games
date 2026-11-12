@@ -1,6 +1,16 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
-A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. No runtime dependencies or source build are required. A production release uses the repository’s `tools/build-site.mjs` for hashed resources and Apache cache rules.
+A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm ci` and `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. Local play works without Firebase configuration. A production release uses the repository’s `tools/build-site.mjs` to resolve the optional Firebase SDK, hash resources and generate Apache cache rules.
+
+## Player accounts, gifts and second-finisher assistance (cache v138)
+
+The first visit asks for a nickname, saved locally and highlighted before 「！今日有咩令你心塞？」. The account panel supports Email, Google and anonymous sign-in once this game's independent Firebase project is configured. Anonymous accounts can bind credentials while retaining their UID. Accounts and the original local stall have separate storage; a new cloud account explicitly chooses whether to copy the local stall. Active rituals save locally, then upload when finished. Stale revisions never silently overwrite newer cloud progress; export the local copy before loading the latest cloud save.
+
+Registered players can publish a nickname/unique handle, accept friends and transfer owned paper, helpers and decorations. A gift contains one paper use, one helper use, or an entire decoration including levels and remaining durability. Sending deducts stock immediately; claims and returns update inventory and gift state atomically. Each sender gets **10 gifts per Hong Kong calendar day**; cancellations do not restore the quota. Pending gifts can be claimed within seven days or reclaimed by the sender. Free plain paper and bare hands cannot be sent. Signed-in saves cannot import old backup files; local play retains import/export.
+
+Only the **second finisher** has wider timing windows: Excellence ±160ms, Great ±330ms, Nice ±650ms, within the existing 1.3-second ring lifetime. Later timing finishers retain ±100/250/500ms. The **88-hit charge**, combo reset, 12-second duration, ring spawning and 225/450/675 point values are unchanged. The HUD states how many more hits are needed to burst.
+
+Firebase uses the independent **beat-bad-luck** project. The project owner reports Firebase setup complete; real sign-in and the full online gift flow still need verification. Setup and redeployment steps are in [FIREBASE.md](./FIREBASE.md). No Cloud Functions or Blaze subscription is required. Cloud progress is a client-managed casual-game save, not a tamper-proof or real-money economy. Ritual worry text is never saved or published.
 
 ## Portable file validation (cache v137)
 
