@@ -25,7 +25,7 @@ try{
   assert.equal(await p.locator('dialog[open]').count(),1);
   assert.equal(await p.locator('#bbl-account-dialog,#bbl-account-open').count(),0);
   for(const selector of ['#bbl-account-form','#settings-sound','#settings-voice','#settings-export','#settings-import'])assert.equal(await p.locator('#settings-dialog '+selector).count(),1);
-  assert(await p.locator('#bbl-google').isDisabled());
+  assert.ok(!(await p.locator('#settings-save-help').textContent()).includes('匯出為加密 .bblsave 文件，匯入不需密碼。'));assert(await p.locator('#bbl-google').isDisabled());
   assert.match(await p.locator('#bbl-account-feedback').textContent(),/Firebase/);
   if(!blocked){const pending=p.waitForEvent('download');await p.locator('#settings-export').click();assert.match((await pending).suggestedFilename(),/\.bblsave$/);}
   await p.locator('#settings-dialog .dialog-x').click();

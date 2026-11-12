@@ -1,3 +1,7 @@
+## Top twenty and score-column presentation (v142)
+
+All **272 unit tests pass**. The ranking test seeds more than 20 entries and verifies that the public query returns exactly 20 while preserving descending scores and earliest-submission ties. The existing four-size collection/ranking browser check verifies visible medal/lightning prefixes and a computed right-aligned Score heading. The actual settings check verifies removal of the requested sentence and successful encrypted export. Source and built SEO checks pass for 27 pages. No Firebase rules/index changes are needed for the smaller query.
+
 ## Automatic codes and recipient-side acceptance (v141)
 
 All **272 unit tests pass**. New tests force handle collisions, concurrent reservations and repeated-collision exhaustion, verify atomic ownership and lack of partial cards, and preserve legacy codes through display-name changes. New card creation uses secure random bytes; the UI provides no editable code input. The field label is 玩家代號.

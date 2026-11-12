@@ -40,7 +40,7 @@ export function createUX({game,audio,preferences,itemName,getState,isPersistent,
  function renderSettings(){
   put('settings-title','玩家帳戶、小攤設定與存檔','Account, settings & saves');put('settings-sound',audio.enabled?'聲音：開啟':'聲音：靜音',audio.enabled?'Sound: on':'Sound: muted');$('#settings-sound').setAttribute('aria-pressed',String(audio.enabled));$('#settings-voice').checked=preferences.value.voice;put('settings-voice-label','裝置語音朗讀','Device voice');put('settings-save-title','本機備份','Local backup');put('settings-preferences-title','小攤偏好','Stall preferences');
   put('settings-save-status',isPersistent()?'已儲存在目前瀏覽器／主畫面版本。':'目前只能暫存；離開前請匯出存檔。',isPersistent()?'Saved in this browser / Home Screen version.':'Progress lasts for this visit. Export before leaving.');
-  put('settings-save-help','如果手機將兩個版本分開儲存，請先匯出，再到另一版本匯入。匯入會取代現有進度，不會合併。匯出為加密 .bblsave 文件，匯入不需密碼。','If your phone separates the two stores, export here and import in the other version. Import replaces progress rather than merging it. Exported .bblsave files are encrypted and need no password to import.');
+  put('settings-save-help','如果手機將兩個版本分開儲存，請先匯出，再到另一版本匯入。匯入會取代現有進度，不會合併。','If your phone separates the two stores, export here and import in the other version. Import replaces progress rather than merging it.');
   put('settings-export','匯出存檔','Export save');put('settings-import','匯入存檔','Import save');put('settings-done','完成','Done');$('#settings-open').setAttribute('aria-label',local('玩家帳戶、小攤設定與存檔','Account, settings and saves'));
   $('#save-banner').hidden=isPersistent();put('save-banner-text','本次進度未能永久儲存。離開前請匯出備份。','Progress cannot be saved permanently. Export a backup before leaving.');put('save-banner-export','匯出備份','Export backup');
  }

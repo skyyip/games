@@ -1,7 +1,7 @@
 import {WEAPONS} from './catalog.js';
 import {unpackState,playerName} from './player-state.js';
 
-export const LEADERBOARD_LIMIT=50;
+export const LEADERBOARD_LIMIT=20;
 export function bestScoreRecord(state){
  return (state.records??[]).filter(r=>Number.isInteger(r.score)&&r.score>0&&r.score<=1000000&&Number.isInteger(r.hits)&&r.hits>=0&&r.hits<=1000000&&WEAPONS.some(w=>w.id===r.weapon))
   .sort((a,b)=>b.score-a.score||a.date-b.date)[0]??null;

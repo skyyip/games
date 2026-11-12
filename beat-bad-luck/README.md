@@ -2,6 +2,10 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm ci` and `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. Local play works without Firebase configuration. A production release uses the repository’s `tools/build-site.mjs` to resolve the optional Firebase SDK, hash resources and generate Apache cache rules.
 
+## Top twenty and clearer score columns (cache v142)
+
+The world leaderboard now queries and displays **20** entries, retaining highest-score ordering and the existing tie rule. Rank numbers use medal icons (gold/silver/bronze for the first three); score numbers use a lightning icon. Decorative icons are hidden from assistive technology, and the Score heading aligns right with the numeric column. The requested encrypted-file/password sentence is removed from settings in Chinese and English; backup behavior is unchanged. Existing Firestore rules/indexes support the smaller query.
+
 ## Automatic player codes and invitation feedback (cache v141)
 
 New public cards receive a system-generated `p_` code with ten random characters. Web Crypto supplies the randomness; Firestore reserves the handle and card in one transaction and retries collisions. Existing codes remain fixed, including legacy custom handles, so searches and friendships keep working after a name change or device switch. The read-only field is labelled **玩家代號** and retains its copy button; players no longer type a code when creating a card.
@@ -24,7 +28,7 @@ Stall scene playback and its collection launcher are replaced by **12 categorize
 
 Fortune photos now last **30 days**, with the existing 24-card limit. The opening cheer follows Master's comforting line, selected favorite stars use a dark glyph on a solid cream background, and the About accordion is removed from source and regenerated releases.
 
-The **world score board** shows the top 50 personal best single-ritual scores, with earlier public submissions winning ties. Viewing is public. Signed-in players (including anonymous accounts) explicitly join before any score is public; new local bests update after a successful cloud save on that device. Leaving removes the public entry, retains private progress and blocks stale automatic submissions from other devices. Names are published as text; Email, worry text and private inventory stay private. This remains a client-managed casual-game leaderboard, without server-authoritative score verification.
+The **world score board** shows the top 20 personal best single-ritual scores, with earlier public submissions winning ties. Viewing is public. Signed-in players (including anonymous accounts) explicitly join before any score is public; new local bests update after a successful cloud save on that device. Leaving removes the public entry, retains private progress and blocks stale automatic submissions from other devices. Names are published as text; Email, worry text and private inventory stay private. This remains a client-managed casual-game leaderboard, without server-authoritative score verification.
 
 Deploy the updated `firestore.rules` and `firestore.indexes.json` to the independent **beat-bad-luck** project. The additional `bbl_scores` composite index is `score DESC, achievedAt ASC`. No Cloud Functions or Blaze plan is needed. `scripts/collection-world-check.mjs` exercises four viewports against the built game and the real ranking UI with a memory transport; the security-rule suite still requires a functioning Firestore emulator.
 
