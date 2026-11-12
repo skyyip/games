@@ -1,3 +1,9 @@
+## Recoverable authentication preparation (v143)
+
+`scripts/auth-start-check.mjs` passes six scenarios: idle preload reuse; visible disabled/preparing state followed by readiness; failed module fetch and successful retry; a missing Auth callback timing out and retrying while its late callback is ignored; ready Google/link/sign-out controls during a blocked cloud read; and the actual configured Firebase Auth SDK becoming ready while IndexedDB.open never completes. The last case runs against the built application, retaining usable localStorage. No production sign-in or data writes were attempted.
+
+The former Google-button enable condition depended on the shared cloud-loading flag and an Auth client that initialized through default IndexedDB before switching to localStorage. The update separates Auth readiness from cloud-save loading, selects prior local persistence directly and exposes bounded recovery controls. Existing UID-scoped saves, popup activation and independent project configuration are retained.
+
 ## Top twenty and score-column presentation (v142)
 
 All **272 unit tests pass**. The ranking test seeds more than 20 entries and verifies that the public query returns exactly 20 while preserving descending scores and earliest-submission ties. The existing four-size collection/ranking browser check verifies visible medal/lightning prefixes and a computed right-aligned Score heading. The actual settings check verifies removal of the requested sentence and successful encrypted export. Source and built SEO checks pass for 27 pages. No Firebase rules/index changes are needed for the smaller query.

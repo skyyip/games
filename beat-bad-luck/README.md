@@ -2,6 +2,12 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm ci` and `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. Local play works without Firebase configuration. A production release uses the repository’s `tools/build-site.mjs` to resolve the optional Firebase SDK, hash resources and generate Apache cache rules.
 
+## Sign-in preparation and recovery (cache v143)
+
+Login services now preload when the browser is idle. The account panel shows a preparing state while the SDK/session initializes, with a 15-second limit and explicit retry/reload controls on failure. Login readiness is independent of cloud-save loading, so a slow save read does not disable otherwise ready account controls. Late responses from timed-out preparations are ignored. Retrying or reloading does not clear local progress.
+
+Auth directly selects the localStorage persistence used by previous releases, with session/memory fallbacks, rather than waiting for Firebase's default IndexedDB initialization before switching persistence. Popup sign-in still starts directly from the trusted button click. `scripts/auth-start-check.mjs` covers prewarming, delay, module failure, missing callbacks, delayed cloud data and the actual Firebase SDK with an indefinitely stalled IndexedDB open. No production sign-in or database write is used by these checks.
+
 ## Top twenty and clearer score columns (cache v142)
 
 The world leaderboard now queries and displays **20** entries, retaining highest-score ordering and the existing tie rule. Rank numbers use medal icons (gold/silver/bronze for the first three); score numbers use a lightning icon. Decorative icons are hidden from assistive technology, and the Score heading aligns right with the numeric column. The requested encrypted-file/password sentence is removed from settings in Chinese and English; backup behavior is unchanged. Existing Firestore rules/indexes support the smaller query.
