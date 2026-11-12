@@ -15,8 +15,11 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('signed-out private progress cannot be read',()=>assertFails(sdk.getDoc(ref(null,'saves','alice'))));
  await check('private collection cannot be enumerated',()=>assertFails(sdk.getDocs(sdk.collection(db('alice'),'bbl_saves'))));
  await check('stale progress cannot overwrite a newer revision',()=>assertFails(sdk.updateDoc(ref('alice','saves','alice'),{revision:1,updatedAt:sdk.serverTimestamp()})));
- await check('public card and unique handle are created atomically',()=>assertSucceeds(api('alice').publish('alice_friend','阿明')));
- await check('second public card is independent',()=>assertSucceeds(api('bob').publish('bob_friend','阿花')));
+ await check('public card and unique handle are created atomically',()=>assertSucceeds(api('alice').publish('阿明')));
+ await check('second public card is independent',()=>assertSucceeds(api('bob').publish('阿花')));
+ await check('generated codes are reserved uniquely and collisions retry atomically',async()=>{const original=await api('alice').card();let attempts=0;const charlie=createPlayerAPI({sdk,db:db('charlie'),uid:'charlie',currentUser:()=>({uid:'charlie'}),newHandle:()=>++attempts===1?original.handle:'p_retry22222'});const card=await charlie.publish('小明');assert.equal(card.handle,'p_retry22222');assert.equal(attempts,2);assert.equal((await sdk.getDoc(ref('charlie','handles',original.handle))).data().uid,'alice');});
+ await check('concurrent generated reservations cannot assign the same code to two accounts',async()=>{let a=0,b=0;const make=(uid,next)=>createPlayerAPI({sdk,db:db(uid),uid,currentUser:()=>({uid}),newHandle:next});const cards=await Promise.all([make('dave',()=>++a===1?'p_same33333':'p_dave44444').publish('大明'),make('eva',()=>++b===1?'p_same33333':'p_eva555555').publish('小花')]);assert.notEqual(cards[0].handle,cards[1].handle);});
+ await check('renaming an existing card preserves its player code',async()=>{const before=await api('alice').card();await api('alice').publish('阿明改名');assert.equal((await api('alice').card()).handle,before.handle);await api('alice').publish('阿明');});
  await check('empty incoming and outgoing friend lists are readable by their owner',async()=>{assert.deepEqual(await api('alice').friends(),[]);assert.deepEqual(await api('bob').friends(),[]);});
  await check('a query cannot enumerate another player friend list',()=>assertFails(sdk.getDocs(sdk.query(sdk.collection(db('charlie'),'bbl_friends'),sdk.where('from','==','alice'),sdk.limit(40)))));
  await check('signed-out players cannot list friend relationships',()=>assertFails(sdk.getDocs(sdk.query(sdk.collection(db(null),'bbl_friends'),sdk.where('to','==','bob'),sdk.limit(40)))));

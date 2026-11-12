@@ -1,18 +1,35 @@
 import {packState,unpackState,inventory,takeGift,receiveGift,hkDay,playerName,GIFT_LIMIT} from './player-state.js';
-export function createPlayerAPI({sdk:s,db,uid,currentUser=()=>({uid}),now=()=>Date.now()}){
+import {createPlayerHandle} from './player-handle.js';
+export function createPlayerAPI({sdk:s,db,uid,currentUser=()=>({uid}),now=()=>Date.now(),newHandle=createPlayerHandle}){
  const doc=(kind,id)=>s.doc(db,'bbl_'+kind,id),own=()=>doc('saves',uid),stamp=()=>s.serverTimestamp();
  function check(){if(currentUser()?.uid!==uid)throw Error('identity-changed');}
  function social(){check();if(currentUser()?.isAnonymous)throw Error('registered-account-required');}
  const decode=d=>d.exists()?{state:unpackState(d.data().payload),revision:d.data().revision,name:d.data().name??''}:null;
  function saved(state,name,revision,operation='save',giftId=''){return {version:1,name:playerName(name),payload:packState(state),inventory:inventory(state),revision,operation,giftId,updatedAt:stamp()};}
  const get=ref=>(s.getDocFromServer??s.getDoc)(ref);
- async function list(kind,field,value,max=40){const q=s.query(s.collection(db,'bbl_'+kind),s.where(field,'==',value),s.orderBy('updatedAt','desc'),s.limit(max)),rows=await s.getDocs(q);return rows.docs.map(d=>({id:d.id,...d.data()}));}
+ async function list(kind,field,value,max=40){const q=s.query(s.collection(db,'bbl_'+kind),s.where(field,'==',value),s.orderBy('updatedAt','desc'),s.limit(max)),rows=await (s.getDocsFromServer??s.getDocs)(q);return rows.docs.map(d=>({id:d.id,...d.data()}));}
  async function mutateSave(tx,ref,expected){const d=await tx.get(ref);if(!d.exists()||d.data().revision!==expected)throw Error('save-conflict');return decode(d);}
  const api={
  async load(){check();const value=decode(await get(own()));check();return value;},
  async save(state,name,revision){check();let next;await s.runTransaction(db,async tx=>{const ref=own(),old=await tx.get(ref);if((old.exists()?old.data().revision:0)!==revision)throw Error('save-conflict');next=saved(state,name,revision+1);tx.set(ref,next);});check();return {state:unpackState(next.payload),name:next.name,revision:next.revision};},
  async card(){social();const d=await get(doc('cards',uid));return d.exists()?{uid,...d.data()}:null;},
- async publish(handle,name){social();handle=String(handle).trim().toLowerCase();if(!/^[a-z][a-z0-9_]{2,15}$/.test(handle)||!playerName(name))throw Error('invalid-profile');await s.runTransaction(db,async tx=>{const ref=doc('cards',uid),h=doc('handles',handle),[old,taken]=await Promise.all([tx.get(ref),tx.get(h)]);if(old.exists()&&old.data().handle!==handle)throw Error('handle-fixed');if(taken.exists()&&taken.data().uid!==uid)throw Error('handle-taken');if(!taken.exists())tx.set(h,{uid});tx.set(ref,{uid,handle,name:playerName(name),updatedAt:stamp()});});return api.card();},
+ async publish(name){
+  social();name=playerName(name);if(!name)throw Error('invalid-profile');
+  for(let attempt=0;attempt<12;attempt++){
+   try{
+    await s.runTransaction(db,async tx=>{
+     social();const ref=doc('cards',uid),old=await tx.get(ref),handle=old.exists()?old.data().handle:newHandle();
+     if(!/^[a-z][a-z0-9_]{2,15}$/.test(handle))throw Error('handle-unavailable');
+     const h=doc('handles',handle),taken=await tx.get(h);
+     if(taken.exists()&&taken.data().uid!==uid)throw Error(old.exists()?'handle-unavailable':'handle-collision');
+     if(!taken.exists())tx.set(h,{uid});
+     tx.set(ref,{uid,handle,name,updatedAt:stamp()});
+    });
+    return api.card();
+   }catch(e){if(e.message!=='handle-collision')throw e;}
+  }
+  throw Error('handle-unavailable');
+ },
  async find(handle){social();handle=String(handle).trim().toLowerCase();if(!/^[a-z][a-z0-9_]{2,15}$/.test(handle))throw Error('invalid-profile');const h=await get(doc('handles',handle));if(!h.exists())throw Error('not-found');const d=await get(doc('cards',h.data().uid));if(!d.exists())throw Error('not-found');return {uid:d.id,...d.data()};},
  async friends(){social();const [outgoing,incoming]=await Promise.all([list('friends','from',uid),list('friends','to',uid)]);return [...new Map([...outgoing,...incoming].map(x=>[x.id,x])).values()];},
  async request(to){
@@ -28,7 +45,7 @@ export function createPlayerAPI({sdk:s,db,uid,currentUser=()=>({uid}),now=()=>Da
  },
  async respond(id,status){
   social();if(!['accepted','rejected','removed'].includes(status))throw Error('invalid-friend');
-  await s.runTransaction(db,async tx=>{const ref=doc('friends',id),d=await tx.get(ref);if(!d.exists()||![d.data().from,d.data().to].includes(uid)||status!=='removed'&&d.data().to!==uid)throw Error('forbidden');if(d.data().status!==(status==='removed'?'accepted':'pending'))throw Error('friend-unavailable');tx.update(ref,{status,updatedAt:stamp()});});
+  let result;await s.runTransaction(db,async tx=>{const ref=doc('friends',id),d=await tx.get(ref);if(!d.exists()||![d.data().from,d.data().to].includes(uid)||status!=='removed'&&d.data().to!==uid)throw Error('forbidden');if(d.data().status!==(status==='removed'?'accepted':'pending'))throw Error('friend-unavailable');tx.update(ref,{status,updatedAt:stamp()});result={id,...d.data(),status};});check();return {friend:result};
  },
  async gifts(){social();const [outgoing,incoming]=await Promise.all([list('gifts','sender',uid,50),list('gifts','receiver',uid,50)]);return {outgoing,incoming};},
  watchNotifications(callback,onError){social();if(typeof s.onSnapshot!=='function')return ()=>{};const counts=[0,0],watch=(kind,field,index,status)=>s.onSnapshot(s.query(s.collection(db,'bbl_'+kind),s.where(field,'==',uid),s.orderBy('updatedAt','desc'),s.limit(40)),snap=>{if(currentUser()?.uid!==uid)return;counts[index]=snap.docs.filter(d=>d.data().status===status).length;callback(counts[0]+counts[1]);},onError);const a=watch('friends','to',0,'pending'),b=watch('gifts','receiver',1,'pending');return ()=>{a();b();};},

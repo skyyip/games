@@ -2,6 +2,14 @@
 
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm ci` and `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. Local play works without Firebase configuration. A production release uses the repository’s `tools/build-site.mjs` to resolve the optional Firebase SDK, hash resources and generate Apache cache rules.
 
+## Automatic player codes and invitation feedback (cache v141)
+
+New public cards receive a system-generated `p_` code with ten random characters. Web Crypto supplies the randomness; Firestore reserves the handle and card in one transaction and retries collisions. Existing codes remain fixed, including legacy custom handles, so searches and friendships keep working after a name change or device switch. The read-only field is labelled **玩家代號** and retains its copy button; players no longer type a code when creating a card.
+
+Accepting an invitation now disables duplicate actions and displays **接受中…** at the clicked button. A confirmed server response updates the friend list and gift-recipient options immediately. Sequence checks discard older in-flight refreshes, server reads fetch current lists, and a failed refresh retains the confirmed result. Rejected writes show an inline error and re-enable retry. The separate “如何增加好友？” block is removed; names and Remove friend buttons have a 24px horizontal gap and wrap on small screens.
+
+Validation: **272 unit tests**, **49 real Firestore security checks**, and recipient-side browser interactions at four sizes, including a rejected accept, delayed accept, stale reads, refresh failure after a successful accept, account switching and subsequent gifting. This update uses the existing v140 rules/indexes; it does not require additional Firebase rules changes.
+
 ## Combined account/settings and friend-query fix (cache v140)
 
 One **Account & settings** launcher now opens sign-in/binding, nickname, cloud progress, sound/voice and portable backup controls in a single dialog. Signed-in imports stay disabled; exports remain available. The friends dialog includes a four-step invitation guide, a copyable player handle, clear pending/already-friend states and recoverable cooldown messages.

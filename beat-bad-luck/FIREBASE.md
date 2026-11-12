@@ -57,7 +57,7 @@ npm test --prefix beat-bad-luck
 firebase emulators:exec --only firestore --project demo-beat-bad-luck --config beat-bad-luck/firebase.json 'node beat-bad-luck/scripts/player-rules-check.mjs'
 ```
 
-規則測試使用 `demo-beat-bad-luck` 及 `127.0.0.1:8087`，不接觸正式資料。**本輪46項真正 Firestore 模擬器安全測試全部通過**，涵蓋私有存檔、匿名限制、好友清單及通知查詢、邀請／接受、實際扣庫存、原子領取／退回、每日送禮限制及排行榜。直接下載受限後，已從套件容器取出官方 v1.22.0 模擬器，SHA-256 與 Firebase CLI 官方中繼資料一致，再於本機執行。仍未驗證正式專案的真實 Google／Email 登入。
+規則測試使用 `demo-beat-bad-luck` 及 `127.0.0.1:8087`，不接觸正式資料。**本輪49項真正 Firestore 模擬器安全測試全部通過**，涵蓋隨機代號碰撞重試／並行分配、私有存檔、匿名限制、好友清單及通知查詢、邀請／接受、實際扣庫存、原子領取／退回、每日送禮限制及排行榜。直接下載受限後，已從套件容器取出官方 v1.22.0 模擬器，SHA-256 與 Firebase CLI 官方中繼資料一致，再於本機執行。仍未驗證正式專案的真實 Google／Email 登入。
 
 **好友操作出現「未獲允許」的修正：** 舊規則用 `request.auth.uid in [resource.data.from, resource.data.to]` 驗證好友清單，查詢引擎會回報欄位未定義並拒絕讀取。新版改為明確的 `resource.data.from == request.auth.uid || resource.data.to == request.auth.uid`；禮物清單也作相同修正。請將最新 `firestore.rules` 整份貼到 **beat-bad-luck → Firestore Database → Rules → 發布**，或用上面的 CLI 指令重新部署。網站 push 不會部署規則。本環境 `firebase login:list` 沒有已授權帳戶，未代為更新正式專案。
 
@@ -77,6 +77,8 @@ firebase emulators:exec --only firestore --project demo-beat-bad-luck --config b
 | `bbl_scores/{uid}` | 主動參加的玩家名字、最高單局得分、命中次數、法寶及時間；公眾可讀，每次最多50筆 |
 
 排行榜每個 UID 只保留一筆最佳得分，同分以較早公開者優先；未進前50名時不會捏造世界名次。匿名玩家也可參加，綁定帳戶可保留跨裝置身分。參加後，這部裝置的新紀錄會在進度成功同步後更新；可退出並刪除公開成績，私人進度不受影響。排行榜是玩家端產生的休閒遊戲紀錄，安全規則限制擁有者、欄位、分數範圍及不可降分，並不驗證實際每一下打擊，沒有伺服器防作弊或真金獎品。
+
+新名片的「玩家代號」由系統隨機產生，例如 `p_7km4tx9d2r`，建立後固定並可複製。既有代號保留，修改名字不換代號。`bbl_handles` 的交易式預留確保不會把同一代號分配給不同帳戶；碰撞會重試，不需玩家自行改名。現有規則已支援此格式，這次前端更新毋須新增規則或索引。
 
 送禮每次最多一份：小人紙一次、法寶一次、小攤物件整件連同等級及剩餘耐用時間。保管期間物件耐用時間暫停；與同款合併使用較早到期日，超過持有上限會拒絕領取，可先使用庫存或婉拒。逾七日不能領取，寄件人可取回；取消／退回都不退每日次數。只有已註冊、互相同意的好友可互贈；匿名玩家需先綁定 Email 或 Google。
 

@@ -4,3 +4,5 @@
 
 .bbl-player-actions .settings-open{display:flex;align-items:center;gap:6px;width:auto;flex:0 1 auto;font-size:13px}.bbl-player-actions .settings-open svg{width:22px;height:22px;flex-shrink:0}#settings-open-label{white-space:nowrap}.bbl-settings-section{padding-bottom:18px;margin-bottom:20px;border-bottom:1px solid #b8a17b}.bbl-settings-section h3{margin-top:0}.bbl-social-guide{padding:14px;border:1px solid #baa781;border-radius:12px;background:#f8edcf}.bbl-social-guide ol{padding-left:22px}.bbl-social-guide li{margin:8px 0}.bbl-friend-status{padding:10px;background:#f1e7cf;border-radius:10px}#bbl-social-feedback:empty{display:none}
 .bbl-player-dialog .settings-voice{display:flex;align-items:center;gap:10px}.bbl-player-dialog .settings-voice input[type=checkbox]{width:20px;height:20px;min-height:20px;padding:0;flex-shrink:0}
+
+.bbl-social-card .bbl-friend-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px 24px}.bbl-friend-row>span{flex:1 1 120px;overflow-wrap:anywhere}.bbl-social-card .bbl-friend-row>button{flex:0 0 auto;margin-left:auto}.bbl-friend-action-feedback{flex-basis:100%;margin:8px 0;color:#843e34}

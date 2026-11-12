@@ -1,3 +1,11 @@
+## Automatic codes and recipient-side acceptance (v141)
+
+All **272 unit tests pass**. New tests force handle collisions, concurrent reservations and repeated-collision exhaustion, verify atomic ownership and lack of partial cards, and preserve legacy codes through display-name changes. New card creation uses secure random bytes; the UI provides no editable code input. The field label is 玩家代號.
+
+All **49 real Firestore emulator checks pass**, including three additional tests for collision retries, concurrent reservations by different accounts and immutable existing codes. The existing rules and indexes suffice; no production Firebase changes were made.
+
+The four-size UI harness now switches from sender to recipient and clicks the actual Accept button. It holds the response to verify disabled/processing controls, releases a stale pending-list response after acceptance, and checks that the invitation stays removed, the accepted friend and gift option appear, and the next gift transfers correctly. The 390px case rejects the first attempt and verifies inline error/retry, then simulates refresh failure after a successful acceptance and retains the confirmed relationship. All sizes check automatic fixed codes across account switches, removal of the help block and at least 24px horizontal or 14px wrapped spacing between friend names and Remove buttons.
+
 ## Combined settings and real friend-rule verification (v140)
 
 The original rules were reproduced against the real Firestore v1.22.0 emulator: publishing cards and creating an invitation succeeded, but the first friends query failed with `Property to is undefined on object` / `permission-denied`. Replacing constructed-list membership checks with direct participant-field comparisons fixed both friend and gift queries. All **46 local Firestore security checks now pass**, including empty/incoming/outgoing participant queries, outsider and signed-out denial, live notification listeners, consent, stock transfer, claim/refund rules, the resend cooldown and public score permissions. The packaged JAR's SHA-256 matches Firebase CLI metadata (`9b6498b7f62714d67f48f59b3818883cd682dbcd46b9f59511de81c97bb5166c`). No production Firebase writes were made.
