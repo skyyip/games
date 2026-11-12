@@ -31,7 +31,7 @@ export function createBurstUI({game,onHit}){
    let view=rings.find(v=>v.id===item.id);
    if(!view){view=rings.find(v=>!v.id);view.id=item.id;view.x=null;}
    if(view.x!==null)continue;
-   const occupied=rings.filter(v=>v!==view&&v.id&&v.x!==null),spot=placeBurstRing(arenaWidth,arenaHeight,occupied,item.position);
+   const occupied=rings.filter(v=>v!==view&&v.id&&v.x!==null),spot=placeBurstRing(arenaWidth,arenaHeight,occupied,item.position,{assisted:current.challenge.use===2});
    if(!spot)continue;
    Object.assign(view,spot);view.node.style.width=view.node.style.height=spot.size+'px';view.node.style.left=spot.x+'px';view.node.style.top=spot.y+'px';
   }
