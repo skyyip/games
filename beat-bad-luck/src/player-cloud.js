@@ -8,7 +8,10 @@ export async function authClient({retry=false}={}){
   if(instance.options.projectId!==FIREBASE_CONFIG.projectId)throw Error('auth-project-conflict');
   // Previous releases ultimately used localStorage. Select it directly rather than
   // waiting on getAuth's default IndexedDB initialization before switching stores.
-  let session;try{session=sdk.initializeAuth(instance,{persistence:[sdk.browserLocalPersistence,sdk.browserSessionPersistence,sdk.inMemoryPersistence],popupRedirectResolver:sdk.browserPopupRedirectResolver});}catch(e){if(e.code!=='auth/already-initialized')throw e;session=sdk.getAuth(instance);}
+  // This game uses popups, not redirects. Supplying a default resolver eagerly
+  // loads Google's iframe on Safari/mobile and can block the first auth callback.
+  // Pass the resolver explicitly only when the player requests a Google popup.
+  let session;try{session=sdk.initializeAuth(instance,{persistence:[sdk.browserLocalPersistence,sdk.browserSessionPersistence,sdk.inMemoryPersistence]});}catch(e){if(e.code!=='auth/already-initialized')throw e;session=sdk.getAuth(instance);}
   if(globalThis.BBL_EMULATORS&&['localhost','127.0.0.1'].includes(location.hostname)&&!session.emulatorConfig)sdk.connectAuthEmulator(session,'http://127.0.0.1:9097',{disableWarnings:true});
   return {...sdk,app:instance,session};
  }).catch(e=>{if(connection===pending)connection=null;throw e;});connection=pending;}return connection;
