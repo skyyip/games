@@ -1,5 +1,10 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Social control and update fixes (v149)
+
+Remove friend is now an always-visible button, retaining the confirmation step. The social header close icon is centered under the real shared modal chrome. Selecting a gift updates only the preview and controls; the native select is kept intact and closes after pointer selection, while keyboard navigation retains focus. The update button dismisses its modal before installing, shows progress, and restores Retry/Later on failure or stalled activation. Browser checks cover both actual production modal styles and real worker transitions.
+
+
 ## Friends and gifts redesign (v148)
 
 The social dialog now has four keyboard-accessible panels: **Friends, Send, Inbox and My card**. The fixed header/tabs stay visible while the current task scrolls. Friend rows include direct gift shortcuts, profile codes are easy to copy, and recipient/item drafts survive refreshes. Searching accepts pasted `@` prefixes and normalizes case. Invitations, empty states, retries and clipboard fallback give clear feedback.

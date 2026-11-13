@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {runInNewContext} from 'node:vm';
 import {serviceWorkerSource} from '../service-worker-source.mjs';
+import {readFile} from 'node:fs/promises';
 const origin='https://example.test';
 function fixture(){
  const stores=new Map(),calls=[];let active=0,peak=0,offline=false;
@@ -21,3 +22,9 @@ test('a new release fetches changed hashes, reuses unchanged hashes and retains 
  const f=fixture(),shared='/assets/font-a123456789.woff2';await f.worker('one','game/',[shared]).event('install');await f.worker('one','other/',[shared]).event('install');const before=f.calls.length;const next=f.worker('two','game/',[shared,'/built/new-b123456789.js']);await next.event('install');assert.equal(f.calls.length-before,2);await next.event('activate');assert(!f.stores.has('pg-html-game/-one'));assert(f.stores.has('pg-html-other/-one'));assert(f.stores.has('pg-assets-one'),'running old tabs retain immutable assets');
 });
 test('missing precache assets reject installation rather than claiming offline readiness',async()=>{const f=fixture();await assert.rejects(f.worker('bad','game/',['/assets/missing-a123456789.png']).event('install'),/precache/);});
+test('Beat the Bad Luck source worker accepts explicit activation messages',async()=>{
+ const events={};let activated=0;
+ runInNewContext(await readFile(new URL('../../beat-bad-luck/sw.js',import.meta.url),'utf8'),{URL,self:{location:new URL(origin+'/beat-bad-luck/sw.js'),addEventListener:(name,handler)=>events[name]=handler,skipWaiting:()=>{activated++;}}});
+ events.message({data:{type:'OTHER'}});assert.equal(activated,0);
+ events.message({data:{type:'ACTIVATE_UPDATE'}});assert.equal(activated,1);
+});

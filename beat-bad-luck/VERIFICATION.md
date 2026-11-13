@@ -1,3 +1,11 @@
+## Social controls, native gift selection and update recovery (v149)
+
+The Remove friend action is directly visible, with its existing review/cancel step retained. The gift recipient/item selects remain the same DOM nodes during change: only preview/help/submit state updates. Pointer selection blurs to close the native picker; keyboard arrows retain focus and remain usable. The shared modal chrome draws the close glyph with a pseudo-element; the social header button now establishes its own relative positioning box, clears inherited offsets and retains a 44px target.
+
+All **278 game unit tests** and **four service-worker unit checks** pass. Four full social scenarios verify the visible removal action, stable select instance, pointer blur and keyboard focus, plus send/claim/return flows. `scripts/social-chrome-check.mjs` loads the actual production entry and shared modal styles at 320/390/812/1280px, verifies glyph centering and header bounds, and clicks the close control. Screenshots were inspected.
+
+`tools/check-update-flow.mjs` uses real service workers and the shared animated modal chrome. It verifies immediate modal dismissal with install progress, one-tab reload and retained/offline saves, install-failure retry, a worker already activated before the click, and bounded recovery when activation is ignored. Update waits inspect current worker/controller state before relying on events, with a 45-second recovery deadline. The legacy Beat worker also accepts explicit activation messages. No production services or player data are used in these checks.
+
 ## Friends and gifts redesign (v148)
 
 All **278 unit tests pass**. Four complete browser scenarios at 320/390/812/1280px verify keyboard-accessible panels, first-profile creation/copy fallback, normalized searches, drafts retained through refresh, request error/retry feedback, stale-read protection, direct-to-friend sending, real owned-item previews and themed confirmations, send/claim/cancel stock changes, preserved guest stock, daily quota and processed history. The 390px case verifies that a confirmed send still displays a receipt and correct remaining quota when the following refresh fails. English labels are checked at 1280px; dialogs stay inside portrait and compact-landscape viewports. Screenshots were visually inspected.

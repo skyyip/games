@@ -48,3 +48,9 @@ Shared favicon and Home Screen artwork can be checked with `node tools/check-bra
 ## Performance
 
 See [PERFORMANCE.md](./PERFORMANCE.md) for shared loading/runtime improvements, local measurements and verification commands. `audit-performance.mjs` measures every route without service-worker noise; `check-performance.mjs` checks all production games offline; `check-release-cache.mjs` checks real release upgrades and cross-game font reuse.
+
+## Update button recovery
+
+`grid-rush/src/site-updates.js` closes the update modal after acceptance and shows a non-blocking status while the next worker installs/activates. It inspects worker/controller state immediately as well as listening for changes, including when installation or activation finished before the listener was attached. A 45-second deadline restores Retry/Later if activation never completes; no player storage is cleared. Only the accepting tab reloads.
+
+Run `BBL_ESBUILD_MODULE=/path/to/esbuild GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright node tools/check-update-flow.mjs` for isolated real-worker tests with the shared animated modal chrome. Scenarios cover normal delayed installation, failure/retry, an already activated worker and stalled activation, including retained records and offline opening. The fixture starts its own local server and does not use production services.
