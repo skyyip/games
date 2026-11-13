@@ -45,7 +45,7 @@ export async function createBackup(state,now=Date.now()){
   const raw=JSON.stringify(backup);if(encoder.encode(raw).length>BACKUP_LIMIT)throw new Error('backup-size');return raw;
  }finally{plain.fill(0);}
 }
-export async function parseBackup(raw,now=Date.now()){
+export async function parseBackupFile(raw,now=Date.now()){
  if(typeof raw!=='string'||encoder.encode(raw).length>BACKUP_LIMIT)throw new Error('backup-size');
  let backup;try{backup=JSON.parse(raw);}catch{throw new Error('backup-format');}
  if(backup?.game!=='beat-bad-luck'||![2,3].includes(backup.format)||backup.algorithm!==ALGORITHM||'progress' in backup)throw new Error('backup-format');
@@ -62,6 +62,7 @@ export async function parseBackup(raw,now=Date.now()){
  try{plain=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv,additionalData:aad(backup.format),tagLength:128},key,encrypted));}catch{throw new Error('backup-integrity');}
  try{
   let decoded;try{decoded=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(plain));}catch{throw new Error('backup-format');}
-  return checkedProgress(decoded,now);
+  return {state:checkedProgress(decoded,now),exportedAt:decoded.exportedAt??0};
  }finally{plain.fill(0);}
 }
+export async function parseBackup(raw,now=Date.now()){return (await parseBackupFile(raw,now)).state;}

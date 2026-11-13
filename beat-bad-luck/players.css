@@ -8,3 +8,7 @@
 .bbl-social-card .bbl-friend-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px 24px}.bbl-friend-row>span{flex:1 1 120px;overflow-wrap:anywhere}.bbl-social-card .bbl-friend-row>button{flex:0 0 auto;margin-left:auto}.bbl-friend-action-feedback{flex-basis:100%;margin:8px 0;color:#843e34}
 
 .leaderboard-table th:last-child{text-align:right}.leaderboard-table th:first-child{width:76px}.leaderboard-value{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.leaderboard-number-icon{font-size:17px;line-height:1;flex-shrink:0}.leaderboard-number{font-variant-numeric:tabular-nums}
+
+#import-dialog{max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain}
+#import-dialog p{font-size:13px;overflow-wrap:anywhere}
+#import-summary{white-space:pre-line}

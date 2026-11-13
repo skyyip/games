@@ -10,3 +10,23 @@ test('wrong identity and removed friendship cannot alter another inventory',asyn
 test('invitations use current profile names even if the search result became stale',async()=>{const {alice,bob,friend,advance}=await setup();const stale=await bob.card();await bob.respond(friend,'removed');advance(86400001);await bob.publish('阿花新名字');await alice.request(stale);const request=(await bob.friends())[0];assert.equal(request.toName,'阿花新名字');assert.equal(request.status,'pending');});
 test('processed invitations and re-invitation cooldowns produce specific recoverable errors',async()=>{const {alice,bob,friend,advance}=await setup();await assert.rejects(()=>bob.respond(friend,'accepted'),/friend-unavailable/);await bob.respond(friend,'removed');await assert.rejects(()=>alice.request({}),/invalid-friend/);
  const card=await bob.card();await assert.rejects(()=>alice.request(card),/friend-cooldown/);advance(86400001);await alice.request(card);await bob.respond(friend,'rejected');await assert.rejects(()=>bob.respond(friend,'accepted'),/friend-unavailable/);});
+test('account backup import replaces progress, retains gift debits, identities and quotas, and rejects stale imports',async()=>{
+ const {alice,bob,friend,advance}=await setup(),original=await alice.load(),before=structuredClone(original.state),exportedAt=Date.UTC(2026,10,12,15,59,0);
+ before.coins=4321;advance(1);const sent=await alice.send(friend,token,original.revision),card=await alice.card();
+ const restored=await alice.importBackup(before,'阿明',sent.revision,exportedAt);
+ assert.equal(restored.state.coins,4321);assert.equal(inventory(restored.state)[token],29);assert.equal(restored.protectedItems,1);
+ assert.equal(await alice.quota(),1);assert.equal((await alice.card()).handle,card.handle);assert.equal((await alice.card()).name,card.name);assert.equal((await alice.card()).updatedAt.toMillis(),card.updatedAt.toMillis());assert.equal((await bob.gifts()).incoming[0].id,sent.giftId);
+ await assert.rejects(()=>alice.importBackup(before,'阿明',sent.revision,exportedAt),/save-conflict/);
+ const twice=await alice.importBackup(before,'阿明',restored.revision,exportedAt);assert.equal(inventory(twice.state)[token],29);assert.equal(await alice.quota(),1);
+ await assert.rejects(()=>alice.importBackup(before,'阿明',twice.revision,exportedAt+10**9),/backup-date/);
+});
+test('backup import reads all gift-history pages rather than reviving an item outside the latest 50 gifts',async()=>{
+ const {alice,friend,advance}=await setup(),other=GIFT_ITEMS.find(i=>i.kind==='weapon'&&i.token!==token),initial=await alice.load(),state=initial.state;
+ state.owned.push(other.id);state.weaponUses[other.id]=1;let current=await alice.save(state,'阿明',initial.revision);
+ const backup=structuredClone(current.state),exportedAt=Date.UTC(2026,10,12,15,59,0);advance(1);
+ current=await alice.send(friend,token,current.revision);
+ for(let i=0;i<60;i++){if(i%9===0)advance(86400001);else advance(1);const gift=await alice.send(friend,other.token,current.revision);current=await alice.cancel(gift.giftId,gift.revision);}
+ assert.equal((await alice.gifts()).outgoing.length,50);
+ const restored=await alice.importBackup(backup,'阿明',current.revision,exportedAt);
+ assert.equal(inventory(restored.state)[token],29);assert.equal(inventory(restored.state)[other.token],1);assert.equal(restored.protectedItems,2);
+});

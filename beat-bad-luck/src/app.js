@@ -418,7 +418,7 @@ for(const costume of document.querySelectorAll('[data-fong-costume]'))costume.in
 renderRitualTiming();
 document.addEventListener('languagechange',()=>{drawWorries();renderStall();renderRitualTiming();purchaseUI.render();});
 
-const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();renderStall();},onImport:next=>{syncProgress();state=next;save();settle();renderStall();},isPlaying:()=>PHASES.includes(game.phase),isPersistent:()=>persistent,canImport:()=>!playerHub?.uid});
+const backupUI=createBackupUI({getState:()=>state,beforeExport:()=>{settle();renderStall();},getImportContext:()=>playerHub?.importContext()??{key:'local',uid:null,label:''},onImport:async(next,context,backup)=>{if(context.uid)return playerHub.importBackup(backup,context);syncProgress();state=next;save();settle();renderStall();},isPlaying:()=>PHASES.includes(game.phase),isPersistent:()=>persistent,canImport:()=>playerHub?.canImport()??true});
 window.addEventListener('storage',event=>{if(event.storageArea!==storage||(event.key!==currentSaveKey&&event.key!==null))return;if(syncProgress()){if(!PHASES.includes(game.phase)&&!purchaseUI.isOpen){settle();renderStall();}purchaseUI.render();}});
 window.addEventListener('pageshow',event=>{if(event.persisted&&syncProgress()&&!PHASES.includes(game.phase)){settle();renderStall();}});
 document.addEventListener('languagechange',()=>backupUI.render());
@@ -453,5 +453,6 @@ observeDecorativeVisibility();
 document.fonts?.ready.then(()=>statCache.clear());
 
 playerHub=createPlayerHub({getState:()=>state,setState:next=>{state=readProgress(JSON.stringify(next));renderStall();preparationUI?.render();backupUI.render();},switchScope:scope=>{currentSaveKey=scopeKey(scope);try{storedRaw=storage?.getItem(currentSaveKey)??null;}catch{storedRaw=null;persistent=false;}state=readProgress(storedRaw);renderStall();preparationUI?.render();backupUI.render();},saveLocal:()=>{try{const raw=JSON.stringify(state);storage?.setItem(currentSaveKey,raw);storedRaw=raw;}catch{persistent=false;}},isPlaying:()=>PHASES.includes(game.phase),onInterrupt:backToStall,notice:message,storage});
+document.getElementById('bbl-adopt-file').onclick=()=>backupUI.requestImport(document.getElementById('bbl-adopt-file'));
 
 createLeaderboardUI({getUser:()=>playerHub?.user,getName:()=>playerHub?.getName()??'',getState:()=>state,flush:()=>playerHub?.flush(),storage});

@@ -1,5 +1,6 @@
 import {packState,unpackState,inventory,takeGift,receiveGift,hkDay,playerName,GIFT_LIMIT} from './player-state.js';
 import {createPlayerHandle} from './player-handle.js';
+import {preserveTransferredItems} from './backup-restore.js';
 export function createPlayerAPI({sdk:s,db,uid,currentUser=()=>({uid}),now=()=>Date.now(),newHandle=createPlayerHandle}){
  const doc=(kind,id)=>s.doc(db,'bbl_'+kind,id),own=()=>doc('saves',uid),stamp=()=>s.serverTimestamp();
  function check(){if(currentUser()?.uid!==uid)throw Error('identity-changed');}
@@ -9,9 +10,32 @@ export function createPlayerAPI({sdk:s,db,uid,currentUser=()=>({uid}),now=()=>Da
  const get=ref=>(s.getDocFromServer??s.getDoc)(ref);
  async function list(kind,field,value,max=40){const q=s.query(s.collection(db,'bbl_'+kind),s.where(field,'==',value),s.orderBy('updatedAt','desc'),s.limit(max)),rows=await (s.getDocsFromServer??s.getDocs)(q);return rows.docs.map(d=>({id:d.id,...d.data()}));}
  async function mutateSave(tx,ref,expected){const d=await tx.get(ref);if(!d.exists()||d.data().revision!==expected)throw Error('save-conflict');return decode(d);}
+ async function transfersSince(exportedAt){
+  const all=new Map();
+  for(const field of ['sender','receiver']){
+   let cursor=null;
+   while(true){
+    check();const constraints=[s.where(field,'==',uid),s.orderBy('updatedAt','desc'),s.limit(50)];if(cursor)constraints.push(s.startAfter(cursor));
+    const rows=await (s.getDocsFromServer??s.getDocs)(s.query(s.collection(db,'bbl_gifts'),...constraints));
+    check();for(const d of rows.docs){const g=d.data();if((g.updatedAt?.toMillis?.()??0)>=exportedAt)all.set(d.id,{id:d.id,...g});}
+    if(rows.docs.length<50||(rows.docs.at(-1).data().updatedAt?.toMillis?.()??0)<exportedAt)break;
+    cursor=rows.docs.at(-1);
+   }
+  }
+  return [...all.values()];
+ }
  const api={
  async load(){check();const value=decode(await get(own()));check();return value;},
  async save(state,name,revision){check();let next;await s.runTransaction(db,async tx=>{const ref=own(),old=await tx.get(ref);if((old.exists()?old.data().revision:0)!==revision)throw Error('save-conflict');next=saved(state,name,revision+1);tx.set(ref,next);});check();return {state:unpackState(next.payload),name:next.name,revision:next.revision};},
+ async importBackup(state,name,revision,exportedAt){
+  check();if(!Number.isFinite(exportedAt)||exportedAt<0||exportedAt>now()+300000)throw Error('backup-date');
+  const gifts=currentUser()?.isAnonymous?[]:await transfersSince(exportedAt);let next,protectedItems=0;
+  await s.runTransaction(db,async tx=>{
+   check();const ref=own(),old=await tx.get(ref);if((old.exists()?old.data().revision:0)!==revision)throw Error('save-conflict');
+   const restored=old.exists()?preserveTransferredItems(state,decode(old).state,gifts,exportedAt,now()):{state,protectedItems:0};protectedItems=restored.protectedItems;
+   next=saved(restored.state,name,revision+1);tx.set(ref,next);
+  });check();return {state:unpackState(next.payload),name:next.name,revision:next.revision,protectedItems};
+ },
  async card(){social();const d=await get(doc('cards',uid));return d.exists()?{uid,...d.data()}:null;},
  async publish(name){
   social();name=playerName(name);if(!name)throw Error('invalid-profile');

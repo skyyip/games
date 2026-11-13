@@ -47,6 +47,14 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('client cannot delete its quota',()=>assertFails(sdk.deleteDoc(ref('alice','limits','alice'))));
  await check('client cannot forge a gift from a third party',()=>assertFails(sdk.setDoc(ref('charlie','gifts','forged'),{sender:'alice',receiver:'charlie',status:'pending'})));
  for(const collection of ['frogger_players','career365_saves','dreamcareer_saves'])await check(collection+' remains inaccessible',()=>assertFails(sdk.getDoc(sdk.doc(db('alice'),collection,'alice'))));
+ const beforeImport=await api('alice').load();
+ await check('signed-in encrypted-backup restore can save with existing rules and preserve transferred inventory',async()=>{
+  const result=await api('alice').importBackup({...state,coins:4321},'阿明',beforeImport.revision,0);
+  assert.equal(result.state.coins,4321);assert.equal(inventory(result.state)[weapon.token],inventory(beforeImport.state)[weapon.token]);assert.equal(await api('alice').quota(),10);
+ });
+ await check('a stale backup import cannot overwrite newer cloud progress',()=>assert.rejects(()=>api('alice').importBackup(state,'阿明',beforeImport.revision,0),/save-conflict/));
+ await check('backup import cannot target an account different from the current identity',()=>assert.rejects(()=>createPlayerAPI({sdk,db:db('alice'),uid:'alice',currentUser:()=>({uid:'bob'})}).importBackup(state,'冒認',0,0),/identity-changed/));
+ await check('first account can initialize directly from an imported backup',async()=>{const result=await api('newbie').importBackup({...fresh(),coins:567},'新玩家',0,0);assert.equal(result.revision,1);assert.equal(result.state.coins,567);});
  const board=createLeaderboardAPI({sdk,db:db('alice'),currentUser:()=>({uid:'alice'})});
  await check('owner explicitly publishes a saved best score',()=>assertSucceeds(board.submit('阿明')));
  await check('signed-out players can read a bounded public scoreboard',()=>assertSucceeds(sdk.getDocs(sdk.query(sdk.collection(db(null),'bbl_scores'),sdk.orderBy('score','desc'),sdk.orderBy('achievedAt','asc'),sdk.limit(50)))));

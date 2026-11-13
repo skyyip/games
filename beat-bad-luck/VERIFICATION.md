@@ -1,3 +1,11 @@
+## Signed-in encrypted backup import (v147)
+
+All **278 unit tests pass**, including authenticated export metadata, item-level transfer protection, repeated import, stale revisions and pagination beyond 50 gift records. The real Firestore emulator passes **53 security checks**: the new account-import transactions and paginated participant reads work with existing rules/indexes, and stale/foreign-account writes remain blocked.
+
+Three browser scenarios pass for Google (390px), Email (1280px), and direct first-account import (320px), using real encrypted files, the account UI/client API and a memory transport. They cover invalid files, cancellation, failed cloud writes and retry, waiting for acknowledgement before local replacement, preserved guest progress/gift inventory/quota, repeated imports, revision conflicts and account changes during file selection/confirmation. Existing four-size player/social checks, twelve Auth readiness scenarios and two production local-entry checks pass as well.
+
+The built production entry also passes with **real Firebase Auth and Firestore SDKs against local emulators**: Email registration, direct encrypted import before creating a fresh stall, account revision 1, retained guest progress/name, and cloud-backed access after reload. No production account or database was accessed. All 27 built SEO checks and 644/755 release permission checks pass. Website deployment is required; Firebase rule/index redeployment is not required for this feature.
+
 ## Recoverable authentication preparation (v143)
 
 `scripts/auth-start-check.mjs` passes six scenarios: idle preload reuse; visible disabled/preparing state followed by readiness; failed module fetch and successful retry; a missing Auth callback timing out and retrying while its late callback is ignored; ready Google/link/sign-out controls during a blocked cloud read; and the actual configured Firebase Auth SDK becoming ready while IndexedDB.open never completes. The last case runs against the built application, retaining usable localStorage. No production sign-in or data writes were attempted.
