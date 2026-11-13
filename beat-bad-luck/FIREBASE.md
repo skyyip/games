@@ -130,3 +130,9 @@ firebase emulators:exec --only auth,firestore --project demo-beat-bad-luck --con
 ```
 
 此測試只連本機模擬器，沒有使用正式帳戶或資料；可設定 `BBL_URL` 和 `GRID_RUSH_PLAYWRIGHT_MODULE`。
+
+## 好友與禮物新版介面（cache v148）
+
+介面分為「好友、送禮、收件匣、我的名片」。好友旁可直接送禮；送禮會先預覽對象、物品及扣除後數量，再於遊戲內確認。收件匣分開顯示收到／寄出的禮物，已處理紀錄摺起。移除好友、婉拒禮物和取回物品也有明確確認畫面。
+
+只需重新建置並上傳網站，無須變更 Firebase 設定、規則或索引；每日10份及實際扣庫存／領取／取回流程不變。`scripts/player-ui-check.mjs` 涵蓋四種尺寸的完整好友互贈流程、鍵盤分頁、複製被拒時的回退，以及操作成功後刷新失敗的收據與數量顯示。

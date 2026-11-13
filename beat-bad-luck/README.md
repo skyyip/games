@@ -1,5 +1,14 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Friends and gifts redesign (v148)
+
+The social dialog now has four keyboard-accessible panels: **Friends, Send, Inbox and My card**. The fixed header/tabs stay visible while the current task scrolls. Friend rows include direct gift shortcuts, profile codes are easy to copy, and recipient/item drafts survive refreshes. Searching accepts pasted `@` prefixes and normalizes case. Invitations, empty states, retries and clipboard fallback give clear feedback.
+
+Sending uses the actual owned-item artwork, category filters, a recipient field and an owned-before/after preview. A themed review screen replaces the browser confirmation; inventory changes only after confirmation. Inbox separates received/sent gifts, with pending actions first and processed history collapsed. Removing friends, declining gifts and taking gifts back also use contextual review screens. Daily remaining allowance is visible; the existing 10-per-day limit, real inventory transfers, claim/return guards and Hong Kong reset stay unchanged.
+
+`scripts/player-ui-check.mjs` verifies complete flows at 320/390/812/1280px, including English, keyboard tabs, clipboard denial, request failures, stale refreshes, preserved drafts, preview cancellation, send acknowledgements followed by failed refresh, real claims/returns and unchanged quota after cancellations. Existing Auth, signed-in import and unit tests pass. No Firestore rule/index changes are required.
+
+
 A bilingual, local-first Hong Kong ritual game at Master Yip’s flyover stall. Run `npm ci` and `npm start` from this directory and open `http://localhost:5173/beat-bad-luck/`. Local play works without Firebase configuration. A production release uses the repository’s `tools/build-site.mjs` to resolve the optional Firebase SDK, hash resources and generate Apache cache rules.
 
 ## Sign-in preparation and recovery (cache v143)
@@ -22,7 +31,7 @@ Validation: **272 unit tests**, **49 real Firestore security checks**, and recip
 
 ## Combined account/settings and friend-query fix (cache v140)
 
-One **Account & settings** launcher now opens sign-in/binding, nickname, cloud progress, sound/voice and portable backup controls in a single dialog. Signed-in imports are supported with account confirmation and revision-checked cloud storage before local application; exports remain available. The friends dialog includes a four-step invitation guide, a copyable player handle, clear pending/already-friend states and recoverable cooldown messages.
+One **Account & settings** launcher now opens sign-in/binding, nickname, cloud progress, sound/voice and portable backup controls in a single dialog. Signed-in imports are supported with account confirmation and revision-checked cloud storage before local application; exports remain available. The social dialog separates friends, sending, inbox and profile, with copyable codes, contextual confirmations and recoverable actions.
 
 The real Firestore emulator reproduced `permission-denied` while listing friends: membership checks against a constructed list of document fields could not be proved by the query engine. Friend and gift list rules now compare each participant field directly to the authenticated UID. They retain owner/participant restrictions and query limits. Invitation transactions read both current profile cards, preventing stale searched names from failing validation. Processed invitations and the 24-hour resend cooldown are caught before a denied write.
 

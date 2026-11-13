@@ -1,3 +1,9 @@
+## Friends and gifts redesign (v148)
+
+All **278 unit tests pass**. Four complete browser scenarios at 320/390/812/1280px verify keyboard-accessible panels, first-profile creation/copy fallback, normalized searches, drafts retained through refresh, request error/retry feedback, stale-read protection, direct-to-friend sending, real owned-item previews and themed confirmations, send/claim/cancel stock changes, preserved guest stock, daily quota and processed history. The 390px case verifies that a confirmed send still displays a receipt and correct remaining quota when the following refresh fails. English labels are checked at 1280px; dialogs stay inside portrait and compact-landscape viewports. Screenshots were visually inspected.
+
+The existing twelve Auth preparation scenarios and three encrypted account-import browser scenarios also pass. All 27 built SEO checks and 644/755 permission checks pass. No backend schema, rule/index, gift limit or inventory-validation change is introduced. Tests use isolated browsers and an in-memory Firestore transport; no production sign-in or data writes were attempted.
+
 ## Signed-in encrypted backup import (v147)
 
 All **278 unit tests pass**, including authenticated export metadata, item-level transfer protection, repeated import, stale revisions and pagination beyond 50 gift records. The real Firestore emulator passes **53 security checks**: the new account-import transactions and paginated participant reads work with existing rules/indexes, and stale/foreign-account writes remain blocked.
