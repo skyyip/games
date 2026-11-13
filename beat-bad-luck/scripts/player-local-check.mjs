@@ -13,6 +13,7 @@ try{
   if(blocked)await context.addInitScript(()=>Object.defineProperty(window,'localStorage',{get(){throw new DOMException('Storage blocked','SecurityError');}}));
   const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
   await p.goto(base,{waitUntil:'networkidle'});
+  assert.equal(await p.locator('#bbl-sync-status').count(),0);
   await p.locator('#bbl-name-dialog[open]').waitFor();
   await p.locator('#bbl-player-name-input').fill('阿明<img src=x>');
   await p.locator('#bbl-player-name-form button[type=submit]').click();

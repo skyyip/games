@@ -24,7 +24,7 @@ export function createPlayerHub({getState,setState,switchScope,saveLocal,isPlayi
  const nameKey=()=>PLAYER_PREFIX+'.name.'+encodeURIComponent(scope??'local');
  function dialog(id){const d=$(id);if(!d.open)d.showModal();d.querySelector('button:not(:disabled),input')?.focus({preventScroll:true});}
  function note(text,id='bbl-account-feedback'){$(id).textContent=text;}
- function status(text){$('bbl-sync-status').textContent=text;}
+ function status(text){const node=$('bbl-sync-status');if(node)node.textContent=text;}
  function meta(){write(metadataKey(),JSON.stringify({revision:hub.revision,dirty:hub.dirty}));}
  function setName(value){hub.name=playerName(value);setPlayerName(hub.name);write(nameKey(),hub.name);renderAccount();}
  function rememberName(){if(hub.name||isPlaying()||hub.loading||document.querySelector('dialog[open]'))return;$('bbl-player-name-input').value='';dialog('bbl-name-dialog');}
