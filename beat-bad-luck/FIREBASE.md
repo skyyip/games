@@ -1,5 +1,11 @@
 # 打小人：獨立 Firebase 設定及部署
 
+## v158：夜市收藏擴充
+
+本次再加入 24 款收藏：小人紙、法寶、貴人、神秘道具各 6 款。最新 [firestore.rules](./firestore.rules) 的可互贈／同步物品白名單已擴充至 **208 項**。請將整份規則貼到 **beat-bad-luck → Firestore Database → Rules** 並 Publish，或在已登入的 Firebase CLI 執行 `npm run firebase:deploy --prefix beat-bad-luck`。
+
+既有索引毋須新增，繼續支援 Spark。71 項本機 Firestore 模擬器安全檢查通過，包括新收藏存檔，以及新小人紙、法寶和隱藏擺設的實際扣庫存與原子領取。正式規則尚未部署；未更新時，持有新物品的存檔或互贈可能被舊白名單拒絕。
+
 ## v157：新增物品與手動上傳
 
 請把本資料夾最新的 [firestore.rules](./firestore.rules) 整份部署至 **beat-bad-luck**。本次將可同步及互贈物品白名單擴充至 190 項，配合新小人紙、法寶及神秘道具；既有索引毋須新增。未部署時，持有新物品的存檔或互贈可能被舊規則拒絕。

@@ -1,3 +1,4 @@
+import {MARKET_WEAPONS,MARKET_SECRET_KITS} from './market-collection.js';
 import {STREET_WEAPONS,STREET_SECRET_KITS} from './street-collection.js';
 import {FILM_FINISHERS} from './film-comedy.js';
 import {CINEMA_SECRET_KITS} from './cinema-expansion.js';
@@ -70,6 +71,7 @@ for(const [i,[id]]of CINEMA_SECRET_KITS.entries()){
  const recipe=EXTRA_KITS[id];FINISHER_SCENES[id]={name:recipe.name,payoff:recipe.win,tag:recipe.tag,pose:recipe.pose,steps:recipe.steps.map(({label,...step})=>step),spread:38+i,tilt:12+i*5};
 }
 for(const [i,id] of [...STREET_WEAPONS.map(w=>w.id),...STREET_SECRET_KITS.map(w=>w[0])].entries()){const recipe=EXTRA_KITS[id];FINISHER_SCENES[id]={name:recipe.name,payoff:recipe.win,tag:recipe.tag,pose:recipe.pose,steps:recipe.steps.map(({label,...step})=>step),spread:63+i*3,tilt:37+i*7};}
+for(const [i,id] of [...MARKET_WEAPONS.map(w=>w.id),...MARKET_SECRET_KITS.map(w=>w[0])].entries()){const recipe=EXTRA_KITS[id];FINISHER_SCENES[id]={name:recipe.name,payoff:recipe.win,tag:recipe.tag,pose:recipe.pose,steps:recipe.steps.map(({label,...step})=>step),spread:91+i*4,tilt:83+i*7};}
 export const finisherScene=id=>FINISHER_SCENES[id]??FINISHER_SCENES['bare-hand'];
 export function finisherKeyframes(id){
  const spec=finisherScene(id),frames=[{transform:'translate(0,0) rotate(0deg) scale(.8)',opacity:.3}],spread=spec.spread;

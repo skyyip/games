@@ -1,5 +1,20 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Night-market collection: 24 more original collectibles (v158)
+
+Six new items per category expand the original cute comic collection:
+
+- Papers: 斷線樹懶、漏單珍奶蟹、自動續費洋蔥、驗證碼烏雲、違泊菠蘿包、廣告彈窗菇。
+- Kits: 珍奶搖搖錘、斷網清心扇、病假護心枕、電飯煲護盾、鍵盤鹹魚劍、尾班車準點哨。
+- Patrons: 補遮慢活叔、玩具診所姨姨、雲吞麵詩人、夜更巴士引路人、天台觀星婆婆、長假期郵差。
+- Secrets: 收工指南針、煩惱吸塵機、好運轉台掣、奶茶許願噴泉、招財貓巴士站、長週末小行星。
+
+Every item has its own local vector artwork and bilingual comic copy. The six purchasable kits and three hidden kits have authored finisher scenes and distinct motion recipes. Paper prices and kit multipliers fit the existing progression; patrons span one to five stars with the existing additive reward buffs and coupon rules. Secrets use the existing ritual drops. Existing items and stable save IDs are retained.
+
+The game now has 41 patrons and 52 secret props. The Firestore inventory whitelist expands to **208 tokens**; deploy the latest [firestore.rules](./firestore.rules) before synchronizing or gifting the new items. No additional indexes, collections, Cloud Functions or paid plan are needed. Production rules have not been deployed from this workspace.
+
+Validation: 295 unit tests and 71 actual Firestore emulator checks, including a save containing all new inventory and atomic transfers of a new paper, kit and secret decoration. `scripts/market-collection-check.mjs` exercises all twelve purchases, exact prices and stock, six patron portraits, six discovered props and persistence after reload across four viewport/language combinations. The 390px case also plays a live new finisher and checks stock consumption. Legacy catalog, backup and finisher identity assertions remain covered by the unit suite.
+
 ## Full settlement, street collection and manual cloud uploads (v157)
 
 Every completed ritual again opens its complete reward/visitor report; the result page shows oil/merit, stock use, visitor arrival, journey notes and the full fortune card directly. Set rewards remain automatic and replay remains available. The charged finisher rail gains a soft pulsing halo, pauses with the game and uses a static glow for reduced motion. The third finisher keeps its drag interaction and shaded area with no dashed boundary. Steps 01–03 have larger number badges, distinct coloured headers, heavier borders and more separation.

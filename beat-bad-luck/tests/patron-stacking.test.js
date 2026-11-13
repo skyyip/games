@@ -27,5 +27,5 @@ test('existing patron collections gain stacking after reload and backup without 
 
 test('balanced half-percent patron bonuses retain exact bilingual descriptions and additive totals',()=>{
  for(const [id,oil,merit]of [['waiter',.005,0],['landlady',0,.015],['star-master',.025,.025]]){const p=PATRONS.find(p=>p.id===id);assert.equal(p.oil,oil);assert.equal(p.merit,merit);for(const zh of [true,false]){const description=patronBuffText(p,zh);if(oil)assert.ok(description.includes(`+${oil*100}%`));if(merit)assert.ok(description.includes(`+${merit*100}%`));}}
- assert.deepEqual(patronBuffs({friends:PATRONS.map(p=>p.id)}),{oil:.395,merit:.345,discount:0});
+ assert.deepEqual(patronBuffs({friends:PATRONS.map(p=>p.id)}),{oil:.48,merit:.43,discount:0});
 });

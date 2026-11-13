@@ -1,6 +1,7 @@
+import {MARKET_SKINS,MARKET_WEAPONS,MARKET_SECRET_KITS,MARKET_SECRET_DECOR} from '../src/market-collection.js';
 // Local emulator only. No production project or credentials are used.
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';
-import {createPlayerAPI} from '../src/player-api.js';import {fresh,reward} from '../src/progress.js';import {GIFT_ITEMS,inventory} from '../src/player-state.js';
+import {createPlayerAPI} from '../src/player-api.js';import {fresh,reward,buySkin,buyWeapon} from '../src/progress.js';import {GIFT_ITEMS,inventory} from '../src/player-state.js';
 import {createLeaderboardAPI} from '../src/leaderboard.js';
 const require=createRequire(new URL('../package.json',import.meta.url)),{initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing'),sdk=require('firebase/firestore');
 const env=await initializeTestEnvironment({projectId:'demo-beat-bad-luck',firestore:{host:'127.0.0.1',port:8087,rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
@@ -90,5 +91,11 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('client exposes the re-invitation cooldown before a rejected write',()=>assert.rejects(()=>api('alice').request({uid:'bob'}),/friend-cooldown/));
  await check('rules enforce the cooldown even if the client is bypassed',()=>assertFails(sdk.updateDoc(ref('alice','friends',request.id),{status:'pending',createdAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()})));
  assert.ok((await api('alice').load()).state.records.length);
+ await check('new market inventory saves and real paper, kit and secret-decoration gifts are allowed atomically',async()=>{
+  const a=api('market-a'),b=api('market-b');let state={...fresh(),coins:100000,merit:50000};for(const item of MARKET_SKINS)state=buySkin(state,item.id);for(const item of MARKET_WEAPONS)state=buyWeapon(state,item.id);for(const [id]of MARKET_SECRET_KITS){state.discovered.push(id);state.owned.push(id);state.weaponUses[id]=3;}for(const [id]of MARKET_SECRET_DECOR){state.discovered.push(id);state.decor[id]=1;}
+  await a.save(state,'夜市甲',0);await b.save(fresh(),'夜市乙',0);await a.publish('夜市甲');await b.publish('夜市乙');await a.request(await b.card());const friendship=(await b.friends())[0];await b.respond(friendship.id,'accepted');
+  for(const token of ['s_'+MARKET_SKINS[0].id,'w_'+MARKET_WEAPONS[0].id,'d_'+MARKET_SECRET_DECOR[0][0]]){const from=await a.load(),sent=await a.send(friendship.id,token,from.revision),to=await b.load();await b.claim(sent.giftId,to.revision);assert.equal(inventory((await b.load()).state)[token],1);}
+  assert.equal(await a.quota(),3);
+ });
  console.log(count+' local Firestore security checks passed.');
 }finally{await env.cleanup();}
