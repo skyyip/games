@@ -281,8 +281,8 @@ body .has-favorite>button.item-favorite{width:44px;height:44px;min-width:44px;mi
 #ritual-completion-choice button strong{font:inherit;font-weight:700}
 #ritual-completion-choice button small{font:600 11px/1.35 var(--display);color:inherit}
 
-/* Selected favorites: dark glyph on a solid cream disc, independent of card color. */
-body .has-favorite>button.item-favorite[aria-pressed=true]{background:#fff2b8!important;border-radius:12px}
-.item-favorite[aria-pressed=true] svg,.skin-card-shell:has(>.skin-card[aria-pressed=true])>.item-favorite[aria-pressed=true] svg,.favorite-filter-toggle[aria-pressed=true] svg{fill:#71441b;stroke:#442b13;stroke-width:2}
+/* Selected favorites change only the star; the 44px touch target stays transparent. */
+.item-favorite[aria-pressed=true] svg,.skin-card-shell:has(>.skin-card[aria-pressed=true])>.item-favorite[aria-pressed=true] svg{fill:#ffdb64;stroke:#64421f;stroke-width:2.5}
+.favorite-filter-toggle[aria-pressed=true] svg{fill:#71441b;stroke:#442b13;stroke-width:2}
 .decor-set-pieces{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}.decor-set-piece{display:grid;justify-items:center;gap:6px;max-width:140px;font-size:13px;line-height:1.5;text-align:center}.decor-set-piece>span:first-child{width:65px;height:65px}.decor-set-piece svg{width:100%;height:100%}.decor-set-piece[data-owned=false]{opacity:.6}.decor-set-piece[data-owned=true]{color:#ffdf90}.decor-set-piece[data-owned=true]::after{content:'✓';font-weight:800}
 #worry-cheer{display:inline;color:#ffe08b;font-weight:800}

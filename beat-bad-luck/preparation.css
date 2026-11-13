@@ -7,7 +7,7 @@
 .preparation-ready .fong-intro>.master-portrait{flex:0 0 84px}
 .preparation-ready .fong-intro>.master-portrait:has(.master-equipped-title:not([hidden])){min-width:max-content}
 .preparation-ready #welcome .master-equipped-title{width:max-content;max-width:none;white-space:nowrap;overflow-wrap:normal}
-.preparation-ready .fong-intro>div:last-child>p:last-child{font-size:19.8375px;font-family:Iansui,'Fredoka',sans-serif;line-height:1.7;margin:0;color:#f7ebce}
+.preparation-ready .fong-intro>div:last-child>p:last-child{font-size:16.861875px;font-family:Iansui,'Fredoka',sans-serif;line-height:1.7;margin:0;color:#f7ebce}
 #ritual-preparation{position:relative;min-width:0;color:#f8edce;text-align:left}
 .preparation-note{font-size:14px;line-height:1.7;color:#e4e9cc;margin:10px 0}
 .preparation-step{margin:12px 0;border:1px solid #8fae98;border-radius:16px;background:#20433d;scroll-margin-block:18px;overflow:clip}
