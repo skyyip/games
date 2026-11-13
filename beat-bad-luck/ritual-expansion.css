@@ -43,7 +43,7 @@ body{padding-bottom:calc(154px + env(safe-area-inset-bottom))}body.is-playing{pa
 @media(max-width:700px){.quick-dock .work-button{font-size:22.4px}.shop-tools{grid-template-columns:minmax(0,1fr) 116px}.kit-row,.decor-row{flex-wrap:wrap}.kit-row>button,.decor-row>button{max-width:100%;white-space:normal}.kit-row>div,.decor-row>div{flex:1 1 110px}.kit-row>.kit-art,.decor-row>.decor-icon{flex-shrink:0}}
 @media(max-height:450px) and (min-aspect-ratio:4/3){.tiger-interaction-status{position:absolute;right:0;top:24px;width:145px;font-size:11px}.tiger-smear-meter{position:absolute;right:0;top:65px;width:140px}.tiger-panel .tiger-tray{align-self:center}}
 @media(prefers-reduced-motion:reduce){.skin-chooser{transition:none}.comic-trophy{animation:none}}
-body{padding-bottom:calc(var(--dock-space,154px) + env(safe-area-inset-bottom))}body.is-playing{padding-bottom:0}
+body{padding-bottom:var(--dock-space,calc(112px + env(safe-area-inset-bottom)))}body.is-playing{padding-bottom:0}
 .purchase-dialog[data-pending=true] .purchase-art #purchase-art{scale:1.32}
 #decor-quick-art{scale:1.1;transform-origin:center}
 .skin-free-card{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:48px;padding:7px 10px;margin:0 0 12px;border:1px solid #88b7a0;border-radius:10px;background:#193f36;color:#f5e9c7;font-size:12px}.skin-free-card svg{width:30px;height:34px;flex-shrink:0}.skin-free-card[aria-pressed=true]{border:2px solid #ecca83}.skin-free-card .skin-bonus{color:#e8ce8b}.skin-free-card small{font-size:11px}.skin-free-card b{min-width:0}

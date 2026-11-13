@@ -27,7 +27,7 @@ body:has(.ux-dialog[open]){overflow:hidden}#pause-kit-note{font-size:12px;line-h
 @media(prefers-reduced-motion:reduce){.work-shoe,.work-bang,.skill-help-art svg{animation:none!important}.work-bang{opacity:1}.layout-map button{transition:none}}
 /* Let a focus-ending tap finish before restoring the floating action bar. */
 body.editing-text #quick-dock{display:none}
-html{scroll-padding-bottom:calc(125px + env(safe-area-inset-bottom))}
+html{scroll-padding-bottom:var(--dock-space,calc(112px + env(safe-area-inset-bottom)))}
 .is-playing .beat-panel .gesture-tools .gesture-hint{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px}
 .is-playing .beat-panel .gesture-tools .gesture-hint>span{font-size:18px;line-height:1}
 .kit-row>button,.decor-row>button,.decor-controls>button,.layout-editor button{min-height:44px}

@@ -106,7 +106,7 @@ body.preparation-ready :is(#start,#quick-start){--button-depth:5px;--button-edge
 @media(max-width:600px){
  .preparation-ready #intro .bbl-kicker{display:none}
  .preparation-ready #intro{margin-bottom:16px}
- .preparation-ready #intro h1{font-size:24px!important;padding:10px 12px}
+ .preparation-ready #intro h1{font-size:clamp(20px,6.2vw,24px)!important;padding:10px 12px}
  .preparation-ready #welcome{padding:20px 14px}
  .preparation-ready .fong-intro{margin-bottom:10px}
  .preparation-ready .fong-intro .fong-logo{width:61.6px;height:70px}

@@ -25,18 +25,14 @@ html:has(.skin-detail-dialog[open]){overflow:hidden;scrollbar-gutter:stable}
 #phase-beat .finisher-charge-frame{grid-column:1;grid-row:2;position:relative;width:100%;height:24px;padding:8px 0;--charge-fill:#86d7a3}
 #phase-beat #finisher-charge{display:block;width:100%;height:8px;margin:0;border:1px solid #94aa8b;border-radius:5px;overflow:hidden;background:#163d34;accent-color:#f0cc80}
 #phase-beat #finisher-count{grid-column:1;grid-row:3}
-/* Green while charging; yellow with one opacity-only border pulse when ready. */
+/* Green while charging and yellow when ready, without an outer decoration. */
 #phase-beat #finisher-charge{appearance:none;accent-color:var(--charge-fill)}
 #phase-beat #finisher-charge::-webkit-progress-bar{background:#163d34;border-radius:4px}
 #phase-beat #finisher-charge::-webkit-progress-value{background:var(--charge-fill);border-radius:4px}
 #phase-beat #finisher-charge::-moz-progress-bar{background:var(--charge-fill);border-radius:4px}
-.finisher-charge-frame::before{content:'';position:absolute;inset:5px -3px;display:none;border:3px solid #fff1a3;border-radius:7px;box-shadow:0 0 6px #ffdc6acc,0 0 10px #f7bd4c88;pointer-events:none}
+.finisher-charge-frame::before,.finisher-charge-frame::after{content:none;display:none}
 #phase-beat .finisher-charge-frame:is([data-state=ready],[data-state=burning]){--charge-fill:#ffe05c}
 #phase-beat .finisher-charge-frame:is([data-state=ready],[data-state=burning]) #finisher-charge{border-color:#ffe05c}
-.finisher-charge-frame:is([data-state=ready],[data-state=burning])::before{display:block;animation:combo-border-pulse 1.2s ease-in-out infinite}
-@keyframes combo-border-pulse{0%,100%{opacity:.2;transform:scale(.99,.92)}45%,60%{opacity:1;transform:scale(1.03,1.16)}}
-.ritual-stage[inert] .finisher-charge-frame::before{animation-play-state:paused!important}
-@media(prefers-reduced-motion:reduce){.finisher-charge-frame::before{animation:none!important;opacity:1}}
 
 /* Background comic spirits have a bounded lifetime and never intercept gestures. */
 .ghost-parade{display:none!important}

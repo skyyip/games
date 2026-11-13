@@ -1,5 +1,13 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Clearer opening and controls (v151)
+
+The board is labelled **功力排行榜 / Power leaderboard**, retaining the existing single-ritual score order. Header actions follow Friends & gifts → Power leaderboard → Account & settings in both visual and keyboard order. The secret collection launcher and its dialog use **神秘道具 / Mystery props**. The opening greeting stays on one line and its right-hand illustration/copy panel is removed; the reassurance names Master Yip explicitly.
+
+The page reserves the measured bottom dock height plus 12px instead of 36px, without counting the dock's safe-area padding twice. The footer stays above the dock. The finisher rail has no outer stripe/pulsing-frame decoration; its green charging and yellow ready fill, charge count and launch behavior remain. No Firebase rules/index changes are needed.
+
+Validation: 278 unit tests, collection/score-board browser flows at four sizes, bilingual opening/footer layout checks at four sizes, and full combat/finisher browser checks at four sizes pass. Release permissions and SEO checks pass for all 27 built pages.
+
 ## Leaderboard label and repeated-update fix (v150)
 
 The board is now labelled **功德排行榜 / Merit leaderboard**. This is a naming change: it retains the original top 20 highest single-ritual scores, score columns, tie order, voluntary participation and `bbl_scores` storage. No Firebase rules or indexes need changing.

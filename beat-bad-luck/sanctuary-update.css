@@ -9,7 +9,6 @@
 .skin-selection-glint rect{stroke-width:2.5;stroke-dasharray:19 81;filter:drop-shadow(0 0 2px #fff1a3);animation:skin-perimeter-glint 6s linear infinite;will-change:stroke-dashoffset}
 #stall-extension .furnishing-art{scale:.7344}.piece-drag-preview .furnishing-art{scale:.7344!important}
 .bbl-intro{grid-template-rows:auto}.bbl-intro>div:first-child{grid-row:1}
-.bbl-intro .intro-note p{text-align:right}
 .bbl-intro h1{position:relative;display:table;padding:15px 16px;background:linear-gradient(135deg,#a82f3d,#c74b4d 48%,#a52839);border:2px solid #f1ce78;border-radius:9px;color:#ffebad;box-shadow:0 5px 0 #663e39,0 9px 22px #130e1822;isolation:isolate;overflow:hidden;animation:spring-scroll-sway 6s ease-in-out infinite;transform-origin:50% 8%;}
 .bbl-intro h1 em{color:#fff3b8}.bbl-intro h1::before{content:'';position:absolute;inset:6px;border:1px solid #e9bb6388;border-radius:4px;z-index:-1}.bbl-intro h1::after{content:'';position:absolute;inset:-20% -80%;background:linear-gradient(115deg,transparent 42%,#fff4b42a 49%,transparent 56%);transform:translateX(-45%);animation:spring-scroll-shine 7s ease-in-out infinite;pointer-events:none;z-index:-1}
 @keyframes spring-scroll-sway{0%,100%{rotate:-.6deg}50%{rotate:.6deg}}@keyframes spring-scroll-shine{0%,55%{transform:translateX(-45%)}85%,100%{transform:translateX(45%)}}

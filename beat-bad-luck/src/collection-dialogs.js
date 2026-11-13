@@ -15,7 +15,7 @@ const entries=[
  ['sets','#journey-panel-sets','#journey-tab-sets',['物件組合獎勵','Decoration set rewards'],()=>setsIcon],
  ['album','#journey-panel-album','#journey-tab-album',['平安籤冊','Fortune album'],()=>albumIcon],
  ['backup','#save-tools-panel','#save-tools-title',['帶住攤位周圍去','Take your stall with you'],()=>stallIcon],
- ['secret','#secret-collection',null,['神秘片場收藏','Secret film-set collection'],()=>secretIcon]
+ ['secret','#secret-collection',null,['神秘道具','Mystery props'],()=>secretIcon]
 ];
 // Move the live content, retaining all inventory, purchase and collection handlers.
 export function createCollectionDialogs({preferences,canOpen=()=>true}){
