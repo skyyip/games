@@ -3,8 +3,7 @@ export const ALTAR_LIMIT=5;
 const known=new Set(DECOR.map(item=>item.id));
 const unique=value=>[...new Set(Array.isArray(value)?value.filter(id=>typeof id==='string'&&known.has(id)):[])];
 export function canPlaceOnAltar(state,id,now=Date.now()){
- const at=Math.max(state.lastSeen??0,now),expires=state.decorExpires?.[id];
- return known.has(id)&&(state.decor?.[id]??0)>0&&(!Number.isFinite(expires)||expires>at);
+ return known.has(id)&&(state.decor?.[id]??0)>0;
 }
 export function altarSelection(state,now=Date.now()){return unique(state.altarDecor).filter(id=>canPlaceOnAltar(state,id,now)).slice(0,ALTAR_LIMIT);}
 export function pruneAltar(state,now=Date.now()){

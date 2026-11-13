@@ -52,5 +52,5 @@ test('new decorations follow existing purchase, eight-level upgrade, income, age
  state=setAltarDecor(state,FILM_DECOR.slice(0,5).map(d=>d.id),0);assert.equal(altarSelection(state,0).length,5);const ids=FILM_DECOR.slice(0,5).map(d=>d.id).reverse();state=setAltarDecor(state,ids,0);
  // This purchase stress fixture exceeds the wallet cap; normalise it before a portable export.
  const portable=readProgress(JSON.stringify(state),0);for(const copy of [portable,(await parseBackup((await createBackup(portable,0)),0))]){assert.deepEqual(copy.decor,state.decor);assert.deepEqual(copy.altarDecor,ids);}
- const earned=collectIdle(state,3600000);assert.ok(earned.earned>0);assert.equal(collectIdle(earned.state,3600000).earned,0);const aged=collectIdle(readProgress(JSON.stringify(state),DECOR_LIFETIME+1),DECOR_LIFETIME+1).state;for(const item of FILM_DECOR)assert.equal(aged.decor[item.id],0);assert.deepEqual(aged.altarDecor,[]);
+ const earned=collectIdle(state,3600000);assert.ok(earned.earned>0);assert.equal(collectIdle(earned.state,3600000).earned,0);const aged=collectIdle(readProgress(JSON.stringify(state),DECOR_LIFETIME+1),DECOR_LIFETIME+1).state;for(const item of FILM_DECOR)assert.equal(aged.decor[item.id],8);assert.deepEqual(aged.altarDecor,ids);
 });

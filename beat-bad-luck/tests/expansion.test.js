@@ -29,14 +29,14 @@ test('twenty-eight expanded decorations migrate at zero while preserving existin
  const migrated=readProgress(JSON.stringify(old),DAY);assert.equal(migrated.coins,12345);assert.equal(migrated.equipped,'marksix-snowball');assert.equal(migrated.decor.cat,3);assert.equal(migrated.decorExpires.cat,DECOR_LIFETIME);
  for(const piece of decor){assert.equal(migrated.decor[piece.id],0);assert.equal(migrated.decorExpires[piece.id],undefined);}
 });
-test('every new decoration earns fractions, expires exactly, repairs and discards independently',()=>{
+test('every new decoration earns fractions, stays permanent and discards independently',()=>{
  for(const piece of decor){
   const initial={...fresh(0),coins:1000000};assert.equal(upgrade({...initial,coins:piece.cost-1},piece.id,0),null);
   let state=initial;for(let level=1;level<=8;level++){const before=state.coins;state=upgrade(state,piece.id,0);assert.equal(before-state.coins,Math.ceil(piece.cost*level*(level>1?.8:1)));assert.equal(state.decor[piece.id],level);}
   assert.equal(upgrade(state,piece.id,0),null);assert.equal(state.decorExpires[piece.id],DECOR_LIFETIME);
   const hour=collectIdle(state,3600000);assert.equal(hour.earned,Math.floor(decorHourlyRate(piece,8)));assert.equal(hour.state.idleCarry,Math.round(decorHourlyRate(piece,8)%1*1e9)/1e9);
-  const aged={...state,lastSeen:15*DAY};assert.equal(decorDurability(aged,piece.id,15*DAY),50);const cost=repairCost(aged,piece.id,15*DAY),fixed=repairDecor(aged,piece.id,15*DAY);assert.equal(fixed.coins,aged.coins-cost);assert.equal(fixed.decor[piece.id],8);assert.equal(fixed.decorExpires[piece.id],45*DAY);
-  const expired=collectIdle({...state,lastSeen:DECOR_LIFETIME-3600000},DECOR_LIFETIME+3600000);assert.equal(expired.earned,Math.floor(decorHourlyRate(piece,8)));assert.deepEqual(expired.lost,[piece.id]);assert.equal(expired.state.decor[piece.id],0);
+  const aged={...state,lastSeen:15*DAY};assert.equal(decorDurability(aged,piece.id,15*DAY),100);assert.equal(repairCost(aged,piece.id,15*DAY),0);assert.equal(repairDecor(aged,piece.id,15*DAY),null);
+  const retained=collectIdle({...state,lastSeen:DECOR_LIFETIME-3600000},DECOR_LIFETIME+3600000);assert.equal(retained.earned,Math.floor(2*decorHourlyRate(piece,8)));assert.deepEqual(retained.lost,[]);assert.equal(retained.state.decor[piece.id],8);
   const discarded=discardDecor(state,piece.id);assert.equal(discarded.coins,state.coins);assert.equal(discarded.decor[piece.id],0);assert.equal(discarded.decorExpires[piece.id],undefined);
  }
 });

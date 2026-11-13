@@ -52,7 +52,7 @@ service cloud.firestore {
     || (resource.data.status in ['removed','rejected'] && request.auth.uid == resource.data.from && request.time >= resource.data.updatedAt+duration.value(24,'h') && validFriend(request.resource.data,id) && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && !reverseOpen(request.resource.data))
    );
   }
-  function validGift(g) { return g.keys().hasOnly(['sender','receiver','friendId','senderName','receiverName','token','kind','itemId','amount','lifeMs','status','createdAt','updatedAt']) && g.sender is string && g.receiver is string && g.sender != g.receiver && g.senderName is string && g.senderName.size() <= 40 && g.receiverName is string && g.receiverName.size() <= 40 && g.token in tokens() && g.itemId is string && g.token == (g.kind == 'skin'?'s_':g.kind == 'weapon'?'w_':'d_')+g.itemId && g.amount is int && g.amount >= 1 && g.lifeMs is int && ((g.kind in ['skin','weapon'] && g.amount == 1 && g.lifeMs == 0) || (g.kind == 'decor' && g.amount <= 8 && g.lifeMs > 0 && g.lifeMs <= 2592000000)) && g.updatedAt == request.time; }
+  function validGift(g) { return g.keys().hasOnly(['sender','receiver','friendId','senderName','receiverName','token','kind','itemId','amount','lifeMs','message','status','createdAt','updatedAt']) && g.get('message','') in ['', 'rest', 'slipper', 'together', 'tea'] && g.sender is string && g.receiver is string && g.sender != g.receiver && g.senderName is string && g.senderName.size() <= 40 && g.receiverName is string && g.receiverName.size() <= 40 && g.token in tokens() && g.itemId is string && g.token == (g.kind == 'skin'?'s_':g.kind == 'weapon'?'w_':'d_')+g.itemId && g.amount is int && g.amount >= 1 && g.lifeMs is int && ((g.kind in ['skin','weapon'] && g.amount == 1 && g.lifeMs == 0) || (g.kind == 'decor' && g.amount <= 8 && g.lifeMs > 0 && g.lifeMs <= 2592000000)) && g.updatedAt == request.time; }
   function linkedSave(uid,id,op) { let next=getAfter(save(uid)).data; return next.giftId == id && next.operation == op && next.revision == get(save(uid)).data.revision+1 && next.updatedAt == request.time; }
   function acceptedFriend(g) { let f=get(friend(g.friendId)).data; return f.status == 'accepted' && g.sender in [f.from,f.to] && g.receiver in [f.from,f.to] && g.senderName == (f.from == g.sender?f.fromName:f.toName) && g.receiverName == (f.from == g.receiver?f.fromName:f.toName); }
   function quotaLinked(g,id) { let c=getAfter(counter(g.sender)).data; return c.day == day() && c.sent is int && c.sent >= 1 && c.sent <= 10 && c.lastGift == id && c.updatedAt == request.time; }
@@ -91,6 +91,48 @@ service cloud.firestore {
     || (request.resource.data.score == resource.data.score && request.resource.data.achievedAt == resource.data.achievedAt && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','updatedAt']))
    );
    allow delete: if owner(uid);
+  }
+  function coop(id) { return /databases/$(database)/documents/bbl_coop/$(id); }
+  function week() { return int((day() + 3) / 7); }
+  function validCoop(c,id) {
+   let f=get(friend(c.friendId)).data;
+   return c.keys().hasAll(['friendId','a','b','aName','bName','week','joinedA','joinedB','joinedAtA','joinedAtB','receiptsA','receiptsB','createdAt','updatedAt'])
+    && c.keys().hasOnly(['friendId','a','b','aName','bName','week','joinedA','joinedB','joinedAtA','joinedAtB','receiptsA','receiptsB','createdAt','updatedAt'])
+    && f.status == 'accepted' && c.a == f.from && c.b == f.to && c.aName == f.fromName && c.bName == f.toName
+    && c.week is int && c.week == week() && id == c.friendId+'__'+string(c.week)
+    && c.joinedA is bool && c.joinedB is bool
+    && (c.joinedA ? c.joinedAtA is timestamp : c.joinedAtA == null)
+    && (c.joinedB ? c.joinedAtB is timestamp : c.joinedAtB == null)
+    && c.receiptsA is list && c.receiptsB is list && c.receiptsA.size() <= 3 && c.receiptsB.size() <= 3
+    && c.updatedAt == request.time;
+  }
+  function ownCoopChange(n,o,side) {
+   let joined='joined'+side;
+   let at='joinedAt'+side;
+   let receipts='receipts'+side;
+   return (
+    (!o[joined] && n[joined] && n[at] == request.time && n.diff(o).affectedKeys().hasOnly([joined,at,'updatedAt']))
+    || (o.joinedA && o.joinedB && n.diff(o).affectedKeys().hasOnly([receipts,'updatedAt'])
+      && n[receipts].size() == o[receipts].size()+1 && n[receipts].hasAll(o[receipts])
+      && n[receipts].toSet().size() == n[receipts].size()
+      && n[receipts][n[receipts].size()-1] is string && n[receipts][n[receipts].size()-1].size() > 0 && n[receipts][n[receipts].size()-1].size() <= 80)
+   );
+  }
+  match /bbl_coop/{id} {
+   allow get: if registered() && (!exists(coop(id)) || resource.data.a == request.auth.uid || resource.data.b == request.auth.uid);
+   allow list: if registered() && request.query.limit <= 40 && (resource.data.a == request.auth.uid || resource.data.b == request.auth.uid);
+   allow create: if registered() && validCoop(request.resource.data,id)
+    && request.resource.data.joinedA == (request.resource.data.a == request.auth.uid)
+    && request.resource.data.joinedB == (request.resource.data.b == request.auth.uid)
+    && (request.resource.data.a == request.auth.uid || request.resource.data.b == request.auth.uid)
+    && request.resource.data.get(request.resource.data.a == request.auth.uid?'joinedAtA':'joinedAtB',null) == request.time
+    && request.resource.data.receiptsA.size() == 0 && request.resource.data.receiptsB.size() == 0
+    && request.resource.data.createdAt == request.time;
+   allow update: if registered() && validCoop(request.resource.data,id) && (
+    (resource.data.a == request.auth.uid && ownCoopChange(request.resource.data,resource.data,'A'))
+    || (resource.data.b == request.auth.uid && ownCoopChange(request.resource.data,resource.data,'B'))
+   );
+   allow delete: if false;
   }
   match /{document=**} { allow read, write: if false; }
  }

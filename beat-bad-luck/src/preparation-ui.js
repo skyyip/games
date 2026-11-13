@@ -50,6 +50,17 @@ export function createPreparationUI({favorites,onCatalogChange=()=>{},weaponInsp
   dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const controls=[...dialog.querySelectorAll('button:not(:disabled),[tabindex="0"]')].filter(node=>node.getClientRects().length),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
  }
 
+ const catalogFilters={skin:'all',kit:'all'};
+ for(const type of ['skin','kit']){
+  const dialog=$('#'+type+'-catalog-dialog'),controls=document.createElement('div');controls.className='catalog-filter-bar';controls.setAttribute('translate','no');controls.innerHTML='<div role="group"></div><label><input type="checkbox" data-catalog-details><span></span></label>';dialog.classList.add('catalog-compact');dialog.querySelector('.catalog-scroll').prepend(controls);
+  for(const value of ['all','owned','affordable']){const b=document.createElement('button');b.type='button';b.dataset.catalogFilter=value;b.onclick=()=>{catalogFilters[type]=value;applyCatalogFilters();};controls.querySelector('[role=group]').append(b);}
+  controls.querySelector('input').onchange=e=>dialog.classList.toggle('catalog-compact',!e.target.checked);
+ }
+ function applyCatalogFilters(){
+  const state=getState();for(const type of ['skin','kit']){const dialog=$('#'+type+'-catalog-dialog'),filter=catalogFilters[type],items=type==='skin'?SKINS:WEAPONS;dialog.querySelector('.catalog-filter-bar>label>span').textContent=local('顯示數值詳情','Show detailed stats');for(const b of dialog.querySelectorAll('[data-catalog-filter]')){b.textContent=local(...({all:['收藏圖鑑','Collection'],owned:['已擁有','Owned'],affordable:['可購買','Can buy']}[b.dataset.catalogFilter]));b.setAttribute('aria-pressed',String(b.dataset.catalogFilter===filter));}
+   for(const b of dialog.querySelectorAll(type==='skin'?'[data-skin]':'[data-preparation-kit]')){const id=type==='skin'?b.dataset.skin:b.dataset.preparationKit,item=items.find(i=>i.id===id),owned=type==='skin'?state.ownedSkins.includes(id):state.owned.includes(id),canBuy=!item.hidden&&state.coins>=bestPurchasePrice(state,item.cost)&&(type==='skin'||state.merit>=item.merit),show=filter==='all'||filter==='owned'&&owned||filter==='affordable'&&!owned&&canBuy;(b.closest(type==='skin'?'.skin-card-shell':'.preparation-kit-card')??b).hidden=!show;}
+  }
+ }
  const notice=$('#daily-reward-note');if(notice)$('#idle-note').before(notice);
  const firstHelp=welcome.querySelector('.fong-intro>div:last-child');
  firstHelp.querySelector('.bbl-kicker').hidden=true;firstHelp.querySelector('h2').hidden=true;firstHelp.querySelector('p:last-child').setAttribute('translate','no');
@@ -150,11 +161,11 @@ export function createPreparationUI({favorites,onCatalogChange=()=>{},weaponInsp
   const dockUsage=skin.starter&&kit.starter?local('不耗道具','no item use'):local(`首次得分：${[!skin.starter&&'紙 1 次',!kit.starter&&'法寶 1 次'].filter(Boolean).join('／')}`,`First score: ${[!skin.starter&&'1 paper',!kit.starter&&'1 helper'].filter(Boolean).join(' + ')}`);
     $('#dock-wallet').textContent=optionalStepsEnabled?`${dockCommission} · ${events?local('挑戰開啟','challenges on'):local('事件關閉','events off')}\n${name(skin)} + ${name(kit)} · ${dockUsage}`:`${name(skin)} + ${name(kit)} · ${dockUsage}`;
   $('#active-commission').hidden=true;
-  renderStories();renderKits();
+  if(optionalStepsEnabled)renderStories();renderKits();applyCatalogFilters();
  }
  // Hide the floating duplicate while the full start control is visible.
  new IntersectionObserver(entries=>document.body.classList.toggle('inline-start-visible',entries[0].isIntersecting),{threshold:.6}).observe($('#start'));
  new IntersectionObserver(entries=>document.body.classList.toggle('preparation-in-view',entries[0].isIntersecting)).observe(steps);
  render();
- return {render,focusStep,validate(){if(optionalStepsEnabled&&commissionEnabled&&!currentStory()){focusStep('commission');text('commission-target-note','揀一單委託，或者選「今次專心處理自己」再開始。','Choose a commission, or select “Just my own worry” before starting.');return false;}return true;},commission:()=>optionalStepsEnabled&&commissionEnabled?getState().neighbourhood.active:'',events:()=>optionalStepsEnabled&&$('#random-events').checked,acceptSavedCommission(){commissionEnabled=true;previousStory=getState().neighbourhood.active;render();},restorePurchaseFocus(kind,id){const step=kind==='skin'?'skin':'kit',dialog=$('#'+step+'-catalog-dialog');$('#prepare-'+step).open=true;const scope=dialog.open?dialog:$('#prepare-'+step),button=scope.querySelector(kind==='skin'?`[data-skin="${id}"]`:`[data-preparation-kit="${id}"]`);button?.focus({preventScroll:true});if(dialog.open)button?.scrollIntoView({block:'nearest',behavior:'instant'});return Boolean(button);}};
+ return {render,focusStep,validate(){if(optionalStepsEnabled&&commissionEnabled&&!currentStory()){focusStep('commission');text('commission-target-note','揀一單委託，或者選「今次專心處理自己」再開始。','Choose a commission, or select “Just my own worry” before starting.');return false;}return true;},commission:()=>optionalStepsEnabled&&commissionEnabled?getState().neighbourhood.active:'',events:()=>optionalStepsEnabled&&$('#random-events').checked,acceptSavedCommission(){commissionEnabled=true;previousStory=getState().neighbourhood.active;render();},restorePurchaseFocus(kind,id){const step=kind==='skin'?'skin':'kit',dialog=$('#'+step+'-catalog-dialog');$('#prepare-'+step).open=true;if(dialog.open){catalogFilters[step]='owned';applyCatalogFilters();}const scope=dialog.open?dialog:$('#prepare-'+step),button=scope.querySelector(kind==='skin'?`[data-skin="${id}"]`:`[data-preparation-kit="${id}"]`);button?.focus({preventScroll:true});if(dialog.open)button?.scrollIntoView({block:'nearest',behavior:'instant'});return Boolean(button);}};
 }

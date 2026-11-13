@@ -18,10 +18,7 @@ test('a complete set pays exact oil and merit once without consuming or rearrang
  assert.equal(claimed.coins,set.oil);assert.equal(claimed.merit,set.merit);assert.deepEqual(claimed.decor,state.decor);assert.deepEqual(claimed.neighbourhood.layout,[]);assert.deepEqual(state.decorSetClaims,[]);
  assert.equal(claimDecorSet(claimed,set.id,now),null);assert.equal(claimDecorSet(state,'fake',now),null);
 });
-test('missing, expired and rolled-back-clock pieces cannot complete a set',()=>{
- const state=complete(),set=DECOR_SETS[0];assert.equal(decorSetReady(fresh(now),set,now),false);state.decorExpires[set.needs[0]]=now;assert.equal(claimDecorSet(state,set.id,now),null);
- state.lastSeen=now+86400000;state.decorExpires[set.needs[0]]=now+1000;assert.equal(claimDecorSet(state,set.id,now-100000),null);
-});
+test('missing pieces cannot complete a set while legacy expired metadata no longer blocks owned pieces',()=>{const state=complete(),set=DECOR_SETS[0];assert.equal(decorSetReady(fresh(now),set),false);state.decorExpires[set.needs[0]]=now-1;assert.ok(claimDecorSet(state,set.id,now));state.decor[set.needs[0]]=0;assert.equal(claimDecorSet(state,set.id,now),null);});
 test('claim receipts survive saves, backups, gifting and receiving the same piece again',async()=>{
  const set=DECOR_SETS[0],claimed=claimDecorSet(complete(),set.id,now),sent=takeGift(claimed,'d_'+set.needs[0],now),returned=receiveGift(sent.state,sent.item,now);
  for(const state of [readProgress(JSON.stringify(claimed),now),await parseBackup(await createBackup(claimed,now),now),returned]){assert.deepEqual(state.decorSetClaims,[set.id]);assert.equal(claimDecorSet(state,set.id,now),null);}

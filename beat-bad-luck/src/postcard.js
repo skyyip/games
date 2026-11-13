@@ -1,5 +1,5 @@
+import {reactionQuote} from './doll-quips.js';
 import {comicLuckyGlyph} from './celebration-art.js';
-import {MASTER_COMMENTS} from './ritual-rewards.js';
 import {MASTER_LOGO} from './master-logo.js';
 import {dollArt,weaponArt,fongCostumeArt,paperWearStyle} from './art.js';
 import {WORRIES,WEAPONS} from './catalog.js';
@@ -12,7 +12,7 @@ export function postcardSvg(entry,language='zh-Hant'){
  const info=fortuneInfo(entry),theme=info?.theme??'jade',palette=({neon:['#613b93','#ffacd8'],receipt:['#1b7d88','#ffde70'],royal:['#9d345d','#ffd365'],jade:['#208b77','#f4a5d9'],comic:['#356fd0','#ffb366'],gold:['#b7662f','#ffe568']})[theme]??['#345951','#a9c8ad'];
  const bubble=zh?({neon:'癲到發光！',receipt:'批准收工！',royal:'奉旨唔煩！',jade:'煩惱彈開！',comic:'嘭！轉運！',gold:'笑到入魂！'})[theme]:({neon:'GLOW!',receipt:'OFF DUTY!',royal:'APPROVED!',jade:'BOING!',comic:'WHAM!',gold:'GOOD LUCK!'})[theme];
  const lineHeight=Math.min(37.5,176/Math.max(1,chunks.length)),quoteSize=Math.min(30,lineHeight*.85);
- const comment=zh?MASTER_COMMENTS[(Math.floor(entry.at/60000)+(entry.score??0))%MASTER_COMMENTS.length]:'Master Yip: Bad luck has wrapped. Even the prop has clocked off!';
+ const comment=(zh?'':'Master Yip: ')+reactionQuote(entry.kind,entry.hits,zh);
  const wrapText=(text,limit)=>{const lines=[];let line='';if(!zh){for(const word of String(text).split(/\s+/)){if(line&&(line+' '+word).length>limit){lines.push(line);line=word;}else line=(line+' '+word).trim();}}else for(const char of String(text)){if(line.length>=limit){lines.push(line);line='';}line+=char;}if(line)lines.push(line);return lines;};
  const commentLines=zh?chineseLines('葉師傅：'+comment,23):wrapText(comment,42),kitText=zh?(weapon?.nameZh??({'iron-hammer':'大鐵鎚','bare-hand':'徒手','flipflop':'藍白人字拖'}[entry.weapon]??'除厄法寶')):(weapon?.name??'Ritual kit'),kitLines=wrapText(`${kitText} · ${entry.score} ${zh?'解壓分':'relief points'}`,zh?23:42);
  const stamp=comicLuckyGlyph().replace('>吉<','>'+escape(challenge?.stamp??'吉')+'<');

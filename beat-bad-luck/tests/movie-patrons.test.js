@@ -10,7 +10,7 @@ test('offline earnings pay through eighteen hours, keep fractional carry and nev
  assert.equal(MAX_IDLE_HOURS,18);const state={...fresh(0),decor:{neon:1},decorExpires:{neon:DECOR_LIFETIME}};assert.equal(idleRate(state),.384);
  for(const hours of [0,8,12,17.5,18,18.5,24,72]){const outcome=collectIdle(state,hours*3600000),total=Math.min(hours,18)*.384;assert.equal(outcome.earned,Math.floor(total));assert.ok(Math.abs(outcome.state.idleCarry-(total-Math.floor(total)))<1e-8);const restored=readProgress(JSON.stringify(outcome.state),hours*3600000);assert.equal(collectIdle(restored,hours*3600000).earned,0);assert.equal(outcome.state.decorExpires.neon,DECOR_LIFETIME);}
  const capped=collectIdle(state,24*3600000);assert.equal(capped.earned,6);assert.equal(capped.state.lastSeen,24*3600000);const nextHour=collectIdle(capped.state,25*3600000);assert.equal(nextHour.earned,1);assert.equal(nextHour.state.idleCarry,.296);assert.equal(collectIdle(nextHour.state,0).earned,0);
- const expired=collectIdle({...state,decorExpires:{neon:10*3600000}},24*3600000);assert.equal(expired.earned,3);assert.equal(expired.state.decor.neon,0);assert.deepEqual(expired.lost,['neon']);
+ const expired=collectIdle({...state,decorExpires:{neon:10*3600000}},24*3600000);assert.equal(expired.earned,6);assert.equal(expired.state.decor.neon,1);assert.deepEqual(expired.lost,[]);
 });
 test('twelve movie-inspired patrons have unique original portraits, bilingual stories and five balanced rarities',()=>{
  assert.equal(PATRONS.length,31);assert.equal(new Set(PATRONS.map(f=>f.id)).size,31);const portraits=[];

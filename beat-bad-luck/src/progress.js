@@ -11,8 +11,9 @@ export const MAX_IDLE_HOURS=18;
 export const MAX_COUPONS=99;
 const clock=(state,now)=>Math.max(state.lastSeen,now);
 const expiry=(state,id,now)=>Number.isFinite(state.decorExpires?.[id])?state.decorExpires[id]:clock(state,now)+DECOR_LIFETIME;
-export function decorDurability(state,id,now=Date.now()){return state.decor[id]>0?Math.max(0,Math.min(100,(expiry(state,id,now)-clock(state,now))/DECOR_LIFETIME*100)):0;}
-export function repairCost(state,id,now=Date.now()){const item=DECOR.find(d=>d.id===id),health=decorDurability(state,id,now);return item&&health>0&&health<100?Math.max(1,Math.ceil(item.cost*state.decor[id]*.25*(1-health/100))):0;}
+// Purchased decorations are permanent; legacy expiry fields remain readable for old backups.
+export function decorDurability(state,id){return state.decor[id]>0?100:0;}
+export function repairCost(){return 0;}
 export const STORAGE_KEY='beat-bad-luck.stall.v1';
 export const WEAPON_USES=3,MAX_WEAPON_USES=999999;
 export const weaponUses=(state,id)=>id==='bare-hand'?Infinity:state.owned.includes(id)?cap(state.weaponUses?.[id]??WEAPON_USES,MAX_WEAPON_USES):0;
@@ -44,11 +45,10 @@ export function collectIdle(state,now=Date.now()){
   for(const item of DECOR){
     const level=decor[item.id]??0;if(!level){delete decorExpires[item.id];continue;}
     const expires=expiry(state,item.id,now);decorExpires[item.id]=expires;
-    const active=Math.max(0,Math.min(end,expires)-state.lastSeen);income+=active/3600000*decorHourlyRate(item,level);
-    if(expires<=at){decor[item.id]=0;delete decorExpires[item.id];lost.push(item.id);}
+    const active=Math.max(0,end-state.lastSeen);income+=active/3600000*decorHourlyRate(item,level);
   }
   const total=Math.round(income*1e9)/1e9,earned=Math.floor(total);
-  return {state:pruneAltar({...state,decor,decorExpires,coins:cap(state.coins+earned),lastSeen:at,idleCarry:Math.round((total-earned)*1e9)/1e9},at),earned,lost};
+  const claimed=claimAvailableSets(pruneAltar({...state,decor,decorExpires,coins:cap(state.coins+earned),lastSeen:at,idleCarry:Math.round((total-earned)*1e9)/1e9},at),at);return {...claimed,earned,lost};
 }
 export function buyWeapon(state,id,{restock=false,coupon=null}={}){
   const weapon=WEAPONS.find(w=>w.id===id);if(!weapon)return null;
@@ -70,10 +70,7 @@ export function upgrade(state,id,now=Date.now(),{coupon=null}={}){
  if(level>=MAX_DECOR_LEVEL||state.coins<cost||(level&&decorDurability(state,id,now)<=0))return null;
  return {...useCoupon(state,coupon),coins:state.coins-cost,decor:{...state.decor,[id]:level+1},decorExpires:{...state.decorExpires,[id]:level?expiry(state,id,now):clock(state,now)+DECOR_LIFETIME}};
 }
-export function repairDecor(state,id,now=Date.now()){
- const cost=repairCost(state,id,now);if(!cost||state.coins<cost)return null;
- return {...state,coins:state.coins-cost,decorExpires:{...state.decorExpires,[id]:clock(state,now)+DECOR_LIFETIME}};
-}
+export function repairDecor(){return null;}
 export function discardDecor(state,id){
  if(!DECOR.some(d=>d.id===id)||!state.decor[id])return null;
  const decorExpires={...state.decorExpires};delete decorExpires[id];return pruneAltar({...state,decor:{...state.decor,[id]:0},decorExpires},state.lastSeen);
@@ -92,7 +89,7 @@ export function reward(state,result,{id,now=Date.now(),random=Math.random}={}){
   let secret=null;if(random()<.08){const pool=[...SECRET_WEAPONS,...SECRET_DECOR],unseen=pool.filter(i=>!(state.discovered??[]).includes(i.id)),choices=unseen.length?unseen:pool;secret=choices[Math.min(choices.length-1,Math.floor(random()*choices.length))];next={...next,discovered:[...new Set([...(state.discovered??[]),secret.id])]};if(SECRET_WEAPONS.includes(secret))next={...next,owned:[...new Set([...next.owned,secret.id])],weaponUses:{...next.weaponUses,[secret.id]:Math.min(MAX_WEAPON_USES,weaponUses(next,secret.id)+weaponDurability(secret.id))}};else next={...next,decor:{...next.decor,[secret.id]:Math.min(MAX_DECOR_LEVEL,(next.decor[secret.id]??0)+1)},decorExpires:{...next.decorExpires,[secret.id]:next.decorExpires[secret.id]??now+DECOR_LIFETIME}};}
   // Roll after the existing patron/secret rewards so their odds and draw order stay intact.
   if(!couponGift&&next.coupons.length<MAX_COUPONS){const returning=PATRONS.filter(p=>p.discount>0&&state.friends.includes(p.id));if(returning.length&&random()<RETURN_COUPON_CHANCE){const patron=weightedPatron(returning,random);couponGift={patron:patron.id,discount:patron.discount,uses:1};couponSource='return';next={...next,coupons:[...next.coupons,couponGift]};}}
-  return {journey,gift,state:next,earned:earned+story.oil,merit:merit+story.merit,story,friend,secret,buffs,couponGift,couponSource};
+  const sets=claimAvailableSets(next,now);next=sets.state;return {journey,gift,newSets:sets.claimed,secretIsNew:!!secret&&!state.discovered.includes(secret.id),state:next,earned:earned+story.oil,merit:merit+story.merit,story,friend,secret,buffs,couponGift,couponSource};
 }
 // A coupon is optional and explicit. A snapshot prevents a stale selection spending another ticket.
 export function selectedCoupon(state,selection){
@@ -117,3 +114,8 @@ export function toggleFavorite(state,kind,id){const field=kind==='weapon'?'favor
 
 export function decorSetReady(state,set,now=Date.now()){return set.needs.every(id=>decorDurability(state,id,now)>0);}
 export function claimDecorSet(state,id,now=Date.now()){const set=DECOR_SETS.find(s=>s.id===id);if(!set||state.decorSetClaims?.includes(id)||!decorSetReady(state,set,now))return null;return {...state,coins:cap(state.coins+set.oil),merit:cap(state.merit+set.merit),decorSetClaims:[...(state.decorSetClaims??[]),id]};}
+
+export function claimAvailableSets(state,now=Date.now()){
+ let next=state;const claimed=[];for(const set of DECOR_SETS){const result=claimDecorSet(next,set.id,now);if(result){next=result;claimed.push(set);}}
+ return {state:next,claimed};
+}

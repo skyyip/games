@@ -42,7 +42,7 @@ npm run firebase:check --prefix beat-bad-luck
 npm run firebase:deploy --prefix beat-bad-luck
 ```
 
-`firebase:check` 只顯示目標和指令；`firebase:deploy` 明確使用本遊戲設定裡的 projectId，僅部署 `firestore:rules,firestore:indexes`。設定缺漏、仍有佔位文字或指向上述其他遊戲時會停止。部署後等五個索引狀態變成 **Enabled**。
+`firebase:check` 只顯示目標和指令；`firebase:deploy` 明確使用本遊戲設定裡的 projectId，僅部署 `firestore:rules,firestore:indexes`。設定缺漏、仍有佔位文字或指向上述其他遊戲時會停止。部署後等七個索引狀態變成 **Enabled**。
 
 **世界排行榜更新需要重新部署規則及索引**，即使之前已完成 Firebase 設定。新增的 `bbl_scores` 索引：Query scope 選 **Collection**，欄位 `score` 選 **Descending**、`achievedAt` 選 **Ascending**。沒有這次新增規則會顯示權限錯誤；索引未完成會顯示建立中。物件組合獎勵包含在原有私有進度內，不需另開 Collection。
 
@@ -84,7 +84,7 @@ npm test --prefix beat-bad-luck
 firebase emulators:exec --only firestore --project demo-beat-bad-luck --config beat-bad-luck/firebase.json 'node beat-bad-luck/scripts/player-rules-check.mjs'
 ```
 
-規則測試使用 `demo-beat-bad-luck` 及 `127.0.0.1:8087`，不接觸正式資料。**本輪49項真正 Firestore 模擬器安全測試全部通過**，涵蓋隨機代號碰撞重試／並行分配、私有存檔、匿名限制、好友清單及通知查詢、邀請／接受、實際扣庫存、原子領取／退回、每日送禮限制及排行榜。直接下載受限後，已從套件容器取出官方 v1.22.0 模擬器，SHA-256 與 Firebase CLI 官方中繼資料一致，再於本機執行。仍未驗證正式專案的真實 Google／Email 登入。
+規則測試使用 `demo-beat-bad-luck` 及 `127.0.0.1:8087`，不接觸正式資料。**目前70項真正 Firestore 模擬器安全測試全部通過**，涵蓋隨機代號碰撞重試／並行分配、私有存檔、匿名限制、好友清單及通知查詢、邀請／接受、實際扣庫存、原子領取／退回、每日送禮限制及排行榜。直接下載受限後，已從套件容器取出官方 v1.22.0 模擬器，SHA-256 與 Firebase CLI 官方中繼資料一致，再於本機執行。仍未驗證正式專案的真實 Google／Email 登入。
 
 **好友操作出現「未獲允許」的修正：** 舊規則用 `request.auth.uid in [resource.data.from, resource.data.to]` 驗證好友清單，查詢引擎會回報欄位未定義並拒絕讀取。新版改為明確的 `resource.data.from == request.auth.uid || resource.data.to == request.auth.uid`；禮物清單也作相同修正。請將最新 `firestore.rules` 整份貼到 **beat-bad-luck → Firestore Database → Rules → 發布**，或用上面的 CLI 指令重新部署。網站 push 不會部署規則。本環境 `firebase login:list` 沒有已授權帳戶，未代為更新正式專案。
 
@@ -146,3 +146,28 @@ firebase emulators:exec --only auth,firestore --project demo-beat-bad-luck --con
 ## 排行榜名稱及重複更新提示（v150）
 
 「世界排行榜」改名為「功德排行榜」，只改名稱，仍按原本最高單局得分排序，沿用 `bbl_scores` 及現有規則／索引，毋須重新部署 Firebase。相同版本的等待中快取會自動啟用，不再誤報新版；稍後更新的選擇在同一分頁重新整理後保留30分鐘。完整上傳建置檔後手動重新整理一次。
+
+## 街坊挑戰與送禮打氣句（v153）
+
+這次需要先部署最新規則及索引，再上傳完整網站建置檔。仍使用獨立 **beat-bad-luck** 專案及 Spark 計劃，沒有 Cloud Functions。
+
+```sh
+firebase login
+npm run firebase:check --prefix beat-bad-luck
+npm run firebase:deploy --prefix beat-bad-luck
+```
+
+新增兩個 Collection scope 複合索引（在 Firestore → Indexes 等待 Enabled）：
+
+| Collection | 第一欄 | 第二欄 |
+| --- | --- | --- |
+| `bbl_coop` | `a` Ascending | `updatedAt` Descending |
+| `bbl_coop` | `b` Ascending | `updatedAt` Descending |
+
+`bbl_coop/{friendId}__{week}` 保存雙方 UID、名片稱呼、參加時間、香港週次及各最多3筆已完成儀式 ID。只有雙方已註冊帳戶可讀，清單每次最多40筆；只有本人可以接受或追加自己的進度，不能替對方接受、改對方進度、刪除紀錄或改寫週次。好友移除後停止追加。它不包含心事、Email、庫存或存檔 payload，也不隨 `.bblsave` 匯出／還原。
+
+加入後各完成3場本週儀式即可查看及下載合作漫畫卡。玩家端會驗證儀式存在於已保存的籤冊，排除參加前、其他週及重複 ID；安全規則限制身分、欄位、追加方式及上限。沿用本遊戲玩家端管理的休閒玩法，不提供伺服器防作弊保證。
+
+禮物新增可選 `message`，只接受 `rest`、`slipper`、`together`、`tea` 或空值。舊禮物沒有此欄位仍可領取／退回；寄出後不可修改留言。沒有部署新版規則時，無留言的舊流程仍可使用，但附打氣句的禮物及街坊挑戰會被拒絕。社交頁會保留好友及禮物功能並提示更新規則。
+
+永久擺設不需新 Collection。舊 `decorExpires`、禮物 `lifeMs` 留作相容資料，網站不再因到期刪除擺設；離線收益仍以18小時為上限。

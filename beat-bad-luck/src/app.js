@@ -1,5 +1,5 @@
 import {createLeaderboardUI} from './leaderboard-ui.js';
-import {claimDecorSet} from './progress.js';
+import {claimDecorSet,claimAvailableSets} from './progress.js';
 import {DECOR_SETS} from './decor-sets.js';
 import {createPlayerHub} from './player-hub.js';
 import {scopeKey} from './player-state.js';
@@ -101,7 +101,7 @@ function renderRitualTiming(){
  literal($('#rules ol li:first-child'),zh?'奉神：輕掃或點亮三炷香，輕吹或按鈕熄去明火。':'Offer incense: swipe or tap to light three sticks, then blow gently or use the button.');
  literal($('#ritual-timing-note'),zh?`打小人 ${DURATIONS.beat/1000} 秒，預設無隨機挑戰；開啟後每局一次事件，一招即可解決。祭白虎後依序火化小人及衣紙、灑米或豆、焚燒綠馬紙，只需打杯一次，師傅會自動補打至聖杯。化解及打杯不催時，可隨時暫停。`:`Whack for ${DURATIONS.beat/1000} seconds with random challenges off by default; enable them for one single-action event per ritual. Feed the tiger, burn the worry and offering papers, scatter rice or beans, burn the green horse paper, then cast once; Master automatically retries until sacred blocks. Purification and divination are untimed. Pause whenever you need.`);
 }
-function save(){let changed=true;try{if(storage){if(!syncProgress()){const raw=JSON.stringify(state);storage.setItem(currentSaveKey,raw);storedRaw=raw;}else changed=false;}}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';if(changed)playerHub?.changed();}
+function save(){state=claimAvailableSets(state).state;let changed=true;try{if(storage){if(!syncProgress()){const raw=JSON.stringify(state);storage.setItem(currentSaveKey,raw);storedRaw=raw;}else changed=false;}}catch{persistent=false;}$('#storage-note').textContent=persistent?'Saved on this device.':'Storage is unavailable. Your stall lasts for this visit.';if(changed)playerHub?.changed();}
 
 function settle(){syncProgress();const idle=collectIdle(state);state=idle.state;if(idle.earned){$('#idle-welcome').hidden=false;$('#idle-welcome').textContent=`Your stall earned ${idle.earned} oil money while you were away.`;}if(idle.lost.length){$('#decor-loss-note').hidden=false;literal($('#decor-loss-note'),translate(`Worn-out decorations removed: ${idle.lost.map(id=>itemName(DECOR.find(d=>d.id===id))).join('、')}`));say('A decoration wore out. You can replace it in the stall.');}save();return idle;}
 function message(text){$('#shop-message').textContent=text;clearTimeout(shopTimer);shopTimer=setTimeout(()=>$('#shop-message').textContent='',4500);say(text);}
@@ -131,7 +131,7 @@ function renderDecorDisplay(){
   }
   if(piece.parentElement!==display)display.append(piece);
   piece.querySelector('.piece-manage').setAttribute('aria-label',(getLanguage()==='zh-Hant'?'管理擺設：':'Manage decoration: ')+itemName(decor));piece.title=itemName(decor);piece.dataset.label=itemName(decor);piece.dataset.level=level;const health=decorDurability(state,decor.id);piece.style.setProperty('--decor-wear',1-health/100);piece.style.setProperty('--decor-health',health/100);piece.classList.toggle('is-weathered',health<70);piece.classList.toggle('is-fragile',health<25);piece.querySelector('.furnishing-level').textContent=level;
-  literal(piece.querySelector('.sr-only'),`${itemName(decor)} · ${translate(`Level ${level} / ${MAX_DECOR_LEVEL} · ${formatNumber(decorHourlyRate(decor,level))} oil per hour`)} · ${translate(`Durability ${Math.max(.1,Math.round(health*10)/10)}%`)}`);
+  literal(piece.querySelector('.sr-only'),`${itemName(decor)} · ${translate(`Level ${level} / ${MAX_DECOR_LEVEL} · ${formatNumber(decorHourlyRate(decor,level))} oil per hour`)} · ${getLanguage()==='zh-Hant'?'永久擺設':'Permanent decoration'}`);
   if((previous&&level>previous)||(!previous&&displayReady)){
    if(!reduced.matches)piece.animate([{transform:'translateY(-12px) scale(.65) rotate(-9deg)',filter:'brightness(1.8)'},{transform:'translateY(2px) scale(1.12) rotate(4deg)'},{transform:'translateY(0) scale(1) rotate(0)',filter:'brightness(1)'}],{duration:650,easing:'cubic-bezier(.2,.8,.3,1)'});
   }
@@ -186,13 +186,11 @@ function renderDecorRows(){
   const growth=getLanguage()==='zh-Hant'?`首級 ${formatNumber(d.rate)}，每升級 +${formatNumber(DECOR_LEVEL_RATE_BONUS)}`:`Starts at ${formatNumber(d.rate)}; +${formatNumber(DECOR_LEVEL_RATE_BONUS)} per upgrade`;
   const info=rowText(itemName(d),'');literal(info.querySelector('small'),`${income} · ${growth}`);if(level<MAX_DECOR_LEVEL)showPurchaseShortfall(info,button,cost,0,`decor-reason-${d.id}`);
   if(level){
-   const health=decorDurability(state,d.id),percent=Math.max(.1,Math.round(health*10)/10),label=document.createElement('span'),meter=document.createElement('meter');label.className='decor-health-label';literal(label,translate(`Durability ${percent}%`)+(getLanguage()==='zh-Hant'?` · 約剩 ${Math.ceil(health*.3)} 天`:` · about ${Math.ceil(health*.3)} days left`));meter.className='decor-durability';meter.min=0;meter.max=100;meter.low=25;meter.high=70;meter.optimum=100;meter.value=health;meter.setAttribute('aria-label',`${itemName(d)} · ${translate(`Durability ${percent}%`)}`);info.append(label,meter);
+   const label=document.createElement('span');label.className='decor-permanent-label';literal(label,getLanguage()==='zh-Hant'?'永久擺設・不用維修':'Permanent decoration · no maintenance');info.append(label);
   }
   row.append(icon,info,button);
   if(level){
-   const controls=document.createElement('div'),repair=document.createElement('button'),discard=document.createElement('button'),cost=repairCost(state,d.id);controls.className='decor-controls';repair.type=discard.type='button';repair.dataset.repair=d.id;discard.dataset.discard=d.id;
-   const fresh=decorDurability(state,d.id)>=99.95;repair.textContent=getLanguage()==='zh-Hant'?(fresh?'簇新，不用修補':`修補 · ${cost} 香油錢`):(fresh?'Good as new':`Repair · ${cost} oil`);repair.disabled=fresh||!cost||state.coins<cost;repair.setAttribute('aria-label',`${itemName(d)} · ${translate(repair.textContent)}`);discard.textContent=getLanguage()==='zh-Hant'?'丟掉擺設':'Discard';discard.setAttribute('aria-label',`${translate('Discard')} · ${itemName(d)}`);
-   repair.addEventListener('click',()=>repairItem(d.id));discard.addEventListener('click',()=>askDiscard(d.id));controls.append(repair,discard);row.append(controls);
+   const controls=document.createElement('div'),discard=document.createElement('button');controls.className='decor-controls';discard.type='button';discard.dataset.discard=d.id;discard.textContent=getLanguage()==='zh-Hant'?'丟掉擺設':'Discard';discard.setAttribute('aria-label',`${translate('Discard')} · ${itemName(d)}`);discard.addEventListener('click',()=>askDiscard(d.id));controls.append(discard);row.append(controls);
   }
   return row;
  }));
@@ -307,9 +305,9 @@ function whack(options){
 
 function finish(){
  if(recorded||!game.result)return;recorded=true;clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.ambience(!document.hidden);try{speechSynthesis.cancel();}catch{}
- settle();const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=!received.friend;if(received.friend)$('#friend-arrival').textContent=`A kind visitor: ${translate(received.friend.name)}`;}
- $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);
- uxUI?.showResult(kitUseCommitted);$('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');ritualUI?.rewards(received,game.result);polishCollections();
+ settle();const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=true;if(received.friend)$('#friend-arrival').textContent=`A kind visitor: ${translate(received.friend.name)}`;}
+ $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);$('#journey-result').hidden=!game.commission;
+ uxUI?.showResult(kitUseCommitted);$('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');ritualUI?.rewards(received,game.result);playerHub?.contributeChallenges().catch(()=>{});polishCollections();
 }
 function backToStall(){clearCriticalHit();impactSwitch.clear();clearHitAnimations();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();ritualUI?.render();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();playerHub?.render();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
 function pause(){if(!PHASES.includes(game.phase))return;game.pause();clearTimeout(frame);frame=0;for(const animation of [paperAnimation,shoeAnimation,...rigAnimations])if(animation?.playState==='running')animation.pause();cancelGestures();stopMicrophone();audio.stop();$('#pause-overlay').hidden=false;$('#ritual-stage').inert=true;uxUI?.renderPause();polishCollections();$('#resume').focus({preventScroll:true});say('The ritual is paused. Take your time.');}

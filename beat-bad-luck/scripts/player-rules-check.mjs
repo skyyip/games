@@ -1,6 +1,6 @@
 // Local emulator only. No production project or credentials are used.
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';
-import {createPlayerAPI} from '../src/player-api.js';import {fresh} from '../src/progress.js';import {GIFT_ITEMS,inventory} from '../src/player-state.js';
+import {createPlayerAPI} from '../src/player-api.js';import {fresh,reward} from '../src/progress.js';import {GIFT_ITEMS,inventory} from '../src/player-state.js';
 import {createLeaderboardAPI} from '../src/leaderboard.js';
 const require=createRequire(new URL('../package.json',import.meta.url)),{initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing'),sdk=require('firebase/firestore');
 const env=await initializeTestEnvironment({projectId:'demo-beat-bad-luck',firestore:{host:'127.0.0.1',port:8087,rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
@@ -31,9 +31,29 @@ try{await env.clearFirestore();const state=fresh();state.owned.push(weapon.id);s
  await check('recipient can accept',()=>assertSucceeds(api('bob').respond(request.id,'accepted')));
  await check('outsider cannot view a private friend relationship',()=>assertFails(sdk.getDoc(ref('charlie','friends',request.id))));
  await check('both participants can query the accepted relationship',async()=>{assert.equal((await api('alice').friends())[0].status,'accepted');assert.equal((await api('bob').friends())[0].status,'accepted');});
- let revision=1;const sent=await api('alice').send(request.id,weapon.token,revision);revision=sent.revision;
+ const coopId=await api('alice').joinChallenge(request.id),coopRef=who=>ref(who,'coop',coopId);
+ await check('challenge creator cannot opt the other player in',()=>assertFails(sdk.updateDoc(coopRef('alice'),{joinedB:true,joinedAtB:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()})));
+ await check('challenge outsider cannot read participant progress',()=>assertFails(sdk.getDoc(coopRef('charlie'))));
+ await check('signed-out players cannot read cooperation progress',()=>assertFails(sdk.getDoc(coopRef(null))));
+ await check('anonymous players cannot join cooperation',()=>assertFails(sdk.getDoc(coopRef('anon'))));
+ await check('bounded participant challenge lists are readable',()=>assertSucceeds(api('alice').challenges()));
+ await check('unbounded challenge collection reads are denied',()=>assertFails(sdk.getDocs(sdk.collection(db('alice'),'bbl_coop'))));
+ await check('other player explicitly accepts the challenge',()=>assertSucceeds(api('bob').joinChallenge(request.id)));
+ await check('one participant cannot forge the others contribution',()=>assertFails(sdk.updateDoc(coopRef('alice'),{receiptsB:['forged'],updatedAt:sdk.serverTimestamp()})));
+ await check('challenge identities and week cannot be rewritten',()=>assertFails(sdk.updateDoc(coopRef('alice'),{a:'charlie',updatedAt:sdk.serverTimestamp()})));
+ const completeRitual=async(uid,id)=>{const saved=await api(uid).load(),next=reward(saved.state,{score:100,hits:5,weapon:'bare-hand',kind:'work',moves:{tap:5},fed:true,blessed:true},{id,now:Date.now(),random:()=>1});await api(uid).save(next.state,saved.name,saved.revision);};
+ await completeRitual('alice','coop-real-a');
+ await check('actual saved ritual can be credited once',async()=>{assert.equal(await api('alice').syncChallenges(),1);assert.equal(await api('alice').syncChallenges(),0);});
+ await check('duplicate cooperation receipts are denied by rules',()=>assertFails(sdk.updateDoc(coopRef('alice'),{receiptsA:['coop-real-a','coop-real-a'],updatedAt:sdk.serverTimestamp()})));
+ await check('contribution cap cannot be bypassed in one write',()=>assertFails(sdk.updateDoc(coopRef('alice'),{receiptsA:['coop-real-a','two','three','four'],updatedAt:sdk.serverTimestamp()})));
+ await check('cooperation records cannot be deleted to reset progress',()=>assertFails(sdk.deleteDoc(coopRef('alice'))));
+ await check('freeform private text is not accepted in a challenge',()=>assertFails(sdk.updateDoc(coopRef('alice'),{worry:'private',updatedAt:sdk.serverTimestamp()})));
+ await check('challenge invitations cannot be forged for another friendship',()=>assertFails(sdk.updateDoc(coopRef('alice'),{friendId:'charlie__bob',updatedAt:sdk.serverTimestamp()})));
+ let revision=(await api('alice').load()).revision;const sent=await api('alice').send(request.id,weapon.token,revision,{message:'rest'});revision=sent.revision;
  await check('sending deducts one real use and creates one pending gift',async()=>{assert.equal(inventory((await api('alice').load()).state)[weapon.token],29);assert.equal((await api('alice').quota()),1);assert.equal((await api('bob').gifts()).incoming[0].id,sent.giftId);});
  await check('real-time friend/gift notification queries can read participant documents',()=>new Promise((resolve,reject)=>{let stop=()=>{};const timer=setTimeout(()=>{stop();reject(Error('notification-timeout'));},5000);stop=api('bob').watchNotifications(count=>{if(count===1){clearTimeout(timer);stop();resolve();}},e=>{clearTimeout(timer);stop();reject(e);});}));
+ await check('gift stores only the chosen preset encouragement',async()=>assert.equal((await api('bob').gifts()).incoming[0].message,'rest'));
+ await check('recipient cannot edit a gift message',()=>assertFails(sdk.updateDoc(ref('bob','gifts',sent.giftId),{message:'private worry',updatedAt:sdk.serverTimestamp()})));
  await check('outsider cannot claim gift',()=>assertFails(sdk.updateDoc(ref('charlie','gifts',sent.giftId),{status:'claimed',updatedAt:sdk.serverTimestamp()})));
  await check('gift cannot be marked claimed without crediting the recipient snapshot',()=>assertFails(sdk.updateDoc(ref('bob','gifts',sent.giftId),{status:'claimed',updatedAt:sdk.serverTimestamp()})));
  await check('recipient claim credits one use atomically',()=>assertSucceeds(api('bob').claim(sent.giftId,1)));

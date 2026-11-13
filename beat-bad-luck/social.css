@@ -126,3 +126,7 @@
 @media(prefers-reduced-motion:reduce){.bbl-social-loader{animation:none}}
 
 @media(max-width:360px){#bbl-social-dialog .bbl-social-tabs button{font-size:12px}.bbl-social-tabs button>span:not(.bbl-social-badge){white-space:nowrap}}
+
+.bbl-gift-message{margin:12px 0;padding:12px 14px;border-left:4px solid #ac7655;border-radius:4px 12px 12px 4px;background:#fff0c5;color:#694b39;font-size:15px;line-height:1.7}.bbl-coop-row{display:grid;gap:10px;padding:16px 0}.bbl-coop-row progress{width:100%;accent-color:#558f69;height:12px}.bbl-coop-card-art svg{display:block;width:100%;height:auto}.bbl-coop-row p{margin:0}.bbl-coop .bbl-button{justify-self:start}.bbl-friend-row .bbl-social-row-actions{flex-wrap:wrap}
+
+.bbl-coop-row{grid-template-columns:68px minmax(0,1fr);column-gap:12px}.bbl-coop-row>:not(.bbl-coop-boss){grid-column:2}.bbl-coop-row>.bbl-coop-boss{grid-column:1;grid-row:1/6;align-self:start}.bbl-coop-boss svg{display:block;width:100%;height:auto}.bbl-coop-row button{max-width:100%;white-space:normal}

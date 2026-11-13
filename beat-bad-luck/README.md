@@ -1,5 +1,21 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Reactions, simpler rewards and neighbourhood teamwork (v153)
+
+Dolls now answer with short, category-specific comic reactions as the ritual progresses. They use preset dialogue, bounded DOM updates and the game's paused clock. Finisher launches add a brief comic panel with the kit's own name/payoff, an audio accent and optional haptic feedback; the 88-hit charge, 12-second duration, three challenge types and plain progress rail remain.
+
+Ordinary ritual rewards are collected automatically and shown in one inline result summary, with a preset comic highlight and prominent replay controls. Only a newly discovered secret or completed decoration set opens a collection celebration. Sharing uses preset dialogue only; typed worries remain out of saves, gifts and exported cards. Paper and kit catalogues have Collection / Owned / Can buy filters and an optional detailed-stat switch. Disabled preparation story/event sections are no longer rendered on every refresh.
+
+Owned decorations are permanent, including owned pieces carrying past expiry metadata in legacy saves. Repair/expiry UI is removed; upgrades, discard, gift transfers, one-time set receipts and the 18-hour idle-income cap remain. Previously removed pieces whose saves already show zero ownership cannot be reconstructed. Set rewards are collected automatically on normal save/settlement and receipt paths. Legacy expiry metadata is retained for backup/gift compatibility but does not expire an owned piece.
+
+Registered friends can explicitly join a weekly **Universe Overtime Boss** challenge. Both must join; each contributes three completed, cloud-saved rituals after the later join time, with one receipt counted once and a three-ritual cap per person. Hong Kong weeks start Monday. Completion unlocks a downloadable shared comic card. Removed friendships stop contributions. Private `bbl_coop` documents remain outside portable saves, so restoring a file cannot reset server-side challenge receipts. This is a client-managed casual feature, not a server-authoritative competition.
+
+Gifts may include one of four preset encouragements or no message. The selection survives review/back, travels with the gift and cannot be edited after sending. Existing gift quotas, inventory transactions and legacy message-free gifts remain supported.
+
+**Deploy the updated Firestore rules and two `bbl_coop` indexes before using challenges or message-bearing gifts.** From the repository root: `npm run firebase:deploy --prefix beat-bad-luck`. No Cloud Functions or Blaze plan is needed. See [FIREBASE.md](./FIREBASE.md).
+
+Validation: 285 unit tests and 70 real Firestore emulator security checks pass. Browser checks cover four viewport sizes for the full ritual, reactions/finisher, compact result and shared preview, collection filters, first-discovery celebration, repeat play, gift message review/delivery and a completed two-player challenge/card download. Existing account-backup browser checks pass. The current environment has no Firebase CLI login; production rules/indexes have not been deployed.
+
 ## Clearer opening and controls (v151)
 
 The board is labelled **功力排行榜 / Power leaderboard**, retaining the existing single-ritual score order. Header actions follow Friends & gifts → Power leaderboard → Account & settings in both visual and keyboard order. The secret collection launcher and its dialog use **神秘道具 / Mystery props**. The opening greeting stays on one line and its right-hand illustration/copy panel is removed; the reassurance names Master Yip explicitly.
