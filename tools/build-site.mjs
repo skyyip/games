@@ -58,21 +58,21 @@ function eagerImports(name,seen=new Set()){
  }return seen;
 }
 for(const [page,text]of html){const imports=new Set();for(const tag of text.matchAll(/<script\b[^>]*type=["']module["'][^>]*>/gi)){const src=tag[0].match(/\bsrc=["']([^"']+)["']/)?.[1];if(src?.startsWith(base))for(const path of eagerImports(src.slice(base.length)))imports.add(path);}if(imports.size)html.set(page,text.replace('</head>',[...imports].map(path=>`<link rel="modulepreload" href="${base+path}">`).join('')+'\n</head>'));}
-const digest=createHash('sha256');for(const [p,text]of [...html].sort())digest.update(p+text);for(const file of (await allFiles(out)).sort())digest.update(await readFile(file));const version=digest.digest('hex').slice(0,16),workers={};
+const digest=createHash('sha256');for(const [p,text]of [...html].sort())digest.update(p+text);for(const file of (await allFiles(out)).sort())digest.update(await readFile(file));const version=digest.digest('hex').slice(0,16),builtAt=Date.now(),workers={};
 function dependencies(seed){const seen=new Set();function visit(name){if(seen.has(name))return;seen.add(name);const m=outputs.get(name);if(m){for(const item of m.imports??[]){const p=slash(relative(out,resolve(repo,item.path)));if(outputs.has(p)||p.startsWith('assets/'))visit(p);else{const alt=posix.normalize(posix.join(posix.dirname(name),item.path));if(outputs.has(alt))visit(alt);}}if(m.cssBundle)visit(slash(relative(out,resolve(repo,m.cssBundle))));for(const input of Object.keys(m.inputs??{}))for(const asset of inputAssets.get(input)??[])seen.add(asset);}}for(const s of seed)visit(s);return seen;}
 for(const [page,text]of html){const route=page==='index.html'?'./':posix.dirname(page)+'/',seed=[...text.matchAll(/\b(?:src|href)=["']([^"']+)["']/g)].map(m=>m[1]).filter(v=>v.startsWith(base)).map(v=>v.slice(base.length)).filter(v=>outputs.has(v)||v.startsWith('assets/')),needed=dependencies(seed);
  for(const [original,file]of assetMap)if(!/\.(?:ttf|woff2?)$/i.test(original)&&(original.startsWith(route==='./'?'grid-rush/assets/icons/':route+'assets/')||original.startsWith('grid-rush/assets/icons/')))needed.add(file);
  const htmlUrls=[base+route.replace('./',''),base+page],urls=[...new Set([...htmlUrls,...needed].map(x=>x.startsWith(base)?x:base+x))];
  const sw=serviceWorkerSource({version,route,urls,home:base+page});
  const file=route.replace('./','')+'sw-'+hash(sw)+'.js';workers[route]=file;await mkdir(dirname(resolve(out,file)),{recursive:true});await writeFile(resolve(out,file),sw);await writeFile(resolve(out,route.replace('./','')+'sw.js'),`// Upgrade bridge for previously installed service workers. Application assets use content hashes.\nimportScripts('./${posix.basename(file)}');self.addEventListener('install',()=>self.skipWaiting());`);
- const config={version,base,route,worker:file};const final=text.replace('<head>',`<head><script>window.PLAYGROUND_RELEASE=${JSON.stringify(config)};</script>`);await mkdir(dirname(resolve(out,page)),{recursive:true});await writeFile(resolve(out,page),final);}
+ const config={version,builtAt,base,route,worker:file};const final=text.replace('<head>',`<head><script>window.PLAYGROUND_RELEASE=${JSON.stringify(config)};</script>`);await mkdir(dirname(resolve(out,page)),{recursive:true});await writeFile(resolve(out,page),final);}
 for(const name of tracked.filter(name=>/^grid-rush\/assets\/fonts\/.*-OFL\.txt$/.test(name)))await copyFile(resolve(repo,name),resolve(out,'assets',posix.basename(name)));
 // Apache/cPanel uses .htaccess; _headers remains available for other hosts.
 await copyFile(resolve(repo,'.htaccess'),resolve(out,'.htaccess'));
 await writeDiscovery(out);
-await writeFile(resolve(out,'release.json'),JSON.stringify({version,workers}));const noCacheRoutes=new Set([base,base+'release.json',base+'sitemap.xml',base+'llms.txt',...pages.flatMap(p=>[base+p,p==='index.html'?base:base+posix.dirname(p)+'/']),...Object.keys(workers).map(route=>base+route.replace('./','')+'sw.js')]);
+await writeFile(resolve(out,'release.json'),JSON.stringify({version,builtAt,workers}));const noCacheRoutes=new Set([base,base+'release.json',base+'sitemap.xml',base+'llms.txt',...pages.flatMap(p=>[base+p,p==='index.html'?base:base+posix.dirname(p)+'/']),...Object.keys(workers).map(route=>base+route.replace('./','')+'sw.js')]);
 await writeFile(resolve(out,'_headers'),[...noCacheRoutes].map(url=>url+'\n  Cache-Control: no-cache, no-store, must-revalidate\n').join('')+base+'assets/*\n  Cache-Control: public, max-age=31536000, immutable\n'+base+'built/*\n  Cache-Control: public, max-age=31536000, immutable\n');
-await writeFile(resolve(out,'build-manifest.json'),JSON.stringify({version,assets:Object.fromEntries(assetMap),entries:Object.fromEntries(entries)},null,2));
+await writeFile(resolve(out,'build-manifest.json'),JSON.stringify({version,builtAt,assets:Object.fromEntries(assetMap),entries:Object.fromEntries(entries)},null,2));
 // Build machines can have umask 077. rsync -a and ZIP extraction preserve these
 // modes, so publish explicit web-readable permissions after every output exists.
 async function publishPermissions(dir){

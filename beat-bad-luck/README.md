@@ -1,5 +1,11 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Leaderboard label and repeated-update fix (v150)
+
+The board is now labelled **功德排行榜 / Merit leaderboard**. This is a naming change: it retains the original top 20 highest single-ritual scores, score columns, tie order, voluntary participation and `bbl_scores` storage. No Firebase rules or indexes need changing.
+
+The shared updater validates release metadata before prompting. A waiting worker for the already displayed release activates silently. Later defers that release for 30 minutes across tab refreshes; a different release can still prompt. Remembered activation prevents repeated prompts and old-worker rollback if the server continues returning stale HTML. Build timestamps reject older cached manifests. Eight real-worker browser scenarios cover these cases plus successful, failed, already-completed and stalled activation, including saved-record and offline checks. Upload the complete built site and manually refresh once to load the corrected updater.
+
 ## Social control and update fixes (v149)
 
 Remove friend is now an always-visible button, retaining the confirmation step. The social header close icon is centered under the real shared modal chrome. Selecting a gift updates only the preview and controls; the native select is kept intact and closes after pointer selection, while keyboard navigation retains focus. The update button dismisses its modal before installing, shows progress, and restores Retry/Later on failure or stalled activation. Browser checks cover both actual production modal styles and real worker transitions.

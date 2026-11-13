@@ -2,7 +2,20 @@
 import {getLanguage} from './language.js';
 if(location.protocol.startsWith('http')&&self.origin!=='null'&&'serviceWorker'in navigator){
  const config=window.PLAYGROUND_RELEASE,base=new URL(config?.base??(location.pathname.endsWith('/games/')?'./':'../'),document.baseURI);
- let latest=null,registration=null,reloading=false,updating=false,failed=false,snoozedUntil=0;
+ let latest=null,registration=null,reloading=false,updating=false,failed=false,snoozedUntil=0,deferredTarget=null,appliedTarget=null;
+ const currentWorker=config?new URL(config.worker,base).href:null,scope=config?new URL(config.route,base).href:location.href;
+ const promptKey='playground.update.prompt.v1:'+base.pathname+':'+(config?.route??location.pathname),watched=new WeakSet();
+ try{const saved=JSON.parse(sessionStorage.getItem(promptKey));if(saved){snoozedUntil=Number(saved.until)||0;deferredTarget=saved.deferred??null;appliedTarget=saved.applied??null;}}catch{}
+ if(appliedTarget===currentWorker)appliedTarget=null;
+ const target=()=>config?(latest?new URL(latest.workers[config.route],base).href:null):registration?.waiting?.scriptURL;
+ function remember(){try{sessionStorage.setItem(promptKey,JSON.stringify({until:snoozedUntil,deferred:deferredTarget,applied:appliedTarget}));}catch{}}
+ function defer(){deferredTarget=target();snoozedUntil=Date.now()+1800000;remember();}
+ function candidate(release){
+  if(!config||!release||typeof release.version!=='string'||release.version===config.version||typeof release.workers?.[config.route]!=='string')return false;
+  const url=new URL(release.workers[config.route],base);if(url.origin!==location.origin||url.href===currentWorker)return false;
+  if(Number.isFinite(config.builtAt)&&(!Number.isFinite(release.builtAt)||release.builtAt<config.builtAt))return false;
+  return true;
+ }
  const dialog=document.createElement('dialog');dialog.id='site-update-dialog';dialog.setAttribute('aria-labelledby','site-update-title');dialog.style.cssText='max-width:min(420px,calc(100vw - 28px));padding:24px;border:2px solid #e8c97e;border-radius:20px;background:#24483f;color:#fff0cc;box-shadow:0 15px 70px #0008';
  const h=document.createElement('h2'),p=document.createElement('p'),update=document.createElement('button'),later=document.createElement('button');h.id='site-update-title';update.id='site-update-apply';later.id='site-update-later';
  for(const b of [update,later]){b.type='button';b.style.cssText='min-height:44px;padding:10px 16px;margin:6px;border-radius:10px;border:1px solid #eac877;background:#efd086;color:#243e33;font:inherit;cursor:pointer';}
@@ -16,16 +29,21 @@ if(location.protocol.startsWith('http')&&self.origin!=='null'&&'serviceWorker'in
   progress.textContent=zh?'正在更新遊戲，完成後會重新載入。已儲存的紀錄會保留。':'Updating the game. This page will reload when ready. Your saved records stay safe.';
  }
  function offer(){
-  if(document.hidden||dialog.open||updating||reloading||Date.now()<snoozedUntil)return;
+  const next=target();if(!next||next===currentWorker||next===appliedTarget&&navigator.serviceWorker.controller?.scriptURL===next||document.hidden||dialog.open||updating||reloading||next===deferredTarget&&Date.now()<snoozedUntil)return;
   text();if(!document.querySelector('dialog[open]')&&!document.body.classList.contains('is-playing')&&!document.querySelector('[data-state=playing],[data-state=running],[data-phase=beat]')){dialog.showModal();later.focus();}
  }
- later.addEventListener('click',()=>{snoozedUntil=Date.now()+1800000;dialog.close();});dialog.addEventListener('cancel',()=>snoozedUntil=Date.now()+1800000);
+ later.addEventListener('click',()=>{defer();dialog.close();});dialog.addEventListener('cancel',defer);
  dialog.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const first=update,last=later;if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
  function reload(){if(reloading)return;reloading=true;window.location.reload();}
- function watch(reg){registration=reg;if(reg.waiting)offer();reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)offer();});});}
+ function watch(reg){
+  registration=reg;
+  const changed=()=>{const worker=reg.waiting??reg.installing;if(!worker)return;if(config){if(!latest&&worker.scriptURL===currentWorker&&worker.state==='installed')worker.postMessage({type:'ACTIVATE_UPDATE'});}else if(reg.waiting)offer();};
+  if(!watched.has(reg)){watched.add(reg);reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',changed);changed();});}
+  changed();
+ }
  async function check(){
   if(document.hidden||updating)return;
-  try{if(config){const response=await fetch(new URL('release.json?check='+Math.floor(Date.now()/60000),base),{cache:'no-store'});if(response.ok){const release=await response.json();if(release.version!==config.version&&release.workers?.[config.route]){latest=release;offer();}}}else{const reg=await navigator.serviceWorker.getRegistration();if(reg&&!registration)watch(reg);await reg?.update();}}
+  try{if(config){const response=await fetch(new URL('release.json?check='+Date.now(),base),{cache:'no-store'});if(response.ok){const release=await response.json();latest=null;if(candidate(release))latest=release;if(latest)offer();else if(dialog.open&&!failed)dialog.close();return release;}}else{const reg=await navigator.serviceWorker.getRegistration();if(reg&&!registration)watch(reg);await reg?.update();}}
   catch{/* Offline play keeps its current immutable assets. */}
  }
  // Inspect immediately and after subscribing: a worker can finish installing
@@ -62,11 +80,23 @@ if(location.protocol.startsWith('http')&&self.origin!=='null'&&'serviceWorker'in
   try{
    await dialog.close();progress.hidden=false;
    const deadline=new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(Error('update-timeout'));},45000);});
-   await Promise.race([install(controller.signal),deadline]);reload();
+   await Promise.race([install(controller.signal),deadline]);appliedTarget=target();deferredTarget=null;snoozedUntil=0;remember();reload();
   }catch{failed=true;update.disabled=false;}
   finally{clearTimeout(timer);controller.abort();progress.hidden=true;updating=false;if(failed)offer();}
  });
- async function boot(){try{if(config)watch(await navigator.serviceWorker.register(new URL(config.worker,base),{scope:new URL(config.route,base).pathname,updateViaCache:'none'}));else{const reg=await navigator.serviceWorker.getRegistration();if(reg)watch(reg);}await check();}catch{}}
+ async function boot(){
+  try{
+   const existing=await navigator.serviceWorker.getRegistration(scope);if(existing)registration=existing;
+   const release=await check();
+   if(config){
+    const alreadyApplied=appliedTarget&&appliedTarget!==currentWorker&&navigator.serviceWorker.controller?.scriptURL===appliedTarget;
+    // A stale HTML response must not register its old worker over a newer one.
+    if(!latest&&!alreadyApplied&&(!existing||release?.version===config.version))watch(await navigator.serviceWorker.register(currentWorker,{scope:new URL(config.route,base).pathname,updateViaCache:'none'}));
+    else if(existing)watch(existing);
+   }else if(existing)watch(existing);
+  }catch{}
+ }
+
  const scheduleBoot=()=>{'requestIdleCallback'in window?requestIdleCallback(boot,{timeout:1500}):setTimeout(boot,0);};if(document.readyState==='complete')scheduleBoot();else window.addEventListener('load',scheduleBoot,{once:true});
  setInterval(check,300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});document.addEventListener('languagechange',text);setInterval(()=>{if(latest||registration?.waiting)offer();},10000);
 }
