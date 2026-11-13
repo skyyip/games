@@ -1,5 +1,9 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Original catalogue display restored (v155)
+
+The newly added Collection / Owned / Can buy category bar and detailed-stat checkbox are removed from the paper and kit catalogues. Owned and unowned cards, score multipliers and stock details return to their original display; the pre-existing favorite controls remain. Permanent decorations, automatic rewards, cooperation, gift messages and the smaller welcome text/transparent selected stars are retained.
+
 ## Reactions, simpler rewards and neighbourhood teamwork (v153)
 
 Dolls now answer with short, category-specific comic reactions as the ritual progresses. They use preset dialogue, bounded DOM updates and the game's paused clock. Finisher launches add a brief comic panel with the kit's own name/payoff, an audio accent and optional haptic feedback; the 88-hit charge, 12-second duration, three challenge types and plain progress rail remain.
