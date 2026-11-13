@@ -33,6 +33,10 @@ HTML includes no-cache metadata. The local server and generated `_headers` suppl
 
 Apache honors the included `.htaccess` when `mod_headers` and the account's overrides are enabled. The build copies it into `_site/` automatically. It sets HTML, stable JS/CSS, manifests and JSON (including `release.json`) to `no-cache, no-store, must-revalidate`. Only content-hashed assets receive `public, max-age=31536000, immutable`. It clears older `Pragma` / `Expires` headers on immutable assets and replaces inherited cache headers on stable files. This config works in either the domain root or a subfolder without rewrite rules.
 
+The builder explicitly sets all output directories to **755** and files to **644**, including `.htaccess`, regardless of the build machine's umask. Run `node tools/check-release-permissions.mjs _site` before packaging; CI checks these modes too. ZIP packages must preserve these permissions and include directory entries at 755. Files at 600 or directories at 700 can cause Apache to return **403 Forbidden** after an `rsync -a` upload.
+
+When uploading to GoDaddy, use `rsync -avzP --chmod=D755,F644 _site/. USER@HOST:public_html/games`. The explicit modes also repair previously uploaded files, even when their contents have not changed. Upload the build directory's **contents**, so `public_html/games/index.html` and `public_html/games/beat-bad-luck/index.html` exist directly, without an extra `games-built/` layer.
+
 The service-worker update prompt and saved progress continue working. Moving to a different domain changes the browser storage origin: export/import the existing game backup to transfer progress to the new domain. HTTPS is required for installed/offline play.
 
 The shared update checker checks the release manifest on visibility and every five minutes. A new release opens a native Update / Later prompt when gameplay and dialogs allow. Update explicitly activates the new hashed worker and calls `window.location.reload()` in the accepting tab; Later snoozes for 30 minutes. Other tabs keep their current ritual and records. No forced automatic reload occurs.

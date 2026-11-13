@@ -35,6 +35,7 @@ jobs:
         env:
           PLAYGROUND_BASE_PATH: /${{ github.event.repository.name }}/
       - run: node tools/check-seo.mjs _site /${{ github.event.repository.name }}/
+      - run: node tools/check-release-permissions.mjs _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

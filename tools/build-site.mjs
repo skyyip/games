@@ -1,4 +1,4 @@
-import {readFile,writeFile,mkdir,rm,copyFile,readdir} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,rm,copyFile,readdir,chmod} from 'node:fs/promises';
 import {resolve,dirname,relative,extname,posix} from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
@@ -72,4 +72,15 @@ await copyFile(resolve(repo,'.htaccess'),resolve(out,'.htaccess'));
 await writeDiscovery(out);
 await writeFile(resolve(out,'release.json'),JSON.stringify({version,workers}));const noCacheRoutes=new Set([base,base+'release.json',base+'sitemap.xml',base+'llms.txt',...pages.flatMap(p=>[base+p,p==='index.html'?base:base+posix.dirname(p)+'/']),...Object.keys(workers).map(route=>base+route.replace('./','')+'sw.js')]);
 await writeFile(resolve(out,'_headers'),[...noCacheRoutes].map(url=>url+'\n  Cache-Control: no-cache, no-store, must-revalidate\n').join('')+base+'assets/*\n  Cache-Control: public, max-age=31536000, immutable\n'+base+'built/*\n  Cache-Control: public, max-age=31536000, immutable\n');
-await writeFile(resolve(out,'build-manifest.json'),JSON.stringify({version,assets:Object.fromEntries(assetMap),entries:Object.fromEntries(entries)},null,2));console.log(`Built ${pages.length} pages; release ${version}; all JS, CSS, images and fonts have content hashes.`);
+await writeFile(resolve(out,'build-manifest.json'),JSON.stringify({version,assets:Object.fromEntries(assetMap),entries:Object.fromEntries(entries)},null,2));
+// Build machines can have umask 077. rsync -a and ZIP extraction preserve these
+// modes, so publish explicit web-readable permissions after every output exists.
+async function publishPermissions(dir){
+ await chmod(dir,0o755);
+ for(const entry of await readdir(dir,{withFileTypes:true})){
+  const file=resolve(dir,entry.name);
+  if(entry.isDirectory())await publishPermissions(file);else await chmod(file,0o644);
+ }
+}
+await publishPermissions(out);
+console.log(`Built ${pages.length} pages; release ${version}; all JS, CSS, images and fonts have content hashes; directories 755, files 644.`);

@@ -66,10 +66,12 @@ npm ci --prefix career-365
 npm ci --prefix your-dream-career
 PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs _site
 node tools/check-seo.mjs _site /games/
-rsync -avzP _site/. zcjnikzosk1q@68.178.235.114:public_html/games
+rsync -avzP --chmod=D755,F644 _site/. zcjnikzosk1q@68.178.235.114:public_html/games
 ```
 
 發布時需包含 `_site` 裡的 `built/`、`assets/`、各遊戲 HTML、service worker、`release.json` 及隱藏檔 `.htaccess`。不要只複製 `beat-bad-luck/`，因為打包後的共用模組在網站根目錄的 `built/` 中。此上傳不使用 `--delete`。
+
+若上傳後出現 **403 Forbidden**，請先重新執行上述包含 `--chmod=D755,F644` 的指令，修復檔案／資料夾權限。先前在受限建置環境產生的壓縮檔帶有 600／700 權限，`rsync -a` 會保留這些模式，可能令 Apache 無法讀取網站。新版建置器會統一輸出檔案 644、資料夾 755；也請確認沒有把整個 `games-built` 資料夾多包一層放進 `public_html/games/`。
 
 部署後，於瀏覽器 Console 查看 `window.PLAYGROUND_RELEASE`，應有 `version` 及 `base: '/games/'`；若是 `undefined`，該頁仍是原始碼或舊版本。輸入名字後開啟帳戶設定，登入按鈕應啟用；不需要清除玩家存檔。Firebase Auth 的授權網域亦須包含 `sky-playground.com`，但缺少授權網域通常會在按下登入後報錯，而不是讓按鈕從一開始就停在灰色。
 
