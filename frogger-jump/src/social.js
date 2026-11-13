@@ -1,13 +1,13 @@
 import {SKILLS,COMPANIONS,equipmentState,purchaseEquipment} from './equipment.js';
 import {PendingResults} from './pending.js';
-import {ANIMALS,animal,rewardCoins,SERIES,shopAnimals} from './animals.js';
+import {ANIMALS,animal,rewardCoins,shopAnimals} from './animals.js';
 import {PROFILE_KEY,PENDING_KEY,readProfile,normalizeName,buyAnimal,settleLocal} from './profile.js';
 import * as cloud from './cloud.js';import {paintAnimalPortrait,paintCompanionPortrait,renderAnimalIcon} from './animal-icons.js';
 import {FROG_COIN,rankBadge} from './badges.js';
 const $=id=>document.getElementById(id);
 export class RiverPlayers{
  constructor({t,onChange,onPlay}){
-  this.shopSeries='all';this.shopOwned=false;this.shopType='animal';this.t=t;this.onChange=onChange;this.onPlay=onPlay;this.guest=readProfile(null);this.cloudProfile=null;this.identity=null;this.authReady=!cloud.cloudConfigured;this.persistent=true;this.busy=false;this.wantPlay=false;this.board=[];this.boardAt=0;this.pendingResults=new PendingResults();this.profileFailed=false;this.resetUntil=0;this.resetTimer=0;this.worldRank={key:'',status:'idle',value:null,at:0};this.rankRequest=0;
+  this.shopOwned=false;this.shopType='animal';this.t=t;this.onChange=onChange;this.onPlay=onPlay;this.guest=readProfile(null);this.cloudProfile=null;this.identity=null;this.authReady=!cloud.cloudConfigured;this.persistent=true;this.busy=false;this.wantPlay=false;this.board=[];this.boardAt=0;this.pendingResults=new PendingResults();this.profileFailed=false;this.resetUntil=0;this.resetTimer=0;this.worldRank={key:'',status:'idle',value:null,at:0};this.rankRequest=0;
   for(const icon of document.querySelectorAll('[data-frog-coin]'))icon.innerHTML=FROG_COIN;
   for(const icon of document.querySelectorAll('[data-animal-icon]'))renderAnimalIcon(icon,icon.dataset.animalIcon,Number(icon.dataset.iconSize)||26);
   try{this.guest=readProfile(localStorage.getItem(PROFILE_KEY));this.pendingResults=new PendingResults(localStorage.getItem(PENDING_KEY));}catch{this.persistent=false;}
@@ -146,10 +146,10 @@ export class RiverPlayers{
  renderShop(){const p=this.profile,root=$('animal-cards');root.replaceChildren();
   let toolbar=$('shop-toolbar');if(!toolbar){toolbar=document.createElement('div');toolbar.id='shop-toolbar';root.before(toolbar);}
   toolbar.replaceChildren();const types=document.createElement('div');types.className='shop-tabs';for(const [id,zh,en]of [['animal','動物','Animals'],['skill','通用技能','Skills'],['companion','河中夥伴','Companions']]){const b=document.createElement('button');b.textContent=this.t(zh,en);b.setAttribute('aria-pressed',String(this.shopType===id));b.onclick=()=>{this.shopType=id;this.renderShop();};types.append(b);}toolbar.append(types);
-  const filter=document.createElement('div');filter.className='shop-filters';if(this.shopType==='animal'){const label=document.createElement('label'),select=document.createElement('select');label.textContent=this.t('系列','Series');for(const [id,zh,en]of SERIES){const option=new Option(this.t(zh,en),id);option.selected=id===this.shopSeries;select.add(option);}select.onchange=()=>{this.shopSeries=select.value;this.renderShop();};label.append(select);filter.append(label);}
+  const filter=document.createElement('div');filter.className='shop-filters';
   const ownedLabel=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=this.shopOwned;check.onchange=()=>{this.shopOwned=check.checked;this.renderShop();};ownedLabel.append(check,document.createTextNode(this.t('只看已購買','Owned only')));filter.append(ownedLabel);toolbar.append(filter);
   const status=document.createElement('p');status.className='form-note';status.textContent=this.t(p.mode==='cloud'?'已連結帳戶：購買項目跨裝置保存。':'本機試玩：購買只保存在此裝置；登入後使用該帳戶的獨立錢包。',p.mode==='cloud'?'Account inventory syncs across devices.':'Local inventory stays on this device; signed-in accounts have separate wallets.');toolbar.append(status);
-  const list=this.shopType==='animal'?shopAnimals(this.shopSeries,this.shopOwned,p.owned):(this.shopType==='skill'?SKILLS:COMPANIONS).filter(a=>!this.shopOwned||(this.shopType==='skill'?p.ownedSkills:p.ownedCompanions).includes(a.id));
+  const list=this.shopType==='animal'?shopAnimals(this.shopOwned,p.owned):(this.shopType==='skill'?SKILLS:COMPANIONS).filter(a=>!this.shopOwned||(this.shopType==='skill'?p.ownedSkills:p.ownedCompanions).includes(a.id));
   if(this.shopType!=='animal'){const remove=document.createElement('button');remove.className='shop-unequip';remove.textContent=this.t('不裝備此類項目','Unequip this slot');remove.onclick=()=>this.chooseEquipment(this.shopType,'');toolbar.append(remove);}
   for(const a of list){const owns=this.shopType==='animal'?p.owned.includes(a.id):(this.shopType==='skill'?p.ownedSkills:p.ownedCompanions).includes(a.id),selected=this.shopType==='animal'?p.selected===a.id:(this.shopType==='skill'?p.equippedSkill:p.companion)===a.id,card=document.createElement('article');card.dataset.animal=a.id;card.className='animal-card'+(selected?' selected':'');
    if(this.shopType==='animal'){const canvas=document.createElement('canvas');canvas.setAttribute('aria-label',this.t(a.zh,a.en));canvas.setAttribute('role','img');paintAnimalPortrait(canvas,a.id);card.append(canvas);}else{const art=document.createElement('div');art.className='equipment-art';if(this.shopType==='companion'){const canvas=document.createElement('canvas');paintCompanionPortrait(canvas,a.id);art.append(canvas);}else art.textContent=a.icon;art.setAttribute('aria-hidden','true');card.append(art);}

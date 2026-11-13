@@ -33,7 +33,5 @@ export const ANIMALS=Object.freeze([
 export const animal=id=>ANIMALS.find(a=>a.id===id)??ANIMALS[0];
 export const rewardCoins=(score,bonus=0)=>1+Math.max(0,Math.floor(score))*2+Math.floor(Math.max(0,score)/20)*10+Math.max(0,Math.min(Math.floor(bonus),Math.max(0,Math.floor(score))*3));
 
-export const SERIES=Object.freeze([['all','全部','All'],['classic','一般動物','Animals'],['chiikawa','Chiikawa 靈感','Chiikawa inspired'],['frieren','芙莉蓮靈感','Frieren inspired'],['sprouts','皮克敏靈感','Pikmin inspired'],['mixed','混搭朋友','Mixed friends']]);
-export function seriesFor(id){return ['elf-mage','violet-mage','red-warrior'].includes(id)?'frieren':id.endsWith('-sprout')?'sprouts':['bloom-bunny','mage-otter'].includes(id)?'mixed':['chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba'].includes(id)?'chiikawa':'classic';}
-export function shopAnimals(series='all',ownedOnly=false,owned=[]){return ANIMALS.filter(a=>(series==='all'||seriesFor(a.id)===series)&&(!ownedOnly||owned.includes(a.id))).slice().sort((a,b)=>a.price-b.price||a.id.localeCompare(b.id));}
+export function shopAnimals(ownedOnly=false,owned=[]){return ANIMALS.filter(a=>!ownedOnly||owned.includes(a.id)).slice().sort((a,b)=>a.price-b.price||a.id.localeCompare(b.id));}
 export function motionFor(id){const i=ANIMALS.findIndex(a=>a.id===id);return {spring:1+(i%5)*.08,sway:((i%3)-1)*.06,kick:.7+(i%4)*.17,settle:1+(i%4)*.09};}
