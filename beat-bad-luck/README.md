@@ -1,5 +1,19 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Full settlement, street collection and manual cloud uploads (v157)
+
+Every completed ritual again opens its complete reward/visitor report; the result page shows oil/merit, stock use, visitor arrival, journey notes and the full fortune card directly. Set rewards remain automatic and replay remains available. The charged finisher rail gains a soft pulsing halo, pauses with the game and uses a static glow for reduced motion. The third finisher keeps its drag interaction and shaded area with no dashed boundary. Steps 01–03 have larger number badges, distinct coloured headers, heavier borders and more separation.
+
+The encouragement selector now preserves the native pointer-opening default. Its handler previously returned `false`, cancelling the operating system picker. Selection and draft persistence continue to use the existing gift flow.
+
+Sixteen original street-comedy collectibles are added: four papers (deadline jelly, hallucinating pigeon, meeting octopus, missing parcel sprite), four kits (clock-off stamp, mute bell, noodle lasso, weekend umbrella), four illustrated patrons and four secret props. New kits fit the existing price/score ladder and have individual comic finisher recipes. Legacy catalogue ordering, saved IDs and ownership remain intact; new content round-trips through backups and gifting.
+
+Account settings offer **Upload current account progress**, with a server-confirmed result or retry feedback, and **Upload pre-login device progress**. The latter compares both summaries and requires confirmation before replacement. The original guest save stays intact; progress is not added together. Upload uses the existing revision-checked import transaction with a zero cutoff to preserve all previously transferred item quantities and leave friends/gift quotas unchanged. Failed writes, cancellation and identity changes do not apply the candidate.
+
+**Deploy this release's `firestore.rules` to `beat-bad-luck` before syncing or gifting the new items.** Its whitelist contains 190 item tokens. No new indexes, Cloud Functions or paid plan are required. This workspace has no authenticated Firebase CLI account; production rules have not been deployed. See [FIREBASE.md](./FIREBASE.md).
+
+Validation covers 292 unit tests, 70 Firestore emulator security checks, full rituals and settlements, ready-rail/reduced-motion behavior, all three finisher challenges, the native selector default, and signed-in device uploads with cancellation, failed-write retry, acknowledged cloud data and transferred-inventory protection.
+
 ## Sign-out and home-screen Google recovery (v156)
 
 Sign-out preserves the account's local draft and sync metadata, attempts a cloud flush for at most two seconds, then signs out even if that flush fails, conflicts or stalls. Guest and account saves remain separate. Late writes from an earlier identity cannot change the current account's sync status or clear its pending upload. A slow cloud-data load or error no longer disables an otherwise available sign-out action.

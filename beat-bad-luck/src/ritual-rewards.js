@@ -1,3 +1,4 @@
+import {STREET_SECRET_KITS,STREET_SECRET_DECOR,STREET_PATRONS} from './street-collection.js';
 import {formatNumber} from './number-format.js';
 import {CINEMA_SECRET_KITS,CINEMA_SECRET_DECOR} from './cinema-expansion.js';
 // Original comic homages; no film stills, recordings or private worries are stored.
@@ -33,9 +34,9 @@ const decor=[
  ['secret-star','星級掃地僧','Star-rated sweeping monk','🧹','掃走霉運順便掃走未讀通知。'],
  ['secret-pineapple','菠蘿油時光機','Pineapple-bun time machine','🍍','返去五分鐘前，食多個菠蘿油。'],
  ['secret-chair','導演喊收工龍椅','Director clock-off throne','🎬','一坐低就喊 Cut，連煩惱都殺青。']];
-kits.push(...CINEMA_SECRET_KITS);decor.push(...CINEMA_SECRET_DECOR);
-export const SECRET_WEAPONS=kits.map(([id,nameZh,name,icon,description],i)=>({id,nameZh,name,icon,description,descriptionEn:'A ridiculous Hong Kong cinema-inspired keepsake. Even bad luck needs a day off.',hidden:true,cost:1800+i*240,merit:0,multiplier:3.5+i*.18,tone:190+i*24,secretIndex:i}));
-export const SECRET_DECOR=decor.map(([id,nameZh,name,icon,description],i)=>({id,nameZh,name,icon,description,descriptionEn:'A tiny comedy set for your stall. The neighbours insist on an encore.',hidden:true,expanded:true,cost:2500+i*350,rate:1.2+i*.12,secretIndex:i}));
+kits.push(...CINEMA_SECRET_KITS,...STREET_SECRET_KITS);decor.push(...CINEMA_SECRET_DECOR,...STREET_SECRET_DECOR);
+export const SECRET_WEAPONS=kits.map(([id,nameZh,name,icon,description],i)=>({id,nameZh,name,icon,description,descriptionEn:'A ridiculous Hong Kong cinema-inspired keepsake. Even bad luck needs a day off.',...(STREET_SECRET_KITS.some(row=>row[0]===id)?{series:'street-comedy'}:{}),hidden:true,cost:1800+i*240,merit:0,multiplier:3.5+i*.18,tone:190+i*24,secretIndex:i}));
+export const SECRET_DECOR=decor.map(([id,nameZh,name,icon,description],i)=>({id,nameZh,name,icon,description,descriptionEn:'A tiny comedy set for your stall. The neighbours insist on an encore.',...(STREET_SECRET_DECOR.some(row=>row[0]===id)?{series:'street-comedy'}:{}),hidden:true,expanded:true,cost:2500+i*350,rate:1.2+i*.12,secretIndex:i}));
 export const PATRON_REWARD_SCALE=.5;
 export const PATRONS=[
  ['waiter','暖心茶記伙記','Kind café waiter','☕',1,.01,0,0],['driver','準點小巴司機','Punctual minibus driver','🚐',1,0,.01,0],['neighbour','通情達理街坊','Thoughtful neighbour','☂',1,.02,0,0],
@@ -61,7 +62,8 @@ export const PATRONS=[
  ["justice-bao","橋底申冤包龍星","Justice Bao of the flyover","⚖",4,0,0.04,0.12,"包大人拍驚堂木叫衰運上庭，驚堂木先話自己要加班費。佢即刻判你無罪，判個鐘今晚準時收工。","Justice Bao calls bad luck to court. His gavel demands overtime pay, so he acquits you and orders the clock to finish work on time."],
  ["god-of-cooking","黯然開飯廚神","God of the clock-off kitchen","🍚",4,0.04,0.03,0.12,"廚神煮黯然銷魂飯，洋葱戴黑超話唔准喊；食完你想繼續做嘢，隻碟竟然自己蓋上「收工」兩隻字。","The chef serves soul-soothing rice while the onion wears shades and refuses to cry. The plate stamps OFF DUTY before you can reopen work."],
  ["little-treasure","一蚊都識慳韋小寶","Little Treasure, bargain diplomat","🧮",4,0.04,0,0.12,"韋小寶同七個錢罌講價，講到錢罌倒貼張折扣券；佢宣布今日只收笑聲，唔收你做打工仔嘅心酸。","Little Treasure negotiates with seven piggy banks until they hand him a coupon. Today he takes laughter, not your hard-earned peace."],
- ["kungfu-sing","掃地練掌阿星","Sing, sweeping palm hero","🖐",5,0.05,0.05,0.15,"阿星掃地掃出一條收工大道，最後一掌將「最後改一次」拍成紙飛機，煩惱坐頭等艙飛走，仲同你揮手。","Sing sweeps a path straight home. One final palm turns the last revision into a paper plane; your worries fly away first class and wave goodbye."]
+ ["kungfu-sing","掃地練掌阿星","Sing, sweeping palm hero","🖐",5,0.05,0.05,0.15,"阿星掃地掃出一條收工大道，最後一掌將「最後改一次」拍成紙飛機，煩惱坐頭等艙飛走，仲同你揮手。","Sing sweeps a path straight home. One final palm turns the last revision into a paper plane; your worries fly away first class and wave goodbye."] ,
+ ...STREET_PATRONS
 ].sort((a,b)=>a[4]-b[4]).map(([id,nameZh,name,icon,stars,oil,merit,discount,story,storyEn])=>({id,nameZh,name,icon,stars,oil:oil*PATRON_REWARD_SCALE,merit:merit*PATRON_REWARD_SCALE,legacyDiscount:discount,discount:discount?[0,.1,.12,.15,.2,.25][stars]:0,weight:[0,40,24,12,5,1][stars],storyEn:storyEn??(id==='extra-king'?'He drops his hat, forgets his lines, then accidentally kicks bad luck off the set.':'Your neighbour has your back. Even bad luck is taking the last bus home.'),story:story??(id==='extra-king'?'跌帽、忘對白，最後踢走件衰運，仲以為自己未開鏡。':`${nameZh}：「唔使驚，今日有我撐你；啲衰運自己識搭尾班車走。」`)}));
 export const MASTER_COMMENTS=['你呢下掌力，保鮮紙都想申請工傷。','小人話想上訴，我話窗口已經收工。','你打得咁準，樓下叮叮都想請你揸車。','衰運已經打包，運費到付，唔好簽收。','睇你個氣勢，隔籬鹹魚都彈起身叫加油。','唔好再內耗喇，個煲都畀你煲到辭職。','今日收工有聲，宇宙都要幫你熄燈。','張紙皺啫，你嘅前途唔皺。','呢招打落去，Requirement 自己改名做 Optional。','煩惱話佢只係臨時工，我話一樣要走。','你個笑容勁過必殺技，記得照吓鏡。','小人未瞓，你可以先瞓；佢冇你份租約。','呢度唔包中六合彩，但包你笑多兩聲。','個帽都笑到甩線，師傅今晚要補鑊。','你一拍，白虎都自動拎飯盒排隊。','今日嘅霉運已殺青，聽日唔好叫佢返工。','恭喜晒，衰運已讀不回。','咁多心事都放低咗，隻拖鞋終於可以抖吓。','呢個姿勢，龍椅都讓位畀你坐。','笑住收工啦，老細都要充電㗎。'];
 export function comicDescription(item){return item.description??COMIC_LINES[item.id]??`${item.nameZh??item.name}：「我只係一件道具，點知一出場就畀衰運搶住攞簽名。」`}

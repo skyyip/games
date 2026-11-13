@@ -12,6 +12,10 @@ const aim=(ms,zh,en)=>({type:'aim',ms,label:[zh,en]});
 const pinch=(zh,en)=>({type:'pinch',label:[zh,en]});
 function kit(name,win,tag,pose,steps){return {name,win,tag,pose,steps,hint:[steps.map(s=>s.label[0]).join('；')+'。',steps.map(s=>s.label[1]).join('; ')+'.']};}
 export const EXTRA_KITS={
+ 'clockoff-stamp':kit(['全宇宙準時收工','Universal clock-off'],['印完連煩惱都申請放假！','Even the worries applied for leave!'],['已結案','CLOSED'],'flat',[tap(1,'點中間蓋收工印','Stamp the middle'),swipe('right','掃走加班申請','Sweep overtime away')]),
+ 'mute-bell':kit(['九十九個已讀','Ninety-nine read receipts'],['通知靜晒，終於聽到自己笑！','Notifications off. Your laughter on!'],['靜音喇','MUTED'],'bounce',[turn('cw','畫圈搖鈴','Circle to ring the bell'),tap(1,'點中間關通知','Tap the middle to mute')]),
+ 'noodle-lasso':kit(['藉口走辣車仔麵','Excuses, hold the chilli'],['藉口撈埋一碗，唔包外賣！','A whole bowl of excuses. No takeaway!'],['開飯喇','LUNCH'],'orbit',[turn('cw','畫圈甩麵套索','Circle the noodle lasso'),swipe('down','向下收麵入碗','Swipe down into the bowl')]),
+ 'weekend-umbrella':kit(['星期六防催單','Saturday email shield'],['急件反彈去星期一，今日休息！','Urgent email bounced to Monday. Rest today!'],['週末結界','WEEKEND'],'spin',[swipe('up','向上開遮','Swipe up to open the umbrella'),hold(550,'按住擋住急件再放手','Hold to block the email, then release')]),
  'bare-hand':kit(['一掌收工','Hands off overtime'],['左右開工，合掌即刻收工！','Left, right, done! Even the paper wants a tea break.'],['收工！','OFF DUTY'], 'flat',[tap(0,'左掌點拍','Tap the left palm'),tap(2,'右掌點拍','Tap the right palm'),tap(0,'再拍左掌','Left palm again'),hold(550,'按住合掌，再鬆手','Hold the palms together, then release')]),
  'chalk-eraser':kit(['擦走加班字','Erase the overtime'],['OT 擦甩晒，小人打乞嗤打到辭職！','OT erased! The gremlin sneezed itself into retirement.'],['準時走','NO OT'], 'sneeze',[rub(3,'來回擦三次，擦走 OT','Rub back and forth three times to erase OT'),swipe('right','向右掃走粉筆灰','Sweep the chalk dust to the right')]),
  spanner:kit(['歪理螺絲鬆晒','Unscrew the excuses'],['螺絲跌晒！原來成個腦都係藉口！','All screws out! That brain was entirely excuses.'],['唔好扭計','NO EXCUSES'], 'spin',[turn('cw','順時針扭鬆螺絲','Turn clockwise to loosen the screw'),turn('ccw','反向扭走歪理齒輪','Turn anticlockwise to remove the excuse gear')]),

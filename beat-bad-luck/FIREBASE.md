@@ -1,5 +1,13 @@
 # 打小人：獨立 Firebase 設定及部署
 
+## v157：新增物品與手動上傳
+
+請把本資料夾最新的 [firestore.rules](./firestore.rules) 整份部署至 **beat-bad-luck**。本次將可同步及互贈物品白名單擴充至 190 項，配合新小人紙、法寶及神秘道具；既有索引毋須新增。未部署時，持有新物品的存檔或互贈可能被舊規則拒絕。
+
+可在 Firebase Console → Firestore Database → Rules 貼上整份規則並 Publish，或在已登入 Firebase CLI 的環境執行 `npm run firebase:deploy --prefix beat-bad-luck`。本次只在本機模擬器驗證，未部署至正式專案。
+
+登入後，在「帳戶與設定」按「上傳目前帳戶進度」可取得雲端儲存確認。若要帶入登入前的本機遊玩紀錄，按「上傳登入前的本機紀錄」，查看本機與目前帳戶摘要，再確認取代。原本本機存檔會保留；兩份資產不會相加。這個流程沿用現有匯入交易及修訂號檢查，保護所有曾互贈物品的雲端數量，不改好友或每日送禮紀錄。
+
 `src/firebase-settings.js` 已填入打小人獨立專案 **`beat-bad-luck`** 的公開 Web App 設定，Auth 網域為 `beat-bad-luck.firebaseapp.com`。登入、跨裝置保存、真人好友與互贈均使用此專案。本機遊玩仍可使用。專案擁有人已回報 Firebase 設定完成；以下保留設定及重新部署步驟。Agent 未代為部署，真實登入及社群完整流程仍待線上驗證。
 
 ## 1. 建立獨立專案

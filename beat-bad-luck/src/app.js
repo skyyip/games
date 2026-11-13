@@ -305,8 +305,8 @@ function whack(options){
 
 function finish(){
  if(recorded||!game.result)return;recorded=true;clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.ambience(!document.hidden);try{speechSynthesis.cancel();}catch{}
- settle();const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=true;if(received.friend)$('#friend-arrival').textContent=`A kind visitor: ${translate(received.friend.name)}`;}
- $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);$('#journey-result').hidden=!game.commission;
+ settle();const received=reward(state,game.result,{id:receipt});if(received){state=received.state;save();renderStall();$('#reward-line').textContent=`Oil money +${received.earned} · Merit +${received.merit}`;$('#friend-arrival').hidden=!received.friend;if(received.friend)literal($('#friend-arrival'),getLanguage()==='zh-Hant'?`貴人到訪：${received.friend.nameZh}`:`A kind visitor: ${received.friend.name}`);}
+ $('#final-score').textContent=game.score;$('#final-hits').textContent=game.hits;$('#final-combo').textContent=game.bestCombo;$('#fortune-text').textContent=game.result.fortune;neighbourhoodUI?.renderResult(game.result,received?.journey);$('#journey-result').hidden=false;
  uxUI?.showResult(kitUseCommitted);$('#ritual-stage').hidden=true;lock(false);$('#result').hidden=false;$('#result-title').focus({preventScroll:true});$('#result').scrollIntoView({block:'start',behavior:'instant'});audio.chime();say('The ritual is complete. Your fortune is ready.');ritualUI?.rewards(received,game.result);playerHub?.contributeChallenges().catch(()=>{});polishCollections();
 }
 function backToStall(){clearCriticalHit();impactSwitch.clear();clearHitAnimations();clearTimeout(frame);frame=0;cancelGestures();stopMicrophone();audio.stop();game.reset();ritualUI?.render();unlockSound();lastPhase='setup';$('#play-panel').dataset.phase='setup';$('#pause-overlay').hidden=true;$('#ritual-stage').hidden=true;$('#ritual-stage').inert=false;$('#result').hidden=true;$('#welcome').hidden=false;lock(false);settle();renderStall();playerHub?.render();$('#start').focus({preventScroll:true});$('#play-panel').scrollIntoView({block:'nearest',behavior:'instant'});}
@@ -451,6 +451,7 @@ observeDecorativeVisibility();
 document.fonts?.ready.then(()=>statCache.clear());
 
 playerHub=createPlayerHub({getState:()=>state,setState:next=>{state=readProgress(JSON.stringify(next));renderStall();preparationUI?.render();backupUI.render();},switchScope:scope=>{currentSaveKey=scopeKey(scope);try{storedRaw=storage?.getItem(currentSaveKey)??null;}catch{storedRaw=null;persistent=false;}state=readProgress(storedRaw);renderStall();preparationUI?.render();backupUI.render();},saveLocal:()=>{try{const raw=JSON.stringify(state);storage?.setItem(currentSaveKey,raw);storedRaw=raw;}catch{persistent=false;}},isPlaying:()=>PHASES.includes(game.phase),onInterrupt:backToStall,notice:message,storage});
+document.getElementById('bbl-cloud-upload-local').onclick=()=>{const raw=storage?.getItem(scopeKey(null));if(raw)backupUI.requestLocal(readProgress(raw),document.getElementById('bbl-cloud-upload-local'));};
 document.getElementById('bbl-adopt-file').onclick=()=>backupUI.requestImport(document.getElementById('bbl-adopt-file'));
 
 createLeaderboardUI({getUser:()=>playerHub?.user,getName:()=>playerHub?.getName()??'',getState:()=>state,flush:()=>playerHub?.flush(),storage});

@@ -1,3 +1,4 @@
+import {streetWeaponArt} from './street-collection.js';
 import {filmWeaponArt,filmDecorArt} from './film-comedy.js';
 import {cinemaDecorArt} from './cinema-expansion.js';
 import {clockoffSealArt} from './slapstick-art.js';
@@ -6,7 +7,7 @@ import {skinArt} from './skins.js';
 import {SECRET_WEAPONS,SECRET_DECOR} from './ritual-rewards.js';
 import {extraWeaponArt,extraDecorArt} from './expansion-art.js';
 const wrap=(content,box='0 0 120 120')=>`<svg viewBox="${box}" aria-hidden="true" focusable="false">${content}</svg>`;
-export function weaponArt(id){const film=filmWeaponArt(id);if(film)return wrap(film);const secret=SECRET_WEAPONS.find(i=>i.id===id);if(secret)return secretArt(secret);
+export function weaponArt(id){const street=streetWeaponArt(id);if(street)return wrap(street);const film=filmWeaponArt(id);if(film)return wrap(film);const secret=SECRET_WEAPONS.find(i=>i.id===id);if(secret)return secretArt(secret);
  const expanded=extraWeaponArt(id);if(expanded)return wrap(expanded);
  const art={
  'bare-hand':`<path d="m33 70-12-15q-8-14 0-18 8-4 17 11l2 4-9-33q-3-13 6-14 9-2 12 13l7 24-1-31Q54-1 63 1q9 0 8 14l1 28 6-23q4-12 12-8 8 3 4 15l-5 25 6-9q8-10 14-5 7 5-1 16l-13 22q-3 20-19 32l-5 9-30-5 1-14q-8-11-9-28Z" fill="#efcc9f" stroke="#a67b56" stroke-width="3" stroke-linejoin="round"/><path d="m45 66 12 10m11-10 9-10m-22 25 17 1" fill="none" stroke="#cd9e77" stroke-width="2" stroke-linecap="round"/><path d="m45 96 29 6-3 13-31-6Z" fill="#90b1a4" stroke="#617f75" stroke-width="2"/><path d="m57 56 2 5 6 1-4 4 1 6-5-3-5 3 1-6-4-4 6-1Z" fill="#f7e8bf"/>`,

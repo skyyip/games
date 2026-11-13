@@ -216,7 +216,7 @@ body .has-favorite>button.item-favorite{width:44px;height:44px;min-width:44px;mi
 
 /* Essential finisher controls are siblings of the ordinary hit button. */
 #burst-challenge{position:absolute;inset:0;z-index:8;pointer-events:none}
-#burst-pull-zone{position:absolute;inset:12px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:ns-resize;border:2px dashed #ffe4a0;border-radius:18px;background:#173b3c80;color:#fff2c4;outline-offset:3px}
+#burst-pull-zone{position:absolute;inset:12px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:ns-resize;border:0;border-radius:18px;background:#173b3c80;color:#fff2c4;outline-offset:3px}
 #burst-pull-zone .burst-pull-handle{display:grid;place-items:center;width:60px;height:60px;flex-shrink:0;border:3px solid #ffe4a0;border-radius:50%;background:#245d57;font-size:38px;line-height:1;box-shadow:0 3px 0 #143634}
 #burst-pull-zone[data-dragging=true] .burst-pull-handle{background:#367a66}
 .burst-pull-arrow{font:700 24px/1 var(--display);pointer-events:none}

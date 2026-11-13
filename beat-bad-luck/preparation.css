@@ -21,6 +21,12 @@ summary.preparation-heading::after{content:'＋';font-size:23px;font-weight:400;
 .preparation-heading small{display:block;font-size:13px;line-height:1.65;color:#d5e8cb;font-weight:400;margin-top:5px;overflow-wrap:anywhere}
 .preparation-heading #worry-required{margin-left:auto;margin-top:0;flex:none;padding:3px 9px;background:#f0d697;color:#27483f;border-radius:20px;font-size:12px}
 .preparation-number{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid #d7b870;border-radius:50%;font-size:14px;line-height:1;background:#183931;color:#ffe7a2;font-variant-numeric:tabular-nums}
+.preparation-step{--step-accent:#f2cf84;margin-block:22px;border:2px solid var(--step-accent);border-left-width:6px;box-shadow:0 5px 0 #122e2b55}
+.preparation-step>.preparation-heading{background:#35584a;border-bottom:1px solid #ffffff24;min-height:82px;padding:18px 16px}
+.preparation-step .preparation-number{width:44px;height:44px;flex-basis:44px;border:2px solid var(--step-accent);border-radius:12px;background:var(--step-accent);color:#233d35;font-size:18px;font-weight:800;box-shadow:0 3px 0 #102a3055}
+#prepare-skin{--step-accent:#b7d9ef}#prepare-skin>.preparation-heading{background:#304e5b}
+#prepare-kit{--step-accent:#d6c0ed}#prepare-kit>.preparation-heading{background:#4a425b}
+.preparation-step>.preparation-body{padding-top:16px}
 .preparation-body{padding:0 16px 16px;min-width:0}
 #prepare-worry-title{flex:1}
 .preparation-body label:not(.preparation-options label){font-size:14px;line-height:1.6;color:#f8edce}

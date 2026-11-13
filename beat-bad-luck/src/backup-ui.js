@@ -17,6 +17,12 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
   put('#cancel-import','保留現在的攤位','Keep current stall');
   put('#confirm-import',committing?(cloud?'正在儲存到雲端…':'正在匯入…'):(cloud?'確認取代並同步到帳戶':'取代並載入'),committing?(cloud?'Saving to cloud…':'Importing…'):(cloud?'Replace and sync to account':'Replace and load'));
   if(pending){const s=pending.backup.state,prefix=cloud?local(`登入帳戶：${pending.context.label}\n`,`Account: ${pending.context.label}\n`):'';$('#import-summary').textContent=prefix+local(`${s.coins.toLocaleString(undefined,{maximumFractionDigits:2})} 香油錢 · ${s.merit.toLocaleString(undefined,{maximumFractionDigits:2})} 功德 · ${s.rituals} 次儀式 · ${s.records.length} 項紀錄`,`${s.coins.toLocaleString(undefined,{maximumFractionDigits:2})} oil · ${s.merit.toLocaleString(undefined,{maximumFractionDigits:2})} merit · ${s.rituals} rituals · ${s.records.length} records`);}
+  if(pending?.local){
+   put('#import-title','上傳登入前的本機紀錄？','Upload your pre-login device progress?');
+   put('#import-warning','確認後會取代此帳戶的遊戲進度，不會把金錢或庫存相加。本機原檔保留；曾互贈的物品保留雲端現有數量，好友及每日送禮次數不變。建議先取消並匯出目前帳戶備份。','Confirmation replaces account progress; money and inventory are not added together. The original device save is kept. Previously transferred items retain cloud quantities; friends and gift quota stay unchanged. Cancel and export your current account first if you need a backup.');
+   $('#import-summary').textContent=local('登入前的本機紀錄：\n','Pre-login device progress:\n')+$('#import-summary').textContent;const current=getState();$('#import-summary').textContent+=local(`\n目前帳戶：${current.rituals} 次儀式 · ${current.coins.toLocaleString()} 香油錢 · ${current.merit.toLocaleString()} 功德`,`\nCurrent account: ${current.rituals} rituals · ${current.coins.toLocaleString()} oil · ${current.merit.toLocaleString()} merit`);
+   if(!committing)put('#confirm-import','確認取代並上傳','Replace and upload');
+  }
  }
  function note(zh,en){put('#save-tools-status',zh,en);put('#settings-save-status',zh,en);}
  function working(value){busy=value;for(const id of ['#export-save','#import-save','#settings-export','#settings-import'])$(id).disabled=value||id.includes('import')&&!canImport();$('#confirm-import').disabled=committing||!canImport();$('#cancel-import').disabled=committing;}
@@ -27,6 +33,13 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
   catch(error){if(error.message==='backup-sanity')note('存檔資料未通過合理性檢查，未有匯出；目前進度未被修改。','Save data failed validation and was not exported. Your progress is unchanged.');else note(error.message==='backup-crypto'?'無法加密存檔，請以 HTTPS 或支援加密的瀏覽器再試。':'未能匯出加密存檔，請稍後再試；目前進度未改變。',error.message==='backup-crypto'?'Encryption is unavailable. Use HTTPS and an up-to-date browser.':'Unable to export the encrypted save. Your progress is unchanged.');}
   finally{working(false);}
  });
+ async function requestLocal(state,from){
+  if(!canImport()){unavailable();return;}if(isPlaying()||busy||!getImportContext().uid)return;
+  const context=getImportContext(),attempt=++readAttempt;opener=from;returnDialog=from?.closest('dialog')??null;completed=false;
+  const backup={state:structuredClone(state),exportedAt:0};if(returnDialog?.open)await returnDialog.close();
+  if(attempt!==readAttempt||!sameTarget(context)||!canImport())return;
+  pending={backup,context,local:true};$('#import-feedback').textContent='';render();dialog.showModal();$('#cancel-import').focus();
+ }
  function requestImport(from){if(!canImport()){unavailable();return;}if(isPlaying()||busy)return;requestedOpener=from;selectionContext=getImportContext();file.click();}
  $('#import-save').addEventListener('click',()=>requestImport($('#import-save')));
  file.addEventListener('change',async()=>{
@@ -61,5 +74,5 @@ export function createBackupUI({getState,beforeExport,onImport,isPlaying,isPersi
  dialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;if(committing){event.preventDefault();return;}const first=$('#cancel-import'),last=$('#confirm-import');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
  document.addEventListener('bbl:identitychange',()=>{readAttempt++;pending=null;returnDialog=null;if(dialog.open)dialog.close();working(busy);});
  document.addEventListener('bbl:accountstate',()=>working(busy));
- render();return {render,requestImport};
+ render();return {render,requestImport,requestLocal};
 }

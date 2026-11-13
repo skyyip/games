@@ -20,7 +20,7 @@ const eventNames=Object.fromEntries(EVENTS.map(e=>[e.id,e.name]));
 export function createNeighbourhoodUI({game,audio,getState,setNeighbourhood,refresh,onAccept,onClaimSet,cancelGestures,onExtraScore,onGesture}){
  const fortunePreview=createFortunePreview();
  let homeKey='',playKey='',entry=null,cameoUsed=false,cameoUntil=0;
- const currentPreview=button(['預覽漫畫籤卡','Preview comic card'],()=>{if(entry)fortunePreview.open(entry,currentPreview);});currentPreview.id='preview-fortune';currentPreview.setAttribute('aria-haspopup','dialog');$('.postcard-actions').prepend(currentPreview);$('#personal-postcard').hidden=true;
+ const currentPreview=button(['預覽漫畫籤卡','Preview comic card'],()=>{if(entry)fortunePreview.open(entry,currentPreview);});currentPreview.id='preview-fortune';currentPreview.setAttribute('aria-haspopup','dialog');$('.postcard-actions').prepend(currentPreview);$('#personal-postcard').hidden=false;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const cameo=document.createElement('div');cameo.id='extra-king-cameo';cameo.className='extra-king-cameo';cameo.hidden=true;cameo.setAttribute('aria-hidden','true');cameo.innerHTML=extraKingArt()+'<i>?!</i>';$('#beat-arena').append(cameo);
  function announce(text){put($('#neighbour-note'),text);}

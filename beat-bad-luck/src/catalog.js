@@ -1,3 +1,4 @@
+import {STREET_WEAPONS} from './street-collection.js';
 import {FILM_WEAPONS,FILM_DECOR} from './film-comedy.js';
 import {CINEMA_DECOR} from './cinema-expansion.js';
 import {OIL_GAIN_FACTOR} from './economy.js';
@@ -119,7 +120,7 @@ export const WORRIES=[
  ...LOCAL_WORRIES,
 ];
 export const WEAPONS=[
- ...FILM_WEAPONS,
+ ...STREET_WEAPONS,...FILM_WEAPONS,
  ...SECRET_WEAPONS,
   {id:'bare-hand',name:'Bare hands',merit:0,cost:0,tone:150,starter:true},
   {id:'flipflop',name:'Blue-and-white flip-flop',merit:0,cost:200,multiplier:2.1,tone:180},

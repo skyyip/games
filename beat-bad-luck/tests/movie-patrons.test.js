@@ -13,7 +13,7 @@ test('offline earnings pay through eighteen hours, keep fractional carry and nev
  const expired=collectIdle({...state,decorExpires:{neon:10*3600000}},24*3600000);assert.equal(expired.earned,6);assert.equal(expired.state.decor.neon,1);assert.deepEqual(expired.lost,[]);
 });
 test('twelve movie-inspired patrons have unique original portraits, bilingual stories and five balanced rarities',()=>{
- assert.equal(PATRONS.length,31);assert.equal(new Set(PATRONS.map(f=>f.id)).size,31);const portraits=[];
+ assert.equal(PATRONS.length,35);assert.equal(new Set(PATRONS.map(f=>f.id)).size,35);const portraits=[];
  for(const id of ids){const patron=PATRONS.find(f=>f.id===id);assert.ok(patron,id);assert.ok(patron.story.length>30&&patron.storyEn.length>30);assert.ok(patron.name&&patron.nameZh);assert.ok(patron.weight>0);assert.ok(patron.oil<=.025&&patron.merit<=.025&&patron.discount<=.25);const art=patronArt(id);assert.ok(art.includes(`data-patron="${id}"`));assert.ok(!/undefined|NaN|<image|<script/.test(art));portraits.push(art);}
  assert.equal(new Set(portraits).size,12);assert.deepEqual([...new Set(ids.map(id=>PATRONS.find(f=>f.id===id).stars))].sort(),[1,2,3,4,5]);
 });
@@ -24,5 +24,5 @@ test('all new patrons can be met without replacing old collections and survive r
 });
 test('new patrons award their stated buffs on future rituals, stack their category bonuses and never duplicate an encounter',()=>{
  for(const id of ids){const f=PATRONS.find(p=>p.id===id),state={...fresh(0),friends:[id],coupons:f.discount?[{patron:id,discount:f.discount,uses:1}]:[]};assert.deepEqual(patronBuffs(state),{oil:f.oil,merit:f.merit,discount:f.discount});const outcome=reward(state,result,{id:'buff-'+id,now:1000,random:()=>.9});assert.equal(outcome.earned,Math.round(Math.round(40*(1+f.oil))*.32));assert.equal(outcome.merit,Math.round(Math.round(28*(1+f.merit))*.36));assert.equal(outcome.friend,null);assert.deepEqual(outcome.state.friends,[id]);}
- assert.deepEqual(patronBuffs({friends:PATRONS.map(f=>f.id),coupons:[]}),{oil:.34,merit:.305,discount:0});
+ assert.deepEqual(patronBuffs({friends:PATRONS.map(f=>f.id),coupons:[]}),{oil:.395,merit:.345,discount:0});
 });

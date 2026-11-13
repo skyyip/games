@@ -115,7 +115,7 @@ export function createSocialUI({root,getData,getState,getName,getUID,isRegistere
   each('[data-challenge-friend]',button=>button.onclick=()=>perform(api=>api.joinChallenge(button.dataset.challengeFriend),false,button,{success:text('街坊挑戰已開啟！雙方參加後各完成 3 場儀式。','Team challenge opened! After both join, finish 3 rituals each.')}));
   each('[data-join-challenge]',button=>button.onclick=()=>perform(api=>api.joinChallenge(button.dataset.joinChallenge),false,button));
   each('[data-coop-card]',button=>button.onclick=()=>showCoopCard(data.challenges.find(c=>c.id===button.dataset.coopCard)));
-  if($('#bbl-gift-message')){const select=$('#bbl-gift-message');let keyboard=false;select.onpointerdown=()=>keyboard=false;select.onkeydown=()=>keyboard=true;select.onchange=event=>{view.message=event.target.value;if(!keyboard)select.blur();};}
+  if($('#bbl-gift-message')){const select=$('#bbl-gift-message');let keyboard=false;select.onpointerdown=()=>{keyboard=false;};select.onkeydown=()=>{keyboard=true;};select.onchange=event=>{view.message=event.target.value;if(!keyboard)select.blur();};}
   each('[data-gift-kind]',button=>button.onclick=()=>{view.kind=button.dataset.giftKind;view.item='';render();$(`[data-gift-kind="${view.kind}"]`)?.focus({preventScroll:true});});
   // Keep the native select instance alive while its OS picker closes. Replacing
   // and refocusing it during change can leave mobile pickers open or reopen them.

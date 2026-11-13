@@ -8,7 +8,7 @@ import {COMIC_MOODS,GHOST_MOODS,spiritPaperArt,comicGhostArt} from '../src/comba
 import {fresh,reward,collectIdle,MAX_IDLE_HOURS,dailyReward} from '../src/progress.js';
 import {OIL_GAIN_FACTOR,MERIT_GAIN_FACTOR} from '../src/economy.js';
 test('all helper finishers have unique bilingual names, comic endings and finite distinct motion recipes',()=>{
- assert.equal(WEAPONS.filter(w=>w.series!=='film-comedy').length,66);const names=new Set(),motions=new Set();
+ assert.equal(WEAPONS.filter(w=>w.series!=='film-comedy'&&w.series!=='street-comedy').length,66);const names=new Set(),motions=new Set();
  for(const kit of WEAPONS){const scene=finisherScene(kit.id);for(const field of ['name','payoff','tag'])assert.ok(scene[field].length===2&&scene[field].every(text=>typeof text==='string'&&text.length>0),kit.id+field);assert.ok(scene.steps.length>=2);assert.ok(scene.pose);assert.match(finisherPropArt(kit.id),/<(?:g|path|rect|circle|ellipse)/,kit.id+' prop');names.add(scene.name[0]);const frames=finisherKeyframes(kit.id);assert.ok(frames.length>=4);for(const frame of frames){assert.equal(/NaN|undefined|Infinity|--\d/.test(frame.transform),false,kit.id);assert.ok(frame.opacity>=0&&frame.opacity<=1);}motions.add(JSON.stringify(frames));}
  assert.equal(names.size,WEAPONS.length);assert.equal(motions.size,WEAPONS.length);
 });
