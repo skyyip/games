@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {RiverScene,MAX_CANVAS_PIXELS} from '../src/scene.js';import {FroggerGame} from '../src/game.js';
 function withScene(run){
  const original={document:globalThis.document,matchMedia:globalThis.matchMedia,devicePixelRatio:globalThis.devicePixelRatio};let resets=0;
- const canvas=()=>{const ctx={setTransform(){},drawImage(){},clearRect(){}};return {getContext:()=>ctx,set width(v){this.w=v;resets++;},get width(){return this.w;},set height(v){this.h=v;resets++;},get height(){return this.h;}};};
+ const canvas=()=>{const ctx={setTransform(){},drawImage(){},clearRect(){},beginPath(){},ellipse(){},fill(){}};return {getContext:()=>ctx,set width(v){this.w=v;resets++;},get width(){return this.w;},set height(v){this.h=v;resets++;},get height(){return this.h;}};};
  Object.assign(globalThis,{document:{createElement:canvas},matchMedia:()=>({matches:false}),devicePixelRatio:3});
  try{const scene=new RiverScene(canvas());return run(scene,()=>resets);}finally{for(const [key,value]of Object.entries(original)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}
 }
@@ -44,4 +44,15 @@ test('hot animal poses survive cache eviction and same-DPR resize',()=>withScene
  s.resize(400,500);s.paintAnimal=()=>{};s.animal(0,0,1,'frog',{});const hot=s.animalCache.values().next().value;
  for(let i=0;i<80;i++){s.animal(0,0,1,'frog',{});s.animal(0,0,1,'frog',{squat:1+i/20});}
  assert([...s.animalCache.values()].includes(hot));assert(s.animalCache.size<=48);s.resize(401,500);assert([...s.animalCache.values()].includes(hot));
+}));
+
+test('camera zoom scales one canonical platform bitmap instead of repainting every frame',()=>withScene(s=>{
+ s.resize(400,500);const g=new FroggerGame({random:()=>.75,now:()=>0});g.start();let paints=0;const scales=[];s.paintPlatform=()=>paints++;s.zoomFrom=.6;s.zoomTarget=1.1;s.ctx.drawImage=(canvas,x,y,w)=>scales.push(w);
+ for(let i=0;i<30;i++)s.stump(g,g.target,1,{s:.6+i/29*.5,point:()=>({x:200,y:300})});
+ assert.equal(paints,1);assert(scales.at(-1)>scales[0]);s.zoomFrom=1.1;s.zoomTarget=.7;s.stump(g,g.target,1,{s:1,point:()=>({x:200,y:300})});assert.equal(paints,1);
+}));
+test('prewarmed flight poses do not rerasterize during a hop and the atlas remains bounded',()=>withScene(s=>{
+ s.resize(400,500);let paints=0;s.paintAnimal=()=>paints++;s.prepareAnimal('frog');const before=paints;
+ for(let i=0;i<=80;i++)s.animal(100,100,1,'frog',{airborne:true,flightPhase:i/80,anchorFeet:true});
+ assert.equal(paints,before);assert(s.animalCache.size<=48);
 }));

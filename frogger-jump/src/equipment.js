@@ -1,4 +1,4 @@
-// Permanent unlocks. Each equipped item has one use per run; skills recharge every 20 landings.
+// Permanent unlocks. Each equipped general skill and companion has one use per run.
 export const SKILLS=Object.freeze([
  {id:'double',zh:'跨兩格',en:'Double hop',price:640,icon:'↗↗',descriptionZh:'下一跳主動瞄準第二個落點，仍需掌握蓄力。',descriptionEn:'Aim at the second pad for your next hop; you still control power.'},
  {id:'adjust',zh:'空中微調',en:'Air adjustment',price:800,icon:'〰',descriptionZh:'預先啟用，下一跳最多修正28距離；差太遠仍會落水。',descriptionEn:'Arm before jumping; correct up to 28 distance on your next hop.'},

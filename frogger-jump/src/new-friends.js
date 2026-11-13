@@ -2,7 +2,7 @@ export const NEW_FRIENDS=new Set(['elf-mage','violet-mage','red-warrior','red-sp
 export function paintNewFriend(s,x,y,scale,id,pose={}){
  const c=s.ctx,ink='#51554e',sprout=id.endsWith('-sprout')||id==='bloom-bunny',elf=id==='elf-mage'||id==='mage-otter',warrior=id==='red-warrior',violet=id==='violet-mage',bunny=id==='bloom-bunny',otter=id==='mage-otter',color=id==='red-sprout'?'#e89487':id==='blue-sprout'?'#87bddf':id==='yellow-sprout'?'#ead575':violet?'#b9a8cf':warrior?'#d99686':bunny?'#eed7a3':otter?'#b2cfc3':'#e4eddb';
  const {squat=0,stretch=0,lean=0,fall=0,kick=0,tuck=0}=pose;c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.14-stretch*.06)*(1-fall*.4),scale*(1-squat*.18+stretch*.08)*(1-fall*.4));
- if(!pose.airborne)s.ellipse(0,2,24,5,'#31543722');
+ if(!pose.airborne&&!pose.noShadow)s.ellipse(0,2,24,5,'#31543722');
  for(const sign of [-1,1]){s.ellipse(sign*(12+kick*8),-2-tuck*7,8,5,color,ink);s.ellipse(sign*(22+kick*3),-22-tuck*7,6,9,color,ink);}
  s.ellipse(0,-22,23,25,color,ink,2);s.ellipse(0,-17,15,16,'#fff4dd');
  if(bunny)for(const sign of [-1,1]){s.ellipse(sign*12,-70,8,22,color,ink,1.5);s.ellipse(sign*12,-71,3,14,'#e9b7af');}

@@ -1,3 +1,4 @@
+import {ROUTE_DEPTH,PAD_DEPTH,landingOffset,soleOffset,ease} from './grounding.js';
 import {NEW_FRIENDS,paintNewFriend,paintRiverCompanion,paintRiverVisitor} from './new-friends.js';
 import {ISLAND_HEAD_HEIGHT,paintIslandFriend} from './island-friends.js';
 import {VARIANTS,surface} from './platforms.js';
@@ -25,14 +26,26 @@ export class RiverScene{
  ellipse(x,y,rx,ry,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  path(points,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();points(c);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  projection(game){
-  const span=game.stumps[2].y-game.current.y,fit=Math.min(this.width/480,(this.height*.7-12)/(span*.74+80),1.5);
+  const span=game.stumps[2].y-game.current.y,fit=Math.min(this.width/480,(this.height*.7-12)/(span*ROUTE_DEPTH+80),1.5);
   if(this.zoom===null){this.zoom=fit;this.zoomFrom=fit;this.zoomTarget=fit;this.currentId=game.current.id;}
   if(this.currentId!==game.current.id){this.zoomFrom=this.zoom;this.zoomTarget=fit;this.currentId=game.current.id;}
   const t=clamp((game.clock-game.cameraAt)/CAMERA_MS);this.zoom=mix(this.zoomFrom,this.zoomTarget,t*t*(3-2*t));
-  const s=this.zoom;return {s,point:p=>({x:this.width/2+p.x*s,y:this.height*.79-(p.y-game.camera)*s*.74})};
+  const s=this.zoom;return {s,point:p=>({x:this.width/2+p.x*s,y:this.height*.79-(p.y-game.camera)*s*ROUTE_DEPTH})};
  }
- shake(game,stump){if(this.reduced.matches||stump.id!==game.current.id||!stump.sinking||game.deadline===null)return {x:0,y:0};const urgency=1-clamp(game.sinkRemaining/SINK_MS);return {x:Math.sin(game.clock*.042)*(1+urgency*2),y:Math.sin(game.clock*.056)*urgency*1.5};}
- impact(game,stump){const age=game.clock-game.landedAt;return !this.reduced.matches&&stump===game.current&&age>=0&&age<420?Math.sin(Math.PI*age/420)*Math.exp(-age/180)*3:0;}
+ shake(game,stump,time=game.clock){if(this.reduced.matches||stump.id!==game.current.id||!stump.sinking||game.deadline===null)return {x:0,y:0};const urgency=1-clamp((game.deadline-time)/SINK_MS);return {x:Math.sin(time*.042)*(1+urgency*2),y:Math.sin(time*.056)*urgency*1.5};}
+ impact(game,stump,time=game.clock){const age=time-game.landedAt;return !this.reduced.matches&&stump===game.current&&age>=0&&age<420?Math.sin(Math.PI*age/420)*Math.exp(-age/180)*3:0;}
+ platformFrame(game,pad,projection,time=game.clock){
+  const top=surface(pad,time),p=projection.point(top),shake=this.shake(game,pad,time),submerge=pad===game.current&&pad.sinking&&game.deadline!==null?clamp((time-game.deadline)/500):0;
+  return {top,r:top.r*projection.s,ry:top.r*projection.s*PAD_DEPTH,x:p.x+shake.x,y:p.y+shake.y+this.impact(game,pad,time)*projection.s*(pad.kind==='lily'?1.5:1)+submerge*65*projection.s,submerge};
+ }
+ padContact(game,pad,offset,projection,time=game.clock){const frame=this.platformFrame(game,pad,projection,time),delta=landingOffset(frame.top,offset,pad===game.current&&!this.reduced.matches?time-game.landedAt:Infinity);return {x:frame.x+delta.x*projection.s,y:frame.y+delta.y*projection.s};}
+ riderContact(game,projection,frog=game.frog){
+  if(game.state!=='jumping')return this.padContact(game,game.current,game.riderOffset??{x:0,y:0},projection);
+  const j=game.jump,t=clamp((game.clock-j.at)/j.duration),raw=projection.point(frog),fromTop=surface(game.current,j.at),from=this.padContact(game,game.current,{x:j.from.x-fromTop.x,y:j.from.y-fromTop.y},projection,j.at),rawFrom=projection.point(j.from),start=1-ease(t/.2);
+  let x=raw.x+(from.x-rawFrom.x)*start,y=raw.y+(from.y-rawFrom.y)*start;
+  if(j.success){const top=surface(game.target,j.at+j.duration),to=this.padContact(game,game.target,{x:j.end.x-top.x,y:j.end.y-top.y},projection,j.at+j.duration),rawTo=projection.point(j.end),end=ease((t-.72)/.28);x+=(to.x-rawTo.x)*end;y+=(to.y-rawTo.y)*end;}
+  return {x,y};
+ }
  ripples(game,projection){
   if(this.reduced.matches)return;
   const c=this.ctx,{s,point}=projection;
@@ -59,21 +72,21 @@ export class RiverScene{
  }
  // Reuse stable pad artwork; moving turtles keep their live surface position.
  stump(game,pad,index,projection){
-  const age=game.clock-game.landedAt,current=pad===game.current,stableScale=Math.abs(this.zoom-this.zoomTarget)<.0001;
-  const cacheable=stableScale&&!['lotus','spinner'].includes(pad.kind)&&!(current&&(pad.sinking||pad.angler||age>=0&&age<650));
+  const age=game.clock-game.landedAt,current=pad===game.current,cacheScale=Math.max(this.zoomFrom??projection.s,this.zoomTarget??projection.s);
+  const cacheable=!['lotus','spinner'].includes(pad.kind)&&!(current&&(pad.sinking||pad.angler||age>=0&&age<650));
   if(!cacheable){this.paintPlatform(game,pad,index,projection);return;}
-  const {s,point}=projection,key=[s,index,game.targetIndex,this.zh,pad.kind,pad.r,pad.sinking,pad.thorns,pad.angler,pad.reinforced,pad.guarded,pad.kind==='shell'&&game.jump?.error<=pad.r*.25].join('|');let cached=this.padCache.get(pad.id);
+  const {s:liveScale,point}=projection,s=cacheScale,key=[s,index,game.targetIndex,this.zh,pad.kind,pad.r,pad.sinking,pad.thorns,pad.angler,pad.reinforced,pad.guarded,pad.kind==='shell'&&game.jump?.error<=pad.r*.25].join('|');let cached=this.padCache.get(pad.id);
   if(!cached||cached.key!==key){
    const left=Math.ceil(pad.r*s*1.35+24),top=Math.ceil(pad.r*s*.43+40),width=left*2,height=top+Math.ceil(pad.r*s*1.5+48),layer=this.layer(width,height),main=this.ctx;
    this.ctx=layer.ctx;try{this.paintPlatform(game,pad,index,{s,point:()=>({x:left,y:top})});}finally{this.ctx=main;}
    cached={...layer,key,left,top};this.padCache.set(pad.id,cached);
   }
-  const p=point(surface(pad,game.clock));this.ctx.drawImage(cached.canvas,p.x-cached.left,p.y-cached.top,cached.width,cached.height);
+  const p=point(surface(pad,game.clock));const ratio=liveScale/s;this.ctx.drawImage(cached.canvas,p.x-cached.left*ratio,p.y-cached.top*ratio,cached.width*ratio,cached.height*ratio);
  }
  paintPlatform(game,stump,index,projection){
   if(VARIANTS.includes(stump.kind)){this.variant(game,stump,index,projection);return;}
   if(stump.kind==='lily'){this.lily(game,stump,index,projection);return;}
-  const c=this.ctx,{s,point}=projection,p=point(surface(stump,game.clock)),shake=this.shake(game,stump),submerge=stump.id===game.current.id&&stump.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,r=stump.r*s,ry=r*.43,height=r*.95,x=p.x+shake.x,y=p.y+shake.y+submerge*65*s+this.impact(game,stump)*s;c.save();c.globalAlpha=1-submerge;
+  const c=this.ctx,{s}=projection,{r,ry,x,y,submerge}=this.platformFrame(game,stump,projection),height=r*.95;c.save();c.globalAlpha=1-submerge;
   this.ellipse(x+5,y+height+8,r*1.13,ry*.8,'#306f6b26');
   c.strokeStyle='#d9eee0aa';c.lineWidth=1.5;this.ellipse(x,y+height+4,r*1.22,ry*.95,null,'#d8f2e099');
   const dark=stump.sinking,side=c.createLinearGradient(x-r,y,x+r,y);side.addColorStop(0,dark?'#553c35':'#86613f');side.addColorStop(.35,dark?'#94705c':'#c39a64');side.addColorStop(1,dark?'#4a3834':'#6b4d38');this.path(p=>{p.moveTo(x-r,y);p.bezierCurveTo(x-r,y+ry,x+r,y+ry,x+r,y);p.lineTo(x+r,y+height);p.bezierCurveTo(x+r,y+height+ry,x-r,y+height+ry,x-r,y+height);p.closePath();},side,dark?'#543b38':'#795b40',2);
@@ -100,7 +113,7 @@ export class RiverScene{
   if(stump.reinforced||stump.guarded)this.ellipse(x,y,r+2,ry+2,null,stump.guarded?'#cceff2':'#d6f2ff',2.5*s);
  }
  lily(game,stump,index,projection){
-  const c=this.ctx,{s,point}=projection,p=point(surface(stump,game.clock)),shake=this.shake(game,stump),submerge=stump===game.current&&stump.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,r=stump.r*s,ry=r*.43,height=r*.12,x=p.x+shake.x,y=p.y+shake.y+this.impact(game,stump)*s*1.5+submerge*65*s;c.save();c.globalAlpha=1-submerge;
+  const c=this.ctx,{s}=projection,{r,ry,x,y,submerge}=this.platformFrame(game,stump,projection),height=r*.12;c.save();c.globalAlpha=1-submerge;
   this.ellipse(x+3*s,y+6*s,r*1.04,ry,'#2d696c22');this.ellipse(x,y+8*s,r*1.14,ry*1.07,null,'#d5efdc88',1.5);
   const top=c.createRadialGradient(x-r*.3,y-ry*.3,1,x,y,r);top.addColorStop(0,'#b2da91');top.addColorStop(1,stump.sinking?'#648a5c':'#68a36e');
   c.beginPath();c.moveTo(x,y);c.ellipse(x,y,r,ry,0,.22,Math.PI*2-.22);c.closePath();c.fillStyle=top;c.fill();c.lineWidth=2.5*s;c.strokeStyle='#488264';c.stroke();
@@ -110,7 +123,7 @@ export class RiverScene{
   this.surfaceMarks(game,stump,index,{s,r,ry,height,x,y});c.restore();
  }
  variant(game,pad,index,projection){
-  const c=this.ctx,{s,point}=projection,top=surface(pad,game.clock),p=point(top),r=top.r*s,ry=r*.43,x=p.x,submerge=pad===game.current&&pad.sinking&&game.deadline!==null?clamp((game.clock-game.deadline)/500):0,y=p.y+this.impact(game,pad)*s+submerge*65*s,kind=pad.kind;
+  const c=this.ctx,{s}=projection,{top,r,ry,x,y,submerge}=this.platformFrame(game,pad,projection),kind=pad.kind;
   const age=game.clock-game.landedAt,occupied=pad===game.current,landed=occupied&&age>=0,phase=this.reduced.matches?0:top.phase;
   c.save();c.globalAlpha=1-submerge;this.ellipse(x+3*s,y+12*s,r*1.07,ry*.95,'#285b642b');this.ellipse(x,y+12*s,r*1.14,ry,null,'#d4f3df88');
   if(kind==='lotus'){
@@ -152,32 +165,32 @@ export class RiverScene{
  animal(x,y,scale,kind,pose={}){
   // A bounded phase atlas: continuous transforms are cheap; full vector art is cached.
   const motion=motionFor(kind);let stage='idle',frame=0,quantized={};
-  if(pose.airborne){stage='flight';frame=Math.round((pose.flightPhase??.5)*11);const t=frame/11;quantized={squat:.5*(1-clamp(t/.18)),stretch:Math.sin(Math.PI*t)*.8,kick:Math.sin(Math.PI*clamp(t/.4))*motion.kick,tuck:Math.sin(Math.PI*clamp((t-.18)/.64)),reach:Math.sin(Math.PI*clamp((t-.65)/.35)),lean:Math.sin(Math.PI*t)*motion.sway,airborne:true};}
+  if(pose.airborne){stage='flight';frame=Math.round((pose.flightPhase??.5)*23);const t=frame/23;quantized={squat:.5*(1-clamp(t/.18)),stretch:Math.sin(Math.PI*t)*.8,kick:Math.sin(Math.PI*clamp(t/.4))*motion.kick,tuck:Math.sin(Math.PI*clamp((t-.18)/.64)),reach:Math.sin(Math.PI*clamp((t-.65)/.35)),lean:Math.sin(Math.PI*t)*motion.sway,airborne:true};}
   else if(pose.fall){stage='fall';frame=Math.round(pose.fall*7);quantized={fall:frame/7,lean:(pose.direction==='long'?1:-1)*frame*.065,airborne:true};}
   else if(pose.landingPhase!==null&&pose.landingPhase!==undefined){stage='land';frame=Math.round(pose.landingPhase*5);quantized={squat:Math.sin(Math.PI*frame/5)*.5*motion.settle,blink:frame<2?.6:0};}
   else{frame=Math.round((pose.squat||0)*7);stage=frame?'charge':'idle';quantized={squat:frame/7*motion.spring};}
-  const key=kind+'|'+stage+'|'+frame+(stage==='fall'?'|'+pose.direction:'');let sprite=this.animalCache.get(key);
+  if(pose.anchorFeet)quantized.noShadow=true;const key=kind+'|'+stage+'|'+frame+(stage==='fall'?'|'+pose.direction:'')+(pose.anchorFeet?'|feet':'');let sprite=this.animalCache.get(key);
   if(!sprite){
-   sprite=this.layer(128,144);const previous=this.ctx;this.ctx=sprite.ctx;
+   sprite=this.layer(128,144);sprite.sole=pose.anchorFeet?soleOffset(kind,quantized):0;const previous=this.ctx;this.ctx=sprite.ctx;
    try{this.paintAnimal(64,100,1,kind,quantized);}finally{this.ctx=previous;}
    if(this.animalCache.size>=48)this.animalCache.delete(this.animalCache.keys().next().value);
    this.animalCache.set(key,sprite);
   }
   // Keep frequently reused charge/idle poses hot when jump poses fill the cache.
   this.animalCache.delete(key);this.animalCache.set(key,sprite);
-  this.ctx.drawImage(sprite.canvas,x-64*scale,y-100*scale,128*scale,144*scale);
+  this.ctx.drawImage(sprite.canvas,x-64*scale,y-(100+sprite.sole)*scale,128*scale,144*scale);
  }
  paintRiverCompanion(x,y,scale,id){paintRiverCompanion(this,x,y,scale,id);}
  riverCompanion(game,projection){if(!game.companion)return;let sprite=this.companionCache.get(game.companion);if(!sprite){sprite=this.layer(100,80);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverCompanion(this,50,40,1,game.companion);}finally{this.ctx=prev;}this.companionCache.set(game.companion,sprite);}const {s,point}=projection,p=point(game.current),c=this.ctx;c.save();c.globalAlpha=game.companionReady?.85:.35;c.drawImage(sprite.canvas,p.x-110*s,p.y-10*s,75*s,60*s);c.restore();}
- prepareAnimal(kind){for(let i=0;i<12;i++)this.animal(-1000,-1000,1,kind,{airborne:true,flightPhase:i/11});for(let i=0;i<8;i++)this.animal(-1000,-1000,1,kind,{squat:i/7});for(let i=0;i<6;i++)this.animal(-1000,-1000,1,kind,{landingPhase:i/5});}
+ prepareAnimal(kind){for(let i=0;i<24;i++)this.animal(-1000,-1000,1,kind,{airborne:true,flightPhase:i/23,anchorFeet:true});for(let i=0;i<8;i++)this.animal(-1000,-1000,1,kind,{squat:i/7,anchorFeet:true});for(let i=0;i<6;i++)this.animal(-1000,-1000,1,kind,{landingPhase:i/5,anchorFeet:true});}
  paintAnimal(x,y,scale,kind,pose){
   if(NEW_FRIENDS.has(kind)){paintNewFriend(this,x,y,scale,kind,pose);return;}
   if(kind==='frog'){this.frog(x,y,scale,pose);return;}
   if(kind==='mochi'){this.mochi(x,y,scale,pose);return;}
   if(ISLAND_HEAD_HEIGHT[kind]){paintIslandFriend(this,x,y,scale,kind,pose);return;}
   if(['chiikawa','hachiware','usagi'].includes(kind)){this.comicFriend(x,y,scale,kind,pose);return;}
-  const {squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}=pose,c=this.ctx,ink='#4b514b';c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.15-stretch*.07)*(1-fall*.55),scale*(1-squat*.2+stretch*.1)*(1-fall*.55));
-  if(!airborne)this.ellipse(0,2,23,5,'#31543733');
+  const {squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false,noShadow=false}=pose,c=this.ctx,ink='#4b514b';c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.15-stretch*.07)*(1-fall*.55),scale*(1-squat*.2+stretch*.1)*(1-fall*.55));
+  if(!airborne&&!noShadow)this.ellipse(0,2,23,5,'#31543733');
   if(kind==='monkey'||kind==='cat')this.path(p=>{p.moveTo(16,-8);p.bezierCurveTo(44,0,41,-36,30,-30);p.quadraticCurveTo(24,-26,32,-22);},null,kind==='cat'?'#b57d4f':'#9f7655',5);
   if(kind==='fox'){this.path(p=>{p.moveTo(12,-8);p.quadraticCurveTo(53,6,37,-39);p.quadraticCurveTo(26,-27,21,-28);p.closePath();},'#d98750',ink,1.5);this.path(p=>{p.moveTo(37,-39);p.lineTo(29,-28);p.lineTo(40,-22);p.closePath();},'#fff1d9');}
   const penguin=kind==='penguin',bunny=kind==='bunny',duck=kind==='duck',panda=kind==='panda',pointy=kind==='cat'||kind==='fox',capy=kind==='capybara',[body,light,dark]=ANIMAL_ART[kind]??ANIMAL_ART.otter;
@@ -195,10 +208,10 @@ export class RiverScene{
   for(const sign of [-1,1])this.path(p=>{p.moveTo(sign*18,-19);p.quadraticCurveTo(sign*(29+kick*2),-15-reach*8,sign*(24+stretch*4),-6+kick*5-reach*14);},null,penguin?'#59768c':panda?'#535952':body,penguin?7:6);
   if(penguin){this.path(p=>{p.moveTo(-14,-17);p.quadraticCurveTo(0,-11,14,-17);},null,'#b6dbe4',5);this.path(p=>{p.moveTo(10,-16);p.lineTo(15,-3);},null,'#b6dbe4',5);}c.restore();
  }
- comicFriend(x,y,scale,kind,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}={}){
+ comicFriend(x,y,scale,kind,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false,noShadow=false}={}){
   const c=this.ctx,ink='#675861',cat=kind==='hachiware',rabbit=kind==='usagi',body=rabbit?'#fff0b8':'#fffaf4',blue='#a9cceb',pink=rabbit?'#efbd9f':'#efb8c9';
   c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.16-stretch*.06)*(1-fall*.55),scale*(1-squat*.21+stretch*.1)*(1-fall*.55));
-  if(!airborne)this.ellipse(0,2,23,5,'#31543722');
+  if(!airborne&&!noShadow)this.ellipse(0,2,23,5,'#31543722');
   if(cat)this.path(p=>{p.moveTo(13,-5);p.bezierCurveTo(35,0,37,-19,28,-23);},null,blue,6);
   for(const side of [-1,1]){
    this.ellipse(side*(10+kick*7-tuck*4),kick*11-tuck*4,7,4,body,ink,1.3);
@@ -223,9 +236,9 @@ export class RiverScene{
   if(rabbit){this.path(p=>{p.moveTo(-4,-9);p.quadraticCurveTo(0,-4,4,-9);},null,'#d7ae63',1.2);}
   c.restore();
  }
- mochi(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}={}){
+ mochi(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false,noShadow=false}={}){
   const c=this.ctx,ink='#725b61';c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.15-stretch*.06)*(1-fall*.55),scale*(1-squat*.2+stretch*.1)*(1-fall*.55));
-  if(!airborne)this.ellipse(0,2,24,5,'#31543722');
+  if(!airborne&&!noShadow)this.ellipse(0,2,24,5,'#31543722');
   for(const side of [-1,1]){this.ellipse(side*(12+kick*7-tuck*4),kick*10-tuck*4,8,4,'#f1d9d5',ink,1.3);this.ellipse(side*18,-47,9,10,'#fff5ed',ink,1.5);this.ellipse(side*18,-47,4.5,5,'#edbabb');}
   this.ellipse(0,-17,22,22,'#fff8ef',ink,1.6);this.ellipse(0,-33,27,22,'#fff8ef',ink,1.7);
   for(const side of [-1,1]){this.ellipse(side*10,-35,3,Math.max(.8,4.2*(1-blink)),ink);if(blink<.6)this.ellipse(side*10-1,-37,1,1.2,'#fff');this.ellipse(side*18,-27,5,3,'#edb8be');this.path(p=>{p.moveTo(side*20,-18);p.quadraticCurveTo(side*31,-16-reach*9,side*22,-8+kick*4-reach*12);},null,'#edcfca',6);}
@@ -240,9 +253,9 @@ export class RiverScene{
  splash(game,projection){const age=game.clock-game.fall.at;if(age>800)return;const c=this.ctx,{s,point}=projection,p=point(game.fall),t=clamp(age/800);c.save();c.globalAlpha=1-t;this.ellipse(p.x,p.y+5*s,(18+t*45)*s,(6+t*16)*s,null,'#efffe7',2.5*s);for(let i=0;i<8;i++){const a=i*Math.PI/4,spread=10+t*48;this.ellipse(p.x+Math.cos(a)*spread*s,p.y+Math.sin(a)*spread*.27*s-Math.sin(Math.PI*clamp(t/.7))*(15+i%3*5)*s,2.5*s,4*s,'#def5e7');}c.restore();}
  skillEffect(game,projection){const e=this.skill;if(!e||this.reduced.matches)return;const age=game.clock-e.at;if(age<0||age>650)return;const {s,point}=projection,c=this.ctx,p=point(e.point),t=age/650,colors={frog:'#d7f1a8',penguin:'#e0f7ff',bunny:'#ffe1e8',monkey:'#e8e5a1',otter:'#c9f1ed'};c.save();c.globalAlpha=1-t;this.ellipse(p.x,p.y,(e.radius+10+t*24)*s,(e.radius+10+t*24)*s*.43,null,(colors[e.animal]??species(e.animal).color),3*s);for(let i=0;i<6;i++){const a=i*Math.PI/3;this.ellipse(p.x+Math.cos(a)*(e.radius+10+t*20)*s,p.y+Math.sin(a)*(e.radius+10+t*20)*s*.43,3*s,2*s,(colors[e.animal]??species(e.animal).color));}c.restore();}
 
- frog(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,airborne=false,lean=0,fall=0}={}){
+ frog(x,y,scale,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,airborne=false,lean=0,fall=0,noShadow=false}={}){
   const c=this.ctx;c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.2-stretch*.08)*(1-fall*.55),scale*(1-squat*.24+stretch*.12)*(1-fall*.55));
-  if(!airborne)this.ellipse(0,2,23+squat*3,5,'#31543733');
+  if(!airborne&&!noShadow)this.ellipse(0,2,23+squat*3,5,'#31543733');
   // Hind legs extend after take-off and tuck back in before touchdown.
   for(const sign of [-1,1]){
    this.path(p=>{p.moveTo(sign*14,-14);p.quadraticCurveTo(sign*(31+kick*8-tuck*10),-14+kick*14-tuck*4,sign*(20+kick*10-tuck*11),-2+kick*19-tuck*10);},null,'#3c7047',8);
@@ -308,13 +321,14 @@ export class RiverScene{
   if(game.riverFriend){const c=this.ctx,q=point(game.target),key='visitor-'+game.riverFriend;let sprite=this.companionCache.get(key);if(!sprite){sprite=this.layer(64,64);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverVisitor(this,32,32,1,game.riverFriend);}finally{this.ctx=prev;}this.companionCache.set(key,sprite);}c.drawImage(sprite.canvas,q.x+game.target.r*s+3*s,q.y-46*s,48*s,48*s);if(game.riverFriend==='firefly'||game.target.mailChallenge)this.ellipse(q.x,q.y,6*s,3*s,'#f8e7a4');if(game.riverFriend==='dragonfly'&&game.target.kind==='turtle'){c.save();c.font=`${16*s}px system-ui`;c.fillStyle='#466a58';c.fillText(surface(game.target,game.clock+100).x>surface(game.target,game.clock).x?'→':'←',q.x+game.target.r*s+15*s,q.y+18*s);c.restore();}}
   for(let i=2;i>=0;i--)this.stump(game,game.stumps[i],i,projection);
   if(!['over','drowning'].includes(game.state))this.fishHazard(game,projection);
-  const frog=game.frog,p=point(frog),shake=['idle','charging','ready'].includes(game.state)?this.shake(game,game.current):{x:0,y:0};
+  const frog=game.frog,p=['over','drowning'].includes(game.state)?point(frog):this.riderContact(game,projection,frog);
   if(!['over','drowning'].includes(game.state)){
    if(game.state==='jumping'){
     const height=clamp(frog.lift/180),c=this.ctx;c.save();c.globalAlpha=.23-height*.12;this.ellipse(p.x,p.y,23*s*(1-height*.4),6*s*(1-height*.35),'#234d48');c.restore();
    }
+   if(game.state!=='jumping')this.ellipse(p.x,p.y+1*s,21*s,3.5*s,'#31543740');
    const pose=this.reduced.matches?{...frog,squat:game.state==='charging'?game.power:0,stretch:0,kick:0,tuck:0,reach:0,blink:0}:frog;
-   this.animal(p.x+shake.x,p.y+shake.y+this.impact(game,game.current)*s*(game.current.kind==='lily'?1.5:1)-frog.lift*s,s*1.12,game.animal,{...pose,airborne:game.state==='jumping'});
+   this.animal(p.x,p.y-frog.lift*s,s*1.12,game.animal,{...pose,anchorFeet:true,airborne:game.state==='jumping'});
   }else{
    const age=game.clock-game.fall.at,t=clamp(age/SPLASH_MS),c=this.ctx;
    if(game.fall.reason==='angler'&&game.fall.airborne){this.angler(game,projection);}
@@ -325,7 +339,7 @@ export class RiverScene{
   this.skillEffect(game,projection);
   if(this.effect?.coins&&game.clock-this.effect.at<650){const t=clamp((game.clock-this.effect.at)/650),p=point(this.effect.point),c=this.ctx;c.save();c.globalAlpha=1-t;c.textAlign='center';c.font='700 17px system-ui';c.fillStyle='#fff3b5';c.strokeStyle='#76613d';c.lineWidth=3;const text=`+${this.effect.coins}`;c.strokeText(text,p.x-10*s,p.y-(65+t*24)*s);c.fillText(text,p.x-10*s,p.y-(65+t*24)*s);this.coin(p.x+17*s,p.y-(71+t*24)*s,.5*s);if(this.effect.milestone){c.font='700 12px system-ui';const label=this.zh?'里程碑 +10':'Milestone +10';c.strokeText(label,p.x,p.y-(90+t*24)*s);c.fillText(label,p.x,p.y-(90+t*24)*s);}c.restore();}
   const headHeight=ISLAND_HEAD_HEIGHT[game.animal]??(NEW_FRIENDS.has(game.animal)?105:game.animal==='usagi'?91:['chiikawa','hachiware'].includes(game.animal)?75:game.animal==='bunny'?80:['fox','cat'].includes(game.animal)?66:game.animal==='duck'?64:game.animal==='mochi'?72:60);
-  this.headAnchor={x:p.x+shake.x,y:p.y+shake.y-frog.lift*s-headHeight*s*(1-frog.squat*.24)};
+  this.headAnchor={x:p.x,y:p.y-frog.lift*s-headHeight*s*(1-frog.squat*.24)};
   if(!this.reduced.matches&&this.effect&&game.clock-this.effect.at<260){const t=clamp((game.clock-this.effect.at)/260),spot=point(game.current),c=this.ctx;c.save();c.globalAlpha=(1-t)*.45;for(const sign of [-1,1]){const x=spot.x+sign*24*s;this.path(p=>{p.moveTo(x-sign*3*s,spot.y+4*s);p.quadraticCurveTo(x,spot.y+7*s,x+sign*(5+t*6)*s,spot.y+3*s);},null,'#f4efc2',1.5*s);}c.restore();}
  }
 }

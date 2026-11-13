@@ -1,11 +1,11 @@
 // Small hand-drawn portraits share the game's cached pose/animation pipeline.
 export const ISLAND_HEAD_HEIGHT=Object.freeze({kurimanju:72,rakko:78,momonga:78,shisa:80,shimajiro:76,mermaid:80,hitoha:82,futaba:82});
-export function paintIslandFriend(scene,x,y,scale,kind,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false}={}){
+export function paintIslandFriend(scene,x,y,scale,kind,{squat=0,stretch=0,kick=0,tuck=0,reach=0,blink=0,lean=0,fall=0,airborne=false,noShadow=false}={}){
  const c=scene.ctx,e=(...a)=>scene.ellipse(...a),p=(...a)=>scene.path(...a),ink='#65565a';
  const kuri=kind==='kurimanju',rakko=kind==='rakko',momo=kind==='momonga',shisa=kind==='shisa',uncle=kind==='shimajiro',mermaid=kind==='mermaid',leaf=kind==='hitoha'||kind==='futaba';
  const body=leaf?'#b6bdc3':shisa?'#ffe9b5':momo?'#fffaf6':uncle?'#f6e6cf':rakko?'#fffdf5':kuri?'#fff1db':'#fff8ee';
  c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.16-stretch*.06)*(1-fall*.55),scale*(1-squat*.21+stretch*.1)*(1-fall*.55));
- if(!airborne)e(0,2,uncle?29:24,5,'#31543722');
+ if(!airborne&&!noShadow)e(0,2,uncle?29:24,5,'#31543722');
  if(momo){
   p(q=>{q.moveTo(12,-5);q.bezierCurveTo(55,10,60,-45,36,-50);q.bezierCurveTo(18,-54,15,-34,26,-26);q.bezierCurveTo(36,-14,22,-15,12,-5);q.closePath();},'#c2d4e5',ink,1.5);
   p(q=>{q.moveTo(25,-6);q.bezierCurveTo(44,-4,48,-30,36,-36);},null,'#f8fcff',8);
