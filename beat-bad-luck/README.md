@@ -1,5 +1,15 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## iPhone Chrome home-screen Google sign-in (v159)
+
+Home-screen apps prepare Firebase's popup helper first, then show **Open Google sign-in**. That second, explicit click opens the final Firebase OAuth handler URL directly. iPhone Chrome/Safari use the same direct-link opening technique as Firebase's iOS standalone resolver. No `about:blank` window or subsequent navigation is required. Ordinary browser sign-in retains its native SDK popup.
+
+Real external window handles are never used to decide cancellation in this flow: iOS handoff and Cross-Origin-Opener-Policy can report `closed` while the account chooser is still open. Firebase observes only the flow's explicit cancellation/cleanup state. OAuth event IDs, provider checks, credential exchange and anonymous UID linking remain handled by Firebase. A **Cancel Google sign-in** button restores the account controls; the existing preparation and action deadlines also recover failed or abandoned operations. If the external page is closed, return to the game and cancel before retrying.
+
+No Firebase config, rules or indexes need changing. The same `beat-bad-luck` project/auth domain and separate local/account saves remain in use.
+
+Validation: 295 unit tests; 12 actual-window adapter scenarios, including trusted-click opening, iPhone Chrome's direct link, genuine COOP-severed and throwing external proxies, blocked-window retry, cancellation and late helpers; six account-controller scenarios for the two-stage interface, anonymous linking, explicit cancellation, timeout and delayed completion; and the existing auth-start, sign-out and account-backup suites. The actual bundled SDK also passes unavailable/stalled-helper recovery checks. Complete Google authorization on a physical iPhone remains unverified in this workspace.
+
 ## Night-market collection: 24 more original collectibles (v158)
 
 Six new items per category expand the original cute comic collection:
