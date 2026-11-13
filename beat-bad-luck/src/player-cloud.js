@@ -13,7 +13,7 @@ export async function authClient({retry=false}={}){
   // Pass the resolver explicitly only when the player requests a Google popup.
   let session;try{session=sdk.initializeAuth(instance,{persistence:[sdk.browserLocalPersistence,sdk.browserSessionPersistence,sdk.inMemoryPersistence]});}catch(e){if(e.code!=='auth/already-initialized')throw e;session=sdk.getAuth(instance);}
   if(globalThis.BBL_EMULATORS&&['localhost','127.0.0.1'].includes(location.hostname)&&!session.emulatorConfig)sdk.connectAuthEmulator(session,'http://127.0.0.1:9097',{disableWarnings:true});
-  return {...sdk,app:instance,session};
+  return {...sdk,app:instance,session,firebaseVersion:app.SDK_VERSION};
  }).catch(e=>{if(connection===pending)connection=null;throw e;});connection=pending;}return connection;
 }
 export async function dataClient(){if(!firestore)firestore=Promise.all([authClient(),import('firebase/firestore')]).then(([auth,sdk])=>{const db=sdk.getFirestore(auth.app);if(globalThis.BBL_EMULATORS&&['localhost','127.0.0.1'].includes(location.hostname))sdk.connectFirestoreEmulator(db,'127.0.0.1',8087);return {auth,sdk,db};}).catch(e=>{firestore=null;throw e;});return firestore;}

@@ -1,5 +1,15 @@
 # Beat the Bad Luck · 鵝頸橋下：小人退散！
 
+## Sign-out and home-screen Google recovery (v156)
+
+Sign-out preserves the account's local draft and sync metadata, attempts a cloud flush for at most two seconds, then signs out even if that flush fails, conflicts or stalls. Guest and account saves remain separate. Late writes from an earlier identity cannot change the current account's sync status or clear its pending upload. A slow cloud-data load or error no longer disables an otherwise available sign-out action.
+
+Home-screen/standalone Google sign-in reserves its window synchronously inside the trusted click, before Firebase's asynchronous helper initialization. The SDK still validates OAuth events and exchanges credentials. A narrow resolver adapter reuses that window for the SDK-generated event ID, including anonymous linking. Preparing the window has a 15-second deadline; all account actions have a two-minute deadline. Closing, blocking or failing to load the window restores the controls with a retry/Email message. An authenticated SDK callback also clears the pending state if the popup promise fails to settle.
+
+Ordinary browser sign-in retains the native SDK popup. GoDaddy's existing Firebase auth domain remains configured: switching to redirect alone would require addressing the cross-origin storage requirements in [Firebase's redirect guidance](https://firebase.google.com/docs/auth/web/redirect-best-practices). No Firestore rule/index changes are required.
+
+Validation: 289 unit tests; nine controller cases for clean/failed/conflicted/stalled sign-out, late writes, auth errors and unsettled Google actions; seven popup reservation/linking/block/close/deadline/retry cases; and the existing 12 auth-start, three signed-in backup and four responsive social checks. `scripts/standalone-auth-check.mjs` exercises immediate window reservation and failure/deadline recovery with the actual bundled Firebase SDK and intercepted public helpers. `scripts/google-popup-check.mjs` isolates the resolver hook; rerun it when updating Firebase. The environment blocks Google's public helper CDN, so complete real Google authorization and physical iOS home-screen behavior remain unverified.
+
 ## Original catalogue display restored (v155)
 
 The newly added Collection / Owned / Can buy category bar and detailed-stat checkbox are removed from the paper and kit catalogues. Owned and unowned cards, score multipliers and stock details return to their original display; the pre-existing favorite controls remain. Permanent decorations, automatic rewards, cooperation, gift messages and the smaller welcome text/transparent selected stars are retained.
