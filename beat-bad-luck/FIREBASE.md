@@ -50,6 +50,31 @@ npm run firebase:deploy --prefix beat-bad-luck
 
 填好 Web App 設定後須按網站既有流程重新建置及發布；規則部署不會發布網頁。
 
+### sky-playground.com：首次輸入名字後 Google 按鈕仍灰色
+
+不要直接上傳從 GitHub 下載的 `games-main/` 原始碼。原始碼中的 Firebase 套件引用必須先由網站建置器打包；一般 Apache/cPanel 靜態伺服器不會替瀏覽器解析 `firebase/app` 等套件。這種情況下本機遊戲和名字仍正常，但登入模組載入失敗。新版會顯示「登入服務尚未部署完成」，而不是籠統的操作失敗。
+
+在 Mac 的終端機執行以下指令。六個資料夾的依賴與 Pages 建置流程一致；只上傳最後產生的 `_site/` 內容：
+
+```sh
+cd /Users/skyyip/Downloads/games-main
+npm ci --prefix tools
+npm ci --prefix mo-lei-tau-studio
+npm ci --prefix frogger-jump
+npm ci --prefix beat-bad-luck
+npm ci --prefix career-365
+npm ci --prefix your-dream-career
+PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs _site
+node tools/check-seo.mjs _site /games/
+rsync -avzP _site/. zcjnikzosk1q@68.178.235.114:public_html/games
+```
+
+發布時需包含 `_site` 裡的 `built/`、`assets/`、各遊戲 HTML、service worker、`release.json` 及隱藏檔 `.htaccess`。不要只複製 `beat-bad-luck/`，因為打包後的共用模組在網站根目錄的 `built/` 中。此上傳不使用 `--delete`。
+
+部署後，於瀏覽器 Console 查看 `window.PLAYGROUND_RELEASE`，應有 `version` 及 `base: '/games/'`；若是 `undefined`，該頁仍是原始碼或舊版本。輸入名字後開啟帳戶設定，登入按鈕應啟用；不需要清除玩家存檔。Firebase Auth 的授權網域亦須包含 `sky-playground.com`，但缺少授權網域通常會在按下登入後報錯，而不是讓按鈕從一開始就停在灰色。
+
+首次載入驗證：`scripts/auth-start-check.mjs` 使用全新瀏覽器，實際輸入名字、開啟帳戶設定及重新載入；同時涵蓋手機/Safari 的初始化分支、卡住的 IndexedDB/Google 輔助資源，以及缺少套件打包時的明確錯誤提示。
+
 ## 4. 本機驗證
 
 ```sh
