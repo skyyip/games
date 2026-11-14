@@ -16,7 +16,7 @@ function gameSchema(game) {
   return {
     '@type': 'VideoGame', '@id': gameUrl(game) + '#game', name: game.name, alternateName: game.zh,
     url: gameUrl(game), description: game.intro, genre: game.genre,
-    inLanguage: ['en', 'zh-Hant'], gamePlatform: 'Web browser', applicationCategory: 'GameApplication',
+    inLanguage: game.languages ?? ['en', 'zh-Hant'], gamePlatform: 'Web browser', applicationCategory: 'GameApplication',
     operatingSystem: 'Any operating system with a modern web browser', isAccessibleForFree: true,
     playMode: game.players[1] === 1 ? 'https://schema.org/SinglePlayer' : 'https://schema.org/MultiPlayer',
     numberOfPlayers: { '@type': 'QuantitativeValue', minValue: game.players[0], maxValue: game.players[1] },
@@ -65,7 +65,7 @@ export function applySeo(source, page) {
   const title = game ? `${game.name} — ${game.topic} | Sky Playground` : 'Free Browser Games & Local Party Games | Sky Playground';
   const description = game?.description ?? 'Play free browser games at Sky Playground: quick solo challenges, puzzles and local party games for 2–6 players. No account or app download needed.';
   const graph = game ? [
-    { '@type': 'WebPage', '@id': url + '#page', url, name: title, description, inLanguage: ['en', 'zh-Hant'], mainEntity: { '@id': url + '#game' }, breadcrumb: { '@id': url + '#breadcrumbs' } },
+    { '@type': 'WebPage', '@id': url + '#page', url, name: title, description, inLanguage: game.languages ?? ['en', 'zh-Hant'], mainEntity: { '@id': url + '#game' }, breadcrumb: { '@id': url + '#breadcrumbs' } },
     gameSchema(game),
     { '@type': 'BreadcrumbList', '@id': url + '#breadcrumbs', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Sky Playground', item: siteUrl },
