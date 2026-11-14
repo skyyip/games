@@ -1,4 +1,5 @@
 import {ANIMALS} from '../src/animals.js';
+import {SKILLS,COMPANIONS} from '../src/equipment.js';
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';
 const require=createRequire(process.env.FIREBASE_TEST_PACKAGE||new URL('../package.json',import.meta.url)),{initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing'),{doc,getDoc,setDoc,updateDoc,runTransaction,serverTimestamp,collection,query,orderBy,limit,getDocs,getDocFromServer,getCountFromServer,documentId,endBefore}=require('firebase/firestore');
 const env=await initializeTestEnvironment({projectId:'demo-frogger',firestore:{host:'127.0.0.1',port:8089,rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});let passed=0;
@@ -35,5 +36,8 @@ try{await env.clearFirestore();await check('Career365 saves are inaccessible in 
  await check('another UID cannot alter purchased gear',()=>assertFails(updateDoc(player(db('bob'),'alice'),{companion:'',updatedAt:serverTimestamp()})));
  await check('a second device reads the same UID collection and loadout',async()=>{const p=(await getDocFromServer(player(db('alice'),'alice'))).data();assert.deepEqual(p.ownedSkills,['double']);assert.deepEqual(p.ownedCompanions,['hippo']);assert.equal(p.companion,'hippo');assert.equal(p.coins,8160);});
  await check('new runs keep the equipped companion snapshot',async()=>{await assertSucceeds(begin('alice','gear-run'));assert.equal((await getDoc(run(db('alice'),'alice','gear-run'))).data().companion,'hippo');await assertFails(updateDoc(run(db('alice'),'alice','gear-run'),{companion:'shark'}));await assertSucceeds(finish('alice','gear-run',0));});
+ await env.withSecurityRulesDisabled(async ctx=>{await updateDoc(player(ctx.firestore(),'alice'),{coins:100000});});
+ for(const [items,ownedKey,selectedKey]of [[SKILLS,'ownedSkills','equippedSkill'],[COMPANIONS,'ownedCompanions','companion']])for(const item of items){const ref=player(db('alice'),'alice'),p=(await getDoc(ref)).data();if(p[ownedKey].includes(item.id))continue;const change={[ownedKey]:[...p[ownedKey],item.id],[selectedKey]:item.id,updatedAt:serverTimestamp()};await check(`reject underpayment: ${item.id}`,()=>assertFails(updateDoc(ref,{...change,coins:p.coins-item.price+1})));await check(`purchase exact price: ${item.id}`,()=>assertSucceeds(updateDoc(ref,{...change,coins:p.coins-item.price})));}
+ await check('the full skill and companion collections remain valid after a new run',async()=>{const p=(await getDoc(player(db('alice'),'alice'))).data();assert.equal(p.ownedSkills.length,SKILLS.length);assert.equal(p.ownedCompanions.length,COMPANIONS.length);await assertSucceeds(begin('alice','expanded-equipment-run'));await assertSucceeds(finish('alice','expanded-equipment-run',0));});
  console.log(`${passed} Firebase security checks passed.`);
 }finally{await env.cleanup();}

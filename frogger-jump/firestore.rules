@@ -4,23 +4,23 @@ service cloud.firestore {
   function owner(uid) { return request.auth != null && request.auth.uid == uid; }
   function player(uid) { return /databases/$(database)/documents/frogger_players/$(uid); }
   function run(uid,id) { return /databases/$(database)/documents/frogger_players/$(uid)/runs/$(id); }
-  function species(id) { return id in ['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba','elf-mage','violet-mage','red-warrior','red-sprout','blue-sprout','yellow-sprout','bloom-bunny','mage-otter']; }
-  function price(id) { return {'frog':0,'penguin':280,'bunny':320,'monkey':360,'otter':400,'duck':440,'cat':480,'panda':520,'fox':960,'capybara':1000,'mochi':1080,'chiikawa':1200,'hachiware':1360,'usagi':1520,'kurimanju':1600,'rakko':1880,'momonga':1760,'shisa':1840,'shimajiro':1920,'mermaid':2000,'hitoha':2080,'futaba':2160,'elf-mage':2240,'violet-mage':2320,'red-warrior':2400,'red-sprout':560,'blue-sprout':600,'yellow-sprout':680,'bloom-bunny':2480,'mage-otter':2560}[id]; }
+  function species(id) { return id in ["frog","penguin","bunny","monkey","otter","duck","cat","panda","fox","capybara","mochi","chiikawa","hachiware","usagi","kurimanju","rakko","momonga","shisa","shimajiro","mermaid","hitoha","futaba","elf-mage","violet-mage","red-warrior","red-sprout","blue-sprout","yellow-sprout","black-sprout","pink-sprout","white-sprout","purple-sprout","ice-sprout","bloom-bunny","mage-otter"]; }
+  function price(id) { return {"frog":0,"penguin":280,"bunny":320,"monkey":360,"otter":400,"duck":440,"cat":480,"panda":520,"fox":960,"capybara":1000,"mochi":1080,"chiikawa":1200,"hachiware":1360,"usagi":1520,"kurimanju":1600,"rakko":1880,"momonga":1760,"shisa":1840,"shimajiro":1920,"mermaid":2000,"hitoha":2080,"futaba":2160,"elf-mage":2240,"violet-mage":2320,"red-warrior":2400,"red-sprout":560,"blue-sprout":600,"yellow-sprout":680,"black-sprout":720,"pink-sprout":760,"white-sprout":840,"purple-sprout":880,"ice-sprout":920,"bloom-bunny":2480,"mage-otter":2560}[id]; }
   function coins(score) { return 1 + score * 2 + int(score / 20) * 10; }
   function valid(p) {
    return validGear(p) && p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun','ownedSkills','equippedSkill','ownedCompanions','companion'])
     && p.version == 2 && p.name is string && p.name.matches('^[A-Za-z0-9_\\-一-鿿㐀-䶿]{2,16}$') && p.nameKey == p.name.lower()
     && p.coins is int && p.coins >= 0 && p.coins <= 2000000000
-    && p.owned is list && p.owned.size() >= 1 && p.owned.size() <= 30 && p.owned.toSet().size() == p.owned.size()
-    && p.owned.hasAll(['frog']) && p.owned.hasOnly(['frog','penguin','bunny','monkey','otter','duck','cat','panda','fox','capybara','mochi','chiikawa','hachiware','usagi','kurimanju','rakko','momonga','shisa','shimajiro','mermaid','hitoha','futaba','elf-mage','violet-mage','red-warrior','red-sprout','blue-sprout','yellow-sprout','bloom-bunny','mage-otter']) && p.selected in p.owned
+    && p.owned is list && p.owned.size() >= 1 && p.owned.size() <= 35 && p.owned.toSet().size() == p.owned.size()
+    && p.owned.hasAll(['frog']) && p.owned.hasOnly(["frog","penguin","bunny","monkey","otter","duck","cat","panda","fox","capybara","mochi","chiikawa","hachiware","usagi","kurimanju","rakko","momonga","shisa","shimajiro","mermaid","hitoha","futaba","elf-mage","violet-mage","red-warrior","red-sprout","blue-sprout","yellow-sprout","black-sprout","pink-sprout","white-sprout","purple-sprout","ice-sprout","bloom-bunny","mage-otter"]) && p.selected in p.owned
     && p.best is int && p.best >= 0 && p.best <= 1000000 && p.bestAnimal in p.owned
     && p.bestAt is timestamp && p.createdAt is timestamp && p.updatedAt == request.time
     && (p.activeRun == null || p.activeRun is string) && (p.lastSettledRun == null || p.lastSettledRun is string);
   }
   function validGear(p) {
    let skills=p.get('ownedSkills',[]); let friends=p.get('ownedCompanions',[]);
-   return skills is list && skills.size() <= 3 && skills.toSet().size() == skills.size() && skills.hasOnly(['double','adjust','rescue'])
-    && friends is list && friends.size() <= 3 && friends.toSet().size() == friends.size() && friends.hasOnly(['hippo','ray','shark'])
+   return skills is list && skills.size() <= 6 && skills.toSet().size() == skills.size() && skills.hasOnly(["double","adjust","prune","anchor","shield","rescue"])
+    && friends is list && friends.size() <= 6 && friends.toSet().size() == friends.size() && friends.hasOnly(["hippo","ray","crab","beaver","koi","shark"])
     && (p.get('equippedSkill','') == '' || p.get('equippedSkill','') in skills) && (p.get('companion','') == '' || p.get('companion','') in friends);
   }
   function gearChange(p,old) {
@@ -29,8 +29,8 @@ service cloud.firestore {
    let skill=p.get('equippedSkill',''); let friend=p.get('companion','');
    return p.diff(old).affectedKeys().hasOnly(['ownedSkills','equippedSkill','ownedCompanions','companion','coins','updatedAt']) && (
     (skills == beforeSkills && friends == beforeFriends && p.coins == old.coins)
-    || (skills.size() == beforeSkills.size()+1 && skills.hasAll(beforeSkills) && !(skill in beforeSkills) && friends == beforeFriends && friend == old.get('companion','') && p.coins == old.coins-{'double':640,'adjust':800,'rescue':1000}[skill])
-    || (friends.size() == beforeFriends.size()+1 && friends.hasAll(beforeFriends) && !(friend in beforeFriends) && skills == beforeSkills && skill == old.get('equippedSkill','') && p.coins == old.coins-{'hippo':1200,'ray':1440,'shark':1680}[friend])
+    || (skills.size() == beforeSkills.size()+1 && skills.hasAll(beforeSkills) && !(skill in beforeSkills) && friends == beforeFriends && friend == old.get('companion','') && p.coins == old.coins-{"double":640,"adjust":800,"prune":720,"anchor":880,"shield":960,"rescue":1000}[skill])
+    || (friends.size() == beforeFriends.size()+1 && friends.hasAll(beforeFriends) && !(friend in beforeFriends) && skills == beforeSkills && skill == old.get('equippedSkill','') && p.coins == old.coins-{"hippo":1200,"ray":1440,"crab":1280,"beaver":1520,"koi":1600,"shark":1680}[friend])
    );
   }
   function selection(p,old) { return p.diff(old).affectedKeys().hasOnly(['selected','updatedAt']); }

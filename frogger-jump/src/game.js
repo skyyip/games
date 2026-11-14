@@ -26,7 +26,17 @@ export class FroggerGame{
  get routeOffer(){if(this.state!=='idle'||this.score<20||this.current.id%7!==0||this.routeChosen===this.current.id||this.targetIndex!==1||dangerous(this.target))return null;return {x:this.target.x>0?-120:120,y:this.target.y};}
  get riverFriend(){return this.score<20?null:this.target?.mailChallenge?'postfrog':['dragonfly','firefly','postfrog'][Math.floor(this.score/8)%3];}
  chooseRoute(reward=false){if(!this.routeOffer||this.paused)return false;const next=this.target,offer=this.routeOffer;this.routeChosen=this.current.id;if(reward){next.x=offer.x;next.r*=.85;next.rewardBonus=1;}else next.r=Math.min(90,next.r+8);this.syncFish();this.events.push({type:'route',reward});return true;}
- useEquipment(){this.update();if(this.paused||this.state!=='idle'||this.gearCharges<1||this.doubleArmed||this.adjustArmed||this.rescueArmed||!this.equippedSkill)return false;if(this.equippedSkill==='double')this.doubleArmed=true;if(this.equippedSkill==='adjust')this.adjustArmed=true;if(this.equippedSkill==='rescue')this.rescueArmed=true;this.gearCharges--;this.syncFish();this.events.push({type:'equipment',id:this.equippedSkill});return true;}
+ useEquipment(){this.update();if(this.paused||this.state!=='idle'||this.gearCharges<1||this.doubleArmed||this.adjustArmed||this.rescueArmed||!this.equippedSkill)return false;if(this.equippedSkill==='double')this.doubleArmed=true;if(this.equippedSkill==='adjust')this.adjustArmed=true;if(this.equippedSkill==='rescue')this.rescueArmed=true;if(this.equippedSkill==='prune'){for(const pad of this.stumps.slice(1))pad.thorns=false;this.widenPad(this.stumps[1],8);}if(this.equippedSkill==='anchor'){this.reinforce(this.current);this.reinforce(this.stumps[1]);}if(this.equippedSkill==='shield')this.fishShield=true;this.gearCharges--;this.syncFish();this.events.push({type:'equipment',id:this.equippedSkill});return true;}
+ // Radius assistance never stacks on the same pad, even across different skills.
+ widenPad(pad,amount){pad.assistBase??=pad.r;pad.r=Math.max(pad.r,Math.min(90,pad.assistBase+Math.min(22,amount)));pad.small=false;}
+ reinforce(pad){pad.sinking=false;pad.reinforced=true;if(pad===this.current)this.deadline=null;}
+ supportCompanion(){
+  if(!this.companionReady||!['idle','charging'].includes(this.state))return;
+  if(this.companion==='crab'&&this.stumps[1].thorns)this.stumps[1].thorns=false;
+  else if(this.companion==='beaver'&&this.current.sinking)this.reinforce(this.current);
+  else return;
+  this.companionReady=false;this.events.push({type:'companion',id:this.companion});
+ }
  get target(){return this.stumps[this.targetIndex];}
  get power(){return this.state==='charging'?chargePower(this.clock-this.chargeAt):0;}
  get sinkRemaining(){return this.deadline===null?null:Math.max(0,this.deadline-this.clock);}
@@ -38,7 +48,7 @@ export class FroggerGame{
   if(this.fishHazard?.key!==key){this.fishHazard={key,x:(this.current.x+this.target.x)/2,y:(this.current.y+this.target.y)/2,at};this.events.push({type:'fish-warning'});}
  }
  randomUnit(){return Math.max(0,Math.min(.999999999,Number(this.random())||0));}
- start({animal:kind='frog',skill='',companion=''}={}){this.reset();this.animal=animal(kind).id;this.equippedSkill=equipment('skill',skill)?.id??'';this.companion=equipment('companion',companion)?.id??'';this.gearCharges=this.equippedSkill?1:0;this.companionReady=!!this.companion;this.skillCharges=1;this.state='idle';this.stumps=[{id:0,x:0,y:0,r:riverRules().normalRadius,sinking:false,thorns:false,angler:false,small:false,kind:'stump',route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));this.syncFish();return this.current;}
+ start({animal:kind='frog',skill='',companion=''}={}){this.reset();this.animal=animal(kind).id;this.equippedSkill=equipment('skill',skill)?.id??'';this.companion=equipment('companion',companion)?.id??'';this.gearCharges=this.equippedSkill?1:0;this.companionReady=!!this.companion;this.skillCharges=1;this.state='idle';this.stumps=[{id:0,x:0,y:0,r:riverRules().normalRadius,sinking:false,thorns:false,angler:false,small:false,kind:'stump',route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));this.supportCompanion();this.syncFish();return this.current;}
  generate(previous,index){
   const rules=riverRules(this.score+this.stumps.length);
   if(this.run<=0){const proposed=this.randomUnit()<.5?'I':'Z';this.route=proposed===this.route?(proposed==='I'?'Z':'I'):proposed;this.run=1+Math.floor(this.randomUnit()*2);}
@@ -54,7 +64,7 @@ export class FroggerGame{
   this.update();if(this.paused||!['idle','charging'].includes(this.state)||this.skillCharges<1)return false;
   this.cancelCharge();const next=this.stumps[1],current=this.current,kind=this.animal;
   const stabilize=p=>{p.sinking=false;p.angler=false;p.reinforced=true;};
-  const widen=amount=>{next.r=Math.min(90,next.r+amount);next.small=false;};
+  const widen=amount=>this.widenPad(next,amount);
   if(kind==='frog'){if(next.thorns)next.thorns=false;else widen(10);}
   if(kind==='penguin'){const danger=current.sinking||current.angler||next.sinking||next.angler;stabilize(current);stabilize(next);if(!danger)widen(10);}
   if(kind==='bunny'){next.thorns=false;widen(22);}
@@ -66,10 +76,10 @@ export class FroggerGame{
   if(kind==='fox'){next.thorns=false;stabilize(next);this.softLanding=true;}
   if(kind==='capybara'){for(const pad of [current,next]){stabilize(pad);pad.thorns=false;}}
   if(kind==='mochi'){this.fishShield=true;next.thorns=false;widen(10);}
-  if(kind==='chiikawa'){this.fishShield=true;this.softLanding=true;this.target.r=Math.min(90,this.target.r+6);this.target.small=false;}
+  if(kind==='chiikawa'){this.fishShield=true;this.softLanding=true;this.widenPad(this.target,6);}
   if(kind==='hachiware'){for(const pad of this.stumps.slice(1)){pad.thorns=false;stabilize(pad);}widen(8);}
-  if(kind==='usagi'){stabilize(current);this.softLanding=true;this.target.r=Math.min(90,this.target.r+16);this.target.small=false;}
-  const widenTarget=amount=>{this.target.r=Math.min(90,this.target.r+amount);this.target.small=false;};
+  if(kind==='usagi'){stabilize(current);this.softLanding=true;this.widenPad(this.target,16);}
+  const widenTarget=amount=>this.widenPad(this.target,amount);
   if(kind==='kurimanju'){stabilize(current);this.target.angler=false;widenTarget(14);}
   if(kind==='rakko'){stabilize(current);for(const pad of this.stumps.slice(1)){pad.thorns=false;stabilize(pad);}widen(6);}
   if(kind==='momonga'){stabilize(current);next.thorns=false;widen(8);this.fishShield=true;}
@@ -84,6 +94,11 @@ export class FroggerGame{
   if(kind==='red-sprout'){next.thorns=false;widen(12);}
   if(kind==='blue-sprout'){stabilize(current);next.angler=false;}
   if(kind==='yellow-sprout'){this.softLanding=true;widenTarget(8);}
+  if(kind==='black-sprout'){this.reinforce(current);this.reinforce(next);widenTarget(8);}
+  if(kind==='pink-sprout'){this.fishShield=true;this.softLanding=true;}
+  if(kind==='white-sprout'){for(const pad of this.stumps.slice(1))pad.thorns=false;widen(8);}
+  if(kind==='purple-sprout'){this.reinforce(current);widenTarget(18);}
+  if(kind==='ice-sprout'){this.reinforce(next);this.fishShield=true;widenTarget(6);}
   if(kind==='bloom-bunny'){next.thorns=false;widen(12);this.softLanding=true;}
   if(!current.sinking)this.deadline=null;if(!current.angler)this.anglerDeadline=null;
   this.syncFish();this.skillCharges--;this.skillSerial++;this.events.push({type:'skill',animal:kind,at:this.clock,point:{x:next.x,y:next.y},radius:next.r});return true;
@@ -104,7 +119,7 @@ export class FroggerGame{
  }
  update(){
   if(this.paused)return;const now=this.clock;
-  if(['idle','charging'].includes(this.state))this.syncFish();
+  if(['idle','charging'].includes(this.state)){this.supportCompanion();this.syncFish();}
   if(this.state==='jumping'){
    const contact=fishContact(this.jump,this.fishHazard,this.jump.checkedAt,now);this.jump.checkedAt=Math.min(now,this.jump.at+this.jump.duration);
    if(contact){
@@ -114,11 +129,11 @@ export class FroggerGame{
   }
   if(this.state==='jumping'&&now+1e-7>=this.jump.at+this.jump.duration){
    const landedAt=this.jump.at+this.jump.duration;this.cameraFrom=this.cameraTarget=this.jump.cameraTo;this.cameraAt=landedAt;
-   if(this.jump.success){const skipped=this.jump.steps-1;this.score++;const skillEarned=this.score%20===0&&this.skillCharges<MAX_SKILL_CHARGES;if(skillEarned){this.skillCharges=Math.min(MAX_SKILL_CHARGES,this.skillCharges+1);this.events.push({type:'skill-ready',score:this.score,charges:this.skillCharges});}this.stumps.splice(0,this.jump.steps);while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.state='idle';this.cameraTarget=this.current.y;this.landedAt=landedAt;const landingTop=surface(this.current,landedAt);this.riderOffset={x:this.jump.end.x-landingTop.x,y:this.jump.end.y-landingTop.y};const perfect=this.jump.error<=landingTop.r*.25,kind=this.current.kind;const bonus=Math.min(3,(perfect?(kind==='lotus'?1:kind==='shell'?3:0):0)+(this.current.rewardBonus??0)+(perfect&&this.current.mailChallenge?1:0));this.bonusCoins+=bonus;this.softLanding=perfect&&kind==='mushroom';if(kind==='duck'){this.current.slideAt=landedAt;this.current.slideX=Math.sign(this.target.x-this.current.x)*12;this.slideUntil=landedAt+440;}this.deadline=this.current.sinking?landedAt+(kind==='ice'?3500:SINK_MS):null;this.current.angler=false;this.anglerDeadline=null;if(this.score>=20&&this.score%24===0&&!dangerous(this.target))this.target.mailChallenge=true;this.syncFish(landedAt);this.events.push({type:'land',score:this.score,skipped,perfect,bonus,coins:2+bonus,kind,soft:this.softLanding,skillEarned,skillCharges:this.skillCharges});}
+   if(this.jump.success){const skipped=this.jump.steps-1;this.score++;const skillEarned=this.score%20===0&&this.skillCharges<MAX_SKILL_CHARGES;if(skillEarned){this.skillCharges=Math.min(MAX_SKILL_CHARGES,this.skillCharges+1);this.events.push({type:'skill-ready',score:this.score,charges:this.skillCharges});}this.stumps.splice(0,this.jump.steps);while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.state='idle';this.cameraTarget=this.current.y;this.landedAt=landedAt;const landingTop=surface(this.current,landedAt);this.riderOffset={x:this.jump.end.x-landingTop.x,y:this.jump.end.y-landingTop.y};const perfect=this.jump.error<=landingTop.r*.25,kind=this.current.kind;let bonus=Math.min(3,(perfect?(kind==='lotus'?1:kind==='shell'?3:0):0)+(this.current.rewardBonus??0)+(perfect&&this.current.mailChallenge?1:0));if(perfect&&bonus<3&&this.companion==='koi'&&this.companionReady){bonus++;this.companionReady=false;this.events.push({type:'companion',id:'koi'});}this.bonusCoins+=bonus;this.softLanding=perfect&&kind==='mushroom';if(kind==='duck'){this.current.slideAt=landedAt;this.current.slideX=Math.sign(this.target.x-this.current.x)*12;this.slideUntil=landedAt+440;}this.deadline=this.current.sinking?landedAt+(kind==='ice'?3500:SINK_MS):null;this.current.angler=false;this.anglerDeadline=null;if(this.score>=20&&this.score%24===0&&!dangerous(this.target))this.target.mailChallenge=true;this.syncFish(landedAt);this.events.push({type:'land',score:this.score,skipped,perfect,bonus,coins:2+bonus,kind,soft:this.softLanding,skillEarned,skillCharges:this.skillCharges});}
    else this.drown(this.jump.visualEnd,this.jump.failure,landedAt);
   }
   if(this.state==='idle'||this.state==='charging'){
-   const at=this.deadline??Infinity;
+   this.supportCompanion();const at=this.deadline??Infinity;
    if(now+1e-7>=at)this.drown(surface(this.current,at),'sunk',at);
   }
   if(this.state==='drowning'&&now+1e-7>=this.fall.at+DROWN_MS){this.state='over';this.events.push({type:'over',score:this.score,reason:this.fall.reason});}

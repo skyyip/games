@@ -8,7 +8,7 @@ Party games use one shared device, without online matchmaking.
 
 ## Games
 
-- [Frogger Jump 2.5D](https://sky-playground.com/games/frogger-jump/): 1 player. A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins, collect thirty animal friends, equip a river companion and unlock an optional general skill. Firebase rankings activate after project setup.
+- [Frogger Jump 2.5D](https://sky-playground.com/games/frogger-jump/): 1 player. A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins, collect thirty-five animal friends, equip a river companion and unlock an optional general skill. Firebase rankings activate after project setup.
 - [Beat the Bad Luck](https://sky-playground.com/games/beat-bad-luck/): 1 player. A single-player game inspired by Hong Kong’s villain-hitting folk ritual. Complete a playful ritual and brighten Master Yip’s stall.
 - [Grid Rush](https://sky-playground.com/games/grid-rush/): 1 player. A solo speed-clicking game. Clear every tile in any order and try to finish the grid in the shortest time.
 - [Grid Rush: In Order](https://sky-playground.com/games/grid-rush-in-order/): 1 player. A solo sequence puzzle that combines quick reactions with ordering numbers, letters, colours or shapes.

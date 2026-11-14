@@ -125,3 +125,13 @@ firebase emulators:exec --only firestore --project demo-frogger --config frogger
 正式Google登入、正式跨裝置操作及新規則部署尚未由本次本機測試驗證；原有登入方式及已購角色保持相容。
 
 未裝備新物品的帳戶，客戶端保留舊版run文件格式（不寫空白裝備欄位），因此更新網站後仍可使用原規則遊玩既有動物。新動物與裝備購買仍需要新版規則。
+
+
+### 花朵動物與新增裝備
+
+最新規則支援35位動物、6項通用技能及6位河中夥伴，依照商品實際價格檢查扣款，保留既有帳戶收藏及限制單次購買一項。發布新版網站前，請先更新規則；不需要新增索引或Cloud Functions。
+
+```sh
+cd frogger-jump
+firebase deploy --only firestore:rules --project sky-playground-3c5af
+```

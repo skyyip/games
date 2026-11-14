@@ -22,5 +22,5 @@ try{
   }
   timings.sort((a,b)=>a-b);return {species:ANIMALS.length,flightFrames,flightVectorPaints,drawP95Ms:timings[Math.floor(timings.length*.95)],drawMaxMs:timings.at(-1)};
  });
- assert.equal(report.species,30);assert.equal(report.flightVectorPaints,0,'prewarmed hops must not rasterize animal vector art');assert(report.flightFrames>3000);assert.deepEqual(errors,[]);await page.screenshot({path:'/tmp/frog-grounding-gallery.png',fullPage:true});await writeFile('/tmp/frog-flight-performance.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));await context.close();
+ assert.equal(report.species,35);assert.equal(report.flightVectorPaints,0,'prewarmed hops must not rasterize animal vector art');assert(report.flightFrames>3000);assert.deepEqual(errors,[]);await page.screenshot({path:'/tmp/frog-grounding-gallery.png',fullPage:true});await writeFile('/tmp/frog-flight-performance.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));await context.close();
 }finally{await browser.close();}
