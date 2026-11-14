@@ -1,5 +1,5 @@
 import {ANIMALS} from '../src/animals.js';
-import {SKILLS,COMPANIONS} from '../src/equipment.js';
+import {COMPANIONS} from '../src/equipment.js';
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';
 const require=createRequire(process.env.FIREBASE_TEST_PACKAGE||new URL('../package.json',import.meta.url)),{initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing'),{doc,getDoc,setDoc,updateDoc,runTransaction,serverTimestamp,collection,query,orderBy,limit,getDocs,getDocFromServer,getCountFromServer,documentId,endBefore}=require('firebase/firestore');
 const env=await initializeTestEnvironment({projectId:'demo-frogger',firestore:{host:'127.0.0.1',port:8089,rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});let passed=0;
@@ -23,21 +23,15 @@ try{await env.clearFirestore();await check('Career365 saves are inaccessible in 
  await env.withSecurityRulesDisabled(async ctx=>{await updateDoc(player(ctx.firestore(),'alice'),{coins:10000});});
  const inventory=player(db('alice'),'alice');
  await check('new profiles cannot claim paid equipment for free',()=>assertFails(reserve('free-gear','FreeGear',{ownedSkills:['double'],equippedSkill:'double'})));
- await check('existing wallet cannot grant a skill without paying',()=>assertFails(updateDoc(inventory,{ownedSkills:['double'],equippedSkill:'double',updatedAt:serverTimestamp()})));
- await check('old wallet can purchase a skill at the exact price',()=>assertSucceeds(updateDoc(inventory,{ownedSkills:['double'],equippedSkill:'double',ownedCompanions:[],companion:'',coins:9360,updatedAt:serverTimestamp()})));
- await check('selecting owned equipment is free',()=>assertSucceeds(updateDoc(inventory,{equippedSkill:'',updatedAt:serverTimestamp()})));
- await check('unowned skill cannot be equipped',()=>assertFails(updateDoc(inventory,{equippedSkill:'adjust',updatedAt:serverTimestamp()})));
- await check('wrong skill price is rejected',()=>assertFails(updateDoc(inventory,{ownedSkills:['double','adjust'],equippedSkill:'adjust',coins:9359,updatedAt:serverTimestamp()})));
- await check('existing purchased skills cannot be removed',()=>assertFails(updateDoc(inventory,{ownedSkills:[],updatedAt:serverTimestamp()})));
- await check('duplicate skill ownership is rejected',()=>assertFails(updateDoc(inventory,{ownedSkills:['double','double'],equippedSkill:'double',coins:8720,updatedAt:serverTimestamp()})));
- await check('river companion purchase deducts its exact price',()=>assertSucceeds(updateDoc(inventory,{ownedCompanions:['hippo'],companion:'hippo',coins:8160,updatedAt:serverTimestamp()})));
- await check('multiple companions cannot be granted in one purchase',()=>assertFails(updateDoc(inventory,{ownedCompanions:['hippo','ray','shark'],companion:'ray',coins:6720,updatedAt:serverTimestamp()})));
- await check('equipment changes cannot mint coins',()=>assertFails(updateDoc(inventory,{equippedSkill:'double',coins:9000,updatedAt:serverTimestamp()})));
- await check('another UID cannot alter purchased gear',()=>assertFails(updateDoc(player(db('bob'),'alice'),{companion:'',updatedAt:serverTimestamp()})));
- await check('a second device reads the same UID collection and loadout',async()=>{const p=(await getDocFromServer(player(db('alice'),'alice'))).data();assert.deepEqual(p.ownedSkills,['double']);assert.deepEqual(p.ownedCompanions,['hippo']);assert.equal(p.companion,'hippo');assert.equal(p.coins,8160);});
- await check('new runs keep the equipped companion snapshot',async()=>{await assertSucceeds(begin('alice','gear-run'));assert.equal((await getDoc(run(db('alice'),'alice','gear-run'))).data().companion,'hippo');await assertFails(updateDoc(run(db('alice'),'alice','gear-run'),{companion:'shark'}));await assertSucceeds(finish('alice','gear-run',0));});
- await env.withSecurityRulesDisabled(async ctx=>{await updateDoc(player(ctx.firestore(),'alice'),{coins:100000});});
- for(const [items,ownedKey,selectedKey]of [[SKILLS,'ownedSkills','equippedSkill'],[COMPANIONS,'ownedCompanions','companion']])for(const item of items){const ref=player(db('alice'),'alice'),p=(await getDoc(ref)).data();if(p[ownedKey].includes(item.id))continue;const change={[ownedKey]:[...p[ownedKey],item.id],[selectedKey]:item.id,updatedAt:serverTimestamp()};await check(`reject underpayment: ${item.id}`,()=>assertFails(updateDoc(ref,{...change,coins:p.coins-item.price+1})));await check(`purchase exact price: ${item.id}`,()=>assertSucceeds(updateDoc(ref,{...change,coins:p.coins-item.price})));}
- await check('the full skill and companion collections remain valid after a new run',async()=>{const p=(await getDoc(player(db('alice'),'alice'))).data();assert.equal(p.ownedSkills.length,SKILLS.length);assert.equal(p.ownedCompanions.length,COMPANIONS.length);await assertSucceeds(begin('alice','expanded-equipment-run'));await assertSucceeds(finish('alice','expanded-equipment-run',0));});
+ await check('retired skills cannot be purchased, even at their former price',()=>assertFails(updateDoc(inventory,{ownedSkills:['double'],equippedSkill:'double',coins:9360,updatedAt:serverTimestamp()})));
+ for(const item of COMPANIONS){const p=(await getDoc(inventory)).data(),owned=p.ownedCompanions??[],change={ownedCompanions:[...owned,item.id],companion:item.id,updatedAt:serverTimestamp()};await check(`reject underpayment: ${item.id}`,()=>assertFails(updateDoc(inventory,{...change,coins:p.coins-item.price+1})));await check(`purchase exact price: ${item.id}`,()=>assertSucceeds(updateDoc(inventory,{...change,coins:p.coins-item.price})));}
+ await check('another UID cannot change the companion',()=>assertFails(updateDoc(player(db('bob'),'alice'),{companion:'',updatedAt:serverTimestamp()})));
+ await env.withSecurityRulesDisabled(async ctx=>{await updateDoc(player(ctx.firestore(),'alice'),{coins:10000,ownedSkills:['double','adjust','prune','anchor','shield','rescue'],equippedSkill:'double'});});
+ const retirement={ownedSkills:[],equippedSkill:'',updatedAt:serverTimestamp()};
+ await check('retirement cannot over-refund the original purchases',()=>assertFails(updateDoc(inventory,{...retirement,coins:15001})));
+ await check('another UID cannot claim the retirement refund',()=>assertFails(updateDoc(player(db('bob'),'alice'),{...retirement,coins:15000})));
+ await check('all six retired purchases refund exactly5000 once',()=>assertSucceeds(updateDoc(inventory,{...retirement,coins:15000})));
+ await check('a second retirement credit is rejected',()=>assertFails(updateDoc(inventory,{...retirement,coins:20000})));
+ await check('the full companion collection and new animal start normally after migration',async()=>{const p=(await getDoc(inventory)).data();assert.equal(p.ownedCompanions.length,COMPANIONS.length);assert.deepEqual(p.ownedSkills,[]);assert.equal(p.equippedSkill,'');await assertSucceeds(begin('alice','merged-skill-run'));await assertSucceeds(finish('alice','merged-skill-run',0));});
  console.log(`${passed} Firebase security checks passed.`);
 }finally{await env.cleanup();}

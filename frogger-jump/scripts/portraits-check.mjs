@@ -11,4 +11,4 @@ const browser=await chromium.launch({headless:true});try{for(const dpr of [1,2])
  if(sources!==before)failures.push('small icons must share cached full portraits');
  for(const a of COMPANIONS){const canvas=document.createElement('canvas');paintCompanionPortrait(canvas,a.id);if(bounds(canvas).margin<1)failures.push('companion clipped: '+a.id);}
  return {animals:ANIMALS.length,companions:COMPANIONS.length,failures};
- });assert.equal(result.animals,35);assert.equal(result.companions,6);assert.deepEqual(result.failures,[]);if(dpr===1)await p.screenshot({path:'/tmp/frog-portraits-gallery.png',fullPage:true});console.log(`PASS DPR ${dpr}: 35 complete portraits, small icons, 6 companion portraits and cache reuse`);await context.close();}}finally{await browser.close();}
+ });assert.equal(result.animals,38);assert.equal(result.companions,6);assert.deepEqual(result.failures,[]);if(dpr===1)await p.screenshot({path:'/tmp/frog-portraits-gallery.png',fullPage:true});console.log(`PASS DPR ${dpr}: 38 complete portraits, small icons, 6 companion portraits and cache reuse`);await context.close();}}finally{await browser.close();}

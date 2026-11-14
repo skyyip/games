@@ -81,5 +81,13 @@ body.is-playing #play-hint{position:absolute;width:1px;height:1px;min-height:0;m
 #play-shell #skill-button>*{grid-row:1;align-self:center;margin:0;min-width:0;display:flex;align-items:center;justify-content:center}
 #play-shell #skill-button #skill-icon{width:26px;height:26px;margin:0}
 #play-shell #skill-count{line-height:1;font-variant-numeric:tabular-nums}
-.river-tools .skill-help{order:3;margin-left:auto}
-.river-tools .skill-help [role=tooltip]{left:auto;right:0}
+
+/* Keep skill help at the upper-right edge and give the river the footer space. */
+.is-playing .hud{max-width:none;padding-right:max(12px,env(safe-area-inset-right));padding-left:max(12px,env(safe-area-inset-left));position:relative;z-index:4;gap:8px}
+.hud .skill-help{flex:none;display:inline-flex;position:relative}
+.hud #skill-info{display:flex;align-items:center;justify-content:center;gap:5px;min-width:44px;min-height:44px;padding:9px 11px;border:1px solid #c5d1af;border-radius:13px;background:#edf1df;color:#456542;font:600 12px/1.3 system-ui;box-shadow:0 2px 0 #c5cfb9;cursor:pointer}
+.hud .skill-help [role=tooltip]{left:auto;right:0;top:calc(100% + 8px);bottom:auto}
+.river-tools #companion-status:not(:empty){display:inline-flex;align-items:center;justify-content:center;min-height:26px;padding:3px 10px;border-radius:16px;background:#e9efdb;font-size:12px;line-height:1.4}
+@media(max-width:480px){.hud #skill-info{width:44px;padding:9px;font-size:20px}.hud #skill-info>span{display:none}.is-playing .hud{gap:6px}.is-playing .best-stat span{font-size:10px}.is-playing .route-pill{min-width:36px;padding:5px}.is-playing .score-stat strong{font-size:26px}}
+
+@media(max-width:480px){.is-playing .hud .route-pill{display:none}.is-playing #play-shell[data-wide-score=true] .hud .score-stat strong,.is-playing #play-shell[data-wide-score=true] .hud .best-stat strong{font-size:18px}}

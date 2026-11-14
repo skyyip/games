@@ -1,6 +1,8 @@
+import {FANTASY_FRIENDS,paintFantasyFriend} from './fantasy-friends.js';
 import {FLOWER_IDS,FLOWERS,paintFlowerFriend} from './flowers.js';
-export const NEW_FRIENDS=new Set(['elf-mage','violet-mage','red-warrior',...FLOWER_IDS,'bloom-bunny','mage-otter']);
+export const NEW_FRIENDS=new Set([...FANTASY_FRIENDS,'elf-mage','violet-mage','red-warrior',...FLOWER_IDS,'bloom-bunny','mage-otter']);
 export function paintNewFriend(s,x,y,scale,id,pose={}){
+ if(FANTASY_FRIENDS.has(id)){paintFantasyFriend(s,x,y,scale,id,pose);return;}
  if(FLOWERS[id]){paintFlowerFriend(s,x,y,scale,id,pose);return;}
  const c=s.ctx,ink='#51554e',sprout=id==='bloom-bunny',elf=id==='elf-mage'||id==='mage-otter',warrior=id==='red-warrior',violet=id==='violet-mage',bunny=id==='bloom-bunny',otter=id==='mage-otter',color=violet?'#b9a8cf':warrior?'#d99686':bunny?'#eed7a3':otter?'#b2cfc3':'#e4eddb';
  const {squat=0,stretch=0,lean=0,fall=0,kick=0,tuck=0}=pose;c.save();c.translate(x,y);c.rotate(lean);c.scale(scale*(1+squat*.14-stretch*.06)*(1-fall*.4),scale*(1-squat*.18+stretch*.08)*(1-fall*.4));

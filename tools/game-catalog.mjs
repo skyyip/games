@@ -36,8 +36,8 @@ export const games = [
   },
   {
     slug: 'frogger-jump', name: 'Frogger Jump 2.5D', zh: '蓄力連連跳', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game',
-    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, earn Frog Coins, unlock thirty-five cute animals and leap across logs and water lilies while avoiding thorns and hungry river creatures.',
-    intro: 'A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins, collect thirty-five animal friends, equip a river companion and unlock an optional general skill. Firebase rankings activate after project setup.',
+    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, earn Frog Coins, unlock thirty-eight cute animals and leap across logs and water lilies while avoiding thorns and hungry river creatures.',
+    intro: 'A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins, collect thirty-eight animal friends, choose a themed animal ability and equip a river companion. Firebase rankings activate after project setup.',
     chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按蓄力，放手自動瞄準木樁或睡蓮；落地賺青蛙幣解鎖企鵝、兔子、猴子、水獺、小鴨、花貓、熊貓、狐狸、水豚、糯糯星鼠及小可愛、小八、烏薩奇與島嶼夥伴等漫畫角色，每 20 跳補充一次技能。Firebase 設定完成後可保留唯一名字，參加顯示所用動物的世界前十名排行。',
     steps: ['Enter a player name, choose an owned animal, then hold the screen, mouse button or Space and release to hop.', 'Read three wood or lily platforms ahead. Use your animal skill to clear obstacles or improve a landing; another use is earned every 20 successful landings.', 'Complete a run to earn Frog Coins and unlock more animals. When Firebase is configured, sign in for unique names, cross-device wallets and the public top ten; local practice stays unranked.'],
     related: ['floating-balance', 'stone-skip'],

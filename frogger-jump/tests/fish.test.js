@@ -36,9 +36,7 @@ test('Mochi star courage blocks exactly one fish and expires after the next hop'
  const r=rig('mochi'),g=r.g;g.useSkill();assert(g.fishShield);r.step(1000);r.jump();assert.equal(g.fishShield,false);assert(g.jump.shield);r.step(g.jump.duration);assert.equal(g.score,1);assert.equal(g.jump.shield,false);assert.equal(g.skillCharges,0);assert.equal(g.drainEvents().filter(e=>e.type==='fish-blocked').length,1);
  const safe=rig('mochi');safe.g.useSkill();safe.jump();safe.step(safe.g.jump.duration);assert.equal(safe.g.fishShield,false);assert.equal(safe.g.skillCharges,0);
 });
-test('Otter and stabilizing skills clear the approaching fish immediately',()=>{
- for(const id of ['otter','penguin','monkey','panda','fox','capybara']){const r=rig(id);assert(r.g.fish);r.g.useSkill();assert.equal(r.g.fish,null);assert.equal(r.g.target.angler,false);}
-});
+test('shield animals keep fish timing and anchor animals do not silently remove fish',()=>{for(const id of ['otter','penguin']){const r=rig(id);assert(r.g.fish);r.g.useSkill();assert(r.g.target.angler);assert(r.g.fish);assert.equal(r.g.fishShield,id==='otter');}});
 test('new prices and the original starmouse survive purchase and wallet reload',()=>{
  assert.equal(animal('fox').price,960);assert.equal(animal('capybara').price,1000);assert.equal(animal('mochi').price,1080);
  const p=readProfile(JSON.stringify(buyAnimal({...freshProfile('河岸朋友'),coins:1080},'mochi')));assert.equal(p.coins,0);assert.equal(p.selected,'mochi');assert(p.owned.includes('mochi'));
