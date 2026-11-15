@@ -1,6 +1,6 @@
 {
-  "version": "8f874bc436682523",
-  "builtAt": 1794751836603,
+  "version": "817a46dd1379abcb",
+  "builtAt": 1794752756767,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -128,7 +128,7 @@
     "your-dream-career/src/app.js": "built/app-PRGYFIRL.js",
     "tap-and-spill/index-pg-inline-0.js": "built/index-pg-inline-0-665I2D7J.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
-    "hong-kong-millionaire/src/app.js": "built/app-UUQXICMY.js",
+    "hong-kong-millionaire/src/app.js": "built/app-JS3QWXWF.js",
     "grid-rush/src/landing.js": "built/landing-U3K2C6AW.js",
     "just-a-sec/src/app.js": "built/app-7R65WMQB.js",
     "line-up/src/app.js": "built/app-22336K2Q.js",
@@ -162,7 +162,7 @@
     "your-dream-career/styles.css": "built/styles-EPARVTUD.css",
     "grid-rush-in-order/styles.css": "built/styles-VZI7CKHG.css",
     "grid-rush/styles.css": "built/styles-D2JKHIEI.css",
-    "hong-kong-millionaire/styles.css": "built/styles-RDI3Z3OE.css",
+    "hong-kong-millionaire/styles.css": "built/styles-OUY5VDKS.css",
     "just-a-sec/styles.css": "built/styles-3Z46GVM2.css",
     "line-up/styles.css": "built/styles-FXI5OTQN.css",
     "mahjong-match/styles.css": "built/styles-LMUBMT2W.css",
