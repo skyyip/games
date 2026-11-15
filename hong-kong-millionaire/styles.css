@@ -19,3 +19,5 @@ main{overflow:clip}
  .lifelines>button{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;padding:8px 4px;min-height:72px}
  .lifelines b{line-height:1.3}.lifelines span,.lifelines small{white-space:nowrap}
 }
+
+.hero-copy>.guest-start{margin-top:12px;font-size:13px;min-height:46px}
