@@ -34,3 +34,26 @@ test('recovery cannot clear a confirmed run, old confirmed marker, guest run or 
  assert.equal(await ledger.releaseUnclaimed('owner',newer.token),true);const guest=await ledger.start();
  assert.equal(await ledger.releaseUnclaimed('guest',guest.token),false);
 });
+
+test('different accounts reserve and resume independently in the same browser',async()=>{
+ const ledger=new DailyLedger({storage:storage(),now:()=>NOW}),a=await ledger.start('account-a');
+ ledger.markCloud('account-a',{day:hkDay(NOW)});const b=await ledger.start('account-b');
+ assert.equal(b.owner,'account-b');assert.notEqual(b.token,a.token);assert.equal(ledger.readAccount('account-a').state,'confirmed');
+ ledger.markCloud('account-b',{day:hkDay(NOW)});
+ const againA=await ledger.start('account-a');assert.equal(againA.token,a.token);assert.equal(againA.state,'confirmed');
+ assert.equal(ledger.readAccount('account-b').token,b.token);assert.equal(ledger.readAccount('account-b').state,'confirmed');
+ await assert.rejects(()=>ledger.start('guest'),/account-used/);
+});
+test('a rejected second account cannot erase the first account daily restriction',async()=>{
+ const ledger=new DailyLedger({storage:storage(),now:()=>NOW}),a=await ledger.start('account-a');ledger.markCloud('account-a',{day:hkDay(NOW)});
+ const b=await ledger.start('account-b');assert.equal(await ledger.releaseUnclaimed('account-b',b.token),true);
+ assert.equal(ledger.read().owner,'account-a');assert.equal(ledger.read().token,a.token);assert.equal(ledger.readAccount('account-b'),null);
+ await assert.rejects(()=>ledger.start('guest'),/account-used/);
+});
+test('pending markers for other accounts survive switching, releasing and midnight rollover',async()=>{
+ let now=NOW;const ledger=new DailyLedger({storage:storage(),now:()=>now}),a=await ledger.start('account-a'),b=await ledger.start('account-b');
+ assert.equal(await ledger.releaseUnclaimed('account-a',a.token),true);assert.equal(ledger.read().owner,'account-b');assert.equal(ledger.read().token,b.token);
+ assert.equal(await ledger.releaseUnclaimed('account-b',b.token),true);assert.equal(ledger.read(),null);
+ await ledger.start('account-a');ledger.markCloud('account-a',{day:hkDay(now)});await ledger.start('account-b');
+ now+=DAY_MS;assert.equal(ledger.readAccount('account-a'),null);assert.equal(ledger.readAccount('account-b'),null);assert.equal((await ledger.start()).owner,'guest');
+});

@@ -12,7 +12,7 @@ const manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8'));
 const art=Object.fromEntries(Object.entries(manifest.assets).filter(([name])=>name.startsWith('hong-kong-millionaire/assets/')).map(([name,url])=>[name.split('/').at(-1).replace('.svg',''),new URL('../'+url,base).href]));
 const gamePath=fileURLToPath(new URL('../src/game.js',import.meta.url));
 const adapter=`
-import {newRun,act,hkDay} from ${JSON.stringify(gamePath)};
+import {newRun,act,hkDay,terminal,finish} from ${JSON.stringify(gamePath)};
 const q=globalThis.hkmAuthQA={uid:globalThis.HKM_INITIAL_AUTH_UID??null,nextUid:'google-player',runs:{},calls:[],holdClaim:false,failClaim:false,claimCommitThenFail:false,failCurrentRun:false,holdAccount:false,failAccount:!!globalThis.HKM_FAIL_ACCOUNT,failMove:false,delayInitialAuth:!!globalThis.HKM_DELAY_INITIAL_AUTH};
 const profile=uid=>({uid,displayName:'街坊'+uid,total:0,bestPrize:0,games:0,titles:[],unlocked:[],wrong:[],favourites:[],activeDay:null});
 const copy=value=>value?JSON.parse(JSON.stringify(value)):null;
@@ -28,8 +28,14 @@ export async function account(){const uid=call('account');if(q.failAccount)throw
 export async function resumeAccount(){const uid=call('resumeAccount');return {profile:await account(),run:copy(q.runs[uid])};}
 export async function claimDaily(){const uid=call('claimDaily');if(q.holdClaim)await new Promise(resolve=>q.releaseClaim=resolve);if(q.failClaim)throw {code:q.claimError??'permission-denied'};const run=q.runs[uid]??=(newRun(hkDay(),Date.now(),uid));if(q.claimCommitThenFail)throw {code:'permission-denied'};return copy(run);}
 export async function currentRun(day,options){const uid=call('currentRun');q.calls.at(-1).server=!!options?.server;if(q.failCurrentRun)throw {code:'permission-denied'};return copy(q.runs[uid]);}
-export async function move(day,action){const uid=call('move');if(q.failMove)throw {code:'permission-denied'};if(q.holdMove)return new Promise((resolve,reject)=>{q.releaseMove=()=>{q.holdMove=false;reject({code:'permission-denied'});};});q.runs[uid]=act(q.runs[uid],action,Date.now());return copy(q.runs[uid]);}
-export async function settle(){call('settle');throw {code:'permission-denied'};}
+export async function move(day,action,{expected=null}={}){const uid=call('move');q.calls.at(-1).action=action.type;
+ if(q.failMove)throw {code:q.moveError??'permission-denied',stage:action.type==='answer'?'answer-write':'progress-write'};
+ if(q.holdMove)return new Promise((resolve,reject)=>{q.releaseMove=()=>{q.holdMove=false;reject({code:'permission-denied'});};});
+ const old=q.runs[uid];if(!expected||old.index===expected.index&&old.questionAt===expected.questionAt&&old.phase===expected.phase)q.runs[uid]=act(old,action,Date.now(),{autoFinish:false});
+ if(q.commitThenFail){q.commitThenFail=false;throw {code:'unavailable',stage:'progress-read'};}
+ if(terminal(q.runs[uid]))return settle(day);return copy(q.runs[uid]);
+}
+export async function settle(){const uid=call('settle');if(q.failSettle)throw {code:'permission-denied',stage:'settlement',run:copy(q.runs[uid])};if(q.runs[uid].phase!=='finished')q.runs[uid]=finish(q.runs[uid],Date.now());return copy(q.runs[uid]);}
 export async function saveName(){return account();}export async function favourite(){return account();}
 export async function leaderboard(){return [];}export async function history(){return [];}
 export async function resetPassword(){}
@@ -56,6 +62,7 @@ async function open({guest=null,width=390,height=900,restoredUid=null,failAccoun
  return {c,p};
 }
 async function login(p){await p.locator('#account-open').click();await p.locator('#google-login').click();await p.waitForFunction(()=>!!globalThis.hkmAuthQA.uid&&!document.querySelector('#logout').disabled);}
+async function switchGoogle(p,uid){await p.locator('#account-open').click();await p.locator('#logout').click();await p.locator('[data-close="account-dialog"]').first().click();await p.evaluate(uid=>hkmAuthQA.nextUid=uid,uid);await login(p);await p.locator('[data-close="account-dialog"]').first().click();}
 const state=p=>p.evaluate(key=>JSON.parse(localStorage.getItem(key)),LEDGER_KEY);
 const noCloudGameWrites=async p=>{const calls=await p.evaluate(()=>hkmAuthQA.calls.map(c=>c.method));assert(!calls.some(method=>['resumeAccount','claimDaily','move','settle'].includes(method)));checks++;};
 try{
@@ -148,6 +155,52 @@ try{
   await p.evaluate(()=>globalThis.__hkmQaNow=Date.UTC(2026,10,15,16));await p.waitForFunction(()=>document.querySelector('#today-label').textContent.includes('11月16日'));
   assert((await p.locator('#challenge-label').textContent()).includes('第 3 回'));assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);await c.close();checks+=4;
  }
+ // A rejected first answer exposes its code beside the retry button, then retries the same answer.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  await p.evaluate(()=>hkmAuthQA.failMove=true);const first=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);const answer=questionFor(first).answer;
+  await p.locator(`[data-choice="${answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#retry-sync').waitFor({state:'visible'});
+  assert((await p.locator('#reveal-explanation').textContent()).includes('permission-denied'));assert((await p.locator('#reveal-explanation').textContent()).includes('提交答案'));
+  await p.evaluate(()=>hkmAuthQA.failMove=false);await p.locator('#retry-sync').click();await p.locator('#next-question').waitFor({state:'visible'});
+  const after=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);assert.equal(after.correct,1);assert.equal(after.answers[0].choice,answer);assert.equal(after.questionAt,first.questionAt);await c.close();checks+=5;
+ }
+ // An already accepted first answer is adopted from the server, never replayed on retry.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});const first=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);
+  await p.evaluate(()=>hkmAuthQA.commitThenFail=true);await p.locator(`[data-choice="${questionFor(first).answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#retry-sync').waitFor({state:'visible'});
+  assert((await p.locator('#reveal-explanation').textContent()).includes('核對雲端進度'));await p.locator('#retry-sync').click();await p.locator('#next-question').waitFor({state:'visible'});
+  assert.equal(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='move'&&c.action==='answer').length),1);assert.equal(await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid].correct),1);await c.close();checks+=3;
+ }
+ // A failed fresh read must keep the page pending instead of trusting a cached playing state.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});const first=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);
+  await p.evaluate(()=>hkmAuthQA.failMove=true);await p.locator(`[data-choice="${questionFor(first).answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#retry-sync').waitFor({state:'visible'});
+  await p.evaluate(()=>{hkmAuthQA.failMove=false;hkmAuthQA.failCurrentRun=true;});await p.locator('#retry-sync').click();assert(await p.locator('#retry-sync').isVisible());assert(await p.locator('.option').first().isDisabled());
+  assert(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='currentRun').every(c=>c.server)));assert.equal(await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid].correct),0);
+  await p.evaluate(()=>hkmAuthQA.failCurrentRun=false);await p.locator('#retry-sync').click();await p.locator('#next-question').waitFor({state:'visible'});await c.close();checks+=4;
+ }
+ // First-answer losses keep the confirmed answer while settlement fails, then settle on reconnect.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});const first=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);
+  await p.evaluate(()=>hkmAuthQA.failSettle=true);await p.locator(`[data-choice="${(questionFor(first).answer+1)%4}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#retry-sync').waitFor({state:'visible'});
+  assert((await p.locator('#reveal-explanation').textContent()).includes('結算成績'));assert.equal(await p.locator('.is-wrong').count(),1);
+  await p.evaluate(()=>hkmAuthQA.failSettle=false);await p.locator('#retry-sync').click();await p.locator('#result-screen').waitFor({state:'visible'});
+  assert.equal(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='move'&&c.action==='answer').length),1);assert.equal(await p.locator('#result-prize').textContent(),'$0');await c.close();checks+=4;
+ }
+ // Shared browser: Google A and B each have their own daily run, and A resumes its original answer.
+ {const {c,p}=await open({restoredUid:'google-a'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});const first=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);
+  await p.locator(`[data-choice="${questionFor(first).answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#next-question').waitFor({state:'visible'});
+  await switchGoogle(p,'google-b');await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  const b=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);assert.equal(b.uid,'google-b');assert.equal(b.correct,0);assert.equal(b.index,0);
+  await p.locator(`[data-choice="${(questionFor(b).answer+1)%4}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#result-screen').waitFor({state:'visible'});
+  await switchGoogle(p,'google-a');await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  assert.equal(await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid].correct),1);assert.equal(await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid].questionAt),first.questionAt);
+  for(const uid of ['google-a','google-b'])assert.equal(await p.evaluate(uid=>hkmAuthQA.calls.filter(c=>c.method==='claimDaily'&&c.uid===uid).length,uid),1);
+  assert.equal((await state(p)).accounts['google-b'].state,'confirmed');await c.close();checks+=8;
+ }
+ // Logging out with a rejected A answer must not carry that pending answer into B's game.
+ {const {c,p}=await open({restoredUid:'google-a'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});const a=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);
+  await p.evaluate(()=>hkmAuthQA.failMove=true);await p.locator(`[data-choice="${questionFor(a).answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#retry-sync').waitFor({state:'visible'});
+  await p.evaluate(()=>hkmAuthQA.failMove=false);await switchGoogle(p,'google-b');await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  assert.equal(await p.locator('#retry-sync').isVisible(),false);assert.equal(await p.evaluate(()=>hkmAuthQA.runs['google-b'].correct),0);
+  assert.equal(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='move'&&c.uid==='google-b').length),0);assert.equal((await state(p)).accounts['google-a'].state,'confirmed');await c.close();checks+=4;
+ }
  // Measure actual icon / label rectangles at narrow, tablet, landscape and desktop widths.
  for(const [width,height]of [[320,850],[390,900],[621,900],[700,900],[812,375],[1280,900]]){
   const {c,p}=await open({guest:saved(),width,height});await p.locator('#start').click();await p.evaluate(()=>document.fonts.ready);
@@ -155,5 +208,5 @@ try{
   assert.deepEqual(overlaps,[],width+'px overlapping lifeline text');assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await p.locator('.lifelines').screenshot({path:`/tmp/hkm-lifelines-${width}.png`});await c.close();checks+=2;
  }
- assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,scenarios:19,viewports:6,pageErrors:0,mode:'local account adapter; no live Firebase'}));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,scenarios:25,viewports:6,pageErrors:0,mode:'local account adapter; no live Firebase'}));
 }finally{await browser.close();}

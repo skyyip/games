@@ -22,9 +22,10 @@ export async function setPersistence(){};export function getFirestore(){return {
 export function onAuthStateChanged(auth,cb){cb(auth.currentUser);return ()=>{};}
 export function doc(db,...parts){return parts.join('/');}export function collection(db,...parts){return parts.join('/');}
 export function serverTimestamp(){return {__server:true};}export async function getDoc(ref){return snap(ref);}
-export async function getDocFromServer(ref){q.calls.push({kind:'server-read',ref});return snap(ref);}
+export async function getDocFromServer(ref){q.calls.push({kind:'server-read',ref});if(q.failServerRead){q.failServerRead--;throw {code:'unavailable'};}return snap(ref);}
 export async function updateDoc(ref,patch){q.data.set(ref,{...q.data.get(ref),...resolve(patch)});}
-export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);for(const w of writes)if(w.value.bankVersion&&!q.allowedBanks.includes(w.value.bankVersion))throw {code:'permission-denied'};for(const w of writes)q.data.set(w.ref,w.update?{...q.data.get(w.ref),...resolve(w.value)}:resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
+function patched(old,patch){const value=copy(old);for(const [key,item]of Object.entries(resolve(patch))){const parts=key.split('.');let map=value;for(const name of parts.slice(0,-1))map=map[name]??={};map[parts.at(-1)]=item;}return value;}
+export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);if(q.failCommit||q.failSettlement&&writes.some(w=>w.ref.startsWith('hkm_results/')))throw {code:'permission-denied'};for(const w of writes)if(w.value.bankVersion&&!q.allowedBanks.includes(w.value.bankVersion))throw {code:'permission-denied'};for(const w of writes)q.data.set(w.ref,w.update?patched(q.data.get(w.ref),w.value):resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
 export const where=(key,op,value)=>({kind:'where',key,op,value}),orderBy=(key,dir='asc')=>({kind:'order',key,dir}),limit=value=>({kind:'limit',value}),query=(path,...clauses)=>({path,clauses});
 export async function getDocs(query){let rows=[...q.data].filter(([key])=>key.startsWith(query.path+'/')&&key.split('/').length===query.path.split('/').length+1).map(([path,data])=>({path,data}));for(const c of query.clauses.filter(c=>c.kind==='where'))rows=rows.filter(r=>r.data[c.key]===c.value);const sorts=query.clauses.filter(c=>c.kind==='order');rows.sort((a,b)=>{for(const s of sorts){const av=a.data[s.key]?.toMillis?.()??a.data[s.key],bv=b.data[s.key]?.toMillis?.()??b.data[s.key];if(av!==bv)return(av<bv?-1:1)*(s.dir==='desc'?-1:1);}return 0;});rows=rows.slice(0,query.clauses.find(c=>c.kind==='limit')?.value??rows.length);return {docs:rows.map(r=>snap(r.path))};}
 export async function signInWithEmailAndPassword(auth,email,password){q.calls.push({kind:'email',email,password});return {user:auth.currentUser};}
@@ -47,7 +48,15 @@ try{
  qa.allowedBanks=[LEGACY_BANK_VERSION,BANK_VERSION];
  let r=await cloud.claimDaily();assert.equal(r.questionAt,NOW);assert.equal(r.seen.length,0);assert.equal((await cloud.claimDaily()).startedAt,r.startedAt);checks++;
  const at=r.questionAt;for(const kind of ['half','phone','audience']){qa.now+=100;r=await cloud.move(r.day,{type:'life',kind});assert.equal(r.questionAt,at);await assert.rejects(()=>cloud.move(r.day,{type:'life',kind}),/life-used/);}checks++;
- for(let i=0;i<15;i++){qa.now+=1000;r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});assert.equal(r.correct,i+1);assert.equal(r.seen.length,i+1);if(i<14){qa.now+=20000;r=await cloud.move(r.day,{type:'next'});}}
+ const firstExpected={index:r.index,phase:r.phase,questionAt:r.questionAt};qa.failCommit=true;
+ await assert.rejects(()=>cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected}),error=>error.code==='permission-denied'&&error.stage==='answer-write');
+ assert.equal((await cloud.currentRun(r.day)).phase,'playing');qa.failCommit=false;checks++;
+ for(let i=0;i<15;i++){qa.now+=1000;
+ if(i===0){
+  qa.failServerRead=1;await assert.rejects(()=>cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected}),error=>error.code==='unavailable'&&error.stage==='progress-read');
+  assert.equal((await cloud.currentRun(r.day)).correct,1);
+  r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected});assert.equal(r.correct,1);checks++;
+ }else r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});assert.equal(r.correct,i+1);assert.equal(r.seen.length,i+1);if(i<14){qa.now+=20000;r=await cloud.move(r.day,{type:'next'});if(i===0){const before=JSON.stringify(r);r=await cloud.move(r.day,{type:'answer',choice:0},{expected:firstExpected});assert.equal(JSON.stringify(r),before);checks++;}}}
  assert.equal(r.payout,1000000);assert.equal(r.reason,'complete');assert.equal(r.timeMs,15300);profile=await cloud.account();assert.equal(profile.games,1);assert.equal(profile.total,1000000);assert.equal(profile.unlocked.length,15);assert.deepEqual(profile.titles,['ordinary','neighbour','expert','peak','millionaire']);checks++;
  await Promise.all([cloud.settle(r.day),cloud.settle(r.day)]);assert.equal((await cloud.account()).total,1000000);assert.equal((await cloud.account()).games,1);assert.equal((await cloud.claimDaily()).phase,'finished');checks++;
  for(const type of ['daily','season','all']){const rows=await cloud.leaderboard(type);assert.equal(rows.length,1);assert.equal(rows[0].displayName,'測試香港通');assert(!('email'in rows[0]));assert(!('answers'in rows[0]));}checks++;
@@ -60,6 +69,11 @@ try{
  r=await cloud.claimDaily();for(let i=0;i<15;i++){r=act(r,{type:'answer',choice:questionFor(r).answer},qa.now+100,{autoFinish:false});if(i<14)r=act(r,{type:'next'},qa.now+200);}qa.data.set('hkm_players/'+qa.uid+'/runs/'+r.day,r);qa.now=dayEnd(r.day)+1000;await cloud.resumeAccount();assert.equal((await cloud.currentRun(r.day)).reason,'complete');checks++;
  // A timed-out unfinished question settles on resume, rather than resetting its deadline.
  r=await cloud.claimDaily();qa.now=r.questionAt+20001;const resumed=await cloud.resumeAccount();assert.equal(resumed.run.reason,'timeout');assert.equal(resumed.run.payout,0);checks++;
+ // First-answer loss: persist the answer, retain its reveal when settlement is rejected, then settle once.
+ const originalUid=qa.uid;qa.uid='qa-first-wrong';let first=await cloud.claimDaily();qa.failSettlement=true;
+ await assert.rejects(()=>cloud.move(first.day,{type:'answer',choice:(questionFor(first).answer+1)%4}),error=>error.stage==='settlement'&&error.run?.phase==='reveal'&&error.run.outcome==='wrong');
+ assert.equal((await cloud.account()).games,0);assert.equal((await cloud.currentRun(first.day)).outcome,'wrong');qa.failSettlement=false;
+ first=await cloud.settle(first.day);assert.equal(first.phase,'finished');assert.equal(first.payout,0);await cloud.settle(first.day);assert.equal((await cloud.account()).games,1);qa.uid=originalUid;checks++;
  await cloud.emailLogin('qa@example.test','password');await cloud.emailLogin('new@example.test','password',true);await cloud.resetPassword('qa@example.test');for(const kind of ['email','register','reset'])assert(qa.calls.some(c=>c.kind===kind));await cloud.logout();await assert.rejects(()=>cloud.claimDaily(),/login-required/);checks++;
  assert(qa.calls.filter(c=>c.kind==='transaction').every(c=>c.paths.every(p=>/^hkm_/.test(p))));console.log(JSON.stringify({checks,transactions:qa.calls.filter(c=>c.kind==='transaction').length,mode:'SDK double; no live Firebase or rule execution'}));
 }finally{Date.now=nativeNow;delete globalThis.__HKM_CLOUD_QA;await rm(dir,{recursive:true,force:true});}
