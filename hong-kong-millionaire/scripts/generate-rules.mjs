@@ -10,7 +10,7 @@ const source=`rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   function owner(uid) { return request.auth != null && request.auth.uid == uid; }
-  function today() { return int((request.time.toMillis()+28800000)/86400000); }
+  function today() { return int((request.time.toMillis()+28800000) / 86400000); }
   function seasonNow() { let t=request.time+duration.value(8,'h'); return string(t.year())+'-'+(t.month()<10?'0':'')+string(t.month()); }
   function player(uid) { return /databases/$(database)/documents/${C.players}/$(uid); }
   function run(uid,day) { let id=string(day); return /databases/$(database)/documents/${C.players}/$(uid)/runs/$(id); }
@@ -19,7 +19,7 @@ service cloud.firestore {
   function season(uid,s) { let id=uid+'_'+s; return /databases/$(database)/documents/${C.seasons}/$(id); }
   // Evaluate one tier only. A full-bank answer map exceeded the 1,000-expression budget.
   function question(day,index) {
-   let tier=int(index/5);
+   let tier=int(index / 5);
    let slot=${slots};
    let ids=${ids};
    let answers=${keys};

@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   function owner(uid) { return request.auth != null && request.auth.uid == uid; }
-  function today() { return int((request.time.toMillis()+28800000)/86400000); }
+  function today() { return int((request.time.toMillis()+28800000) / 86400000); }
   function seasonNow() { let t=request.time+duration.value(8,'h'); return string(t.year())+'-'+(t.month()<10?'0':'')+string(t.month()); }
   function player(uid) { return /databases/$(database)/documents/hkm_v4_players/$(uid); }
   function run(uid,day) { let id=string(day); return /databases/$(database)/documents/hkm_v4_players/$(uid)/runs/$(id); }
@@ -11,7 +11,7 @@ service cloud.firestore {
   function season(uid,s) { let id=uid+'_'+s; return /databases/$(database)/documents/hkm_v4_seasons/$(id); }
   // Evaluate one tier only. A full-bank answer map exceeded the 1,000-expression budget.
   function question(day,index) {
-   let tier=int(index/5);
+   let tier=int(index / 5);
    let slot=tier == 0 ? (day*17+(index%5)*7+0)%54 : tier == 1 ? (day*17+(index%5)*7+11)%66 : (day*19+(index%5)*7+22)%51;
    let ids=tier == 0 ? ["e01","e02","e03","e04","e05","e06","e07","e08","e09","e10","e11","e12","e13","e14","e15","e16","e17","e18","e19","e20","e21","e22","e23","e24","e25","e26","e27","e28","e29","e30","u04","u05","u08","u11","u14","c01","c03","c04","c08","c09","c10","c12","c18","c19","c34","c41","c45","c46","c48","c51","c60","c61","c62","c66"] : tier == 1 ? ["m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m12","m13","m14","m15","m16","m17","m18","m19","m20","m21","m22","m23","m24","m25","m26","m27","m28","m29","m30","u02","u03","u06","u07","u09","u13","c02","c05","c07","c11","c13","c14","c16","c17","c20","c22","c23","c24","c26","c31","c33","c37","c42","c43","c49","c50","c52","c53","c54","c56","c57","c58","c59","c63","c64","c67"] : ["h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h11","h12","h13","h14","h15","h16","h17","h18","h19","h20","h21","h22","h23","h24","h25","h26","h27","h28","h29","h30","u01","u10","u12","c06","c15","c21","c25","c27","c28","c29","c30","c32","c35","c36","c38","c39","c40","c44","c47","c55","c65"];
    let answers=tier == 0 ? [2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,2,0,1,3,2,0,1,1,2,3,1,3,0,3,2,2,3,1,0,1,2,3,3] : tier == 1 ? [3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,1,3,1,2,2,3,2,0,0,2,3,1,2,1,3,0,1,3,0,2,2,3,0,2,3,1,2,3,1,2,3,0,0,1,0] : [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,0,2,2,0,1,2,3,1,0,1,3,0,1,1,0,0,2];
