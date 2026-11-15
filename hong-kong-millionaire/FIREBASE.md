@@ -79,3 +79,14 @@ npm run firebase:deploy
 ```
 
 本次沒有連線部署到正式Firebase專案。題庫來源與圖片分享不用新增任何公開或私人Firestore欄位。
+
+## Google已登入，但「帳戶每日挑戰」被拒
+
+若已發布的規則仍寫 `r.bankVersion == 'hk-2026-11-v1'`，它只接受舊90題，會拒絕目前網站建立的104題v2挑戰。Google登入成功與Firestore允許建立挑戰是兩件事。
+
+1. 開啟 [本遊戲的Firestore Rules](https://console.firebase.google.com/project/sky-playground-millionaire/firestore/rules)，確認專案為 `sky-playground-millionaire`。
+2. 把本資料夾的 **完整** [firestore.rules](firestore.rules) 貼上並Publish。不要只改bankVersion那一行：抽題表、不同版本的步長及圖鑑上限亦須一起更新。最新版同時接受v1與v2，保留舊局的原題組。
+3. 上傳最新建置網站後重新載入，以原Google帳戶選「帳戶每日挑戰」。有既有雲端局就續局，沒有才建立新局。這次修復不需要新增索引。
+4. 若只想匿名測試，而舊網站留下尚未成功的開局標記，選「核實未完成開局，再匿名遊玩」。程式用伺服器即時讀取確認今日不存在帳戶局後，才解除未確認標記；讀取被拒、離線或已存在帳戶局時均不會清除。已確認的帳戶挑戰不能以此重置。
+
+不需要刪除玩家文件、清除整個網站資料、開放公開寫入，或重新建立Firebase專案。

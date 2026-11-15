@@ -1,7 +1,7 @@
 import {createQuestionCard,questionShareText} from './question-share.js';
 import {QUESTIONS} from './questions.js';
 import {ART} from './art.js';
-import {DailyLedger} from './ledger.js';
+import {DailyLedger,pendingAccount} from './ledger.js';
 import {newRun,act,hkDay,dayEnd,dayLabel,challengeNumber,questionFor,questionById,presentation,MODE_NAMES,PRIZES,TITLES,titleFor,earned,insurance,remaining,limitMs,livesLeft,removedOptions,audience,shareText,terminal,spent} from './game.js';
 import * as cloud from './cloud.js';
 import '../../grid-rush/src/site-updates.js';
@@ -9,6 +9,7 @@ const $=id=>document.getElementById(id),money=n=>'$'+Number(n).toLocaleString('e
 let storage;try{storage=localStorage;}catch{storage={getItem(){return null;},setItem(){throw Error('storage-required');},removeItem(){}};}
 const ledger=new DailyLedger({storage}),initial=ledger.read();let run=initial?.owner==='guest'?initial.run:null,owner=run?'guest':null,token=initial?.token,user=null,profile=null,busy=false,pending=false,selected=null,screen='lobby',visualKey='',blur=null,authReady=false,authBusy=false,googleAttempt=null,authVersion=0,identityVersion=0,actionVersion=0,accountLoading=false,authRestored=false,anonymousIntent=!!run,accountRequested=false,stopAuth,boardType='daily',bookType='wrong',detailId=null,deadlineCall=false,lastSecond=-1,lastAnnounced=-1,historyRows=[],boardVersion=0;
 const boardCache=new Map(),prepared=new Map();
+let lobbyDay=hkDay();
 function announce(text){put('announcer',text);}
 function dialog(id){if(!$(id).open)$(id).showModal();}
 function close(id){if($(id).open)$(id).close();}
@@ -28,14 +29,16 @@ function restoreGuest(){
 function activeAction(version,actor){return version===actionVersion&&owner===actor&&(actor==='guest'||user?.uid===actor);}
 function renderLobby(){
  const day=hkDay(),mark=ledger.read(),today=run?.day===day,guest=guestEntry();
- put('today-label',dayLabel(day));put('challenge-label','第 '+challengeNumber(day)+' 回');
+ lobbyDay=day;put('today-label','香港時間 '+dayLabel(day));put('challenge-label','每日題組 · 第 '+challengeNumber(day)+' 回');
  $('start').disabled=busy||!guest&&(!authRestored||accountLoading);$('guest-start').disabled=busy;
+ put('guest-start',pendingAccount(mark)?'核實未完成開局，再匿名遊玩 ↗':'直接匿名遊玩（只存本機） ↗');
  put('start',today?(run.phase==='finished'?'查看今日成績 ↗':'返回今日熱座 ↗'):!authRestored?'正在確認登入狀態…':accountLoading?'正在連接帳戶…':mark?.owner&&mark.owner!=='guest'&&!user?'登入繼續今日挑戰 ↗':user?'帳戶每日挑戰，開始遊玩 ↗':'匿名坐上熱座，開始挑戰 ↗');
  show('guest-start',!guest&&(!!user||!authRestored||accountLoading));
  let note='每人每日一次，香港時間凌晨零時更新。';
  if(!authRestored&&!today)note='正在確認登入狀態；可直接匿名遊玩，進度只保存在本機。';
  else if(!ledger.available&&!user)note='匿名挑戰需要儲存今日次數，請允許網站儲存，或登入後遊玩。';
  else if(today)note=owner==='guest'?'今日匿名進度已保留；登入不會重新獲得一次機會。':'今日挑戰已綁定帳戶，跨裝置可繼續。';
+ else if(pendingAccount(mark))note='上次帳戶開局仍待確認；可重試帳戶挑戰，或由伺服器核實後改為匿名遊玩。';
  else if(mark?.owner&&mark.owner!=='guest'&&!user)note='此瀏覽器今日已有帳戶挑戰，登入原帳戶繼續。';
  put('lobby-status',note);
 }
@@ -45,20 +48,37 @@ function renderGame(){if(!run)return;const q=questionFor(run);put('round-label',
 function renderResult(){closeRoundDialogs();const title=titleFor(run.payout);put('result-day',dayLabel(run.day)+' · 第'+challengeNumber(run.day)+'回');put('result-title',title.name);put('result-reason',{wrong:'答錯了，帶走最近保險線的獎金。',walk:'識得收手，安全帶走已累積的獎金。',timeout:'時間到，保留已累積的獎金。',complete:'十五條全中，今晚你就係百萬富翁！'}[run.reason]);put('result-prize',money(run.payout));put('title-note',title.note);put('result-correct',run.correct+'／15');put('result-time',(run.timeMs/1000).toFixed(1)+'秒');put('result-lives',livesLeft(run)+'／3');const grid=$('result-grid');grid.replaceChildren();for(let i=0;i<15;i++){const cell=document.createElement('span'),a=run.answers[i];if(a)cell.className=a.outcome;cell.setAttribute('aria-label','第'+(i+1)+'題：'+(a?{correct:'答對',wrong:'答錯',walk:'未作答',timeout:'超時'}[a.outcome]:'未到達'));grid.append(cell);}put('result-account-note',owner==='guest'?'本局為匿名挑戰，只保留今日結果，不會進入排行榜或永久圖鑑。':'已綁定登入帳戶；永久稱號、圖鑑及排行榜由雲端保存。');show('native-share',typeof navigator.share==='function');tick();}
 function render(){renderLobby();renderAccount();if(screen==='game')renderGame();if(screen==='result'&&run)renderResult();}
 function renderAccount(){show('signed-in',!!user);show('signed-out',!user);put('account-label',user?profile?.displayName??'我的帳戶':'登入／帳戶');$('google-login').disabled=!authReady||authBusy;$('email-login').disabled=!authReady||authBusy;$('reset-password').disabled=!authReady||authBusy;$('logout').disabled=authBusy;show('google-open',!!googleAttempt?.popup?.ready&&!googleAttempt.popup.opened);show('auth-cancel',!!googleAttempt?.popup?.standalone);if(user){put('account-identity',user.email??'已登入 Google 帳戶');if(document.activeElement!==$('display-name'))$('display-name').value=profile?.displayName??'';const box=$('account-stats');box.replaceChildren();for(const [value,label]of [[money(profile?.total??0),'生涯虛擬總獎金'],[profile?.games??0,'完成挑戰'],[(profile?.unlocked??[]).length+'/'+QUESTIONS.length,'文化圖鑑']]){const cell=document.createElement('div'),b=document.createElement('b');b.textContent=value;cell.append(b,document.createTextNode(label));box.append(cell);}}}
+async function releaseFailedStart(mark,current){
+ if(!pendingAccount(mark)||user?.uid!==mark.owner)return false;
+ // Only a fresh, successful server read can establish that an old reservation never became a run.
+ return accountClaimLock(async()=>{
+  if(!current()||user?.uid!==mark.owner)return false;
+  const existing=await timeout(cloud.currentRun(mark.day,{server:true}));if(!current()||user?.uid!==mark.owner)return false;
+  const latest=ledger.read();if(latest?.token!==mark.token||!pendingAccount(latest))return false;
+  if(existing){ledger.markCloud(mark.owner,existing);return false;}
+  return ledger.releaseUnclaimed(mark.owner,mark.token);
+ });
+}
+// Keep recovery behind another tab's in-flight claim, including requests outliving a UI timeout.
+const accountClaimLock=task=>navigator.locks?navigator.locks.request('hk-millionaire-cloud-start',task):task();
 async function start(mode){
  const wantsGuest=mode==='guest';
  if(busy||!wantsGuest&&!guestEntry()&&(!authRestored||accountLoading))return;
  const day=hkDay(),mark=ledger.read();
- if(wantsGuest&&(mark?.owner&&mark.owner!=='guest'||run?.day===day&&owner&&owner!=='guest')){
+ if(wantsGuest&&(!pendingAccount(mark)&&mark?.owner&&mark.owner!=='guest'||run?.day===day&&owner&&owner!=='guest')){
   put('lobby-status','本瀏覽器今日已開始帳戶挑戰，請登入原帳戶繼續；今日機會不會重置。');return;
  }
  restoreGuest();if(run?.day===day){page(run.phase==='finished'?'result':'game');render();return;}
  if(!wantsGuest&&!user){dialog('account-dialog');return;}
  anonymousIntent=wantsGuest;accountRequested=!wantsGuest;
- const version=++actionVersion,uid=user?.uid;busy=true;put('lobby-status',wantsGuest?'正在準備匿名本機挑戰…':'正在連接帳戶挑戰…');renderLobby();
+ const version=++actionVersion,uid=user?.uid;let reservation=null;busy=true;renderLobby();put('lobby-status',wantsGuest?'正在準備匿名本機挑戰…':'正在連接帳戶挑戰…');
  const current=()=>version===actionVersion&&(wantsGuest?anonymousIntent:user?.uid===uid);
  try{
   if(wantsGuest){
+   if(pendingAccount(mark)){
+    put('lobby-status','正在向伺服器核實上次開局是否成功…');
+    if(!await releaseFailedStart(mark,current)){if(current())put('lobby-status',user?.uid===mark.owner?'今日帳戶挑戰已存在，或仍未能確認開局狀態。請用原帳戶繼續，不會重置今日機會。':'請先登入上次使用的帳戶，核實未完成的開局；不會重置今日機會。');return;}
+   }
    if(!ledger.read())await preload(questionFor(newRun(day)));if(!current())return;
    const entry=await ledger.start('guest');if(!current())return;
    run=entry.run;owner='guest';token=entry.token;
@@ -67,13 +87,22 @@ async function start(mode){
    if(state.run?.day===day){run=state.run;owner=uid;if(ledger.available)ledger.markCloud(uid,run);}
    else{
     await preload(questionFor(newRun(day)));if(!current())return;
-    if(ledger.available)await ledger.start(uid);if(!current())return;
-    const next=await timeout(cloud.claimDaily());if(!current())return;
+    const next=await timeout(accountClaimLock(async()=>{
+     if(!current())return null;
+     if(ledger.available)reservation=await ledger.start(uid);if(!current())return null;
+     return cloud.claimDaily();
+    }));if(!current())return;
     run=next;owner=uid;if(ledger.available)ledger.markCloud(uid,run);
    }
   }
   pending=false;visualKey='';put('game-status','');page(run.phase==='finished'?'result':'game');announce('今日挑戰開始。第一條問題，準備好。');
- }catch(error){if(current()){put('lobby-status',error.message==='storage-required'?'請允許網站儲存今日次數，或登入後遊玩。':error.message==='guest-used'?'今日已開始匿名挑戰，請繼續同一局。':error.message==='account-used'?'今日已有帳戶挑戰，請登入原帳戶繼續。':error.message==='image-unavailable'?'題圖未能載入，尚未開始挑戰；請重新連線再試。':cloud.errorText(error));if(error.message==='account-used')dialog('account-dialog');}}
+ }catch(error){if(current()){
+  let released=false;
+  // A timeout can still commit later. Keep its reservation until a subsequent explicit check.
+  if(reservation&&error.code==='permission-denied')try{released=await releaseFailedStart(reservation,current);}catch{}
+  if(!current())return;
+  put('lobby-status',(error.message==='storage-required'?'請允許網站儲存今日次數，或登入後遊玩。':error.message==='guest-used'?'今日已開始匿名挑戰，請繼續同一局。':error.message==='account-used'?'今日已有帳戶挑戰，請登入原帳戶繼續。':error.message==='image-unavailable'?'題圖未能載入，尚未開始挑戰；請重新連線再試。':cloud.errorText(error))+(released?' 伺服器確認今日尚未開局，已解除失敗標記；可重試帳戶挑戰或匿名遊玩。':''));if(error.message==='account-used')dialog('account-dialog');
+ }}
  finally{if(version===actionVersion){busy=false;if(screen!=='lobby')render();else{$('start').disabled=!guestEntry()&&(!authRestored||accountLoading);$('guest-start').disabled=false;}}}
 }
 async function perform(action){
@@ -130,7 +159,7 @@ async function openQuestionShare(q){
   show('native-question-share',typeof navigator.share==='function'&&!!navigator.canShare?.({files:[questionCardFile]}));put('question-share-status','圖片已準備好，可儲存或自行選擇分享。');
  }catch{if(version===questionCardVersion)put('question-share-status','圖片暫時未能製作，仍可複製題目文字。');}
 }
-function tick(){if(run&&screen==='game'){const left=remaining(run),seconds=Math.ceil(left/1000);if(lastSecond!==seconds){put('timer',run.phase==='playing'?seconds:'—');lastSecond=seconds;}const urgent=seconds<=5&&run.phase==='playing';document.querySelector('.timer-box').classList.toggle('urgent',urgent);document.querySelector('.time-track').classList.toggle('urgent',urgent);$('timer-fill').style.transform='scaleX('+(run.phase==='playing'?Math.max(0,Math.min(1,left/limitMs(run.index))):0)+')';if(seconds>0&&seconds<=5&&lastAnnounced!==seconds&&run.phase==='playing'){lastAnnounced=seconds;announce('剩餘'+seconds+'秒。');}if(run.phase==='playing'&&left<=0&&!busy&&!pending&&!deadlineCall){deadlineCall=true;closeRoundDialogs();perform({type:'timeout'});}else if(run.phase==='reveal'&&run.day!==hkDay()&&!busy&&!pending){perform({type:'timeout'});}}if(screen==='result'){const ms=Math.max(0,dayEnd(hkDay())-Date.now()),h=Math.floor(ms/3600000),m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60;put('next-day-countdown',run?.day===hkDay()?`${h}小時 ${String(m).padStart(2,'0')}分 ${String(s).padStart(2,'0')}秒後，新一回開場。`:'今日新挑戰已開放，返回大堂即可開始。');}}
+function tick(){if(screen==='lobby'&&!busy&&lobbyDay!==hkDay()){run=null;owner=null;token=null;pending=false;anonymousIntent=false;renderLobby();}if(run&&screen==='game'){const left=remaining(run),seconds=Math.ceil(left/1000);if(lastSecond!==seconds){put('timer',run.phase==='playing'?seconds:'—');lastSecond=seconds;}const urgent=seconds<=5&&run.phase==='playing';document.querySelector('.timer-box').classList.toggle('urgent',urgent);document.querySelector('.time-track').classList.toggle('urgent',urgent);$('timer-fill').style.transform='scaleX('+(run.phase==='playing'?Math.max(0,Math.min(1,left/limitMs(run.index))):0)+')';if(seconds>0&&seconds<=5&&lastAnnounced!==seconds&&run.phase==='playing'){lastAnnounced=seconds;announce('剩餘'+seconds+'秒。');}if(run.phase==='playing'&&left<=0&&!busy&&!pending&&!deadlineCall){deadlineCall=true;closeRoundDialogs();perform({type:'timeout'});}else if(run.phase==='reveal'&&run.day!==hkDay()&&!busy&&!pending){perform({type:'timeout'});}}if(screen==='result'){const ms=Math.max(0,dayEnd(hkDay())-Date.now()),h=Math.floor(ms/3600000),m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60;put('next-day-countdown',run?.day===hkDay()?`${h}小時 ${String(m).padStart(2,'0')}分 ${String(s).padStart(2,'0')}秒後，新一回開場。`:'今日新挑戰已開放，返回大堂即可開始。');}}
 async function initAuth(){
  const version=++authVersion;identityVersion++;put('account-status','正在準備登入服務…');show('auth-retry',false);
  try{

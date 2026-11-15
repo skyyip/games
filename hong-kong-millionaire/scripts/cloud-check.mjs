@@ -4,10 +4,10 @@ import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {hkDay,dayEnd,questionFor,newRun,act} from '../src/game.js';
+import {hkDay,dayEnd,questionFor,newRun,act,LEGACY_BANK_VERSION,BANK_VERSION} from '../src/game.js';
 const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
 const dir=await mkdtemp(join(tmpdir(),'hkm-cloud-')),NOW=Date.UTC(2026,10,14,4),nativeNow=Date.now;
-const qa=globalThis.__HKM_CLOUD_QA={now:NOW,uid:'qa-account-0001',data:new Map(),calls:[],tail:Promise.resolve()};
+const qa=globalThis.__HKM_CLOUD_QA={now:NOW,uid:'qa-account-0001',data:new Map(),calls:[],tail:Promise.resolve(),allowedBanks:[BANK_VERSION,LEGACY_BANK_VERSION]};
 Date.now=()=>qa.now;
 const sdk=`
 const q=globalThis.__HKM_CLOUD_QA;
@@ -22,8 +22,9 @@ export async function setPersistence(){};export function getFirestore(){return {
 export function onAuthStateChanged(auth,cb){cb(auth.currentUser);return ()=>{};}
 export function doc(db,...parts){return parts.join('/');}export function collection(db,...parts){return parts.join('/');}
 export function serverTimestamp(){return {__server:true};}export async function getDoc(ref){return snap(ref);}
+export async function getDocFromServer(ref){q.calls.push({kind:'server-read',ref});return snap(ref);}
 export async function updateDoc(ref,patch){q.data.set(ref,{...q.data.get(ref),...resolve(patch)});}
-export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);for(const w of writes)q.data.set(w.ref,w.update?{...q.data.get(w.ref),...resolve(w.value)}:resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
+export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);for(const w of writes)if(w.value.bankVersion&&!q.allowedBanks.includes(w.value.bankVersion))throw {code:'permission-denied'};for(const w of writes)q.data.set(w.ref,w.update?{...q.data.get(w.ref),...resolve(w.value)}:resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
 export const where=(key,op,value)=>({kind:'where',key,op,value}),orderBy=(key,dir='asc')=>({kind:'order',key,dir}),limit=value=>({kind:'limit',value}),query=(path,...clauses)=>({path,clauses});
 export async function getDocs(query){let rows=[...q.data].filter(([key])=>key.startsWith(query.path+'/')&&key.split('/').length===query.path.split('/').length+1).map(([path,data])=>({path,data}));for(const c of query.clauses.filter(c=>c.kind==='where'))rows=rows.filter(r=>r.data[c.key]===c.value);const sorts=query.clauses.filter(c=>c.kind==='order');rows.sort((a,b)=>{for(const s of sorts){const av=a.data[s.key]?.toMillis?.()??a.data[s.key],bv=b.data[s.key]?.toMillis?.()??b.data[s.key];if(av!==bv)return(av<bv?-1:1)*(s.dir==='desc'?-1:1);}return 0;});rows=rows.slice(0,query.clauses.find(c=>c.kind==='limit')?.value??rows.length);return {docs:rows.map(r=>snap(r.path))};}
 export async function signInWithEmailAndPassword(auth,email,password){q.calls.push({kind:'email',email,password});return {user:auth.currentUser};}
@@ -39,6 +40,11 @@ try{
  const outfile=join(dir,'cloud.mjs');await build({entryPoints:[new URL('../src/cloud.js',import.meta.url).pathname],bundle:true,platform:'node',format:'esm',outfile,plugins:[{name:'test-sdk',setup(b){b.onResolve({filter:/^firebase\//},()=>({path:join(dir,'sdk.mjs')}));}}]});
  const cloud=await import(pathToFileURL(outfile));await cloud.prepareAuth();const app=qa.calls.find(c=>c.kind==='app');assert.equal(app.name,'hk-millionaire');assert.equal(app.config.projectId,'sky-playground-millionaire');assert.equal(app.config.apiKey.length,39);checks++;
  let profile=await cloud.account();assert.equal(profile.total,0);assert(!profile.displayName.includes('@'));await cloud.saveName('測試香港通');assert.equal((await cloud.account()).displayName,'測試香港通');checks++;
+ // Reproduce the published v1-only bank gate: the v2 transaction must fail atomically.
+ qa.allowedBanks=[LEGACY_BANK_VERSION];await assert.rejects(()=>cloud.claimDaily(),error=>error.code==='permission-denied');
+ assert.equal((await cloud.account()).activeDay,null);assert.equal(await cloud.currentRun(hkDay(),{server:true}),null);
+ assert(qa.calls.some(c=>c.kind==='server-read'));assert(cloud.errorText({code:'permission-denied'}).includes('v1／v2'));checks++;
+ qa.allowedBanks=[LEGACY_BANK_VERSION,BANK_VERSION];
  let r=await cloud.claimDaily();assert.equal(r.questionAt,NOW);assert.equal(r.seen.length,0);assert.equal((await cloud.claimDaily()).startedAt,r.startedAt);checks++;
  const at=r.questionAt;for(const kind of ['half','phone','audience']){qa.now+=100;r=await cloud.move(r.day,{type:'life',kind});assert.equal(r.questionAt,at);await assert.rejects(()=>cloud.move(r.day,{type:'life',kind}),/life-used/);}checks++;
  for(let i=0;i<15;i++){qa.now+=1000;r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});assert.equal(r.correct,i+1);assert.equal(r.seen.length,i+1);if(i<14){qa.now+=20000;r=await cloud.move(r.day,{type:'next'});}}
