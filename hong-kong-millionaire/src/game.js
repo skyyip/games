@@ -1,6 +1,6 @@
-import {QUESTIONS,LEGACY_QUESTIONS} from './questions.js';
-export const LEGACY_BANK_VERSION='hk-2026-11-v1',BANK_VERSION='hk-2026-11-v2';
-export const SUPPORTED_BANK_VERSIONS=Object.freeze([LEGACY_BANK_VERSION,BANK_VERSION]);
+import {QUESTIONS,LEGACY_QUESTIONS,V2_QUESTIONS} from './questions.js';
+export const LEGACY_BANK_VERSION='hk-2026-11-v1',PREVIOUS_BANK_VERSION='hk-2026-11-v2',BANK_VERSION='hk-2026-11-v3';
+export const SUPPORTED_BANK_VERSIONS=Object.freeze([LEGACY_BANK_VERSION,PREVIOUS_BANK_VERSION,BANK_VERSION]);
 export const DAY_MS=86400000,HK_OFFSET=28800000;
 export const PRIZES=Object.freeze([1000,2000,3000,4000,8000,10000,20000,30000,40000,60000,80000,150000,250000,500000,1000000]);
 export const TITLES=Object.freeze([{id:'ordinary',name:'運氣平平',min:0,note:'香港故事仲有好多，聽日再接再厲。'},{id:'neighbour',name:'街坊地保',min:8000,note:'街頭巷尾嘅香港常識，難唔到你。'},{id:'expert',name:'香港通',min:60000,note:'地理、節慶與文化，你都熟門熟路。'},{id:'peak',name:'太平山神',min:500000,note:'只差一步登頂，你已經站得好高。'},{id:'millionaire',name:'百萬富翁',min:1000000,note:'十五題全中，今晚香港由你話事！'}]);
@@ -11,7 +11,7 @@ const gcd=(a,b)=>b?gcd(b,a%b):a;
 function stride(size,start){while(gcd(size,start)!==1)start++;return start;}
 function plan(bank,legacy=false){return Object.freeze([1,2,3].map(tier=>{const ids=Object.freeze(bank.filter(q=>q.tier===tier).map(q=>q.id));return Object.freeze({ids,dayStep:legacy?17:stride(ids.length,17),slotStep:legacy?7:stride(ids.length,7)});}));}
 // Preserve the original plan for saved / in-progress v1 runs, even after a bank expansion.
-export const QUESTION_PLANS=Object.freeze({[LEGACY_BANK_VERSION]:plan(LEGACY_QUESTIONS,true),[BANK_VERSION]:plan(QUESTIONS)});
+export const QUESTION_PLANS=Object.freeze({[LEGACY_BANK_VERSION]:plan(LEGACY_QUESTIONS,true),[PREVIOUS_BANK_VERSION]:plan(V2_QUESTIONS),[BANK_VERSION]:plan(QUESTIONS)});
 export const hkDay=(now=Date.now())=>Math.floor((now+HK_OFFSET)/DAY_MS);
 export const dayEnd=day=>(day+1)*DAY_MS-HK_OFFSET;
 export const seasonForDay=day=>new Date(day*DAY_MS).toISOString().slice(0,7);

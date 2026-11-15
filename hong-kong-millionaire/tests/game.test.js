@@ -1,7 +1,7 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,existsSync} from 'node:fs';import {QUESTIONS,LEGACY_QUESTIONS} from '../src/questions.js';import {URBAN_QUESTIONS} from '../src/urban-questions.js';import {BANK_VERSION,LEGACY_BANK_VERSION,QUESTION_PLANS} from '../src/game.js';import {questionShareText} from '../src/question-share.js';import {newRun,act,finish,hkDay,dayEnd,questionFor,questionId,presentation,MODES,PRIZES,insurance,earned,titleFor,remaining,limitMs,audience,removedOptions,livesLeft,shareText,nextProfile,spent} from '../src/game.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,existsSync} from 'node:fs';import {QUESTIONS,LEGACY_QUESTIONS,V2_QUESTIONS} from '../src/questions.js';import {COMIC_QUESTIONS} from '../src/comic-questions.js';import {URBAN_QUESTIONS} from '../src/urban-questions.js';import {BANK_VERSION,LEGACY_BANK_VERSION,PREVIOUS_BANK_VERSION,QUESTION_PLANS} from '../src/game.js';import {questionShareText} from '../src/question-share.js';import {newRun,act,finish,hkDay,dayEnd,questionFor,questionId,presentation,MODES,PRIZES,insurance,earned,titleFor,remaining,limitMs,audience,removedOptions,livesLeft,shareText,nextProfile,spent} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
 function rig(){let now=NOW,run=newRun(DAY,now);return {get run(){return run;},step(ms){now+=ms;},answer(correct=true){run=act(run,{type:'answer',choice:(questionFor(run).answer+(correct?0:1))%4},now+=1000);return run;},next(){run=act(run,{type:'next'},now+=300);},action(a){run=act(run,a,now);return run;}};}
-test('104 factual question records have stable unique IDs, distinct choices, sources and existing artwork',()=>{assert.equal(QUESTIONS.length,104);assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,104);for(const [i,size]of [35,36,33].entries())assert.equal(QUESTIONS.filter(q=>q.tier===i+1).length,size);for(const q of QUESTIONS){assert.equal(q.options.length,4);assert.equal(new Set(q.options).size,4);assert(q.answer>=0&&q.answer<=3);assert(q.explanation&&q.hint&&q.source.label);assert.equal(new URL(q.source.url).protocol,'https:');assert(existsSync(new URL('../assets/'+q.art+'.svg',import.meta.url)));}});
+test('171 factual question records have stable unique IDs, distinct choices, sources and existing artwork',()=>{assert.equal(QUESTIONS.length,171);assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,171);for(const [i,size]of [54,66,51].entries())assert.equal(QUESTIONS.filter(q=>q.tier===i+1).length,size);for(const q of QUESTIONS){assert.equal(q.options.length,4);assert.equal(new Set(q.options).size,4);assert(q.answer>=0&&q.answer<=3);assert(q.explanation&&q.hint&&q.source.label);assert.equal(new URL(q.source.url).protocol,'https:');assert(existsSync(new URL('../assets/'+q.art+'.svg',import.meta.url)));}});
 test('daily plans are shared, repeatable, progressive and have15 unique questions',()=>{const modes=new Set();for(let day=DAY;day<DAY+30;day++){const ids=[];for(let i=0;i<15;i++){ids.push(questionId(day,i));assert.equal(questionFor({...newRun(day,NOW),index:i}).tier,Math.floor(i/5)+1);assert.deepEqual(presentation(day,i),presentation(day,i));assert.deepEqual([...presentation(day,i).order].sort(),[0,1,2,3]);assert(presentation(day,i).partial>=.05&&presentation(day,i).partial<=.1);modes.add(presentation(day,i).mode);}assert.equal(new Set(ids).size,15);}assert.deepEqual(modes,new Set(MODES));});
 test('Hong Kong midnight defines the daily boundary instead of UTC or device timezone',()=>{const last=Date.UTC(2026,10,14,15,59,59,999),next=last+1;assert.equal(hkDay(next),hkDay(last)+1);assert.equal(dayEnd(hkDay(last)),next);});
 for(const count of [0,4,5,9,10,13,14])test(`wrong after${count} correct answers pays only the applicable insurance`,()=>{const r=rig();for(let i=0;i<count;i++){r.answer();r.next();}r.answer(false);assert.equal(r.run.phase,'finished');assert.equal(r.run.correct,count);assert.equal(r.run.payout,insurance(count));assert.equal(r.run.reason,'wrong');});
@@ -46,4 +46,24 @@ test('question sharing is deliberate and contains no answer key, explanation, hi
  const shared=questionShareText(q,'https://sky-playground.com/games/hong-kong-millionaire/');
  assert(shared.includes(q.question));for(const option of q.options)assert(shared.includes(option));
  for(const secret of ['PRIVATE_EXPLANATION','PRIVATE_HINT','PRIVATE_UID','正確答案'])assert(!shared.includes(secret));assert(shared.includes('不附答案'));
+});
+
+
+test('all 67 supplied topics have a distinct integrated comic question and a documented correction',()=>{
+ const source=JSON.parse(readFileSync(new URL('../docs/source-67-topics.json',import.meta.url),'utf8'));
+ assert.equal(source.sourceEntries-source.duplicateEntries,67);assert.equal(source.topics.length,67);assert.equal(COMIC_QUESTIONS.length,67);
+ const positions=[0,0,0,0];for(const [i,q]of COMIC_QUESTIONS.entries()){
+  assert.equal(q.id,'c'+String(i+1).padStart(2,'0'));assert.equal(q.sourceNumber,i+1);assert(q.review);assert(QUESTIONS.includes(q));
+  assert.equal(q.art,'comic-'+String(i+1).padStart(2,'0'));assert(q.modes.every(mode=>MODES.includes(mode)));assert(q.focus.x>0&&q.focus.x<100&&q.focus.y>0&&q.focus.y<100);positions[q.answer]++;
+ }
+ assert(Math.max(...positions)-Math.min(...positions)<=1);
+});
+test('the 104-question v2 schedule is immutable after adding the 67 comic questions',()=>{
+ assert.equal(V2_QUESTIONS.length,104);const sizes=[35,36,33],slots=[8,7,7];
+ for(let day=DAY;day<DAY+180;day++)for(let index=0;index<15;index++){
+  const tier=Math.floor(index/5),pool=V2_QUESTIONS.filter(q=>q.tier===tier+1);
+  assert.equal(questionId(day,index,PREVIOUS_BANK_VERSION),pool[(day*17+(index%5)*slots[tier]+tier*11)%sizes[tier]].id);
+ }
+ let run={...newRun(DAY,NOW),bankVersion:PREVIOUS_BANK_VERSION};for(let i=0;i<15;i++){run=act(run,{type:'answer',choice:questionFor(run).answer},NOW+1000+i*1000);if(i<14)run=act(run,{type:'next'},NOW+1100+i*1000);}
+ assert.equal(run.payout,1000000);assert.equal(run.bankVersion,PREVIOUS_BANK_VERSION);assert.equal(newRun(DAY,NOW).bankVersion,'hk-2026-11-v3');
 });

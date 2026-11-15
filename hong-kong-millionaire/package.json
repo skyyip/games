@@ -12,7 +12,10 @@
     "test:browser": "node scripts/browser-check.mjs",
     "test:cloud": "node scripts/cloud-check.mjs",
     "test:urban": "node scripts/urban-browser-check.mjs",
-    "test:auth-transition": "node scripts/auth-transition-check.mjs"
+    "test:auth-transition": "node scripts/auth-transition-check.mjs",
+    "test:comic": "node scripts/comic-browser-check.mjs",
+    "review:generate": "node scripts/generate-comic-review.mjs",
+    "review:check": "node scripts/generate-comic-review.mjs --check"
   },
   "dependencies": {
     "firebase": "^12.5.0"

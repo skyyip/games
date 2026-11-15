@@ -1,6 +1,7 @@
-import {readFile,writeFile} from 'node:fs/promises';import {QUESTIONS} from '../src/questions.js';import {PRIZES,BANK_VERSION,LEGACY_BANK_VERSION,SUPPORTED_BANK_VERSIONS,QUESTION_PLANS} from '../src/game.js';
+import {readFile,writeFile} from 'node:fs/promises';import {QUESTIONS} from '../src/questions.js';import {PRIZES,SUPPORTED_BANK_VERSIONS,QUESTION_PLANS} from '../src/game.js';
 const ids=QUESTIONS.map(q=>q.id),json=JSON.stringify;
 const planExpression=version=>QUESTION_PLANS[version].map((pool,tier)=>{const slot=`(day*${pool.dayStep}+(index%5)*${pool.slotStep}+${tier*11})%${pool.ids.length}`;return `${json(pool.ids)}[${slot}]`;}).reduceRight((tail,expr,tier)=>tier===2?expr:`tier == ${tier} ? ${expr} : ${tail}`,'');
+const versionedPlan=SUPPORTED_BANK_VERSIONS.map(version=>({version,expression:planExpression(version)})).reduceRight((tail,{version,expression})=>tail?`version == '${version}' ? (${expression}) : (${tail})`:expression,'');
 const source=`rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
@@ -12,8 +13,8 @@ service cloud.firestore {
   function result(uid,day) { let key=uid+'_'+string(day); return /databases/$(database)/documents/hkm_results/$(key); }
   function rank(uid) { return /databases/$(database)/documents/hkm_rankings/$(uid); }
   function season(uid,s) { let key=uid+'_'+s; return /databases/$(database)/documents/hkm_seasons/$(key); }
-  function qid(day,index,version) { let tier=int(index / 5); return version == '${LEGACY_BANK_VERSION}' ? (${planExpression(LEGACY_BANK_VERSION)}) : (${planExpression(BANK_VERSION)}); }
-  function key(day,index,version) { return ${json(Object.fromEntries(QUESTIONS.map(q=>[q.id,q.answer])))}[qid(day,index,version)]; }
+  function qid(day,index,version) { let tier=int(index / 5); return ${versionedPlan}; }
+  function key(id) { return ${json(Object.fromEntries(QUESTIONS.map(q=>[q.id,q.answer])))}[id]; }
   function prize(count) { return count == 0 ? 0 : ${json(PRIZES)}[count-1]; }
   function floorPrize(count) { return count >= 10 ? 60000 : count >= 5 ? 8000 : 0; }
   function titles(best) { return best >= 1000000 ? ['ordinary','neighbour','expert','peak','millionaire'] : best >= 500000 ? ['ordinary','neighbour','expert','peak'] : best >= 60000 ? ['ordinary','neighbour','expert'] : best >= 8000 ? ['ordinary','neighbour'] : ['ordinary']; }
@@ -58,11 +59,12 @@ service cloud.firestore {
   }
   function answer(r,old) {
    let item=r.answers[string(old.index)];
+   let expected=qid(old.day,old.index,old.bankVersion);
    return old.phase == 'playing' && r.phase == 'reveal' && r.diff(old).affectedKeys().hasOnly(['phase','correct','answerAt','updatedAt','outcome','choice','answers','seen'])
-    && r.seen == old.seen.concat([qid(old.day,old.index,old.bankVersion)]) && r.answerAt == request.time && r.answers.size() == old.answers.size()+1 && r.answers.diff(old.answers).affectedKeys().hasOnly([string(old.index)])
-    && item.keys().hasOnly(['qid','choice','outcome','startedAt','answeredAt']) && item.qid == qid(old.day,old.index,old.bankVersion) && item.choice == r.choice && item.outcome == r.outcome && item.startedAt == old.questionAt && item.answeredAt == request.time
+    && r.seen == old.seen.concat([expected]) && r.answerAt == request.time && r.answers.size() == old.answers.size()+1 && r.answers.diff(old.answers).affectedKeys().hasOnly([string(old.index)])
+    && item.keys().hasOnly(['qid','choice','outcome','startedAt','answeredAt']) && item.qid == expected && item.choice == r.choice && item.outcome == r.outcome && item.startedAt == old.questionAt && item.answeredAt == request.time
     && (
-     (r.choice >= 0 && timely(old) && r.outcome == (r.choice == key(old.day,old.index,old.bankVersion) ? 'correct' : 'wrong') && r.correct == old.correct+(r.outcome == 'correct' ? 1 : 0))
+     (r.choice >= 0 && timely(old) && r.outcome == (r.choice == key(expected) ? 'correct' : 'wrong') && r.correct == old.correct+(r.outcome == 'correct' ? 1 : 0))
      || (r.choice == -1 && r.correct == old.correct && ((r.outcome == 'walk' && timely(old)) || (r.outcome == 'timeout' && (today() != old.day || request.time >= old.questionAt + duration.value(cap(old.index),'ms')))))
     );
   }

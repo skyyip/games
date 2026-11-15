@@ -23,3 +23,13 @@
 `generate_urban_art.py` 產生14張800×500原創示意圖：`tram-lifeguard`（歷史裝置位置）、`ferry-bench`（椅背與轉軸）、`steel-seats`、`bus-route-sheet`、`taxi-light`、`weep-holes`、`pawn-screen`、`escalator-brush`、`tong-lau-arcade`、`seawater-flushing`、`lamppost-number`、`scalloped-coins`、`yellow-box`、`red-market-bag`。原來23張由`generate_art.py`重建。
 
 巴士路線和燈柱編號是虛構示例；硬幣只畫波浪輪廓、不含幣面及面額；電車不聲稱現役普遍保留裝置。不得把這些示意圖作導航、工程圖或實物細節考證。每題以`focus`指定局部焦點，`modes`限制適用的呈現方式；水資源數字題只用文字。分享圖使用插畫局部與四選一，不標正確答案。
+
+
+## 香港街頭漫畫篇
+
+- `comic-cover.webp`：本次以圖像生成工具製作的原創香港街景漫畫，包含街坊主持、唐樓、電車、小輪、菠蘿包及奶茶角色；沒有使用電視節目標誌或真實主持人肖像。1536×1024，WebP約530KiB。
+- `comic-01.svg`至`comic-67.svg`：67幅新繪的800×500向量教學漫畫，對應c01–c67。使用墨線、紙色、朱紅與墨綠、簡化形狀及印刷網點；不是實景照片、官方商標、真鈔票或出土古文字複製。需要閱讀的中文字及花碼已轉為字形輪廓，避免圖片在不同裝置缺字。
+- `generate_comic_art.py`重建上述67幅SVG；需Python、fontTools及可選的Noto Serif CJK字型（預設Linux套件位置，可用HK_COMIC_FONT覆寫）。文字輪廓取自開放字型Noto Serif CJK；其餘圖形是本程式原創。字型僅用於產生圖像輪廓，不附帶整份字型檔。
+- 原有36幅題圖保留，供舊題及舊局繼續使用；舊`cover.svg`亦保留作相容資源。現有題圖共103幅，另有新版封面。
+
+局部焦點按題目調整，例如大士王頭像、過路觸覺裝置、巴士樹擋、廢屑箱入口、竹棚捆紮及信箱小孔。讀字題不使用鏡像；純文字資料題不依賴圖像判斷。圖片不自動標正確選項，分享卡維持不附答案。

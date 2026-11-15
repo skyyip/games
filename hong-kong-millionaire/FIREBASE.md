@@ -98,3 +98,10 @@ npm run firebase:deploy
 「重新連接並核對答案」使用server-only讀取。伺服器已收下的答案不會重複提交；尚未收下且仍為同一題才重送，截止時間維持不變。此更新不需新的規則或索引；若正式環境仍顯示permission-denied，請確認已發布本資料夾完整v1／v2規則，並保留錯誤碼及發生階段供核對。
 
 同一瀏覽器的不同登入帳戶可各自核對當日題局；同一帳戶登出再登入仍續原局，雲端每UID每日一次的驗證不變。無須手動刪除玩家、題局或排行榜資料。
+
+
+## 香港漫畫篇：v3／171題
+
+新增67題後，新開局使用 `hk-2026-11-v3`。請**先把本資料夾完整firestore.rules重新Publish，再上傳新網站**，不要只改bankVersion字串。規則同時保存v1／90題、v2／104題及v3／171題的抽題表與答案；圖鑑上限同步為171。答案驗證重用同一個預期題號，減少重複建立抽題表的運算。現有三個索引保持不變。
+
+CLI：`firebase deploy --project sky-playground-millionaire --only firestore:rules`。或在 [Firebase Rules](https://console.firebase.google.com/project/sky-playground-millionaire/firestore/rules) 貼上完整檔案後Publish。此工作沒有替你登入Firebase或部署正式規則；正式讀寫仍需發布後驗證。

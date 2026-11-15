@@ -2,7 +2,8 @@
 // Named placeholders preserve numbers and player names without interpreting HTML.
 export const messages = {
   "Hong Kong Millionaire": "香港百萬富翁",
-  "Daily Hong Kong quiz": "每日香港挑戰",
+  "Daily Hong Kong quiz": "港味漫畫每日挑戰",
+  "Discover Hong Kong through comic clues. 171 questions, three lifelines, one daily shot at a virtual million.": "跟住漫畫線索認識香港。171條知識題、三個錦囊，每日一次挑戰虛擬百萬獎金。",
   "Fifteen questions. Three lifelines. One city you thought you knew. Take the daily million-dollar hot seat.": "十五條問題、三個錦囊。一座你以為好熟悉的城市，今日上熱座，挑戰虛擬百萬獎金。",
   'Your Dream Career': '我的夢想職涯',
   '365 Careers, One Little Life': '365行，行行出狀元',
