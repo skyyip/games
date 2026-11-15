@@ -158,3 +158,7 @@ See [VERIFICATION.md](VERIFICATION.md) for evidence and [FIREBASE.md](FIREBASE.m
 - [x] 角色快取不因畫布預算改變清空，增加動作格數，快取普通落點落地畫面，減少HUD工作。
 - [x] 移除七款河岸新朋友、About玩法accordion、指定蓄力提示及首頁介紹區塊，禁止SEO工具重新插入。
 - [ ] 正式部署最新Firestore價格規則（目前CLI未登入）。
+
+- [x] 玩法指引移到頁底，標題字體縮小30%；河岸朋友介紹以頁底accordion展示。
+- [x] 新增蜜蜂花盤／蝸牛慢活葉／翠鳥浮標／螃蟹清道站，21／31／41／51跳分階段出現。
+- [x] 花粉及加時一次性、不疊加，維持每跳獎勵上限與首20跳難度；新落點使用繪圖快取。

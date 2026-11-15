@@ -1,5 +1,5 @@
 import {riverRules} from '../src/game.js';
-import {VARIANTS} from '../src/platforms.js';
+import {availableVariants} from '../src/platforms.js';
 import assert from 'node:assert/strict';import {writeFile} from 'node:fs/promises';
 const {chromium}=await import(process.env.GRID_RUSH_PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({headless:true}),base=process.env.FROGGER_URL||'http://localhost:5301/games/frogger-jump/',optimized=process.env.FROGGER_EXPECT_OPTIMIZED==='1',report={};
@@ -12,7 +12,7 @@ async function pageFor(mode='static',options={}){
   for(const [name,key]of [['createLinearGradient','gradients'],['createRadialGradient','gradients'],['ellipse','ellipses'],['drawImage','images']]){const fn=CanvasRenderingContext2D.prototype[name];CanvasRenderingContext2D.prototype[name]=function(...args){riverPerf[key]++;return fn.apply(this,args);};}
   const clear=CanvasRenderingContext2D.prototype.clearRect;CanvasRenderingContext2D.prototype.clearRect=function(...args){if(this.canvas.id==='scene')riverPerf.draws++;return clear.apply(this,args);};
   document.addEventListener('DOMContentLoaded',()=>new MutationObserver(records=>riverPerf.mutations+=records.length).observe(document.querySelector('#play-shell'),{attributes:true,subtree:true}));
- },{mode,variantChance:riverRules(1).variantChance,variantCount:VARIANTS.length});
+ },{mode,variantChance:riverRules(1).variantChance,variantCount:availableVariants(1).length});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(base,{waitUntil:'networkidle'});await page.evaluate(()=>document.fonts.ready);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await page.evaluate(()=>{const raf=requestAnimationFrame;globalThis.requestAnimationFrame=fn=>raf(t=>{riverPerf.frames++;fn(t);});});await page.locator('#start').click();await page.clock.runFor(1000);return {context,page,errors};
 }
 async function reset(p){await p.evaluate(()=>{for(const key in riverPerf)riverPerf[key]=0;});}

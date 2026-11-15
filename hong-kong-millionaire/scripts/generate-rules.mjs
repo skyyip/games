@@ -1,5 +1,6 @@
-import {readFile,writeFile} from 'node:fs/promises';import {QUESTIONS} from '../src/questions.js';import {PRIZES,BANK_VERSION} from '../src/game.js';
-const ids=QUESTIONS.map(q=>q.id),pools=[1,2,3].map(t=>QUESTIONS.filter(q=>q.tier===t).map(q=>q.id)),json=JSON.stringify;
+import {readFile,writeFile} from 'node:fs/promises';import {QUESTIONS} from '../src/questions.js';import {PRIZES,BANK_VERSION,LEGACY_BANK_VERSION,SUPPORTED_BANK_VERSIONS,QUESTION_PLANS} from '../src/game.js';
+const ids=QUESTIONS.map(q=>q.id),json=JSON.stringify;
+const planExpression=version=>QUESTION_PLANS[version].map((pool,tier)=>{const slot=`(day*${pool.dayStep}+(index%5)*${pool.slotStep}+${tier*11})%${pool.ids.length}`;return `${json(pool.ids)}[${slot}]`;}).reduceRight((tail,expr,tier)=>tier===2?expr:`tier == ${tier} ? ${expr} : ${tail}`,'');
 const source=`rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
@@ -11,8 +12,8 @@ service cloud.firestore {
   function result(uid,day) { let key=uid+'_'+string(day); return /databases/$(database)/documents/hkm_results/$(key); }
   function rank(uid) { return /databases/$(database)/documents/hkm_rankings/$(uid); }
   function season(uid,s) { let key=uid+'_'+s; return /databases/$(database)/documents/hkm_seasons/$(key); }
-  function qid(day,index) { let tier=int(index / 5); let slot=(day*17+(index%5)*7+tier*11)%30; return tier == 0 ? ${json(pools[0])}[slot] : tier == 1 ? ${json(pools[1])}[slot] : ${json(pools[2])}[slot]; }
-  function key(day,index) { return ${json(Object.fromEntries(QUESTIONS.map(q=>[q.id,q.answer])))}[qid(day,index)]; }
+  function qid(day,index,version) { let tier=int(index / 5); return version == '${LEGACY_BANK_VERSION}' ? (${planExpression(LEGACY_BANK_VERSION)}) : (${planExpression(BANK_VERSION)}); }
+  function key(day,index,version) { return ${json(Object.fromEntries(QUESTIONS.map(q=>[q.id,q.answer])))}[qid(day,index,version)]; }
   function prize(count) { return count == 0 ? 0 : ${json(PRIZES)}[count-1]; }
   function floorPrize(count) { return count >= 10 ? 60000 : count >= 5 ? 8000 : 0; }
   function titles(best) { return best >= 1000000 ? ['ordinary','neighbour','expert','peak','millionaire'] : best >= 500000 ? ['ordinary','neighbour','expert','peak'] : best >= 60000 ? ['ordinary','neighbour','expert'] : best >= 8000 ? ['ordinary','neighbour'] : ['ordinary']; }
@@ -25,7 +26,7 @@ service cloud.firestore {
     && p.uid == uid && p.displayName is string && p.displayName.size() >= 2 && p.displayName.size() <= 20
     && p.total is int && p.total >= 0 && p.total <= 1000000000000 && p.bestPrize is int && p.bestPrize >= 0 && p.bestPrize <= 1000000
     && p.games is int && p.games >= 0 && p.games <= 1000000 && p.titles is list
-    && p.unlocked is list && p.unlocked.size() <= 90 && p.unlocked.toSet().size() == p.unlocked.size() && p.unlocked.hasOnly(${json(ids)})
+    && p.unlocked is list && p.unlocked.size() <= ${QUESTIONS.length} && p.unlocked.toSet().size() == p.unlocked.size() && p.unlocked.hasOnly(${json(ids)})
     && p.wrong is list && p.wrong.toSet().size() == p.wrong.size() && p.wrong.hasOnly(p.unlocked)
     && p.favourites is list && p.favourites.toSet().size() == p.favourites.size() && p.favourites.hasOnly(p.unlocked)
     && (p.activeDay == null || p.activeDay is int) && (p.lastSettledDay == null || p.lastSettledDay is int)
@@ -33,7 +34,7 @@ service cloud.firestore {
   }
   function runValid(r,uid) {
    return r.keys().hasOnly(['version','bankVersion','uid','day','season','phase','index','correct','timeMs','startedAt','questionAt','answerAt','endedAt','updatedAt','outcome','choice','halfFor','phoneFor','audienceFor','audienceHadHalf','answers','seen','payout','reason'])
-    && r.version == 1 && r.bankVersion == '${BANK_VERSION}' && r.uid == uid && r.day is int && r.day >= 0 && r.season is string
+    && r.version == 1 && r.bankVersion in ${json(SUPPORTED_BANK_VERSIONS)} && r.uid == uid && r.day is int && r.day >= 0 && r.season is string
     && r.phase in ['playing','reveal','finished'] && r.index is int && r.index >= 0 && r.index <= 14 && r.correct is int && r.correct >= 0 && r.correct <= 15
     && r.timeMs is int && r.timeMs >= 0 && r.timeMs <= 400000 && r.startedAt is timestamp && r.questionAt is timestamp
     && (r.answerAt == null || r.answerAt is timestamp) && (r.endedAt == null || r.endedAt is timestamp) && r.updatedAt == request.time
@@ -58,10 +59,10 @@ service cloud.firestore {
   function answer(r,old) {
    let item=r.answers[string(old.index)];
    return old.phase == 'playing' && r.phase == 'reveal' && r.diff(old).affectedKeys().hasOnly(['phase','correct','answerAt','updatedAt','outcome','choice','answers','seen'])
-    && r.seen == old.seen.concat([qid(old.day,old.index)]) && r.answerAt == request.time && r.answers.size() == old.answers.size()+1 && r.answers.diff(old.answers).affectedKeys().hasOnly([string(old.index)])
-    && item.keys().hasOnly(['qid','choice','outcome','startedAt','answeredAt']) && item.qid == qid(old.day,old.index) && item.choice == r.choice && item.outcome == r.outcome && item.startedAt == old.questionAt && item.answeredAt == request.time
+    && r.seen == old.seen.concat([qid(old.day,old.index,old.bankVersion)]) && r.answerAt == request.time && r.answers.size() == old.answers.size()+1 && r.answers.diff(old.answers).affectedKeys().hasOnly([string(old.index)])
+    && item.keys().hasOnly(['qid','choice','outcome','startedAt','answeredAt']) && item.qid == qid(old.day,old.index,old.bankVersion) && item.choice == r.choice && item.outcome == r.outcome && item.startedAt == old.questionAt && item.answeredAt == request.time
     && (
-     (r.choice >= 0 && timely(old) && r.outcome == (r.choice == key(old.day,old.index) ? 'correct' : 'wrong') && r.correct == old.correct+(r.outcome == 'correct' ? 1 : 0))
+     (r.choice >= 0 && timely(old) && r.outcome == (r.choice == key(old.day,old.index,old.bankVersion) ? 'correct' : 'wrong') && r.correct == old.correct+(r.outcome == 'correct' ? 1 : 0))
      || (r.choice == -1 && r.correct == old.correct && ((r.outcome == 'walk' && timely(old)) || (r.outcome == 'timeout' && (today() != old.day || request.time >= old.questionAt + duration.value(cap(old.index),'ms')))))
     );
   }
@@ -125,4 +126,4 @@ service cloud.firestore {
  }
 }
 `;
-const file=new URL('../firestore.rules',import.meta.url);if(process.argv.includes('--check')){if(await readFile(file,'utf8')!==source)throw Error('Generated rules differ from the current question bank');console.log('Rules match all90 question keys, plan, prizes and bank version.');}else{await writeFile(file,source);console.log('Generated independent Spark-compatible rules:',source.length,'characters');}
+const file=new URL('../firestore.rules',import.meta.url);if(process.argv.includes('--check')){if(await readFile(file,'utf8')!==source)throw Error('Generated rules differ from the current question bank');console.log(`Rules match all ${QUESTIONS.length} question keys, versioned plans and prizes.`);}else{await writeFile(file,source);console.log('Generated independent Spark-compatible rules:',source.length,'characters');}

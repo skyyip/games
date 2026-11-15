@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {DailyLedger,LEDGER_KEY} from '../src/ledger.js';import {hkDay,DAY_MS,questionFor} from '../src/game.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {DailyLedger,LEDGER_KEY} from '../src/ledger.js';import {hkDay,DAY_MS,questionFor,LEGACY_BANK_VERSION} from '../src/game.js';
 function storage(){const map=new Map();return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};}
 const NOW=Date.UTC(2026,10,14,4);
 test('guest refresh resumes the same attempt and never creates a new question plan',async()=>{const s=storage(),one=new DailyLedger({storage:s,now:()=>NOW}),a=await one.start();const b=await new DailyLedger({storage:s,now:()=>NOW+1000}).start();assert.equal(a.token,b.token);assert.equal(a.run.questionAt,b.run.questionAt);const after=await one.action({type:'answer',choice:questionFor(a.run).answer},a.token);assert.equal(after.run.correct,1);assert.equal((await one.start()).run.correct,1);});
@@ -6,3 +6,9 @@ test('a completed anonymous day remains consumed and login cannot promote it int
 test('logging out after an account run does not grant a new guest attempt',async()=>{const ledger=new DailyLedger({storage:storage(),now:()=>NOW});await ledger.start('owner');await assert.rejects(()=>ledger.start('guest'),/account-used/);ledger.markCloud('owner',{day:hkDay(NOW)});assert.equal(ledger.read().owner,'owner');});
 test('the following Hong Kong day starts fresh and does not save anonymous historical records',async()=>{let now=NOW;const s=storage(),ledger=new DailyLedger({storage:s,now:()=>now}),a=await ledger.start();now+=DAY_MS;const b=await ledger.start();assert.notEqual(b.token,a.token);assert.equal(b.day,a.day+1);assert.equal(JSON.parse(s.getItem(LEDGER_KEY)).day,b.day);});
 test('unavailable local storage is explicit and cannot silently award repeat guest attempts',async()=>{const ledger=new DailyLedger({storage:{getItem:()=>null,setItem(){throw Error('blocked');},removeItem(){}},now:()=>NOW});assert.equal(ledger.available,false);await assert.rejects(()=>ledger.start(),/storage-required/);});
+
+test('refresh of a v1 guest run preserves its consumed daily attempt and can answer',async()=>{
+ const s=storage(),ledger=new DailyLedger({storage:s,now:()=>NOW});const a=await ledger.start();a.run.bankVersion=LEGACY_BANK_VERSION;s.setItem(LEDGER_KEY,JSON.stringify(a));
+ const loaded=await new DailyLedger({storage:s,now:()=>NOW+1000}).start();assert.equal(loaded.token,a.token);assert.equal(loaded.run.bankVersion,LEGACY_BANK_VERSION);
+ const next=await ledger.action({type:'answer',choice:questionFor(loaded.run).answer},a.token);assert.equal(next.run.correct,1);assert.equal(next.run.bankVersion,LEGACY_BANK_VERSION);
+});

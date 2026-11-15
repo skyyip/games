@@ -1,4 +1,4 @@
-import {hkDay,newRun,act,BANK_VERSION} from './game.js';
+import {hkDay,newRun,act,SUPPORTED_BANK_VERSIONS} from './game.js';
 const KEY='sky.hk-millionaire.today.v1';
 export class DailyLedger{
  constructor({storage=localStorage,now=()=>Date.now()}={}){this.storage=storage;this.now=now;this.available=true;try{const key=KEY+'.probe';storage.setItem(key,'1');if(storage.getItem(key)!=='1')throw Error();storage.removeItem(key);}catch{this.available=false;}}
@@ -9,6 +9,6 @@ export class DailyLedger{
   return globalThis.window&&globalThis.navigator?.locks?navigator.locks.request('hk-millionaire-daily',async()=>begin()):begin();
  }
  markCloud(uid,run){const current=this.read();if(current?.owner==='guest')throw Error('guest-used');return this.write({day:run.day,owner:uid,token:current?.owner===uid?current.token:crypto.randomUUID(),revision:(current?.revision??0)+1,run:null});}
- async action(action,token){const change=()=>{const current=this.read();if(!current||current.owner!=='guest'||current.token!==token||current.run?.bankVersion!==BANK_VERSION)throw Error('other-tab');return this.write({...current,revision:current.revision+1,run:act(current.run,action,this.now())});};return globalThis.window&&globalThis.navigator?.locks?navigator.locks.request('hk-millionaire-daily',async()=>change()):change();}
+ async action(action,token){const change=()=>{const current=this.read();if(!current||current.owner!=='guest'||current.token!==token||!SUPPORTED_BANK_VERSIONS.includes(current.run?.bankVersion))throw Error('other-tab');return this.write({...current,revision:current.revision+1,run:act(current.run,action,this.now())});};return globalThis.window&&globalThis.navigator?.locks?navigator.locks.request('hk-millionaire-daily',async()=>change()):change();}
 }
 export const LEDGER_KEY=KEY;

@@ -12,3 +12,6 @@ dialog{width:min(470px,calc(100% - 28px));max-height:calc(100dvh - 32px);padding
 /* Keep decorative orbit strokes inside the page at narrow and wide sizes. */
 main{overflow:clip}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+.question-share-preview{display:block;width:100%;max-width:440px;height:auto;margin:20px auto;border-radius:16px;border:1px solid var(--line,#d5c9ad)}
+.question-share-preview[hidden]{display:none}

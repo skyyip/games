@@ -1,20 +1,27 @@
-import {QUESTIONS} from './questions.js';
-export const BANK_VERSION='hk-2026-11-v1',DAY_MS=86400000,HK_OFFSET=28800000;
+import {QUESTIONS,LEGACY_QUESTIONS} from './questions.js';
+export const LEGACY_BANK_VERSION='hk-2026-11-v1',BANK_VERSION='hk-2026-11-v2';
+export const SUPPORTED_BANK_VERSIONS=Object.freeze([LEGACY_BANK_VERSION,BANK_VERSION]);
+export const DAY_MS=86400000,HK_OFFSET=28800000;
 export const PRIZES=Object.freeze([1000,2000,3000,4000,8000,10000,20000,30000,40000,60000,80000,150000,250000,500000,1000000]);
 export const TITLES=Object.freeze([{id:'ordinary',name:'運氣平平',min:0,note:'香港故事仲有好多，聽日再接再厲。'},{id:'neighbour',name:'街坊地保',min:8000,note:'街頭巷尾嘅香港常識，難唔到你。'},{id:'expert',name:'香港通',min:60000,note:'地理、節慶與文化，你都熟門熟路。'},{id:'peak',name:'太平山神',min:500000,note:'只差一步登頂，你已經站得好高。'},{id:'millionaire',name:'百萬富翁',min:1000000,note:'十五題全中，今晚香港由你話事！'}]);
 export const MODES=Object.freeze(['blurred','partial','mirrored','original','text']);
 export const MODE_NAMES=Object.freeze({blurred:'慢慢睇清',partial:'眼利局部',mirrored:'倒轉香港',original:'原圖考眼力',text:'地膽常識'});
-const byId=new Map(QUESTIONS.map(q=>[q.id,q])),pools=[1,2,3].map(tier=>QUESTIONS.filter(q=>q.tier===tier));
+const byId=new Map(QUESTIONS.map(q=>[q.id,q]));
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+function stride(size,start){while(gcd(size,start)!==1)start++;return start;}
+function plan(bank,legacy=false){return Object.freeze([1,2,3].map(tier=>{const ids=Object.freeze(bank.filter(q=>q.tier===tier).map(q=>q.id));return Object.freeze({ids,dayStep:legacy?17:stride(ids.length,17),slotStep:legacy?7:stride(ids.length,7)});}));}
+// Preserve the original plan for saved / in-progress v1 runs, even after a bank expansion.
+export const QUESTION_PLANS=Object.freeze({[LEGACY_BANK_VERSION]:plan(LEGACY_QUESTIONS,true),[BANK_VERSION]:plan(QUESTIONS)});
 export const hkDay=(now=Date.now())=>Math.floor((now+HK_OFFSET)/DAY_MS);
 export const dayEnd=day=>(day+1)*DAY_MS-HK_OFFSET;
 export const seasonForDay=day=>new Date(day*DAY_MS).toISOString().slice(0,7);
 export const dayLabel=day=>new Intl.DateTimeFormat('zh-HK',{timeZone:'UTC',month:'long',day:'numeric'}).format(new Date(day*DAY_MS));
 export const challengeNumber=day=>Math.max(1,day-hkDay(Date.UTC(2026,10,13,16))+1);
 export function hash(text){let h=2166136261;for(const c of String(text))h=Math.imul(h^c.codePointAt(0),16777619);return h>>>0;}
-export function questionId(day,index){const tier=Math.floor(index/5),slot=(day*17+(index%5)*7+tier*11)%30;return pools[tier][slot].id;}
+export function questionId(day,index,version=BANK_VERSION){const tier=Math.floor(index/5),pool=QUESTION_PLANS[version]?.[tier];if(!pool)throw Error('bank-version');const slot=(day*pool.dayStep+(index%5)*pool.slotStep+tier*11)%pool.ids.length;return pool.ids[slot];}
 export const questionById=id=>byId.get(id);
-export function questionFor(run){return byId.get(questionId(run.day,run.index));}
-export function presentation(day,index){const q=byId.get(questionId(day,index)),mode=q.textOnly?'text':MODES[(day*13+index*7)%5],offset=(day+index)%4;return {mode,order:[0,1,2,3].map(i=>(i+offset)%4),partial:.05+(hash(q.id+day)%6)/100,vertical:hash(day+q.id)%2===0};}
+export function questionFor(run){return byId.get(questionId(run.day,run.index,run.bankVersion));}
+export function presentation(day,index,version=BANK_VERSION){const q=byId.get(questionId(day,index,version)),allowed=q.textOnly?['text']:(q.modes??MODES),mode=allowed[(day*13+index*7)%allowed.length],offset=(day+index)%4;return {mode,order:[0,1,2,3].map(i=>(i+offset)%4),partial:.05+(hash(q.id+day)%6)/100,vertical:hash(day+q.id)%2===0};}
 export const limitMs=index=>index>=10?40000:20000;
 export const earned=count=>count?PRIZES[count-1]:0;
 export const insurance=count=>count>=10?60000:count>=5?8000:0;
@@ -31,7 +38,7 @@ export function audience(run){const q=questionFor(run),half=run.audienceHadHalf?
 function answered(run,choice,now,outcome){const q=questionFor(run);return {...run,phase:'reveal',correct:run.correct+(outcome==='correct'?1:0),answerAt:now,updatedAt:now,outcome,choice,seen:[...run.seen,q.id],answers:{...run.answers,[run.index]:{qid:q.id,choice,outcome,startedAt:run.questionAt,answeredAt:now}}};}
 export function finish(run,now=Date.now(),reason=null){if(run.phase!=='reveal')throw Error('not-ready');const why=reason??(run.correct===15&&run.outcome==='correct'?'complete':run.outcome==='correct'?'walk':run.outcome);if(why==='complete'&&run.correct!==15)throw Error('not-complete');const payout=why==='wrong'?insurance(run.correct):earned(run.correct);return {...run,phase:'finished',timeMs:spent(run),payout,reason:why,endedAt:now,updatedAt:now};}
 export function act(run,action,now=Date.now(),{autoFinish=true}={}){
- if(run.bankVersion!==BANK_VERSION)throw Error('bank-version');if(run.phase==='finished')throw Error('already-finished');
+ if(!SUPPORTED_BANK_VERSIONS.includes(run.bankVersion))throw Error('bank-version');if(run.phase==='finished')throw Error('already-finished');
  if(run.day!==hkDay(now)){const expired=run.phase==='playing'?answered(run,-1,now,'timeout'):run;return autoFinish?finish(expired,now,expired.outcome==='wrong'?'wrong':expired.correct===15&&expired.outcome==='correct'?'complete':'timeout'):expired;}
  if(run.phase==='playing'&&remaining(run,now)<=0){const expired=answered(run,-1,now,'timeout');return autoFinish?finish(expired,now):expired;}
  if(action.type==='life'){if(run.phase!=='playing')throw Error('not-playing');const key={half:'halfFor',phone:'phoneFor',audience:'audienceFor'}[action.kind];if(!key||run[key]!==-1)throw Error('life-used');return {...run,[key]:run.index,...(action.kind==='audience'?{audienceHadHalf:run.halfFor===run.index}:{}),updatedAt:now};}

@@ -65,3 +65,17 @@ firebase emulators:exec --project demo-hk-millionaire --only firestore "node scr
 Emulator需Java及可下載的Firestore Emulator JAR。測試使用demo專案，不接觸正式資料。本次工作環境無可用Emulator JAR，因此未執行真實規則編譯、Google授權或正式雲端部署；部署後須完成上述檢查。
 
 題庫修改後執行 `npm run rules:generate` 並同步發布網站與規則。不要在同日尚有玩家進行挑戰時改動題組、答案或 `BANK_VERSION`；先安排版本切換。
+
+## 104題題庫更新（v2）
+
+此更新需要重新部署本資料夾的`firestore.rules`，讓新題u01–u14及最多104項文化圖鑑解鎖通過驗證。`npm run rules:generate`會同步兩個版本的抽題表、步長、答案及圖鑑上限；v1進行中的存檔仍能驗證，不會因新增題而被改題。三個既有索引不變，無需Cloud Functions。
+
+請先部署規則，再上傳新的已建置網站。CLI指令：
+
+```sh
+cd hong-kong-millionaire
+npm run rules:check
+npm run firebase:deploy
+```
+
+本次沒有連線部署到正式Firebase專案。題庫來源與圖片分享不用新增任何公開或私人Firestore欄位。

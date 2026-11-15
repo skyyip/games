@@ -10,7 +10,7 @@ try{
  const page=await context.newPage();await page.goto('http://river-performance.local/');
  const report=await page.evaluate(async()=>{
   const {FroggerGame,RiverScene,MAX_ANIMAL_SPRITES,ANIMALS,distance,MAX_JUMP,CHARGE_UP_MS,surface}=await import('/harness.js');
-  const samples=[],failures=[];let frames=0,prepared=0;
+  const samples=[],failures=[];let frames=0,prepared=0,landings=0;
   for(const a of ANIMALS){
    const canvas=document.createElement('canvas');document.querySelector('main').replaceChildren(canvas);
    const scene=new RiverScene(canvas);scene.resize(390,600);
@@ -19,19 +19,19 @@ try{
    // Scene DPR changes with the canvas pixel budget; sprite DPR should remain stable.
    scene.resize(1280,900);scene.resize(390,600);
    let now=0;const g=new FroggerGame({random:()=>.75,now:()=>now});g.start({animal:a.id});
-   for(const kind of ['stump','hermit','firefly','beaver']){
+   for(const kind of ['stump','hermit','firefly','beaver','bee','snail','kingfisher','crab']){
     Object.assign(g.target,{kind,sinking:false,thorns:false,angler:false});
     g.beginCharge();now+=distance(g.frog,g.target)/MAX_JUMP*CHARGE_UP_MS;g.update();g.release();
     const end=g.jump.at+g.jump.duration;
     while(now<end+700){now=Math.min(now+1000/60,end+700);g.update();const at=performance.now();scene.draw(g);samples.push(performance.now()-at);frames++;}
-    if(g.state!=='idle')failures.push(a.id+': '+kind+' failed');
+    if(g.state!=='idle')failures.push(a.id+': '+kind+' failed');else landings++;
    }
    if(rasterizations!==warm)failures.push(a.id+': unexpected pose rasterization '+(rasterizations-warm));
    if(scene.animalCache.size>MAX_ANIMAL_SPRITES)failures.push(a.id+': atlas budget');
    if(scene.padCache.size>3)failures.push(a.id+': pad budget');
   }
   samples.sort((a,b)=>a-b);
-  return {animals:ANIMALS.length,landings:ANIMALS.length*4,frames,prepared,failures,drawCpuMs:{p50:samples[Math.floor(samples.length*.5)],p95:samples[Math.floor(samples.length*.95)],max:samples.at(-1)}};
+  return {animals:ANIMALS.length,landings,frames,prepared,failures,drawCpuMs:{p50:samples[Math.floor(samples.length*.5)],p95:samples[Math.floor(samples.length*.95)],max:samples.at(-1)}};
  });
  assert.equal(report.animals,38);assert.deepEqual(report.failures,[]);console.log(JSON.stringify(report,null,2));await context.close();
 }finally{await browser.close();}

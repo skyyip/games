@@ -1,6 +1,7 @@
+import {URBAN_QUESTIONS} from './urban-questions.js';
 // Curated Traditional Chinese Hong Kong culture questions.
 // Artwork is original illustration / pictograph demonstration, never a claimed historic facsimile.
-export const QUESTIONS=Object.freeze([
+export const LEGACY_QUESTIONS=Object.freeze([
   {
     "id": "e01",
     "tier": 1,
@@ -2179,3 +2180,5 @@ export const QUESTIONS=Object.freeze([
     }
   }
 ].map(q=>Object.freeze({...q,options:Object.freeze(q.options),source:Object.freeze(q.source),focus:Object.freeze(q.focus)})));
+
+export const QUESTIONS=Object.freeze([...LEGACY_QUESTIONS,...URBAN_QUESTIONS]);

@@ -9,7 +9,8 @@ const repo=resolve(import.meta.dirname,'..'),out=resolve(process.argv[2]||resolv
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex').slice(0,12),slash=s=>s.replaceAll('\\','/');
 if(out===repo||!out.startsWith(repo+'/')&&!out.startsWith('/tmp/'))throw Error('Unsafe build directory');
 await rm(out,{recursive:true,force:true});await mkdir(resolve(out,'assets'),{recursive:true});
-let tracked;try{tracked=execFileSync('git',['ls-files'],{cwd:repo,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim().split('\n');}catch{tracked=(await allFiles(repo)).map(f=>slash(relative(repo,f))).filter(f=>!f.includes('node_modules/')&&!f.startsWith('_site/'));}
+// Include new, non-ignored files so added question artwork works before its first commit.
+let tracked;try{tracked=execFileSync('git',['ls-files','--cached','--others','--exclude-standard'],{cwd:repo,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim().split('\n');}catch{tracked=(await allFiles(repo)).map(f=>slash(relative(repo,f))).filter(f=>!f.includes('node_modules/')&&!f.startsWith('_site/'));}
 // Registered new games must be previewable before their first commit.
 tracked=[...new Set([...tracked,...games.flatMap(game=>[game.slug+'/index.html',game.slug+'/manifest.webmanifest'])])];
 const pages=tracked.filter(n=>n==='index.html'||/^[^/]+\/index\.html$/.test(n));

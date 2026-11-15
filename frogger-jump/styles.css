@@ -91,3 +91,12 @@ body.is-playing #play-hint{position:absolute;width:1px;height:1px;min-height:0;m
 @media(max-width:480px){.hud #skill-info{width:44px;padding:9px;font-size:20px}.hud #skill-info>span{display:none}.is-playing .hud{gap:6px}.is-playing .best-stat span{font-size:10px}.is-playing .route-pill{min-width:36px;padding:5px}.is-playing .score-stat strong{font-size:26px}}
 
 @media(max-width:480px){.is-playing .hud .route-pill{display:none}.is-playing #play-shell[data-wide-score=true] .hud .score-stat strong,.is-playing #play-shell[data-wide-score=true] .hud .best-stat strong{font-size:18px}}
+
+/* Keep optional reading below the game and records, with a compact guide title. */
+.river-notes{display:grid;gap:14px;margin:24px 0 12px;min-width:0}
+.river-notes .guide-card>summary{font-size:16.8px;line-height:1.5;min-height:48px}
+.river-notes .guide-card>summary::marker{font-size:12px}
+.river-notes .platform-guide>summary{font-size:16px;line-height:1.5}
+.river-notes .friends-intro{font-size:12px;line-height:1.8;color:var(--muted);margin:10px 0}
+#river-friends-list{columns:2;column-gap:32px}#river-friends-list li{break-inside:avoid}
+@media(max-width:650px){#river-friends-list{columns:1}.river-notes{margin-top:20px}.river-notes .guide-card{padding:16px}}

@@ -148,7 +148,7 @@ export class RiverScene{
    this.path(p=>{p.moveTo(x+r*.8,y-ry*.3);p.lineTo(x+r*1.08,y-ry*.85);p.lineTo(x+r*.95,y+ry*.2);},'#ffe69b','#ab8c54',s);
   }else if(kind==='ice'){
    this.ellipse(x,y+9*s,r,ry,'#80bcc8','#59899b',2*s);this.ellipse(x,y,r,ry,'#d7f6f2','#76a9bd',2*s);
-   const elapsed=occupied&&pad.sinking?1-game.sinkRemaining/3500:0,cracks=Math.min(3,1+Math.floor(elapsed*3));
+   const elapsed=occupied&&pad.sinking?1-game.sinkRemaining/(pad.sinkDuration??3500):0,cracks=Math.min(3,1+Math.floor(elapsed*3));
    for(let i=0;i<cracks;i++){const a=i*2.1+.3;this.path(p=>{p.moveTo(x+Math.cos(a)*r*.9,y+Math.sin(a)*ry*.9);p.lineTo(x+Math.cos(a+.3)*r*.35,y+Math.sin(a+.3)*ry*.35);p.lineTo(x-5*s,y+3*s);},null,'#6d9fb7',2*s);}this.ellipse(x-r*.45,y-ry*.25,r*.19,ry*.16,'#ffffffbb');
   }else if(kind==='spinner'){
    this.ellipse(x,y+4*s,r,ry,'#629a73','#49785f',2*s);this.ellipse(x,y,r,ry,'#add994','#49785f',2*s);
@@ -169,6 +169,31 @@ export class RiverScene{
    for(const d of [-.5,0,.5])this.path(p=>{p.moveTo(x-r*.82,y+d*ry);p.lineTo(x+r*.82,y+d*ry);},null,'#a58a60',1.5*s);
    for(const side of [-1,1])this.path(p=>{p.moveTo(x+side*r*.65,y-ry*.55);p.lineTo(x+side*r*.65,y+ry*.55);},null,'#e1cb9b',3*s);
    const bx=x-r*.79,by=y-ry*.65;this.ellipse(bx,by,11*s,10*s,'#b99471','#6d6550',1.3*s);for(const side of [-1,1]){this.ellipse(bx+side*7*s,by-7*s,3*s,3*s,'#c6a37d');this.ellipse(bx+side*4*s,by-1*s,1.5*s,2*s,'#4b5548');}this.ellipse(bx,by+4*s,5*s,3*s,'#efe0bc');
+  }else if(kind==='bee'){
+   for(let i=0;i<7;i++){const a=i*Math.PI*2/7;this.ellipse(x+Math.cos(a)*r*.65,y+Math.sin(a)*ry*.65,r*.4,ry*.48,'#ffe4a1','#ba995e',1.3*s);}
+   this.ellipse(x,y,r*.72,ry*.74,'#d6bd77','#998653',1.5*s);this.ellipse(x,y,7*s,4*s,'#fff0b0');
+   const bx=x-r*.78,by=y-ry*.75;
+   for(const sign of [-1,1])this.ellipse(bx+sign*5*s,by-8*s,6*s,4*s,'#e7f2e4','#91aaa0',s);
+   this.ellipse(bx,by,10*s,6*s,'#f5ce6b','#766a50',s);
+   for(const d of [-3,3])this.path(p=>{p.moveTo(bx+d*s,by-4*s);p.lineTo(bx+d*s,by+4*s);},null,'#766a50',2*s);this.ellipse(bx+7*s,by-1*s,1.5*s,1.7*s,'#344e46');
+  }else if(kind==='snail'){
+   this.ellipse(x,y+6*s,r,ry,'#5f986b','#497a59',2*s);this.ellipse(x,y,r,ry,'#bbd99a','#5c8a62',2*s);
+   this.path(p=>{p.moveTo(x-r*.75,y);p.quadraticCurveTo(x,y-ry*.5,x+r*.8,y);},null,'#7ba66c',2*s);
+   const sx=x-r*.68,sy=y-ry*.65;this.ellipse(sx,sy+7*s,18*s,6*s,'#d9d3a8','#7a8061',s);this.ellipse(sx,sy,12*s,11*s,'#d6b39b','#987d66',1.5*s);
+   this.path(p=>{p.moveTo(sx+7*s,sy);p.bezierCurveTo(sx+7*s,sy-9*s,sx-8*s,sy-9*s,sx-7*s,sy);p.bezierCurveTo(sx-6*s,sy+6*s,sx+3*s,sy+6*s,sx+3*s,sy);},null,'#a17f68',1.5*s);
+   for(const d of [12,19]){this.path(p=>{p.moveTo(sx+d*s,sy+6*s);p.lineTo(sx+(d+1)*s,sy-5*s);},null,'#7a8061',1.5*s);this.ellipse(sx+(d+1)*s,sy-5*s,2*s,2*s,'#536451');}
+  }else if(kind==='kingfisher'){
+   this.ellipse(x,y+7*s,r,ry,'#b18b63','#826d54',2*s);this.ellipse(x,y,r,ry,'#f3dfb6','#aa8e61',2*s);
+   this.ellipse(x,y,r*.7,ry*.7,'#d3e3cd','#839d80',1.5*s);
+   const bx=x-r*.76,by=y-ry*.75;this.ellipse(bx,by,10*s,13*s,'#72b7c3','#486f76',1.3*s);this.ellipse(bx+3*s,by+5*s,6*s,8*s,'#ebbd86');this.ellipse(bx,by-11*s,9*s,8*s,'#68a9bb','#486f76',s);this.ellipse(bx+4*s,by-12*s,1.7*s,2*s,'#344e46');
+   this.path(p=>{p.moveTo(bx+7*s,by-11*s);p.lineTo(bx+22*s,by-8*s);p.lineTo(bx+7*s,by-6*s);},'#dcaa6b','#957f5e',s);
+   this.path(p=>{p.moveTo(bx-7*s,by+6*s);p.lineTo(bx-16*s,by+19*s);p.lineTo(bx-3*s,by+12*s);},'#5996ac','#486f76',s);
+  }else if(kind==='crab'){
+   for(const sign of [-1,1])for(const d of [-.4,.35])this.path(p=>{p.moveTo(x+sign*r*.75,y+d*ry);p.lineTo(x+sign*r*1.08,y+d*ry+7*s);},null,'#ac7a66',3*s);
+   this.ellipse(x,y+6*s,r,ry,'#bb866d','#886a56',2*s);this.ellipse(x,y,r,ry,'#e7b394','#a47b60',2*s);
+   this.ellipse(x,y,r*.55,ry*.55,'#f7dfae','#b99a6f',s);
+   for(const sign of [-1,1]){const cx=x+sign*r*.91,cy=y-ry*.4;this.ellipse(cx,cy,8*s,7*s,'#e7a388','#9a715e',1.2*s);this.path(p=>{p.moveTo(cx,cy-6*s);p.lineTo(cx,cy+1*s);},null,'#9a715e',s);this.ellipse(x+sign*r*.4,y-ry*.5,3*s,4*s,'#f5d0ae','#9a715e',s);this.ellipse(x+sign*r*.4,y-ry*.55,1.3*s,1.7*s,'#47564a');}
+   this.path(p=>{p.moveTo(x-7*s,y+4*s);p.quadraticCurveTo(x,y+9*s,x+7*s,y+4*s);},null,'#a47b60',1.3*s);
   }else if(kind==='shell'){
    const open=landed?Math.min(1,age/400):.15;
    this.ellipse(x,y-ry*(.15+open*.4),r,ry*(1+open*.5),'#e7bed9','#9b789d',2*s);
