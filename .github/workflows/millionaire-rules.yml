@@ -1,0 +1,48 @@
+name: Verify Millionaire Firestore rules
+
+on:
+  push:
+    branches: [main, fix/millionaire-answer-rules]
+    paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rules.yml]
+  pull_request:
+    paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rules.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: millionaire-rules-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: hong-kong-millionaire
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: hong-kong-millionaire/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm test
+      - run: npm run rules:check
+      - name: Compile and execute actual rules against the demo emulator
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only firestore "node scripts/firestore-check.mjs"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: millionaire-rules-diagnostics
+          path: |
+            hong-kong-millionaire/firestore-debug.log
+            hong-kong-millionaire/firebase-debug.log
+          if-no-files-found: ignore
