@@ -11,7 +11,8 @@
     "rules:check": "node scripts/generate-rules.mjs --check",
     "test:browser": "node scripts/browser-check.mjs",
     "test:cloud": "node scripts/cloud-check.mjs",
-    "test:urban": "node scripts/urban-browser-check.mjs"
+    "test:urban": "node scripts/urban-browser-check.mjs",
+    "test:auth-transition": "node scripts/auth-transition-check.mjs"
   },
   "dependencies": {
     "firebase": "^12.5.0"

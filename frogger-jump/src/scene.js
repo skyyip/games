@@ -1,5 +1,5 @@
 import {ROUTE_DEPTH,PAD_DEPTH,landingOffset,soleOffset,ease} from './grounding.js';
-import {NEW_FRIENDS,paintNewFriend,paintRiverCompanion,paintRiverVisitor} from './new-friends.js';
+import {NEW_FRIENDS,paintNewFriend,paintRiverVisitor} from './new-friends.js';
 import {ISLAND_HEAD_HEIGHT,paintIslandFriend} from './island-friends.js';
 import {VARIANTS,surface} from './platforms.js';
 import {CAMERA_MS,SINK_MS,DROWN_MS,FISH_WARNING_MS,SPLASH_MS} from './game.js';
@@ -12,13 +12,13 @@ const ANIMAL_ART={
 export const MAX_CANVAS_PIXELS=1400000;
 export const FLIGHT_FRAMES=32,LANDING_FRAMES=10,MAX_ANIMAL_SPRITES=64;
 export class RiverScene{
- constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.pixelRatio=0;this.waterLayer=null;this.padCache=new Map();this.animalCache=new Map();this.companionCache=new Map();this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.pixelRatio=0;this.waterLayer=null;this.padCache=new Map();this.animalCache=new Map();this.visitorCache=new Map();this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
  resize(width,height){
   width=Math.max(1,width);height=Math.max(1,height);
   const dpr=Math.min(devicePixelRatio||1,1.75,Math.sqrt(MAX_CANVAS_PIXELS/(width*height)));
   if(width===this.width&&height===this.height&&dpr===this.pixelRatio)return false;
   const spriteRatio=Math.min(devicePixelRatio||1,1.5),scaleChanged=this.spriteRatio!==undefined&&spriteRatio!==this.spriteRatio;
-  this.waterLayer?.canvas.remove?.();this.width=width;this.height=height;this.pixelRatio=dpr;this.spriteRatio=spriteRatio;this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;this.waterLayer=null;this.padCache.clear();if(scaleChanged){this.animalCache.clear();this.companionCache.clear();}return true;
+  this.waterLayer?.canvas.remove?.();this.width=width;this.height=height;this.pixelRatio=dpr;this.spriteRatio=spriteRatio;this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;this.waterLayer=null;this.padCache.clear();if(scaleChanged){this.animalCache.clear();this.visitorCache.clear();}return true;
  }
  reset(){this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.padCache.clear();}
  layer(width,height,dpr=this.pixelRatio||1){
@@ -223,8 +223,7 @@ export class RiverScene{
   this.animalCache.delete(key);this.animalCache.set(key,sprite);
   this.ctx.drawImage(sprite.canvas,x-64*scale,y-(100+sprite.sole)*scale,128*scale,144*scale);
  }
- paintRiverCompanion(x,y,scale,id){paintRiverCompanion(this,x,y,scale,id);}
- riverCompanion(game,projection){if(!game.companion)return;let sprite=this.companionCache.get(game.companion);if(!sprite){sprite=this.layer(100,80);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverCompanion(this,50,40,1,game.companion);}finally{this.ctx=prev;}this.companionCache.set(game.companion,sprite);}const {s,point}=projection,p=point(game.current),c=this.ctx;c.save();c.globalAlpha=game.companionReady?.85:.35;c.drawImage(sprite.canvas,p.x-110*s,p.y-10*s,75*s,60*s);c.restore();}
+
  prepareAnimal(kind){for(const key of this.animalCache.keys())if(!key.startsWith(kind+'|'))this.animalCache.delete(key);for(let i=0;i<FLIGHT_FRAMES;i++)this.animal(-1000,-1000,1,kind,{airborne:true,flightPhase:i/(FLIGHT_FRAMES-1),anchorFeet:true});for(let i=0;i<8;i++)this.animal(-1000,-1000,1,kind,{squat:i/7,anchorFeet:true});for(let i=0;i<LANDING_FRAMES;i++)this.animal(-1000,-1000,1,kind,{landingPhase:i/(LANDING_FRAMES-1),anchorFeet:true});}
  paintAnimal(x,y,scale,kind,pose){
   if(NEW_FRIENDS.has(kind)){paintNewFriend(this,x,y,scale,kind,pose);return;}
@@ -359,9 +358,9 @@ export class RiverScene{
 
  draw(game){
   this.water();for(const id of this.padCache.keys())if(!game.stumps.some(p=>p.id===id))this.padCache.delete(id);const projection=this.projection(game),{s,point}=projection;
-  this.ripples(game,projection);this.riverCompanion(game,projection);
+  this.ripples(game,projection);
   if(game.routeOffer){const alternate=point(game.routeOffer),c=this.ctx;c.save();c.globalAlpha=.5;this.ellipse(alternate.x,alternate.y,game.target.r*s*.8,game.target.r*s*.35,'#e9ce83','#8c784f',2*s);c.restore();}
-  if(game.riverFriend){const c=this.ctx,q=point(game.target),key='visitor-'+game.riverFriend;let sprite=this.companionCache.get(key);if(!sprite){sprite=this.layer(64,64);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverVisitor(this,32,32,1,game.riverFriend);}finally{this.ctx=prev;}this.companionCache.set(key,sprite);}c.drawImage(sprite.canvas,q.x+game.target.r*s+3*s,q.y-46*s,48*s,48*s);if(game.riverFriend==='firefly'||game.target.mailChallenge)this.ellipse(q.x,q.y,6*s,3*s,'#f8e7a4');if(game.riverFriend==='dragonfly'&&game.target.kind==='turtle'){c.save();c.font=`${16*s}px system-ui`;c.fillStyle='#466a58';c.fillText(surface(game.target,game.clock+100).x>surface(game.target,game.clock).x?'→':'←',q.x+game.target.r*s+15*s,q.y+18*s);c.restore();}}
+  if(game.riverFriend){const c=this.ctx,q=point(game.target),key='visitor-'+game.riverFriend;let sprite=this.visitorCache.get(key);if(!sprite){sprite=this.layer(64,64);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverVisitor(this,32,32,1,game.riverFriend);}finally{this.ctx=prev;}this.visitorCache.set(key,sprite);}c.drawImage(sprite.canvas,q.x+game.target.r*s+3*s,q.y-46*s,48*s,48*s);if(game.riverFriend==='firefly'||game.target.mailChallenge)this.ellipse(q.x,q.y,6*s,3*s,'#f8e7a4');if(game.riverFriend==='dragonfly'&&game.target.kind==='turtle'){c.save();c.font=`${16*s}px system-ui`;c.fillStyle='#466a58';c.fillText(surface(game.target,game.clock+100).x>surface(game.target,game.clock).x?'→':'←',q.x+game.target.r*s+15*s,q.y+18*s);c.restore();}}
   for(let i=2;i>=0;i--)this.stump(game,game.stumps[i],i,projection);
   if(!['over','drowning'].includes(game.state))this.fishHazard(game,projection);
   const frog=game.frog,p=['over','drowning'].includes(game.state)?point(frog):this.riderContact(game,projection,frog);

@@ -129,7 +129,7 @@ firebase emulators:exec --only firestore --project demo-frogger --config frogger
 
 ### 動物技能整合與退役退款
 
-最新版本38位動物整合六種能力，通用技能商店／裝備已移除。規則僅允許依舊帳戶實際已購清單按原價退款一次並清空退役欄位；拒絕再次購買通用技能、超額或重複退款。舊帳戶先更新規則，重新登入或讀取帳戶即可同步退款。河中夥伴保留。
+最新版本38位動物整合六種能力，通用技能商店／裝備已移除。規則僅允許依舊帳戶實際已購清單按原價退款一次並清空退役欄位；拒絕再次購買通用技能、超額或重複退款。舊帳戶先更新規則，重新登入或讀取帳戶即可同步退款。河中夥伴亦已退役，遷移方式見下節。
 
 ```sh
 cd frogger-jump
@@ -138,7 +138,7 @@ firebase deploy --only firestore:rules --project sky-playground-3c5af
 
 ## 2026-11-15 青蛙幣重新定價
 
-38位動物及6位河中夥伴的購買價格已更新，完整清單見 [BALANCE.md](BALANCE.md)。須在發布新網站前部署本資料夾的最新規則，否則登入帳戶以新價格購買會被舊規則拒絕。已有收藏及現有餘額無須遷移，沒有新增集合、索引或Functions。
+38位動物的購買價格已更新；6位河中夥伴現已退役，價格僅用於一次退款，完整清單見 [BALANCE.md](BALANCE.md)。須在發布新網站前部署本資料夾的最新規則，否則登入帳戶以新價格購買會被舊規則拒絕。動物收藏保留；退役夥伴與舊技能欄位按下節遷移，沒有新增集合、索引或Functions。
 
 從網站根目錄執行：
 
@@ -148,3 +148,15 @@ firebase deploy --project sky-playground-3c5af --only firestore:rules --config f
 ```
 
 本次檢查CLI回覆「No authorized accounts」，未替你完成正式規則部署。本機價格與規則價格的精確一致性已通過測試；部署後仍應以正式帳戶測一次購買、重載及跨裝置收藏。
+
+## 河中夥伴退役：先更新規則，再上傳網站
+
+本次需要部署本資料夾最新`firestore.rules`，索引沒有新增，無需Cloud Functions。規則移除所有夥伴購買路徑；新帳戶及新局不接受夥伴或舊通用技能欄位。既有歷史題局可正常結算。
+
+```sh
+firebase deploy --project sky-playground-3c5af --only firestore:rules --config frogger-jump/firebase.json
+```
+
+`readCloudProfile()`會以交易按舊帳戶實際持有清單一次退款，並以`deleteField()`移除`ownedCompanions`、`companion`及舊`ownedSkills`、`equippedSkill`。六位夥伴現行價格合計1880幣；若連舊通用技能均未退還，合計最多6880幣。規則只容許精確退款及欄位一併刪除，不容許超額、重複或其他玩家退款。動物收藏、最佳分數、活躍題局及待結算記錄不改寫。
+
+舊規則仍在時，客戶端保留伺服器的原有幣數，顯示遷移及退款待同步，阻止未遷移帳戶開新局；部署後按「重新讀取雲端存檔」或重新登入完成遷移。不要清除現有Firestore資料。

@@ -1,6 +1,5 @@
 import {skillFor} from './animal-skills.js';
 import {animal} from './animals.js';
-import {equipment} from './equipment.js';
 import {availableVariants,VARIANT_CHANCE,surface,dangerous} from './platforms.js';
 import {fishPose,fishContact,jumpPoint} from './fish.js';
 export {FISH_WARNING_MS,FISH_LEAP_MS,FISH_REST_MS} from './fish.js';
@@ -20,7 +19,7 @@ export function chargePower(ms){const t=Math.max(0,ms)/CHARGE_UP_MS%2;return t<=
 export function powerColor(power){const t=clamp(power),a=t<.5?[103,185,99]:[245,202,78],b=t<.5?[245,202,78]:[227,89,72],f=t<.5?t*2:(t-.5)*2;return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*f)).join(', ')})`;}
 export class FroggerGame{
  constructor({random=Math.random,now=()=>performance.now()}={}){this.random=random;this.now=now;this.reset();}
- reset(){this.animal='frog';this.riderOffset={x:0,y:0};this.companion='';this.companionReady=false;this.doubleArmed=false;this.adjustArmed=false;this.rescueArmed=false;this.skillPending=null;this.routeChosen=-1;this.skillCharges=0;this.skillSerial=0;this.state='ready';this.score=0;this.bonusCoins=0;this.softLanding=false;this.pollenReady=false;this.sinkGrace=0;this.fishShield=false;this.fishHazard=null;this.slideUntil=0;this.stumps=[];this.events=[];this.jump=null;this.fall=null;this.chargeAt=0;this.deadline=null;this.anglerDeadline=null;this.landedAt=-Infinity;this.pausedAt=null;this.pausedTotal=0;this.cameraFrom=0;this.cameraTarget=0;this.cameraAt=-Infinity;this.route=null;this.run=0;}
+ reset(){this.animal='frog';this.riderOffset={x:0,y:0};this.doubleArmed=false;this.adjustArmed=false;this.rescueArmed=false;this.skillPending=null;this.routeChosen=-1;this.skillCharges=0;this.skillSerial=0;this.state='ready';this.score=0;this.bonusCoins=0;this.softLanding=false;this.pollenReady=false;this.sinkGrace=0;this.fishShield=false;this.fishHazard=null;this.slideUntil=0;this.stumps=[];this.events=[];this.jump=null;this.fall=null;this.chargeAt=0;this.deadline=null;this.anglerDeadline=null;this.landedAt=-Infinity;this.pausedAt=null;this.pausedTotal=0;this.cameraFrom=0;this.cameraTarget=0;this.cameraAt=-Infinity;this.route=null;this.run=0;}
  get clock(){return (this.pausedAt??this.now())-this.pausedTotal;}
  get paused(){return this.pausedAt!==null;}
  get current(){return this.stumps[0];}
@@ -32,13 +31,6 @@ export class FroggerGame{
  // Radius assistance never stacks on the same pad, even across different skills.
  widenPad(pad,amount){pad.assistBase??=pad.r;pad.r=Math.max(pad.r,Math.min(90,pad.assistBase+Math.min(8,amount)));pad.small=false;}
  reinforce(pad){pad.sinking=false;pad.reinforced=true;pad.anchoredAt??=this.clock;if(pad===this.current)this.deadline=null;}
- supportCompanion(){
-  if(!this.companionReady||!['idle','charging'].includes(this.state))return;
-  if(this.companion==='crab'&&this.stumps[1].thorns)this.stumps[1].thorns=false;
-  else if(this.companion==='beaver'&&this.current.sinking)this.reinforce(this.current);
-  else return;
-  this.companionReady=false;this.events.push({type:'companion',id:this.companion});
- }
  get target(){return this.stumps[this.targetIndex];}
  get power(){return this.state==='charging'?chargePower(this.clock-this.chargeAt):0;}
  get sinkRemaining(){return this.deadline===null?null:Math.max(0,this.deadline-this.clock);}
@@ -50,7 +42,7 @@ export class FroggerGame{
   if(this.fishHazard?.key!==key){this.fishHazard={key,x:(this.current.x+this.target.x)/2,y:(this.current.y+this.target.y)/2,at};this.events.push({type:'fish-warning'});}
  }
  randomUnit(){return Math.max(0,Math.min(.999999999,Number(this.random())||0));}
- start({animal:kind='frog',companion=''}={}){this.reset();this.animal=animal(kind).id;this.companion=equipment('companion',companion)?.id??'';this.companionReady=!!this.companion;this.skillCharges=1;this.state='idle';this.stumps=[{id:0,x:0,y:0,r:riverRules().normalRadius,sinking:false,thorns:false,angler:false,small:false,kind:'stump',route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));this.supportCompanion();this.syncFish();return this.current;}
+ start({animal:kind='frog'}={}){this.reset();this.animal=animal(kind).id;this.skillCharges=1;this.state='idle';this.stumps=[{id:0,x:0,y:0,r:riverRules().normalRadius,sinking:false,thorns:false,angler:false,small:false,kind:'stump',route:'I'}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.length));this.syncFish();return this.current;}
  generate(previous,index){
   const landingNumber=this.score+this.stumps.length,rules=riverRules(landingNumber);
   if(this.run<=0){const proposed=this.randomUnit()<.5?'I':'Z';this.route=proposed===this.route?(proposed==='I'?'Z':'I'):proposed;this.run=1+Math.floor(this.randomUnit()*2);}
@@ -82,35 +74,35 @@ export class FroggerGame{
   const power=this.power,top=surface(this.current,this.clock),from={...top,x:top.x+this.riderOffset.x,y:top.y+this.riderOffset.y},duration=560+power*180,target=surface(this.target,this.clock+duration),length=distance(from,target);
   let travel=power*MAX_JUMP,error=Math.abs(travel-length),corrected='';
   const tolerance=target.r+(this.softLanding?12:0);
-  const animalCorrection=this.adjustArmed&&error>tolerance&&error<=tolerance+28,correction=animalCorrection?Math.min(28,error):this.companion==='ray'&&this.companionReady&&error>tolerance&&error<=tolerance+18?18:0;
-  if(correction){travel+=Math.sign(length-travel)*correction;error=Math.abs(travel-length);corrected=animalCorrection?'adjust':'ray';if(corrected==='ray')this.companionReady=false;}
+  const animalCorrection=this.adjustArmed&&error>tolerance&&error<=tolerance+28,correction=animalCorrection?Math.min(28,error):0;
+  if(correction){travel+=Math.sign(length-travel)*correction;error=Math.abs(travel-length);corrected='adjust';}
   const end={x:from.x+(target.x-from.x)*travel/length,y:from.y+(target.y-from.y)*travel/length};
   const middle=surface(this.stumps[1],this.clock+duration),thornHit=this.stumps[1].thorns&&distance(end,middle)<=middle.r,success=error<=target.r+(this.softLanding?12:0)+1e-7&&!thornHit;
   if(!success&&travel<from.r+8){const edge=from.r+8;end.x=from.x+(target.x-from.x)*edge/length;end.y=from.y+(target.y-from.y)*edge/length;}
-  if(!['rescue','shield'].includes(this.skillPending))this.skillPending=null;this.softLanding=false;this.adjustArmed=false;this.jump={at:this.clock,checkedAt:this.clock,shield:this.fishShield,duration,from:{x:from.x,y:from.y},end,visualEnd:{...end},success,error,power,travel,steps:this.targetIndex,corrected,failure:thornHit?'thorns':travel<length?'short':'long',cameraFrom:this.camera,cameraTo:from.y+(end.y-from.y)*.2};this.doubleArmed=false;this.fishShield=false;this.state='jumping';this.events.push({type:'jump',power,skipped:this.jump.steps-1});return true;
+  if(!['rescue','shield'].includes(this.skillPending))this.skillPending=null;this.softLanding=false;this.adjustArmed=false;this.jump={at:this.clock,checkedAt:this.clock,shield:this.fishShield,duration,from:{x:from.x,y:from.y},end,visualEnd:{...end},success,error,power,travel,steps:this.targetIndex,precisionReward:this.doubleArmed&&!!skillFor(this.animal).precisionReward,corrected,failure:thornHit?'thorns':travel<length?'short':'long',cameraFrom:this.camera,cameraTo:from.y+(end.y-from.y)*.2};this.doubleArmed=false;this.fishShield=false;this.state='jumping';this.events.push({type:'jump',power,skipped:this.jump.steps-1});return true;
  }
  update(){
   if(this.paused)return;const now=this.clock;
-  if(['idle','charging'].includes(this.state)){this.supportCompanion();this.syncFish();}
+  if(['idle','charging'].includes(this.state)){this.syncFish();}
   if(this.state==='jumping'){
    const contact=fishContact(this.jump,this.fishHazard,this.jump.checkedAt,now);this.jump.checkedAt=Math.min(now,this.jump.at+this.jump.duration);
    if(contact){
-    if(this.jump.shield||this.companion==='shark'&&this.companionReady){if(!this.jump.shield)this.companionReady=false;this.jump.shield=false;if(this.skillPending==='shield')this.skillPending=null;this.fishHazard=null;this.target.angler=false;this.events.push({type:'fish-blocked'});}
+    if(this.jump.shield){this.jump.shield=false;if(this.skillPending==='shield')this.skillPending=null;this.fishHazard=null;this.target.angler=false;this.events.push({type:'fish-blocked'});}
     else this.drown({...contact.player,fish:contact.fish,airborne:true},'angler',contact.at);
    }
   }
   if(this.state==='jumping'&&now+1e-7>=this.jump.at+this.jump.duration){
    const landedAt=this.jump.at+this.jump.duration;this.cameraFrom=this.cameraTarget=this.jump.cameraTo;this.cameraAt=landedAt;
-   if(this.jump.success){const skipped=this.jump.steps-1;this.score++;const skillEarned=this.score%SKILL_INTERVAL===0&&this.skillCharges<MAX_SKILL_CHARGES;if(skillEarned){this.skillCharges=Math.min(MAX_SKILL_CHARGES,this.skillCharges+1);this.events.push({type:'skill-ready',score:this.score,charges:this.skillCharges});}this.stumps.splice(0,this.jump.steps);while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.state='idle';this.fishShield=this.jump.shield;this.cameraTarget=this.current.y;this.landedAt=landedAt;const landingTop=surface(this.current,landedAt);this.riderOffset={x:this.jump.end.x-landingTop.x,y:this.jump.end.y-landingTop.y};const perfect=!this.jump.corrected&&this.jump.error<=landingTop.r*.25,kind=this.current.kind;let bonus=Math.min(3,(perfect?(kind==='lotus'?1:kind==='shell'?3:0):0)+(this.current.rewardBonus??0)+(perfect&&this.current.mailChallenge?1:0));if(perfect&&kind==='firefly'&&landingTop.glowing)bonus=Math.min(3,bonus+1);if(perfect&&this.pollenReady)bonus=Math.min(3,bonus+1);this.pollenReady=perfect&&kind==='bee';const sinkGrace=this.sinkGrace;this.sinkGrace=perfect&&kind==='snail'?800:0;if(perfect&&kind==='beaver')this.reinforce(this.stumps[1]);if(perfect&&kind==='crab')this.stumps[1].thorns=false;if(perfect&&bonus<3&&this.companion==='koi'&&this.companionReady){bonus++;this.companionReady=false;this.events.push({type:'companion',id:'koi'});}this.bonusCoins+=bonus;this.softLanding=perfect&&kind==='mushroom';if(kind==='duck'){this.current.slideAt=landedAt;this.current.slideX=Math.sign(this.target.x-this.current.x)*12;this.slideUntil=landedAt+440;}this.current.sinkDuration=(kind==='ice'?3500:SINK_MS)+sinkGrace;this.deadline=this.current.sinking?landedAt+this.current.sinkDuration:null;this.current.angler=false;this.anglerDeadline=null;if(this.score>=20&&this.score%24===0&&!dangerous(this.target))this.target.mailChallenge=true;this.syncFish(landedAt);this.events.push({type:'land',score:this.score,skipped,perfect,bonus,coins:2+bonus,kind,pollen:this.pollenReady,sinkGrace:this.sinkGrace,cleared:perfect&&kind==='crab',soft:this.softLanding,skillEarned,skillCharges:this.skillCharges});}
+   if(this.jump.success){const skipped=this.jump.steps-1;this.score++;const skillEarned=this.score%SKILL_INTERVAL===0&&this.skillCharges<MAX_SKILL_CHARGES;if(skillEarned){this.skillCharges=Math.min(MAX_SKILL_CHARGES,this.skillCharges+1);this.events.push({type:'skill-ready',score:this.score,charges:this.skillCharges});}this.stumps.splice(0,this.jump.steps);while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.state='idle';this.fishShield=this.jump.shield;this.cameraTarget=this.current.y;this.landedAt=landedAt;const landingTop=surface(this.current,landedAt);this.riderOffset={x:this.jump.end.x-landingTop.x,y:this.jump.end.y-landingTop.y};const perfect=!this.jump.corrected&&this.jump.error<=landingTop.r*.25,kind=this.current.kind;let bonus=Math.min(3,(perfect?(kind==='lotus'?1:kind==='shell'?3:0):0)+(this.current.rewardBonus??0)+(perfect&&this.current.mailChallenge?1:0));if(perfect&&kind==='firefly'&&landingTop.glowing)bonus=Math.min(3,bonus+1);if(perfect&&this.pollenReady)bonus=Math.min(3,bonus+1);this.pollenReady=perfect&&kind==='bee';const sinkGrace=this.sinkGrace;this.sinkGrace=perfect&&kind==='snail'?800:0;if(perfect&&kind==='beaver')this.reinforce(this.stumps[1]);if(perfect&&kind==='crab')this.stumps[1].thorns=false;if(perfect&&this.jump.precisionReward)bonus=Math.min(3,bonus+1);this.bonusCoins+=bonus;this.softLanding=perfect&&kind==='mushroom';if(kind==='duck'){this.current.slideAt=landedAt;this.current.slideX=Math.sign(this.target.x-this.current.x)*12;this.slideUntil=landedAt+440;}this.current.sinkDuration=(kind==='ice'?3500:SINK_MS)+sinkGrace;this.deadline=this.current.sinking?landedAt+this.current.sinkDuration:null;this.current.angler=false;this.anglerDeadline=null;if(this.score>=20&&this.score%24===0&&!dangerous(this.target))this.target.mailChallenge=true;this.syncFish(landedAt);this.events.push({type:'land',score:this.score,skipped,perfect,bonus,coins:2+bonus,kind,pollen:this.pollenReady,sinkGrace:this.sinkGrace,cleared:perfect&&kind==='crab',soft:this.softLanding,skillEarned,skillCharges:this.skillCharges});}
    else this.drown(this.jump.visualEnd,this.jump.failure,landedAt);
   }
   if(this.state==='idle'||this.state==='charging'){
-   this.supportCompanion();const at=this.deadline??Infinity;
+   const at=this.deadline??Infinity;
    if(now+1e-7>=at)this.drown(surface(this.current,at),'sunk',at);
   }
   if(this.state==='drowning'&&now+1e-7>=this.fall.at+DROWN_MS){this.state='over';this.events.push({type:'over',score:this.score,reason:this.fall.reason});}
  }
- drown(point,reason,at=this.clock){if(['short','long','sunk'].includes(reason)&&(this.rescueArmed||this.companion==='hippo'&&this.companionReady)){if(this.rescueArmed){this.rescueArmed=false;this.skillPending=null;}else this.companionReady=false;const id=this.stumps.at(-1).id+1;this.stumps=[{id,x:point.x,y:point.y,r:62,kind:'lily',route:'I',reinforced:true}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.riderOffset={x:0,y:0};this.fishShield=this.fishShield||this.skillPending==='shield'&&!!this.jump?.shield;this.state='idle';this.deadline=null;this.slideUntil=0;this.pollenReady=false;this.sinkGrace=0;this.cameraFrom=this.cameraTarget=point.y;this.cameraAt=at;this.landedAt=at;this.syncFish(at);this.events.push({type:'rescue'});return;}if(this.state==='jumping'){const j=this.jump,t=clamp((at-j.at)/j.duration);this.cameraFrom=this.cameraTarget=j.cameraFrom+(j.cameraTo-j.cameraFrom)*smooth(t);this.cameraAt=at;}this.cancelCharge();this.state='drowning';const j=this.jump,speed=reason==='long'?1:reason==='short'?.35:0;this.fall={...point,at,reason,velocity:j&&['short','long'].includes(reason)?{x:(j.end.x-j.from.x)/j.duration*speed,y:(j.end.y-j.from.y)/j.duration*speed}:{x:0,y:0}};this.events.push({type:'fall',reason});}
+ drown(point,reason,at=this.clock){if(['short','long','sunk'].includes(reason)&&this.rescueArmed){this.rescueArmed=false;this.skillPending=null;const id=this.stumps.at(-1).id+1;this.stumps=[{id,x:point.x,y:point.y,r:62,kind:'lily',route:'I',reinforced:true}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.riderOffset={x:0,y:0};this.fishShield=this.fishShield||this.skillPending==='shield'&&!!this.jump?.shield;this.state='idle';this.deadline=null;this.slideUntil=0;this.pollenReady=false;this.sinkGrace=0;this.cameraFrom=this.cameraTarget=point.y;this.cameraAt=at;this.landedAt=at;this.syncFish(at);this.events.push({type:'rescue'});return;}if(this.state==='jumping'){const j=this.jump,t=clamp((at-j.at)/j.duration);this.cameraFrom=this.cameraTarget=j.cameraFrom+(j.cameraTo-j.cameraFrom)*smooth(t);this.cameraAt=at;}this.cancelCharge();this.state='drowning';const j=this.jump,speed=reason==='long'?1:reason==='short'?.35:0;this.fall={...point,at,reason,velocity:j&&['short','long'].includes(reason)?{x:(j.end.x-j.from.x)/j.duration*speed,y:(j.end.y-j.from.y)/j.duration*speed}:{x:0,y:0}};this.events.push({type:'fall',reason});}
  pause(){if(this.paused||!['idle','charging','jumping','drowning'].includes(this.state))return false;this.cancelCharge();this.pausedAt=this.now();return true;}
  resume(){if(!this.paused)return false;this.pausedTotal+=this.now()-this.pausedAt;this.pausedAt=null;return true;}
  drainEvents(){return this.events.splice(0);}

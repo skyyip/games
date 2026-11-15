@@ -1,4 +1,4 @@
-const CACHE='hk-millionaire-v2';
+const CACHE='hk-millionaire-v3';
 // The production builder replaces this source worker with a complete hashed release worker.
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(['./','./index.html','./styles.css','./src/app.js','./src/game.js','./src/questions.js','./src/urban-questions.js','./src/question-share.js','./src/art.js','./src/ledger.js','./src/cloud.js','./src/firebase-settings.js','../beat-bad-luck/src/google-popup.js','../grid-rush/src/site-updates.js','../grid-rush/src/language.js','../grid-rush/src/translations.js']))));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));

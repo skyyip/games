@@ -3,17 +3,14 @@ import assert from 'node:assert/strict';
 import {FroggerGame,distance,MAX_JUMP,CHARGE_UP_MS} from '../src/game.js';
 import {surface,VARIANTS} from '../src/platforms.js';
 import {ANIMALS,rewardCoins} from '../src/animals.js';
-import {COMPANIONS} from '../src/equipment.js';
 function rig(kind='stump',animal='frog'){
  let now=0;const g=new FroggerGame({random:()=>.75,now:()=>now});g.start({animal});g.target.kind=kind;
  return {g,step(ms){now+=ms;g.update();},hop(error=0){assert(g.beginCharge());this.step((distance(g.frog,g.target)+error)/MAX_JUMP*CHARGE_UP_MS);assert(g.release());this.step(g.jump.duration);}};
 }
-test('economy provides early role choice and a short first companion goal without stronger expensive skins',()=>{
+test('economy provides early animal-role choices without stronger expensive skins',()=>{
  assert.equal(ANIMALS.filter(a=>a.price===0).length,1);
  for(const role of new Set(ANIMALS.map(a=>a.ability)))assert(Math.min(...ANIMALS.filter(a=>a.ability===role).map(a=>a.price))<=320);
  assert(Math.max(...ANIMALS.map(a=>a.price))<=1600);
- const byId=Object.fromEntries(COMPANIONS.map(c=>[c.id,c.price]));
- assert(byId.koi<=rewardCoins(20)*2);assert(byId.crab<byId.ray);assert(byId.ray<byId.hippo);
  assert.equal(rewardCoins(20),51);assert.equal(rewardCoins(50),121);
 });
 test('moving hermit crabs have a bounded shared surface, predict the landing and carry the rider',()=>{
@@ -47,8 +44,7 @@ test('a shield waits through safe landings, blocks one later fish and then permi
  assert.equal(g.fishShield,false);assert.equal(g.skillPending,null);assert.equal(g.drainEvents().filter(e=>e.type==='fish-blocked').length,1);
  assert(g.useSkill());assert.equal(g.skillCharges,0);
 });
-test('a hippo rescue preserves an unspent animal fish shield instead of leaving a stuck pending skill',()=>{
+test('a legacy hippo option cannot silently add rescue to an animal shield',()=>{
  const r=rig('stump','mochi'),g=r.g;g.start({animal:'mochi',companion:'hippo'});assert(g.useSkill());r.hop(180);
- assert.equal(g.state,'idle');assert.equal(g.score,0);assert.equal(g.companionReady,false);assert(g.fishShield);assert.equal(g.skillPending,'shield');
- g.target.angler=true;g.update();r.step(1000);r.hop();assert.equal(g.state,'idle');assert.equal(g.fishShield,false);assert.equal(g.skillPending,null);
+ assert.equal(g.state,'drowning');assert.equal(g.score,0);assert(!('companion' in g));assert(!('companionReady' in g));
 });
