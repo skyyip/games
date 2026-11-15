@@ -1,6 +1,6 @@
 {
-  "version": "3e12ec47a13cf3a7",
-  "builtAt": 1794750267555,
+  "version": "8f874bc436682523",
+  "builtAt": 1794751836603,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -139,7 +139,7 @@
     "feet-up-cafe/src/app.js": "built/app-TMJ4LIAU.js",
     "flick-force/src/app.js": "built/app-RNBBGQ7D.js",
     "floating-balance/src/app.js": "built/app-HY52BL4C.js",
-    "frogger-jump/src/app.js": "built/app-DJFDURZP.js",
+    "frogger-jump/src/app.js": "built/app-QTNXU66X.js",
     "grid-rush-in-order/src/app.js": "built/app-O2AAM4X6.js",
     "grid-rush-in-order/src/pwa.js": "built/pwa-7AFLM7W4.js",
     "grid-rush/src/app.js": "built/app-JOGQYZYQ.js",
@@ -175,7 +175,7 @@
     "feet-up-cafe/styles.css": "built/styles-ESYETR63.css",
     "flick-force/styles.css": "built/styles-UCKVNNFS.css",
     "floating-balance/styles.css": "built/styles-MBSKT3UV.css",
-    "frogger-jump/styles.css": "built/styles-HSLFLUNB.css",
+    "frogger-jump/styles.css": "built/styles-LNN75WM5.css",
     "beat-bad-luck/collections.css": "built/collections-AAFFCYWR.css",
     "beat-bad-luck/combat-refresh.css": "built/combat-refresh-IU5SL7U6.css",
     "beat-bad-luck/mobile-dialogs.css": "built/mobile-dialogs-MQOU2TSY.css",
