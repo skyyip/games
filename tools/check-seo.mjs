@@ -46,7 +46,7 @@ for (const [index, page] of pages.entries()) {
     assert.deepEqual(new Set(list.itemListElement.map(item => item.url)), new Set(visible), 'Collection matches visible cards, including hidden-game policy');
   }
   const guide = html.match(/<!-- game-guide:start -->([\s\S]*?)<!-- game-guide:end -->/)?.[1];
-  if(game?.guide===false){assert.equal(guide,undefined,`${page}: About accordion remains removed`);}else assert.ok(guide, `${page}: readable guide`);
+  if(!game||game.guide===false){assert.equal(guide,undefined,`${page}: About section remains removed`);}else assert.ok(guide, `${page}: readable guide`);
   for (const match of (guide??'').matchAll(/href="([^"]+)"/g)) {
     const target = resolve(dirname(resolve(directory, page)), match[1], 'index.html');
     await access(target);

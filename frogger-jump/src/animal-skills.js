@@ -1,8 +1,8 @@
 // One primary ability per animal. Prices unlock artwork; role power is shared.
 export const ABILITIES=Object.freeze({
  prune:{width:8,zh:'剪道',en:'Thorn clearing',descriptionZh:'清走前方兩個落點的荊棘，下一落點加闊8；不防下沉、燈籠魚或失足。',descriptionEn:'Clear thorns from both upcoming pads and widen the next by 8; sinking, fish and falls remain dangerous.'},
- anchor:{width:8,zh:'固橋',en:'Pad anchor',descriptionZh:'加固腳下與前方第一個落點，目標加闊8；只處理下沉，不移除魚燈或荊棘。',descriptionEn:'Stabilize the current and first upcoming pad against sinking and widen the target by 8; fish and thorns remain.'},
- shield:{width:8,zh:'護盾',en:'Fish shield',descriptionZh:'下一跳擋住一次空中燈籠魚，目標加闊8；不防落水、下沉或荊棘。',descriptionEn:'Block one airborne fish on the next hop and widen the target by 8; falls, sinking and thorns still hurt.'},
+ anchor:{width:8,zh:'固橋',en:'Pad anchor',descriptionZh:'加固腳下與下一個落點，停止海龜、寄居蟹及葉盤移動，目標加闊8；不防魚嘴、荊棘或失足。',descriptionEn:'Anchor the current and next pad against sinking and motion, including turtles, hermit crabs and turning leaves. Widen the target by 8; fish, thorns and falls remain dangerous.'},
+ shield:{width:8,zh:'護盾',en:'Fish shield',descriptionZh:'啟用一次防魚護盾，安全跳躍保留至真正擋魚，當前目標加闊8；不防落水、下沉或荊棘。',descriptionEn:'Arm one fish shield that waits through safe hops until it blocks a fish. Widen the current target by 8; falls, sinking and thorns still hurt.'},
  double:{width:0,zh:'跨跳',en:'Double hop',descriptionZh:'下一跳瞄準第二個落點，仍需掌握較遠的蓄力；成功只計1跳，不附帶救援或護盾。',descriptionEn:'Aim at the second pad for the next hop; charge for the longer gap. Count one landing, with no rescue or shield.'},
  adjust:{width:0,zh:'微調',en:'Air adjustment',descriptionZh:'下一跳僅在差距超出落腳範圍時修正最多28；差太遠仍落水，修正落地不獲正中心獎勵。',descriptionEn:'On the next hop, correct a miss by up to 28 only outside the landing area. Larger misses still fail; assisted landings earn no centre bonus.'},
  rescue:{width:0,zh:'救援',en:'Rescue leaf',descriptionZh:'預先啟用一次浮葉救援，失足或下沉時接住你；成功跳躍會保留待命，不防魚嘴與荊棘，救援不加分。',descriptionEn:'Arm one rescue from a fall or sinking pad. It waits through successful hops, does not stop fish or thorns, and gives no landing score.'}

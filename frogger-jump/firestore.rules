@@ -5,7 +5,7 @@ service cloud.firestore {
   function player(uid) { return /databases/$(database)/documents/frogger_players/$(uid); }
   function run(uid,id) { return /databases/$(database)/documents/frogger_players/$(uid)/runs/$(id); }
   function species(id) { return id in ["frog","penguin","bunny","monkey","otter","duck","cat","panda","fox","capybara","mochi","chiikawa","hachiware","usagi","kurimanju","rakko","momonga","shisa","shimajiro","mermaid","hitoha","futaba","elf-mage","violet-mage","red-warrior","red-sprout","blue-sprout","yellow-sprout","black-sprout","pink-sprout","white-sprout","purple-sprout","ice-sprout","bloom-bunny","mage-otter","dawn-hero","stone-dwarf","gentle-priest"]; }
-  function price(id) { return {"frog":0,"penguin":280,"bunny":320,"monkey":360,"otter":400,"duck":440,"cat":480,"panda":520,"fox":960,"capybara":1000,"mochi":1080,"chiikawa":1200,"hachiware":1360,"usagi":1520,"kurimanju":1600,"rakko":1880,"momonga":1760,"shisa":1840,"shimajiro":1920,"mermaid":2000,"hitoha":2080,"futaba":2160,"elf-mage":2240,"violet-mage":2320,"red-warrior":2400,"red-sprout":560,"blue-sprout":600,"yellow-sprout":680,"black-sprout":720,"pink-sprout":760,"white-sprout":840,"purple-sprout":880,"ice-sprout":920,"bloom-bunny":2480,"mage-otter":2560,"dawn-hero":2640,"stone-dwarf":2720,"gentle-priest":2800}[id]; }
+  function price(id) { return {"frog":0,"penguin":120,"bunny":140,"monkey":180,"otter":160,"duck":180,"cat":200,"panda":240,"fox":480,"capybara":320,"mochi":520,"chiikawa":680,"hachiware":720,"usagi":760,"kurimanju":800,"rakko":1200,"momonga":840,"shisa":880,"shimajiro":920,"mermaid":960,"hitoha":1000,"futaba":1040,"elf-mage":1120,"violet-mage":1160,"red-warrior":1200,"red-sprout":220,"blue-sprout":260,"yellow-sprout":280,"black-sprout":300,"pink-sprout":340,"white-sprout":360,"purple-sprout":400,"ice-sprout":440,"bloom-bunny":1280,"mage-otter":1360,"dawn-hero":1440,"stone-dwarf":1520,"gentle-priest":1600}[id]; }
   function coins(score) { return 1 + score * 2 + int(score / 20) * 10; }
   function valid(p) {
    return validGear(p) && p.keys().hasOnly(['version','name','nameKey','coins','owned','selected','best','bestAnimal','bestAt','createdAt','updatedAt','activeRun','lastSettledRun','ownedSkills','equippedSkill','ownedCompanions','companion'])
@@ -37,7 +37,7 @@ service cloud.firestore {
    let friends=p.get('ownedCompanions',[]); let before=old.get('ownedCompanions',[]); let friend=p.get('companion','');
    return p.diff(old).affectedKeys().hasOnly(['ownedCompanions','companion','coins','updatedAt']) && (
     (friends == before && p.coins == old.coins)
-    || (friends.size() == before.size()+1 && friends.hasAll(before) && !(friend in before) && p.coins == old.coins-{'hippo':1200,'ray':1440,'crab':1280,'beaver':1520,'koi':1600,'shark':1680}[friend])
+    || (friends.size() == before.size()+1 && friends.hasAll(before) && !(friend in before) && p.coins == old.coins-{"hippo":540,"ray":360,"crab":200,"beaver":260,"koi":100,"shark":420}[friend])
    );
   }
   function selection(p,old) { return p.diff(old).affectedKeys().hasOnly(['selected','updatedAt']); }

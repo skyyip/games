@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {RiverScene,MAX_CANVAS_PIXELS} from '../src/scene.js';import {FroggerGame} from '../src/game.js';
+import {RiverScene,MAX_CANVAS_PIXELS,MAX_ANIMAL_SPRITES} from '../src/scene.js';import {FroggerGame} from '../src/game.js';
 function withScene(run){
  const original={document:globalThis.document,matchMedia:globalThis.matchMedia,devicePixelRatio:globalThis.devicePixelRatio};let resets=0;
  const canvas=()=>{const ctx={setTransform(){},drawImage(){},clearRect(){},beginPath(){},ellipse(){},fill(){}};return {getContext:()=>ctx,set width(v){this.w=v;resets++;},get width(){return this.w;},set height(v){this.h=v;resets++;},get height(){return this.h;}};};
@@ -15,8 +15,8 @@ test('unchanged water is rasterized once and resized water invalidates the layer
 test('static platform cache responds to language, landing radius and role changes',()=>withScene(s=>{
  s.resize(400,500);const g=new FroggerGame({random:()=>.75,now:()=>0});g.start();let paints=0;s.paintPlatform=()=>paints++;let projection=s.projection(g);s.stump(g,g.target,1,projection);s.stump(g,g.target,1,projection);assert.equal(paints,1);g.useSkill();s.stump(g,g.target,1,projection);assert.equal(paints,2);s.zh=false;s.stump(g,g.target,1,projection);assert.equal(paints,3);s.stump(g,g.target,0,projection);assert.equal(paints,4);
 }));
-test('breathing pads and a newly landed or sinking current pad never reuse a frozen sprite',()=>withScene(s=>{
- s.resize(400,500);let clock=1000;const g=new FroggerGame({random:()=>.75,now:()=>clock});g.start();let paints=0;s.paintPlatform=()=>paints++;const projection=s.projection(g);g.target.kind='spinner';s.stump(g,g.target,1,projection);s.stump(g,g.target,1,projection);assert.equal(paints,2);g.landedAt=900;s.stump(g,g.current,0,projection);s.stump(g,g.current,0,projection);assert.equal(paints,4);clock=2000;g.current.sinking=true;s.stump(g,g.current,0,projection);s.stump(g,g.current,0,projection);assert.equal(paints,6);
+test('breathing and sinking pads stay live while ordinary landing artwork is cached',()=>withScene(s=>{
+ s.resize(400,500);let clock=1000;const g=new FroggerGame({random:()=>.75,now:()=>clock});g.start();let paints=0;s.paintPlatform=()=>paints++;const projection=s.projection(g);g.target.kind='spinner';s.stump(g,g.target,1,projection);s.stump(g,g.target,1,projection);assert.equal(paints,2);g.landedAt=900;s.stump(g,g.current,0,projection);s.stump(g,g.current,0,projection);assert.equal(paints,3);clock=2000;g.current.sinking=true;s.stump(g,g.current,0,projection);s.stump(g,g.current,0,projection);assert.equal(paints,5);
 }));
 test('platform bitmaps stay bounded to the visible trio and reset releases them',()=>withScene(s=>{
  s.resize(400,500);const g=new FroggerGame({random:()=>.75,now:()=>0});g.start();s.paintPlatform=()=>{};s.animal=()=>{};s.ripples=()=>{};s.skillEffect=()=>{};s.paintWater=()=>{};
@@ -27,7 +27,7 @@ test('repeated animal poses reuse sprites; species and animation changes invalid
  s.resize(400,500);let paints=0;s.paintAnimal=()=>paints++;
  s.animal(20,30,1,'frog',{squat:.25});s.animal(40,60,.8,'frog',{squat:.25});assert.equal(paints,1);
  s.animal(40,60,1,'mochi',{squat:.25});assert.equal(paints,2);
- for(let i=0;i<100;i++)s.animal(0,0,1,'mochi',{squat:i/20});assert(s.animalCache.size<=48);
+ for(let i=0;i<100;i++)s.animal(0,0,1,'mochi',{squat:i/20});assert(s.animalCache.size<=MAX_ANIMAL_SPRITES);
  const count=s.animalCache.size;s.resize(401,500);assert.equal(s.animalCache.size,count);globalThis.devicePixelRatio=1;s.resize(401,500);assert.equal(s.animalCache.size,0);
 }));
 
@@ -43,7 +43,7 @@ test('settled special pads cache safely but landing reactions finish before cach
 test('hot animal poses survive cache eviction and same-DPR resize',()=>withScene(s=>{
  s.resize(400,500);s.paintAnimal=()=>{};s.animal(0,0,1,'frog',{});const hot=s.animalCache.values().next().value;
  for(let i=0;i<80;i++){s.animal(0,0,1,'frog',{});s.animal(0,0,1,'frog',{squat:1+i/20});}
- assert([...s.animalCache.values()].includes(hot));assert(s.animalCache.size<=48);s.resize(401,500);assert([...s.animalCache.values()].includes(hot));
+ assert([...s.animalCache.values()].includes(hot));assert(s.animalCache.size<=MAX_ANIMAL_SPRITES);s.resize(401,500);assert([...s.animalCache.values()].includes(hot));
 }));
 
 test('camera zoom scales one canonical platform bitmap instead of repainting every frame',()=>withScene(s=>{
@@ -54,5 +54,5 @@ test('camera zoom scales one canonical platform bitmap instead of repainting eve
 test('prewarmed flight poses do not rerasterize during a hop and the atlas remains bounded',()=>withScene(s=>{
  s.resize(400,500);let paints=0;s.paintAnimal=()=>paints++;s.prepareAnimal('frog');const before=paints;
  for(let i=0;i<=80;i++)s.animal(100,100,1,'frog',{airborne:true,flightPhase:i/80,anchorFeet:true});
- assert.equal(paints,before);assert(s.animalCache.size<=48);
+ assert.equal(paints,before);assert(s.animalCache.size<=MAX_ANIMAL_SPRITES);
 }));

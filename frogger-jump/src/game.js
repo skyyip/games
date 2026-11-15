@@ -4,7 +4,8 @@ import {equipment} from './equipment.js';
 import {VARIANTS,VARIANT_CHANCE,surface,dangerous} from './platforms.js';
 import {fishPose,fishContact,jumpPoint} from './fish.js';
 export {FISH_WARNING_MS,FISH_LEAP_MS,FISH_REST_MS} from './fish.js';
-export const MAX_SKILL_CHARGES=3;
+export const MAX_SKILL_CHARGES=2;
+export const SKILL_INTERVAL=50;
 export const MAX_JUMP=540,CHARGE_UP_MS=1000,SINK_MS=2500,SPLASH_MS=420,DROWN_MS=1900,CAMERA_MS=520;
 export const RIVER_RULES=Object.freeze({minGap:152,maxGap:208,normalRadius:58,smallChance:.09,sinkChance:.05,thornChance:.05,fishChance:.05,lilyChance:.4});
 // Use the upcoming landing number, including pads already visible ahead.
@@ -30,7 +31,7 @@ export class FroggerGame{
 
  // Radius assistance never stacks on the same pad, even across different skills.
  widenPad(pad,amount){pad.assistBase??=pad.r;pad.r=Math.max(pad.r,Math.min(90,pad.assistBase+Math.min(8,amount)));pad.small=false;}
- reinforce(pad){pad.sinking=false;pad.reinforced=true;if(pad===this.current)this.deadline=null;}
+ reinforce(pad){pad.sinking=false;pad.reinforced=true;pad.anchoredAt??=this.clock;if(pad===this.current)this.deadline=null;}
  supportCompanion(){
   if(!this.companionReady||!['idle','charging'].includes(this.state))return;
   if(this.companion==='crab'&&this.stumps[1].thorns)this.stumps[1].thorns=false;
@@ -58,7 +59,7 @@ export class FroggerGame{
   const y=previous.y+rules.minGap+this.randomUnit()*(rules.maxGap-rules.minGap),small=this.randomUnit()<rules.smallChance,r=small?rules.smallRadius+Math.floor(this.randomUnit()*8):rules.normalRadius,hazard=this.randomUnit();
   const busy=this.stumps.some(dangerous)||dangerous(previous);
   const sinking=!busy&&hazard<rules.sinkChance,thorns=!busy&&hazard>=rules.sinkChance&&hazard<rules.sinkChance+rules.thornChance&&!previous.thorns,angler=!busy&&hazard>=rules.sinkChance+rules.thornChance&&hazard<rules.sinkChance+rules.thornChance+rules.fishChance;
-  let kind=this.randomUnit()<rules.lilyChance?'lily':'stump';const variant=this.randomUnit();if(variant<rules.variantChance&&!sinking&&!thorns&&!angler){kind=VARIANTS[Math.min(6,Math.floor(variant/rules.variantChance*7))];if(kind==='ice'&&busy)kind='shell';}
+  let kind=this.randomUnit()<rules.lilyChance?'lily':'stump';const variant=this.randomUnit();if(variant<rules.variantChance&&!sinking&&!thorns&&!angler){kind=VARIANTS[Math.min(VARIANTS.length-1,Math.floor(variant/rules.variantChance*VARIANTS.length))];if(kind==='ice'&&busy)kind='shell';}
   return {id:index,x,y,r,small,kind,sinking:sinking||kind==='ice',thorns,angler,route:this.route};
  }
  useSkill(){
@@ -86,7 +87,7 @@ export class FroggerGame{
   const end={x:from.x+(target.x-from.x)*travel/length,y:from.y+(target.y-from.y)*travel/length};
   const middle=surface(this.stumps[1],this.clock+duration),thornHit=this.stumps[1].thorns&&distance(end,middle)<=middle.r,success=error<=target.r+(this.softLanding?12:0)+1e-7&&!thornHit;
   if(!success&&travel<from.r+8){const edge=from.r+8;end.x=from.x+(target.x-from.x)*edge/length;end.y=from.y+(target.y-from.y)*edge/length;}
-  if(this.skillPending!=='rescue')this.skillPending=null;this.softLanding=false;this.adjustArmed=false;this.jump={at:this.clock,checkedAt:this.clock,shield:this.fishShield,duration,from:{x:from.x,y:from.y},end,visualEnd:{...end},success,error,power,travel,steps:this.targetIndex,corrected,failure:thornHit?'thorns':travel<length?'short':'long',cameraFrom:this.camera,cameraTo:from.y+(end.y-from.y)*.2};this.doubleArmed=false;this.fishShield=false;this.state='jumping';this.events.push({type:'jump',power,skipped:this.jump.steps-1});return true;
+  if(!['rescue','shield'].includes(this.skillPending))this.skillPending=null;this.softLanding=false;this.adjustArmed=false;this.jump={at:this.clock,checkedAt:this.clock,shield:this.fishShield,duration,from:{x:from.x,y:from.y},end,visualEnd:{...end},success,error,power,travel,steps:this.targetIndex,corrected,failure:thornHit?'thorns':travel<length?'short':'long',cameraFrom:this.camera,cameraTo:from.y+(end.y-from.y)*.2};this.doubleArmed=false;this.fishShield=false;this.state='jumping';this.events.push({type:'jump',power,skipped:this.jump.steps-1});return true;
  }
  update(){
   if(this.paused)return;const now=this.clock;
@@ -94,13 +95,13 @@ export class FroggerGame{
   if(this.state==='jumping'){
    const contact=fishContact(this.jump,this.fishHazard,this.jump.checkedAt,now);this.jump.checkedAt=Math.min(now,this.jump.at+this.jump.duration);
    if(contact){
-    if(this.jump.shield||this.companion==='shark'&&this.companionReady){if(!this.jump.shield)this.companionReady=false;this.jump.shield=false;this.fishHazard=null;this.target.angler=false;this.events.push({type:'fish-blocked'});}
+    if(this.jump.shield||this.companion==='shark'&&this.companionReady){if(!this.jump.shield)this.companionReady=false;this.jump.shield=false;if(this.skillPending==='shield')this.skillPending=null;this.fishHazard=null;this.target.angler=false;this.events.push({type:'fish-blocked'});}
     else this.drown({...contact.player,fish:contact.fish,airborne:true},'angler',contact.at);
    }
   }
   if(this.state==='jumping'&&now+1e-7>=this.jump.at+this.jump.duration){
    const landedAt=this.jump.at+this.jump.duration;this.cameraFrom=this.cameraTarget=this.jump.cameraTo;this.cameraAt=landedAt;
-   if(this.jump.success){const skipped=this.jump.steps-1;this.score++;const skillEarned=this.score%20===0&&this.skillCharges<MAX_SKILL_CHARGES;if(skillEarned){this.skillCharges=Math.min(MAX_SKILL_CHARGES,this.skillCharges+1);this.events.push({type:'skill-ready',score:this.score,charges:this.skillCharges});}this.stumps.splice(0,this.jump.steps);while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.state='idle';this.cameraTarget=this.current.y;this.landedAt=landedAt;const landingTop=surface(this.current,landedAt);this.riderOffset={x:this.jump.end.x-landingTop.x,y:this.jump.end.y-landingTop.y};const perfect=!this.jump.corrected&&this.jump.error<=landingTop.r*.25,kind=this.current.kind;let bonus=Math.min(3,(perfect?(kind==='lotus'?1:kind==='shell'?3:0):0)+(this.current.rewardBonus??0)+(perfect&&this.current.mailChallenge?1:0));if(perfect&&bonus<3&&this.companion==='koi'&&this.companionReady){bonus++;this.companionReady=false;this.events.push({type:'companion',id:'koi'});}this.bonusCoins+=bonus;this.softLanding=perfect&&kind==='mushroom';if(kind==='duck'){this.current.slideAt=landedAt;this.current.slideX=Math.sign(this.target.x-this.current.x)*12;this.slideUntil=landedAt+440;}this.deadline=this.current.sinking?landedAt+(kind==='ice'?3500:SINK_MS):null;this.current.angler=false;this.anglerDeadline=null;if(this.score>=20&&this.score%24===0&&!dangerous(this.target))this.target.mailChallenge=true;this.syncFish(landedAt);this.events.push({type:'land',score:this.score,skipped,perfect,bonus,coins:2+bonus,kind,soft:this.softLanding,skillEarned,skillCharges:this.skillCharges});}
+   if(this.jump.success){const skipped=this.jump.steps-1;this.score++;const skillEarned=this.score%SKILL_INTERVAL===0&&this.skillCharges<MAX_SKILL_CHARGES;if(skillEarned){this.skillCharges=Math.min(MAX_SKILL_CHARGES,this.skillCharges+1);this.events.push({type:'skill-ready',score:this.score,charges:this.skillCharges});}this.stumps.splice(0,this.jump.steps);while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.state='idle';this.fishShield=this.jump.shield;this.cameraTarget=this.current.y;this.landedAt=landedAt;const landingTop=surface(this.current,landedAt);this.riderOffset={x:this.jump.end.x-landingTop.x,y:this.jump.end.y-landingTop.y};const perfect=!this.jump.corrected&&this.jump.error<=landingTop.r*.25,kind=this.current.kind;let bonus=Math.min(3,(perfect?(kind==='lotus'?1:kind==='shell'?3:0):0)+(this.current.rewardBonus??0)+(perfect&&this.current.mailChallenge?1:0));if(perfect&&kind==='firefly'&&landingTop.glowing)bonus=Math.min(3,bonus+1);if(perfect&&kind==='beaver')this.reinforce(this.stumps[1]);if(perfect&&bonus<3&&this.companion==='koi'&&this.companionReady){bonus++;this.companionReady=false;this.events.push({type:'companion',id:'koi'});}this.bonusCoins+=bonus;this.softLanding=perfect&&kind==='mushroom';if(kind==='duck'){this.current.slideAt=landedAt;this.current.slideX=Math.sign(this.target.x-this.current.x)*12;this.slideUntil=landedAt+440;}this.deadline=this.current.sinking?landedAt+(kind==='ice'?3500:SINK_MS):null;this.current.angler=false;this.anglerDeadline=null;if(this.score>=20&&this.score%24===0&&!dangerous(this.target))this.target.mailChallenge=true;this.syncFish(landedAt);this.events.push({type:'land',score:this.score,skipped,perfect,bonus,coins:2+bonus,kind,soft:this.softLanding,skillEarned,skillCharges:this.skillCharges});}
    else this.drown(this.jump.visualEnd,this.jump.failure,landedAt);
   }
   if(this.state==='idle'||this.state==='charging'){
@@ -109,11 +110,11 @@ export class FroggerGame{
   }
   if(this.state==='drowning'&&now+1e-7>=this.fall.at+DROWN_MS){this.state='over';this.events.push({type:'over',score:this.score,reason:this.fall.reason});}
  }
- drown(point,reason,at=this.clock){if(['short','long','sunk'].includes(reason)&&(this.rescueArmed||this.companion==='hippo'&&this.companionReady)){if(this.rescueArmed){this.rescueArmed=false;this.skillPending=null;}else this.companionReady=false;const id=this.stumps.at(-1).id+1;this.stumps=[{id,x:point.x,y:point.y,r:62,kind:'lily',route:'I',reinforced:true}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.riderOffset={x:0,y:0};this.state='idle';this.deadline=null;this.slideUntil=0;this.cameraFrom=this.cameraTarget=point.y;this.cameraAt=at;this.landedAt=at;this.syncFish(at);this.events.push({type:'rescue'});return;}if(this.state==='jumping'){const j=this.jump,t=clamp((at-j.at)/j.duration);this.cameraFrom=this.cameraTarget=j.cameraFrom+(j.cameraTo-j.cameraFrom)*smooth(t);this.cameraAt=at;}this.cancelCharge();this.state='drowning';const j=this.jump,speed=reason==='long'?1:reason==='short'?.35:0;this.fall={...point,at,reason,velocity:j&&['short','long'].includes(reason)?{x:(j.end.x-j.from.x)/j.duration*speed,y:(j.end.y-j.from.y)/j.duration*speed}:{x:0,y:0}};this.events.push({type:'fall',reason});}
+ drown(point,reason,at=this.clock){if(['short','long','sunk'].includes(reason)&&(this.rescueArmed||this.companion==='hippo'&&this.companionReady)){if(this.rescueArmed){this.rescueArmed=false;this.skillPending=null;}else this.companionReady=false;const id=this.stumps.at(-1).id+1;this.stumps=[{id,x:point.x,y:point.y,r:62,kind:'lily',route:'I',reinforced:true}];while(this.stumps.length<3)this.stumps.push(this.generate(this.stumps.at(-1),this.stumps.at(-1).id+1));this.riderOffset={x:0,y:0};this.fishShield=this.fishShield||this.skillPending==='shield'&&!!this.jump?.shield;this.state='idle';this.deadline=null;this.slideUntil=0;this.cameraFrom=this.cameraTarget=point.y;this.cameraAt=at;this.landedAt=at;this.syncFish(at);this.events.push({type:'rescue'});return;}if(this.state==='jumping'){const j=this.jump,t=clamp((at-j.at)/j.duration);this.cameraFrom=this.cameraTarget=j.cameraFrom+(j.cameraTo-j.cameraFrom)*smooth(t);this.cameraAt=at;}this.cancelCharge();this.state='drowning';const j=this.jump,speed=reason==='long'?1:reason==='short'?.35:0;this.fall={...point,at,reason,velocity:j&&['short','long'].includes(reason)?{x:(j.end.x-j.from.x)/j.duration*speed,y:(j.end.y-j.from.y)/j.duration*speed}:{x:0,y:0}};this.events.push({type:'fall',reason});}
  pause(){if(this.paused||!['idle','charging','jumping','drowning'].includes(this.state))return false;this.cancelCharge();this.pausedAt=this.now();return true;}
  resume(){if(!this.paused)return false;this.pausedTotal+=this.now()-this.pausedAt;this.pausedAt=null;return true;}
  drainEvents(){return this.events.splice(0);}
- get needsAnimation(){return !this.paused&&(['charging','jumping','drowning'].includes(this.state)||this.state==='idle'&&(this.deadline!==null||this.fishHazard!==null||this.clock<this.cameraAt+CAMERA_MS||this.stumps.some(p=>['turtle','lotus','spinner'].includes(p.kind))||this.clock<this.landedAt+440||this.clock<this.slideUntil));}
+ get needsAnimation(){return !this.paused&&(['charging','jumping','drowning'].includes(this.state)||this.state==='idle'&&(this.deadline!==null||this.fishHazard!==null||this.clock<this.cameraAt+CAMERA_MS||this.stumps.some(p=>p.kind==='firefly'||p.anchoredAt===undefined&&['turtle','lotus','spinner','hermit'].includes(p.kind))||this.clock<this.landedAt+440||this.clock<this.slideUntil));}
  get camera(){if(this.state==='jumping'){const j=this.jump,t=clamp((this.clock-j.at)/j.duration);return j.cameraFrom+(j.cameraTo-j.cameraFrom)*t*t*(3-2*t);}const t=clamp((this.clock-this.cameraAt)/CAMERA_MS);return this.cameraFrom+(this.cameraTarget-this.cameraFrom)*smooth(t);}
  get frog(){
   if(this.state==='jumping'){

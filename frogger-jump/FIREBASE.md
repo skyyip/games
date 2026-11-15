@@ -135,3 +135,16 @@ firebase emulators:exec --only firestore --project demo-frogger --config frogger
 cd frogger-jump
 firebase deploy --only firestore:rules --project sky-playground-3c5af
 ```
+
+## 2026-11-15 青蛙幣重新定價
+
+38位動物及6位河中夥伴的購買價格已更新，完整清單見 [BALANCE.md](BALANCE.md)。須在發布新網站前部署本資料夾的最新規則，否則登入帳戶以新價格購買會被舊規則拒絕。已有收藏及現有餘額無須遷移，沒有新增集合、索引或Functions。
+
+從網站根目錄執行：
+
+```sh
+firebase login
+firebase deploy --project sky-playground-3c5af --only firestore:rules --config frogger-jump/firebase.json
+```
+
+本次檢查CLI回覆「No authorized accounts」，未替你完成正式規則部署。本機價格與規則價格的精確一致性已通過測試；部署後仍應以正式帳戶測一次購買、重載及跨裝置收藏。

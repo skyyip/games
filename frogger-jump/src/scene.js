@@ -10,18 +10,19 @@ const ANIMAL_ART={
  duck:['#f4d879','#fff3b7','#c89a45'],cat:['#d5a06d','#ffe8c9','#ad794d'],panda:['#eeeadd','#fff9eb','#babeb3'],fox:['#dc935d','#fff0d5','#b36d47'],capybara:['#b7a083','#e4ceb0','#8d775e'],mochi:['#f6eee8','#fffaf0','#e8cfc9']
 };
 export const MAX_CANVAS_PIXELS=1400000;
+export const FLIGHT_FRAMES=32,LANDING_FRAMES=10,MAX_ANIMAL_SPRITES=64;
 export class RiverScene{
  constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.width=400;this.height=500;this.pixelRatio=0;this.waterLayer=null;this.padCache=new Map();this.animalCache=new Map();this.companionCache=new Map();this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.zh=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)');}
  resize(width,height){
   width=Math.max(1,width);height=Math.max(1,height);
   const dpr=Math.min(devicePixelRatio||1,1.75,Math.sqrt(MAX_CANVAS_PIXELS/(width*height)));
   if(width===this.width&&height===this.height&&dpr===this.pixelRatio)return false;
-  const scaleChanged=dpr!==this.pixelRatio;
-  this.waterLayer?.canvas.remove?.();this.width=width;this.height=height;this.pixelRatio=dpr;this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;this.waterLayer=null;this.padCache.clear();if(scaleChanged){this.animalCache.clear();this.companionCache.clear();}return true;
+  const spriteRatio=Math.min(devicePixelRatio||1,1.5),scaleChanged=this.spriteRatio!==undefined&&spriteRatio!==this.spriteRatio;
+  this.waterLayer?.canvas.remove?.();this.width=width;this.height=height;this.pixelRatio=dpr;this.spriteRatio=spriteRatio;this.canvas.width=Math.round(width*dpr);this.canvas.height=Math.round(height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.zoom=null;this.waterLayer=null;this.padCache.clear();if(scaleChanged){this.animalCache.clear();this.companionCache.clear();}return true;
  }
  reset(){this.zoom=null;this.currentId=null;this.effect=null;this.launch=null;this.skill=null;this.padCache.clear();}
- layer(width,height){
-  const canvas=document.createElement('canvas'),dpr=this.pixelRatio||1;canvas.width=Math.ceil(width*dpr);canvas.height=Math.ceil(height*dpr);const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {canvas,ctx,width,height};
+ layer(width,height,dpr=this.pixelRatio||1){
+  const canvas=document.createElement('canvas');canvas.width=Math.ceil(width*dpr);canvas.height=Math.ceil(height*dpr);const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {canvas,ctx,width,height};
  }
  ellipse(x,y,rx,ry,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
  path(points,fill,stroke=null,line=1.5){const c=this.ctx;c.beginPath();points(c);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
@@ -36,7 +37,7 @@ export class RiverScene{
  impact(game,stump,time=game.clock){const age=time-game.landedAt;return !this.reduced.matches&&stump===game.current&&age>=0&&age<420?Math.sin(Math.PI*age/420)*Math.exp(-age/180)*3:0;}
  platformFrame(game,pad,projection,time=game.clock){
   const top=surface(pad,time),p=projection.point(top),shake=this.shake(game,pad,time),submerge=pad===game.current&&pad.sinking&&game.deadline!==null?clamp((time-game.deadline)/500):0;
-  return {top,r:top.r*projection.s,ry:top.r*projection.s*PAD_DEPTH,x:p.x+shake.x,y:p.y+shake.y+this.impact(game,pad,time)*projection.s*(pad.kind==='lily'?1.5:1)+submerge*65*projection.s,submerge};
+  return {top,r:top.r*projection.s,ry:top.r*projection.s*PAD_DEPTH,x:p.x+shake.x,y:p.y+shake.y+(this.cachingPad?0:this.impact(game,pad,time))*projection.s*(pad.kind==='lily'?1.5:1)+submerge*65*projection.s,submerge};
  }
  padContact(game,pad,offset,projection,time=game.clock){const frame=this.platformFrame(game,pad,projection,time),delta=landingOffset(frame.top,offset,pad===game.current&&!this.reduced.matches?time-game.landedAt:Infinity);return {x:frame.x+delta.x*projection.s,y:frame.y+delta.y*projection.s};}
  riderContact(game,projection,frog=game.frog){
@@ -73,15 +74,16 @@ export class RiverScene{
  // Reuse stable pad artwork; moving turtles keep their live surface position.
  stump(game,pad,index,projection){
   const age=game.clock-game.landedAt,current=pad===game.current,cacheScale=Math.max(this.zoomFrom??projection.s,this.zoomTarget??projection.s);
-  const cacheable=!['lotus','spinner'].includes(pad.kind)&&!(current&&(pad.sinking||pad.angler||age>=0&&age<650));
+  const reaction=['turtle','mushroom','duck','shell'].includes(pad.kind)&&age>=0&&age<650;
+  const cacheable=!['lotus','spinner','firefly'].includes(pad.kind)&&!(current&&(pad.sinking||pad.angler||reaction));
   if(!cacheable){this.paintPlatform(game,pad,index,projection);return;}
   const {s:liveScale,point}=projection,s=cacheScale,key=[s,index,game.targetIndex,this.zh,pad.kind,pad.r,pad.sinking,pad.thorns,pad.angler,pad.reinforced,pad.guarded,pad.kind==='shell'&&game.jump?.error<=pad.r*.25].join('|');let cached=this.padCache.get(pad.id);
   if(!cached||cached.key!==key){
    const left=Math.ceil(pad.r*s*1.35+24),top=Math.ceil(pad.r*s*.43+40),width=left*2,height=top+Math.ceil(pad.r*s*1.5+48),layer=this.layer(width,height),main=this.ctx;
-   this.ctx=layer.ctx;try{this.paintPlatform(game,pad,index,{s,point:()=>({x:left,y:top})});}finally{this.ctx=main;}
+   this.ctx=layer.ctx;this.cachingPad=true;try{this.paintPlatform(game,pad,index,{s,point:()=>({x:left,y:top})});}finally{this.ctx=main;this.cachingPad=false;}
    cached={...layer,key,left,top};this.padCache.set(pad.id,cached);
   }
-  const p=point(surface(pad,game.clock));const ratio=liveScale/s;this.ctx.drawImage(cached.canvas,p.x-cached.left*ratio,p.y-cached.top*ratio,cached.width*ratio,cached.height*ratio);
+  const p=this.platformFrame(game,pad,projection);const ratio=liveScale/s;this.ctx.drawImage(cached.canvas,p.x-cached.left*ratio,p.y-cached.top*ratio,cached.width*ratio,cached.height*ratio);
  }
  paintPlatform(game,stump,index,projection){
   if(VARIANTS.includes(stump.kind)){this.variant(game,stump,index,projection);return;}
@@ -151,6 +153,22 @@ export class RiverScene{
   }else if(kind==='spinner'){
    this.ellipse(x,y+4*s,r,ry,'#629a73','#49785f',2*s);this.ellipse(x,y,r,ry,'#add994','#49785f',2*s);
    for(let i=0;i<5;i++){const a=i*Math.PI*2/5+phase*.4;this.path(p=>{p.moveTo(x,y);p.quadraticCurveTo(x+Math.cos(a+.5)*r*.5,y+Math.sin(a+.5)*ry*.5,x+Math.cos(a)*r*.96,y+Math.sin(a)*ry*.96);},null,'#598d67',2*s);}this.ellipse(x,y,5*s,3*s,'#d7eba3');
+  }else if(kind==='hermit'){
+   for(const side of [-1,1])for(const dy of [-.5,.3])this.path(p=>{p.moveTo(x+side*r*.7,y+dy*ry);p.lineTo(x+side*r*1.05,y+dy*ry+6*s);},null,'#b5836c',3*s);
+   this.ellipse(x,y+5*s,r,ry,'#c99b7d','#836e60',2*s);this.ellipse(x,y,r,ry,'#f0d4a4','#94795e',2*s);
+   this.path(p=>{p.moveTo(x+r*.3,y);p.bezierCurveTo(x+r*.3,y-ry*.8,x-r*.5,y-ry*.7,x-r*.44,y);p.bezierCurveTo(x-r*.4,y+ry*.55,x+r*.08,y+ry*.5,x+r*.05,y);},null,'#b18d6b',2*s);
+   for(const side of [-1,1]){this.ellipse(x+side*r*.3,y+ry*.65,5*s,7*s,'#f5c1a1','#94795e',s);this.ellipse(x+side*r*.3,y+ry*.52,1.8*s,2.4*s,'#4e574a');}
+  }else if(kind==='firefly'){
+   this.ellipse(x,y+5*s,r,ry,'#578c76','#426f61',2*s);this.ellipse(x,y,r,ry,top.glowing?'#c8df94':'#91bb8c','#4e8263',2*s);
+   for(let i=0;i<5;i++){const a=i*Math.PI*2/5;this.path(p=>{p.moveTo(x,y);p.lineTo(x+Math.cos(a)*r*.78,y+Math.sin(a)*ry*.78);},null,'#6c9866',s);}
+   this.ellipse(x,y,9*s,5*s,top.glowing?'#fff4aa':'#739a78',top.glowing?'#fff9d9':'#60845f',1.5*s);
+   for(const side of [-1,1]){this.ellipse(x+side*r*.72,y-ry*.55,5*s,3*s,'#d6e9d5');this.ellipse(x+side*r*.72,y-ry*.48,2*s,4*s,top.glowing?'#ffe890':'#8f9872');}
+  }else if(kind==='beaver'){
+   this.ellipse(x,y+8*s,r,ry,'#896e51','#655d49',2*s);
+   this.ellipse(x,y,r,ry,'#c8aa77','#816c50',2*s);
+   for(const d of [-.5,0,.5])this.path(p=>{p.moveTo(x-r*.82,y+d*ry);p.lineTo(x+r*.82,y+d*ry);},null,'#a58a60',1.5*s);
+   for(const side of [-1,1])this.path(p=>{p.moveTo(x+side*r*.65,y-ry*.55);p.lineTo(x+side*r*.65,y+ry*.55);},null,'#e1cb9b',3*s);
+   const bx=x-r*.79,by=y-ry*.65;this.ellipse(bx,by,11*s,10*s,'#b99471','#6d6550',1.3*s);for(const side of [-1,1]){this.ellipse(bx+side*7*s,by-7*s,3*s,3*s,'#c6a37d');this.ellipse(bx+side*4*s,by-1*s,1.5*s,2*s,'#4b5548');}this.ellipse(bx,by+4*s,5*s,3*s,'#efe0bc');
   }else if(kind==='shell'){
    const open=landed?Math.min(1,age/400):.15;
    this.ellipse(x,y-ry*(.15+open*.4),r,ry*(1+open*.5),'#e7bed9','#9b789d',2*s);
@@ -165,15 +183,15 @@ export class RiverScene{
  animal(x,y,scale,kind,pose={}){
   // A bounded phase atlas: continuous transforms are cheap; full vector art is cached.
   const motion=motionFor(kind);let stage='idle',frame=0,quantized={};
-  if(pose.airborne){stage='flight';frame=Math.round((pose.flightPhase??.5)*23);const t=frame/23;quantized={squat:.5*(1-clamp(t/.18)),stretch:Math.sin(Math.PI*t)*.8,kick:Math.sin(Math.PI*clamp(t/.4))*motion.kick,tuck:Math.sin(Math.PI*clamp((t-.18)/.64)),reach:Math.sin(Math.PI*clamp((t-.65)/.35)),lean:Math.sin(Math.PI*t)*motion.sway,airborne:true};}
+  if(pose.airborne){stage='flight';frame=Math.round(clamp(pose.flightPhase??.5)*(FLIGHT_FRAMES-1));const t=frame/(FLIGHT_FRAMES-1);quantized={squat:.5*(1-clamp(t/.18)),stretch:Math.sin(Math.PI*t)*.8,kick:Math.sin(Math.PI*clamp(t/.4))*motion.kick,tuck:Math.sin(Math.PI*clamp((t-.18)/.64)),reach:Math.sin(Math.PI*clamp((t-.65)/.35)),lean:Math.sin(Math.PI*t)*motion.sway,airborne:true};}
   else if(pose.fall){stage='fall';frame=Math.round(pose.fall*7);quantized={fall:frame/7,lean:(pose.direction==='long'?1:-1)*frame*.065,airborne:true};}
-  else if(pose.landingPhase!==null&&pose.landingPhase!==undefined){stage='land';frame=Math.round(pose.landingPhase*5);quantized={squat:Math.sin(Math.PI*frame/5)*.5*motion.settle,blink:frame<2?.6:0};}
+  else if(pose.landingPhase!==null&&pose.landingPhase!==undefined){stage='land';frame=Math.round(clamp(pose.landingPhase)*(LANDING_FRAMES-1));quantized={squat:Math.sin(Math.PI*frame/(LANDING_FRAMES-1))*.5*motion.settle,blink:frame<3?.6:0};}
   else{frame=Math.round((pose.squat||0)*7);stage=frame?'charge':'idle';quantized={squat:frame/7*motion.spring};}
   if(pose.anchorFeet)quantized.noShadow=true;const key=kind+'|'+stage+'|'+frame+(stage==='fall'?'|'+pose.direction:'')+(pose.anchorFeet?'|feet':'');let sprite=this.animalCache.get(key);
   if(!sprite){
-   sprite=this.layer(128,144);sprite.sole=pose.anchorFeet?soleOffset(kind,quantized):0;const previous=this.ctx;this.ctx=sprite.ctx;
+   sprite=this.layer(128,144,this.spriteRatio??Math.min(devicePixelRatio||1,1.5));sprite.sole=pose.anchorFeet?soleOffset(kind,quantized):0;const previous=this.ctx;this.ctx=sprite.ctx;
    try{this.paintAnimal(64,100,1,kind,quantized);}finally{this.ctx=previous;}
-   if(this.animalCache.size>=48)this.animalCache.delete(this.animalCache.keys().next().value);
+   if(this.animalCache.size>=MAX_ANIMAL_SPRITES)this.animalCache.delete(this.animalCache.keys().next().value);
    this.animalCache.set(key,sprite);
   }
   // Keep frequently reused charge/idle poses hot when jump poses fill the cache.
@@ -182,7 +200,7 @@ export class RiverScene{
  }
  paintRiverCompanion(x,y,scale,id){paintRiverCompanion(this,x,y,scale,id);}
  riverCompanion(game,projection){if(!game.companion)return;let sprite=this.companionCache.get(game.companion);if(!sprite){sprite=this.layer(100,80);const prev=this.ctx;this.ctx=sprite.ctx;try{paintRiverCompanion(this,50,40,1,game.companion);}finally{this.ctx=prev;}this.companionCache.set(game.companion,sprite);}const {s,point}=projection,p=point(game.current),c=this.ctx;c.save();c.globalAlpha=game.companionReady?.85:.35;c.drawImage(sprite.canvas,p.x-110*s,p.y-10*s,75*s,60*s);c.restore();}
- prepareAnimal(kind){for(let i=0;i<24;i++)this.animal(-1000,-1000,1,kind,{airborne:true,flightPhase:i/23,anchorFeet:true});for(let i=0;i<8;i++)this.animal(-1000,-1000,1,kind,{squat:i/7,anchorFeet:true});for(let i=0;i<6;i++)this.animal(-1000,-1000,1,kind,{landingPhase:i/5,anchorFeet:true});}
+ prepareAnimal(kind){for(const key of this.animalCache.keys())if(!key.startsWith(kind+'|'))this.animalCache.delete(key);for(let i=0;i<FLIGHT_FRAMES;i++)this.animal(-1000,-1000,1,kind,{airborne:true,flightPhase:i/(FLIGHT_FRAMES-1),anchorFeet:true});for(let i=0;i<8;i++)this.animal(-1000,-1000,1,kind,{squat:i/7,anchorFeet:true});for(let i=0;i<LANDING_FRAMES;i++)this.animal(-1000,-1000,1,kind,{landingPhase:i/(LANDING_FRAMES-1),anchorFeet:true});}
  paintAnimal(x,y,scale,kind,pose){
   if(NEW_FRIENDS.has(kind)){paintNewFriend(this,x,y,scale,kind,pose);return;}
   if(kind==='frog'){this.frog(x,y,scale,pose);return;}
