@@ -1,7 +1,8 @@
 import {hkDay,newRun,act,SUPPORTED_BANK_VERSIONS} from './game.js';
-const KEY='sky.hk-millionaire.today.v1';
-// revision 0 / run null is the old client's pre-write reservation, not proof of a cloud run.
-export const pendingAccount=entry=>!!entry&&entry.owner!=='guest'&&entry.run===null&&entry.revision===0&&entry.state!=='confirmed';
+import {DAILY_KEY} from './schema.js';
+const KEY=DAILY_KEY;
+// A local reservation does not prove that a cloud run was created.
+export const pendingAccount=entry=>!!entry&&entry.owner!=='guest'&&entry.run===null&&entry.revision===0&&entry.state==='pending';
 const core=({accounts,...entry})=>entry;
 function markers(record){const all=new Map(Object.entries(record?.accounts??{}));if(record?.owner&&record.owner!=='guest')all.set(record.owner,core(record));return all;}
 function activate(all,entry){const others=new Map(all);others.delete(entry.owner);return {...core(entry),...(others.size?{accounts:Object.fromEntries(others)}:{})};}

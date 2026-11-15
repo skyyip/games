@@ -4,10 +4,10 @@ import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {hkDay,dayEnd,questionFor,newRun,act,LEGACY_BANK_VERSION,BANK_VERSION} from '../src/game.js';
+import {hkDay,dayEnd,questionFor,newRun,act,BANK_VERSION} from '../src/game.js';
 const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
 const dir=await mkdtemp(join(tmpdir(),'hkm-cloud-')),NOW=Date.UTC(2026,10,14,4),nativeNow=Date.now;
-const qa=globalThis.__HKM_CLOUD_QA={now:NOW,uid:'qa-account-0001',data:new Map(),calls:[],tail:Promise.resolve(),allowedBanks:[BANK_VERSION,LEGACY_BANK_VERSION]};
+const qa=globalThis.__HKM_CLOUD_QA={now:NOW,uid:'qa-account-0001',data:new Map(),calls:[],tail:Promise.resolve(),allowedBanks:[BANK_VERSION]};
 Date.now=()=>qa.now;
 const sdk=`
 const q=globalThis.__HKM_CLOUD_QA;
@@ -25,7 +25,7 @@ export function serverTimestamp(){return {__server:true};}export async function 
 export async function getDocFromServer(ref){q.calls.push({kind:'server-read',ref});if(q.failServerRead){q.failServerRead--;throw {code:'unavailable'};}return snap(ref);}
 export async function updateDoc(ref,patch){q.data.set(ref,{...q.data.get(ref),...resolve(patch)});}
 function patched(old,patch){const value=copy(old);for(const [key,item]of Object.entries(resolve(patch))){const parts=key.split('.');let map=value;for(const name of parts.slice(0,-1))map=map[name]??={};map[parts.at(-1)]=item;}return value;}
-export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);if(q.failCommit||q.failSettlement&&writes.some(w=>w.ref.startsWith('hkm_results/')))throw {code:'permission-denied'};for(const w of writes)if(w.value.bankVersion&&!q.allowedBanks.includes(w.value.bankVersion))throw {code:'permission-denied'};for(const w of writes)q.data.set(w.ref,w.update?patched(q.data.get(w.ref),w.value):resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
+export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);if(q.failCommit||q.failSettlement&&writes.some(w=>w.ref.startsWith('hkm_v4_results/')))throw {code:'permission-denied'};for(const w of writes)if(w.value.bankVersion&&!q.allowedBanks.includes(w.value.bankVersion))throw {code:'permission-denied'};for(const w of writes)q.data.set(w.ref,w.update?patched(q.data.get(w.ref),w.value):resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
 export const where=(key,op,value)=>({kind:'where',key,op,value}),orderBy=(key,dir='asc')=>({kind:'order',key,dir}),limit=value=>({kind:'limit',value}),query=(path,...clauses)=>({path,clauses});
 export async function getDocs(query){let rows=[...q.data].filter(([key])=>key.startsWith(query.path+'/')&&key.split('/').length===query.path.split('/').length+1).map(([path,data])=>({path,data}));for(const c of query.clauses.filter(c=>c.kind==='where'))rows=rows.filter(r=>r.data[c.key]===c.value);const sorts=query.clauses.filter(c=>c.kind==='order');rows.sort((a,b)=>{for(const s of sorts){const av=a.data[s.key]?.toMillis?.()??a.data[s.key],bv=b.data[s.key]?.toMillis?.()??b.data[s.key];if(av!==bv)return(av<bv?-1:1)*(s.dir==='desc'?-1:1);}return 0;});rows=rows.slice(0,query.clauses.find(c=>c.kind==='limit')?.value??rows.length);return {docs:rows.map(r=>snap(r.path))};}
 export async function signInWithEmailAndPassword(auth,email,password){q.calls.push({kind:'email',email,password});return {user:auth.currentUser};}
@@ -41,11 +41,11 @@ try{
  const outfile=join(dir,'cloud.mjs');await build({entryPoints:[new URL('../src/cloud.js',import.meta.url).pathname],bundle:true,platform:'node',format:'esm',outfile,plugins:[{name:'test-sdk',setup(b){b.onResolve({filter:/^firebase\//},()=>({path:join(dir,'sdk.mjs')}));}}]});
  const cloud=await import(pathToFileURL(outfile));await cloud.prepareAuth();const app=qa.calls.find(c=>c.kind==='app');assert.equal(app.name,'hk-millionaire');assert.equal(app.config.projectId,'sky-playground-millionaire');assert.equal(app.config.apiKey.length,39);checks++;
  let profile=await cloud.account();assert.equal(profile.total,0);assert(!profile.displayName.includes('@'));await cloud.saveName('測試香港通');assert.equal((await cloud.account()).displayName,'測試香港通');checks++;
- // Reproduce the published v1-only bank gate: the v2 transaction must fail atomically.
- qa.allowedBanks=[LEGACY_BANK_VERSION];await assert.rejects(()=>cloud.claimDaily(),error=>error.code==='permission-denied');
+ // Reproduce the retired bank gate: the v4 transaction must fail atomically.
+ qa.allowedBanks=['hk-2026-11-v3'];await assert.rejects(()=>cloud.claimDaily(),error=>error.code==='permission-denied');
  assert.equal((await cloud.account()).activeDay,null);assert.equal(await cloud.currentRun(hkDay(),{server:true}),null);
- assert(qa.calls.some(c=>c.kind==='server-read'));assert(cloud.errorText({code:'permission-denied'}).includes('v1／v2'));checks++;
- qa.allowedBanks=[LEGACY_BANK_VERSION,BANK_VERSION];
+ assert(qa.calls.some(c=>c.kind==='server-read'));assert(cloud.errorText({code:'permission-denied'}).includes('作答驗證'));checks++;
+ qa.allowedBanks=[BANK_VERSION];
  let r=await cloud.claimDaily();assert.equal(r.questionAt,NOW);assert.equal(r.seen.length,0);assert.equal((await cloud.claimDaily()).startedAt,r.startedAt);checks++;
  const at=r.questionAt;for(const kind of ['half','phone','audience']){qa.now+=100;r=await cloud.move(r.day,{type:'life',kind});assert.equal(r.questionAt,at);await assert.rejects(()=>cloud.move(r.day,{type:'life',kind}),/life-used/);}checks++;
  const firstExpected={index:r.index,phase:r.phase,questionAt:r.questionAt};qa.failCommit=true;
@@ -64,9 +64,9 @@ try{
  // Next day: an ordinary wrong result adds only the applicable insurance to lifetime/month totals.
  qa.now=dayEnd(r.day)+1000;r=await cloud.claimDaily();for(let i=0;i<10;i++){qa.now+=1000;r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});qa.now+=200;r=await cloud.move(r.day,{type:'next'});}qa.now+=1000;r=await cloud.move(r.day,{type:'answer',choice:(questionFor(r).answer+1)%4});assert.equal(r.payout,60000);assert.equal((await cloud.account()).total,1060000);assert.equal((await cloud.leaderboard('season'))[0].total,1060000);checks++;
  // Leave an incorrect terminal reveal before midnight, then reconnect the following day.
- qa.now=dayEnd(r.day)+1000;r=await cloud.claimDaily();for(let i=0;i<6;i++){qa.now+=500;r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});qa.now+=100;r=await cloud.move(r.day,{type:'next'});}const waiting=act(r,{type:'answer',choice:(questionFor(r).answer+1)%4},qa.now+100,{autoFinish:false});const path='hkm_players/'+qa.uid+'/runs/'+r.day;qa.data.set(path,waiting);qa.now=dayEnd(r.day)+1000;await cloud.resumeAccount();const failed=await cloud.currentRun(r.day);assert.equal(failed.reason,'wrong');assert.equal(failed.payout,8000);checks++;
+ qa.now=dayEnd(r.day)+1000;r=await cloud.claimDaily();for(let i=0;i<6;i++){qa.now+=500;r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});qa.now+=100;r=await cloud.move(r.day,{type:'next'});}const waiting=act(r,{type:'answer',choice:(questionFor(r).answer+1)%4},qa.now+100,{autoFinish:false});const path='hkm_v4_players/'+qa.uid+'/runs/'+r.day;qa.data.set(path,waiting);qa.now=dayEnd(r.day)+1000;await cloud.resumeAccount();const failed=await cloud.currentRun(r.day);assert.equal(failed.reason,'wrong');assert.equal(failed.payout,8000);checks++;
  // A full win waiting for settlement must still finish as complete after midnight.
- r=await cloud.claimDaily();for(let i=0;i<15;i++){r=act(r,{type:'answer',choice:questionFor(r).answer},qa.now+100,{autoFinish:false});if(i<14)r=act(r,{type:'next'},qa.now+200);}qa.data.set('hkm_players/'+qa.uid+'/runs/'+r.day,r);qa.now=dayEnd(r.day)+1000;await cloud.resumeAccount();assert.equal((await cloud.currentRun(r.day)).reason,'complete');checks++;
+ r=await cloud.claimDaily();for(let i=0;i<15;i++){r=act(r,{type:'answer',choice:questionFor(r).answer},qa.now+100,{autoFinish:false});if(i<14)r=act(r,{type:'next'},qa.now+200);}qa.data.set('hkm_v4_players/'+qa.uid+'/runs/'+r.day,r);qa.now=dayEnd(r.day)+1000;await cloud.resumeAccount();assert.equal((await cloud.currentRun(r.day)).reason,'complete');checks++;
  // A timed-out unfinished question settles on resume, rather than resetting its deadline.
  r=await cloud.claimDaily();qa.now=r.questionAt+20001;const resumed=await cloud.resumeAccount();assert.equal(resumed.run.reason,'timeout');assert.equal(resumed.run.payout,0);checks++;
  // First-answer loss: persist the answer, retain its reveal when settlement is rejected, then settle once.

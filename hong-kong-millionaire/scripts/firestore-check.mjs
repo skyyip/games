@@ -1,31 +1,68 @@
-// Run only inside `firebase emulators:exec --project demo-hk-millionaire --only firestore`.
+// Actual production transition payloads, executed only against a demo Firestore Emulator.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc,getDoc,setDoc,updateDoc,writeBatch,serverTimestamp,collection,getDocs,query,limit} from 'firebase/firestore';
+import {doc,getDoc,setDoc,updateDoc,writeBatch,serverTimestamp,Timestamp,collection,getDocs,query,limit} from 'firebase/firestore';
 import {newRun,act,questionFor,hkDay,spent,nextProfile,livesLeft} from '../src/game.js';
-if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('No emulator: run firebase emulators:exec as documented; never run against production.');
+import {normalizeRun,transitionPatch} from '../src/cloud-transition.js';
+import {COLLECTIONS as C} from '../src/schema.js';
+if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('Run with firebase emulators:exec; no production access.');
 const env=await initializeTestEnvironment({projectId:'demo-hk-millionaire',firestore:{rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
-const uid='rules-player',db=env.authenticatedContext(uid).firestore(),other=env.authenticatedContext('other').firestore(),anon=env.unauthenticatedContext().firestore();
-const pRef=doc(db,'hkm_players',uid),day=hkDay(),rRef=doc(db,'hkm_players',uid,'runs',String(day));let checks=0;
-const num=v=>{const n=v?.toMillis?.()??v;return typeof n==='number'?Math.floor(n):n;};
-const normalize=raw=>({...raw,...Object.fromEntries(['startedAt','questionAt','answerAt','endedAt','updatedAt'].map(k=>[k,num(raw[k])])),answers:Object.fromEntries(Object.entries(raw.answers).map(([k,a])=>[k,{...a,startedAt:num(a.startedAt),answeredAt:num(a.answeredAt)}]))});
-async function read(){return normalize((await getDoc(rRef)).data());}
-try{
- await env.clearFirestore();const stamp=serverTimestamp();
+const other=env.authenticatedContext('other').firestore(),anon=env.unauthenticatedContext().firestore();
+let checks=0;
+async function begin(uid){
+ const db=env.authenticatedContext(uid).firestore(),day=hkDay(),pRef=doc(db,C.players,uid),rRef=doc(db,C.players,uid,'runs',String(day)),stamp=serverTimestamp();
  await assertSucceeds(setDoc(pRef,{uid,displayName:'規則測試街坊',total:0,bestPrize:0,games:0,titles:[],unlocked:[],wrong:[],favourites:[],activeDay:null,lastSettledDay:null,createdAt:stamp,updatedAt:stamp}));checks++;
- await assertFails(getDoc(doc(other,'hkm_players',uid)));await assertFails(getDoc(doc(anon,'hkm_players',uid)));await assertFails(updateDoc(pRef,{total:1000000,updatedAt:serverTimestamp()}));checks+=3;
- let run=newRun(day,Date.now(),uid);const start=writeBatch(db);start.set(rRef,{...run,startedAt:serverTimestamp(),questionAt:serverTimestamp(),updatedAt:serverTimestamp()});start.update(pRef,{activeDay:day,updatedAt:serverTimestamp()});await assertSucceeds(start.commit());checks++;
- await assertFails(setDoc(rRef,{...run,startedAt:serverTimestamp(),questionAt:serverTimestamp(),updatedAt:serverTimestamp()}));await assertFails(updateDoc(rRef,{index:14,correct:14,updatedAt:serverTimestamp()}));checks+=2;
- await assertSucceeds(updateDoc(rRef,{halfFor:0,updatedAt:serverTimestamp()}));await assertFails(updateDoc(rRef,{halfFor:-1,updatedAt:serverTimestamp()}));checks+=2;
- for(let i=0;i<15;i++){
-  const raw=(await getDoc(rRef)).data();run=normalize(raw);const next=act(run,{type:'answer',choice:questionFor(run).answer},Date.now(),{autoFinish:false});
-  await assertSucceeds(updateDoc(rRef,{phase:'reveal',correct:next.correct,answerAt:serverTimestamp(),updatedAt:serverTimestamp(),outcome:next.outcome,choice:next.choice,seen:next.seen,answers:{...raw.answers,[i]:{...next.answers[i],startedAt:raw.questionAt,answeredAt:serverTimestamp()}}}));
-  if(i<14){run=await read();await assertSucceeds(updateDoc(rRef,{phase:'playing',index:i+1,timeMs:spent(run),questionAt:serverTimestamp(),answerAt:null,outcome:'',choice:-1,updatedAt:serverTimestamp()}));}
- }checks+=29;
- run=await read();const profile=(await getDoc(pRef)).data(),done=act(run,{type:'finish'},Date.now()),next=nextProfile(profile,done),seasonRef=doc(db,'hkm_seasons',uid+'_'+run.season),resultRef=doc(db,'hkm_results',uid+'_'+day),rankRef=doc(db,'hkm_rankings',uid);
- await assertFails(setDoc(resultRef,{uid,day,displayName:profile.displayName,prize:1000000,timeMs:done.timeMs,lifelinesLeft:2,correct:15,reason:'complete',completedAt:serverTimestamp()}));checks++;
- const batch=writeBatch(db);batch.update(rRef,{phase:'finished',timeMs:done.timeMs,payout:1000000,reason:'complete',endedAt:serverTimestamp(),updatedAt:serverTimestamp()});batch.update(pRef,{total:next.total,bestPrize:next.bestPrize,games:next.games,titles:next.titles,unlocked:next.unlocked,wrong:next.wrong,activeDay:null,lastSettledDay:day,updatedAt:serverTimestamp()});batch.set(resultRef,{uid,day,displayName:profile.displayName,prize:done.payout,timeMs:done.timeMs,lifelinesLeft:livesLeft(done),correct:15,reason:'complete',completedAt:serverTimestamp()});batch.set(rankRef,{uid,displayName:profile.displayName,total:next.total,bestPrize:next.bestPrize,games:next.games,updatedAt:serverTimestamp()});batch.set(seasonRef,{uid,season:run.season,displayName:profile.displayName,total:done.payout,bestPrize:done.payout,games:1,updatedAt:serverTimestamp()});await assertSucceeds(batch.commit());checks++;
- assert.equal((await getDoc(pRef)).data().total,1000000);await assertFails(updateDoc(pRef,{total:2000000,games:2,updatedAt:serverTimestamp()}));await assertFails(updateDoc(resultRef,{prize:2000000}));await assertSucceeds(getDocs(query(collection(anon,'hkm_results'),limit(20))));await assertFails(getDocs(collection(anon,'hkm_results')));checks+=4;
- console.log(JSON.stringify({checks,project:'demo-hk-millionaire',rules:'compiled and executed by Firestore Emulator'}));
+ const run=newRun(day,Date.now(),uid),batch=writeBatch(db);batch.set(rRef,{...run,startedAt:stamp,questionAt:stamp,updatedAt:stamp});batch.update(pRef,{activeDay:day,updatedAt:stamp});await assertSucceeds(batch.commit());checks++;
+ return {uid,db,day,pRef,rRef};
+}
+async function raw(a){return (await getDoc(a.rRef)).data();}
+async function move(a,action){const before=await raw(a),patch=transitionPatch(before,action,Date.now(),serverTimestamp);if(patch)await assertSucceeds(updateDoc(a.rRef,patch));checks++;return normalizeRun(await raw(a));}
+async function settle(a){
+ const run=normalizeRun(await raw(a)),profile=(await getDoc(a.pRef)).data(),done=act(run,{type:'finish'},Date.now()),p=nextProfile(profile,done),stamp=serverTimestamp();
+ const seasonRef=doc(a.db,C.seasons,a.uid+'_'+run.season),previous=(await getDoc(seasonRef)).data()??{total:0,bestPrize:0,games:0};
+ const batch=writeBatch(a.db);
+ batch.update(a.rRef,{phase:'finished',timeMs:done.timeMs,payout:done.payout,reason:done.reason,endedAt:stamp,updatedAt:stamp});
+ batch.update(a.pRef,{total:p.total,bestPrize:p.bestPrize,games:p.games,titles:p.titles,unlocked:p.unlocked,wrong:p.wrong,activeDay:null,lastSettledDay:a.day,updatedAt:stamp});
+ batch.set(doc(a.db,C.results,a.uid+'_'+a.day),{uid:a.uid,day:a.day,displayName:profile.displayName,prize:done.payout,timeMs:done.timeMs,lifelinesLeft:livesLeft(done),correct:done.correct,reason:done.reason,completedAt:stamp});
+ batch.set(doc(a.db,C.rankings,a.uid),{uid:a.uid,displayName:profile.displayName,total:p.total,bestPrize:p.bestPrize,games:p.games,updatedAt:stamp});
+ batch.set(seasonRef,{uid:a.uid,season:run.season,displayName:profile.displayName,total:previous.total+done.payout,bestPrize:Math.max(previous.bestPrize,done.payout),games:previous.games+1,updatedAt:stamp});
+ await assertSucceeds(batch.commit());checks++;return done;
+}
+try{
+ await env.clearFirestore();const a=await begin('rules-player');
+ await assertFails(getDoc(doc(other,C.players,a.uid)));await assertFails(getDoc(doc(anon,C.players,a.uid)));await assertFails(updateDoc(a.pRef,{total:1000000,updatedAt:serverTimestamp()}));checks+=3;
+ await assertFails(updateDoc(a.rRef,{index:14,correct:14,updatedAt:serverTimestamp()}));await assertFails(updateDoc(a.pRef,{activeDay:null,updatedAt:serverTimestamp()}));checks+=2;
+ const initial=await raw(a),old=normalizeRun(initial),good=transitionPatch(initial,{type:'answer',choice:questionFor(old).answer},Date.now(),serverTimestamp);
+ for(const patch of [
+  {...good,correct:15},
+  {...good,uid:'other'},
+  {...good,questionAt:serverTimestamp()},
+  {...good,payout:1000000},
+  {...good,'answers.0':{...good['answers.0'],qid:'forged'}},
+  {...good,'answers.0':{...good['answers.0'],startedAt:Timestamp.fromMillis(0)}},
+  {...good,answerAt:Timestamp.fromMillis(0)},
+ ]){await assertFails(updateDoc(a.rRef,patch));checks++;}
+ for(const kind of ['half','phone','audience'])await move(a,{type:'life',kind});
+ assert.equal((await raw(a)).questionAt.isEqual(initial.questionAt),true);checks++;
+ await assertFails(updateDoc(a.rRef,{halfFor:-1,updatedAt:serverTimestamp()}));checks++;
+ console.log('Rules regression: submitting the first correct answer with the production payload.');
+ let run=await move(a,{type:'answer',choice:questionFor(old).answer});assert.equal(run.correct,1);assert.equal(run.phase,'reveal');checks++;
+ await assertFails(updateDoc(a.rRef,good));checks++;
+ for(let i=1;i<15;i++){run=await move(a,{type:'next'});run=await move(a,{type:'answer',choice:questionFor(run).answer});assert.equal(run.correct,i+1);checks++;}
+ await assertFails(setDoc(doc(a.db,C.results,a.uid+'_'+a.day),{uid:a.uid,day:a.day,displayName:'偽造',prize:1000000,timeMs:0,lifelinesLeft:3,correct:15,reason:'complete',completedAt:serverTimestamp()}));checks++;
+ console.log('Rules regression: atomic run/profile/daily/ranking/season settlement.');
+ const won=await settle(a);assert.equal(won.payout,1000000);assert.equal((await getDoc(a.pRef)).data().total,1000000);checks++;
+ await assertFails(updateDoc(a.pRef,{total:2000000,games:2,updatedAt:serverTimestamp()}));await assertFails(updateDoc(a.rRef,{phase:'playing',updatedAt:serverTimestamp()}));checks+=2;
+ await assertSucceeds(getDocs(query(collection(anon,C.results),limit(20))));await assertFails(getDocs(collection(anon,C.results)));checks+=2;
+ // Both first-answer failure and voluntary exit must use the same protected transition and settlement.
+ for(const type of ['wrong','walk','timeout']){
+  const b=await begin('rules-'+type);
+  if(type==='timeout')await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),C.players,b.uid,'runs',String(b.day)),{questionAt:Timestamp.fromMillis(Date.now()-21000),startedAt:Timestamp.fromMillis(Date.now()-22000)});});
+  const r=normalizeRun(await raw(b));await move(b,type==='wrong'?{type:'answer',choice:(questionFor(r).answer+1)%4}:{type});
+  const done=await settle(b);assert.equal(done.reason,type);assert.equal(done.payout,0);assert.equal((await getDoc(b.pRef)).data().games,1);checks+=3;
+ }
+ // The new release does not read or write the retired data namespace.
+ await assertFails(getDoc(doc(a.db,'hkm_players',a.uid)));checks++;
+ console.log(JSON.stringify({checks,project:'demo-hk-millionaire',rules:'compiled and executed by Firestore Emulator',payload:'production transitionPatch',bank:won.bankVersion}));
 }finally{await env.cleanup();}

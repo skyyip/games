@@ -118,14 +118,14 @@ try{
   assert.equal(await state(p),null);assert(await p.evaluate(()=>hkmAuthQA.calls.some(c=>c.method==='currentRun'&&c.server)));
   await p.locator('#guest-start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'guest');await c.close();checks+=3;
  }
- // Old revision-zero reservations can recover even if unrelated account-profile loading fails.
- {const marker={day:DAY,owner:'cached-google-player',token:'old-failed-start',revision:0,run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});
+ // Pending reservations can recover even if unrelated account-profile loading fails.
+ {const marker={day:DAY,owner:'cached-google-player',token:'failed-start',revision:0,state:'pending',run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});
   await p.waitForFunction(()=>!document.querySelector('#start').disabled);assert((await p.locator('#guest-start').textContent()).includes('核實'));
   await p.locator('#guest-start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'guest');
   assert(await p.evaluate(()=>hkmAuthQA.calls.some(c=>c.method==='currentRun'&&c.server)));await c.close();checks+=3;
  }
  // If server verification is denied, never use cached absence or clear the reservation.
- {const marker={day:DAY,owner:'cached-google-player',token:'unverified-start',revision:0,run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});
+ {const marker={day:DAY,owner:'cached-google-player',token:'unverified-start',revision:0,state:'pending',run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});
   await p.waitForFunction(()=>!document.querySelector('#start').disabled);await p.evaluate(()=>hkmAuthQA.failCurrentRun=true);await p.locator('#guest-start').click();
   await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('未獲允許'));assert.equal((await state(p)).token,marker.token);assert.equal(await p.locator('#game-screen').isVisible(),false);
   await p.evaluate(()=>hkmAuthQA.failCurrentRun=false);await p.locator('#guest-start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'guest');await c.close();checks+=3;

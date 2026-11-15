@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,existsSync} from 'node:fs';import {QUESTIONS,LEGACY_QUESTIONS,V2_QUESTIONS} from '../src/questions.js';import {COMIC_QUESTIONS} from '../src/comic-questions.js';import {URBAN_QUESTIONS} from '../src/urban-questions.js';import {BANK_VERSION,LEGACY_BANK_VERSION,PREVIOUS_BANK_VERSION,QUESTION_PLANS} from '../src/game.js';import {questionShareText} from '../src/question-share.js';import {newRun,act,finish,hkDay,dayEnd,questionFor,questionId,presentation,MODES,PRIZES,insurance,earned,titleFor,remaining,limitMs,audience,removedOptions,livesLeft,shareText,nextProfile,spent} from '../src/game.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,existsSync} from 'node:fs';import {QUESTIONS} from '../src/questions.js';import {COMIC_QUESTIONS} from '../src/comic-questions.js';import {URBAN_QUESTIONS} from '../src/urban-questions.js';import {BANK_VERSION,QUESTION_PLANS} from '../src/game.js';import {questionShareText} from '../src/question-share.js';import {newRun,act,finish,hkDay,dayEnd,questionFor,questionId,presentation,MODES,PRIZES,insurance,earned,titleFor,remaining,limitMs,audience,removedOptions,livesLeft,shareText,nextProfile,spent} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
 function rig(){let now=NOW,run=newRun(DAY,now);return {get run(){return run;},step(ms){now+=ms;},answer(correct=true){run=act(run,{type:'answer',choice:(questionFor(run).answer+(correct?0:1))%4},now+=1000);return run;},next(){run=act(run,{type:'next'},now+=300);},action(a){run=act(run,a,now);return run;}};}
 test('171 factual question records have stable unique IDs, distinct choices, sources and existing artwork',()=>{assert.equal(QUESTIONS.length,171);assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,171);for(const [i,size]of [54,66,51].entries())assert.equal(QUESTIONS.filter(q=>q.tier===i+1).length,size);for(const q of QUESTIONS){assert.equal(q.options.length,4);assert.equal(new Set(q.options).size,4);assert(q.answer>=0&&q.answer<=3);assert(q.explanation&&q.hint&&q.source.label);assert.equal(new URL(q.source.url).protocol,'https:');assert(existsSync(new URL('../assets/'+q.art+'.svg',import.meta.url)));}});
@@ -13,7 +13,7 @@ test('hard questions can produce misleading simulated majorities while polls are
 test('an already wrong server reveal cannot become a richer timeout after midnight',()=>{let r=newRun(DAY,NOW);for(let i=0;i<14;i++){r=act(r,{type:'answer',choice:questionFor(r).answer},NOW+1000);r=act(r,{type:'next'},NOW+1200);}r=act(r,{type:'answer',choice:(questionFor(r).answer+1)%4},NOW+1400,{autoFinish:false});assert.equal(r.outcome,'wrong');r=act(r,{type:'timeout'},dayEnd(DAY)+1);assert.equal(r.payout,60000);assert.equal(r.reason,'wrong');});
 test('spoiler-free sharing excludes questions, option text and personal account information',()=>{const r=rig();r.answer(false);const shared=shareText(r.run,'https://sky-playground.com/games/hong-kong-millionaire/');assert(shared.includes('🟥'));assert(shared.includes('香港百萬富翁'));assert(!shared.includes(questionFor(r.run).question));for(const option of questionFor(r.run).options)assert(!shared.includes(option));});
 test('completed accounts unlock permanent culture records but no guest career profile is written by the engine',()=>{const r=rig();r.answer(false);const p={total:0,bestPrize:0,games:0,titles:[],unlocked:[],wrong:[],favourites:[],activeDay:DAY,lastSettledDay:null};const next=nextProfile(p,r.run);assert.equal(next.games,1);assert.equal(next.unlocked.length,1);assert.deepEqual(next.wrong,next.unlocked);assert.equal(next.activeDay,null);assert.deepEqual(next.titles,['ordinary']);assert.equal(p.games,0);});
-test('generated rules and indexes describe this independent game without paid functions or other game collections',()=>{const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');for(const q of QUESTIONS)assert(rules.includes('"'+q.id+'":'+q.answer));assert(!/frogger_|career_|bbl_/.test(rules));const indexes=JSON.parse(readFileSync(new URL('../firestore.indexes.json',import.meta.url)));assert.equal(indexes.indexes.length,3);assert.equal(JSON.parse(readFileSync(new URL('../.firebaserc',import.meta.url))).projects.default,'sky-playground-millionaire');});
+test('generated rules and indexes describe this independent game without paid functions or other game collections',()=>{const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');for(const pool of QUESTION_PLANS[BANK_VERSION]){assert(rules.includes(JSON.stringify(pool.ids)));assert(rules.includes(JSON.stringify(pool.ids.map(id=>QUESTIONS.find(q=>q.id===id).answer))));}assert(!/frogger_|career_|bbl_/.test(rules));const indexes=JSON.parse(readFileSync(new URL('../firestore.indexes.json',import.meta.url)));assert.equal(indexes.indexes.length,3);assert.equal(JSON.parse(readFileSync(new URL('../.firebaserc',import.meta.url))).projects.default,'sky-playground-millionaire');});
 test('a final correct answer awaiting cloud settlement stays complete across midnight',()=>{let r=newRun(DAY,NOW);for(let i=0;i<15;i++){r=act(r,{type:'answer',choice:questionFor(r).answer},NOW+1000,{autoFinish:false});if(i<14)r=act(r,{type:'next'},NOW+1200);}const done=act(r,{type:'timeout'},dayEnd(DAY)+1);assert.equal(done.reason,'complete');assert.equal(done.payout,1000000);});
 
 test('expanded pools reach every question and never repeat within a daily plan',()=>{
@@ -25,21 +25,10 @@ test('expanded pools reach every question and never repeat within a daily plan',
  }
  assert.equal(seen.size,QUESTIONS.length);for(const q of URBAN_QUESTIONS)assert(seen.has(q.id));
 });
-test('v1 saved runs keep all original questions and can still finish after the expansion',()=>{
- for(let day=DAY;day<DAY+60;day++)for(let index=0;index<15;index++){
-  const tier=Math.floor(index/5),pool=LEGACY_QUESTIONS.filter(q=>q.tier===tier+1);
-  assert.equal(questionId(day,index,LEGACY_BANK_VERSION),pool[(day*17+(index%5)*7+tier*11)%30].id);
- }
- let run={...newRun(DAY,NOW),bankVersion:LEGACY_BANK_VERSION};
- for(let i=0;i<15;i++){const q=questionFor(run);assert(LEGACY_QUESTIONS.includes(q));assert.deepEqual(presentation(DAY,i,LEGACY_BANK_VERSION).order,[0,1,2,3].map(n=>(n+(DAY+i)%4)%4));run=act(run,{type:'answer',choice:q.answer},NOW+1000+i*1000);if(i<14)run=act(run,{type:'next'},NOW+1100+i*1000);}
- assert.equal(run.payout,1000000);assert.equal(run.bankVersion,LEGACY_BANK_VERSION);assert.equal(newRun(DAY,NOW).bankVersion,BANK_VERSION);
- assert.throws(()=>questionId(DAY,0,'unknown'),/bank-version/);
-});
-test('rules allow expanded collections and retain both immutable question plans',()=>{
- const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
- assert(rules.includes('p.unlocked.size() <= '+QUESTIONS.length));
- for(const [version,pools]of Object.entries(QUESTION_PLANS)){assert(rules.includes(version));for(const pool of pools)assert(rules.includes(JSON.stringify(pool.ids)));}
- assert(rules.includes('qid(old.day,old.index,old.bankVersion)'));
+test('rules accept only the fresh bank and use the isolated current collections',()=>{
+ const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');assert(rules.includes('p.unlocked.size()<='+QUESTIONS.length));
+ assert(rules.includes(BANK_VERSION));for(const pool of QUESTION_PLANS[BANK_VERSION])assert(rules.includes(JSON.stringify(pool.ids)));
+ assert(rules.includes('question(o.day,o.index)'));assert(rules.includes('hkm_v4_players'));assert(!/hk-2026-11-v[123]/.test(rules));
 });
 test('question sharing is deliberate and contains no answer key, explanation, hint or account data',()=>{
  const q={...URBAN_QUESTIONS[7],explanation:'PRIVATE_EXPLANATION',hint:'PRIVATE_HINT',answer:3,uid:'PRIVATE_UID'};
@@ -58,12 +47,10 @@ test('all 67 supplied topics have a distinct integrated comic question and a doc
  }
  assert(Math.max(...positions)-Math.min(...positions)<=1);
 });
-test('the 104-question v2 schedule is immutable after adding the 67 comic questions',()=>{
- assert.equal(V2_QUESTIONS.length,104);const sizes=[35,36,33],slots=[8,7,7];
- for(let day=DAY;day<DAY+180;day++)for(let index=0;index<15;index++){
-  const tier=Math.floor(index/5),pool=V2_QUESTIONS.filter(q=>q.tier===tier+1);
-  assert.equal(questionId(day,index,PREVIOUS_BANK_VERSION),pool[(day*17+(index%5)*slots[tier]+tier*11)%sizes[tier]].id);
+test('new games accept only v4 and reject retired run snapshots',()=>{
+ assert.equal(newRun(DAY,NOW).bankVersion,'hk-2026-11-v4');assert.deepEqual(Object.keys(QUESTION_PLANS),['hk-2026-11-v4']);
+ for(const bankVersion of ['hk-2026-11-v1','hk-2026-11-v2','hk-2026-11-v3']){
+  assert.throws(()=>act({...newRun(DAY,NOW),bankVersion},{type:'walk'},NOW),/bank-version/);
+  assert.throws(()=>questionId(DAY,0,bankVersion),/bank-version/);
  }
- let run={...newRun(DAY,NOW),bankVersion:PREVIOUS_BANK_VERSION};for(let i=0;i<15;i++){run=act(run,{type:'answer',choice:questionFor(run).answer},NOW+1000+i*1000);if(i<14)run=act(run,{type:'next'},NOW+1100+i*1000);}
- assert.equal(run.payout,1000000);assert.equal(run.bankVersion,PREVIOUS_BANK_VERSION);assert.equal(newRun(DAY,NOW).bankVersion,'hk-2026-11-v3');
 });

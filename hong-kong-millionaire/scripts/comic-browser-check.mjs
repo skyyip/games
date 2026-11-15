@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {COMIC_QUESTIONS} from '../src/comic-questions.js';
-import {newRun,act,hkDay,questionId,questionFor,presentation,PREVIOUS_BANK_VERSION,DAY_MS,HK_OFFSET} from '../src/game.js';
+import {newRun,act,hkDay,questionId,questionFor,presentation,DAY_MS,HK_OFFSET} from '../src/game.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL||'http://127.0.0.1:5444/games/hong-kong-millionaire/';
-const built=process.env.HKM_BUILD_DIR||'/tmp/games-built-comic-edition',KEY='sky.hk-millionaire.today.v1',DAY=hkDay(Date.UTC(2026,10,15,4));
+const built=process.env.HKM_BUILD_DIR||'/tmp/games-built-comic-edition',KEY='sky.hk-millionaire.today.v4',DAY=hkDay(Date.UTC(2026,10,15,4));
 const manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8'));
 const browser=await chromium.launch({headless:true}),errors=[],badResponses=[];let checks=0;
 function planned(day,index,version){
@@ -40,12 +40,6 @@ try{
   const after=await p.evaluate(key=>JSON.parse(localStorage.getItem(key)).run,KEY);assert.equal(after.answers[value.run.index].qid,q.id);assert.equal(after.answers[value.run.index].outcome,'correct');
   if([1,9,18,35,54,55,61,65].includes(q.sourceNumber))await p.screenshot({path:'/tmp/hkm-comic-'+q.id+'.png',fullPage:true});checks+=5;
  }
- // A v2 guest save can still answer its original question and retain its bank version.
- const previous=planned(DAY,6,PREVIOUS_BANK_VERSION);await seed(previous);const oldQ=questionFor(previous.run);
- assert.equal(await p.locator('#question-title').textContent(),presentation(DAY,6,PREVIOUS_BANK_VERSION).mode==='text'?(oldQ.textQuestion??oldQ.question):oldQ.question);
- await p.locator(`[data-choice="${oldQ.answer}"]`).click();await p.locator('#confirm-answer').click();
- await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key)).run.phase==='reveal',KEY);
- assert.equal(await p.evaluate(key=>JSON.parse(localStorage.getItem(key)).run.bankVersion,KEY),PREVIOUS_BANK_VERSION);checks+=2;
  // Comic sharing remains deliberate and carries neither answer key nor explanation.
  const q=COMIC_QUESTIONS[34];let match;
  for(let day=DAY;day<DAY+180&&!match;day++)for(let index=0;index<15;index++)if(questionId(day,index)===q.id){match={day,index};break;}
@@ -57,5 +51,5 @@ try{
  const panels=COMIC_QUESTIONS.map(q=>({id:q.id,url:new URL('../'+manifest.assets['hong-kong-millionaire/assets/'+q.art+'.svg'],base).href}));
  await gallery.setViewportSize({width:1200,height:1000});await gallery.evaluate(panels=>{document.head.innerHTML='<style>body{margin:0;padding:20px;background:#efe6ce;font:16px sans-serif}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.panel{border:2px solid #243335;background:#fff5dc}.panel img{width:100%;display:block}.panel b{display:block;padding:5px}</style>';document.body.innerHTML='<main class="grid"></main>';for(const panel of panels){const card=document.createElement('div');card.className='panel';const image=new Image();image.src=panel.url;const label=document.createElement('b');label.textContent=panel.id;card.append(image,label);document.querySelector('main').append(card);}},panels);
  await gallery.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));await gallery.screenshot({path:'/tmp/hkm-comic-art-gallery.png',fullPage:true});checks++;
- assert.deepEqual(errors,[]);assert.deepEqual(badResponses,[]);await c.close();console.log(JSON.stringify({checks,questions:67,legacy:'v2 resumed',pageErrors:0}));
+ assert.deepEqual(errors,[]);assert.deepEqual(badResponses,[]);await c.close();console.log(JSON.stringify({checks,questions:67,bank:'fresh v4',pageErrors:0}));
 }finally{await browser.close();}

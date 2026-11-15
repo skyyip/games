@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {URBAN_QUESTIONS} from '../src/urban-questions.js';
-import {newRun,act,hkDay,questionId,questionFor,presentation,LEGACY_BANK_VERSION,DAY_MS,HK_OFFSET} from '../src/game.js';
+import {newRun,act,hkDay,questionId,questionFor,presentation,DAY_MS,HK_OFFSET} from '../src/game.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL||'http://127.0.0.1:5437/games/hong-kong-millionaire/';
-const KEY='sky.hk-millionaire.today.v1',DAY=hkDay(Date.UTC(2026,10,15,4));
+const KEY='sky.hk-millionaire.today.v4',DAY=hkDay(Date.UTC(2026,10,15,4));
 const browser=await chromium.launch({headless:true}),errors=[],badResponses=[];
 let checks=0;
 function planned(day,index,version){
@@ -54,10 +54,6 @@ try{
   }
   await page.locator('[data-close="question-share-dialog"]').click();checks+=8;
  }
- // A v1 run from before the bank expansion must still answer the original question after reload.
- const value=planned(DAY,5,LEGACY_BANK_VERSION);await seed(value);const q=questionFor(value.run);assert.equal(await page.locator('#question-title').textContent(),presentation(DAY,5,LEGACY_BANK_VERSION).mode==='text'?(q.textQuestion??q.question):q.question);
- await page.locator(`[data-choice="${q.answer}"]`).click();await page.locator('#confirm-answer').click();await page.locator('#next-question').waitFor({state:'visible'});
- assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).run.bankVersion,KEY),LEGACY_BANK_VERSION);checks+=2;
  await context.close();assert.deepEqual(errors,[]);assert.deepEqual(badResponses,[]);
- console.log(JSON.stringify({checks,newQuestions:14,shareImages:14,legacyResume:true,pageErrors:0,failedAssets:0}));
+ console.log(JSON.stringify({checks,newQuestions:14,shareImages:14,pageErrors:0,failedAssets:0}));
 }finally{await browser.close();}
