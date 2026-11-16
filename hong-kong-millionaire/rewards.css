@@ -42,3 +42,5 @@ html[data-hkm-theme=theme-ink] body{background-color:#e9e5d9;background-image:li
 @keyframes neon-breathe{50%{box-shadow:0 0 10px #ae6bbf,0 0 18px #d581a455}}@keyframes redvan-drive{0%{transform:translateX(-100px)}45%,62%{transform:translateX(145px)}100%{transform:translateX(550px)}}
 @media(max-width:560px){.collection-dialog,.arcade-dialog{padding:24px 15px}.reward-grid{grid-template-columns:1fr}.reward-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.culture-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.reward-tile{padding:16px}.arcade-options{grid-template-columns:1fr}.arcade-visual{height:190px}.arcade-question{font-size:18px}.room-roster{grid-template-columns:1fr}.room-form{padding:16px}.arcade-dialog .close-button,.collection-dialog .close-button{top:10px;right:10px}}
 @media(prefers-reduced-motion:reduce){.profile-avatar.frame-neon{animation:none}.redvan-car{animation:none;left:40%}}
+
+#book-status{color:#52634f}@media(max-width:480px){.footprints-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.footprints-summary>div:first-child{grid-column:1/-1}.footprints-summary>div:first-child b{font-size:21px;white-space:nowrap}}
