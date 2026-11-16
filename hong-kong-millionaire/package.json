@@ -16,7 +16,9 @@
     "test:auth-transition": "node scripts/auth-transition-check.mjs",
     "test:comic": "node scripts/comic-browser-check.mjs",
     "review:generate": "node scripts/generate-comic-review.mjs",
-    "review:check": "node scripts/generate-comic-review.mjs --check"
+    "review:check": "node scripts/generate-comic-review.mjs --check && node scripts/generate-daily-review.mjs --check",
+    "review:daily": "node scripts/generate-daily-review.mjs",
+    "test:daily-design": "node scripts/daily-design-browser-check.mjs"
   },
   "dependencies": {
     "firebase": "^12.5.0"
