@@ -82,9 +82,13 @@ export function rewardRules(){
    return rwChanged(w,o,['bonus'])&&uid in before.players&&after.updatedAt==request.time&&w.bonus==o.bonus+rrCreditAmount(before,uid)
     &&(before.rebates[uid]!=after.rebates[uid]||before.refunds[uid]!=after.refunds[uid]||before.paidTo!=after.paidTo);
   }
+  function rwRetire(w,o){
+   return rwChanged(w,o,['activeSession','activeKind','activeRoom'])&&o.activeSession!=''&&w.item==o.activeSession&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
+    &&(!(o.activeKind in ['room','weekend'])||(o.activeKind=='room'&&(!exists(rrPath(o.activeRoom))||!get(rrPath(o.activeRoom)).data.keys().hasAny(['entryFee']))));
+  }
   function rwUpdate(w,o,uid){
    return w.updatedAt==request.time&&w.revision is int&&w.revision==o.revision+1&&w.spent is int&&w.spent>=0&&w.spent<=1000000000000&&w.bonus is int&&w.bonus>=0&&w.bonus<=1000000000000
-    &&(w.op in ['draw','gold','buy','equip','pass']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
+    &&(w.op in ['draw','gold','buy','equip','pass']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
   }
   match /hkm_wallets/{uid}{
    allow get:if owner(uid);allow list,delete:if false;

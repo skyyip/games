@@ -93,12 +93,16 @@ service cloud.firestore {
     && p.wrong is list && p.wrong.toSet().size()==p.wrong.size() && p.wrong.toSet()==o.wrong.toSet().union(failed.toSet())
     && getAfter(result(uid,r.day)).data.completedAt==request.time && getAfter(rank(uid)).data.updatedAt==request.time && getAfter(season(uid,r.season)).data.updatedAt==request.time;
   }
+  function retireExtraProfile(p,o,uid){
+   return o.activeDay is int&&o.get('activeKind','daily')!='daily'&&!exists(run(uid,o.activeDay))&&p.diff(o).affectedKeys().hasOnly(['activeDay','activeKind','lastSettledDay','updatedAt'])
+    &&p.activeDay==null&&p.get('activeKind','daily')=='daily'&&p.lastSettledDay==o.activeDay;
+  }
   function profileUpdate(p,o,uid) {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
     changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
     :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
-    :profileFinish(p,o,uid));
+    :(retireExtraProfile(p,o,uid)||profileFinish(p,o,uid)));
   }
   match /${C.players}/{uid} {
    allow get: if owner(uid); allow list,delete: if false;

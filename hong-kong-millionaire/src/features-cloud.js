@@ -27,7 +27,14 @@ export async function shop(c,uid,action){
 export async function publicStyles(c,uids){return Object.fromEntries(await Promise.all([...new Set(uids)].slice(0,20).map(async uid=>[uid,data(await c.getDoc(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid)))])));}
 export async function getSession(c,uid,descriptor){return normalizeRun(data(await c.getDocFromServer(sessionRef(c,uid,descriptor))));}
 export function watchSession(c,uid,descriptor,callback,onError){return c.onSnapshot(sessionRef(c,uid,descriptor),{includeMetadataChanges:true},snap=>{if(!snap.metadata.hasPendingWrites)callback(normalizeRun(data(snap)));},onError);}
-export async function activeSession(c,uid){const w=data(await c.getDoc(walletRef(c,uid)));return w?.activeSession?getSession(c,uid,{id:w.activeSession,kind:w.activeKind,room:w.activeRoom}):null;}
+export async function activeSession(c,uid){
+ const ref=walletRef(c,uid),w=data(await c.getDoc(ref));if(!w?.activeSession)return null;
+ const r=w.activeKind==='room'?data(await c.getDoc(roomRef(c,w.activeRoom))):null;
+ if(!['room','weekend'].includes(w.activeKind)||w.activeKind==='room'&&(!r||!Number.isInteger(r.entryFee))){
+  await c.runTransaction(c.db,async t=>{const current=(await t.get(ref)).data();if(current.activeSession!==w.activeSession)return;t.update(ref,{activeSession:'',activeKind:'',activeRoom:'',revision:current.revision+1,op:'retire-extra',item:current.activeSession,updatedAt:c.serverTimestamp()});});return null;
+ }
+ return getSession(c,uid,{id:w.activeSession,kind:w.activeKind,room:w.activeRoom});
+}
 function afterInterval(c,stamp){const nano=stamp.nanoseconds+(ROOM_INTERVAL%1000)*1000000;return new c.Timestamp(stamp.seconds+Math.floor(ROOM_INTERVAL/1000)+Math.floor(nano/1000000000),nano%1000000000);}
 export async function startSession(c,uid,{kind,room=''}){
  if(!['weekend','room'].includes(kind))throw Error('invalid-session');
