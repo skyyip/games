@@ -51,16 +51,19 @@ try{
  assert.equal(hostRun.questionAt,guestRun.questionAt);checks++;
  let first=await ok(feature.moveSession(host,'host',hostRun,{type:'answer',choice:sessionQuestion(hostRun).answer}));assert.equal(first.phase,'reveal');
  await assert.rejects(feature.moveSession(host,'host',first,{type:'next'}));checks++;
+ const guestDone=await ok(feature.moveSession(guest,'guest',guestRun,{type:'walk'}));assert.equal(guestDone.phase,'finished');assert.equal((await feature.getRoom(host,'host',id)).scores.guest.finished,true);checks+=2;
  await no(sdk.updateDoc(ref(guest,'hkm_rooms',id),{'scores.guest':{correct:10,timeMs:0,finished:true,finishedAt:sdk.serverTimestamp()},updatedAt:sdk.serverTimestamp()}));
  // Advance only the demo fixture clock; real clients can never change these server timestamps.
  await env.withSecurityRulesDisabled(async ctx=>{
   const db=ctx.firestore(),start=sdk.Timestamp.fromMillis(Date.now()-270000);
   await sdk.updateDoc(sdk.doc(db,'hkm_rooms',id),{startedAt:start,scores:{host:{correct:9,timeMs:8000,finished:true,finishedAt:sdk.Timestamp.now()},guest:{correct:9,timeMs:12000,finished:true,finishedAt:sdk.Timestamp.now()}}});
  });
+ await no(sdk.updateDoc(ref(guest,'hkm_rooms',id),{status:'finished',winner:'guest',winnerOrder:1,updatedAt:sdk.serverTimestamp()}));
  room=await ok(feature.finaliseRoom(guest,'guest',id));assert.equal(room.winner,'host');checks++;
  await assert.rejects(feature.claimRoom(guest,'guest',id));checks++;
  const before=(await feature.wallet(host,'host')).balance;await ok(feature.claimRoom(host,'host',id));assert.equal((await feature.wallet(host,'host')).balance,before+50000);checks++;
  await assert.rejects(feature.claimRoom(host,'host',id));checks++;
+ const late=await ok(feature.moveSession(host,'host',first,{type:'walk'}));assert.equal(late.phase,'finished');assert.equal((await feature.wallet(host,'host')).wallet.activeSession,'');checks+=2;
  const cancelled=await ok(feature.createRoom(host,'host',{topic:'places',pool:20000})),beforeCancel=(await feature.wallet(host,'host')).balance;
  await ok(feature.claimRoom(host,'host',cancelled,{cancel:true}));assert.equal((await feature.wallet(host,'host')).balance,beforeCancel+20000);checks++;
  await no(sdk.updateDoc(ref(host,'hkm_rooms',cancelled),{paidTo:'',updatedAt:sdk.serverTimestamp()}));

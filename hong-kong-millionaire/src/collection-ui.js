@@ -44,7 +44,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
   reveal.querySelector('#culture-card-story').textContent=owned?c.story:'這款卡尚未加入你的卡冊。抽卡後可重溫它的香港故事。';
   const link=reveal.querySelector('#culture-card-source');link.href=c.source;link.hidden=!owned;reveal.showModal();
  }
- function request(action,title,cost=0){if(busy||!state)return;intent=action;confirm.querySelector('#shop-confirm-title').textContent=title;confirm.querySelector('#shop-confirm-copy').textContent=(cost?'將使用 '+money(cost)+' 虛擬獎金。':'這項設定不扣除獎金。')+' 目前可用 '+money(state.balance)+'。';confirm.showModal();}
+ function request(action,title,cost=0){if(busy||!state)return;if(pending()){$('shop-status').textContent='請先核對上次操作，再開始新的購買。';return;}intent=action;confirm.querySelector('#shop-confirm-title').textContent=title;confirm.querySelector('#shop-confirm-copy').textContent=(cost?'將使用 '+money(cost)+' 虛擬獎金。':'這項設定不扣除獎金。')+' 目前可用 '+money(state.balance)+'。';confirm.showModal();}
  confirm.querySelector('#shop-confirm-buy').onclick=()=>{const action=intent;confirm.close();if(action)transact(action);};
  async function transact(action){
   if(busy||!uid)return;const actor=uid,epoch=version,requestId=action.requestId??crypto.randomUUID(),payload={...action,requestId};busy=true;
@@ -71,7 +71,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
    const preview=el('div','','identity-preview'),avatar=el('span',(getProfile()?.displayName??'香港')[0],'profile-avatar '+w.frame);preview.append(avatar,el('strong',prefixedTitle(w,titleFor(getProfile()?.bestPrize??0).name)));list.append(preview);
    const grid=el('div','','reward-grid');for(const g of GEAR){const owned=w.owned.includes(g.id),active=w[g.kind]===g.id,box=tile(g.name,g.description),demo=el('div',g.kind==='frame'?'港':g.kind==='theme'?'香港知識':'🚐',g.kind==='frame'?'profile-avatar gear-preview '+g.id:'theme-preview '+g.id);box.prepend(demo);box.append(el('strong',owned?'已擁有':money(g.price),'reward-price'),button(owned?(active?'使用中，按此還原':'套用'): '購買',()=>request(owned?{type:'equip',slot:g.kind,id:active?(g.kind==='frame'?'none':'default'):g.id}:{type:'buy',id:g.id},owned?'更新展示設定？':'購買'+g.name+'？',owned?0:g.price),!owned&&state.balance<g.price));grid.append(box);}list.append(grid);
   }else{
-   const pass=tile('週末狂熱通行券','香港時間星期六、日可無限次挑戰隨機15題。每場最多獲5,000額外獎金，每日最多100,000；達上限仍可繼續練習。全部不計純每日榜。');
+   const passDay=weekendKey(),dates=[passDay,passDay+1].map(d=>new Intl.DateTimeFormat('zh-HK',{timeZone:'UTC',month:'numeric',day:'numeric'}).format(new Date(d*86400000))).join('—');const pass=tile('週末狂熱通行券 · '+dates,'香港時間星期六、日可無限次挑戰隨機15題。每場最多獲5,000額外獎金，每日最多100,000；達上限仍可繼續練習。全部不計純每日榜。');
    pass.append(el('strong',money(100000),'reward-price'),button(w.pass===weekendKey()?'本週末通行已擁有':'購買本週末通行',()=>request({type:'pass'},'購買週末通行？',100000),w.pass===weekendKey()||state.balance<100000));
    const swap=tile('每日換題券','只可在開局前準備；每場最多換一題，沿用原本倒數。開局會使用今日每日機會及一張券，未用換題亦不退券；成績只進🛒換題榜。');
    swap.append(el('strong',money(80000),'reward-price'),button(w.swapTokens?'已擁有一張換題券':'購買一張換題券',()=>request({type:'swap'},'購買換題券？',80000),w.swapTokens>0||state.balance<80000));const grid=el('div','','reward-grid');grid.append(pass,swap);list.append(grid);
@@ -80,7 +80,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  for(const b of dialog.querySelectorAll('[data-tab]'))b.onclick=()=>{tab=b.dataset.tab;render();};
  $('shop-recover').onclick=()=>{const action=pending();if(action)transact(action);};$('shop-refresh').onclick=()=>load(true);$('shop-arcade').onclick=()=>{dialog.close();onArcade();};
  async function load(force=false){if(!uid||typeof cloud.wallet!=='function'||loadingUid===uid)return;const actor=uid,epoch=version;loadingUid=uid;try{$('shop-status').textContent='正在讀取雲端收藏…';const next=await cloud.wallet();if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;apply();$('shop-status').textContent=pending()?'有一筆未確認操作，請核對上次結果。':'';render();}catch(error){if(uid===actor&&version===epoch){$('shop-status').textContent=cloud.errorText(error);render();}}finally{if(version===epoch)loadingUid=null;}}
- function setIdentity(next){if(uid!==next){uid=next;version++;state=null;loadedUid=null;loadingUid=null;busy=false;apply();if(!uid){dialog.close();reveal.close();confirm.close();}}}
+ function setIdentity(next){if(uid!==next){uid=next;version++;state=null;loadedUid=null;loadingUid=null;busy=false;apply();dialog.close();reveal.close();confirm.close();}}
  async function open(nextTab=tab){setIdentity(getUser()?.uid??null);if(!uid){login();return;}tab=nextTab;dialog.showModal();render();await load();}
  return {open,setIdentity,restore:()=>{setIdentity(getUser()?.uid??null);if(uid&&loadedUid!==uid&&getProfile()?.uid===uid)load();},reload:()=>load(true),get wallet(){return state?.wallet??null;},get state(){return state;},soundEnabled};
 }

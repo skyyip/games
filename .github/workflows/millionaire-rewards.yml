@@ -1,10 +1,11 @@
 name: Verify Millionaire rewards
 on:
   push:
-    branches: [millionaire-rewards]
+    branches: [millionaire-rewards, main]
+    paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rewards.yml]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: millionaire-rewards
   cancel-in-progress: true
@@ -48,8 +49,23 @@ jobs:
           HKM_BUILD_DIR: /tmp/games-built-rewards
           BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
         run: |
+          node scripts/cloud-check.mjs
           node scripts/browser-check.mjs
+          node scripts/auth-transition-check.mjs
           node scripts/rewards-browser-check.mjs
+      - name: Save browser preview images
+        if: always()
+        working-directory: .
+        run: |
+          mkdir -p /tmp/hkm-preview-images
+          find /tmp -maxdepth 1 -name 'hkm-*.png' -exec cp {} /tmp/hkm-preview-images/ \;
+          if [ -n "$(find /tmp/hkm-preview-images -name '*.png' -print -quit)" ]; then
+            node hong-kong-millionaire/scripts/publish-tested-tree.mjs previews/millionaire-rewards /tmp/hkm-preview-images
+          fi
+      - name: Publish tested website files
+        if: success() && github.ref == 'refs/heads/main'
+        working-directory: .
+        run: node hong-kong-millionaire/scripts/publish-tested-tree.mjs downloads/games-site /tmp/games-built-rewards
       - uses: actions/upload-artifact@v4
         if: always()
         with:
