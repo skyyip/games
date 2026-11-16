@@ -21,8 +21,9 @@ export function hash(text){let h=2166136261;for(const c of String(text))h=Math.i
 export function questionId(day,index,version=BANK_VERSION){const tier=Math.floor(index/5),pool=QUESTION_PLANS[version]?.[tier];if(!pool)throw Error('bank-version');const slot=(day*pool.dayStep+(index%5)*pool.slotStep+tier*11)%pool.ids.length;return pool.ids[slot];}
 export const questionById=id=>byId.get(id);
 export function questionFor(run){return byId.get(questionId(run.day,run.index,run.bankVersion));}
-export function presentation(day,index,version=BANK_VERSION){const q=byId.get(questionId(day,index,version)),allowed=q.textOnly?['text']:(q.modes??MODES),mode=allowed[(day*13+index*7)%allowed.length],offset=(day+index)%4;return {mode,order:[0,1,2,3].map(i=>(i+offset)%4),partial:.05+(hash(q.id+day)%6)/100,vertical:hash(day+q.id)%2===0};}
-export const limitMs=index=>index>=10?40000:20000;
+export function presentation(day,index,version=BANK_VERSION){const q=byId.get(questionId(day,index,version)),allowed=q.textOnly?['text']:(q.modes??MODES),mode=allowed[(day*13+index*7)%allowed.length];return {mode,partial:.05+(hash(q.id+day)%6)/100,vertical:hash(day+q.id)%2===0};}
+export const QUESTION_MS=25000;
+export const limitMs=()=>QUESTION_MS;
 export const earned=count=>count?PRIZES[count-1]:0;
 export const insurance=count=>count>=10?60000:count>=5?8000:0;
 export const titleFor=prize=>TITLES.filter(t=>prize>=t.min).at(-1);

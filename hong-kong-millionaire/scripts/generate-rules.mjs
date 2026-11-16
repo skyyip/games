@@ -29,7 +29,7 @@ service cloud.firestore {
   function prize(n) { return n==0?0:${json(PRIZES)}[n-1]; }
   function floorPrize(n) { return n>=10?60000:n>=5?8000:0; }
   function titles(n) { return n>=1000000?['ordinary','neighbour','expert','peak','millionaire']:n>=500000?['ordinary','neighbour','expert','peak']:n>=60000?['ordinary','neighbour','expert']:n>=8000?['ordinary','neighbour']:['ordinary']; }
-  function cap(index) { return index>=10?40000:20000; }
+  function cap(index) { return 25000; }
   function timely(r) { return r.day==today() && request.time<=r.questionAt+duration.value(cap(r.index)+2000,'ms'); }
   function elapsed(r) { let ms=r.answerAt.toMillis()-r.questionAt.toMillis(); return ms>cap(r.index)?cap(r.index):ms; }
   function lifeLeft(r) { return (r.halfFor==-1?1:0)+(r.phoneFor==-1?1:0)+(r.audienceFor==-1?1:0); }
@@ -93,13 +93,16 @@ service cloud.firestore {
     && p.wrong is list && p.wrong.toSet().size()==p.wrong.size() && p.wrong.toSet()==o.wrong.toSet().union(failed.toSet())
     && getAfter(result(uid,r.day)).data.completedAt==request.time && getAfter(rank(uid)).data.updatedAt==request.time && getAfter(season(uid,r.season)).data.updatedAt==request.time;
   }
+  function retireExtraProfile(p,o,uid){
+   return o.activeDay is int&&o.get('activeKind','daily')!='daily'&&!exists(run(uid,o.activeDay))&&p.diff(o).affectedKeys().hasOnly(['activeDay','activeKind','lastSettledDay','updatedAt'])
+    &&p.activeDay==null&&p.get('activeKind','daily')=='daily'&&p.lastSettledDay==o.activeDay;
+  }
   function profileUpdate(p,o,uid) {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
     changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
-    :(p.get('activeKind','daily')=='assisted'||o.get('activeKind','daily')=='assisted')?arcadeProfileUpdate(p,o,uid)
     :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
-    :profileFinish(p,o,uid));
+    :(retireExtraProfile(p,o,uid)||profileFinish(p,o,uid)));
   }
   match /${C.players}/{uid} {
    allow get: if owner(uid); allow list,delete: if false;
