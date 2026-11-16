@@ -128,7 +128,7 @@ export function rewardRules(){
     &&r.answerAt==null&&r.endedAt==null&&r.outcome==''&&r.choice is int&&r.choice==-1&&r.halfFor is int&&r.halfFor==-1&&r.phoneFor is int&&r.phoneFor==-1&&r.audienceFor is int&&r.audienceFor==-1
     &&r.answers=={}&&r.seen==[]&&r.payout is int&&r.payout==0&&r.credit is int&&r.credit==0&&r.credited==false&&r.reason==''
     &&w.op=='start-session'&&w.item==id&&w.activeSession==id&&w.activeKind==r.kind&&w.activeRoom==r.room&&w.updatedAt==request.time
-    &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(215,'s')):
+    &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(265,'s')):
      (r.room==''&&r.topic=='all'&&r.count==15&&r.questionAt==request.time&&r.kind=='weekend'&&id.matches('^weekend_[a-f0-9-]{36}$')&&rwIsWeekend()&&get(rwPath(uid)).data.pass==rwWeekend()&&get(rwPath(uid)).data.get('passUses',0)<3));
   }
   function rsLife(r,o){
@@ -150,7 +150,7 @@ export function rewardRules(){
    return o.index<o.count-1&&(o.kind=='room'?o.outcome!='walk':(o.outcome=='correct'&&o.day==today()))
     &&r.diff(o).affectedKeys().hasOnly(['phase','index','timeMs','questionAt','answerAt','outcome','choice','updatedAt'])&&r.index is int&&r.index==o.index+1
     &&r.timeMs is int&&r.timeMs==o.timeMs+elapsed(o)&&r.answerAt==null&&r.outcome==''&&r.choice==-1
-    &&(o.kind=='room'?(r.questionAt==o.questionAt+duration.value(21500,'ms')&&request.time>=r.questionAt):r.questionAt==request.time);
+    &&(o.kind=='room'?(r.questionAt==o.questionAt+duration.value(26500,'ms')&&request.time>=r.questionAt):r.questionAt==request.time);
   }
   function rsReason(o){
    return o.kind=='room'&&o.index==o.count-1?'complete':o.correct==15?'complete':o.outcome=='correct'?(o.kind!='room'&&o.day!=today()?'timeout':'walk'):o.outcome;
@@ -222,7 +222,7 @@ export function rewardRules(){
     changed.hasOnly(['status','startedAt','feeShare','updatedAt'])&&v.status=='playing'?(o.status=='lobby'&&uid==o.hostUid&&o.players.size()>=2&&request.time<o.createdAt+duration.value(1,'h')&&v.startedAt==request.time&&v.feeShare==int(30000 / o.players.size())):
     changed.hasOnly(['status','updatedAt'])&&v.status=='cancelled'?(o.status=='lobby'&&uid==o.hostUid):
     changed.hasOnly(['scores','updatedAt'])?rrReport(v,o,id):
-    o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&(rrAll(o)||request.time>=o.startedAt+duration.value(245,'s'))&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNone(o)))):
+    o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&(rrAll(o)||request.time>=o.startedAt+duration.value(295,'s'))&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNone(o)))):
     rrPayment(v,o,id));
   }
   match /hkm_rooms/{id}{

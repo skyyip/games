@@ -58,7 +58,7 @@ try{
  // Both first-answer failure and voluntary exit must use the same protected transition and settlement.
  for(const type of ['wrong','walk','timeout']){
   const b=await begin('rules-'+type);
-  if(type==='timeout')await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),C.players,b.uid,'runs',String(b.day)),{questionAt:Timestamp.fromMillis(Date.now()-21000),startedAt:Timestamp.fromMillis(Date.now()-22000)});});
+  if(type==='timeout')await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),C.players,b.uid,'runs',String(b.day)),{questionAt:Timestamp.fromMillis(Date.now()-26000),startedAt:Timestamp.fromMillis(Date.now()-27000)});});
   const r=normalizeRun(await raw(b));await move(b,type==='wrong'?{type:'answer',choice:(questionFor(r).answer+1)%4}:{type});
   const done=await settle(b);assert.equal(done.reason,type);assert.equal(done.payout,0);assert.equal((await getDoc(b.pRef)).data().games,1);checks+=3;
  }

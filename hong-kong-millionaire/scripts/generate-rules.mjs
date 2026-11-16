@@ -29,7 +29,7 @@ service cloud.firestore {
   function prize(n) { return n==0?0:${json(PRIZES)}[n-1]; }
   function floorPrize(n) { return n>=10?60000:n>=5?8000:0; }
   function titles(n) { return n>=1000000?['ordinary','neighbour','expert','peak','millionaire']:n>=500000?['ordinary','neighbour','expert','peak']:n>=60000?['ordinary','neighbour','expert']:n>=8000?['ordinary','neighbour']:['ordinary']; }
-  function cap(index) { return index>=10?40000:20000; }
+  function cap(index) { return 25000; }
   function timely(r) { return r.day==today() && request.time<=r.questionAt+duration.value(cap(r.index)+2000,'ms'); }
   function elapsed(r) { let ms=r.answerAt.toMillis()-r.questionAt.toMillis(); return ms>cap(r.index)?cap(r.index):ms; }
   function lifeLeft(r) { return (r.halfFor==-1?1:0)+(r.phoneFor==-1?1:0)+(r.audienceFor==-1?1:0); }

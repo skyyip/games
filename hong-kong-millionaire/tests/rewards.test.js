@@ -45,7 +45,7 @@ test('room entry bounds, eight-character codes and fair shared fee',()=>{
 test('all submitted rooms can settle immediately; disconnected rooms retain a grace period',()=>{
  const room={status:'playing',startedAt:NOW,players:['a','b'],scores:{a:{finished:true},b:{finished:false}}};
  assert(!roomCanFinish(room,NOW+1000));room.scores.b.finished=true;assert(roomCanFinish(room,NOW+1000));
- room.scores.b.finished=false;assert(!roomCanFinish(room,NOW+244999));assert(roomCanFinish(room,NOW+245000));
+ room.scores.b.finished=false;assert(!roomCanFinish(room,NOW+294999));assert(roomCanFinish(room,NOW+295000));
 });
 test('weekend ticket use cannot be reset by repurchasing the same weekend',()=>{
  const w=walletAction({total:1000000},emptyWallet('p',0),{type:'pass'},DAY);assert.equal(w.passUses,0);
