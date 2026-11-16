@@ -5,7 +5,7 @@ let output='# 街角觀察：兩份附件60題整合對照\n\n第一份45題、�
 for(const [i,q]of bank.entries()){
  const t=draft.topics[i];if(t.id!==q.id)throw Error('Unmapped topic');
  output+=`## ${t.source}.${t.sourceNumber} ${t.topic}（${q.id}）\n\n完整問法：${q.textQuestion??q.question}\n\n遊戲問法：${q.question}\n\n${q.options.map((v,i)=>'- '+ 'ABCD'[i]+'）'+v).join('\n')}\n\n答案：${'ABCD'[q.answer]}）${q.options[q.answer]}\n\n解說：${q.explanation}\n\n修訂：${q.review}\n\n模式：${q.modes.join('／')}\n\n`;
- if(q.observation){output+=`認圖線索：${q.observation.clue}\n\n`;if(q.modes.includes('partial'))output+=`局部框（800×500來源像素）：${JSON.stringify(q.observation.crop)}\n\n`;if(q.modes.includes('mirrored'))output+=`鏡像問法：${q.observation.mirroredPrompt}\n\n`;}
+ if(q.observation){output+=`認圖線索：${q.observation.clue}\n\n`;if(q.modes.includes('partial'))output+=`局部框（800×500來源像素）：${JSON.stringify(q.observation.crop)}\n\n`;if(q.observation.overview)output+=`手機字樣構圖框：${JSON.stringify(q.observation.overview)}\n\n`;if(q.modes.includes('mirrored'))output+=`鏡像問法：${q.observation.mirroredPrompt}\n\n`;}
  output+=`延伸參考：[${q.source.label}](${q.source.url})\n\n`;
 }
 output=output.trimEnd()+'\n';const file=new URL('../QUESTION-BANK-STREET-60.md',import.meta.url);

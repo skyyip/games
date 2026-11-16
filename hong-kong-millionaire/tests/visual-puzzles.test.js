@@ -47,3 +47,8 @@ test('every transformed puzzle keeps canonical answer validation independent of 
   const after=act(r,{type:'answer',choice:questionView(q,mode).answer},r.questionAt+1000,{autoFinish:false});assert.equal(after.outcome,'correct');assert.equal(after.answers[index].qid,q.id);seen.add(q.id+mode);
  }assert.equal(seen.size,bank.reduce((n,q)=>n+visualModes(q).filter(m=>['partial','blurred','mirrored'].includes(m)).length,0));
 });
+
+test('mirrored text and number puzzles have a legible authored overview on small screens',()=>{
+ const sizes={s16:57,s21:24,s40:50,s43:24};
+ for(const q of bank.filter(q=>q.modes.includes('mirrored'))){const r=q.observation.overview;assert(r);assert(r.x>=0&&r.y>=0&&r.x+r.width<=800&&r.y+r.height<=500);if(sizes[q.id]){const l=cropLayout(r,290,80);assert(l.width/800*sizes[q.id]>=12,q.id);}}
+});

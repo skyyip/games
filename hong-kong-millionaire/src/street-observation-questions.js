@@ -124,7 +124,13 @@ const records=[
     "height": 110
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原地面倒轉字樣，哪個用途配對正確？"
+   "mirroredPrompt": "還原地面倒轉字樣，哪個用途配對正確？",
+   "overview": {
+    "x": 220,
+    "y": 205,
+    "width": 360,
+    "height": 90
+   }
   }
  },
  {
@@ -672,7 +678,13 @@ const records=[
     "height": 110
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "先還原倒轉標牌，再讀H下方距離：幾多米？"
+   "mirroredPrompt": "先還原倒轉標牌，再讀H下方距離：幾多米？",
+   "overview": {
+    "x": 270,
+    "y": 90,
+    "width": 260,
+    "height": 320
+   }
   }
  },
  {
@@ -882,7 +894,13 @@ const records=[
     "height": 85
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原兩部機的倒轉字樣，正確拍卡次序是？"
+   "mirroredPrompt": "還原兩部機的倒轉字樣，正確拍卡次序是？",
+   "overview": {
+    "x": 215,
+    "y": 185,
+    "width": 370,
+    "height": 90
+   }
   }
  },
  {
@@ -967,7 +985,13 @@ const records=[
     "height": 110
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原機身字樣，這次拍卡應處理甚麼？"
+   "mirroredPrompt": "還原機身字樣，這次拍卡應處理甚麼？",
+   "overview": {
+    "x": 325,
+    "y": 185,
+    "width": 150,
+    "height": 105
+   }
   }
  },
  {
@@ -1303,7 +1327,13 @@ const records=[
     "height": 70
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原倒轉地面字樣後，提示你先留意哪邊？"
+   "mirroredPrompt": "還原倒轉地面字樣後，提示你先留意哪邊？",
+   "overview": {
+    "x": 205,
+    "y": 200,
+    "width": 390,
+    "height": 120
+   }
   }
  },
  {
@@ -1602,7 +1632,13 @@ const records=[
     "height": 130
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原倒轉尺寸數字，再算長闊高總和是多少？"
+   "mirroredPrompt": "還原倒轉尺寸數字，再算長闊高總和是多少？",
+   "overview": {
+    "x": 210,
+    "y": 80,
+    "width": 380,
+    "height": 240
+   }
   }
  },
  {
@@ -1731,7 +1767,13 @@ const records=[
     "height": 105
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原倒轉容量標籤，兩樽合共多少毫升？"
+   "mirroredPrompt": "還原倒轉容量標籤，兩樽合共多少毫升？",
+   "overview": {
+    "x": 245,
+    "y": 205,
+    "width": 310,
+    "height": 70
+   }
   }
  },
  {
@@ -1984,7 +2026,13 @@ const records=[
     "height": 110
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原箱上倒轉字樣，這類物料可協助做甚麼？"
+   "mirroredPrompt": "還原箱上倒轉字樣，這類物料可協助做甚麼？",
+   "overview": {
+    "x": 250,
+    "y": 205,
+    "width": 300,
+    "height": 100
+   }
   }
  },
  {
@@ -2153,7 +2201,13 @@ const records=[
     "height": 90
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原投信口倒轉字樣，寄往東京應選哪一類？"
+   "mirroredPrompt": "還原投信口倒轉字樣，寄往東京應選哪一類？",
+   "overview": {
+    "x": 205,
+    "y": 177,
+    "width": 390,
+    "height": 120
+   }
   }
  },
  {
@@ -2248,7 +2302,13 @@ const records=[
     "height": 110
    },
    "mirrorAxis": "horizontal",
-   "mirroredPrompt": "還原餐牌倒轉字樣，換指定品牌麵應怎樣付款？"
+   "mirroredPrompt": "還原餐牌倒轉字樣，換指定品牌麵應怎樣付款？",
+   "overview": {
+    "x": 230,
+    "y": 190,
+    "width": 340,
+    "height": 130
+   }
   }
  },
  {

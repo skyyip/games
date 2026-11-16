@@ -75,6 +75,8 @@
 
 認圖線索：黃色BUS STOP字樣及站邊標記
 
+手機字樣構圖框：{"x":220,"y":205,"width":360,"height":90}
+
 鏡像問法：還原地面倒轉字樣，哪個用途配對正確？
 
 延伸參考：[運輸署・不准停車的地點](https://www.td.gov.hk/tc/road_safety/road_users_code/index/chapter_5_for_all_drivers/where_not_to_stop_/index.html)
@@ -392,6 +394,8 @@
 
 認圖線索：H下方橫線以下寫着2.5，上方為150
 
+手機字樣構圖框：{"x":270,"y":90,"width":260,"height":320}
+
 鏡像問法：先還原倒轉標牌，再讀H下方距離：幾多米？
 
 延伸參考：[水務署・敷設水管實務手冊](https://www.wsd.gov.hk/filemanager/en/content_1456/Manual%20of%20Mainlaying%20Practice%20%28Amendment%20No.%201_2021%29.pdf)
@@ -515,6 +519,8 @@
 
 認圖線索：橙色機寫入站ENTRY，綠色機寫出站EXIT
 
+手機字樣構圖框：{"x":215,"y":185,"width":370,"height":90}
+
 鏡像問法：還原兩部機的倒轉字樣，正確拍卡次序是？
 
 延伸參考：[港鐵・正確使用車票](https://www.mtr.com.hk/ch/customer/main/correct-use-ticket.html)
@@ -564,6 +570,8 @@
 模式：mirrored／original
 
 認圖線索：車門旁裝置印有回贈REBATE字樣
+
+手機字樣構圖框：{"x":325,"y":185,"width":150,"height":105}
 
 鏡像問法：還原機身字樣，這次拍卡應處理甚麼？
 
@@ -758,6 +766,8 @@
 模式：mirrored／original
 
 認圖線索：LOOK RIGHT字樣及指向原圖右方的箭嘴
+
+手機字樣構圖框：{"x":205,"y":200,"width":390,"height":120}
 
 鏡像問法：還原倒轉地面字樣後，提示你先留意哪邊？
 
@@ -962,6 +972,8 @@
 
 認圖線索：旅行喼旁三個尺寸數字60、50、40厘米
 
+手機字樣構圖框：{"x":210,"y":80,"width":380,"height":240}
+
 鏡像問法：還原倒轉尺寸數字，再算長闊高總和是多少？
 
 延伸參考：[運輸署・的士收費表](https://www.td.gov.hk/tc/transport_in_hong_kong/public_transport/taxi/taxi_fare_of_hong_kong/index.html)
@@ -1036,6 +1048,8 @@
 模式：mirrored／original
 
 認圖線索：兩個小瓶，正面各印100mL
+
+手機字樣構圖框：{"x":245,"y":205,"width":310,"height":70}
 
 鏡像問法：還原倒轉容量標籤，兩樽合共多少毫升？
 
@@ -1185,6 +1199,8 @@
 
 認圖線索：箱面SAND字樣與蓋邊少量細顆粒
 
+手機字樣構圖框：{"x":250,"y":205,"width":300,"height":100}
+
 鏡像問法：還原箱上倒轉字樣，這類物料可協助做甚麼？
 
 延伸參考：[運輸署・道路使用者守則](https://www.td.gov.hk/tc/road_safety/road_users_code/index.html)
@@ -1283,6 +1299,8 @@
 
 認圖線索：兩個口分寫本港LOCAL與外地OVERSEAS
 
+手機字樣構圖框：{"x":205,"y":177,"width":390,"height":120}
+
 鏡像問法：還原投信口倒轉字樣，寄往東京應選哪一類？
 
 延伸參考：[香港郵政・郵筒與郵件投寄](https://www.hongkongpost.hk/tc/sending_mail/)
@@ -1349,6 +1367,8 @@
 模式：mirrored／original
 
 認圖線索：餐牌一行轉指定品牌麵＋$4
+
+手機字樣構圖框：{"x":230,"y":190,"width":340,"height":130}
 
 鏡像問法：還原餐牌倒轉字樣，換指定品牌麵應怎樣付款？
 

@@ -4,7 +4,7 @@
 
 ## 單一題庫與固定資料集合
 
-把本遊戲視為首次推出，直接使用目前完整的 231 題，包括 67 題香港漫畫篇及新增60題日常細節；唯一題庫標識為 `hk-2026-11`。
+把本遊戲視為首次推出，直接使用目前完整的 291 題，包括 67 題香港漫畫篇、60題日常細節及兩份附件新增的60題街角觀察；唯一題庫標識為 `hk-2026-11`。
 
 - 私人玩家：`hkm_players/{uid}`，每日題局放在其 `runs/{香港日數}`。
 - 每日榜：`hkm_results`；生涯榜：`hkm_rankings`；月榜：`hkm_seasons`。
@@ -84,7 +84,7 @@ firebase emulators:exec --project demo-hk-millionaire --only firestore "node scr
 
 ## 新增60題的發布次序
 
-題庫由171題增至231題，難度池為73／92／66。請先Publish本資料夾**完整** `firestore.rules`，再上傳新網站；抽題表、答案及圖鑑上限須一致，不能只改一個總數。仍使用原本的單一題庫與 `hkm_` 集合，三個索引不變。
+題庫擴充至291題，難度池為84／134／73。請先Publish本資料夾**完整** `firestore.rules`，再上傳新網站；抽題表、答案及圖鑑上限須一致，不能只改一個總數。仍使用原本的單一題庫與 `hkm_` 集合，三個索引不變。
 
 只發布規則的指令：
 
@@ -93,3 +93,5 @@ cd hong-kong-millionaire
 npm run rules:check
 firebase deploy --project sky-playground-millionaire --only firestore:rules
 ```
+
+本輪房間作答25秒、揭曉2.5秒（每題節奏27.5秒），完整規則已同步更新；四個複合索引不變。新增題目逐條修訂見 [QUESTION-BANK-STREET-60.md](QUESTION-BANK-STREET-60.md)。

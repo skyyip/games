@@ -30,11 +30,11 @@ export async function createQuestionCard(q,artURL){
   rasterContext.drawImage(image,0,0,800,500);
   const iw=raster.width,ih=raster.height;
   const cropWidth=Math.sqrt(iw*ih*.1*(936/430)),cropHeight=cropWidth*430/936;
-  const x=Math.max(0,Math.min(iw-cropWidth,(q.focus?.x??50)*iw/100-cropWidth/2));
-  const y=Math.max(0,Math.min(ih-cropHeight,(q.focus?.y??50)*ih/100-cropHeight/2));
-  ctx.drawImage(raster,x,y,cropWidth,cropHeight,72,190,936,430);
+  const crop=q.observation?(q.observation.overview??(q.modes.includes('partial')?q.observation.crop:{x:0,y:0,width:800,height:500})):{x:Math.max(0,Math.min(iw-cropWidth,(q.focus?.x??50)*iw/100-cropWidth/2)),y:Math.max(0,Math.min(ih-cropHeight,(q.focus?.y??50)*ih/100-cropHeight/2)),width:cropWidth,height:cropHeight};
+  const scale=Math.min(936/crop.width,430/crop.height),dw=crop.width*scale,dh=crop.height*scale;
+  ctx.drawImage(raster,crop.x,crop.y,crop.width,crop.height,72+(936-dw)/2,190+(430-dh)/2,dw,dh);
   ctx.strokeStyle='#243335';ctx.lineWidth=4;ctx.strokeRect(72,190,936,430);
-  write('原創漫畫局部示意',72,653,23,'#526c74');
+  write('香港街角，留意畫面細節',72,653,23,'#526c74');
  }
  let y=questionY;
  for(const line of questionLines){write(line,72,y,36);y+=51;}
