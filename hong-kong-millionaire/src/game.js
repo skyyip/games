@@ -1,5 +1,5 @@
 import {QUESTIONS} from './questions.js';
-export const BANK_VERSION='hk-2026-11-v4';
+export const BANK_VERSION='hk-2026-11';
 export const SUPPORTED_BANK_VERSIONS=Object.freeze([BANK_VERSION]);
 export const DAY_MS=86400000,HK_OFFSET=28800000;
 export const PRIZES=Object.freeze([1000,2000,3000,4000,8000,10000,20000,30000,40000,60000,80000,150000,250000,500000,1000000]);
@@ -10,7 +10,7 @@ const byId=new Map(QUESTIONS.map(q=>[q.id,q]));
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 function stride(size,start){while(gcd(size,start)!==1)start++;return start;}
 function plan(bank){return Object.freeze([1,2,3].map(tier=>{const ids=Object.freeze(bank.filter(q=>q.tier===tier).map(q=>q.id));return Object.freeze({ids,dayStep:stride(ids.length,17),slotStep:stride(ids.length,7)});}));}
-// Only the fresh release is playable; old snapshots are not migrated.
+// The game uses one current question bank.
 export const QUESTION_PLANS=Object.freeze({[BANK_VERSION]:plan(QUESTIONS)});
 export const hkDay=(now=Date.now())=>Math.floor((now+HK_OFFSET)/DAY_MS);
 export const dayEnd=day=>(day+1)*DAY_MS-HK_OFFSET;

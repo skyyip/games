@@ -4,7 +4,7 @@ import {URBAN_QUESTIONS} from '../src/urban-questions.js';
 import {newRun,act,hkDay,questionId,questionFor,presentation,DAY_MS,HK_OFFSET} from '../src/game.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL||'http://127.0.0.1:5437/games/hong-kong-millionaire/';
-const KEY='sky.hk-millionaire.today.v4',DAY=hkDay(Date.UTC(2026,10,15,4));
+const KEY='sky.hk-millionaire.today.v1',DAY=hkDay(Date.UTC(2026,10,15,4));
 const browser=await chromium.launch({headless:true}),errors=[],badResponses=[];
 let checks=0;
 function planned(day,index,version){

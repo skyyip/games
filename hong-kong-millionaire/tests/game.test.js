@@ -25,10 +25,10 @@ test('expanded pools reach every question and never repeat within a daily plan',
  }
  assert.equal(seen.size,QUESTIONS.length);for(const q of URBAN_QUESTIONS)assert(seen.has(q.id));
 });
-test('rules accept only the fresh bank and use the isolated current collections',()=>{
+test('rules use one question bank and the standard game collections',()=>{
  const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');assert(rules.includes('p.unlocked.size()<='+QUESTIONS.length));
  assert(rules.includes(BANK_VERSION));for(const pool of QUESTION_PLANS[BANK_VERSION])assert(rules.includes(JSON.stringify(pool.ids)));
- assert(rules.includes('question(o.day,o.index)'));assert(rules.includes('hkm_v4_players'));assert(!/hk-2026-11-v[123]/.test(rules));
+ assert(rules.includes('question(o.day,o.index)'));assert(rules.includes('hkm_players'));assert(!/hkm_v4_|hk-2026-11-v[1234]/.test(rules));
 });
 test('question sharing is deliberate and contains no answer key, explanation, hint or account data',()=>{
  const q={...URBAN_QUESTIONS[7],explanation:'PRIVATE_EXPLANATION',hint:'PRIVATE_HINT',answer:3,uid:'PRIVATE_UID'};
@@ -47,9 +47,9 @@ test('all 67 supplied topics have a distinct integrated comic question and a doc
  }
  assert(Math.max(...positions)-Math.min(...positions)<=1);
 });
-test('new games accept only v4 and reject retired run snapshots',()=>{
- assert.equal(newRun(DAY,NOW).bankVersion,'hk-2026-11-v4');assert.deepEqual(Object.keys(QUESTION_PLANS),['hk-2026-11-v4']);
- for(const bankVersion of ['hk-2026-11-v1','hk-2026-11-v2','hk-2026-11-v3']){
+test('new games use one current bank and reject an unknown bank',()=>{
+ assert.equal(newRun(DAY,NOW).bankVersion,'hk-2026-11');assert.deepEqual(Object.keys(QUESTION_PLANS),['hk-2026-11']);
+ for(const bankVersion of ['unknown-bank']){
   assert.throws(()=>act({...newRun(DAY,NOW),bankVersion},{type:'walk'},NOW),/bank-version/);
   assert.throws(()=>questionId(DAY,0,bankVersion),/bank-version/);
  }

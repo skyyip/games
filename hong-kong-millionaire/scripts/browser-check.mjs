@@ -5,7 +5,7 @@ const module=process.env.GRID_RUSH_PLAYWRIGHT_MODULE;
 if(!module)throw Error('Set GRID_RUSH_PLAYWRIGHT_MODULE to a Playwright module exposing chromium');
 const {chromium}=await import(pathToFileURL(module));
 const base=process.env.HKM_TEST_URL||'http://127.0.0.1:5436/games/hong-kong-millionaire/';
-const NOW=Date.UTC(2026,10,14,4),KEY='sky.hk-millionaire.today.v4';
+const NOW=Date.UTC(2026,10,14,4),KEY='sky.hk-millionaire.today.v1';
 const browser=await chromium.launch({headless:true}),errors=[];let checks=0;
 async function context(width=390,height=900,configured=false){const c=await browser.newContext({viewport:{width,height},serviceWorkers:'block'});await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());await c.addInitScript(({now,configured})=>{if(!configured)globalThis.HK_MILLIONAIRE_FIREBASE_CONFIG=null;let saved;try{saved=localStorage.getItem('qa.hkm.clock');}catch{}globalThis.__hkmNow=Number(saved)||now;const Native=Date;globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[globalThis.__hkmNow]));}static now(){return globalThis.__hkmNow;}};Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>{globalThis.__hkmShare=text;}}});Object.defineProperty(navigator,'share',{value:async data=>{globalThis.__hkmNativeShare=data;}});},{now:NOW,configured});c.on('page',p=>p.on('pageerror',e=>errors.push(e.stack)));return c;}
 async function open(c){const p=await c.newPage();await p.goto(base,{waitUntil:'networkidle'});return p;}

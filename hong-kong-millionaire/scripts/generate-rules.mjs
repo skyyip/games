@@ -141,5 +141,5 @@ service cloud.firestore {
 }
 `;
 const file=new URL('../firestore.rules',import.meta.url);
-if(process.argv.includes('--check')){if(await readFile(file,'utf8')!==source)throw Error('Generated rules differ from the current bank');console.log(`Rules match ${QUESTIONS.length} questions and the fresh ${BANK_VERSION} schema.`);}
-else{await writeFile(file,source);console.log('Generated fresh single-version rules:',source.length,'characters');}
+if(process.argv.includes('--check')){if(await readFile(file,'utf8')!==source)throw Error('Generated rules differ from the current bank');console.log(`Rules match ${QUESTIONS.length} questions and the current ${BANK_VERSION} schema.`);}
+else{await writeFile(file,source);console.log('Generated single-bank rules:',source.length,'characters');}

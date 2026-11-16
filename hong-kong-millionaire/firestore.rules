@@ -4,11 +4,11 @@ service cloud.firestore {
   function owner(uid) { return request.auth != null && request.auth.uid == uid; }
   function today() { return int((request.time.toMillis()+28800000) / 86400000); }
   function seasonNow() { let t=request.time+duration.value(8,'h'); return string(t.year())+'-'+(t.month()<10?'0':'')+string(t.month()); }
-  function player(uid) { return /databases/$(database)/documents/hkm_v4_players/$(uid); }
-  function run(uid,day) { let id=string(day); return /databases/$(database)/documents/hkm_v4_players/$(uid)/runs/$(id); }
-  function result(uid,day) { let id=uid+'_'+string(day); return /databases/$(database)/documents/hkm_v4_results/$(id); }
-  function rank(uid) { return /databases/$(database)/documents/hkm_v4_rankings/$(uid); }
-  function season(uid,s) { let id=uid+'_'+s; return /databases/$(database)/documents/hkm_v4_seasons/$(id); }
+  function player(uid) { return /databases/$(database)/documents/hkm_players/$(uid); }
+  function run(uid,day) { let id=string(day); return /databases/$(database)/documents/hkm_players/$(uid)/runs/$(id); }
+  function result(uid,day) { let id=uid+'_'+string(day); return /databases/$(database)/documents/hkm_results/$(id); }
+  function rank(uid) { return /databases/$(database)/documents/hkm_rankings/$(uid); }
+  function season(uid,s) { let id=uid+'_'+s; return /databases/$(database)/documents/hkm_seasons/$(id); }
   // Evaluate one tier only. A full-bank answer map exceeded the 1,000-expression budget.
   function question(day,index) {
    let tier=int(index / 5);
@@ -32,7 +32,7 @@ service cloud.firestore {
   }
   function start(r,uid,day) {
    return r.keys().hasOnly(['version','bankVersion','uid','day','season','phase','index','correct','timeMs','startedAt','questionAt','answerAt','endedAt','updatedAt','outcome','choice','halfFor','phoneFor','audienceFor','audienceHadHalf','answers','seen','payout','reason'])
-    && r.version==1 && r.bankVersion=='hk-2026-11-v4' && r.uid==uid && r.day is int && day==string(today()) && r.day==today() && r.season==seasonNow()
+    && r.version==1 && r.bankVersion=='hk-2026-11' && r.uid==uid && r.day is int && day==string(today()) && r.day==today() && r.season==seasonNow()
     && r.phase=='playing' && r.index is int && r.index==0 && r.correct is int && r.correct==0 && r.timeMs is int && r.timeMs==0
     && r.startedAt==request.time && r.questionAt==request.time && r.updatedAt==request.time && r.answerAt==null && r.endedAt==null && r.outcome=='' && r.choice is int && r.choice==-1
     && r.halfFor is int && r.halfFor==-1 && r.phoneFor is int && r.phoneFor==-1 && r.audienceFor is int && r.audienceFor==-1 && r.audienceHadHalf==false
@@ -91,7 +91,7 @@ service cloud.firestore {
     :changed.hasOnly(['activeDay','updatedAt'])?(o.activeDay==null && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
     :profileFinish(p,o,uid));
   }
-  match /hkm_v4_players/{uid} {
+  match /hkm_players/{uid} {
    allow get: if owner(uid); allow list,delete: if false;
    allow create: if owner(uid) && profileCreate(request.resource.data,uid);
    allow update: if owner(uid) && profileUpdate(request.resource.data,resource.data,uid);
@@ -121,9 +121,9 @@ service cloud.firestore {
     && id==v.uid+'_'+r.season && v.season==r.season && v.displayName==p.displayName && v.updatedAt==request.time
     && v.total==old.total+r.payout && v.games==old.games+1 && v.bestPrize==(old.bestPrize>r.payout?old.bestPrize:r.payout);
   }
-  match /hkm_v4_results/{id} { allow get: if true; allow list: if request.query.limit<=20; allow create: if resultValid(request.resource.data,id); allow update,delete: if false; }
-  match /hkm_v4_rankings/{uid} { allow get: if true; allow list: if request.query.limit<=20; allow create,update: if rankValid(request.resource.data,uid); allow delete: if false; }
-  match /hkm_v4_seasons/{id} {
+  match /hkm_results/{id} { allow get: if true; allow list: if request.query.limit<=20; allow create: if resultValid(request.resource.data,id); allow update,delete: if false; }
+  match /hkm_rankings/{uid} { allow get: if true; allow list: if request.query.limit<=20; allow create,update: if rankValid(request.resource.data,uid); allow delete: if false; }
+  match /hkm_seasons/{id} {
    allow get: if true; allow list: if request.query.limit<=20; allow delete: if false;
    allow create: if seasonValid(request.resource.data,id,{'total':0,'games':0,'bestPrize':0});
    allow update: if seasonValid(request.resource.data,id,resource.data);

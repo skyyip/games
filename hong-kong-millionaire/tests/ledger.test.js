@@ -7,9 +7,10 @@ test('logging out after an account run does not grant a new guest attempt',async
 test('the following Hong Kong day starts fresh and does not save anonymous historical records',async()=>{let now=NOW;const s=storage(),ledger=new DailyLedger({storage:s,now:()=>now}),a=await ledger.start();now+=DAY_MS;const b=await ledger.start();assert.notEqual(b.token,a.token);assert.equal(b.day,a.day+1);assert.equal(JSON.parse(s.getItem(LEDGER_KEY)).day,b.day);});
 test('unavailable local storage is explicit and cannot silently award repeat guest attempts',async()=>{const ledger=new DailyLedger({storage:{getItem:()=>null,setItem(){throw Error('blocked');},removeItem(){}},now:()=>NOW});assert.equal(ledger.available,false);await assert.rejects(()=>ledger.start(),/storage-required/);});
 
-test('fresh local storage ignores old daily markers and starts a new current run',async()=>{
- const s=storage();s.setItem('sky.hk-millionaire.today.v1',JSON.stringify({day:hkDay(NOW),owner:'old-account',token:'old',revision:2,run:null}));
- const ledger=new DailyLedger({storage:s,now:()=>NOW});assert.equal(ledger.read(),null);const run=await ledger.start();assert.equal(run.owner,'guest');assert.equal(run.run.bankVersion,'hk-2026-11-v4');assert.notEqual(LEDGER_KEY,'sky.hk-millionaire.today.v1');
+test('a first anonymous attempt uses the standard daily key and the current question bank',async()=>{
+ const s=storage(),ledger=new DailyLedger({storage:s,now:()=>NOW});assert.equal(ledger.read(),null);
+ const entry=await ledger.start();assert.equal(entry.owner,'guest');assert.equal(entry.run.bankVersion,'hk-2026-11');assert.equal(LEDGER_KEY,'sky.hk-millionaire.today.v1');
+ assert.equal(JSON.parse(s.getItem(LEDGER_KEY)).token,entry.token);assert.equal(ledger.read().run.index,0);
 });
 
 test('a server-verified unclaimed reservation can be released, with a pending current-release marker',async()=>{

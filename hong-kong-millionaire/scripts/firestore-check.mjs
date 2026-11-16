@@ -62,7 +62,7 @@ try{
   const r=normalizeRun(await raw(b));await move(b,type==='wrong'?{type:'answer',choice:(questionFor(r).answer+1)%4}:{type});
   const done=await settle(b);assert.equal(done.reason,type);assert.equal(done.payout,0);assert.equal((await getDoc(b.pRef)).data().games,1);checks+=3;
  }
- // The new release does not read or write the retired data namespace.
- await assertFails(getDoc(doc(a.db,'hkm_players',a.uid)));checks++;
+ // Release-specific collections are not part of the game schema.
+ await assertFails(getDoc(doc(a.db,'hkm_v4_players',a.uid)));checks++;
  console.log(JSON.stringify({checks,project:'demo-hk-millionaire',rules:'compiled and executed by Firestore Emulator',payload:'production transitionPatch',bank:won.bankVersion}));
 }finally{await env.cleanup();}

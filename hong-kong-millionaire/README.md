@@ -12,14 +12,15 @@
 - 匿名只存本瀏覽器今日進度；開局前登入 Google／Email 可保存歷史、稱號、錯題、圖鑑與收藏，參與每日／月度／生涯榜。
 - 每日榜依獎金、總作答時間、剩餘錦囊排序；成績分享不含題目、答案或 Email。另可明確選擇製作帶有題目的「考考朋友」圖片，預覽後才分享。
 
-## 全新進度版本
+## 單一遊戲資料設定
 
-目前只使用 `hk-2026-11-v4`；按擁有者要求，不延續舊版遊玩紀錄。Firebase 身份保留，進度、總獎金與排行榜從新集合開始。舊文件未刪除，本版不讀寫。
+以首次推出的新遊戲為前提，只使用目前完整題庫 `hk-2026-11`；沒有舊題庫相容、遷移或另開版本資料分區的流程。
 
 - 專案：`sky-playground-millionaire`，與其他遊戲獨立。
-- 集合：`hkm_v4_players`、`hkm_v4_results`、`hkm_v4_rankings`、`hkm_v4_seasons`。
-- Local Storage：`sky.hk-millionaire.today.v4`。
-- 需先發布完整規則和三個新集合索引，再上傳建置網站，詳見 [FIREBASE.md](FIREBASE.md)。
+- 集合沿用：`hkm_players`、`hkm_results`、`hkm_rankings`、`hkm_seasons`。
+- Local Storage 沿用：`sky.hk-millionaire.today.v1`。
+- 首次建立玩家及開始挑戰時，正常初始化紀錄；不會自動刪除現有 Firestore 文件。
+- 上線先發布完整規則，再上傳網站。三個索引沿用原本定義，已建立相同索引者無須新增，詳見 [FIREBASE.md](FIREBASE.md)。
 
 同一瀏覽器切換帳戶時，各帳戶向雲端核對自己的每日進度；匿名局不會轉成帳戶排名局。開局未確認、答案提交或結算失敗時會保留核對入口。答案重送會檢查題號、開始時間及狀態，不會套到下一題；倒數不重置。
 
