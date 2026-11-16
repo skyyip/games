@@ -1,7 +1,7 @@
 name: Verify Millionaire rewards
 on:
   push:
-    branches: [millionaire-rewards, main]
+    branches: [millionaire-rewards, millionaire-room-rework, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rewards.yml]
   workflow_dispatch:
 permissions:

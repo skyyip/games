@@ -59,38 +59,12 @@
       ]
     },
     {
-      "collectionGroup": "hkm_assisted_results",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "day",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "prize",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "timeMs",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "lifelinesLeft",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "completedAt",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "hkm_rooms",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "hostUid",
-          "order": "ASCENDING"
+          "fieldPath": "players",
+          "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "createdAt",

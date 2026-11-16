@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARDS,unlockedPrefixes,weekendKey,isWeekend} from '../src/economy.js';
-import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,ROOM_POOLS,roomWinner} from '../src/session-engine.js';
+import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
 import {hkDay,dayEnd} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
 test('purchases spend an available balance without reducing career prize totals',()=>{
@@ -29,12 +29,28 @@ test('all private topic pools support ten distinct synchronized questions',()=>{
  let run=newSession({id:'r',uid:'p',kind:'room',seed:19,topic:'sport',room:'r'},NOW,NOW);
  run=sessionAct(run,{type:'answer',choice:sessionQuestion(run).answer},NOW+500);
  assert.throws(()=>sessionAct(run,{type:'next'},NOW+1000),/room-wait/);
- run=sessionAct(run,{type:'next'},NOW+23000);assert.equal(run.questionAt,NOW+23000);assert.equal(run.index,1);
+ run=sessionAct(run,{type:'next'},NOW+ROOM_INTERVAL);assert.equal(run.questionAt,NOW+ROOM_INTERVAL);assert.equal(run.index,1);
 });
-test('the paid swap changes one question without extending its original countdown',()=>{
- let run=newSession({id:'a',uid:'p',kind:'assisted',seed:DAY},NOW);const initial=Array.from({length:15},(_,index)=>sessionQid(run,index));
- run=sessionAct(run,{type:'swap'},NOW+100);assert(!initial.includes(sessionQid(run)));assert.equal(run.questionAt,NOW);
- assert.throws(()=>sessionAct(run,{type:'swap'},NOW+200),/swap-unavailable/);
+test('removed paid mode and ticket cannot be started or purchased',()=>{
+ assert.throws(()=>newSession({id:'removed',uid:'p',kind:'assisted',seed:DAY},NOW),/invalid-session/);
+ assert.throws(()=>walletAction({total:1000000},emptyWallet('p',0),{type:'swap'},DAY),/invalid-item/);
+});
+test('room entry bounds, eight-character codes and fair shared fee',()=>{
+ for(const n of [2,3,4])assert.equal(roomFeeShare(n)*n,30000);
+ assert.throws(()=>roomFeeShare(5),/room-size/);
+ assert.equal(roomEntry(1000),1000);assert.equal(roomEntry(500000),500000);
+ for(const n of [0,999,500001,1000.5])assert.throws(()=>roomEntry(n),/invalid-entry/);
+ assert.match(roomCode(),/^[A-HJ-NP-Z2-9]{8}$/);
+});
+test('all submitted rooms can settle immediately; disconnected rooms retain a grace period',()=>{
+ const room={status:'playing',startedAt:NOW,players:['a','b'],scores:{a:{finished:true},b:{finished:false}}};
+ assert(!roomCanFinish(room,NOW+1000));room.scores.b.finished=true;assert(roomCanFinish(room,NOW+1000));
+ room.scores.b.finished=false;assert(!roomCanFinish(room,NOW+244999));assert(roomCanFinish(room,NOW+245000));
+});
+test('weekend ticket use cannot be reset by repurchasing the same weekend',()=>{
+ const w=walletAction({total:1000000},emptyWallet('p',0),{type:'pass'},DAY);assert.equal(w.passUses,0);
+ w.passUses=3;assert.throws(()=>walletAction({total:1000000},w,{type:'pass'},DAY),/already-owned/);
+ const next=walletAction({total:1000000},w,{type:'pass'},DAY+7);assert.equal(next.passUses,0);assert.equal(next.pass,DAY+7);
 });
 test('a wrong extra-mode result cannot be upgraded after midnight',()=>{
  let run=newSession({id:'w',uid:'p',kind:'weekend',seed:19},NOW);

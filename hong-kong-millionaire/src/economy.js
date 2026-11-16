@@ -38,7 +38,7 @@ export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wal
 export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
 export const isWeekend=(day=hkDay())=>[0,6].includes((day+4)%7);
-export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,swapTokens:0,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
+export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
 export function drawnCard(wallet,gold=false){
  const seed=Math.floor(wallet.createdAt?.toMillis?.()??wallet.createdAt??0);
  if(gold)return FOIL_CARDS[(seed+wallet.draws*5)%FOIL_CARDS.length];
@@ -52,8 +52,7 @@ export function walletAction(profile,wallet,action,day=hkDay()){
   if(action.slot==='prefix'){if(action.id!==''&&!unlockedPrefixes(wallet).some(s=>s.id===action.id))throw Error('not-owned');next.prefix=action.id;}
   else{if(!['frame','theme','exit'].includes(action.slot))throw Error('invalid-item');const reset=action.slot==='frame'?'none':'default';if(action.id!==reset&&(!wallet.owned.includes(action.id)||gearById(action.id)?.kind!==action.slot))throw Error('not-owned');next[action.slot]=action.id;}
   next.item=action.slot;
- }else if(action.type==='pass'){if(wallet.pass===weekendKey(day))throw Error('already-owned');cost=100000;next.pass=weekendKey(day);}
- else if(action.type==='swap'){if(wallet.swapTokens>0)throw Error('already-owned');cost=80000;next.swapTokens=1;}
+ }else if(action.type==='pass'){if(wallet.pass===weekendKey(day))throw Error('already-owned');cost=100000;next.pass=weekendKey(day);next.passUses=0;}
  else throw Error('invalid-item');
  if(walletBalance(profile,wallet)<cost)throw Error('insufficient-balance');next.spent+=cost;return next;
 }

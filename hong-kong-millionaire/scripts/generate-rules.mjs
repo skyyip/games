@@ -97,7 +97,6 @@ service cloud.firestore {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
     changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
-    :(p.get('activeKind','daily')=='assisted'||o.get('activeKind','daily')=='assisted')?arcadeProfileUpdate(p,o,uid)
     :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
     :profileFinish(p,o,uid));
   }

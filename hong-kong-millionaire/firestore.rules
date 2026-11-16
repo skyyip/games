@@ -88,7 +88,6 @@ service cloud.firestore {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
     changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
-    :(p.get('activeKind','daily')=='assisted'||o.get('activeKind','daily')=='assisted')?arcadeProfileUpdate(p,o,uid)
     :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
     :profileFinish(p,o,uid));
   }
@@ -135,7 +134,6 @@ service cloud.firestore {
   function rrPath(id){return /databases/$(database)/documents/hkm_rooms/$(id);}
   function rsPath(uid,id){return /databases/$(database)/documents/hkm_players/$(uid)/sessions/$(id);}
   function rrSession(id,uid){return /databases/$(database)/documents/hkm_rooms/$(id)/sessions/$(uid);}
-  function raResult(uid,day){let id=uid+'_'+string(day);return /databases/$(database)/documents/hkm_assisted_results/$(id);}
   function rwReceiptPath(uid,id){return /databases/$(database)/documents/hkm_wallets/$(uid)/receipts/$(id);}
   function rwActivePath(uid,w){return w.activeKind=='room'?rrSession(w.activeRoom,uid):rsPath(uid,w.activeSession);}
   function rwChanged(w,o,keys){return w.diff(o).affectedKeys().hasOnly(keys.concat(['revision','op','item','updatedAt']));}
@@ -143,9 +141,9 @@ service cloud.firestore {
   function rwIsWeekend(){return (today()+4)%7 in [0,6];}
   function rwOwned(w){return (w.frame=='none'||(w.frame in ["frame-rwb","frame-neon","frame-gold"]&&w.frame in w.owned))&&(w.theme=='default'||(w.theme in ["theme-cafe","theme-ink"]&&w.theme in w.owned))&&(w.exit=='default'||(w.exit in ["exit-redvan"]&&w.exit in w.owned))&&(w.prefix==''||(w.prefix=="transport"&&w.cards.get("hotdog",0)>0&&w.cards.get("old-ferry",0)>0&&w.cards.get("new-ferry",0)>0&&w.cards.get("first-metro",0)>0&&w.cards.get("whiteplate-foil",0)>0&&w.cards.get("tram-foil",0)>0)||(w.prefix=="heritage"&&w.cards.get("bun-tower",0)>0&&w.cards.get("fire-dragon",0)>0&&w.cards.get("mahjong-carving",0)>0&&w.cards.get("bamboo-theatre",0)>0&&w.cards.get("flower-foil",0)>0&&w.cards.get("floating-colour-foil",0)>0)||(w.prefix=="snacks"&&w.cards.get("rice-roll",0)>0&&w.cards.get("egg-waffle",0)>0&&w.cards.get("dog-noodle",0)>0&&w.cards.get("bowl-pudding",0)>0&&w.cards.get("milk-tea-foil",0)>0&&w.cards.get("lemon-tea-foil",0)>0));}
   function rwCreate(w,uid){
-   return w.keys().hasOnly(['uid','spent','bonus','draws','cards','owned','frame','theme','exit','prefix','pass','swapTokens','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
+   return w.keys().hasOnly(['uid','spent','bonus','draws','cards','owned','frame','theme','exit','prefix','pass','passUses','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
     &&w.uid==uid&&w.spent is int&&w.spent==0&&w.bonus is int&&w.bonus==0&&w.draws is int&&w.draws==0&&w.cards=={}&&w.owned==[]
-    &&w.frame=='none'&&w.theme=='default'&&w.exit=='default'&&w.prefix==''&&w.pass is int&&w.pass==-1&&w.swapTokens is int&&w.swapTokens==0
+    &&w.frame=='none'&&w.theme=='default'&&w.exit=='default'&&w.prefix==''&&w.pass is int&&w.pass==-1&&w.passUses is int&&w.passUses==0
     &&w.practiceDay is int&&w.practiceDay==-1&&w.practiceEarned is int&&w.practiceEarned==0&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
     &&w.revision is int&&w.revision==0&&w.op=='create'&&w.item==''&&w.receipt==''&&w.createdAt==request.time&&w.updatedAt==request.time&&exists(player(uid));
   }
@@ -164,34 +162,39 @@ service cloud.firestore {
    return rwReceipt(w,o,uid)&&get(player(uid)).data.total+o.bonus-o.spent>=w.spent-o.spent&&(
     w.op=='draw'?rwDraw(w,o,false):w.op=='gold'?rwDraw(w,o,true):w.op=='buy'?rwBuy(w,o):
     w.op=='equip'?(rwChanged(w,o,['frame','theme','exit','prefix','receipt'])&&w.spent==o.spent&&w.item in ['frame','theme','exit','prefix']&&rwOwned(w)):
-    w.op=='pass'?(rwChanged(w,o,['pass','spent','receipt'])&&o.pass!=rwWeekend()&&w.pass is int&&w.pass==rwWeekend()&&w.spent==o.spent+100000):
-    (rwChanged(w,o,['swapTokens','spent','receipt'])&&o.swapTokens==0&&w.swapTokens is int&&w.swapTokens==1&&w.spent==o.spent+80000));
+    (w.op=='pass'&&rwChanged(w,o,['pass','passUses','spent','receipt'])&&o.pass!=rwWeekend()&&w.pass is int&&w.pass==rwWeekend()&&w.passUses==0&&w.spent==o.spent+100000));
   }
   function rwStart(w,o,uid){
    let r=getAfter(rwActivePath(uid,w)).data;
-   return rwChanged(w,o,['activeSession','activeKind','activeRoom','swapTokens'])&&o.activeSession==''&&w.item==r.id&&w.activeSession==r.id&&w.activeKind==r.kind&&w.activeRoom==r.room
-    &&r.startedAt==request.time&&r.uid==uid&&r.phase=='playing'&&w.swapTokens is int&&w.swapTokens==o.swapTokens-(r.kind=='assisted'?1:0);
+   return rwChanged(w,o,['activeSession','activeKind','activeRoom','passUses','bonus'])&&o.activeSession==''&&w.item==r.id&&w.activeSession==r.id&&w.activeKind==r.kind&&w.activeRoom==r.room
+    &&r.startedAt==request.time&&r.uid==uid&&r.phase=='playing'&&(
+     r.kind=='weekend'?(w.passUses is int&&o.get('passUses',0)<3&&w.passUses==o.get('passUses',0)+1&&w.bonus==o.bonus):
+     (r.kind=='room'&&w.get('passUses',0)==o.get('passUses',0)&&w.bonus==o.bonus+rrCreditAmount(get(rrPath(r.room)).data,uid)&&getAfter(rrPath(r.room)).data.rebates[uid]==true));
   }
   function rwSettle(w,o,uid){
    let r=getAfter(rwActivePath(uid,o)).data;
    let oldEarned=o.practiceDay==r.day?o.practiceEarned:0;
    let reward=r.correct*500>5000?5000:r.correct*500;
    let capped=100000-oldEarned<reward?100000-oldEarned:reward;
-   let credit=r.kind=='weekend'?capped:r.kind=='assisted'?r.payout:0;
+   let credit=r.kind=='weekend'?capped:0;
    return rwChanged(w,o,['bonus','activeSession','activeKind','activeRoom','practiceDay','practiceEarned'])
     &&o.activeSession!=''&&w.item==o.activeSession&&get(rwActivePath(uid,o)).data.phase!='finished'&&r.phase=='finished'&&r.credited==true&&r.endedAt==request.time&&r.credit==credit
     &&w.bonus==o.bonus+credit&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
     &&(r.kind=='weekend'?(r.day>=o.practiceDay&&w.practiceDay==r.day&&w.practiceEarned==oldEarned+credit&&w.practiceEarned<=100000):(w.practiceDay==o.practiceDay&&w.practiceEarned==o.practiceEarned));
   }
-  function rwRoomDebit(w,o,uid){let r=getAfter(rrPath(w.item)).data;return rwChanged(w,o,['spent'])&&r.hostUid==uid&&r.createdAt==request.time&&r.status=='lobby'&&w.spent==o.spent+30000+r.pool&&get(player(uid)).data.total+o.bonus-o.spent>=30000+r.pool;}
+  function rwRoomDebit(w,o,uid){
+   let r=getAfter(rrPath(w.item)).data;let cost=r.entryFee+15000;
+   return rwChanged(w,o,['spent'])&&r.status=='lobby'&&uid in r.players&&r.updatedAt==request.time&&w.spent==o.spent+cost&&get(player(uid)).data.total+o.bonus-o.spent>=cost
+    &&(w.op=='create-room'?(r.hostUid==uid&&r.createdAt==request.time):!(uid in get(rrPath(w.item)).data.players));
+  }
   function rwRoomCredit(w,o,uid){
    let before=get(rrPath(w.item)).data;let after=getAfter(rrPath(w.item)).data;
-   return rwChanged(w,o,['bonus'])&&before.paidTo==''&&after.paidTo==uid&&after.updatedAt==request.time&&w.bonus==o.bonus+before.pool
-    &&(w.op=='room-prize'?(before.status=='finished'&&before.winner==uid&&after.status=='finished'):(before.hostUid==uid&&before.status in ['lobby','cancelled']&&after.status=='cancelled'));
+   return rwChanged(w,o,['bonus'])&&uid in before.players&&after.updatedAt==request.time&&w.bonus==o.bonus+rrCreditAmount(before,uid)
+    &&(before.rebates[uid]!=after.rebates[uid]||before.refunds[uid]!=after.refunds[uid]||before.paidTo!=after.paidTo);
   }
   function rwUpdate(w,o,uid){
    return w.updatedAt==request.time&&w.revision is int&&w.revision==o.revision+1&&w.spent is int&&w.spent>=0&&w.spent<=1000000000000&&w.bonus is int&&w.bonus>=0&&w.bonus<=1000000000000
-    &&(w.op in ['draw','gold','buy','equip','pass','swap']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='create-room'?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund']?rwRoomCredit(w,o,uid):false);
+    &&(w.op in ['draw','gold','buy','equip','pass']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
   }
   match /hkm_wallets/{uid}{
    allow get:if owner(uid);allow list,delete:if false;
@@ -201,7 +204,7 @@ service cloud.firestore {
     allow get:if owner(uid);allow list,update,delete:if false;
     allow create:if owner(uid)&&id.matches('^[a-f0-9-]{36}$')&&request.resource.data.keys().hasOnly(['uid','op','item','cost','revision','createdAt'])
      &&request.resource.data.createdAt==request.time&&request.resource.data.uid==uid
-     &&getAfter(rwPath(uid)).data.receipt==id&&getAfter(rwPath(uid)).data.op in ['draw','gold','buy','equip','pass','swap']
+     &&getAfter(rwPath(uid)).data.receipt==id&&getAfter(rwPath(uid)).data.op in ['draw','gold','buy','equip','pass']
      &&request.resource.data.op==getAfter(rwPath(uid)).data.op&&request.resource.data.item==getAfter(rwPath(uid)).data.item
      &&request.resource.data.revision==getAfter(rwPath(uid)).data.revision&&getAfter(rwPath(uid)).data.updatedAt==request.time
      &&request.resource.data.cost==getAfter(rwPath(uid)).data.spent-get(rwPath(uid)).data.spent;
@@ -213,38 +216,33 @@ service cloud.firestore {
     &&request.resource.data.uid==uid&&request.resource.data.updatedAt==request.time
     &&request.resource.data.frame==getAfter(rwPath(uid)).data.frame&&request.resource.data.theme==getAfter(rwPath(uid)).data.theme&&request.resource.data.prefix==getAfter(rwPath(uid)).data.prefix;
   }
-  function rsSwapQuestion(day,index){
-   let tier=int(index / 5);let slot=tier==0?(day*17+(index%5+5)*7+0)%73:tier==1?(day*17+(index%5+5)*7+11)%92:(day*17+(index%5+5)*7+22)%66;let ids=tier==0?["e01","e02","e03","e04","e05","e06","e07","e08","e09","e10","e11","e12","e13","e14","e15","e16","e17","e18","e19","e20","e21","e22","e23","e24","e25","e26","e27","e28","e29","e30","u04","u05","u08","u11","u14","c01","c03","c04","c08","c09","c10","c12","c18","c19","c34","c41","c45","c46","c48","c51","c60","c61","c62","c66","d05","d10","d12","d15","d17","d18","d21","d26","d27","d35","d38","d41","d43","d44","d45","d53","d54","d56","d59"]:tier==1?["m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m12","m13","m14","m15","m16","m17","m18","m19","m20","m21","m22","m23","m24","m25","m26","m27","m28","m29","m30","u02","u03","u06","u07","u09","u13","c02","c05","c07","c11","c13","c14","c16","c17","c20","c22","c23","c24","c26","c31","c33","c37","c42","c43","c49","c50","c52","c53","c54","c56","c57","c58","c59","c63","c64","c67","d01","d02","d03","d08","d09","d13","d14","d16","d22","d23","d25","d28","d29","d31","d32","d33","d36","d37","d39","d40","d42","d47","d48","d49","d50","d55"]:["h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h11","h12","h13","h14","h15","h16","h17","h18","h19","h20","h21","h22","h23","h24","h25","h26","h27","h28","h29","h30","u01","u10","u12","c06","c15","c21","c25","c27","c28","c29","c30","c32","c35","c36","c38","c39","c40","c44","c47","c55","c65","d04","d06","d07","d11","d19","d20","d24","d30","d34","d46","d51","d52","d57","d58","d60"];let answers=tier==0?[2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,2,0,1,3,2,0,1,1,2,3,1,3,0,3,2,2,3,1,0,1,2,3,3,3,0,2,1,3,0,3,0,1,1,0,3,1,2,3,3,0,2,1]:tier==1?[3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,1,3,1,2,2,3,2,0,0,2,3,1,2,1,3,0,1,3,0,2,2,3,0,2,3,1,2,3,1,2,3,0,0,1,0,3,0,1,2,3,3,0,2,0,1,3,2,3,1,2,3,2,3,1,2,0,1,2,3,0,1]:[0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,0,2,2,0,1,2,3,1,0,1,3,0,1,1,0,0,2,2,0,1,1,1,2,2,0,0,0,1,2,3,0,2];return [ids[slot],answers[slot]];
-  }
+
   function rsRoomQuestion(seed,index,topic){
    let ids=topic=='sport'?["e20","e21","e22","e23","m21","m22","m23","h26","h27","c13","c14","c32","c34","c50"]:["e01","e04","e13","e14","e15","m01","m02","m03","m04","m05","m06","m13","m24","m25","m30","h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h25","c05","c09","c16","c26","c27","c39","c42","c47","d32"];let answers=topic=='sport'?[1,2,3,0,3,0,1,1,2,2,3,1,3,3]:[2,1,2,3,0,3,0,1,2,3,0,3,2,3,0,0,1,2,3,0,1,2,3,0,1,0,2,2,1,3,0,0,3,0,2];let stride=topic=='sport'?9:8;
    let slot=(seed*17+index*stride)%ids.size();return [ids[slot],answers[slot]];
   }
   function rsQuestion(r){
    return r.kind=='room'?(r.topic=='all'?question(r.seed,r.index<3?r.index:r.index<7?r.index+2:r.index+3):rsRoomQuestion(r.seed,r.index,r.topic))
-    :r.kind=='assisted'?(r.swapFor==r.index?rsSwapQuestion(r.day,r.index):question(r.day,r.index)):question(r.seed,r.index);
+    :question(r.seed,r.index);
   }
   function rsTimely(r){return (r.kind=='room'||r.day==today())&&request.time>=r.questionAt&&request.time<=r.questionAt+duration.value(cap(r.index)+2000,'ms');}
   function rsCreate(r,uid,id,roomId){
    let w=getAfter(rwPath(uid)).data;
-   return r.keys().hasOnly(['id','uid','kind','seed','topic','room','bankVersion','day','count','phase','index','correct','timeMs','startedAt','questionAt','answerAt','endedAt','outcome','choice','halfFor','phoneFor','audienceFor','swapFor','answers','seen','payout','credit','credited','reason','updatedAt'])
+   return r.keys().hasOnly(['id','uid','kind','seed','topic','room','bankVersion','day','count','phase','index','correct','timeMs','startedAt','questionAt','answerAt','endedAt','outcome','choice','halfFor','phoneFor','audienceFor','answers','seen','payout','credit','credited','reason','updatedAt'])
     &&r.id==id&&r.id is string&&r.id.size()<=100&&r.uid==uid&&r.bankVersion=='hk-2026-11'&&r.seed is int&&r.seed>=0&&r.seed<=1000000000&&r.day is int&&r.day==today()
     &&r.count is int&&r.phase=='playing'&&r.index is int&&r.index==0&&r.correct is int&&r.correct==0&&r.timeMs is int&&r.timeMs==0&&r.startedAt==request.time&&r.updatedAt==request.time
-    &&r.answerAt==null&&r.endedAt==null&&r.outcome==''&&r.choice is int&&r.choice==-1&&r.halfFor is int&&r.halfFor==-1&&r.phoneFor is int&&r.phoneFor==-1&&r.audienceFor is int&&r.audienceFor==-1&&r.swapFor is int&&r.swapFor==-1
+    &&r.answerAt==null&&r.endedAt==null&&r.outcome==''&&r.choice is int&&r.choice==-1&&r.halfFor is int&&r.halfFor==-1&&r.phoneFor is int&&r.phoneFor==-1&&r.audienceFor is int&&r.audienceFor==-1
     &&r.answers=={}&&r.seen==[]&&r.payout is int&&r.payout==0&&r.credit is int&&r.credit==0&&r.credited==false&&r.reason==''
     &&w.op=='start-session'&&w.item==id&&w.activeSession==id&&w.activeKind==r.kind&&w.activeRoom==r.room&&w.updatedAt==request.time
-    &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(230,'s')):
-     (r.room==''&&r.topic=='all'&&r.count==15&&r.questionAt==request.time&&(
-      r.kind=='weekend'?(id.matches('^weekend_[a-f0-9-]{36}$')&&rwIsWeekend()&&get(rwPath(uid)).data.pass==rwWeekend()):
-      (r.kind=='assisted'&&id=='assisted_'+string(today())&&r.seed==today()&&get(rwPath(uid)).data.swapTokens==1&&get(player(uid)).data.activeDay==null&&get(player(uid)).data.lastSettledDay!=today()&&getAfter(player(uid)).data.activeDay==today()&&getAfter(player(uid)).data.get('activeKind','daily')=='assisted'))));
+    &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(215,'s')):
+     (r.room==''&&r.topic=='all'&&r.count==15&&r.questionAt==request.time&&r.kind=='weekend'&&id.matches('^weekend_[a-f0-9-]{36}$')&&rwIsWeekend()&&get(rwPath(uid)).data.pass==rwWeekend()&&get(rwPath(uid)).data.get('passUses',0)<3));
   }
   function rsLife(r,o){
    let changed=r.diff(o).affectedKeys();
    return rsTimely(o)&&(
     changed.hasOnly(['halfFor','updatedAt'])?(o.halfFor==-1&&r.halfFor is int&&r.halfFor==o.index):
     changed.hasOnly(['phoneFor','updatedAt'])?(o.phoneFor==-1&&r.phoneFor is int&&r.phoneFor==o.index):
-    changed.hasOnly(['audienceFor','updatedAt'])?(o.audienceFor==-1&&r.audienceFor is int&&r.audienceFor==o.index):
-    (changed.hasOnly(['swapFor','updatedAt'])&&o.kind=='assisted'&&o.swapFor==-1&&r.swapFor is int&&r.swapFor==o.index&&o.halfFor!=o.index&&o.phoneFor!=o.index&&o.audienceFor!=o.index));
+    (changed.hasOnly(['audienceFor','updatedAt'])&&o.audienceFor==-1&&r.audienceFor is int&&r.audienceFor==o.index));
   }
   function rsAnswer(r,o){
    let expected=rsQuestion(o);let item=r.answers[string(o.index)];
@@ -258,7 +256,7 @@ service cloud.firestore {
    return o.index<o.count-1&&(o.kind=='room'?o.outcome!='walk':(o.outcome=='correct'&&o.day==today()))
     &&r.diff(o).affectedKeys().hasOnly(['phase','index','timeMs','questionAt','answerAt','outcome','choice','updatedAt'])&&r.index is int&&r.index==o.index+1
     &&r.timeMs is int&&r.timeMs==o.timeMs+elapsed(o)&&r.answerAt==null&&r.outcome==''&&r.choice==-1
-    &&(o.kind=='room'?(r.questionAt==o.questionAt+duration.value(23,'s')&&request.time>=r.questionAt):r.questionAt==request.time);
+    &&(o.kind=='room'?(r.questionAt==o.questionAt+duration.value(21500,'ms')&&request.time>=r.questionAt):r.questionAt==request.time);
   }
   function rsReason(o){
    return o.kind=='room'&&o.index==o.count-1?'complete':o.correct==15?'complete':o.outcome=='correct'?(o.kind!='room'&&o.day!=today()?'timeout':'walk'):o.outcome;
@@ -269,8 +267,7 @@ service cloud.firestore {
     &&r.reason==reason&&r.timeMs is int&&r.timeMs==o.timeMs+elapsed(o)&&r.payout is int&&r.payout==(o.kind=='room'?0:reason=='wrong'?floorPrize(o.correct):prize(o.correct))
     &&get(rwPath(uid)).data.activeSession==o.id&&get(rwPath(uid)).data.activeKind==o.kind&&get(rwPath(uid)).data.activeRoom==o.room
     &&r.endedAt==request.time&&r.credit is int&&r.credit>=0&&r.credited==true&&w.op=='settle-session'&&w.item==o.id&&w.activeSession==''&&w.updatedAt==request.time
-    &&(o.kind=='room'?(get(rrPath(o.room)).data.status=='playing'?(getAfter(rrPath(o.room)).data.scores[uid].finished==true&&getAfter(rrPath(o.room)).data.scores[uid].finishedAt==request.time):(get(rrPath(o.room)).data.status in ['finished','cancelled']&&request.time>=get(rrPath(o.room)).data.startedAt+duration.value(260,'s'))):
-     o.kind=='assisted'?(getAfter(player(uid)).data.activeDay==null&&getAfter(player(uid)).data.lastSettledDay==o.day&&getAfter(raResult(uid,o.day)).data.completedAt==request.time):true);
+    &&(o.kind=='room'?(get(rrPath(o.room)).data.status=='playing'?(getAfter(rrPath(o.room)).data.scores[uid].finished==true&&getAfter(rrPath(o.room)).data.scores[uid].finishedAt==request.time):get(rrPath(o.room)).data.status in ['finished','cancelled']):true);
   }
   function rsUpdate(r,o,uid){return r.updatedAt==request.time&&(o.phase=='playing'?(r.phase=='playing'?rsLife(r,o):rsAnswer(r,o)):o.phase=='reveal'?(r.phase=='playing'?rsAdvance(r,o):rsFinish(r,o,uid)):false);}
   match /hkm_players/{uid}/sessions/{id}{
@@ -278,71 +275,64 @@ service cloud.firestore {
    allow create:if owner(uid)&&rsCreate(request.resource.data,uid,id,'');
    allow update:if owner(uid)&&rsUpdate(request.resource.data,resource.data,uid);
   }
-  function arcadeProfileUpdate(p,o,uid){
-   let id='assisted_'+string(p.activeDay==null?o.activeDay:p.activeDay);
-   let r=getAfter(rsPath(uid,id)).data;
-   return p.updatedAt==request.time&&(
-    o.activeDay==null?(p.diff(o).affectedKeys().hasOnly(['activeDay','activeKind','updatedAt'])&&o.lastSettledDay!=today()&&p.activeDay==today()&&p.get('activeKind','daily')=='assisted'&&r.phase=='playing'&&r.kind=='assisted'&&r.startedAt==request.time):
-    (o.get('activeKind','daily')=='assisted'&&p.diff(o).affectedKeys().hasOnly(['activeDay','activeKind','lastSettledDay','updatedAt'])&&p.activeDay==null&&p.get('activeKind','daily')=='daily'&&p.lastSettledDay==o.activeDay&&get(rsPath(uid,id)).data.phase!='finished'&&r.phase=='finished'&&r.endedAt==request.time));
-  }
-  match /hkm_assisted_results/{id}{
-   allow get:if true;allow list:if request.query.limit<=20;allow update,delete:if false;
-   allow create:if owner(request.resource.data.uid)&&raValid(request.resource.data,id);
-  }
-  function raValid(v,id){
-   let r=getAfter(rsPath(v.uid,'assisted_'+string(v.day))).data;
-   return v.keys().hasOnly(['uid','day','displayName','prize','timeMs','lifelinesLeft','correct','assisted','swapUsed','completedAt'])&&id==v.uid+'_'+string(v.day)
-    &&r.kind=='assisted'&&r.phase=='finished'&&r.credited==true&&r.endedAt==request.time&&r.day==v.day&&v.assisted==true&&v.swapUsed==(r.swapFor>=0)
-    &&v.displayName==get(player(v.uid)).data.displayName&&v.prize==r.payout&&v.timeMs==r.timeMs&&v.lifelinesLeft==lifeLeft(r)&&v.correct==r.correct&&v.completedAt==request.time;
-  }
+
   function rrEmpty(){return {'correct':0,'timeMs':0,'finished':false,'finishedAt':null};}
+  function rrDebit(uid,id,cost,op){let w=getAfter(rwPath(uid)).data;return w.op==op&&w.item==id&&w.updatedAt==request.time&&w.spent==get(rwPath(uid)).data.spent+cost;}
   function rrCreate(v,id){
-   let uid=request.auth.uid;let w=getAfter(rwPath(uid)).data;
-   return v.keys().hasOnly(['id','hostUid','hostName','players','names','topic','pool','seed','status','scores','winner','winnerOrder','paidTo','createdAt','startedAt','updatedAt'])
-    &&id.matches('^[a-f0-9]{32}$')&&v.id==id&&v.hostUid==uid&&v.hostName==get(player(uid)).data.displayName&&v.players==[uid]&&v.names.size()==1&&v.names.keys().hasOnly([uid])&&v.names[uid]==v.hostName&&v.scores.size()==1&&v.scores.keys().hasOnly([uid])&&v.scores[uid]==rrEmpty()
-    &&v.topic in ['all','sport','places']&&v.pool is int&&v.pool>=0&&v.pool<=500000&&v.seed is int&&v.seed>=0&&v.seed<=1000000000
-    &&v.status=='lobby'&&v.winner==''&&v.winnerOrder==-1&&v.paidTo==''&&v.createdAt==request.time&&v.startedAt==null&&v.updatedAt==request.time
-    &&w.op=='create-room'&&w.item==id&&w.updatedAt==request.time&&w.spent==get(rwPath(uid)).data.spent+30000+v.pool;
-  }
-  function rrJoin(v,o){
    let uid=request.auth.uid;
-   return o.status=='lobby'&&request.time<o.createdAt+duration.value(1,'h')&&o.players.size()<6&&!(uid in o.players)&&v.diff(o).affectedKeys().hasOnly(['players','names','scores','updatedAt'])
+   return v.keys().hasOnly(['id','hostUid','hostName','players','names','topic','entryFee','pool','feeShare','rebates','refunds','seed','status','scores','winner','winnerOrder','paidTo','createdAt','startedAt','updatedAt'])
+    &&id.matches('^[A-HJ-NP-Z2-9]{8}$')&&v.id==id&&v.hostUid==uid&&v.hostName==get(player(uid)).data.displayName&&v.players==[uid]&&v.names.size()==1&&v.names.keys().hasOnly([uid])&&v.names[uid]==v.hostName&&v.scores.size()==1&&v.scores.keys().hasOnly([uid])&&v.scores[uid]==rrEmpty()
+    &&v.rebates.size()==1&&v.rebates.keys().hasOnly([uid])&&v.rebates[uid]==false&&v.refunds.size()==1&&v.refunds.keys().hasOnly([uid])&&v.refunds[uid]==false
+    &&v.entryFee is int&&v.entryFee>=1000&&v.entryFee<=500000&&v.pool==v.entryFee&&v.feeShare==0
+    &&v.topic in ['all','sport','places']&&v.seed is int&&v.seed>=0&&v.seed<=1000000000
+    &&v.status=='lobby'&&v.winner==''&&v.winnerOrder==-1&&v.paidTo==''&&v.createdAt==request.time&&v.startedAt==null&&v.updatedAt==request.time
+    &&rrDebit(uid,id,v.entryFee+15000,'create-room');
+  }
+  function rrJoin(v,o,id){
+   let uid=request.auth.uid;
+   return o.status=='lobby'&&request.time<o.createdAt+duration.value(1,'h')&&o.players.size()<4&&!(uid in o.players)&&v.diff(o).affectedKeys().hasOnly(['players','names','scores','pool','rebates','refunds','updatedAt'])
     &&v.players==o.players.concat([uid])&&v.names.diff(o.names).affectedKeys().hasOnly([uid])&&v.names[uid]==get(player(uid)).data.displayName
-    &&v.scores.diff(o.scores).affectedKeys().hasOnly([uid])&&v.scores[uid]==rrEmpty();
+    &&v.scores.diff(o.scores).affectedKeys().hasOnly([uid])&&v.scores[uid]==rrEmpty()&&v.pool==o.pool+o.entryFee
+    &&v.rebates.diff(o.rebates).affectedKeys().hasOnly([uid])&&v.rebates[uid]==false&&v.refunds.diff(o.refunds).affectedKeys().hasOnly([uid])&&v.refunds[uid]==false
+    &&rrDebit(uid,id,o.entryFee+15000,'join-room');
   }
   function rrReport(v,o,id){
    let uid=request.auth.uid;let r=getAfter(rrSession(id,uid)).data;let item=v.scores[uid];
-   return o.status=='playing'&&uid in o.players&&v.diff(o).affectedKeys().hasOnly(['scores','updatedAt'])&&v.scores.diff(o.scores).affectedKeys().hasOnly([uid])
-    &&r.phase=='finished'&&r.endedAt==request.time&&item.keys().hasOnly(['correct','timeMs','finished','finishedAt'])&&item.finished==true&&item.correct==r.correct&&item.timeMs==r.timeMs&&item.finishedAt==request.time;
+   return o.status=='playing'&&uid in o.players&&o.scores[uid].finished==false&&v.diff(o).affectedKeys().hasOnly(['scores','updatedAt'])&&v.scores.diff(o.scores).affectedKeys().hasOnly([uid])
+    &&get(rrSession(id,uid)).data.phase!='finished'&&r.phase=='finished'&&r.endedAt==request.time&&item.keys().hasOnly(['correct','timeMs','finished','finishedAt'])&&item.finished==true&&item.correct==r.correct&&item.timeMs==r.timeMs&&item.finishedAt==request.time;
   }
   function rrBeats(a,b,ai,bi){return !b.finished||a.correct>b.correct||(a.correct==b.correct&&(a.timeMs<b.timeMs||(a.timeMs==b.timeMs&&ai<=bi)));}
   function rrWinner(v,o){
    let i=v.winnerOrder;let a=o.scores[o.players[i]];
-   return i is int&&i>=0&&i<o.players.size()&&v.winner==o.players[i]&&a.finished
-    &&rrBeats(a,o.scores[o.players[0]],i,0)
-    &&(o.players.size()<2||rrBeats(a,o.scores[o.players[1]],i,1))
-    &&(o.players.size()<3||rrBeats(a,o.scores[o.players[2]],i,2))
-    &&(o.players.size()<4||rrBeats(a,o.scores[o.players[3]],i,3))
-    &&(o.players.size()<5||rrBeats(a,o.scores[o.players[4]],i,4))
-    &&(o.players.size()<6||rrBeats(a,o.scores[o.players[5]],i,5));
+   return i is int&&i>=0&&i<o.players.size()&&v.winner==o.players[i]&&a.finished&&rrBeats(a,o.scores[o.players[0]],i,0)
+    &&rrBeats(a,o.scores[o.players[1]],i,1)&&(o.players.size()<3||rrBeats(a,o.scores[o.players[2]],i,2))&&(o.players.size()<4||rrBeats(a,o.scores[o.players[3]],i,3));
   }
-  function rrNoFinish(o){return !o.scores[o.players[0]].finished&&(o.players.size()<2||!o.scores[o.players[1]].finished)&&(o.players.size()<3||!o.scores[o.players[2]].finished)&&(o.players.size()<4||!o.scores[o.players[3]].finished)&&(o.players.size()<5||!o.scores[o.players[4]].finished)&&(o.players.size()<6||!o.scores[o.players[5]].finished);}
+  function rrAll(o){return o.scores[o.players[0]].finished&&o.scores[o.players[1]].finished&&(o.players.size()<3||o.scores[o.players[2]].finished)&&(o.players.size()<4||o.scores[o.players[3]].finished);}
+  function rrNone(o){return !o.scores[o.players[0]].finished&&!o.scores[o.players[1]].finished&&(o.players.size()<3||!o.scores[o.players[2]].finished)&&(o.players.size()<4||!o.scores[o.players[3]].finished);}
+  function rrCreditAmount(o,uid){
+   return (o.startedAt!=null&&!o.rebates[uid]?15000-o.feeShare:0)+(o.status=='cancelled'&&!o.refunds[uid]?o.entryFee+(o.startedAt==null?15000:0):0)+(o.status=='finished'&&o.winner==uid&&o.paidTo==''?o.pool:0);
+  }
   function rrPayment(v,o,id){
    let uid=request.auth.uid;let w=getAfter(rwPath(uid)).data;
-   return o.paidTo==''&&v.paidTo==uid&&v.diff(o).affectedKeys().hasOnly(['status','paidTo','updatedAt'])&&w.item==id&&w.updatedAt==request.time&&w.bonus==get(rwPath(uid)).data.bonus+o.pool
-    &&(w.op=='room-prize'?(o.status=='finished'&&o.winner==uid&&v.status=='finished'):(w.op=='room-refund'&&o.hostUid==uid&&o.status in ['lobby','cancelled']&&v.status=='cancelled'));
+   return uid in o.players&&v.diff(o).affectedKeys().hasOnly(['rebates','refunds','paidTo','updatedAt'])
+    &&v.rebates.diff(o.rebates).affectedKeys().hasOnly([uid])&&v.refunds.diff(o.refunds).affectedKeys().hasOnly([uid])
+    &&v.rebates[uid]==(o.rebates[uid]||o.startedAt!=null||o.status=='cancelled')&&v.refunds[uid]==(o.refunds[uid]||o.status=='cancelled')
+    &&v.paidTo==(o.status=='finished'&&o.winner==uid&&o.paidTo==''?uid:o.paidTo)
+    &&(v.rebates!=o.rebates||v.refunds!=o.refunds||v.paidTo!=o.paidTo)
+    &&w.op in ['start-session','room-prize','room-refund','room-rebate']&&w.item==id&&w.updatedAt==request.time&&w.bonus==get(rwPath(uid)).data.bonus+rrCreditAmount(o,uid);
   }
   function rrUpdate(v,o,id){
    let uid=request.auth.uid;let changed=v.diff(o).affectedKeys();
    return v.updatedAt==request.time&&(
-    changed.hasOnly(['players','names','scores','updatedAt'])&&v.players!=o.players?rrJoin(v,o):
-    changed.hasOnly(['status','startedAt','updatedAt'])&&v.status=='playing'?(o.status=='lobby'&&uid==o.hostUid&&o.players.size()>=2&&request.time<o.createdAt+duration.value(1,'h')&&v.startedAt==request.time):
+    changed.hasOnly(['players','names','scores','pool','rebates','refunds','updatedAt'])&&v.players!=o.players?rrJoin(v,o,id):
+    changed.hasOnly(['status','startedAt','feeShare','updatedAt'])&&v.status=='playing'?(o.status=='lobby'&&uid==o.hostUid&&o.players.size()>=2&&request.time<o.createdAt+duration.value(1,'h')&&v.startedAt==request.time&&v.feeShare==int(30000 / o.players.size())):
+    changed.hasOnly(['status','updatedAt'])&&v.status=='cancelled'?(o.status=='lobby'&&uid==o.hostUid):
     changed.hasOnly(['scores','updatedAt'])?rrReport(v,o,id):
-    o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&request.time>=o.startedAt+duration.value(260,'s')&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNoFinish(o)))):
+    o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&(rrAll(o)||request.time>=o.startedAt+duration.value(245,'s'))&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNone(o)))):
     rrPayment(v,o,id));
   }
   match /hkm_rooms/{id}{
-   allow get:if request.auth!=null;allow list:if request.auth!=null&&resource.data.hostUid==request.auth.uid&&request.query.limit<=20;allow delete:if false;
+   allow get:if request.auth!=null;allow list:if request.auth!=null&&request.auth.uid in resource.data.players&&request.query.limit<=20;allow delete:if false;
    allow create:if request.auth!=null&&rrCreate(request.resource.data,id);
    allow update:if request.auth!=null&&rrUpdate(request.resource.data,resource.data,id);
    match /sessions/{uid}{

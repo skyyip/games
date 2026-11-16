@@ -12,11 +12,11 @@ export async function downloadResultCard({run,name,wallet}){
  const colors=wallet?.frame==='frame-rwb'?['#c64039','#faf7e6','#23619b']:wallet?.frame==='frame-neon'?['#793ea0','#e35070','#376e58']:['#a6762c','#e6ba55','#846322'];
  for(let i=0;i<3;i++){c.strokeStyle=colors[i];c.lineWidth=13;c.strokeRect(27+i*17,27+i*17,1026-i*34,1026-i*34);}
  c.textAlign='center';c.fillStyle='#234b3d';c.font='bold 46px sans-serif';c.fillText('香港百萬富翁',540,160);
- c.font='32px sans-serif';c.fillText((run.kind==='assisted'?'🛒 換題挑戰':run.kind==='weekend'?'週末練習':'每日挑戰')+' · 香港街坊',540,225);
+ c.font='32px sans-serif';c.fillText((run.kind==='weekend'?'週末練習':'每日挑戰')+' · 香港街坊',540,225);
  c.font='bold 44px sans-serif';const safe=String(name).slice(0,20);c.fillText(safe,540,330,850);
  c.fillStyle='#983a2d';c.font='bold 47px sans-serif';c.fillText(prefixedTitle(wallet,titleFor(run.payout).name),540,415,850);
  c.fillStyle='#72521c';c.font='bold 94px sans-serif';c.fillText('$'+run.payout.toLocaleString('en-HK'),540,550);
- c.font='28px sans-serif';c.fillText('虛擬港元・不可兌換現金',540,607);
+ c.font='28px sans-serif';c.fillText('港元・不可兌換現金',540,607);
  c.fillStyle='#234b3d';c.font='32px sans-serif';c.fillText('答對 '+run.correct+'／15 題 · '+(run.timeMs/1000).toFixed(1)+' 秒',540,695);
  for(let i=0;i<15;i++){const x=222+(i%5)*134,y=746+Math.floor(i/5)*51;c.fillStyle=run.answers[i]?.outcome==='correct'?'#316e52':run.answers[i]?'#b34a3b':'#c9c9ba';c.fillRect(x,y,100,29);}
  c.fillStyle='#435b50';c.font='23px sans-serif';c.fillText('sky-playground.com/games/hong-kong-millionaire/',540,978);
