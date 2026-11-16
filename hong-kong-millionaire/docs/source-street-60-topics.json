@@ -1,0 +1,426 @@
+{
+  "sourceFiles": 2,
+  "sourceEntries": 60,
+  "topics": [
+    {
+      "id": "s01",
+      "source": 1,
+      "sourceNumber": 1,
+      "topic": "商場花槽石壆邊緣的「小金屬凸粒」（防滑板裝置）",
+      "scene": "studs"
+    },
+    {
+      "id": "s02",
+      "source": 1,
+      "sourceNumber": 2,
+      "topic": "公眾洗手間廁格門板「底部留空一大截」的標準設計",
+      "scene": "door-gap"
+    },
+    {
+      "id": "s03",
+      "source": 1,
+      "sourceNumber": 3,
+      "topic": "巴士站旁「黃色鋸齒線（巴士停車處）」的禁區鐵律",
+      "scene": "bus-stop"
+    },
+    {
+      "id": "s04",
+      "source": 1,
+      "sourceNumber": 4,
+      "topic": "行車天橋與海濱長廊欄杆的「向內傾斜／圓管頂部」設計",
+      "scene": "rail"
+    },
+    {
+      "id": "s05",
+      "source": 1,
+      "sourceNumber": 5,
+      "topic": "商場與屋苑停車場入口「上下雙層八達通讀卡器」",
+      "scene": "readers"
+    },
+    {
+      "id": "s06",
+      "source": 1,
+      "sourceNumber": 6,
+      "topic": "港鐵月台地面「斜向排隊箭咀」的流體力學秘密",
+      "scene": "queue"
+    },
+    {
+      "id": "s07",
+      "source": 1,
+      "sourceNumber": 7,
+      "topic": "紅的、綠的、藍的三種的士「共同合法禁區突破點」",
+      "scene": "taxis"
+    },
+    {
+      "id": "s08",
+      "source": 1,
+      "sourceNumber": 8,
+      "topic": "雙層巴士下層車尾「高高隆起的幾級台階座位」",
+      "scene": "bus-step"
+    },
+    {
+      "id": "s09",
+      "source": 1,
+      "sourceNumber": 9,
+      "topic": "港鐵車廂地面「車門附近與車廂中央」的雙色地膠分界",
+      "scene": "floor-zones"
+    },
+    {
+      "id": "s10",
+      "source": 1,
+      "sourceNumber": 10,
+      "topic": "九巴「紅巴」車身塗裝上的「城市剪影與心跳線」暗號",
+      "scene": "heartbeat-bus"
+    },
+    {
+      "id": "s11",
+      "source": 1,
+      "sourceNumber": 11,
+      "topic": "港式麵包店名物「雞尾包」沒有雞尾，它的誕生秘密是什麼？",
+      "scene": "bun"
+    },
+    {
+      "id": "s12",
+      "source": 1,
+      "sourceNumber": 12,
+      "topic": "茶餐廳「厚身白色瓷杯（奶茶杯）」的物理保溫絕學",
+      "scene": "warm-cup"
+    },
+    {
+      "id": "s13",
+      "source": 1,
+      "sourceNumber": 13,
+      "topic": "香港經典國貨「紅A牌塑膠水桶」桶身的「一圈圈凸起橫紋」",
+      "scene": "buckets"
+    },
+    {
+      "id": "s14",
+      "source": 1,
+      "sourceNumber": 14,
+      "topic": "傳統涼茶舖櫃檯上的「巨型金色大銅葫蘆」",
+      "scene": "gourd"
+    },
+    {
+      "id": "s15",
+      "source": 1,
+      "sourceNumber": 15,
+      "topic": "港式大牌檔或茶餐廳「凍飲膠杯」底部的「凹陷圓坑」",
+      "scene": "cup-base"
+    },
+    {
+      "id": "s16",
+      "source": 1,
+      "sourceNumber": 16,
+      "topic": "街邊牆身「黃底黑字 H」小鐵牌的消防密碼",
+      "scene": "hydrant-plate"
+    },
+    {
+      "id": "s17",
+      "source": 1,
+      "sourceNumber": 17,
+      "topic": "港鐵站與低窪地帶商舖門框的「垂直金屬凹槽」",
+      "scene": "flood-slots"
+    },
+    {
+      "id": "s18",
+      "source": 1,
+      "sourceNumber": 18,
+      "topic": "香港高樓大廈外牆「外露排污渠」的建築智慧",
+      "scene": "pipes"
+    },
+    {
+      "id": "s19",
+      "source": 1,
+      "sourceNumber": 19,
+      "topic": "巴士候車亭屋頂為何刻意「向後（行人路方向）傾斜」？",
+      "scene": "shelter"
+    },
+    {
+      "id": "s20",
+      "source": 1,
+      "sourceNumber": 20,
+      "topic": "康文署公眾泳池池邊「與水面平齊的溢水槽」",
+      "scene": "pool-gutter"
+    },
+    {
+      "id": "s21",
+      "source": 1,
+      "sourceNumber": 21,
+      "topic": "新界西北「輕鐵」月台為何分設「橙色」與「綠色」拍卡機？",
+      "scene": "light-rail-readers"
+    },
+    {
+      "id": "s22",
+      "source": 1,
+      "sourceNumber": 22,
+      "topic": "港鐵車廂連接處（風琴位）的「兩塊重疊半圓形鐵板」",
+      "scene": "gangway"
+    },
+    {
+      "id": "s23",
+      "source": 1,
+      "sourceNumber": 23,
+      "topic": "部分九巴路線落車門旁的「雙向分段收費」拍卡機",
+      "scene": "rebate-reader"
+    },
+    {
+      "id": "s24",
+      "source": 1,
+      "sourceNumber": 24,
+      "topic": "經典「叮叮」電車車頭擋風玻璃「向外推開」的通風絕技",
+      "scene": "tram-window"
+    },
+    {
+      "id": "s25",
+      "source": 1,
+      "sourceNumber": 25,
+      "topic": "港鐵機場快綫列車「不設企位吊環」的貼心設計",
+      "scene": "luggage-rack"
+    },
+    {
+      "id": "s26",
+      "source": 1,
+      "sourceNumber": 26,
+      "topic": "港式「絲襪奶茶」白色棉布茶袋為何「越舊越好沖」？",
+      "scene": "tea-sock"
+    },
+    {
+      "id": "s27",
+      "source": 1,
+      "sourceNumber": 27,
+      "topic": "正宗港式雲吞麵「湯匙墊底、雲吞在中、麵條放頂」的擺盤哲學",
+      "scene": "wonton"
+    },
+    {
+      "id": "s28",
+      "source": 1,
+      "sourceNumber": 28,
+      "topic": "香港家用「英式三腳插頭」頂部那支「地線腳」為何特別長？",
+      "scene": "plug"
+    },
+    {
+      "id": "s29",
+      "source": 1,
+      "sourceNumber": 29,
+      "topic": "住宅大門「防盜眼（貓眼）」為何屋外完全看不到屋內？",
+      "scene": "peephole"
+    },
+    {
+      "id": "s30",
+      "source": 1,
+      "sourceNumber": 30,
+      "topic": "玻璃樽裝「維他奶」為何總讓人覺得比紙包裝特別好飲？",
+      "scene": "drink-packs"
+    },
+    {
+      "id": "s31",
+      "source": 1,
+      "sourceNumber": 31,
+      "topic": "行人過路處路邊地面的「望左 / 望右」白色大字",
+      "scene": "look-right"
+    },
+    {
+      "id": "s32",
+      "source": 1,
+      "sourceNumber": 32,
+      "topic": "行人過路處「綠公仔」閃動時的「急促嘟嘟聲」",
+      "scene": "crossing"
+    },
+    {
+      "id": "s33",
+      "source": 1,
+      "sourceNumber": 33,
+      "topic": "行人路邊「可拆卸式防撞鐵柱」底部的鎖孔機關",
+      "scene": "bollard"
+    },
+    {
+      "id": "s34",
+      "source": 1,
+      "sourceNumber": 34,
+      "topic": "香港住宅「外鐵閘＋內木門」的經典雙門防盜通風組合",
+      "scene": "double-door"
+    },
+    {
+      "id": "s35",
+      "source": 1,
+      "sourceNumber": 35,
+      "topic": "舊式唐樓外牆「伸出馬路的大型霓虹燈招牌」逐步消失之謎",
+      "scene": "neon-bracket"
+    },
+    {
+      "id": "s36",
+      "source": 1,
+      "sourceNumber": 36,
+      "topic": "港鐵「請小心空隙（Please mind the gap）」英文女聲的幕後主人",
+      "scene": "announcement"
+    },
+    {
+      "id": "s37",
+      "source": 1,
+      "sourceNumber": 37,
+      "topic": "雙層巴士車頭「上層剩餘座位顯示屏」的計算原理",
+      "scene": "seat-counter"
+    },
+    {
+      "id": "s38",
+      "source": 1,
+      "sourceNumber": 38,
+      "topic": "香港「叮叮」電車車頂的「單桿集電桿（辮子）」與車尾拉繩",
+      "scene": "trolley"
+    },
+    {
+      "id": "s39",
+      "source": 1,
+      "sourceNumber": 39,
+      "topic": "乘搭公共小巴「不佩戴安全帶」被檢控的法律責任歸屬",
+      "scene": "seatbelt"
+    },
+    {
+      "id": "s40",
+      "source": 1,
+      "sourceNumber": 40,
+      "topic": "香港的士「行李附加費」的尺寸計算冷知識",
+      "scene": "suitcase-measures"
+    },
+    {
+      "id": "s41",
+      "source": 1,
+      "sourceNumber": 41,
+      "topic": "港式街頭名物「雞蛋仔」倒漿後必須「立即反轉烤模」的物理絕學",
+      "scene": "waffle"
+    },
+    {
+      "id": "s42",
+      "source": 1,
+      "sourceNumber": 42,
+      "topic": "傳統酒樓「蝦餃」堅持「十二至十三摺」的點心工藝標準",
+      "scene": "dumpling"
+    },
+    {
+      "id": "s43",
+      "source": 1,
+      "sourceNumber": 43,
+      "topic": "超級市場「益力多」為何堅持使用「100 毫升迷你膠樽」？",
+      "scene": "lactic-label"
+    },
+    {
+      "id": "s44",
+      "source": 1,
+      "sourceNumber": 44,
+      "topic": "傳統港式「煲仔飯」堅持使用「瓦煲（砂鍋）」而非不鏽鋼煲的秘密",
+      "scene": "claypot"
+    },
+    {
+      "id": "s45",
+      "source": 1,
+      "sourceNumber": 45,
+      "topic": "茶餐廳經典飲品「鴛鴦」的誕生與香港碼頭工人文化",
+      "scene": "yuenyeung"
+    },
+    {
+      "id": "s46",
+      "source": 2,
+      "sourceNumber": 1,
+      "topic": "馬路停車線前柏油路上的「黑色長方形／菱形切線」（車輛感應線圈）",
+      "scene": "loop"
+    },
+    {
+      "id": "s47",
+      "source": 2,
+      "sourceNumber": 2,
+      "topic": "交通燈箱四周那圈「白色反光外框」",
+      "scene": "signal-border"
+    },
+    {
+      "id": "s48",
+      "source": 2,
+      "sourceNumber": 3,
+      "topic": "行車隧道入口處上方的「鏤空石屎／金屬遮光棚」",
+      "scene": "tunnel-louvers"
+    },
+    {
+      "id": "s49",
+      "source": 2,
+      "sourceNumber": 4,
+      "topic": "山邊公路與隧道口旁的「紅／黃色玻璃纖維大砂箱」",
+      "scene": "sand-box"
+    },
+    {
+      "id": "s50",
+      "source": 2,
+      "sourceNumber": 5,
+      "topic": "行人路過路處斜坡位的「下斜路緣」與黃色圓點磚",
+      "scene": "tactile"
+    },
+    {
+      "id": "s51",
+      "source": 2,
+      "sourceNumber": 6,
+      "topic": "港鐵車站所有出入口都比街道「高出幾級樓梯」的防洪設計",
+      "scene": "raised-entry"
+    },
+    {
+      "id": "s52",
+      "source": 2,
+      "sourceNumber": 7,
+      "topic": "雙層巴士車窗旁「緊急逃生錘」貼紙指示敲擊「玻璃四個角落」",
+      "scene": "hammer"
+    },
+    {
+      "id": "s53",
+      "source": 2,
+      "sourceNumber": 8,
+      "topic": "街邊綠色郵筒分設「本港」與「外地／空郵」雙投信口",
+      "scene": "post-slots"
+    },
+    {
+      "id": "s54",
+      "source": 2,
+      "sourceNumber": 9,
+      "topic": "香港天文台「黃、紅、黑」三色暴雨警告的降雨量標準",
+      "scene": "rain"
+    },
+    {
+      "id": "s55",
+      "source": 2,
+      "sourceNumber": 10,
+      "topic": "公立醫院急症室「五級分流制度」的第一類「危殆」承諾",
+      "scene": "triage"
+    },
+    {
+      "id": "s56",
+      "source": 2,
+      "sourceNumber": 11,
+      "topic": "茶餐廳「餐蛋麵」轉「出前一丁」為何幾乎全港都要加 $3 至 $5？",
+      "scene": "menu"
+    },
+    {
+      "id": "s57",
+      "source": 2,
+      "sourceNumber": 12,
+      "topic": "香港食水自 1961 年起加入「氟化物（Fluoride）」的公共衛生奇蹟",
+      "scene": "water-tooth"
+    },
+    {
+      "id": "s58",
+      "source": 2,
+      "sourceNumber": 13,
+      "topic": "街市菜檔與生果檔愛用「鮮紅色膠帶／紅繩」綑綁蔬果的視覺玄機",
+      "scene": "vegetables"
+    },
+    {
+      "id": "s59",
+      "source": 2,
+      "sourceNumber": 14,
+      "topic": "傳統中式餅家「嫁女餅」中的「皮蛋酥」為何完全沒有蛋腥味？",
+      "scene": "pastry"
+    },
+    {
+      "id": "s60",
+      "source": 2,
+      "sourceNumber": 15,
+      "topic": "香港住宅買賣自 2013 年起強制統一使用「實用面積」計算呎價的改革",
+      "scene": "floorplan"
+    }
+  ]
+}

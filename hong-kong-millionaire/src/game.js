@@ -1,3 +1,4 @@
+import {chooseVisualMode,visualSpec} from './question-view.js';
 import {QUESTIONS} from './questions.js';
 export const BANK_VERSION='hk-2026-11';
 export const SUPPORTED_BANK_VERSIONS=Object.freeze([BANK_VERSION]);
@@ -21,7 +22,7 @@ export function hash(text){let h=2166136261;for(const c of String(text))h=Math.i
 export function questionId(day,index,version=BANK_VERSION){const tier=Math.floor(index/5),pool=QUESTION_PLANS[version]?.[tier];if(!pool)throw Error('bank-version');const slot=(day*pool.dayStep+(index%5)*pool.slotStep+tier*11)%pool.ids.length;return pool.ids[slot];}
 export const questionById=id=>byId.get(id);
 export function questionFor(run){return byId.get(questionId(run.day,run.index,run.bankVersion));}
-export function presentation(day,index,version=BANK_VERSION){const q=byId.get(questionId(day,index,version)),allowed=q.textOnly?['text']:(q.modes??MODES),mode=allowed[(day*13+index*7)%allowed.length];return {mode,partial:.05+(hash(q.id+day)%6)/100,vertical:hash(day+q.id)%2===0};}
+export function presentation(day,index,version=BANK_VERSION){const q=byId.get(questionId(day,index,version)),mode=chooseVisualMode(q,day,index);return visualSpec(q,mode);}
 export const QUESTION_MS=25000;
 export const limitMs=()=>QUESTION_MS;
 export const earned=count=>count?PRIZES[count-1]:0;
