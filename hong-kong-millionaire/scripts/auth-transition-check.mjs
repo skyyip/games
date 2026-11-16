@@ -112,7 +112,7 @@ try{
  }
  // An already consumed account day still cannot be replaced with a second anonymous attempt.
  {const marker={day:DAY,owner:'cached-google-player',token:'account-consumed',revision:1,run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});await p.locator('#guest-start').waitFor({state:'visible'});await p.locator('#guest-start').click();assert.equal((await state(p)).token,'account-consumed');assert((await p.locator('#lobby-status').textContent()).includes('今日已開始帳戶挑戰'));assert.equal(await p.locator('#game-screen').isVisible(),false);await c.close();checks+=3;}
- // A rejected v2 claim must not consume the local opportunity when the server confirms no run.
+ // A rejected current-version claim must not consume the local opportunity when the server confirms no run.
  {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>hkmAuthQA.failClaim=true);await p.locator('#start').click();
   await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('已解除失敗標記'));
   assert.equal(await state(p),null);assert(await p.evaluate(()=>hkmAuthQA.calls.some(c=>c.method==='currentRun'&&c.server)));

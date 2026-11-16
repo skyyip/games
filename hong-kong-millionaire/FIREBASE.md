@@ -1,31 +1,35 @@
-# Firebase設定與部署
+# Firebase 設定與部署
 
-本遊戲只使用 **sky-playground-millionaire**。公開Web App設定已放在 `src/firebase-settings.js`；API Key是Firebase瀏覽器公開設定，不是服務帳戶私鑰。不要把服務帳戶、OAuth密碼或CLI登入Token加入網站。
+本遊戲只使用 **sky-playground-millionaire**，與其他遊戲獨立。公開 Web App 設定在 `src/firebase-settings.js`；不要把服務帳戶私鑰、OAuth 密碼或 CLI token 放進網站。
 
-## 1. 建立資料庫
+## 本次更新：全新進度 v4
 
-1. 到 https://console.firebase.google.com/project/sky-playground-millionaire/overview ，核對專案名稱。
-2. Build → Firestore Database → Create database，選擇Standard／Native mode的預設 `(default)` 資料庫及合適地區。地區建立後不能直接更改。
-3. 選Production mode；稍後部署本資料夾的完整規則，不要改為公開讀寫。
-4. 無須手動建立集合、貼題目答案或匯入資料。首次登入建立私人玩家紀錄，完成挑戰才會建立公開榜單紀錄。
+按遊戲擁有者要求，本版不讀取或延續舊版玩家紀錄。題庫仍有 171 題，包括已整合的 67 題香港漫畫篇；新開局只接受 `hk-2026-11-v4`。
 
-## 2. 開啟登入
+- 私人玩家：`hkm_v4_players/{uid}`，每日題局放在其 `runs/{香港日數}`。
+- 每日榜：`hkm_v4_results`；生涯榜：`hkm_v4_rankings`；月榜：`hkm_v4_seasons`。
+- 本機每日紀錄：`sky.hk-millionaire.today.v4`。程式不讀取舊 key。
+- Google／Email 登入身份保留；新版本的獎金、歷史、稱號、圖鑑及今日進度從零開始。舊雲端文件沒有被刪除，但本版不讀寫它們，最新規則亦不開放舊集合。
+- 新集合需要重新部署 **完整規則及三個索引**。不要只修改題庫版本字串。
 
-1. Authentication → Get started → Sign-in method。
-2. Enable **Google**，選擇支援電郵並Save。
-3. Enable **Email/Password** 的Email/Password登入；不用開啟Email link。
-4. Authentication → Settings → Authorized domains加入 `sky-playground.com`、`www.sky-playground.com`（如實際使用）；本機測試另加 `localhost` 與 `127.0.0.1`。保留本專案的 `sky-playground-millionaire.firebaseapp.com`。
-5. Google登入預設使用Firebase的 `firebaseapp.com/__/auth/handler`。不要在GoDaddy仿造這個handler。iPhone主畫面模式會先準備登入，再要求玩家按第二個明確的開啟按鈕。
+## 1. 確認資料庫及登入
 
-如對公開API Key設定HTTP referrer及API限制，須同時容許實際網站及本專案Firebase登入handler所需來源，並容許Firebase Authentication／Identity Toolkit、Secure Token及Firestore所需API。限制錯誤會令登入或讀寫失敗，不能只容許主頁的單一路徑。
+1. 開啟 [Firebase 專案](https://console.firebase.google.com/project/sky-playground-millionaire/overview)，確認是 `sky-playground-millionaire`。
+2. Firestore Database 使用預設 `(default)` Standard／Native mode 資料庫。已建立者不用重建；不需手動匯入題目或玩家。
+3. Authentication → Sign-in method 啟用 Google 及 Email/Password；Google 需選擇支援電郵。
+4. Authentication → Settings → Authorized domains 加入 `sky-playground.com`、實際使用的 `www.sky-playground.com`；本機測試另加 `localhost`、`127.0.0.1`。保留 `sky-playground-millionaire.firebaseapp.com`。
+5. Google 登入沿用 Firebase 的 `firebaseapp.com/__/auth/handler`。iPhone 主畫面模式可能需要第二次明確點擊來開啟登入視窗。
 
-## 3. 部署規則與三個索引
+如 API key 有 HTTP referrer／API 限制，須容許實際網站、Firebase 登入 handler，以及 Authentication／Identity Toolkit、Secure Token、Firestore 所需 API。Google 登入成功不代表 Firestore 已允許讀寫。
 
-已安裝Firebase CLI時：
+## 2. 先部署規則及三個新索引
+
+在 GitHub 下載最新版原始碼後，於本資料夾執行：
 
 ```sh
 cd hong-kong-millionaire
 npm ci
+# 尚未安裝 CLI 才需要：npm install -g firebase-tools
 firebase login
 firebase projects:list
 npm run rules:check
@@ -33,28 +37,34 @@ npm run firebase:check
 npm run firebase:deploy
 ```
 
-未安裝CLI可先 `npm install -g firebase-tools`。部署輔助程式會固定指向 `sky-playground-millionaire`，只部署Firestore規則及索引，避免影響其他遊戲。
-
-等效指令：
+最後一步等效於：
 
 ```sh
 firebase deploy --project sky-playground-millionaire --only firestore:rules,firestore:indexes
 ```
 
-- 規則：[firestore.rules](firestore.rules)。也可整份貼到Firestore → Rules → Publish，但索引仍需CLI或Console建立。
-- 索引：[firestore.indexes.json](firestore.indexes.json)，共3個：每日 `hkm_results`、月榜 `hkm_seasons`、生涯 `hkm_rankings`。
-- Firebase Console → Firestore → Indexes確認索引從Building變為Enabled後再測試榜單。
-- Spark不需要升級Blaze；沒有Functions、排程或付費伺服器。仍受Spark的Auth／Firestore每日配額約束。
+部署輔助程式固定專案及部署範圍，不會部署其他遊戲或 Cloud Functions。Spark 可使用本版所需服務，仍受 Auth／Firestore 配額限制。
 
-## 4. 上線檢查
+也可在 [Firestore Rules](https://console.firebase.google.com/project/sky-playground-millionaire/firestore/rules) 貼上完整 [firestore.rules](firestore.rules) 後 Publish；索引仍須用 CLI 或 Console 建立。三個新索引定義見 [firestore.indexes.json](firestore.indexes.json)，collection group 分別為 `hkm_v4_results`、`hkm_v4_seasons`、`hkm_v4_rankings`。等 Indexes 顯示 Enabled 再測試排行榜。
 
-1. 上傳**已建置網站**至 `/games/`，開啟 `/games/hong-kong-millionaire/`。
-2. 開局前登入Google或建立Email帳戶，修改公開稱呼。
-3. 開始挑戰，重新整理應續同一局；同帳戶另一裝置亦只可續局。
-4. 完成後核對私人 `hkm_players/{uid}/runs/{香港日數}`、公開結果及兩個累積榜，總額只能加一次。
-5. 登出不會補回今日次數。匿名局不會事後轉為排名局。Email、題目作答細節及收藏不放在公開榜單。
+## 3. 再上傳網站
 
-## 規則測試
+使用 `downloads/games-site` 分支的已建置檔案，將解壓後**內容**上傳到 `public_html/games/`，包含 `.htaccess`；不要再套一層儲存庫資料夾。
+
+遊戲網址：https://sky-playground.com/games/hong-kong-millionaire/
+
+1. 更新並重新載入遊戲，登入 Google，開始帳戶挑戰。
+2. 第一題選答案並確認，應顯示作答結果，再進入下一題。
+3. 重新整理應續同一局；同帳戶另一裝置亦只可續局。
+4. 完成後檢查新集合的每日結果及兩個累積榜；同一局只結算一次。
+5. A 登出後 B 可進行 B 的當日挑戰；切回 A 仍恢復 A 的進度。
+6. 匿名進度不轉成帳戶排名；登出不會補發當日匿名機會。其他遊戲的資料不受影響。
+
+## 已修復的第一題 permission-denied
+
+真正 Firestore Emulator 已重現舊規則超出每次請求 **1,000 expressions** 的限制。新版移除多版本相容及整份狀態重複驗證，改用單一題庫、分難度題目／答案查表，以及每個操作各自的欄位變更白名單；仍驗證伺服器時間、逐題狀態、保險線、每日一次及原子結算。
+
+[實際規則測試紀錄](https://github.com/skyyip/games/actions/runs/43736446629) 已通過 93 項檢查，包括用正式程式的 `transitionPatch` 提交第一題、完整 15 題結算、答錯／退出／超時，以及拒絕偽造分數、時間、題號、他人資料讀取與重複結算。
 
 ```sh
 npm test
@@ -62,46 +72,10 @@ npm run rules:check
 firebase emulators:exec --project demo-hk-millionaire --only firestore "node scripts/firestore-check.mjs"
 ```
 
-Emulator需Java及可下載的Firestore Emulator JAR。測試使用demo專案，不接觸正式資料。本次工作環境無可用Emulator JAR，因此未執行真實規則編譯、Google授權或正式雲端部署；部署後須完成上述檢查。
+模擬器需要 Java 21 及可下載的 Firestore Emulator JAR。GitHub Actions 會在相關修改後自動執行。測試只使用 demo 專案，沒有部署正式 Firebase，也沒有執行真實 Google 帳戶授權；正式部署後仍須完成上述上線檢查。
 
-題庫修改後執行 `npm run rules:generate` 並同步發布網站與規則。不要在同日尚有玩家進行挑戰時改動題組、答案或 `BANK_VERSION`；先安排版本切換。
+## 本機匿名測試
 
-## 104題題庫更新（v2）
+瀏覽器開發者工具 → Application → Local Storage，只刪除 `sky.hk-millionaire.today.v4` 再重新整理。這只重置本機測試資料，不會刪除或重置帳戶在 Firestore 的今日挑戰，也不會登出 Google。不要清除整個網域，以免影響其他遊戲。
 
-此更新需要重新部署本資料夾的`firestore.rules`，讓新題u01–u14及最多104項文化圖鑑解鎖通過驗證。`npm run rules:generate`會同步兩個版本的抽題表、步長、答案及圖鑑上限；v1進行中的存檔仍能驗證，不會因新增題而被改題。三個既有索引不變，無需Cloud Functions。
-
-請先部署規則，再上傳新的已建置網站。CLI指令：
-
-```sh
-cd hong-kong-millionaire
-npm run rules:check
-npm run firebase:deploy
-```
-
-本次沒有連線部署到正式Firebase專案。題庫來源與圖片分享不用新增任何公開或私人Firestore欄位。
-
-## Google已登入，但「帳戶每日挑戰」被拒
-
-若已發布的規則仍寫 `r.bankVersion == 'hk-2026-11-v1'`，它只接受舊90題，會拒絕目前網站建立的104題v2挑戰。Google登入成功與Firestore允許建立挑戰是兩件事。
-
-1. 開啟 [本遊戲的Firestore Rules](https://console.firebase.google.com/project/sky-playground-millionaire/firestore/rules)，確認專案為 `sky-playground-millionaire`。
-2. 把本資料夾的 **完整** [firestore.rules](firestore.rules) 貼上並Publish。不要只改bankVersion那一行：抽題表、不同版本的步長及圖鑑上限亦須一起更新。最新版同時接受v1與v2，保留舊局的原題組。
-3. 上傳最新建置網站後重新載入，以原Google帳戶選「帳戶每日挑戰」。有既有雲端局就續局，沒有才建立新局。這次修復不需要新增索引。
-4. 若只想匿名測試，而舊網站留下尚未成功的開局標記，選「核實未完成開局，再匿名遊玩」。程式用伺服器即時讀取確認今日不存在帳戶局後，才解除未確認標記；讀取被拒、離線或已存在帳戶局時均不會清除。已確認的帳戶挑戰不能以此重置。
-
-不需要刪除玩家文件、清除整個網站資料、開放公開寫入，或重新建立Firebase專案。
-
-## 已開局，但提交答案後等待同步
-
-更新網站後，「今日進度等待同步」下方會直接顯示例如「提交答案未完成（permission-denied）」、「核對雲端進度未完成（unavailable）」或「結算成績未完成」。請以這段完整訊息分辨失敗階段，不要只憑共用標題推斷登入或規則錯誤。
-
-「重新連接並核對答案」使用server-only讀取。伺服器已收下的答案不會重複提交；尚未收下且仍為同一題才重送，截止時間維持不變。此更新不需新的規則或索引；若正式環境仍顯示permission-denied，請確認已發布本資料夾完整v1／v2規則，並保留錯誤碼及發生階段供核對。
-
-同一瀏覽器的不同登入帳戶可各自核對當日題局；同一帳戶登出再登入仍續原局，雲端每UID每日一次的驗證不變。無須手動刪除玩家、題局或排行榜資料。
-
-
-## 香港漫畫篇：v3／171題
-
-新增67題後，新開局使用 `hk-2026-11-v3`。請**先把本資料夾完整firestore.rules重新Publish，再上傳新網站**，不要只改bankVersion字串。規則同時保存v1／90題、v2／104題及v3／171題的抽題表與答案；圖鑑上限同步為171。答案驗證重用同一個預期題號，減少重複建立抽題表的運算。現有三個索引保持不變。
-
-CLI：`firebase deploy --project sky-playground-millionaire --only firestore:rules`。或在 [Firebase Rules](https://console.firebase.google.com/project/sky-playground-millionaire/firestore/rules) 貼上完整檔案後Publish。此工作沒有替你登入Firebase或部署正式規則；正式讀寫仍需發布後驗證。
+日後修改題目、答案或抽題表時，須同步執行 `npm run rules:generate`、模擬器測試並發布規則及網站。
