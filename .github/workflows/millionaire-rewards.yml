@@ -46,7 +46,10 @@ jobs:
           GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
           HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
           HKM_BUILD_DIR: /tmp/games-built-rewards
-        run: node scripts/browser-check.mjs
+          BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
+        run: |
+          node scripts/browser-check.mjs
+          node scripts/rewards-browser-check.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
