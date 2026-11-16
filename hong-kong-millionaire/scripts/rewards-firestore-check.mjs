@@ -67,8 +67,8 @@ try{
  clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'next'}));const raw=(await sdk.getDoc(ref(clockHost,'hkm_rooms',clockId,'sessions','clockHost'))).data();assert.equal(raw.questionAt.nanoseconds,623456000);assert.equal(clockRun.index,1);checks+=2;
  await no(sdk.updateDoc(ref(clockGuest,'hkm_rooms',clockId),{feeShare:0,updatedAt:sdk.serverTimestamp()}));
  const legacy=await seed('legacy');await ok(feature.wallet(legacy,'legacy'));
- await env.withSecurityRulesDisabled(async ctx=>{await sdk.setDoc(sdk.doc(ctx.firestore(),'hkm_rooms','old-room'),{status:'playing',players:['legacy']});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets','legacy'),{activeKind:'room',activeRoom:'old-room',activeSession:'old-room'});});
- assert.equal(await ok(feature.activeSession(legacy,'legacy')),null);assert.equal((await feature.wallet(legacy,'legacy')).balance,1000000);checks++;
+ await env.withSecurityRulesDisabled(async ctx=>{await sdk.setDoc(sdk.doc(ctx.firestore(),'hkm_rooms','old-room'),{status:'playing',players:['legacy'],createdAt:sdk.Timestamp.now()});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets','legacy'),{activeKind:'room',activeRoom:'old-room',activeSession:'old-room'});});
+ assert.equal(await ok(feature.activeSession(legacy,'legacy')),null);assert.equal((await ok(feature.myRooms(legacy,'legacy'))).length,0);assert.equal((await feature.wallet(legacy,'legacy')).balance,1000000);checks++;
  await no(sdk.updateDoc(ref(clockHost,'hkm_wallets','clockHost'),{activeSession:'',activeKind:'',activeRoom:'',op:'retire-extra',item:clockId,revision:(await feature.wallet(clockHost,'clockHost')).wallet.revision+1,updatedAt:sdk.serverTimestamp()}));
  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','legacy'),{activeDay:hkDay(),activeKind:'retired'});});
  await ok(sdk.updateDoc(ref(legacy,'hkm_players','legacy'),{activeDay:null,activeKind:'daily',lastSettledDay:hkDay(),updatedAt:sdk.serverTimestamp()}));

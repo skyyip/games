@@ -103,4 +103,4 @@ export async function claimRoom(c,uid,id){
   t.update(roomRef(c,id),patch);t.update(walletRef(c,uid),{bonus:w.bonus+amount,revision:w.revision+1,op,item:id,updatedAt:c.serverTimestamp()});
  });return {...await wallet(c,uid),room:await getRoom(c,uid,id)};
 }
-export async function myRooms(c,uid){const rows=await c.getDocs(c.query(c.collection(c.db,FEATURE_COLLECTIONS.rooms),c.where('players','array-contains',uid),c.orderBy('createdAt','desc'),c.limit(20)));return rows.docs.map(d=>normalizeRoom(d.data()));}
+export async function myRooms(c,uid){const rows=await c.getDocs(c.query(c.collection(c.db,FEATURE_COLLECTIONS.rooms),c.where('players','array-contains',uid),c.orderBy('createdAt','desc'),c.limit(20)));return rows.docs.map(d=>normalizeRoom(d.data())).filter(r=>Number.isInteger(r.entryFee)&&/^[A-HJ-NP-Z2-9]{8}$/.test(r.id));}
