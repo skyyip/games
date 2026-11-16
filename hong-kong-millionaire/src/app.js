@@ -287,7 +287,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(blur&&
 window.addEventListener('storage',event=>{if(owner!=='guest'||!event.key?.startsWith('sky.hk-millionaire.today'))return;const value=ledger.read();if(value?.owner==='guest'){run=value.run;token=value.token;if(run.phase==='finished'&&screen==='game')page('result');render();}});
 new ResizeObserver(()=>{if(screen==='game'&&run){visualKey='';renderVisual();}}).observe($('visual-frame'));
 
-function rewardChanged(next){if(next?.profile?.uid!==user?.uid)return;profile=next.profile;boardCache.clear();renderAccount();if(screen==='result'&&run)renderResult();}
+function rewardChanged(next){if(!next?.profile||!user||next.profile.uid!==user.uid)return;profile=next.profile;boardCache.clear();renderAccount();if(screen==='result'&&run)renderResult();}
 collectionUI=installCollection({cloud,getUser:()=>user,getProfile:()=>profile,login:()=>dialog('account-dialog'),onChange:rewardChanged,onArcade:()=>arcadeUI.open()});
 arcadeUI=installArcade({cloud,getUser:()=>user,getProfile:()=>profile,login:()=>dialog('account-dialog'),onShop:tab=>collectionUI.open(tab),onChange:rewardChanged,soundEnabled:()=>collectionUI.soundEnabled(),canStart:()=>!run||run.phase==='finished',beforeDaily:async()=>{if(guestEntry())throw Error('guest-used');if(ledger.available)await ledger.start(user.uid);},onDaily:value=>{assistedToday=true;if(ledger.available)ledger.markCloud(user.uid,value);renderLobby();}});
 for(const id of ['collection-open','lobby-collection','result-collection'])$(id).onclick=()=>{close('book-dialog');collectionUI.open();};
