@@ -19,7 +19,7 @@ function closeRoundDialogs(){for(const id of ['answer-dialog','walk-dialog','pho
 function timeout(task,ms=14000){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Object.assign(Error('request-timeout'),{code:'unavailable'})),ms);Promise.resolve(task).then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});});}
 function preload(q){if(q.textOnly)return Promise.resolve();const url=ART[q.art];if(!prepared.has(url))prepared.set(url,new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>{prepared.delete(url);reject(Error('image-unavailable'));};image.src=url;}));return prepared.get(url);}
 function page(next){screen=next;show('lobby',next==='lobby');show('game-screen',next==='game');show('result-screen',next==='result');document.body.classList.toggle('is-playing',next==='game');if(next==='game')window.scrollTo({top:0,behavior:'instant'});}
-function renderLadders(){for(const id of ['prize-ladder','modal-ladder']){const list=$(id);list.replaceChildren();for(let i=14;i>=0;i--){const li=document.createElement('li');li.classList.toggle('safe',i===4||i===9);li.classList.toggle('current',!!run&&run.phase!=='finished'&&run.index===i);li.classList.toggle('reached',!!run&&i<run.correct);const no=document.createElement('span'),value=document.createElement('b'),mark=document.createElement('span');no.textContent=String(i+1).padStart(2,'0');value.textContent=money(PRIZES[i]);mark.textContent=i===4||i===9?'◇':i===14?'✦':'';li.append(no,value,mark);list.append(li);}}}
+function renderLadders(){for(const id of ['prize-ladder','modal-ladder']){const list=$(id);list.replaceChildren();for(let i=14;i>=0;i--){const li=document.createElement('li');li.classList.toggle('safe',i===4||i===9);li.classList.toggle('current',!!run&&run.phase!=='finished'&&run.index===i);li.classList.toggle('reached',!!run&&i<run.correct);if(li.classList.contains('current'))li.setAttribute('aria-current','step');const no=document.createElement('span'),value=document.createElement('b'),mark=document.createElement('span');no.textContent=String(i+1).padStart(2,'0');value.textContent=money(PRIZES[i]);mark.textContent=i===4||i===9?'◇':i===14?'✦':'';li.append(no,value,mark);list.append(li);}}}
 // A login changes the account identity, never the ownership of today's anonymous attempt.
 function guestEntry(){const entry=ledger.read();return entry?.owner==='guest'&&entry.run?.uid==='guest'?entry:null;}
 function restoreGuest(){
@@ -225,6 +225,27 @@ $('native-question-share').onclick=async()=>{if(!questionCardFile||!sharedQuesti
 $('copy-question-share').onclick=async()=>{if(!sharedQuestion)return;try{await navigator.clipboard.writeText(questionShareText(sharedQuestion,new URL('./',location.href).href));put('question-share-status','已複製題目與選項，不包含答案或解說。');}catch{put('question-share-status','未能自動複製，可儲存題目圖片分享。');}};
 $('copy-share').onclick=async()=>{const text=shareText(run,new URL('./',location.href).href);try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);else{const area=document.createElement('textarea');area.value=text;area.style.cssText='position:fixed;left:-9999px';document.body.append(area);area.select();if(!document.execCommand('copy'))throw Error();area.remove();}put('share-status','已複製！貼去 WhatsApp、IG 或 Facebook，唔會劇透題目。');}catch{put('share-status','未能自動複製，請使用「分享畀朋友」或瀏覽器的分享功能。');}};
 $('native-share').onclick=async()=>{try{await navigator.share({title:'香港百萬富翁',text:shareText(run,new URL('./',location.href).href)});}catch(error){if(error.name!=='AbortError')put('share-status','暫時未能分享，仍可複製成績。');}};
+// Limit clipboard and image extraction only for the current challenge content.
+// This is a browser deterrent; scoring and timing are still enforced by Firestore rules.
+const protectedQuestionSelector='#question-title,#options,#visual-frame,#answer-dialog-title,#phone-hint,#audience-chart';
+const challengeActive=()=>screen==='game'&&run&&run.phase!=='finished';
+const protectedQuestionTarget=node=>(node instanceof Element?node:node?.parentElement)?.closest(protectedQuestionSelector);
+function selectedQuestion(){
+ const selection=window.getSelection();if(!selection||selection.isCollapsed)return false;
+ const nodes=document.querySelectorAll(protectedQuestionSelector);
+ for(let i=0;i<selection.rangeCount;i++)for(const node of nodes)if(selection.getRangeAt(i).intersectsNode(node))return true;
+ return false;
+}
+for(const type of ['copy','cut'])document.addEventListener(type,event=>{
+ if(!challengeActive()||event.target instanceof Element&&event.target.closest('input,textarea,[contenteditable="true"]'))return;
+ if(protectedQuestionTarget(event.target)||selectedQuestion()){
+  event.preventDefault();event.clipboardData?.clearData();
+  announce('挑戰期間不能複製題目、選項或提示；完成後可回顧及分享。');
+ }
+},true);
+for(const type of ['selectstart','contextmenu','dragstart'])document.addEventListener(type,event=>{
+ if(challengeActive()&&protectedQuestionTarget(event.target))event.preventDefault();
+},true);
 document.addEventListener('keydown',event=>{if(document.querySelector('dialog[open]'))return;if(screen==='game'&&run?.phase==='playing'&&!busy&&!pending&&/^[1-4]$/.test(event.key)){event.preventDefault();$('options').children[Number(event.key)-1]?.click();}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(blur&&run?.phase==='playing')blur.currentTime=Math.max(0,Date.now()-run.questionAt);tick();}});
 window.addEventListener('storage',event=>{if(owner!=='guest'||!event.key?.startsWith('sky.hk-millionaire.today'))return;const value=ledger.read();if(value?.owner==='guest'){run=value.run;token=value.token;if(run.phase==='finished'&&screen==='game')page('result');render();}});
