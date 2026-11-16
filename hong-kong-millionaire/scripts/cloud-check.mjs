@@ -44,7 +44,7 @@ try{
  // A rejected claim must leave the opportunity unconsumed: the current-bank transaction must fail atomically.
  qa.allowedBanks=[];await assert.rejects(()=>cloud.claimDaily(),error=>error.code==='permission-denied');
  assert.equal((await cloud.account()).activeDay,null);assert.equal(await cloud.currentRun(hkDay(),{server:true}),null);
- assert(qa.calls.some(c=>c.kind==='server-read'));assert(cloud.errorText({code:'permission-denied'}).includes('作答驗證'));checks++;
+ assert(qa.calls.some(c=>c.kind==='server-read'));assert(cloud.errorText({code:'permission-denied'}).includes('permission-denied'));assert(cloud.errorText({code:'permission-denied'}).includes('Firestore 規則'));checks++;
  qa.allowedBanks=[BANK_VERSION];
  let r=await cloud.claimDaily();assert.equal(r.questionAt,NOW);assert.equal(r.seen.length,0);assert.equal((await cloud.claimDaily()).startedAt,r.startedAt);checks++;
  const at=r.questionAt;for(const kind of ['half','phone','audience']){qa.now+=100;r=await cloud.move(r.day,{type:'life',kind});assert.equal(r.questionAt,at);await assert.rejects(()=>cloud.move(r.day,{type:'life',kind}),/life-used/);}checks++;
