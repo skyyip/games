@@ -1,0 +1,59 @@
+name: Verify Millionaire rewards
+on:
+  push:
+    branches: [millionaire-rewards]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: millionaire-rewards
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: hong-kong-millionaire
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm test
+      - run: npm run rules:check
+      - name: Real Firestore rules
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only firestore "node scripts/firestore-check.mjs"
+      - name: Prepare built browser tests
+        working-directory: .
+        run: |
+          npm ci --prefix tools
+          for game in beat-bad-luck career-365 frogger-jump your-dream-career; do npm ci --prefix "$game"; done
+          npm install --prefix /tmp/hkm-playwright --no-save --package-lock=false playwright@1.56.1
+          /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps chromium
+          printf "export {chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" > /tmp/hkm-playwright.mjs
+          BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs /tmp/games-built-rewards
+          mkdir -p /tmp/hkm-preview
+          ln -s /tmp/games-built-rewards /tmp/hkm-preview/games
+          python3 -m http.server 5445 --bind 127.0.0.1 --directory /tmp/hkm-preview > /tmp/hkm-http.log 2>&1 &
+      - name: Full gameplay
+        env:
+          GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
+          HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
+          HKM_BUILD_DIR: /tmp/games-built-rewards
+        run: node scripts/browser-check.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: millionaire-rewards-preview
+          path: |
+            /tmp/hkm-*.png
+            /tmp/hkm-http.log
+            /tmp/games-built-rewards
+            hong-kong-millionaire/firestore-debug.log
+          if-no-files-found: ignore
