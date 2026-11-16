@@ -1,0 +1,68 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
+import * as sdk from 'firebase/firestore';
+import * as feature from '../src/features-cloud.js';
+import {emptyWallet,isWeekend} from '../src/economy.js';
+import {newSession,sessionQuestion} from '../src/session-engine.js';
+import {hkDay} from '../src/game.js';
+if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('demo emulator required');
+const env=await initializeTestEnvironment({projectId:'demo-hk-millionaire',firestore:{rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
+let checks=0;
+const context=uid=>({...sdk,db:env.authenticatedContext(uid).firestore()});
+const ref=(c,...p)=>sdk.doc(c.db,...p);
+async function seed(uid,total=1000000){await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.now();await sdk.setDoc(sdk.doc(ctx.firestore(),'hkm_players',uid),{uid,displayName:'街坊'+uid,total,bestPrize:1000000,games:1,titles:['ordinary','neighbour','expert','peak','millionaire'],unlocked:[],wrong:[],favourites:[],activeDay:null,activeKind:'daily',lastSettledDay:null,createdAt:stamp,updatedAt:stamp});});return context(uid);}
+const ok=async p=>{const r=await assertSucceeds(p);checks++;return r;},no=async p=>{await assertFails(p);checks++;};
+try{
+ await env.clearFirestore();
+ const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
+ await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{cards:{'tram-foil':100},updatedAt:sdk.serverTimestamp()}));
+ const requestId=crypto.randomUUID();result=await ok(feature.shop(c,'collector',{type:'gold',requestId}));assert(result.outcome.endsWith('-foil'));assert.equal(result.balance,950000);const revision=result.wallet.revision;
+ result=await ok(feature.shop(c,'collector',{type:'gold',requestId}));assert.equal(result.wallet.revision,revision);assert.equal(result.balance,950000);checks+=3;
+ await assert.rejects(feature.shop(c,'collector',{type:'equip',slot:'frame',id:'frame-gold',requestId:crypto.randomUUID()}));checks++;
+ result=await ok(feature.shop(c,'collector',{type:'buy',id:'frame-rwb',requestId:crypto.randomUUID()}));assert.equal(result.balance,930000);
+ result=await ok(feature.shop(c,'collector',{type:'equip',slot:'frame',id:'frame-rwb',requestId:crypto.randomUUID()}));assert.equal(result.wallet.frame,'frame-rwb');
+ const styles=await ok(feature.publicStyles(c,['collector']));assert.equal(styles.collector.frame,'frame-rwb');checks++;
+ await no(sdk.updateDoc(ref(c,'hkm_styles','collector'),{frame:'frame-gold',updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(ref(c,'hkm_players','collector'),{total:9999999,updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(ref(c,'hkm_wallets','collector','receipts',requestId),{cost:0}));
+ const other=context('other');await no(sdk.getDoc(ref(other,'hkm_wallets','collector')));
+ result=await ok(feature.shop(c,'collector',{type:'swap',requestId:crypto.randomUUID()}));
+ let run=await ok(feature.startSession(c,'collector',{kind:'assisted'}));assert.equal(run.kind,'assisted');assert.equal(run.index,0);checks++;
+ const oldAt=run.questionAt;run=await ok(feature.moveSession(c,'collector',run,{type:'swap'}));assert.equal(run.questionAt,oldAt);assert.equal(run.swapFor,0);checks++;
+ const sessionRef=ref(c,'hkm_players','collector','sessions',run.id);
+ await no(sdk.updateDoc(sessionRef,{swapFor:-1,updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(sessionRef,{correct:15,payout:1000000,updatedAt:sdk.serverTimestamp()}));
+ for(let i=0;i<15;i++){run=await ok(feature.moveSession(c,'collector',run,{type:'answer',choice:sessionQuestion(run).answer}));if(i<14)run=await ok(feature.moveSession(c,'collector',run,{type:'next'}));}
+ assert.equal(run.phase,'finished');assert.equal(run.payout,1000000);assert.equal(run.credit,1000000);checks+=3;
+ result=await feature.wallet(c,'collector');const bonus=result.wallet.bonus;run=await ok(feature.settleSession(c,'collector',run));assert.equal((await feature.wallet(c,'collector')).wallet.bonus,bonus);checks++;
+ const profile=(await sdk.getDoc(ref(c,'hkm_players','collector'))).data();assert.equal(profile.total,1000000);assert.equal(profile.games,1);assert.equal(profile.activeDay,null);assert.equal(profile.lastSettledDay,hkDay());checks+=4;
+ assert.equal((await ok(feature.assistedBoard(c))).length,1);
+ await no(sdk.setDoc(ref(c,'hkm_results','collector_'+hkDay()),{uid:'collector',prize:1000000}));
+ await no(sdk.updateDoc(ref(c,'hkm_players','collector'),{activeDay:hkDay(),activeKind:'daily',updatedAt:sdk.serverTimestamp()}));
+ if(!isWeekend())await assert.rejects(feature.startSession(c,'collector',{kind:'weekend'}));
+ const host=await seed('host'),guest=await seed('guest');
+ const id=await ok(feature.createRoom(host,'host',{topic:'sport',pool:50000}));assert.equal((await feature.wallet(host,'host')).balance,920000);checks++;
+ await ok(feature.joinRoom(guest,'guest',id));await no(sdk.getDoc(ref(guest,'hkm_players','host')));
+ await no(sdk.updateDoc(ref(guest,'hkm_rooms',id),{status:'finished',winner:'guest',winnerOrder:1,updatedAt:sdk.serverTimestamp()}));
+ await ok(feature.startRoom(host,'host',id));let room=await feature.getRoom(host,'host',id);
+ const hostRun=await ok(feature.startSession(host,'host',{kind:'room',room:id})),guestRun=await ok(feature.startSession(guest,'guest',{kind:'room',room:id}));
+ assert.equal(hostRun.questionAt,guestRun.questionAt);checks++;
+ let first=await ok(feature.moveSession(host,'host',hostRun,{type:'answer',choice:sessionQuestion(hostRun).answer}));assert.equal(first.phase,'reveal');
+ await assert.rejects(feature.moveSession(host,'host',first,{type:'next'}));checks++;
+ await no(sdk.updateDoc(ref(guest,'hkm_rooms',id),{'scores.guest':{correct:10,timeMs:0,finished:true,finishedAt:sdk.serverTimestamp()},updatedAt:sdk.serverTimestamp()}));
+ // Advance only the demo fixture clock; real clients can never change these server timestamps.
+ await env.withSecurityRulesDisabled(async ctx=>{
+  const db=ctx.firestore(),start=sdk.Timestamp.fromMillis(Date.now()-270000);
+  await sdk.updateDoc(sdk.doc(db,'hkm_rooms',id),{startedAt:start,scores:{host:{correct:9,timeMs:8000,finished:true,finishedAt:sdk.Timestamp.now()},guest:{correct:9,timeMs:12000,finished:true,finishedAt:sdk.Timestamp.now()}}});
+ });
+ room=await ok(feature.finaliseRoom(guest,'guest',id));assert.equal(room.winner,'host');checks++;
+ await assert.rejects(feature.claimRoom(guest,'guest',id));checks++;
+ const before=(await feature.wallet(host,'host')).balance;await ok(feature.claimRoom(host,'host',id));assert.equal((await feature.wallet(host,'host')).balance,before+50000);checks++;
+ await assert.rejects(feature.claimRoom(host,'host',id));checks++;
+ const cancelled=await ok(feature.createRoom(host,'host',{topic:'places',pool:20000})),beforeCancel=(await feature.wallet(host,'host')).balance;
+ await ok(feature.claimRoom(host,'host',cancelled,{cancel:true}));assert.equal((await feature.wallet(host,'host')).balance,beforeCancel+20000);checks++;
+ await no(sdk.updateDoc(ref(host,'hkm_rooms',cancelled),{paidTo:'',updatedAt:sdk.serverTimestamp()}));
+ console.log('Rewards Firestore: '+checks+' checks passed (production SDK service, verified wallet receipts, assisted complete game, room escrow and winner).');
+}finally{await env.cleanup();}

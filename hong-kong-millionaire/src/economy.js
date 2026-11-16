@@ -37,7 +37,7 @@ export const gearById=id=>GEAR.find(c=>c.id===id);
 export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wallet?.bonus??0)-(wallet?.spent??0));
 export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
-export const isWeekend=day=>[0,6].includes((day+4)%7);
+export const isWeekend=(day=hkDay())=>[0,6].includes((day+4)%7);
 export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,swapTokens:0,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
 export function drawnCard(wallet,gold=false){
  const seed=Math.floor(wallet.createdAt?.toMillis?.()??wallet.createdAt??0);

@@ -30,7 +30,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  document.body.append(dialog);dialog.querySelector('.close-button').onclick=()=>dialog.close();const $=id=>dialog.querySelector('#'+id);
  const reveal=document.createElement('dialog');reveal.id='culture-card-dialog';reveal.className='culture-card-dialog';reveal.setAttribute('aria-labelledby','culture-card-title');reveal.innerHTML='<button class="close-button" type="button" aria-label="關閉文化卡">×</button><div id="culture-card-face"></div><h2 id="culture-card-title"></h2><p id="culture-card-story"></p><a id="culture-card-source" class="source-link" target="_blank" rel="noopener noreferrer">延伸閱讀 ↗</a><button class="primary card-done" type="button">收到，繼續收藏</button>';document.body.append(reveal);for(const button of reveal.querySelectorAll('button'))button.onclick=()=>reveal.close();
  const confirm=document.createElement('dialog');confirm.id='shop-confirm-dialog';confirm.setAttribute('aria-labelledby','shop-confirm-title');confirm.innerHTML='<h2 id="shop-confirm-title">確認使用虛擬獎金？</h2><p id="shop-confirm-copy"></p><button id="shop-confirm-buy" class="primary" type="button">確認</button><button class="outline" type="button">先再看看</button>';document.body.append(confirm);confirm.querySelector('.outline').onclick=()=>confirm.close();
- let state=null,uid=null,loadedUid=null,busy=false,version=0,tab='draw',intent=null;
+ let state=null,uid=null,loadedUid=null,loadingUid=null,busy=false,version=0,tab='draw',intent=null;
  const pendingKey=()=>uid?'sky.hkm.shop.pending.'+uid:null;
  function pending(){try{return JSON.parse(localStorage.getItem(pendingKey()));}catch{return null;}}
  function soundEnabled(){try{return localStorage.getItem('sky.hkm.sound')==='1';}catch{return false;}}
@@ -79,8 +79,8 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  }
  for(const b of dialog.querySelectorAll('[data-tab]'))b.onclick=()=>{tab=b.dataset.tab;render();};
  $('shop-recover').onclick=()=>{const action=pending();if(action)transact(action);};$('shop-refresh').onclick=()=>load(true);$('shop-arcade').onclick=()=>{dialog.close();onArcade();};
- async function load(force=false){if(!uid||typeof cloud.wallet!=='function')return;const actor=uid,epoch=version;try{$('shop-status').textContent='正在讀取雲端收藏…';const next=await cloud.wallet();if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;apply();$('shop-status').textContent=pending()?'有一筆未確認操作，請核對上次結果。':'';render();}catch(error){if(uid===actor&&version===epoch){$('shop-status').textContent=cloud.errorText(error);render();}}}
- function setIdentity(next){if(uid!==next){uid=next;version++;state=null;loadedUid=null;busy=false;apply();if(!uid){dialog.close();reveal.close();confirm.close();}}}
+ async function load(force=false){if(!uid||typeof cloud.wallet!=='function'||loadingUid===uid)return;const actor=uid,epoch=version;loadingUid=uid;try{$('shop-status').textContent='正在讀取雲端收藏…';const next=await cloud.wallet();if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;apply();$('shop-status').textContent=pending()?'有一筆未確認操作，請核對上次結果。':'';render();}catch(error){if(uid===actor&&version===epoch){$('shop-status').textContent=cloud.errorText(error);render();}}finally{if(version===epoch)loadingUid=null;}}
+ function setIdentity(next){if(uid!==next){uid=next;version++;state=null;loadedUid=null;loadingUid=null;busy=false;apply();if(!uid){dialog.close();reveal.close();confirm.close();}}}
  async function open(nextTab=tab){setIdentity(getUser()?.uid??null);if(!uid){login();return;}tab=nextTab;dialog.showModal();render();await load();}
  return {open,setIdentity,restore:()=>{setIdentity(getUser()?.uid??null);if(uid&&loadedUid!==uid&&getProfile()?.uid===uid)load();},reload:()=>load(true),get wallet(){return state?.wallet??null;},get state(){return state;},soundEnabled};
 }
