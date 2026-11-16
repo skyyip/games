@@ -1,7 +1,7 @@
 name: Verify Millionaire rewards
 on:
   push:
-    branches: [millionaire-rewards, millionaire-room-rework, main]
+    branches: [millionaire-rewards, millionaire-room-rework, millionaire-visual-bank, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rewards.yml]
   workflow_dispatch:
 permissions:
@@ -28,6 +28,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run rules:check
+      - run: npm run review:check
       - name: Real Firestore rules
         run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only firestore "node scripts/firestore-check.mjs && node scripts/rewards-firestore-check.mjs"
       - name: Prepare built browser tests
@@ -54,6 +55,7 @@ jobs:
           node scripts/browser-check.mjs
           node scripts/auth-transition-check.mjs
           node scripts/rewards-browser-check.mjs
+          node scripts/street-observation-browser-check.mjs
       - name: Save browser preview images
         if: always()
         working-directory: .

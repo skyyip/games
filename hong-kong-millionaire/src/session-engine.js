@@ -1,6 +1,7 @@
+import {chooseVisualMode,visualSpec} from './question-view.js';
 import {QUESTIONS} from './questions.js';
 import {questionId,questionById,QUESTION_PLANS,BANK_VERSION,hkDay,dayEnd,hash,PRIZES,QUESTION_MS} from './game.js';
-export const ROOM_QUESTIONS=10,ROOM_INTERVAL=QUESTION_MS+1500;
+export const ROOM_QUESTIONS=10,ROOM_REVEAL_MS=2500,ROOM_INTERVAL=QUESTION_MS+ROOM_REVEAL_MS;
 export const TOPICS=Object.freeze([{id:'all',name:'香港綜合'},{id:'sport',name:'體育專場'},{id:'places',name:'地理與景點'}]);
 const topicMatch={all:()=>true,sport:q=>/體育|奧運|賽馬|劍擊|運動/.test(q.category),places:q=>/景點|郊遊|地質|水塘|地名|圍村|文物徑|地理|山|海岸|古蹟/.test(q.category)};
 const gcd=(a,b)=>b?gcd(b,a%b):a;
@@ -26,7 +27,7 @@ export function sessionVotes(run){
  const weights=[0,1,2,3].map(i=>removed.includes(i)?0:i===leader?61:10+(hash(seed+':'+i)%20)),total=weights.reduce((a,b)=>a+b),votes=weights.map(n=>Math.floor(n/total*100));
  let rest=100-votes.reduce((a,b)=>a+b);for(let i=0;rest;i=(i+1)%4)if(!removed.includes(i)){votes[i]++;rest--;}return votes;
 }
-export function sessionPresentation(run){const q=sessionQuestion(run),allowed=q.textOnly?['text']:(q.modes??['blurred','partial','mirrored','original','text']),mode=run.phase==='playing'?allowed[(run.seed+run.index*7)%allowed.length]:'original';return {mode};}
+export function sessionPresentation(run,now=Date.now()){const q=sessionQuestion(run),revealed=run.phase!=='playing'&&(run.kind!=='room'||now>=run.questionAt+QUESTION_MS||run.phase==='finished'),mode=revealed?'original':chooseVisualMode(q,run.seed,run.index);return visualSpec(q,mode);}
 function reveal(run,choice,outcome,now){return {...run,phase:'reveal',choice,outcome,correct:run.correct+(outcome==='correct'?1:0),answerAt:now,updatedAt:now,seen:[...run.seen,sessionQid(run)],answers:{...run.answers,[run.index]:{qid:sessionQid(run),choice,outcome,startedAt:run.questionAt,answeredAt:now}}};}
 export function sessionFinish(run,now=Date.now()){
  if(run.phase!=='reveal')throw Error('not-ready');

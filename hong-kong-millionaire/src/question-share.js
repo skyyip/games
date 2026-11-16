@@ -1,6 +1,6 @@
 // Deliberate question sharing is separate from the spoiler-free daily score card.
 export function questionShareText(q,url){
- return `${q.sharePrompt??'呢啲香港日常設計，你又留意過未？'}\n\n${q.question}\n${q.options.map((option,i)=>'ABCD'[i]+'）'+option).join('\n')}\n\n香港百萬富翁・題目分享（不附答案）\n${url}`;
+ return `${q.sharePrompt??'呢啲香港日常設計，你又留意過未？'}\n\n${q.textQuestion??q.question}\n${q.options.map((option,i)=>'ABCD'[i]+'）'+option).join('\n')}\n\n香港百萬富翁・題目分享（不附答案）\n${url}`;
 }
 function lines(ctx,text,width){
  const result=[];let line='';

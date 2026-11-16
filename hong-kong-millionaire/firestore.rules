@@ -12,9 +12,9 @@ service cloud.firestore {
   // Evaluate one tier only. A full-bank answer map exceeded the 1,000-expression budget.
   function question(day,index) {
    let tier=int(index / 5);
-   let slot=tier == 0 ? (day*17+(index%5)*7+0)%73 : tier == 1 ? (day*17+(index%5)*7+11)%92 : (day*17+(index%5)*7+22)%66;
-   let ids=tier == 0 ? ["e01","e02","e03","e04","e05","e06","e07","e08","e09","e10","e11","e12","e13","e14","e15","e16","e17","e18","e19","e20","e21","e22","e23","e24","e25","e26","e27","e28","e29","e30","u04","u05","u08","u11","u14","c01","c03","c04","c08","c09","c10","c12","c18","c19","c34","c41","c45","c46","c48","c51","c60","c61","c62","c66","d05","d10","d12","d15","d17","d18","d21","d26","d27","d35","d38","d41","d43","d44","d45","d53","d54","d56","d59"] : tier == 1 ? ["m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m12","m13","m14","m15","m16","m17","m18","m19","m20","m21","m22","m23","m24","m25","m26","m27","m28","m29","m30","u02","u03","u06","u07","u09","u13","c02","c05","c07","c11","c13","c14","c16","c17","c20","c22","c23","c24","c26","c31","c33","c37","c42","c43","c49","c50","c52","c53","c54","c56","c57","c58","c59","c63","c64","c67","d01","d02","d03","d08","d09","d13","d14","d16","d22","d23","d25","d28","d29","d31","d32","d33","d36","d37","d39","d40","d42","d47","d48","d49","d50","d55"] : ["h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h11","h12","h13","h14","h15","h16","h17","h18","h19","h20","h21","h22","h23","h24","h25","h26","h27","h28","h29","h30","u01","u10","u12","c06","c15","c21","c25","c27","c28","c29","c30","c32","c35","c36","c38","c39","c40","c44","c47","c55","c65","d04","d06","d07","d11","d19","d20","d24","d30","d34","d46","d51","d52","d57","d58","d60"];
-   let answers=tier == 0 ? [2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,2,0,1,3,2,0,1,1,2,3,1,3,0,3,2,2,3,1,0,1,2,3,3,3,0,2,1,3,0,3,0,1,1,0,3,1,2,3,3,0,2,1] : tier == 1 ? [3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,1,3,1,2,2,3,2,0,0,2,3,1,2,1,3,0,1,3,0,2,2,3,0,2,3,1,2,3,1,2,3,0,0,1,0,3,0,1,2,3,3,0,2,0,1,3,2,3,1,2,3,2,3,1,2,0,1,2,3,0,1] : [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,0,2,2,0,1,2,3,1,0,1,3,0,1,1,0,0,2,2,0,1,1,1,2,2,0,0,0,1,2,3,0,2];
+   let slot=tier == 0 ? (day*17+(index%5)*11+0)%84 : tier == 1 ? (day*17+(index%5)*7+11)%134 : (day*17+(index%5)*7+22)%73;
+   let ids=tier == 0 ? ["e01","e02","e03","e04","e05","e06","e07","e08","e09","e10","e11","e12","e13","e14","e15","e16","e17","e18","e19","e20","e21","e22","e23","e24","e25","e26","e27","e28","e29","e30","u04","u05","u08","u11","u14","c01","c03","c04","c08","c09","c10","c12","c18","c19","c34","c41","c45","c46","c48","c51","c60","c61","c62","c66","d05","d10","d12","d15","d17","d18","d21","d26","d27","d35","d38","d41","d43","d44","d45","d53","d54","d56","d59","s02","s05","s06","s09","s14","s24","s25","s26","s30","s43","s45"] : tier == 1 ? ["m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m12","m13","m14","m15","m16","m17","m18","m19","m20","m21","m22","m23","m24","m25","m26","m27","m28","m29","m30","u02","u03","u06","u07","u09","u13","c02","c05","c07","c11","c13","c14","c16","c17","c20","c22","c23","c24","c26","c31","c33","c37","c42","c43","c49","c50","c52","c53","c54","c56","c57","c58","c59","c63","c64","c67","d01","d02","d03","d08","d09","d13","d14","d16","d22","d23","d25","d28","d29","d31","d32","d33","d36","d37","d39","d40","d42","d47","d48","d49","d50","d55","s01","s03","s04","s07","s08","s10","s11","s12","s13","s15","s17","s18","s19","s20","s21","s22","s23","s27","s28","s29","s31","s32","s33","s34","s35","s37","s38","s39","s41","s42","s44","s47","s49","s50","s51","s52","s53","s55","s56","s57","s58","s59"] : ["h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h11","h12","h13","h14","h15","h16","h17","h18","h19","h20","h21","h22","h23","h24","h25","h26","h27","h28","h29","h30","u01","u10","u12","c06","c15","c21","c25","c27","c28","c29","c30","c32","c35","c36","c38","c39","c40","c44","c47","c55","c65","d04","d06","d07","d11","d19","d20","d24","d30","d34","d46","d51","d52","d57","d58","d60","s16","s36","s40","s46","s48","s54","s60"];
+   let answers=tier == 0 ? [2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,2,0,1,3,2,0,1,1,2,3,1,3,0,3,2,2,3,1,0,1,2,3,3,3,0,2,1,3,0,3,0,1,1,0,3,1,2,3,3,0,2,1,3,2,3,2,3,1,2,3,3,0,2] : tier == 1 ? [3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,1,3,1,2,2,3,2,0,0,2,3,1,2,1,3,0,1,3,0,2,2,3,0,2,3,1,2,3,1,2,3,0,0,1,0,3,0,1,2,3,3,0,2,0,1,3,2,3,1,2,3,2,3,1,2,0,1,2,3,0,1,2,0,1,0,1,3,0,1,2,0,2,3,0,1,2,3,0,0,1,2,0,1,2,3,0,2,3,0,2,3,1,0,2,3,0,1,2,0,1,2,3,0] : [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,3,0,2,2,0,1,2,3,1,0,1,3,0,1,1,0,0,2,2,0,1,1,1,2,2,0,0,0,1,2,3,0,2,1,1,1,3,1,3,1];
    return [ids[slot],answers[slot]];
   }
   function prize(n) { return n==0?0:[1000,2000,3000,4000,8000,10000,20000,30000,40000,60000,80000,150000,250000,500000,1000000][n-1]; }
@@ -80,7 +80,7 @@ service cloud.firestore {
    return o.activeDay is int && p.diff(o).affectedKeys().hasOnly(['total','bestPrize','games','titles','unlocked','wrong','activeDay','lastSettledDay','updatedAt'])
     && get(run(uid,o.activeDay)).data.phase!='finished' && r.phase=='finished' && p.activeDay==null && p.lastSettledDay==o.activeDay
     && p.total is int && p.total==o.total+r.payout && p.bestPrize==(o.bestPrize>r.payout?o.bestPrize:r.payout) && p.games==o.games+1 && p.titles==titles(p.bestPrize)
-    && p.unlocked is list && p.unlocked.size()<=231 && p.unlocked.toSet().size()==p.unlocked.size() && p.unlocked.toSet()==o.unlocked.toSet().union(r.seen.toSet())
+    && p.unlocked is list && p.unlocked.size()<=291 && p.unlocked.toSet().size()==p.unlocked.size() && p.unlocked.toSet()==o.unlocked.toSet().union(r.seen.toSet())
     && p.wrong is list && p.wrong.toSet().size()==p.wrong.size() && p.wrong.toSet()==o.wrong.toSet().union(failed.toSet())
     && getAfter(result(uid,r.day)).data.completedAt==request.time && getAfter(rank(uid)).data.updatedAt==request.time && getAfter(season(uid,r.season)).data.updatedAt==request.time;
   }
@@ -226,7 +226,7 @@ service cloud.firestore {
   }
 
   function rsRoomQuestion(seed,index,topic){
-   let ids=topic=='sport'?["e20","e21","e22","e23","m21","m22","m23","h26","h27","c13","c14","c32","c34","c50"]:["e01","e04","e13","e14","e15","m01","m02","m03","m04","m05","m06","m13","m24","m25","m30","h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h25","c05","c09","c16","c26","c27","c39","c42","c47","d32"];let answers=topic=='sport'?[1,2,3,0,3,0,1,1,2,2,3,1,3,3]:[2,1,2,3,0,3,0,1,2,3,0,3,2,3,0,0,1,2,3,0,1,2,3,0,1,0,2,2,1,3,0,0,3,0,2];let stride=topic=='sport'?9:8;
+   let ids=topic=='sport'?["e20","e21","e22","e23","m21","m22","m23","h26","h27","c13","c14","c32","c34","c50"]:["e01","e04","e13","e14","e15","m01","m02","m03","m04","m05","m06","m13","m24","m25","m30","h01","h02","h03","h04","h05","h06","h07","h08","h09","h10","h25","c05","c09","c16","c26","c27","c39","c42","c47","d32","s07"];let answers=topic=='sport'?[1,2,3,0,3,0,1,1,2,2,3,1,3,3]:[2,1,2,3,0,3,0,1,2,3,0,3,2,3,0,0,1,2,3,0,1,2,3,0,1,0,2,2,1,3,0,0,3,0,2,0];let stride=topic=='sport'?9:7;
    let slot=(seed*17+index*stride)%ids.size();return [ids[slot],answers[slot]];
   }
   function rsQuestion(r){
@@ -242,7 +242,7 @@ service cloud.firestore {
     &&r.answerAt==null&&r.endedAt==null&&r.outcome==''&&r.choice is int&&r.choice==-1&&r.halfFor is int&&r.halfFor==-1&&r.phoneFor is int&&r.phoneFor==-1&&r.audienceFor is int&&r.audienceFor==-1
     &&r.answers=={}&&r.seen==[]&&r.payout is int&&r.payout==0&&r.credit is int&&r.credit==0&&r.credited==false&&r.reason==''
     &&w.op=='start-session'&&w.item==id&&w.activeSession==id&&w.activeKind==r.kind&&w.activeRoom==r.room&&w.updatedAt==request.time
-    &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(265,'s')):
+    &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(275,'s')):
      (r.room==''&&r.topic=='all'&&r.count==15&&r.questionAt==request.time&&r.kind=='weekend'&&id.matches('^weekend_[a-f0-9-]{36}$')&&rwIsWeekend()&&get(rwPath(uid)).data.pass==rwWeekend()&&get(rwPath(uid)).data.get('passUses',0)<3));
   }
   function rsLife(r,o){
@@ -264,7 +264,7 @@ service cloud.firestore {
    return o.index<o.count-1&&(o.kind=='room'?o.outcome!='walk':(o.outcome=='correct'&&o.day==today()))
     &&r.diff(o).affectedKeys().hasOnly(['phase','index','timeMs','questionAt','answerAt','outcome','choice','updatedAt'])&&r.index is int&&r.index==o.index+1
     &&r.timeMs is int&&r.timeMs==o.timeMs+elapsed(o)&&r.answerAt==null&&r.outcome==''&&r.choice==-1
-    &&(o.kind=='room'?(r.questionAt==o.questionAt+duration.value(26500,'ms')&&request.time>=r.questionAt):r.questionAt==request.time);
+    &&(o.kind=='room'?(r.questionAt==o.questionAt+duration.value(27500,'ms')&&request.time>=r.questionAt):r.questionAt==request.time);
   }
   function rsReason(o){
    return o.kind=='room'&&o.index==o.count-1?'complete':o.correct==15?'complete':o.outcome=='correct'?(o.kind!='room'&&o.day!=today()?'timeout':'walk'):o.outcome;
@@ -336,7 +336,7 @@ service cloud.firestore {
     changed.hasOnly(['status','startedAt','feeShare','updatedAt'])&&v.status=='playing'?(o.status=='lobby'&&uid==o.hostUid&&o.players.size()>=2&&request.time<o.createdAt+duration.value(1,'h')&&v.startedAt==request.time&&v.feeShare==int(30000 / o.players.size())):
     changed.hasOnly(['status','updatedAt'])&&v.status=='cancelled'?(o.status=='lobby'&&uid==o.hostUid):
     changed.hasOnly(['scores','updatedAt'])?rrReport(v,o,id):
-    o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&(rrAll(o)||request.time>=o.startedAt+duration.value(295,'s'))&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNone(o)))):
+    o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&(rrAll(o)||request.time>=o.startedAt+duration.value(305,'s'))&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNone(o)))):
     rrPayment(v,o,id));
   }
   match /hkm_rooms/{id}{
