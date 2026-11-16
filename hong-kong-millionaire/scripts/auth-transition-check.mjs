@@ -204,7 +204,7 @@ try{
  // Measure actual icon / label rectangles at narrow, tablet, landscape and desktop widths.
  for(const [width,height]of [[320,850],[390,900],[621,900],[700,900],[812,375],[1280,900]]){
   const {c,p}=await open({guest:saved(),width,height});await p.locator('#start').click();await p.evaluate(()=>document.fonts.ready);
-  const overlaps=await p.locator('.lifelines>button').evaluateAll(buttons=>buttons.flatMap(button=>{const icon=button.querySelector('b').getBoundingClientRect();return [...button.querySelectorAll('span,small')].filter(node=>{const text=node.getBoundingClientRect();return Math.min(icon.right,text.right)-Math.max(icon.left,text.left)>1&&Math.min(icon.bottom,text.bottom)-Math.max(icon.top,text.top)>1;}).map(node=>node.textContent);}));
+  const overlaps=await p.locator('.lifelines>button').evaluateAll(buttons=>buttons.flatMap(button=>{const icon=button.querySelector('.hk-icon,b').getBoundingClientRect();return [...button.querySelectorAll('span,small')].filter(node=>{const text=node.getBoundingClientRect();return Math.min(icon.right,text.right)-Math.max(icon.left,text.left)>1&&Math.min(icon.bottom,text.bottom)-Math.max(icon.top,text.top)>1;}).map(node=>node.textContent);}));
   assert.deepEqual(overlaps,[],width+'px overlapping lifeline text');assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await p.locator('.lifelines').screenshot({path:`/tmp/hkm-lifelines-${width}.png`});await c.close();checks+=2;
  }

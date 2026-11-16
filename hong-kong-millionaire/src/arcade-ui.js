@@ -26,7 +26,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  }
  async function bindRun(value){
   if(!value)return;const version=epoch;stopRun?.();stopRun=null;acceptRun(value);view='game';
-  if(typeof cloud.watchSession==='function'){const stop=await cloud.watchSession(descriptor(value),next=>{if(epoch===version&&next?.id===value.id)acceptRun(next);},error=>{if(epoch===version)status(cloud.errorText(error)+' 請重新連接。');});if(version!==epoch)stop?.();else stopRun=stop;}
+  if(typeof cloud.watchSession==='function'){const stop=await cloud.watchSession(descriptor(value),next=>{if(epoch===version&&run?.id===value.id&&next?.id===value.id)acceptRun(next);},error=>{if(epoch===version)status(cloud.errorText(error)+' 請重新連接。');});if(version!==epoch)stop?.();else stopRun=stop;}
   render();
  }
  function acceptRun(next){
@@ -46,7 +46,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  }
  async function attach(id){
   const version=epoch;stopRoom?.();stopRoom=null;const request=++roomFetch,next=await cloud.getRoom(id);if(version!==epoch||request!==roomFetch)return;if(!next)throw Error('room-missing');room=next;view='room';render();
-  const stop=await cloud.watchRoom(id,value=>{if(epoch!==version||!value)return;room=value;
+  const stop=await cloud.watchRoom(id,value=>{if(epoch!==version||request!==roomFetch||!value)return;room=value;
    // A peer's roster/score update never starts another generic task or rebuilds answer controls.
    if(view==='room'){render();if(value.status==='playing'&&value.players.includes(uid)&&!(run?.room===id&&run.phase==='finished'))queueMicrotask(startRoomSession);}
    else updateRoomProgress();

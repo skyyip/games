@@ -62,3 +62,8 @@ test('room prize ties use score, answer time, then fixed join order',()=>{
  const room={players:['a','b','c']},sessions={a:{phase:'finished',correct:8,timeMs:10000},b:{phase:'finished',correct:9,timeMs:20000},c:{phase:'finished',correct:9,timeMs:15000}};
  assert.equal(roomWinner(room,sessions),'c');sessions.b.timeMs=15000;assert.equal(roomWinner(room,sessions),'b');sessions.b.phase='playing';assert.equal(roomWinner(room,sessions),'c');
 });
+test('comic icon outlines exceed the requested 2.5:1 against their plaques',async()=>{
+ const {ICON_INK,ICON_PAPER}=await import('../src/hk-icons.js');
+ const luminance=hex=>{const rgb=hex.match(/[a-f0-9]{2}/gi).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];};
+ assert((luminance(ICON_PAPER)+.05)/(luminance(ICON_INK)+.05)>=2.5);
+});

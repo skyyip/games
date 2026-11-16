@@ -1,5 +1,5 @@
 import {hkDay} from './game.js';
-export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'叮叮地膽',icon:'🚋'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者',icon:'🏮'},{id:'snacks',name:'街頭小吃',prefix:'食神',icon:'🥣'}]);
+export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'叮叮地膽'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'}]);
 const tourism='https://www.discoverhongkong.com/tc/explore.html',ich='https://www.icho.hk/tc/web/icho/home.html';
 const cards=[
  ['hotdog','transport','熱狗巴士',false,'「熱狗」是香港人對昔日沒有空調巴士的俗稱，記錄公共交通設備的變遷。',tourism],

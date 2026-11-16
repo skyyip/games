@@ -19,7 +19,7 @@ const drawings={
  book:'<path d="M4 7q7-3 12 1 5-4 12-1v19q-7-3-12 0-5-3-12 0Z" fill="#e6c47a"/><path d="M16 9v16m-9-13h5m-5 5h5m8-5h5m-5 5h5"/>'
 };
 export function iconSVG(kind='bao'){return '<svg class="hk-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="1" y="1" width="30" height="30" rx="9" fill="'+ICON_PAPER+'"/><g fill="none" stroke="'+ICON_INK+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(drawings[kind]??drawings.bao)+'</g></svg>';}
-const classify=b=>{const text=(b.getAttribute('aria-label')??'')+' '+b.textContent;
+const classify=b=>{const known={'account-open':'people','book-open':'book','board-open':'trophy','life-half':'coin','life-phone':'phone','life-audience':'people','arcade-lobby':'back','arcade-retry':'refresh'};if(known[b.id])return known[b.id];const text=(b.getAttribute('aria-label')??'')+' '+b.textContent;
  if(b.classList.contains('close-button'))return 'close';if(/取消|返回|返去|登出|離場|割禾青/.test(text))return 'back';if(/排行|成績|獎金|領取/.test(text))return 'trophy';if(/開房|遊樂場|對戰|熱座|挑戰|開始/.test(text))return 'tram';if(/加入|街坊|觀眾|好友/.test(text))return 'people';if(/電郵|email/i.test(text))return 'letter';if(/重試|核對|同步|重新/.test(text))return 'refresh';if(/朋友|來電/.test(text))return 'phone';if(/確認|確定|保存|收到|明白|套用/.test(text))return 'tick';if(/購買|費|通行|退款/.test(text))return 'coin';if(/收藏|卡|扭蛋|金蛋/.test(text))return 'card';if(/查看|解說|故事|玩法|回顧|稱號/.test(text))return 'book';return 'bao';};
 export function installIcons(){
  const make=kind=>{const holder=document.createElement('template');holder.innerHTML=iconSVG(kind);return holder.content.firstChild;};
