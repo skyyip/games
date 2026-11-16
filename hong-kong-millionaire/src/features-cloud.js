@@ -14,13 +14,17 @@ export async function wallet(c,uid){
  const [p,w]=await Promise.all([c.getDoc(player(c,uid)),c.getDoc(ref)]);return {profile:data(p),wallet:data(w),balance:walletBalance(data(p),data(w))};
 }
 export async function shop(c,uid,action){
- await wallet(c,uid);let outcome;
+ await wallet(c,uid);const requestId=action.requestId??crypto.randomUUID();if(!/^[a-f0-9-]{36}$/.test(requestId))throw Error('invalid-item');
+ const receiptRef=c.doc(c.db,FEATURE_COLLECTIONS.wallets,uid,'receipts',requestId);let outcome;
  await c.runTransaction(c.db,async t=>{
-  const [p,w]=await Promise.all([t.get(player(c,uid)),t.get(walletRef(c,uid))]);const next=walletAction(p.data(),w.data(),action),stamp=c.serverTimestamp();outcome=next.item;
+  const [p,w,receipt]=await Promise.all([t.get(player(c,uid)),t.get(walletRef(c,uid)),t.get(receiptRef)]);
+  if(receipt.exists()){if(receipt.data().op!==action.type)throw Error('receipt-mismatch');outcome=receipt.data().item;return;}
+  const next=walletAction(p.data(),w.data(),{...action,requestId}),stamp=c.serverTimestamp();outcome=next.item;
   t.set(walletRef(c,uid),{...next,updatedAt:stamp});
+  t.set(receiptRef,{uid,op:next.op,item:next.item,cost:next.spent-w.data().spent,revision:next.revision,createdAt:stamp});
   if(action.type==='equip')t.set(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid),{uid,frame:next.frame,theme:next.theme,prefix:next.prefix,updatedAt:stamp});
  });
- return {...await wallet(c,uid),outcome};
+ return {...await wallet(c,uid),outcome,requestId};
 }
 export async function publicStyles(c,uids){const rows=await Promise.all([...new Set(uids)].slice(0,20).map(async uid=>[uid,data(await c.getDoc(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid)))]));return Object.fromEntries(rows);}
 export async function getSession(c,uid,descriptor){return normalizeRun(data(await c.getDocFromServer(sessionRef(c,uid,descriptor))));}
@@ -70,7 +74,7 @@ export async function settleSession(c,uid,descriptor){
    t.update(player(c,uid),{activeDay:null,activeKind:'daily',lastSettledDay:old.day,updatedAt:stamp});
    t.set(c.doc(c.db,FEATURE_COLLECTIONS.assisted,uid+'_'+old.day),{uid,day:old.day,displayName:p.data().displayName,prize:done.payout,timeMs:done.timeMs,lifelinesLeft:[done.halfFor,done.phoneFor,done.audienceFor].filter(n=>n===-1).length,correct:done.correct,assisted:true,swapUsed:done.swapFor>=0,completedAt:stamp});
   }
-  if(old.kind==='room')t.update(roomRef(c,descriptor.room),{['scores.'+uid]:{correct:done.correct,timeMs:done.timeMs,finishedAt:stamp},updatedAt:stamp});
+  if(old.kind==='room'&&roomSnap.data().status==='playing')t.update(roomRef(c,descriptor.room),{['scores.'+uid]:{correct:done.correct,timeMs:done.timeMs,finished:true,finishedAt:stamp},updatedAt:stamp});
  });
  return getSession(c,uid,descriptor);
 }
@@ -80,7 +84,7 @@ export async function createRoom(c,uid,{topic='all',pool=0}){
  const id=crypto.randomUUID().replaceAll('-',''),ref=roomRef(c,id);
  await c.runTransaction(c.db,async t=>{
   const [p,w]=await Promise.all([t.get(player(c,uid)),t.get(walletRef(c,uid))]);const old=w.data();if(walletBalance(p.data(),old)<30000+pool)throw Error('insufficient-balance');
-  const stamp=c.serverTimestamp(),room={id,hostUid:uid,hostName:p.data().displayName,players:[uid],names:{[uid]:p.data().displayName},topic,pool,seed:randomSeed(),status:'lobby',scores:{},winner:'',paidTo:'',createdAt:stamp,startedAt:null,updatedAt:stamp};
+  const stamp=c.serverTimestamp(),room={id,hostUid:uid,hostName:p.data().displayName,players:[uid],names:{[uid]:p.data().displayName},topic,pool,seed:randomSeed(),status:'lobby',scores:{[uid]:{correct:0,timeMs:0,finished:false,finishedAt:null}},winner:'',winnerOrder:-1,paidTo:'',createdAt:stamp,startedAt:null,updatedAt:stamp};
   t.set(ref,room);t.update(walletRef(c,uid),{spent:old.spent+30000+pool,revision:old.revision+1,op:'create-room',item:id,updatedAt:stamp});
  });return id;
 }
@@ -88,15 +92,15 @@ export async function getRoom(c,uid,id){return normalizeRoom(data(await c.getDoc
 export function watchRoom(c,uid,id,callback,onError){return c.onSnapshot(roomRef(c,id),snapshot=>callback(normalizeRoom(data(snapshot))),onError);}
 export async function joinRoom(c,uid,id){
  await c.runTransaction(c.db,async t=>{const [r,p]=await Promise.all([t.get(roomRef(c,id)),t.get(player(c,uid))]);const room=r.data();if(!room)throw Error('room-missing');if(room.players.includes(uid))return;if(room.status!=='lobby'||room.players.length>=6||Date.now()>stampNum(room.createdAt)+3600000)throw Error('room-full');
-  t.update(roomRef(c,id),{players:[...room.players,uid],['names.'+uid]:p.data().displayName,updatedAt:c.serverTimestamp()});
+  t.update(roomRef(c,id),{players:[...room.players,uid],['names.'+uid]:p.data().displayName,['scores.'+uid]:{correct:0,timeMs:0,finished:false,finishedAt:null},updatedAt:c.serverTimestamp()});
  });return getRoom(c,uid,id);
 }
 export async function startRoom(c,uid,id){await c.runTransaction(c.db,async t=>{const r=(await t.get(roomRef(c,id))).data();if(r.hostUid!==uid||r.status!=='lobby'||r.players.length<2)throw Error('room-not-ready');t.update(roomRef(c,id),{status:'playing',startedAt:c.serverTimestamp(),updatedAt:c.serverTimestamp()});});return getRoom(c,uid,id);}
 export async function finaliseRoom(c,uid,id){
  await c.runTransaction(c.db,async t=>{
-  const ref=roomRef(c,id),r=(await t.get(ref)).data();if(r.status!=='playing')return;if(!r.players.includes(uid)||Date.now()<stampNum(r.startedAt)+230000)throw Error('room-wait');
-  const snapshots=await Promise.all(r.players.map(p=>t.get(c.doc(c.db,FEATURE_COLLECTIONS.rooms,id,'sessions',p))));const sessions=Object.fromEntries(r.players.map((p,i)=>[p,data(snapshots[i])])),winner=roomWinner(r,sessions);
-  t.update(ref,{status:winner?'finished':'cancelled',winner,updatedAt:c.serverTimestamp()});
+  const ref=roomRef(c,id),r=(await t.get(ref)).data();if(r.status!=='playing')return;if(!r.players.includes(uid)||Date.now()<stampNum(r.startedAt)+260000)throw Error('room-wait');
+  const sessions=Object.fromEntries(r.players.map(p=>[p,{phase:r.scores[p]?.finished?'finished':'playing',correct:r.scores[p]?.correct??0,timeMs:r.scores[p]?.timeMs??0}])),winner=roomWinner(r,sessions);
+  t.update(ref,{status:winner?'finished':'cancelled',winner,winnerOrder:winner?r.players.indexOf(winner):-1,updatedAt:c.serverTimestamp()});
  });return getRoom(c,uid,id);
 }
 export async function claimRoom(c,uid,id,{cancel=false}={}){

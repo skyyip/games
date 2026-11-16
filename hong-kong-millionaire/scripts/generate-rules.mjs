@@ -1,3 +1,4 @@
+import {rewardRules} from './reward-rules.mjs';
 import {readFile,writeFile} from 'node:fs/promises';
 import {QUESTIONS} from '../src/questions.js';
 import {PRIZES,BANK_VERSION,QUESTION_PLANS} from '../src/game.js';
@@ -34,8 +35,8 @@ service cloud.firestore {
   function lifeLeft(r) { return (r.halfFor==-1?1:0)+(r.phoneFor==-1?1:0)+(r.audienceFor==-1?1:0); }
   function nameValid(name) { return name is string && name.size()>=2 && name.size()<=20; }
   function profileCreate(p,uid) {
-   return p.keys().hasOnly(['uid','displayName','total','bestPrize','games','titles','unlocked','wrong','favourites','activeDay','lastSettledDay','createdAt','updatedAt'])
-    && p.uid==uid && nameValid(p.displayName) && p.total is int && p.total==0 && p.bestPrize is int && p.bestPrize==0 && p.games is int && p.games==0
+   return p.keys().hasOnly(['uid','displayName','total','bestPrize','games','titles','unlocked','wrong','favourites','activeDay','activeKind','lastSettledDay','createdAt','updatedAt'])
+    && p.uid==uid && p.get('activeKind','daily')=='daily' && nameValid(p.displayName) && p.total is int && p.total==0 && p.bestPrize is int && p.bestPrize==0 && p.games is int && p.games==0
     && p.titles==[] && p.unlocked==[] && p.wrong==[] && p.favourites==[] && p.activeDay==null && p.lastSettledDay==null && p.createdAt==request.time && p.updatedAt==request.time;
   }
   function start(r,uid,day) {
@@ -44,7 +45,7 @@ service cloud.firestore {
     && r.phase=='playing' && r.index is int && r.index==0 && r.correct is int && r.correct==0 && r.timeMs is int && r.timeMs==0
     && r.startedAt==request.time && r.questionAt==request.time && r.updatedAt==request.time && r.answerAt==null && r.endedAt==null && r.outcome=='' && r.choice is int && r.choice==-1
     && r.halfFor is int && r.halfFor==-1 && r.phoneFor is int && r.phoneFor==-1 && r.audienceFor is int && r.audienceFor==-1 && r.audienceHadHalf==false
-    && r.answers=={} && r.seen==[] && r.payout is int && r.payout==0 && r.reason=='' && get(player(uid)).data.activeDay==null && getAfter(player(uid)).data.activeDay==r.day;
+    && r.answers=={} && r.seen==[] && r.payout is int && r.payout==0 && r.reason=='' && get(player(uid)).data.activeDay==null && get(player(uid)).data.get('activeKind','daily')=='daily' && get(player(uid)).data.lastSettledDay!=r.day && getAfter(player(uid)).data.activeDay==r.day;
   }
   // Strict diff allowlists preserve immutable fields and valid untouched state; do not revalidate the whole run on every update.
   function lifeline(r,o) {
@@ -96,7 +97,8 @@ service cloud.firestore {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
     changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
-    :changed.hasOnly(['activeDay','updatedAt'])?(o.activeDay==null && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
+    :(p.get('activeKind','daily')=='assisted'||o.get('activeKind','daily')=='assisted')?arcadeProfileUpdate(p,o,uid)
+    :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
     :profileFinish(p,o,uid));
   }
   match /${C.players}/{uid} {
@@ -136,6 +138,7 @@ service cloud.firestore {
    allow create: if seasonValid(request.resource.data,id,{'total':0,'games':0,'bestPrize':0});
    allow update: if seasonValid(request.resource.data,id,resource.data);
   }
+${rewardRules()}
   match /{document=**} { allow read,write: if false; }
  }
 }

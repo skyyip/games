@@ -38,14 +38,14 @@ export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wal
 export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
 export const isWeekend=day=>[0,6].includes((day+4)%7);
-export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,swapTokens:0,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',createdAt:stamp,updatedAt:stamp};}
+export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,swapTokens:0,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
 export function drawnCard(wallet,gold=false){
  const seed=Math.floor(wallet.createdAt?.toMillis?.()??wallet.createdAt??0);
  if(gold)return FOIL_CARDS[(seed+wallet.draws*5)%FOIL_CARDS.length];
  const slot=(seed+wallet.draws*37)%126;return slot<120?NORMAL_CARDS[Math.floor(slot/10)]:FOIL_CARDS[slot-120];
 }
 export function walletAction(profile,wallet,action,day=hkDay()){
- const next={...wallet,revision:wallet.revision+1,op:action.type,item:action.id??''};let cost=0;
+ const next={...wallet,revision:wallet.revision+1,op:action.type,item:action.id??'',receipt:action.requestId??wallet.receipt};let cost=0;
  if(action.type==='buy'){const gear=gearById(action.id);if(!gear||wallet.owned.includes(gear.id))throw Error('already-owned');cost=gear.price;next.owned=[...wallet.owned,gear.id];}
  else if(action.type==='draw'||action.type==='gold'){cost=action.type==='gold'?50000:5000;next.item=drawnCard(wallet,action.type==='gold');next.cards={...wallet.cards,[next.item]:(wallet.cards[next.item]??0)+1};next.draws++;}
  else if(action.type==='equip'){

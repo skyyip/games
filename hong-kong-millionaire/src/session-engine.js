@@ -6,6 +6,7 @@ const topicMatch={all:()=>true,sport:q=>/體育|奧運|賽馬|劍擊|運動/.tes
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 export const ROOM_POOLS=Object.freeze(Object.fromEntries(TOPICS.map(t=>{const ids=QUESTIONS.filter(topicMatch[t.id]).map(q=>q.id);let stride=7;while(gcd(stride,ids.length)!==1)stride++;return [t.id,Object.freeze({ids:Object.freeze(ids),stride})];})));
 export function sessionQid(run,index=run.index){
+ if(run.kind==='room'&&run.topic==='all')return questionId(run.seed,index<3?index:index<7?index+2:index+3);
  if(run.kind==='room'){const pool=ROOM_POOLS[run.topic];if(!pool)throw Error('invalid-topic');return pool.ids[(run.seed*17+index*pool.stride)%pool.ids.length];}
  if(run.kind==='assisted'&&run.swapFor===index){const tier=Math.floor(index/5),pool=QUESTION_PLANS[BANK_VERSION][tier];return pool.ids[(run.day*pool.dayStep+(index%5+5)*pool.slotStep+tier*11)%pool.ids.length];}
  return questionId(run.kind==='assisted'?run.day:run.seed,index);
