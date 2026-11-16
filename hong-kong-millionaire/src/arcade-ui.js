@@ -3,8 +3,9 @@ import {hkDay,titleFor,PRIZES} from './game.js';
 import {isWeekend,weekendKey} from './economy.js';
 import {TOPICS,sessionQuestion,sessionQid,sessionRemaining,sessionRemoved,sessionVotes,sessionPresentation,sessionTerminal} from './session-engine.js';
 import {celebrateMillion} from './celebrations.js';
+import {playRedVan} from './reward-effects.js';
 const money=n=>'$'+Number(n).toLocaleString('en-HK'),el=(tag,text='',cls='')=>{const n=document.createElement(tag);n.textContent=text;n.className=cls;return n;};
-export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onChange=()=>{},beforeDaily=()=>{},onDaily=()=>{},canStart=()=>true}){
+export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onChange=()=>{},beforeDaily=()=>{},onDaily=()=>{},canStart=()=>true,soundEnabled=()=>false}){
  const dialog=el('dialog','','wide-dialog arcade-dialog');dialog.id='arcade-dialog';dialog.setAttribute('aria-labelledby','arcade-title');
  dialog.innerHTML='<button class="close-button" type="button" aria-label="關閉遊樂場">×</button><h2 id="arcade-title">街坊遊樂場</h2><p class="quiet">練習、私人房間與🛒換題挑戰分開計分，不影響純每日排行榜。</p><p id="arcade-status" role="status" class="status"></p><div id="arcade-content"></div><div class="arcade-footer"><button id="arcade-retry" class="outline" type="button">重新連接／繼續進度</button><button id="arcade-lobby" class="text-button" type="button">返回遊樂場選單</button></div>';
  document.body.append(dialog);const $=id=>dialog.querySelector('#'+id);dialog.querySelector('.close-button').onclick=()=>dialog.close();
@@ -30,6 +31,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(!run){list.append(el('p','尚未有進度。'));return;}const q=sessionQuestion(run);
   const head=el('div','','arcade-score');head.append(el('strong',modeName()),el('span','第 '+(run.index+1)+'／'+run.count+' 題'),el('b','答對 '+run.correct+' 題'));list.append(head);
   if(run.phase==='finished'){
+   celebrateMillion(run);if(state?.wallet?.exit==='exit-redvan'&&run.reason==='walk')playRedVan(run,soundEnabled());
    const result=el('section','','arcade-result');result.append(el('div',run.correct===15?'🏆':'✦','gacha-icon'),el('h3',run.kind==='room'?'已交卷，等候全場結算':titleFor(run.payout).name),el('strong',run.kind==='room'?run.correct+'／10':money(run.payout),'result-prize'),el('p',run.kind==='weekend'?'練習虛擬成績；本場已存入 '+money(run.credit)+' 額外獎金（每日上限100,000）。':run.kind==='assisted'?'已存入 '+money(run.credit)+' 可用獎金，成績只計🛒換題榜。':'個人答題不產生獎金；260秒全場結算後，由勝出街坊領取房主獎金池。'));
    result.append(button('查看本局解說',()=>{const body=hint.querySelector('#arcade-hint-body');body.replaceChildren();hint.querySelector('h2').textContent='本局香港故事';for(const a of Object.values(run.answers)){const item=el('article','','arcade-review');item.append(el('b',a.qid+' · '+({correct:'答啱',wrong:'答錯',walk:'未作答',timeout:'超時'}[a.outcome])));import('./game.js').then(({questionById})=>{const value=questionById(a.qid);if(value)item.append(el('h3',value.question),el('p','答案：'+value.options[value.answer]),el('p',value.explanation));});body.append(item);}hint.showModal();}));
    if(run.kind==='room')result.append(button('查看房間及獎金池',()=>{view='room';render();}));else result.append(button('返回遊樂場',()=>{view='lobby';render();}));

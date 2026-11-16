@@ -42,6 +42,10 @@ try{
  await no(sdk.setDoc(ref(c,'hkm_results','collector_'+hkDay()),{uid:'collector',prize:1000000}));
  await no(sdk.updateDoc(ref(c,'hkm_players','collector'),{activeDay:hkDay(),activeKind:'daily',updatedAt:sdk.serverTimestamp()}));
  if(!isWeekend())await assert.rejects(feature.startSession(c,'collector',{kind:'weekend'}));
+ const practice=await seed('practice');await ok(feature.wallet(practice,'practice'));const practiceId='weekend_'+crypto.randomUUID();
+ await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore(),stamp=sdk.Timestamp.now(),seed=newSession({id:practiceId,uid:'practice',kind:'weekend',seed:hkDay()},Date.now());await sdk.setDoc(sdk.doc(db,'hkm_players','practice','sessions',practiceId),{...seed,phase:'reveal',index:14,correct:15,outcome:'correct',choice:0,answerAt:stamp,startedAt:stamp,questionAt:stamp,updatedAt:stamp});await sdk.updateDoc(sdk.doc(db,'hkm_wallets','practice'),{activeSession:practiceId,activeKind:'weekend',practiceDay:hkDay(),practiceEarned:99500});});
+ const practiceRun=await ok(feature.settleSession(practice,'practice',{id:practiceId,kind:'weekend',room:''}));assert.equal(practiceRun.credit,500);assert.equal((await feature.wallet(practice,'practice')).wallet.practiceEarned,100000);checks+=2;
+ await no(sdk.updateDoc(ref(practice,'hkm_wallets','practice'),{practiceEarned:0,updatedAt:sdk.serverTimestamp()}));
  const host=await seed('host'),guest=await seed('guest');
  const id=await ok(feature.createRoom(host,'host',{topic:'sport',pool:50000}));assert.equal((await feature.wallet(host,'host')).balance,920000);checks++;
  await ok(feature.joinRoom(guest,'guest',id));await no(sdk.getDoc(ref(guest,'hkm_players','host')));

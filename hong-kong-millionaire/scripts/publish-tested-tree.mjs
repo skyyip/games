@@ -12,7 +12,7 @@ let parent='';try{git(['fetch','--no-tags','origin','refs/heads/'+branch]);paren
 const index='/tmp/hkm-publish-'+branch.replaceAll('/','-')+'.index',env={...process.env,GIT_INDEX_FILE:index};
 rmSync(index,{force:true});git(['read-tree','--empty'],{env});
 writeFileSync(root+'/SOURCE-COMMIT.txt',git(['rev-parse','HEAD'])+'\n');
-git(['--work-tree='+root,'add','--all','.'],{env});const tree=git(['write-tree'],{env});
+const gitDir=git(['rev-parse','--absolute-git-dir']);git(['--git-dir='+gitDir,'--work-tree='+root,'add','--all','.'],{env,cwd:root});const tree=git(['write-tree'],{env});
 if(parent&&git(['rev-parse',parent+'^{tree}'])===tree){console.log(branch+': already current');process.exit(0);}
 const sha=git(['commit-tree',tree,...(parent?['-p',parent]:[]),'-m','Verified Millionaire '+(branch.startsWith('previews/')?'UI previews':'website')+' from '+process.env.GITHUB_SHA]);
 git(['push','origin',sha+':refs/heads/'+branch]);rmSync(index,{force:true});console.log('Published '+branch+' at '+sha);
