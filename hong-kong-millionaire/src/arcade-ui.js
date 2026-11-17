@@ -4,7 +4,7 @@ import {optionOrder} from './choice-order.js';
 import {ART} from './art.js';
 import {titleFor,PRIZES,MODE_NAMES,questionById,QUESTION_MS} from './game.js';
 import {isWeekend,weekendKey} from './economy.js';
-import {TOPICS,sessionQuestion,sessionRemaining,sessionRemoved,sessionVotes,sessionPresentation,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE,ROOM_FEE_RESERVE,roomCode,roomFeeShare,roomCanFinish} from './session-engine.js';
+import {TOPICS,sessionQuestion,sessionRemaining,sessionRemoved,sessionVotes,sessionPresentation,sessionReviewReady,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE,ROOM_FEE_RESERVE,roomCode,roomFeeShare,roomCanFinish} from './session-engine.js';
 import {celebrateMillion} from './celebrations.js';
 import {playRedVan} from './reward-effects.js';
 const money=n=>'$'+Number(n).toLocaleString('en-HK'),el=(tag,text='',cls='')=>{const n=document.createElement(tag);n.textContent=text;n.className=cls;return n;};
@@ -19,6 +19,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  const status=text=>{$('arcade-status').textContent=text;};
  const button=(text,fn,disabled=false,cls='outline')=>{const b=el('button',text,cls);b.type='button';b.disabled=!!disabled;b.onclick=fn;return b;};
  const now=()=>cloud.sessionNow?.()??Date.now();
+ const reviewReady=()=>sessionReviewReady(run,room,cloud.sessionSafeNow?.()??now());
  let autoPaused=false,retryAt=0,failureCount=0;const rebated=new Set();
  const resetFailures=()=>{autoPaused=false;retryAt=0;failureCount=0;};
  const automaticReady=()=>!autoPaused&&performance.now()>=retryAt;
@@ -64,7 +65,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
    else updateRoomProgress();
   },error=>{if(epoch===version)status(cloud.errorText(error));});if(version!==epoch)stop?.();else stopRoom=stop;
  }
- function updateRoomProgress(){const info=$('room-live');if(info&&room)info.textContent=room.players.filter(p=>room.scores[p]?.finished).length+'／'+room.players.length+' 人已交卷';const ready=$('room-finish');if(ready)ready.disabled=!!pending||!roomCanFinish(room,now());}
+ function updateRoomProgress(){const info=$('room-live');if(info&&room)info.textContent=room.players.filter(p=>room.scores[p]?.finished).length+'／'+room.players.length+' 人已交卷';const ready=$('room-finish');if(ready)ready.disabled=!!pending||!roomCanFinish(room,now());const review=$('arcade-review-open');if(review)review.disabled=!reviewReady();const note=$('arcade-review-wait');if(note)note.hidden=reviewReady();}
  function showHint(kind){const body=hint.querySelector('#arcade-hint-body');body.replaceChildren();hint.querySelector('h2').textContent=kind==='phone'?'香港地膽・模擬朋友':'模擬現場觀眾';if(kind==='phone')body.append(el('p',sessionQuestion(run).hint),el('small','題庫預設的方向提示，不保證直接提供答案。'));else{const votes=sessionVotes(run);optionOrder(run,sessionQuestion(run).id).forEach((choice,i)=>{const v=votes[choice];const row=el('div','','audience-row'),bar=el('progress');bar.max=100;bar.value=v;row.append(el('b','ABCD'[i]),bar,el('span',v+'%'));body.append(row);});body.append(el('small','系統模擬投票，觀眾亦可能答錯。'));}hint.showModal();}
  async function life(kind){const key={half:'halfFor',phone:'phoneFor',audience:'audienceFor'}[kind];if(run[key]!==run.index)await move({type:'life',kind});if(run?.[key]===run.index&&kind!=='half')showHint(kind);}
  const isRevealed=()=>run?.phase==='reveal'&&(run.kind!=='room'||now()>=run.questionAt+QUESTION_MS);
@@ -72,7 +73,8 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(!run)return;const q=sessionQuestion(run),revealed=isRevealed(),head=el('div','','arcade-score');head.append(el('strong',run.kind==='room'?'街坊對戰':'週末狂熱'),el('span','第 '+(run.index+1)+'／'+run.count+' 題'),el('b','答對 '+run.correct+' 題'));list.append(head);
   if(run.phase==='finished'){
    const result=el('section','','arcade-result');result.append(el('div','','gacha-icon'));result.firstChild.dataset.icon='trophy';result.append(el('h3',run.kind==='room'?'已交卷！':titleFor(run.payout).name),el('strong',run.kind==='room'?run.correct+'／10':money(run.payout),'result-prize'),el('p',run.kind==='room'?'等齊街坊即可立即結算。勝出者取得全池獎金。':'本場入帳 '+money(run.credit)+'；不計每日排行榜。'));
-   result.append(button('查看本局解說',()=>{hint.querySelector('h2').textContent='本局香港故事';const body=hint.querySelector('#arcade-hint-body');body.replaceChildren();for(const a of Object.values(run.answers)){const question=questionById(a.qid);if(question){const item=el('article','','arcade-review');item.append(el('h3',question.question),el('p','答案：'+question.options[question.answer]),el('p',question.explanation));body.append(item);}}hint.showModal();}));
+   const review=button('查看本局解說',()=>{if(!reviewReady())return;hint.querySelector('h2').textContent='本局香港故事';const body=hint.querySelector('#arcade-hint-body');body.replaceChildren();for(const a of Object.values(run.answers)){const question=questionById(a.qid);if(question){const item=el('article','','arcade-review');item.append(el('h3',question.question),el('p','答案：'+question.options[question.answer]),el('p',question.explanation));body.append(item);}}hint.showModal();},!reviewReady());review.id='arcade-review-open';result.append(review);
+   if(run.kind==='room'){const note=el('small','本題揭曉或全員交卷後，即可查看解說。');note.id='arcade-review-wait';result.append(note);}
    if(run.kind==='room'){result.append(button('查看房間及結算',()=>{view='room';render();},false,'primary'));const live=el('p');live.id='room-live';result.append(live);}
    else result.append(button('返回遊樂場',()=>{view='home';render();}));list.append(result);updateRoomProgress();celebrateMillion(run);if(state?.wallet?.exit==='exit-redvan'&&run.reason==='walk')playRedVan(run,soundEnabled());return;
   }

@@ -1,7 +1,7 @@
 name: Verify Millionaire rewards
 on:
   push:
-    branches: [millionaire-rewards, millionaire-room-rework, millionaire-visual-bank, millionaire-room-launch-ux, main]
+    branches: [millionaire-rewards, millionaire-room-rework, millionaire-visual-bank, millionaire-room-launch-ux, millionaire-full-qa, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rewards.yml]
   workflow_dispatch:
 permissions:
@@ -56,6 +56,13 @@ jobs:
           node scripts/auth-transition-check.mjs
           node scripts/rewards-browser-check.mjs
           node scripts/street-observation-browser-check.mjs
+      - name: Real Firebase browser journeys
+        env:
+          GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
+          HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
+          HKM_BUILD_DIR: /tmp/games-built-rewards
+          BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only auth,firestore "node scripts/firebase-browser-check.mjs"
       - name: Save browser preview images
         if: always()
         working-directory: .
