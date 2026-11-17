@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import * as sdk from 'firebase/firestore';
 import * as feature from '../src/features-cloud.js';
-import {emptyWallet,isWeekend} from '../src/economy.js';
+import {emptyWallet,isWeekend,WEEKEND_LIMIT} from '../src/economy.js';
 import {newSession,sessionQuestion} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
 import {sessionClock} from '../src/session-clock.js';
@@ -19,10 +19,10 @@ try{
  const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{cards:{'tram-foil':100},updatedAt:sdk.serverTimestamp()}));
- const requestId=crypto.randomUUID();result=await ok(feature.shop(c,'collector',{type:'gold',requestId}));assert(result.outcome.endsWith('-foil'));assert.equal(result.balance,950000);const revision=result.wallet.revision;
- result=await ok(feature.shop(c,'collector',{type:'gold',requestId}));assert.equal(result.wallet.revision,revision);assert.equal(result.balance,950000);checks+=3;
+ const requestId=crypto.randomUUID();result=await ok(feature.shop(c,'collector',{type:'gold',requestId}));assert(result.outcome.endsWith('-foil'));assert.equal(result.balance,920000);const revision=result.wallet.revision;
+ result=await ok(feature.shop(c,'collector',{type:'gold',requestId}));assert.equal(result.wallet.revision,revision);assert.equal(result.balance,920000);checks+=3;
  await assert.rejects(feature.shop(c,'collector',{type:'equip',slot:'frame',id:'frame-gold',requestId:crypto.randomUUID()}));checks++;
- result=await ok(feature.shop(c,'collector',{type:'buy',id:'frame-rwb',requestId:crypto.randomUUID()}));assert.equal(result.balance,930000);
+ result=await ok(feature.shop(c,'collector',{type:'buy',id:'frame-rwb',requestId:crypto.randomUUID()}));assert.equal(result.balance,900000);
  result=await ok(feature.shop(c,'collector',{type:'equip',slot:'frame',id:'frame-rwb',requestId:crypto.randomUUID()}));assert.equal(result.wallet.frame,'frame-rwb');
  const styles=await ok(feature.publicStyles(c,['collector']));assert.equal(styles.collector.frame,'frame-rwb');checks++;
  await no(sdk.updateDoc(ref(c,'hkm_styles','collector'),{frame:'frame-gold',updatedAt:sdk.serverTimestamp()}));
@@ -36,6 +36,20 @@ try{
  const practiceRun=await ok(feature.settleSession(practice,'practice',{id:practiceId,kind:'weekend',room:''}));assert.equal(practiceRun.credit,500);assert.equal((await feature.wallet(practice,'practice')).wallet.practiceEarned,100000);checks+=2;
  await no(sdk.updateDoc(ref(practice,'hkm_wallets','practice'),{practiceEarned:0,passUses:0,updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(practice,'hkm_wallets','practice'),{passUses:0,revision:5,op:'pass',updatedAt:sdk.serverTimestamp()}));
+ // A retry ticket is paid once per Hong Kong day and cannot be replayed across devices.
+ const retry=await seed('retry');await ok(feature.wallet(retry,'retry'));
+ await assert.rejects(feature.startSession(retry,'retry',{kind:'retry'}),/retry-ticket-required/);checks++;
+ const ticketReceipt=crypto.randomUUID();await ok(feature.shop(retry,'retry',{type:'retry-ticket',requestId:ticketReceipt}));
+ await ok(feature.shop(retry,'retry',{type:'retry-ticket',requestId:ticketReceipt}));
+ assert.equal((await feature.wallet(retry,'retry')).balance,900000);checks++;
+ await assert.rejects(feature.shop(retry,'retry',{type:'retry-ticket',requestId:crypto.randomUUID()}),/retry-bought/);checks++;
+ let retryRun=await ok(feature.startSession(retry,'retry',{kind:'retry'}));
+ await no(sdk.updateDoc(ref(retry,'hkm_wallets','retry'),{retryUsedDay:-1,revision:(await feature.wallet(retry,'retry')).wallet.revision+1,op:'start-session',updatedAt:sdk.serverTimestamp()}));
+ for(let i=0;i<15;i++){retryRun=await ok(feature.moveSession(retry,'retry',retryRun,{type:'answer',choice:sessionQuestion(retryRun).answer}));if(i<14)retryRun=await ok(feature.moveSession(retry,'retry',retryRun,{type:'next'}));}
+ assert.equal(retryRun.payout,1000000);assert.equal(retryRun.credit,1000000);assert.equal((await feature.wallet(retry,'retry')).balance,1900000);assert.equal((await feature.wallet(retry,'retry')).profile.total,1000000);checks+=4;
+ await ok(feature.settleSession(retry,'retry',retryRun));assert.equal((await feature.wallet(retry,'retry')).balance,1900000);checks++;
+ await assert.rejects(feature.startSession(retry,'retry',{kind:'retry'}),/retry-ticket-required/);checks++;
+ await ok(feature.syncSessionClock(retry,'retry',retryRun)); // Another tab may already have settled during recovery.
  for(const count of [2,3,4]){
   const people=await Promise.all(Array.from({length:count},(_,i)=>seed('table'+count+'p'+i))),uids=Array.from({length:count},(_,i)=>'table'+count+'p'+i),entryFee=50000;
   const id=await ok(feature.createRoom(people[0],uids[0],{topic:'sport',entryFee}));assert.match(id,/^[A-HJ-NP-Z2-9]{8}$/);checks++;
@@ -82,6 +96,14 @@ try{
  await env.withSecurityRulesDisabled(async ctx=>{const stamp=new sdk.Timestamp(Math.floor(Date.now()/1000)-30,123456000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId,'sessions','clockHost'),{questionAt:stamp});});
  clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'next'}));const raw=(await sdk.getDoc(ref(clockHost,'hkm_rooms',clockId,'sessions','clockHost'))).data();assert.equal(raw.questionAt.nanoseconds,623456000);assert.equal(clockRun.index,1);checks+=2;
  await no(sdk.updateDoc(ref(clockGuest,'hkm_rooms',clockId),{feeShare:0,updatedAt:sdk.serverTimestamp()}));
+ // Resume a finished room with an expired private session without replaying ten timeouts.
+ const staleHost=await seed('staleHost'),staleGuest=await seed('staleGuest'),staleId=await ok(feature.createRoom(staleHost,'staleHost',{entryFee:1000}));
+ await ok(feature.joinRoom(staleGuest,'staleGuest',staleId));await ok(feature.startRoom(staleHost,'staleHost',staleId));
+ const staleRun=await ok(feature.startSession(staleHost,'staleHost',{kind:'room',room:staleId}));
+ await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-400000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId,'sessions','staleHost'),{questionAt:stamp});});
+ const recovered=await ok(feature.resumeSession(staleHost,'staleHost',staleRun));assert.equal(recovered.phase,'finished');assert.equal(recovered.correct,0);assert.equal((await feature.wallet(staleHost,'staleHost')).wallet.activeSession,'');checks+=3;
+ const dangling=await seed('dangling');await ok(feature.wallet(dangling,'dangling'));await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets','dangling'),{activeSession:'weekend_missing',activeKind:'weekend'});});
+ assert.equal(await ok(feature.activeSession(dangling,'dangling')),null);assert.equal((await feature.wallet(dangling,'dangling')).wallet.activeSession,'');checks++;
  const legacy=await seed('legacy');await ok(feature.wallet(legacy,'legacy'));
  await env.withSecurityRulesDisabled(async ctx=>{await sdk.setDoc(sdk.doc(ctx.firestore(),'hkm_rooms','old-room'),{status:'playing',players:['legacy'],createdAt:sdk.Timestamp.now()});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets','legacy'),{activeKind:'room',activeRoom:'old-room',activeSession:'old-room'});});
  assert.equal(await ok(feature.activeSession(legacy,'legacy')),null);assert.equal((await ok(feature.myRooms(legacy,'legacy'))).length,0);assert.equal((await feature.wallet(legacy,'legacy')).balance,1000000);checks++;

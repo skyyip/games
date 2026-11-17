@@ -47,3 +47,11 @@
 `sound-{tram,ferry,bus,crossing,mahjong,cafe}.wav`為本專案以`scripts/generate-sensory-audio.py`自行合成的六段四秒、22050Hz、16-bit單聲道PCM情境音效。沒有使用交通營辦商、電視節目、真人或實地錄音；題目明確標示情境重製，不用它們辨認真實車型、官方提示音或安全信號。執行產生器可重建全部音檔。
 
 `showtime-model.js`的四位親友SVG肖像及`hk-icons.js`的喇叭／放大鏡圖示為原創程式向量圖，不描繪真實主持人。背景心跳與選項回饋以Web Audio合成，不載入外部音樂。
+
+## 新情懷及造型素材（2026-11-17）
+
+`collection-streets-harbour.webp`為本次生成並人工檢視的原創港式漫畫圖集，4欄×3行方格，前六格老街、後六格海港。`exit-redvan.webp`是另行生成的透明背景原創紅色小巴，沒有商標或真人角色。保留生成原圖，網站使用WebP轉檔以減少下載量。插畫是文化情境示意，不是指定建築或車型的技術圖。
+
+六款`frame-*.svg`及六款`theme-*.svg`由`scripts/generate-cosmetics.py`建立；墨字風只用原創通用街坊字樣及筆畫，不摹寫任何人的真跡。邊框中央透明，文字仍清晰可讀。
+
+`theme-panels.webp`為另一組原創生成的2欄×3行方格主題插畫，依序冰室、原創墨痕街景、維港、電車、花燈、青花瓷。用於商店預覽、低透明度背景及分享卡，並非照片或任何人的真跡。

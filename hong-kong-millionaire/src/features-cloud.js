@@ -1,6 +1,6 @@
 import {sessionClock} from './session-clock.js';
 import {COLLECTIONS} from './schema.js';
-import {emptyWallet,walletAction,walletBalance,weekendKey,isWeekend,practiceReward,randomSeed} from './economy.js';
+import {emptyWallet,walletAction,walletBalance,weekendKey,isWeekend,practiceReward,randomSeed,WEEKEND_LIMIT} from './economy.js';
 import {newSession,sessionAct,sessionFinish,sessionTerminal,roomWinner,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE,ROOM_FEE_RESERVE,ROOM_LIMIT,roomFeeShare,roomCanFinish,roomCode,roomEntry} from './session-engine.js';
 import {normalizeRun} from './cloud-transition.js';
 import {hkDay} from './game.js';
@@ -29,36 +29,45 @@ export async function publicStyles(c,uids){return Object.fromEntries(await Promi
 export async function getSession(c,uid,descriptor){return normalizeRun(data(await c.getDocFromServer(sessionRef(c,uid,descriptor))));}
 export function watchSession(c,uid,descriptor,callback,onError){return c.onSnapshot(sessionRef(c,uid,descriptor),{includeMetadataChanges:true},snap=>{if(!snap.metadata.hasPendingWrites)callback(normalizeRun(data(snap)));},onError);}
 export async function activeSession(c,uid){
- const ref=walletRef(c,uid),w=data(await c.getDoc(ref));if(!w?.activeSession)return null;
+ const ref=walletRef(c,uid),w=data(await c.getDocFromServer(ref));if(!w?.activeSession)return null;
  const r=w.activeKind==='room'?data(await c.getDoc(roomRef(c,w.activeRoom))):null;
- if(!['room','weekend'].includes(w.activeKind)||w.activeKind==='room'&&(!r||!Number.isInteger(r.entryFee))){
+ const active=['room','weekend','retry'].includes(w.activeKind)?await getSession(c,uid,{id:w.activeSession,kind:w.activeKind,room:w.activeRoom}):null;
+ if(!['room','weekend','retry'].includes(w.activeKind)||!active||active.phase==='finished'||w.activeKind==='room'&&(!r||!Number.isInteger(r.entryFee))){
   await c.runTransaction(c.db,async t=>{const current=(await t.get(ref)).data();if(current.activeSession!==w.activeSession)return;t.update(ref,{activeSession:'',activeKind:'',activeRoom:'',revision:current.revision+1,op:'retire-extra',item:current.activeSession,updatedAt:c.serverTimestamp()});});return null;
  }
- return getSession(c,uid,{id:w.activeSession,kind:w.activeKind,room:w.activeRoom});
+ return active;
 }
 function afterInterval(c,stamp){const nano=stamp.nanoseconds+(ROOM_INTERVAL%1000)*1000000;return new c.Timestamp(stamp.seconds+Math.floor(ROOM_INTERVAL/1000)+Math.floor(nano/1000000000),nano%1000000000);}
 export async function syncSessionClock(c,uid,descriptor){
- const ref=sessionRef(c,uid,descriptor),sent=performance.now();
- await c.updateDoc(ref,{updatedAt:c.serverTimestamp()});const received=performance.now(),run=await getSession(c,uid,descriptor);
- if(run)sessionClock.observe(run.updatedAt,sent,received);return run;
+ const ref=sessionRef(c,uid,descriptor);let sent=null;
+ await c.runTransaction(c.db,async t=>{sent=null;const snap=await t.get(ref);if(!snap.exists())throw Error('run-missing');if(snap.data().phase==='finished')return;sent=performance.now();t.update(ref,{updatedAt:c.serverTimestamp()});});
+ const received=performance.now(),run=await getSession(c,uid,descriptor);if(run&&sent!==null)sessionClock.observe(run.updatedAt,sent,received);return run;
+}
+export async function resumeSession(c,uid,descriptor){
+ let run=await syncSessionClock(c,uid,descriptor);if(!run||run.phase==='finished')return run;
+ const time=sessionClock.lowerBound(),roomEnded=run.kind==='room'&&time>=run.questionAt+(run.count-run.index)*ROOM_INTERVAL;
+ if(run.phase==='playing'&&(time>=run.questionAt+25000||run.kind!=='room'&&hkDay(time)!==run.day))run=await moveSession(c,uid,descriptor,{type:'timeout'});
+ if(run.phase==='reveal'&&(roomEnded||sessionTerminal(run)||run.kind!=='room'&&run.day!==hkDay(time)))run=await settleSession(c,uid,descriptor);
+ return run;
 }
 export async function startSession(c,uid,{kind,room=''}){
- if(!['weekend','room'].includes(kind))throw Error('invalid-session');
- const id=kind==='room'?room:'weekend_'+crypto.randomUUID(),descriptor={id,kind,room};let sent=null;
+ if(!['weekend','retry','room'].includes(kind))throw Error('invalid-session');
+ const id=kind==='room'?room:kind+'_'+crypto.randomUUID(),descriptor={id,kind,room};let sent=null;
  await c.runTransaction(c.db,async t=>{
   sent=null;const [w,existing,rs]=await Promise.all([t.get(walletRef(c,uid)),t.get(sessionRef(c,uid,descriptor)),kind==='room'?t.get(roomRef(c,room)):Promise.resolve(null)]);
   if(existing.exists())return;if(!w.exists())throw Error('login-required');const old=w.data();if(old.activeSession)throw Error('active-session');
   const r=rs?.data(),now=sessionClock.now(),day=kind==='room'?hkDay(stampNum(r?.startedAt)):hkDay(now);
-  if(kind==='weekend'&&(!isWeekend(day)||old.pass!==weekendKey(day)))throw Error('weekend-pass-required');if(kind==='weekend'&&(old.passUses??0)>=3)throw Error('weekend-limit');
+  if(kind==='weekend'&&(!isWeekend(day)||old.pass!==weekendKey(day)))throw Error('weekend-pass-required');if(kind==='weekend'&&(old.passUses??0)>=WEEKEND_LIMIT)throw Error('weekend-limit');
+  if(kind==='retry'&&(old.retryBoughtDay!==day||old.retryUsedDay===day))throw Error('retry-ticket-required');
   if(kind==='room'&&(!r||r.status!=='playing'||!r.players.includes(uid)))throw Error('room-not-playing');
   const stamp=c.serverTimestamp(),run=newSession({id,uid,kind,seed:kind==='room'?r.seed:randomSeed(),topic:kind==='room'?r.topic:'all',room},now,kind==='room'?stampNum(r.startedAt):null);run.day=day;
   sent=performance.now();t.set(sessionRef(c,uid,descriptor),{...run,startedAt:stamp,questionAt:kind==='room'?r.startedAt:stamp,updatedAt:stamp});
   // Joining the shared clock only touches the player's private session and wallet.
   // Fee rebates are claimed after the quiz is visible, outside this transaction.
-  t.update(walletRef(c,uid),{activeSession:id,activeKind:kind,activeRoom:room,...(kind==='weekend'?{passUses:(old.passUses??0)+1}:{}),revision:old.revision+1,op:'start-session',item:id,updatedAt:stamp});
+  t.update(walletRef(c,uid),{activeSession:id,activeKind:kind,activeRoom:room,...(kind==='weekend'?{passUses:(old.passUses??0)+1}:kind==='retry'?{retryUsedDay:day}:{}),revision:old.revision+1,op:'start-session',item:id,updatedAt:stamp});
  });const received=performance.now(),run=await getSession(c,uid,descriptor);
  if(sent!==null){sessionClock.observe(run.startedAt,sent,received);return run;}
- return run.phase==='finished'?run:syncSessionClock(c,uid,descriptor);
+ return run.phase==='finished'?run:resumeSession(c,uid,descriptor);
 }
 export async function moveSession(c,uid,descriptor,action,{expected=null}={}){
  const ref=sessionRef(c,uid,descriptor);let finish=false;
@@ -75,7 +84,7 @@ export async function settleSession(c,uid,descriptor){
  const ref=sessionRef(c,uid,descriptor);
  await c.runTransaction(c.db,async t=>{const [r,w,rs]=await Promise.all([t.get(ref),t.get(walletRef(c,uid)),descriptor.kind==='room'?t.get(roomRef(c,descriptor.room)):Promise.resolve(null)]);
   if(!r.exists())throw Error('run-missing');const old=normalizeRun(r.data());if(old.phase==='finished')return;const oldWallet=w.data(),done=sessionFinish(old,sessionClock.now()),stamp=c.serverTimestamp();
-  const already=oldWallet.practiceDay===old.day?oldWallet.practiceEarned:0,credit=old.kind==='weekend'?Math.min(practiceReward(done.correct),Math.max(0,100000-already)):0;
+  const already=oldWallet.practiceDay===old.day?oldWallet.practiceEarned:0,credit=old.kind==='weekend'?Math.min(practiceReward(done.correct),Math.max(0,100000-already)):old.kind==='retry'?done.payout:0;
   t.update(ref,{phase:'finished',timeMs:done.timeMs,payout:done.payout,reason:done.reason,endedAt:stamp,updatedAt:stamp,credit,credited:true});
   t.update(walletRef(c,uid),{bonus:oldWallet.bonus+credit,activeSession:'',activeKind:'',activeRoom:'',...(old.kind==='weekend'?{practiceDay:old.day,practiceEarned:already+credit}:{}),revision:oldWallet.revision+1,op:'settle-session',item:old.id,updatedAt:stamp});
   if(old.kind==='room'&&rs.data().status==='playing')t.update(roomRef(c,descriptor.room),{['scores.'+uid]:{correct:done.correct,timeMs:done.timeMs,finished:true,finishedAt:stamp},updatedAt:stamp});

@@ -7,6 +7,7 @@ const topicMatch={all:()=>true,sport:q=>/體育|奧運|賽馬|劍擊|運動/.tes
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 export const ROOM_POOLS=Object.freeze(Object.fromEntries(TOPICS.map(t=>{const ids=QUESTIONS.filter(topicMatch[t.id]).map(q=>q.id);let stride=7;while(gcd(stride,ids.length)!==1)stride++;return [t.id,Object.freeze({ids:Object.freeze(ids),stride})];})));
 export function sessionQid(run,index=run.index){
+ if(run.kind==='retry'){const tier=Math.floor(index/5),pool=QUESTION_PLANS[run.bankVersion][tier],offset=5+(run.seed%Math.floor((pool.ids.length-5)/5))*5;return pool.ids[(run.day*pool.dayStep+(offset+index%5)*pool.slotStep+tier*11)%pool.ids.length];}
  if(run.kind==='room'&&run.topic==='all')return questionId(run.seed,index<3?index:index<7?index+2:index+3);
  if(run.kind==='room'){const pool=ROOM_POOLS[run.topic];if(!pool)throw Error('invalid-topic');return pool.ids[(run.seed*17+index*pool.stride)%pool.ids.length];}
  return questionId(run.seed,index);
@@ -17,7 +18,7 @@ export const sessionRemaining=(run,now=Date.now())=>run.phase==='playing'?Math.m
 export const sessionTerminal=run=>run.phase==='reveal'&&(run.kind==='room'?run.index===run.count-1||run.outcome==='walk':run.outcome!=='correct'||run.correct===15);
 export const sessionSpent=run=>run.timeMs+(run.answerAt===null?0:Math.max(0,Math.min(sessionLimit(run),run.answerAt-run.questionAt)));
 export function newSession({id,uid,kind,seed,topic='all',room=''},now=Date.now(),roomStartedAt=null){
- if(!['weekend','room'].includes(kind)||!Number.isInteger(seed)||seed<0||seed>1000000000||!ROOM_POOLS[topic])throw Error('invalid-session');
+ if(!['weekend','retry','room'].includes(kind)||!Number.isInteger(seed)||seed<0||seed>1000000000||!ROOM_POOLS[topic])throw Error('invalid-session');
  return {id,uid,kind,seed,topic,room,bankVersion:BANK_VERSION,day:hkDay(now),count:kind==='room'?ROOM_QUESTIONS:15,phase:'playing',index:0,correct:0,timeMs:0,startedAt:now,questionAt:kind==='room'?roomStartedAt:now,answerAt:null,endedAt:null,outcome:'',choice:-1,halfFor:-1,phoneFor:-1,audienceFor:-1,answers:{},seen:[],payout:0,credit:0,credited:false,reason:'',updatedAt:now};
 }
 export function sessionRemoved(run){if(run.halfFor!==run.index)return [];const q=sessionQuestion(run),wrong=[0,1,2,3].filter(i=>i!==q.answer),keep=wrong[hash(run.seed+q.id)%3];return wrong.filter(i=>i!==keep);}

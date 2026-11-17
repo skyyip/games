@@ -2,8 +2,8 @@ import {questionView} from './question-view.js';
 import {paintQuestionImage} from './visual-effects.js';
 import {optionOrder} from './choice-order.js';
 import {ART} from './art.js';
-import {titleFor,PRIZES,MODE_NAMES,questionById,QUESTION_MS} from './game.js';
-import {isWeekend,weekendKey} from './economy.js';
+import {titleFor,PRIZES,MODE_NAMES,questionById,QUESTION_MS,hkDay} from './game.js';
+import {isWeekend,weekendKey,WEEKEND_LIMIT} from './economy.js';
 import {TOPICS,sessionQuestion,sessionRemaining,sessionRemoved,sessionVotes,sessionPresentation,sessionReviewReady,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE,ROOM_FEE_RESERVE,roomCode,roomFeeShare,roomCanFinish} from './session-engine.js';
 import {celebrateMillion} from './celebrations.js';
 import {playRedVan} from './reward-effects.js';
@@ -23,19 +23,19 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  let autoPaused=false,retryAt=0,failureCount=0;const rebated=new Set();
  const resetFailures=()=>{autoPaused=false;retryAt=0;failureCount=0;};
  const automaticReady=()=>!autoPaused&&performance.now()>=retryAt;
- function failed(error){failureCount++;const code=String(error?.code??error?.message??'').replace(/^firestore\//,'');autoPaused=['permission-denied','unauthenticated','not-configured'].includes(code)||failureCount>=3;retryAt=performance.now()+Math.min(8000,1000*2**(failureCount-1));}
+ function failed(error){if(['room-wait','not-expired','not-ready'].includes(error?.code??error?.message)){retryAt=performance.now()+400;return;}failureCount++;const code=String(error?.code??error?.message??'').replace(/^firestore\//,'');autoPaused=['permission-denied','unauthenticated','not-configured'].includes(code)||failureCount>=3;retryAt=performance.now()+Math.min(8000,1000*2**(failureCount-1));}
  const descriptor=r=>({id:r.id,kind:r.kind,room:r.room});
  function setIdentity(next){if(uid===next)return;resetFailures();rebated.clear();uid=next;epoch++;loadId++;stopRoom?.();stopRun?.();stopRoom=stopRun=null;run=room=state=pending=null;starting=auto=false;view='home';dialog.close();hint.close();}
  async function bounded(promise){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error('request-timeout'),{code:'unavailable'})),10000);})]);}finally{clearTimeout(timer);}}
  async function wallet(){const actor=uid,version=epoch,next=await cloud.wallet();if(uid===actor&&epoch===version){if(!state||next.wallet.revision>=state.wallet.revision){state=next;onChange(next);}}return next;}
  async function operation(key,fn,label='正在連接…'){
   if(pending||!uid)return false;const token={key,epoch};pending=token;status(label);render();
-  try{await bounded(fn(()=>epoch===token.epoch&&pending===token));if(epoch===token.epoch){failureCount=0;retryAt=0;status('');}return true;}
+  try{await bounded(fn(()=>epoch===token.epoch&&pending===token));if(epoch===token.epoch){resetFailures();status('');}return true;}
   catch(error){if(epoch===token.epoch){failed(error);status(cloud.errorText(error)+(autoPaused?' 自動重試已暫停；請按「重新連接」核對。':' 稍後會重試；亦可按「重新連接」。'));}return false;}
   finally{if(pending===token){pending=null;render();}}
  }
  async function bindRun(value,{calibrate=true}={}){
-  if(!value)return;const version=epoch;if(calibrate&&value.phase!=='finished'&&typeof cloud.syncSessionClock==='function')value=await cloud.syncSessionClock(descriptor(value));if(version!==epoch)return;stopRun?.();stopRun=null;acceptRun(value);view='game';
+  if(!value)return;const version=epoch;if(calibrate&&value.phase!=='finished'&&typeof cloud.syncSessionClock==='function')value=await (typeof cloud.resumeSession==='function'?cloud.resumeSession(descriptor(value)):cloud.syncSessionClock(descriptor(value)));if(version!==epoch)return;stopRun?.();stopRun=null;acceptRun(value);view='game';
   if(typeof cloud.watchSession==='function'){const stop=await cloud.watchSession(descriptor(value),next=>{if(epoch===version&&run?.id===value.id&&next?.id===value.id)acceptRun(next);},error=>{if(epoch===version){failed(error);status(cloud.errorText(error)+' 請重新連接。');}});if(version!==epoch)stop?.();else stopRun=stop;}
   render();
   if(value.kind==='room'&&!rebated.has(value.room)){const actor=uid;rebated.add(value.room);cloud.claimRoom(value.room).then(next=>{if(uid===actor&&epoch===version){room=next.room;state=next;onChange(next);updateRoomProgress();}}).catch(()=>{});}
@@ -50,7 +50,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(!run||run.phase==='finished'||pending)return;const old=run;
   await operation('move',async current=>{const next=await cloud.moveSession(descriptor(old),action,{expected:{index:old.index,phase:old.phase,questionAt:old.questionAt}});if(current())acceptRun(next);},action.type==='answer'?'答案傳送中…':'正在更新本局…');
  }
- async function startWeekend(){if(!canStart()){status('先完成目前的每日熱座，再加入額外挑戰。');return;}await operation('start',async current=>{const next=await cloud.startSession({kind:'weekend'});if(current()){await bindRun(next,{calibrate:false});wallet().catch(()=>{});}});}
+ async function startWeekend(kind='weekend'){if(!canStart()){status('先完成目前的每日熱座，再加入額外挑戰。');return;}await operation('start',async current=>{const next=await cloud.startSession({kind});if(current()){await bindRun(next,{calibrate:false});wallet().catch(()=>{});}});}
  async function startRoomSession(manual=false){
   if(manual===true)resetFailures();if(!automaticReady())return;
   if(starting||pending||!room||room.status!=='playing'||!room.players.includes(uid)||run?.room===room.id&&run.phase==='finished'||!canStart())return;
@@ -70,7 +70,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  async function life(kind){const key={half:'halfFor',phone:'phoneFor',audience:'audienceFor'}[kind];if(run[key]!==run.index)await move({type:'life',kind});if(run?.[key]===run.index&&kind!=='half')showHint(kind);}
  const isRevealed=()=>run?.phase==='reveal'&&(run.kind!=='room'||now()>=run.questionAt+QUESTION_MS);
  function quiz(list){
-  if(!run)return;showtime?.fixedFriend(run);const q=sessionQuestion(run),revealed=isRevealed(),head=el('div','','arcade-score');head.append(el('strong',run.kind==='room'?'街坊對戰':'週末狂熱'),el('span','第 '+(run.index+1)+'／'+run.count+' 題'),el('b','答對 '+run.correct+' 題'));list.append(head);
+  if(!run)return;showtime?.fixedFriend(run);const q=sessionQuestion(run),revealed=isRevealed(),head=el('div','','arcade-score');head.append(el('strong',run.kind==='room'?'街坊對戰':run.kind==='retry'?'再挑戰一次':'週末狂熱'),el('span','第 '+(run.index+1)+'／'+run.count+' 題'),el('b','答對 '+run.correct+' 題'));list.append(head);
   if(run.phase==='finished'){
    const result=el('section','','arcade-result');result.append(el('div','','gacha-icon'));result.firstChild.dataset.icon='trophy';result.append(el('h3',run.kind==='room'?'已交卷！':titleFor(run.payout).name),el('strong',run.kind==='room'?run.correct+'／10':money(run.payout),'result-prize'),el('p',run.kind==='room'?'等齊街坊即可立即結算。勝出者取得全池獎金。':'本場入帳 '+money(run.credit)+'；不計每日排行榜。'));
    const review=button('查看本局解說',()=>{if(!reviewReady())return;hint.querySelector('h2').textContent='本局香港故事';const body=hint.querySelector('#arcade-hint-body');body.replaceChildren();for(const a of Object.values(run.answers)){const question=questionById(a.qid);if(question){const item=el('article','','arcade-review');item.append(el('h3',question.question),el('p','答案：'+question.options[question.answer]),el('p',question.explanation));body.append(item);}}hint.showModal();},!reviewReady());review.id='arcade-review-open';result.append(review);
@@ -95,8 +95,8 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   const w=state?.wallet;list.append(button('聽香港・擦霧練習（免費）',()=>{dialog.close();onPractice();},!!pending||!canStart()||!!run&&run.phase!=='finished','outline sensory-link'));list.append(el('p','可用獎金 '+(state?money(state.balance):'—'),'arcade-balance'));
   if(w?.activeSession)list.append(button('繼續未完成挑戰',recover,false,'primary'));
   const grid=el('div','','arcade-entry-grid');for(const [to,title,copy,icon]of [['create','我來開房','訂好參加費，邀街坊鬥香港知識。','tram'],['join','輸入代號','8位代號就入到房。','lantern']]){const card=button('',()=>{view=to;render();},false,'arcade-entry');const picture=el('span','','arcade-entry-art');picture.dataset.icon=icon;card.append(picture,el('strong',title),el('small',copy));grid.append(card);}list.append(grid);
-  const pass=el('section','','weekend-compact');pass.append(el('h3','週末狂熱'),el('p','星期六、日隨機15題，一張通行券最多玩3次。每場最多5,000獎金，每日上限100,000；不計每日榜。'));
-  const owned=w?.pass===weekendKey(),left=owned?Math.max(0,3-(w.passUses??0)):0;pass.append(el('b',owned?'本週末剩餘 '+left+'／3 次':'通行券 100,000'),button(owned?(isWeekend()?'開始週末挑戰':'星期六、日開放'):'購買週末通行券',()=>owned?startWeekend():(dialog.close(),onShop('tickets')),!!pending||owned&&(!isWeekend()||!left),'primary'));list.append(pass,button('我的房間紀錄',()=>loadRooms()));
+  const pass=el('section','','weekend-compact');pass.append(el('h3','週末狂熱'),el('p','星期六、日隨機15題，整個週末合共最多玩5次。每場最多5,000獎金，每日上限100,000；不計每日榜。'));
+  const owned=w?.pass===weekendKey(),left=owned?Math.max(0,WEEKEND_LIMIT-(w.passUses??0)):0;pass.append(el('b',owned?'本週末剩餘 '+left+'／5 次':'通行券 80,000'),button(owned?(isWeekend()?'開始週末挑戰':'星期六、日開放'):'購買週末通行券',()=>owned?startWeekend():(dialog.close(),onShop('tickets')),!!pending||owned&&(!isWeekend()||!left),'primary'));const retry=el('section','','weekend-compact retry-compact'),ready=w?.retryBoughtDay===hkDay()&&w?.retryUsedDay!==hkDay(),bought=w?.retryBoughtDay===hkDay();retry.append(el('h3','再挑戰一次'),el('p','全新隨機15題，最高1,000,000。每天最多購買及使用一次，不計純每日榜。'),el('b',ready?'今天尚有1次機會':bought?'今天機會已使用':'挑戰券 100,000'),button(ready?'開始再挑戰':bought?'明天再嚟':'購買再挑戰一次券',()=>ready?startWeekend('retry'):(dialog.close(),onShop('tickets')),!!pending||bought&&!ready,'primary'));list.append(pass,retry,button('我的房間紀錄',()=>loadRooms()));
  }
  function create(list){
   const form=el('form','','room-form');form.innerHTML='<h3>開個街坊房</h3><label>題目專場<select name="topic"><option value="all">香港綜合</option><option value="sport">體育專場</option><option value="places">地理與景點</option></select></label><label>每人參加費<input name="entryFee" type="number" inputmode="numeric" min="1000" max="500000" step="1" value="1000" required></label><div class="room-cost-preview"></div><p class="quiet">開房費30,000由2–4人均分。報名先預收參加費＋15,000，開局後退回開房費差額；未開局取消，全數退還。參加費全部放入獎金池。</p><button class="primary" type="submit">確認開房</button>';
@@ -130,7 +130,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(!allowAction||auto||pending||!automaticReady())return;const safeAt=cloud.sessionSafeNow?.()??clockAt,action=run.phase==='playing'&&sessionRemaining(run,safeAt)<=0?{type:'timeout'}:run.kind==='room'&&run.phase==='reveal'&&safeAt>=run.questionAt+ROOM_INTERVAL?{type:'next'}:null;if(action){auto=true;move(action,{automatic:true}).finally(()=>{auto=false;});}
  }
  async function recover(){if(pending)return;resetFailures();await operation('recover',async current=>{const next=run?await cloud.getSession(descriptor(run)):await cloud.activeSession();if(!current())return;if(next){await bindRun(next);if(next.kind==='room'&&room?.id!==next.room){await attach(next.room);view='game';}}else{let payload;try{payload=JSON.parse(localStorage.getItem('sky.hkm.pending-room.'+uid));}catch{}if(payload){const id=await cloud.createRoom(payload);if(current()){localStorage.removeItem('sky.hkm.pending-room.'+uid);await attach(id);}}}wallet().catch(()=>{});});}
- async function open(){setIdentity(getUser()?.uid??null);if(!uid){login();return;}dialog.showModal();view='home';render();if(!canStart()){status('請先完成目前的每日熱座。');return;}const ticket=++loadId;await operation('open',async current=>{await wallet();const next=await cloud.activeSession();if(!current()||ticket!==loadId)return;if(next){await bindRun(next);if(next.kind==='room'){await attach(next.room);view='game';}}});}
+ async function open(){setIdentity(getUser()?.uid??null);if(!uid){login();return;}dialog.showModal();view='home';if(!pending)resetFailures();render();if(!canStart()){status('請先完成目前的每日熱座。');return;}const ticket=++loadId;await operation('open',async current=>{await wallet();const next=await cloud.activeSession();if(!current()||ticket!==loadId)return;if(next){await bindRun(next);if(next.kind==='room'){await attach(next.room);view='game';}}});}
  $('arcade-retry').onclick=recover;$('arcade-lobby').onclick=()=>{view='home';render();};dialog.addEventListener('close',()=>{hint.close();visualObserver?.disconnect();visualAnimation?.cancel();visualObserver=visualAnimation=null;});setInterval(clock,150);
  for(const type of ['copy','cut','contextmenu','selectstart','dragstart'])dialog.addEventListener(type,event=>{if(view==='game'&&run?.phase!=='finished'&&event.target.closest?.('.arcade-question,.arcade-options,.arcade-visual'))event.preventDefault();});
  return {open,setIdentity,get run(){return run;},get visibleRun(){return dialog.open&&view==='game'?run:null;}};
