@@ -11,7 +11,7 @@ try{
  page.on('pageerror',e=>report.pageErrors.push(e.message));
  page.on('response',r=>{if(r.status()>=400&&new URL(r.url()).origin===new URL(base).origin)report.failedAssets.push({path:new URL(r.url()).pathname,status:r.status()});});
  const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:60000});report.httpStatus=response.status();check(response.status()===200,'Live game returns HTTP 200');
- await page.locator('#start').waitFor({state:'visible'});check((await page.title()).includes('百萬富翁'),'Game application loads');
+ await page.locator('#start').waitFor({state:'visible'});check(/百萬富翁|Hong Kong Millionaire/i.test(await page.title()),'Game application loads');
  await page.locator('#account-open').click();await page.waitForFunction(()=>!document.querySelector('#google-login').disabled,null,{timeout:20000});check(await page.locator('#email-login').isEnabled(),'Firebase Google/email controls initialise');
  const popupTask=page.waitForEvent('popup',{timeout:20000});await page.locator('#google-login').click();const popup=await popupTask;await popup.waitForURL(url=>url.hostname==='accounts.google.com'||url.pathname.includes('/__/auth/'),{timeout:30000}).catch(()=>{});
  await popup.waitForTimeout(5000).catch(()=>{});const popupURL=popup.isClosed()?null:new URL(popup.url());

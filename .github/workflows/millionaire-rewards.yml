@@ -37,13 +37,20 @@ jobs:
           npm ci --prefix tools
           npm run check:seo --prefix tools
           for game in beat-bad-luck career-365 frogger-jump your-dream-career mo-lei-tau-studio; do npm ci --prefix "$game"; done
-          npm install --prefix /tmp/hkm-playwright --no-save --package-lock=false playwright@1.56.1
+          npm install --prefix /tmp/hkm-playwright --no-save --package-lock=false playwright@1.58.2
           /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps chromium
           printf "export {chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" > /tmp/hkm-playwright.mjs
           BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs /tmp/games-built-rewards
           mkdir -p /tmp/hkm-preview
           ln -s /tmp/games-built-rewards /tmp/hkm-preview/games
           python3 -m http.server 5445 --bind 127.0.0.1 --directory /tmp/hkm-preview > /tmp/hkm-http.log 2>&1 &
+      - name: Real Firebase browser journeys
+        env:
+          GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
+          HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
+          HKM_BUILD_DIR: /tmp/games-built-rewards
+          BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only auth,firestore "node scripts/firebase-browser-check.mjs"
       - name: Full gameplay
         env:
           GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
@@ -57,13 +64,6 @@ jobs:
           node scripts/rewards-browser-check.mjs
           node scripts/street-observation-browser-check.mjs
           node scripts/offline-browser-check.mjs
-      - name: Real Firebase browser journeys
-        env:
-          GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
-          HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
-          HKM_BUILD_DIR: /tmp/games-built-rewards
-          BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
-        run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only auth,firestore "node scripts/firebase-browser-check.mjs"
       - name: Firefox and WebKit gameplay
         working-directory: .
         env:

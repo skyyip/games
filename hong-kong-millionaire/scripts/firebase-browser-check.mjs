@@ -28,8 +28,7 @@ async function open(label,width=390){
  const page=await context.newPage();page.on('pageerror',e=>errors.push(label+': '+e.message));
  // Chromium protects cross-port loopback requests. Grant access to the local
  // emulators explicitly; production traffic does not need this permission.
- const protocol=await context.newCDPSession(page),{targetInfo}=await protocol.send('Target.getTargetInfo'),permission={origin:new URL(base).origin,browserContextId:targetInfo.browserContextId};
- await protocol.send('Browser.grantPermissions',{...permission,permissions:['localNetworkAccess','localNetwork','loopbackNetwork']}).catch(()=>protocol.send('Browser.grantPermissions',{...permission,permissions:['localNetworkAccess']}));await protocol.detach();
+ await context.grantPermissions(['local-network-access'],{origin:new URL(base).origin});
  page.on('requestfailed',r=>networkFailures.push({label,path:new URL(r.url()).pathname,error:r.failure()?.errorText}));
  page.on('response',async r=>{if(r.status()>=400){const body=await r.json().catch(()=>null);networkFailures.push({label,path:new URL(r.url()).pathname,status:r.status(),error:body?.error?.message});}});
  async function load(){await page.goto(base,{waitUntil:'domcontentloaded'});await page.addScriptTag({type:'module',url:harness});await page.waitForFunction(()=>globalThis.__qaCloud&&!document.querySelector('#google-login').disabled);}
