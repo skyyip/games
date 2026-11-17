@@ -1,29 +1,10 @@
+import {ART} from './art.js';
 import {CULTURE_CARDS,SERIES,GEAR,cardById,gearById,unlockedPrefixes,weekendKey,prefixedTitle,walletBalance} from './economy.js';
 import {hkDay,titleFor} from './game.js';
 const money=n=>'$'+Number(n).toLocaleString('en-HK');
 const el=(tag,text='',className='')=>{const node=document.createElement(tag);node.textContent=text;if(className)node.className=className;return node;};
-const sourceSVG=id=>{
- const ink='#243335',paper='#fff3d1',red='#c54e39',gold='#e5b751',green='#4b8870';
- const rect=(x,y,w,h,c)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6" fill="'+c+'"/>';
- const circle=(x,y,r,c)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+c+'"/>';
- const path=(d,c='none')=>'<path d="'+d+'" fill="'+c+'"/>';
- let s='';
- if(id==='egg-waffle'){for(let row=0;row<5;row++)for(let col=0;col<4;col++)s+=circle(103+col*31+(row%2)*12,64+row*29,18,gold);}
- else if(id==='rice-roll'){s=rect(70,75,160,110,paper);for(let i=0;i<4;i++)s+='<ellipse cx="'+(95+i*37)+'" cy="123" rx="16" ry="39" fill="#f8f5e9"/>';s+=path('M80 112Q120 92 151 115T230 110', 'none');}
- else if(id==='dog-noodle'){s=path('M70 121H235Q218 210 153 212Q85 206 70 121Z',green);for(let i=0;i<7;i++)s+=path('M'+(90+i*18)+' 114q-9-29 5-44',paper);}
- else if(id==='bowl-pudding'){s=path('M80 115H225L208 203H99Z',red)+'<ellipse cx="152" cy="115" rx="73" ry="29" fill="'+gold+'"/>';for(let i=0;i<9;i++)s+=circle(105+(i*29)%98,104+(i*13)%31,5,red);}
- else if(id==='milk-tea-foil'||id==='lemon-tea-foil'){s=path('M98 55H213L197 214H114Z','#b6814c');s+=id==='lemon-tea-foil'?circle(155,145,37,gold)+path('M195 171L226 36'):rect(98,59,115,29,'#efdab0');}
- else if(id==='bun-tower'){s=path('M92 214L130 43H184L225 214Z',gold);for(let y=71;y<208;y+=31)for(let x=124;x<192;x+=30)s+=circle(x,y,12,paper);}
- else if(id==='fire-dragon'){s=path('M50 159Q72 60 128 129T228 129',red)+circle(245,105,31,red)+circle(255,97,6,paper)+path('M236 78L230 50L249 69M261 77L281 54L278 90',gold);}
- else if(id==='mahjong-carving'){s=rect(74,58,153,152,green)+rect(74,48,153,152,paper)+'<text x="150" y="151" fill="'+red+'" stroke="none" text-anchor="middle" font-size="80">中</text>';}
- else if(id==='bamboo-theatre'){for(let x=70;x<245;x+=43)s+=path('M'+x+' 45V215');for(let y=60;y<220;y+=42)s+=path('M60 '+y+'H248');s+=path('M110 85H201V171L155 198L110 171Z',red);}
- else if(id==='flower-foil'||id==='floating-colour-foil'){s=path('M58 105L154 30L250 105L233 216H77Z',red)+circle(154,119,55,gold)+'<text x="154" y="140" fill="'+ink+'" stroke="none" text-anchor="middle" font-size="57">喜</text>';}
- else if(id==='old-ferry'||id==='new-ferry'){s=path('M49 151H260L223 207H91Z',green)+rect(85,81,143,70,paper)+rect(102,57,108,28,green);for(let x=100;x<221;x+=31)s+=rect(x,99,20,31,'#9fc6ca');}
- else if(id==='whiteplate-foil'){s=rect(52,118,206,74,red)+path('M96 119L121 69H211L235 119Z','#adced2')+circle(101,196,21,ink)+circle(220,196,21,ink)+rect(124,151,68,26,paper);}
- else{const c=id==='tram-foil'?green:id==='first-metro'?'#a9bfb4':gold;s=rect(58,66,200,135,c);for(let x=75;x<244;x+=41)s+=rect(x,85,30,42,'#b7d8d7');s+=circle(99,207,20,ink)+circle(219,207,20,ink);if(id==='tram-foil')s+=rect(58,25,200,40,c)+path('M155 25V8');if(id==='first-metro')s+=path('M38 229H276');}
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310 250" width="310" height="250"><rect width="310" height="250" fill="'+paper+'"/><g stroke="'+ink+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'+s+'</g></svg>';
-};
-export function cultureCardImage(card){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sourceSVG(card.id));}
+export function cultureCardImage(card){return ART['collection-'+card.series+'.webp'];}
+export function cultureCardCrop(card){const index=CULTURE_CARDS.filter(c=>c.series===card.series).findIndex(c=>c.id===card.id);return {column:index%2,row:Math.floor(index/2)};}
 export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{},onArcade=()=>{}}){
  const dialog=document.createElement('dialog');dialog.id='collection-dialog';dialog.className='wide-dialog collection-dialog';dialog.setAttribute('aria-labelledby','collection-title');
  dialog.innerHTML='<button class="close-button" type="button" aria-label="關閉情懷收藏">×</button><h2 id="collection-title">情懷收藏與商店</h2><div class="wallet-summary"><span>可用獎金</span><strong id="wallet-balance">—</strong><small>消費不會扣減純每日排行榜的累積成績；不能兌換現金。</small></div><nav class="reward-tabs" aria-label="收藏商店分類"><button type="button" data-tab="draw">文化扭蛋</button><button type="button" data-tab="cards">我的卡冊</button><button type="button" data-tab="gear">個人造型</button><button type="button" data-tab="tickets">週末通行</button></nav><p id="shop-status" class="status" role="status"></p><button id="shop-recover" class="outline" type="button" hidden>核對上次操作</button><div id="shop-content"></div><div class="collection-footer"><label class="checkbox-label"><input id="reward-sound" type="checkbox">播放短音效及合成語音</label><button id="shop-refresh" class="text-button" type="button">重新讀取餘額</button><button id="shop-arcade" class="outline" type="button">前往街坊遊樂場 ↗</button></div>';
@@ -38,7 +19,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  function apply(){const w=state?.wallet;document.documentElement.dataset.hkmTheme=w?.theme??'default';document.body.dataset.hkmFrame=w?.frame??'none';onChange(state);}
  function button(label,handler,disabled=false){const b=el('button',label,'outline');b.type='button';b.disabled=disabled||busy;b.onclick=handler;return b;}
  function tile(title,copy){const box=el('article','','reward-tile');box.append(el('h3',title),el('p',copy));return box;}
- function cardFace(c){const box=el('div','','culture-face'+(c.foil?' foil':'')),img=new Image();img.src=cultureCardImage(c);img.alt=c.name+'原創插畫';img.width=310;img.height=250;box.append(img,el('span',c.foil?'閃卡':'文化卡','card-rarity'));return box;}
+ function cardFace(c){const box=el('div','','culture-face'+(c.foil?' foil':'')),img=new Image();img.src=cultureCardImage(c);img.alt=c.name+'原創插畫';img.width=1024;img.height=1536;img.loading='lazy';img.decoding='async';const crop=cultureCardCrop(c);img.style.left=(-crop.column*100)+'%';img.style.top=(-crop.row*100)+'%';box.append(img,el('span',c.foil?'閃卡':'文化卡','card-rarity'));return box;}
  function showCard(c,owned=true){
   if(!c)return;reveal.querySelector('#culture-card-face').replaceChildren(cardFace(c));reveal.querySelector('#culture-card-title').textContent=c.name;
   reveal.querySelector('#culture-card-story').textContent=owned?c.story:'這款卡尚未加入你的卡冊。抽卡後可重溫它的香港故事。';
@@ -62,14 +43,14 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
   const list=$('shop-content');list.replaceChildren();if(!state){list.append(el('p','登入後讀取你的可用餘額及收藏。','empty-book'));return;}const w=state.wallet;
   if(tab==='draw'){
    const grid=el('div','','reward-grid');
-   for(const gold of [false,true]){const cost=gold?50000:5000,box=tile(gold?'閃卡金蛋':'普通文化扭蛋',gold?'保證獲得一款閃卡；可能與已有卡重複。':'隨機文化卡；完整一輪抽取序號中約4.8%為閃卡。');const icon=el('div','','gacha-icon');icon.dataset.icon=gold?'trophy':'card';box.prepend(icon);box.append(el('strong',money(cost),'reward-price'),button(gold?'抽一顆閃卡金蛋':'抽一張文化卡',()=>request({type:gold?'gold':'draw'},gold?'抽閃卡金蛋？':'抽普通文化卡？',cost),state.balance<cost));grid.append(box);}list.append(grid,el('p','重複卡會保留數量。抽取序號會保存，重新連線不會重抽；所有卡片只作收藏，不提供答題加成。','quiet'));
+   for(const gold of [false,true]){const cost=gold?50000:5000,box=tile(gold?'閃卡金蛋':'普通文化扭蛋',gold?'保證獲得一款閃卡；可能與已有卡重複。':'隨機文化卡；完整一輪抽取序號中約4.8%為閃卡。');const machine=el('figure','','gacha-machine'+(gold?' gold-machine':'')),dome=el('div','','gacha-dome');dome.append(cardFace(cardById(gold?'flower-foil':'egg-waffle')));const base=el('div','','gacha-base');base.append(el('span','','gacha-knob'),el('span','','gacha-slot'));machine.append(dome,base);machine.setAttribute('aria-hidden','true');box.prepend(machine);box.append(el('strong',money(cost),'reward-price'),button(gold?'抽一顆閃卡金蛋':'抽一張文化卡',()=>request({type:gold?'gold':'draw'},gold?'抽閃卡金蛋？':'抽普通文化卡？',cost),state.balance<cost));grid.append(box);}list.append(grid,el('p','重複卡會保留數量。抽取序號會保存，重新連線不會重抽；所有卡片只作收藏，不提供答題加成。','quiet'));
   }else if(tab==='cards'){
    for(const series of SERIES){const cards=CULTURE_CARDS.filter(c=>c.series===series.id),owned=cards.filter(c=>(w.cards[c.id]??0)>0),section=el('section','','card-series');section.append(el('h3',series.name+' · '+owned.length+'／'+cards.length));
     const grid=el('div','','culture-grid');for(const c of cards){const n=w.cards[c.id]??0,b=el('button','','culture-tile'+(n?' owned':' locked'));b.type='button';b.append(cardFace(c),el('b',c.name),el('small',n?'已收藏 ×'+n:'未抽到'));b.onclick=()=>showCard(c,n>0);grid.append(b);}section.append(grid);
     const complete=owned.length===cards.length;section.append(el('p','集齊本系列六款（包括閃卡），可展示【'+series.prefix+'】稱號前綴。','quiet'),button(w.prefix===series.id?'已使用前綴，按此還原':'使用【'+series.prefix+'】前綴',()=>request({type:'equip',slot:'prefix',id:w.prefix===series.id?'':series.id},'更新稱號前綴？'),!complete));list.append(section);}
   }else if(tab==='gear'){
    const preview=el('div','','identity-preview'),avatar=el('span',(getProfile()?.displayName??'香港')[0],'profile-avatar '+w.frame);preview.append(avatar,el('strong',prefixedTitle(w,titleFor(getProfile()?.bestPrize??0).name)));list.append(preview);
-   const grid=el('div','','reward-grid');for(const g of GEAR){const owned=w.owned.includes(g.id),active=w[g.kind]===g.id,box=tile(g.name,g.description),demo=el('div',g.kind==='frame'?'港':g.kind==='theme'?'香港知識':'🚐',g.kind==='frame'?'profile-avatar gear-preview '+g.id:'theme-preview '+g.id);if(g.kind==='exit'){demo.textContent='';demo.dataset.icon='tram';}box.prepend(demo);box.append(el('strong',owned?'已擁有':money(g.price),'reward-price'),button(owned?(active?'使用中，按此還原':'套用'): '購買',()=>request(owned?{type:'equip',slot:g.kind,id:active?(g.kind==='frame'?'none':'default'):g.id}:{type:'buy',id:g.id},owned?'更新展示設定？':'購買'+g.name+'？',owned?0:g.price),!owned&&state.balance<g.price));grid.append(box);}list.append(grid);
+   const grid=el('div','','reward-grid');for(const g of GEAR){const owned=w.owned.includes(g.id),active=w[g.kind]===g.id,box=tile(g.name,g.description),demo=el('div',g.kind==='frame'?'港':g.kind==='theme'?'香港知識':'🚐',g.kind==='frame'?'profile-avatar gear-preview '+g.id:'theme-preview '+g.id);if(g.kind==='exit'){demo.textContent='';demo.dataset.icon='tram';}else if(g.kind==='theme'){const picture=cardFace(cardById(g.id==='theme-cafe'?'milk-tea-foil':'mahjong-carving'));picture.classList.add('gear-illustration');demo.prepend(picture);}box.prepend(demo);box.append(el('strong',owned?'已擁有':money(g.price),'reward-price'),button(owned?(active?'使用中，按此還原':'套用'): '購買',()=>request(owned?{type:'equip',slot:g.kind,id:active?(g.kind==='frame'?'none':'default'):g.id}:{type:'buy',id:g.id},owned?'更新展示設定？':'購買'+g.name+'？',owned?0:g.price),!owned&&state.balance<g.price));grid.append(box);}list.append(grid);
   }else{
    const passDay=weekendKey(),dates=[passDay,passDay+1].map(d=>new Intl.DateTimeFormat('zh-HK',{timeZone:'UTC',month:'numeric',day:'numeric'}).format(new Date(d*86400000))).join('—');const pass=tile('週末狂熱通行券 · '+dates,'香港時間星期六、日可挑戰隨機15題，整個週末合共最多3次。每場最多獲5,000額外獎金，每日最多100,000。全部不計純每日榜。');
    pass.append(el('p',w.pass===weekendKey()?'本週末剩餘 '+Math.max(0,3-(w.passUses??0))+'／3 次':'每張通行券提供3次挑戰。','quiet'),el('strong',money(100000),'reward-price'),button(w.pass===weekendKey()?'本週末通行已擁有':'購買本週末通行',()=>request({type:'pass'},'購買週末通行？',100000),w.pass===weekendKey()||state.balance<100000));

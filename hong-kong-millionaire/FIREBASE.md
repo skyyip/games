@@ -95,3 +95,9 @@ firebase deploy --project sky-playground-millionaire --only firestore:rules
 ```
 
 本輪房間作答25秒、揭曉2.5秒（每題節奏27.5秒），完整規則已同步更新；四個複合索引不變。新增題目逐條修訂見 [QUESTION-BANK-STREET-60.md](QUESTION-BANK-STREET-60.md)。
+
+## 房間進場與時間校準
+
+新版進場只寫入玩家自己的 session 與 wallet，開房費差額在答題畫面建立後另外領取，避免所有人開局時爭用房間文件。伺服器寫入時間與單調時鐘校準房間倒數；恢復對戰時只更新自己的 session.updatedAt，不能更改題目起始時間、分數或答案。房間日期固定跟隨伺服器開房時間，裝置時差不會改變房間日期。
+
+權限錯誤會暫停自動操作；網絡錯誤以退避方式有限重試，並保留明確的重新連接按鈕。請發布本次完整 firestore.rules 後，再讓兩位玩家重新載入網站。索引仍為四個。

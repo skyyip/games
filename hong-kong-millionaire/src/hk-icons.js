@@ -26,6 +26,7 @@ export function installIcons(){
  function decorate(root){
   const targets=[];if(root.matches?.('button,[data-icon]'))targets.push(root);targets.push(...(root.querySelectorAll?.('button,[data-icon]')??[]));
   for(const node of targets){if(!node.isConnected)continue;if(node.matches('[data-icon]')&&!node.matches('button')){if(!node.querySelector('.hk-icon')){node.replaceChildren(make(node.dataset.icon));}continue;}
+   if(node.matches('#google-login,#email-login,.option,.arcade-options button,#result-screen .result-actions button,[data-no-icon]')){node.querySelectorAll('.hk-icon').forEach(icon=>icon.remove());continue;}
    if(node.querySelector('.hk-icon'))continue;if(node.matches('.book-card,.culture-tile,.arcade-entry'))continue;
    const kind=classify(node),svg=make(kind);if(node.classList.contains('close-button')){node.replaceChildren(svg);continue;}
    const special=node.querySelector('.history-copy b');if(special){special.prepend(svg);continue;}
