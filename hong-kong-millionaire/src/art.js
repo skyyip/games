@@ -223,4 +223,7 @@ export const ART=Object.freeze({
  'street-58':new URL('../assets/street-58.svg',import.meta.url).href,
  'street-59':new URL('../assets/street-59.svg',import.meta.url).href,
  'street-60':new URL('../assets/street-60.svg',import.meta.url).href,
+ 'collection-transport.webp':new URL('../assets/collection-transport.webp',import.meta.url).href,
+ 'collection-heritage.webp':new URL('../assets/collection-heritage.webp',import.meta.url).href,
+ 'collection-snacks.webp':new URL('../assets/collection-snacks.webp',import.meta.url).href,
 });

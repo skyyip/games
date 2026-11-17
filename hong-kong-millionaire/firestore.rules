@@ -173,7 +173,7 @@ service cloud.firestore {
    return rwChanged(w,o,['activeSession','activeKind','activeRoom','passUses','bonus'])&&o.activeSession==''&&w.item==r.id&&w.activeSession==r.id&&w.activeKind==r.kind&&w.activeRoom==r.room
     &&r.startedAt==request.time&&r.uid==uid&&r.phase=='playing'&&(
      r.kind=='weekend'?(w.passUses is int&&o.get('passUses',0)<3&&w.passUses==o.get('passUses',0)+1&&w.bonus==o.bonus):
-     (r.kind=='room'&&w.get('passUses',0)==o.get('passUses',0)&&w.bonus==o.bonus+rrCreditAmount(get(rrPath(r.room)).data,uid)&&getAfter(rrPath(r.room)).data.rebates[uid]==true));
+     (r.kind=='room'&&w.get('passUses',0)==o.get('passUses',0)&&w.bonus==o.bonus));
   }
   function rwSettle(w,o,uid){
    let r=getAfter(rwActivePath(uid,o)).data;
@@ -237,7 +237,7 @@ service cloud.firestore {
   function rsCreate(r,uid,id,roomId){
    let w=getAfter(rwPath(uid)).data;
    return r.keys().hasOnly(['id','uid','kind','seed','topic','room','bankVersion','day','count','phase','index','correct','timeMs','startedAt','questionAt','answerAt','endedAt','outcome','choice','halfFor','phoneFor','audienceFor','answers','seen','payout','credit','credited','reason','updatedAt'])
-    &&r.id==id&&r.id is string&&r.id.size()<=100&&r.uid==uid&&r.bankVersion=='hk-2026-11'&&r.seed is int&&r.seed>=0&&r.seed<=1000000000&&r.day is int&&r.day==today()
+    &&r.id==id&&r.id is string&&r.id.size()<=100&&r.uid==uid&&r.bankVersion=='hk-2026-11'&&r.seed is int&&r.seed>=0&&r.seed<=1000000000&&r.day is int&&(roomId!=''?r.day==int((get(rrPath(roomId)).data.startedAt.toMillis()+28800000) / 86400000):r.day==today())
     &&r.count is int&&r.phase=='playing'&&r.index is int&&r.index==0&&r.correct is int&&r.correct==0&&r.timeMs is int&&r.timeMs==0&&r.startedAt==request.time&&r.updatedAt==request.time
     &&r.answerAt==null&&r.endedAt==null&&r.outcome==''&&r.choice is int&&r.choice==-1&&r.halfFor is int&&r.halfFor==-1&&r.phoneFor is int&&r.phoneFor==-1&&r.audienceFor is int&&r.audienceFor==-1
     &&r.answers=={}&&r.seen==[]&&r.payout is int&&r.payout==0&&r.credit is int&&r.credit==0&&r.credited==false&&r.reason==''
@@ -277,7 +277,7 @@ service cloud.firestore {
     &&r.endedAt==request.time&&r.credit is int&&r.credit>=0&&r.credited==true&&w.op=='settle-session'&&w.item==o.id&&w.activeSession==''&&w.updatedAt==request.time
     &&(o.kind=='room'?(get(rrPath(o.room)).data.status=='playing'?(getAfter(rrPath(o.room)).data.scores[uid].finished==true&&getAfter(rrPath(o.room)).data.scores[uid].finishedAt==request.time):get(rrPath(o.room)).data.status in ['finished','cancelled']):true);
   }
-  function rsUpdate(r,o,uid){return r.updatedAt==request.time&&(o.phase=='playing'?(r.phase=='playing'?rsLife(r,o):rsAnswer(r,o)):o.phase=='reveal'?(r.phase=='playing'?rsAdvance(r,o):rsFinish(r,o,uid)):false);}
+  function rsUpdate(r,o,uid){return r.updatedAt==request.time&&((o.phase in ['playing','reveal']&&r.diff(o).affectedKeys().hasOnly(['updatedAt']))||(o.phase=='playing'?(r.phase=='playing'?rsLife(r,o):rsAnswer(r,o)):o.phase=='reveal'?(r.phase=='playing'?rsAdvance(r,o):rsFinish(r,o,uid)):false));}
   match /hkm_players/{uid}/sessions/{id}{
    allow get:if owner(uid);allow list:if owner(uid)&&request.query.limit<=60;allow delete:if false;
    allow create:if owner(uid)&&rsCreate(request.resource.data,uid,id,'');

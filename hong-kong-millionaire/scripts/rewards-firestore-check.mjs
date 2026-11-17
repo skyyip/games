@@ -6,6 +6,7 @@ import * as feature from '../src/features-cloud.js';
 import {emptyWallet,isWeekend} from '../src/economy.js';
 import {newSession,sessionQuestion} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
+import {sessionClock} from '../src/session-clock.js';
 if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('demo emulator required');
 const env=await initializeTestEnvironment({projectId:'demo-hk-millionaire',firestore:{rules:await readFile(new URL('../firestore.rules',import.meta.url),'utf8')}});
 let checks=0;
@@ -43,8 +44,11 @@ try{
   await no(sdk.updateDoc(ref(people[0],'hkm_rooms',id),{entryFee:1000,updatedAt:sdk.serverTimestamp()}));
   if(count===4){const fifth=await seed('fifth');await assert.rejects(feature.joinRoom(fifth,'fifth',id),/room-full/);checks++;}
   await ok(feature.startRoom(people[0],uids[0],id));
+  const beforeLaunch=(await sdk.getDoc(ref(people[0],'hkm_rooms',id))).data();
   const runs=await Promise.all(people.map((person,i)=>ok(feature.startSession(person,uids[i],{kind:'room',room:id}))));
   assert.equal(new Set(runs.map(r=>r.questionAt)).size,1);checks++;
+  const afterLaunch=(await sdk.getDoc(ref(people[0],'hkm_rooms',id))).data();assert(beforeLaunch.updatedAt.isEqual(afterLaunch.updatedAt));assert.deepEqual(afterLaunch.rebates,beforeLaunch.rebates);checks+=2;
+  await Promise.all(people.map((person,i)=>ok(feature.claimRoom(person,uids[i],id))));
   for(let i=0;i<count;i++){const w=await feature.wallet(people[i],uids[i]);assert.equal(w.balance,1000000-entryFee-30000/count);checks++;}
   await assert.rejects(feature.finaliseRoom(people[0],uids[0],id),/room-wait/);checks++;
   // Both clients answer concurrently. Peers cannot forge the public scoreboard.
@@ -59,6 +63,18 @@ try{
  const cancelHost=await seed('cancelHost'),cancelGuest=await seed('cancelGuest'),cancel=await ok(feature.createRoom(cancelHost,'cancelHost',{entryFee:1000}));
  await ok(feature.joinRoom(cancelGuest,'cancelGuest',cancel));await ok(feature.cancelRoom(cancelHost,'cancelHost',cancel));
  for(const [person,who]of [[cancelHost,'cancelHost'],[cancelGuest,'cancelGuest']]){await ok(feature.claimRoom(person,who,cancel));assert.equal((await feature.wallet(person,who)).balance,1000000);await assert.rejects(feature.claimRoom(person,who,cancel),/already-claimed/);checks+=2;}
+ // A bad device clock must not change room day, start an early timeout, or edit the shared root.
+ const skewHost=await seed('skewHost'),skewGuest=await seed('skewGuest'),skewId=await ok(feature.createRoom(skewHost,'skewHost',{entryFee:1000}));
+ const nativeNow=Date.now;sessionClock.reset();let skewRun;
+ try{Date.now=()=>nativeNow()+26*3600000;await ok(feature.joinRoom(skewGuest,'skewGuest',skewId));await ok(feature.startRoom(skewHost,'skewHost',skewId));skewRun=await ok(feature.startSession(skewGuest,'skewGuest',{kind:'room',room:skewId}));assert.equal(skewRun.day,hkDay(nativeNow()));assert(Math.abs(sessionClock.now()-nativeNow())<2000);checks+=2;
+  skewRun=await ok(feature.moveSession(skewGuest,'skewGuest',skewRun,{type:'answer',choice:sessionQuestion(skewRun).answer}));assert.equal(skewRun.outcome,'correct');checks++;
+ }finally{Date.now=nativeNow;}
+ const rawBefore=(await sdk.getDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'))).data();
+ await ok(feature.syncSessionClock(skewGuest,'skewGuest',{id:skewId,kind:'room',room:skewId}));
+ const rawAfter=(await sdk.getDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'))).data();assert(rawBefore.questionAt.isEqual(rawAfter.questionAt));assert.equal(rawBefore.index,rawAfter.index);assert.equal(rawBefore.correct,rawAfter.correct);checks+=3;
+ await no(sdk.updateDoc(ref(skewHost,'hkm_rooms',skewId,'sessions','skewGuest'),{updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'),{questionAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'),{correct:10,updatedAt:sdk.serverTimestamp()}));
  // Nanosecond precision survives the half-second room interval.
  const clockHost=await seed('clockHost'),clockGuest=await seed('clockGuest'),clockId=await ok(feature.createRoom(clockHost,'clockHost',{entryFee:1000}));
  await ok(feature.joinRoom(clockGuest,'clockGuest',clockId));await ok(feature.startRoom(clockHost,'clockHost',clockId));
