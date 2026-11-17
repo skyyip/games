@@ -18,15 +18,18 @@ const drawings={
  letter:'<rect x="5" y="8" width="22" height="17" rx="3" fill="#a2c4ad"/><path d="m6 10 10 9 10-9"/>',
  book:'<path d="M4 7q7-3 12 1 5-4 12-1v19q-7-3-12 0-5-3-12 0Z" fill="#e6c47a"/><path d="M16 9v16m-9-13h5m-5 5h5m8-5h5m-5 5h5"/>'
 };
+drawings.sound='<path d="M6 13h5l7-6v18l-7-6H6Z" fill="#e8b46b"/><path d="M22 11q6 5 0 10m3-14q10 9 0 18"/>';
+drawings.silent='<path d="M6 13h5l7-6v18l-7-6H6Z" fill="#e8b46b"/><path d="m23 12 6 8m0-8-6 8"/>';
+drawings.search='<circle cx="14" cy="13" r="8" fill="#b4d2c1"/><path d="m20 19 8 9M10 11q2-3 5-2"/>';
 export function iconSVG(kind='bao'){return '<svg class="hk-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="1" y="1" width="30" height="30" rx="9" fill="'+ICON_PAPER+'"/><g fill="none" stroke="'+ICON_INK+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(drawings[kind]??drawings.bao)+'</g></svg>';}
-const classify=b=>{const known={'account-open':'people','book-open':'book','board-open':'trophy','life-half':'coin','life-phone':'phone','life-audience':'people','arcade-lobby':'back','arcade-retry':'refresh'};if(known[b.id])return known[b.id];const text=(b.getAttribute('aria-label')??'')+' '+b.textContent;
+const classify=b=>{const known={'account-open':'people','book-open':'book','board-open':'trophy','life-half':'coin','life-phone':'phone','life-audience':'people','arcade-lobby':'back','arcade-retry':'refresh','show-sound-toggle':b.getAttribute('aria-pressed')==='true'?'sound':'silent','sensory-play':'sound','sensory-caption':'book','scratch-step':'search','sensory-scratch-start':'search'};if(known[b.id])return known[b.id];const text=(b.getAttribute('aria-label')??'')+' '+b.textContent;
  if(b.classList.contains('close-button'))return 'close';if(/取消|返回|返去|登出|離場|割禾青/.test(text))return 'back';if(/排行|成績|獎金|領取/.test(text))return 'trophy';if(/開房|遊樂場|對戰|熱座|挑戰|開始/.test(text))return 'tram';if(/加入|街坊|觀眾|好友/.test(text))return 'people';if(/電郵|email/i.test(text))return 'letter';if(/重試|核對|同步|重新/.test(text))return 'refresh';if(/朋友|來電/.test(text))return 'phone';if(/確認|確定|保存|收到|明白|套用/.test(text))return 'tick';if(/購買|費|通行|退款/.test(text))return 'coin';if(/收藏|卡|扭蛋|金蛋/.test(text))return 'card';if(/查看|解說|故事|玩法|回顧|稱號/.test(text))return 'book';return 'bao';};
 export function installIcons(){
  const make=kind=>{const holder=document.createElement('template');holder.innerHTML=iconSVG(kind);return holder.content.firstChild;};
  function decorate(root){
   const targets=[];if(root.matches?.('button,[data-icon]'))targets.push(root);targets.push(...(root.querySelectorAll?.('button,[data-icon]')??[]));
   for(const node of targets){if(!node.isConnected)continue;if(node.matches('[data-icon]')&&!node.matches('button')){if(!node.querySelector('.hk-icon')){node.replaceChildren(make(node.dataset.icon));}continue;}
-   if(node.matches('#google-login,#email-login,.option,.arcade-options button,#result-screen .result-actions button,[data-no-icon]')){node.querySelectorAll('.hk-icon').forEach(icon=>icon.remove());continue;}
+   if(node.matches('#google-login,#email-login,.option,.arcade-options button,.sensory-options button,#result-screen .result-actions button,[data-no-icon]')){node.querySelectorAll('.hk-icon').forEach(icon=>icon.remove());continue;}
    if(node.querySelector('.hk-icon'))continue;if(node.matches('.book-card,.culture-tile,.arcade-entry'))continue;
    const kind=classify(node),svg=make(kind);if(node.classList.contains('close-button')){node.replaceChildren(svg);continue;}
    const special=node.querySelector('.history-copy b');if(special){special.prepend(svg);continue;}

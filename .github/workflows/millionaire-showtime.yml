@@ -1,0 +1,48 @@
+name: Verify Millionaire sensory browsers
+on:
+  push:
+    branches: [millionaire-showtime, main]
+    paths: [hong-kong-millionaire/**, .github/workflows/millionaire-showtime.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: millionaire-sensory-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browsers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare application and browser engines
+        run: |
+          for game in tools hong-kong-millionaire beat-bad-luck career-365 frogger-jump your-dream-career mo-lei-tau-studio; do npm ci --prefix "$game"; done
+          npm install --prefix /tmp/hkm-playwright --no-save --package-lock=false playwright@1.58.2
+          /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps chromium firefox webkit
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=hkm_ci
+          pactl set-default-sink hkm_ci
+          BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs /tmp/games-built-sensory
+          mkdir -p /tmp/hkm-sensory-preview
+          ln -s /tmp/games-built-sensory /tmp/hkm-sensory-preview/games
+          python3 -m http.server 5459 --bind 127.0.0.1 --directory /tmp/hkm-sensory-preview > /tmp/hkm-sensory-http.log 2>&1 &
+      - name: Actual audio and interaction in three browser engines
+        env:
+          HKM_TEST_URL: http://127.0.0.1:5459/games/hong-kong-millionaire/
+        run: |
+          for engine in chromium firefox webkit; do
+            printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
+            GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/showtime-browser-check.mjs
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: millionaire-sensory-browsers
+          path: |
+            /tmp/hkm-show-*.png
+            /tmp/hkm-sensory-http.log

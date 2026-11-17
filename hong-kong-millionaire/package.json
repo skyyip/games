@@ -10,6 +10,7 @@
     "rules:generate": "node scripts/generate-rules.mjs",
     "rules:check": "node scripts/generate-rules.mjs --check",
     "test:browser": "node scripts/browser-check.mjs",
+    "test:showtime": "node scripts/showtime-browser-check.mjs",
     "test:offline": "node scripts/offline-browser-check.mjs",
     "test:firebase-browser": "node scripts/firebase-browser-check.mjs",
     "test:fairplay": "node scripts/fairplay-browser-check.mjs",

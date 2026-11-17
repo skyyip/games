@@ -1,8 +1,10 @@
 import {cropLayout,questionView} from './question-view.js';
+import {installSpotlight} from './interactive-visual.js';
 export function paintQuestionImage(image,frame,q,spec,elapsed,duration){
  const mode=spec.mode;
  image.style.cssText='';image.alt=questionView(q,mode).alt;
  image.dataset.mode=mode;frame.dataset.visualMode=mode;
+ if(mode==='spotlight'&&!spec.complete){image.style.objectFit='contain';return installSpotlight(frame,{key:spec.key??q.id+':'+spec.seed,elapsed});}
  const crop=mode==='partial'?q.observation?.crop:!spec.complete?q.observation?.overview:null;
  if(crop){
   const {width,height}=frame.getBoundingClientRect(),layout=cropLayout(crop,width||800,height||500);
