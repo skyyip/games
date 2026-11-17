@@ -1,6 +1,6 @@
 {
-  "version": "a5a434d021137bd8",
-  "builtAt": 1794875012967,
+  "version": "3f555e35bb6c9528",
+  "builtAt": 1794909428613,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -298,7 +298,7 @@
     "hong-kong-millionaire/node_modules/firebase/app/dist/esm/index.esm.js": "built/chunk-F2JKNEH6.js",
     "hong-kong-millionaire/node_modules/firebase/auth/dist/esm/index.esm.js": "built/chunk-L4T6I2L2.js",
     "hong-kong-millionaire/node_modules/firebase/firestore/dist/esm/index.esm.js": "built/chunk-CBGWJXQL.js",
-    "hong-kong-millionaire/src/features-cloud.js": "built/chunk-2JMLNW4X.js",
+    "hong-kong-millionaire/src/features-cloud.js": "built/chunk-DLEOSMJ6.js",
     "mo-lei-tau-studio/node_modules/html-to-image/es/index.js": "built/chunk-K3INGOKM.js",
     "your-dream-career/node_modules/firebase/app/dist/esm/index.esm.js": "built/chunk-ZSAOVEHU.js",
     "career-365/node_modules/firebase/auth/dist/esm/index.esm.js": "built/chunk-6GIWVIDA.js",
@@ -323,7 +323,7 @@
     "your-dream-career/src/app.js": "built/app-VA5AHZ3Y.js",
     "tap-and-spill/index-pg-inline-0.js": "built/index-pg-inline-0-E6YARUUY.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
-    "hong-kong-millionaire/src/app.js": "built/app-AJ2CVHO3.js",
+    "hong-kong-millionaire/src/app.js": "built/app-J2LU5PBT.js",
     "grid-rush/src/landing.js": "built/landing-AHO4LOY4.js",
     "just-a-sec/src/app.js": "built/app-GHP7FF3D.js",
     "line-up/src/app.js": "built/app-WJFIRFMB.js",
