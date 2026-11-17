@@ -9,8 +9,8 @@ export function friendHint(id,hint){const f=friendById(id);return {name:f.name,i
 const hash=text=>{let n=2166136261;for(const c of String(text))n=Math.imul(n^c.codePointAt(0),16777619);return n>>>0;};
 export function hostPrompt(run){
  if(!run||run.phase!=='playing')return '';
- const lines=run.index>=13?['上到呢一步，信你嘅觀察。最後答案？','百萬之路近在眼前，錦囊仲用唔用？','呢一步，你話事。睇清楚，最後答案？']:run.index>=9?['保險線過咗，每一步都要睇清楚。','直覺定線索？最後答案由你決定。','仲有冇忽略咗嘅細節？最後答案？']:run.index>=4?['先睇清楚，再信自己。最後答案？','穩陣都係一種實力，最後答案？']:['準備好就鎖定，最後答案？'];
- return lines[hash(run.day+':'+run.index)%lines.length];
+ const lines=run.kind==='room'?['同一條題，靠你搵到嘅線索。','大家一齊倒數，最後答案？','交卷前睇清楚，選項位置各有不同。']:run.index>=13?['上到呢一步，信你嘅觀察。最後答案？','百萬之路近在眼前，錦囊仲用唔用？','呢一步，你話事。睇清楚，最後答案？']:run.index>=9?['保險線過咗，每一步都要睇清楚。','直覺定線索？最後答案由你決定。','仲有冇忽略咗嘅細節？最後答案？']:run.index>=4?['先睇清楚，再信自己。最後答案？','穩陣都係一種實力，最後答案？']:['準備好就鎖定，最後答案？'];
+ const line=lines[hash(run.day+':'+run.index)%lines.length];return line.includes('錦囊仲用唔用')&&[run.halfFor,run.phoneFor,run.audienceFor].every(n=>n>=0)?'錦囊用盡，信你嘅觀察。最後答案？':line;
 }
 export function resultBadges(run){
  if(run?.phase!=='finished')return [];

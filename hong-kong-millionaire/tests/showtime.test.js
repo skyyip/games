@@ -10,6 +10,7 @@ test('all four free friends preserve exactly the same factual hint',()=>{
 });
 test('host prompts are stable across retries and never invent population statistics',()=>{
  const r={...newRun(),index:14};assert.equal(hostPrompt(r),hostPrompt({...r}));assert(!/\d+%|全港/.test(hostPrompt(r)));assert.equal(hostPrompt({...r,phase:'reveal'}),'');
+ for(let day=0;day<30;day++){assert(!hostPrompt({...r,day,halfFor:0,phoneFor:1,audienceFor:2}).includes('仲用唔用'));assert(!/保險線|百萬/.test(hostPrompt({...r,day,kind:'room',index:9})));}
  assert.equal(stageFor(4),'warm');assert.equal(stageFor(5),'tense');assert.equal(stageFor(10),'final');assert.equal(stageFor(7,10),'final');
 });
 test('44萬 rollercoaster badge requires failing after fourteen correct answers',()=>{
