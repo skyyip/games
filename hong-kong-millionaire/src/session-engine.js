@@ -27,7 +27,10 @@ export function sessionVotes(run){
  const weights=[0,1,2,3].map(i=>removed.includes(i)?0:i===leader?61:10+(hash(seed+':'+i)%20)),total=weights.reduce((a,b)=>a+b),votes=weights.map(n=>Math.floor(n/total*100));
  let rest=100-votes.reduce((a,b)=>a+b);for(let i=0;rest;i=(i+1)%4)if(!removed.includes(i)){votes[i]++;rest--;}return votes;
 }
-export function sessionPresentation(run,now=Date.now()){const q=sessionQuestion(run),revealed=run.phase!=='playing'&&(run.kind!=='room'||now>=run.questionAt+QUESTION_MS||run.phase==='finished'),mode=revealed?'original':chooseVisualMode(q,run.seed,run.index);return visualSpec(q,mode);}
+export function sessionPresentation(run,now=Date.now()){const q=sessionQuestion(run),revealed=run.phase!=='playing'&&(run.kind!=='room'||now>=run.questionAt+QUESTION_MS),mode=revealed?'original':chooseVisualMode(q,run.seed,run.index);return visualSpec(q,mode);}
+export function sessionReviewReady(run,room,now=Date.now()){
+ return run?.phase==='finished'&&(run.kind!=='room'||now>=run.questionAt+QUESTION_MS||room?.id===run.room&&(room.status==='finished'||roomComplete(room)));
+}
 function reveal(run,choice,outcome,now){return {...run,phase:'reveal',choice,outcome,correct:run.correct+(outcome==='correct'?1:0),answerAt:now,updatedAt:now,seen:[...run.seen,sessionQid(run)],answers:{...run.answers,[run.index]:{qid:sessionQid(run),choice,outcome,startedAt:run.questionAt,answeredAt:now}}};}
 export function sessionFinish(run,now=Date.now()){
  if(run.phase!=='reveal')throw Error('not-ready');

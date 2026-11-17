@@ -1,0 +1,37 @@
+name: Millionaire live website smoke
+on:
+  push:
+    branches: [millionaire-full-qa, main]
+    paths: [hong-kong-millionaire/**, .github/workflows/millionaire-live-smoke.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --prefix /tmp/hkm-playwright --no-save --package-lock=false playwright@1.58.2
+          /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps chromium
+          printf "export {chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" > /tmp/hkm-playwright.mjs
+      - name: Test deployed site without a real account
+        env:
+          GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
+        run: node hong-kong-millionaire/scripts/live-smoke-check.mjs
+      - name: Hosting diagnostics
+        if: failure()
+        run: curl --head --location --connect-timeout 15 --max-time 30 https://sky-playground.com/games/hong-kong-millionaire/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: millionaire-live-smoke
+          path: |
+            /tmp/hkm-live-smoke.json
+            /tmp/hkm-live-mobile.png
+            /tmp/hkm-live-failure.png

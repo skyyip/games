@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARDS,unlockedPrefixes,weekendKey,isWeekend} from '../src/economy.js';
-import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
+import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,sessionReviewReady,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
 import {hkDay,dayEnd} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
 test('purchases spend an available balance without reducing career prize totals',()=>{
@@ -46,6 +46,16 @@ test('all submitted rooms can settle immediately; disconnected rooms retain a gr
  const room={status:'playing',startedAt:NOW,players:['a','b'],scores:{a:{finished:true},b:{finished:false}}};
  assert(!roomCanFinish(room,NOW+1000));room.scores.b.finished=true;assert(roomCanFinish(room,NOW+1000));
  room.scores.b.finished=false;assert(!roomCanFinish(room,NOW+304999));assert(roomCanFinish(room,NOW+305000));
+});
+test('room explanations wait for the shared deadline or all submissions, including early departure',()=>{
+ const room={id:'r',status:'playing',players:['a','b'],scores:{a:{finished:true},b:{finished:false}}};
+ let run=newSession({id:'r',uid:'a',kind:'room',seed:19,room:'r'},NOW,NOW);
+ run=sessionFinish(sessionAct(run,{type:'walk'},NOW+1000),NOW+1000);
+ assert(!sessionReviewReady(run,room,NOW+24999));assert(sessionReviewReady(run,room,NOW+25000));
+ room.scores.b.finished=true;assert(sessionReviewReady(run,room,NOW+1000));
+ assert(!sessionReviewReady(run,{...room,id:'another'},NOW+1000));
+ assert(!sessionReviewReady({...run,phase:'reveal'},room,NOW+25000));
+ assert(sessionReviewReady({...run,kind:'weekend'},null,NOW+1000));
 });
 test('weekend ticket use cannot be reset by repurchasing the same weekend',()=>{
  const w=walletAction({total:1000000},emptyWallet('p',0),{type:'pass'},DAY);assert.equal(w.passUses,0);
