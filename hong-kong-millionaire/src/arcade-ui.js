@@ -29,7 +29,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  async function wallet(){const actor=uid,version=epoch,next=await cloud.wallet();if(uid===actor&&epoch===version){if(!state||next.wallet.revision>=state.wallet.revision){state=next;onChange(next);}}return next;}
  async function operation(key,fn,label='正在連接…'){
   if(pending||!uid)return false;const token={key,epoch};pending=token;status(label);render();
-  try{await bounded(fn(()=>epoch===token.epoch&&pending===token));if(epoch===token.epoch)status('');return true;}
+  try{await bounded(fn(()=>epoch===token.epoch&&pending===token));if(epoch===token.epoch){failureCount=0;retryAt=0;status('');}return true;}
   catch(error){if(epoch===token.epoch){failed(error);status(cloud.errorText(error)+(autoPaused?' 自動重試已暫停；請按「重新連接」核對。':' 稍後會重試；亦可按「重新連接」。'));}return false;}
   finally{if(pending===token){pending=null;render();}}
  }
