@@ -17,3 +17,9 @@ html[data-hkm-theme=theme-porcelain] body{background-color:#e7eee4;background-im
 @keyframes redvan-drive-rich{0%{transform:translateX(-260px)}42%,65%{transform:translateX(70px)}100%{transform:translateX(550px)}}
 @media(prefers-reduced-motion:reduce){.redvan-car{animation:none;left:20%}}
 @media(max-width:560px){.gear-preview.profile-avatar{width:84px;height:84px;margin:23px auto}.theme-preview>img{height:180px}.identity-preview{padding:18px}.redvan-car img{width:200px}.reward-tile h3{line-height:1.5}}
+
+/* Six detailed comic scenes share one atlas; crop without extra requests. */
+.theme-preview.theme-atlas{position:relative;aspect-ratio:1;min-height:0}
+.theme-preview.theme-atlas>img{position:absolute;width:200%;height:300%;max-width:none;object-fit:fill}
+html[data-hkm-theme^="theme-"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.12;background-image:url('./assets/theme-panels.webp');background-size:200% 300%;background-repeat:no-repeat}
+html[data-hkm-theme=theme-cafe] body::after{background-position:0 0}html[data-hkm-theme=theme-ink] body::after{background-position:100% 0}html[data-hkm-theme=theme-harbour] body::after{background-position:0 50%}html[data-hkm-theme=theme-tram] body::after{background-position:100% 50%}html[data-hkm-theme=theme-lantern] body::after{background-position:0 100%}html[data-hkm-theme=theme-porcelain] body::after{background-position:100% 100%}

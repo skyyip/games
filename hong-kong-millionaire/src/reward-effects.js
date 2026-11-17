@@ -10,7 +10,7 @@ export function playRedVan(run,sound=false){
 export async function downloadResultCard({run,name,wallet,badge=''}){
  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1080;const c=canvas.getContext('2d');if(!c)throw Error('canvas');
  c.fillStyle=wallet?.theme==='theme-ink'?'#e7e3d5':'#fff2cc';c.fillRect(0,0,1080,1080);
- const illustrations=await Promise.all([wallet?.theme,wallet?.frame].map(async id=>{const url=ART[id+'.svg'];if(!url)return null;const image=new Image();image.src=url;try{await image.decode();return image;}catch{return null;}}));if(illustrations[0]){c.globalAlpha=.12;c.drawImage(illustrations[0],0,0,1080,800);c.globalAlpha=1;}
+ const illustrations=await Promise.all([wallet?.theme,wallet?.frame].map(async id=>{const url=ART[id?.startsWith('theme-')?'theme-panels.webp':id+'.svg'];if(!url)return null;const image=new Image();image.src=url;try{await image.decode();return image;}catch{return null;}}));if(illustrations[0]){c.globalAlpha=.12;const index=['theme-cafe','theme-ink','theme-harbour','theme-tram','theme-lantern','theme-porcelain'].indexOf(wallet.theme),image=illustrations[0],w=image.naturalWidth/2,h=image.naturalHeight/3;c.drawImage(image,index%2*w,Math.floor(index/2)*h,w,h,0,0,1080,1080);c.globalAlpha=1;}
  const extraColors={'frame-jade':['#315e48','#d9bc73','#7a9f81'],'frame-harbour':['#365d7b','#ddc68f','#8fbec3'],'frame-lantern':['#ad4e39','#e8c374','#80483a']};
  const colors=extraColors[wallet?.frame]??(wallet?.frame==='frame-rwb'?['#c64039','#faf7e6','#23619b']:wallet?.frame==='frame-neon'?['#793ea0','#e35070','#376e58']:['#a6762c','#e6ba55','#846322']);
  for(let i=0;i<3;i++){c.strokeStyle=colors[i];c.lineWidth=13;c.strokeRect(27+i*17,27+i*17,1026-i*34,1026-i*34);}

@@ -229,6 +229,7 @@ export const ART=Object.freeze({
  'street-58':new URL('../assets/street-58.svg',import.meta.url).href,
  'street-59':new URL('../assets/street-59.svg',import.meta.url).href,
  'street-60':new URL('../assets/street-60.svg',import.meta.url).href,
+ 'theme-panels.webp':new URL('../assets/theme-panels.webp',import.meta.url).href,
  'exit-redvan.webp':new URL('../assets/exit-redvan.webp',import.meta.url).href,
  'frame-rwb.svg':new URL('../assets/frame-rwb.svg',import.meta.url).href,
  'frame-neon.svg':new URL('../assets/frame-neon.svg',import.meta.url).href,
