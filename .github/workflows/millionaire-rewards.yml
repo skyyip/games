@@ -71,6 +71,10 @@ jobs:
           HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
         run: |
           /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps firefox webkit
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=hkm_ci
+          pactl set-default-sink hkm_ci
           for engine in firefox webkit; do
             printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
             GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/browser-check.mjs
