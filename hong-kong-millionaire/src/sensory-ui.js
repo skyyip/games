@@ -1,7 +1,7 @@
 import {ART} from './art.js';
 import {optionOrder} from './choice-order.js';
 import {questionById} from './game.js';
-import {AUDIO_QUESTIONS,SCRATCH_IDS,PRACTICE_MS,PRACTICE_COUNT,GRID_SIZE,newPractice,validPractice,practiceAnswer} from './sensory-model.js';
+import {AUDIO_QUESTIONS,SCRATCH_IDS,scratchPool,PRACTICE_MS,PRACTICE_COUNT,GRID_SIZE,newPractice,validPractice,practiceAnswer} from './sensory-model.js';
 import {installScratch} from './interactive-visual.js';
 import {iconSVG} from './hk-icons.js';
 const KEY='sky.hkm.sensory.current.v1',BEST='sky.hkm.sensory.best.v1';
@@ -11,10 +11,10 @@ export function installSensory({canStart=()=>true,onActive=()=>{},onCloudArcade=
  const $=id=>dialog.querySelector('#'+id),content=$('sensory-content');let run=null,view='home',scratch=null,audio=null,selectedCaption=false,version=0,savingAt=0;
  const status=text=>{$('sensory-status').textContent=text;};
  const button=(text,fn,disabled=false,cls='outline')=>{const b=el('button',text,cls);b.type='button';b.disabled=disabled;b.onclick=fn;return b;};
- const pool=kind=>kind==='audio'?AUDIO_QUESTIONS.map(q=>q.id):SCRATCH_IDS;
+ const pool=kind=>kind==='audio'?AUDIO_QUESTIONS.map(q=>q.id):scratchPool();
  function question(){return run?.kind==='audio'?AUDIO_QUESTIONS.find(q=>q.id===run.qids[run.index]):questionById(run?.qids[run?.index]);}
  function save(){try{if(run)localStorage.setItem(KEY,JSON.stringify(run));}catch{status('此瀏覽器未能儲存練習；關閉後可能無法繼續。');}}
- function load(){try{const value=JSON.parse(localStorage.getItem(KEY));return validPractice(value,pool(value?.kind));}catch{return null;}}
+ function load(){try{const value=JSON.parse(localStorage.getItem(KEY));return validPractice(value,value?.kind==='audio'?AUDIO_QUESTIONS.map(q=>q.id):SCRATCH_IDS);}catch{return null;}}
  function stopAudio(){if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null;}}
  function clear(){version++;stopAudio();scratch?.cancel();scratch=null;}
  function start(kind){if(!canStart()){status('先完成目前的每日熱座，再開始練習。');return;}clear();run=newPractice(kind,pool(kind));selectedCaption=false;view='game';save();status('');render();}

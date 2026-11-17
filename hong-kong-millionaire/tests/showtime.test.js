@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {FRIENDS,friendHint,hostPrompt,resultBadges,stageFor} from '../src/showtime-model.js';
-import {AUDIO_QUESTIONS,SCRATCH_IDS,brushCells,scratchStars,newPractice,validPractice,practiceAnswer} from '../src/sensory-model.js';
-import {questionById,newRun,hkDay} from '../src/game.js';
+import {AUDIO_QUESTIONS,SCRATCH_IDS,scratchPool,brushCells,scratchStars,newPractice,validPractice,practiceAnswer} from '../src/sensory-model.js';
+import {SPOTLIGHT_IDS} from '../src/visual-catalog.js';
+import {questionById,questionId,newRun,hkDay} from '../src/game.js';
 import {visualModes} from '../src/question-view.js';
 test('all four free friends preserve exactly the same factual hint',()=>{
  assert.equal(FRIENDS.length,4);const text='留意路軌。';for(const f of FRIENDS)assert.equal(friendHint(f.id,text).hint,text);assert.equal(friendHint('bad',text).name,FRIENDS[0].name);
@@ -26,6 +27,10 @@ test('practice has five distinct questions, no ranked prize fields, and a persis
  assert(practiceAnswer(playing,answer,answer,time+24999).answers[0].correct);assert(!practiceAnswer(playing,answer,answer,time+25000).answers[0].correct);assert.equal(validPractice({...run,qids:Array(5).fill(ids[0])},ids),null);assert.equal(validPractice({...run,cells:[1000]},ids),null);assert.equal(validPractice({...run,startedAt:time-86400001},ids,time),null);
 });
 test('all spotlight and scratch scenes are curated; sound sketches are playable original PCM assets',()=>{
- for(const id of SCRATCH_IDS){const q=questionById(id);assert(q.observation?.clue);assert(!q.observation.overview,'Reading small print is not a spotlight puzzle: '+id);assert(visualModes(q).includes('spotlight'));}
+ for(const id of SCRATCH_IDS){const q=questionById(id);assert(q.observation?.clue);assert(!q.observation.overview,'Reading small print is not an interactive picture puzzle: '+id);}
+ for(const id of SPOTLIGHT_IDS)assert(visualModes(questionById(id)).includes('spotlight'));
  for(const q of AUDIO_QUESTIONS){assert.equal(new Set(q.options).size,4);assert(q.answer>=0&&q.answer<=3);assert(q.caption&&q.explanation);const wav=readFileSync(new URL('../assets/'+q.audio+'.wav',import.meta.url));assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');assert.equal(wav.readUInt16LE(22),1);assert.equal(wav.readUInt32LE(24),22050);assert.equal((wav.length-44)/44100,4);}
+});
+test('new scratch practice never discloses the current daily questions, across a full year',()=>{
+ const today=hkDay();for(let day=today;day<today+365;day++){const daily=new Set(Array.from({length:15},(_,i)=>questionId(day,i))),pool=scratchPool(day);assert(pool.length>=5);const r=newPractice('scratch',pool);assert(r.qids.every(id=>!daily.has(id)));}
 });
