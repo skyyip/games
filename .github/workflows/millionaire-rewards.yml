@@ -56,6 +56,7 @@ jobs:
           node scripts/auth-transition-check.mjs
           node scripts/rewards-browser-check.mjs
           node scripts/street-observation-browser-check.mjs
+          node scripts/offline-browser-check.mjs
       - name: Real Firebase browser journeys
         env:
           GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
@@ -63,6 +64,16 @@ jobs:
           HKM_BUILD_DIR: /tmp/games-built-rewards
           BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
         run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-hk-millionaire --only auth,firestore "node scripts/firebase-browser-check.mjs"
+      - name: Firefox and WebKit gameplay
+        working-directory: .
+        env:
+          HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
+        run: |
+          /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps firefox webkit
+          for engine in firefox webkit; do
+            printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
+            GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/browser-check.mjs
+          done
       - name: Save browser preview images
         if: always()
         working-directory: .
@@ -83,6 +94,7 @@ jobs:
           path: |
             /tmp/hkm-*.png
             /tmp/hkm-http.log
+            /tmp/hkm-firebase-browser-errors.json
             /tmp/games-built-rewards
             hong-kong-millionaire/firestore-debug.log
           if-no-files-found: ignore

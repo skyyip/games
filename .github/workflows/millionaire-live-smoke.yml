@@ -24,6 +24,9 @@ jobs:
         env:
           GRID_RUSH_PLAYWRIGHT_MODULE: /tmp/hkm-playwright.mjs
         run: node hong-kong-millionaire/scripts/live-smoke-check.mjs
+      - name: Hosting diagnostics
+        if: failure()
+        run: curl --head --location --connect-timeout 15 --max-time 30 https://sky-playground.com/games/hong-kong-millionaire/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -31,3 +34,4 @@ jobs:
           path: |
             /tmp/hkm-live-smoke.json
             /tmp/hkm-live-mobile.png
+            /tmp/hkm-live-failure.png
