@@ -1,7 +1,7 @@
 name: Verify Millionaire sensory browsers
 on:
   push:
-    branches: [millionaire-showtime, millionaire-collections-refresh, main]
+    branches: [millionaire-showtime, millionaire-collections-refresh, millionaire-room-countdown-fix, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-showtime.yml]
   workflow_dispatch:
 permissions:
@@ -38,6 +38,9 @@ jobs:
           for engine in chromium firefox webkit; do
             printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
             GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/showtime-browser-check.mjs
+            if [ "$engine" = webkit ]; then
+              BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" HKM_BUILD_DIR=/tmp/games-built-sensory GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/rewards-browser-check.mjs
+            fi
           done
       - uses: actions/upload-artifact@v4
         if: always()

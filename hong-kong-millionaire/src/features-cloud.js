@@ -41,7 +41,7 @@ function afterInterval(c,stamp){const nano=stamp.nanoseconds+(ROOM_INTERVAL%1000
 export async function syncSessionClock(c,uid,descriptor){
  const ref=sessionRef(c,uid,descriptor);let sent=null;
  await c.runTransaction(c.db,async t=>{sent=null;const snap=await t.get(ref);if(!snap.exists())throw Error('run-missing');if(snap.data().phase==='finished')return;sent=performance.now();t.update(ref,{updatedAt:c.serverTimestamp()});});
- const received=performance.now(),run=await getSession(c,uid,descriptor);if(run&&sent!==null)sessionClock.observe(run.updatedAt,sent,received);return run;
+ const run=await getSession(c,uid,descriptor),received=performance.now();if(run&&sent!==null)sessionClock.observe(run.updatedAt,sent,received);return run;
 }
 export async function resumeSession(c,uid,descriptor){
  let run=await syncSessionClock(c,uid,descriptor);if(!run||run.phase==='finished')return run;
