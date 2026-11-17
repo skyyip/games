@@ -17,7 +17,7 @@ export function installSensory({canStart=()=>true,onActive=()=>{},onCloudArcade=
  function load(){try{const value=JSON.parse(localStorage.getItem(KEY));return validPractice(value,value?.kind==='audio'?AUDIO_QUESTIONS.map(q=>q.id):SCRATCH_IDS);}catch{return null;}}
  function stopAudio(){if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null;}}
  function clear(){version++;stopAudio();scratch?.cancel();scratch=null;}
- function start(kind){if(!canStart()){status('先完成目前的每日熱座，再開始練習。');return;}clear();run=newPractice(kind,pool(kind));selectedCaption=false;view='game';save();status('');render();}
+ function start(kind){if(!canStart()){status('先完成目前的每日熱座或房間對戰，再開始練習。');return;}clear();run=newPractice(kind,pool(kind));selectedCaption=false;view='game';save();status('');render();}
  function home(){content.append(el('p','免登入、五條一組，想玩就玩。新朋友可先練習，再挑戰每日熱座。','sensory-intro'));
   const grid=el('div','','sensory-entries');for(const [kind,title,copy,icon]of [['audio','香港聲音挑戰','聽四秒原創情境音效，辨認街頭日常；可選文字描述。','phone'],['scratch','擦玻璃・搵線索','親手抹開霧氣，揭露愈少、答得愈準，觀察星星愈多。','search']]){const card=button('',()=>start(kind),false,'sensory-entry');card.dataset.practice=kind;card.innerHTML=iconSVG(icon);card.append(el('strong',title),el('span',copy));grid.append(card);}content.append(grid);
   const old=load();if(old?.phase!=='finished'&&old)content.append(button('繼續上次練習',()=>{run=old;view='game';render();},false,'primary'));
