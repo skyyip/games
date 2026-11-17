@@ -65,9 +65,8 @@ try{
  for(const [person,who]of [[cancelHost,'cancelHost'],[cancelGuest,'cancelGuest']]){await ok(feature.claimRoom(person,who,cancel));assert.equal((await feature.wallet(person,who)).balance,1000000);await assert.rejects(feature.claimRoom(person,who,cancel),/already-claimed/);checks+=2;}
  // A bad device clock must not change room day, start an early timeout, or edit the shared root.
  const skewHost=await seed('skewHost'),skewGuest=await seed('skewGuest'),skewId=await ok(feature.createRoom(skewHost,'skewHost',{entryFee:1000}));
- await ok(feature.joinRoom(skewGuest,'skewGuest',skewId));await ok(feature.startRoom(skewHost,'skewHost',skewId));
  const nativeNow=Date.now;sessionClock.reset();let skewRun;
- try{Date.now=()=>nativeNow()+26*3600000;skewRun=await ok(feature.startSession(skewGuest,'skewGuest',{kind:'room',room:skewId}));assert.equal(skewRun.day,hkDay(nativeNow()));assert(Math.abs(sessionClock.now()-nativeNow())<2000);checks+=2;
+ try{Date.now=()=>nativeNow()+26*3600000;await ok(feature.joinRoom(skewGuest,'skewGuest',skewId));await ok(feature.startRoom(skewHost,'skewHost',skewId));skewRun=await ok(feature.startSession(skewGuest,'skewGuest',{kind:'room',room:skewId}));assert.equal(skewRun.day,hkDay(nativeNow()));assert(Math.abs(sessionClock.now()-nativeNow())<2000);checks+=2;
   skewRun=await ok(feature.moveSession(skewGuest,'skewGuest',skewRun,{type:'answer',choice:sessionQuestion(skewRun).answer}));assert.equal(skewRun.outcome,'correct');checks++;
  }finally{Date.now=nativeNow;}
  const rawBefore=(await sdk.getDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'))).data();
