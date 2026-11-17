@@ -47,7 +47,7 @@ export function installSensory({canStart=()=>true,onActive=()=>{},onCloudArcade=
    if(run.phase==='ready'){const cover=el('div','準備好就開始擦霧','scratch-ready');frame.append(cover);const start=button('開始擦霧・25秒',async()=>{start.disabled=true;const before=run,ticket=version;try{await image.decode();if(run!==before||ticket!==version||run.phase!=='ready'||!dialog.open)return;run={...run,phase:'playing',questionAt:Date.now()};save();render();}catch{status('圖片未能載入，請重新連接後再試。');start.disabled=false;}},false,'primary');start.id='sensory-scratch-start';content.append(start);}
    else if(run.phase==='playing'){
     const progress=el('p','','scratch-progress');progress.id='scratch-progress';const tools=el('div','','scratch-tools');tools.append(progress);content.append(tools);
-    const update=cells=>{if(run.phase!=='playing')return;run={...run,cells};progress.textContent='已擦開 '+Math.round(cells.length/GRID_SIZE*100)+'% · '+(cells.length>500?'觀察星星已歸零，仍可繼續答題':'50%以內答對，可得觀察星星');if(performance.now()-savingAt>150){savingAt=performance.now();save();}};
+    const update=(cells,final=false)=>{if(run.phase!=='playing')return;run={...run,cells};progress.textContent='已擦開 '+Math.round(cells.length/GRID_SIZE*100)+'% · '+(cells.length>500?'觀察星星已歸零，仍可繼續答題':'50%以內答對，可得觀察星星');if(final||performance.now()-savingAt>150){savingAt=performance.now();save();}};
     scratch=installScratch(frame,{cells:run.cells,onChange:update});update(run.cells);const step=button('逐步擦開（鍵盤／點按）',()=>{scratch?.revealStep();save();});step.id='scratch-step';tools.append(step);
     if(!scratch){run={...run,cells:Array.from({length:GRID_SIZE},(_,i)=>i)};update(run.cells);status('此瀏覽器未能顯示擦霧畫布，已開放完整圖片；本題不計觀察星星。');}
    }
