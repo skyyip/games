@@ -45,7 +45,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "options": [
       "山頂纜車",
       "輕鐵",
-      "小巴",
+      "小巴（司機：有落呀！）",
       "叮叮"
     ],
     "answer": 3,
@@ -96,7 +96,7 @@ export const CORE_QUESTIONS=Object.freeze([
       "大帽山",
       "獅子山",
       "大東山",
-      "太平山"
+      "太平山（搭纜車都算行山？）"
     ],
     "answer": 1,
     "focus": {
@@ -144,7 +144,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "options": [
       "五月初五",
       "七月初七",
-      "九月初九",
+      "九月初九（月餅遲到咗？）",
       "八月十五"
     ],
     "answer": 3,
@@ -190,7 +190,7 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.discoverhongkong.com/tc/"
     },
     "options": [
-      "聖誕節",
+      "聖誕節（聖誕老人接棒？）",
       "中秋節",
       "復活節",
       "元旦"
@@ -241,7 +241,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "options": [
       "龍井茶",
       "檸檬可樂",
-      "凍朱古力",
+      "凍朱古力（朱古力放假中）",
       "絲襪奶茶"
     ],
     "answer": 3,
@@ -290,7 +290,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "options": [
       "牛肉",
       "蝦",
-      "栗子",
+      "栗子（蝦先生請咗假？）",
       "紅豆"
     ],
     "answer": 1,

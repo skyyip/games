@@ -1,4 +1,10 @@
 export const ART=Object.freeze({
+ 'sound-tram':new URL('../assets/sound-tram.wav',import.meta.url).href,
+ 'sound-ferry':new URL('../assets/sound-ferry.wav',import.meta.url).href,
+ 'sound-bus':new URL('../assets/sound-bus.wav',import.meta.url).href,
+ 'sound-crossing':new URL('../assets/sound-crossing.wav',import.meta.url).href,
+ 'sound-mahjong':new URL('../assets/sound-mahjong.wav',import.meta.url).href,
+ 'sound-cafe':new URL('../assets/sound-cafe.wav',import.meta.url).href,
  'harbour':new URL('../assets/harbour.svg',import.meta.url).href,
  'lantern':new URL('../assets/lantern.svg',import.meta.url).href,
  'tram':new URL('../assets/tram.svg',import.meta.url).href,

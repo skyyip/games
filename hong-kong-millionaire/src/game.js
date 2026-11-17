@@ -5,8 +5,8 @@ export const SUPPORTED_BANK_VERSIONS=Object.freeze([BANK_VERSION]);
 export const DAY_MS=86400000,HK_OFFSET=28800000;
 export const PRIZES=Object.freeze([1000,2000,3000,4000,8000,10000,20000,30000,40000,60000,80000,150000,250000,500000,1000000]);
 export const TITLES=Object.freeze([{id:'ordinary',name:'運氣平平',min:0,note:'香港故事仲有好多，聽日再接再厲。'},{id:'neighbour',name:'街坊地保',min:8000,note:'街頭巷尾嘅香港常識，難唔到你。'},{id:'expert',name:'香港通',min:60000,note:'地理、節慶與文化，你都熟門熟路。'},{id:'peak',name:'太平山神',min:500000,note:'只差一步登頂，你已經站得好高。'},{id:'millionaire',name:'百萬富翁',min:1000000,note:'十五題全中，今晚香港由你話事！'}]);
-export const MODES=Object.freeze(['blurred','partial','mirrored','original','text']);
-export const MODE_NAMES=Object.freeze({blurred:'慢慢睇清',partial:'眼利局部',mirrored:'倒轉香港',original:'原圖考眼力',text:'地膽常識'});
+export const MODES=Object.freeze(['blurred','partial','mirrored','original','text','spotlight']);
+export const MODE_NAMES=Object.freeze({blurred:'慢慢睇清',partial:'眼利局部',mirrored:'倒轉香港',original:'原圖考眼力',text:'地膽常識',spotlight:'探照燈找線索'});
 const byId=new Map(QUESTIONS.map(q=>[q.id,q]));
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 function stride(size,start){while(gcd(size,start)!==1)start++;return start;}

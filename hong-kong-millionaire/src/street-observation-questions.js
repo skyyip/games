@@ -1,4 +1,5 @@
 // Two supplied drafts: all 45 + 15 topics, with reviewed facts and authored visual clues.
+import {SPOTLIGHT_IDS} from './visual-catalog.js';
 const records=[
  {
   "id": "s01",
@@ -2463,4 +2464,4 @@ const records=[
   }
  }
 ];
-export const STREET_OBSERVATION_QUESTIONS=Object.freeze(records.map(q=>Object.freeze({...q,options:Object.freeze(q.options),modes:Object.freeze(q.modes),source:Object.freeze(q.source),...(q.observation?{focus:Object.freeze(q.focus),observation:Object.freeze({...q.observation,crop:Object.freeze(q.observation.crop)})}:{})})));
+export const STREET_OBSERVATION_QUESTIONS=Object.freeze(records.map(q=>Object.freeze({...q,options:Object.freeze(q.options),modes:Object.freeze(SPOTLIGHT_IDS.includes(q.id)?[...q.modes,'spotlight']:q.modes),source:Object.freeze(q.source),...(q.observation?{focus:Object.freeze(q.focus),observation:Object.freeze({...q.observation,crop:Object.freeze(q.observation.crop)})}:{})})));

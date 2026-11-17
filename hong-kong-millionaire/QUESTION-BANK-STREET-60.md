@@ -21,7 +21,7 @@
 
 修訂：保留題材；限定圖中裝置，移除所有花槽均如此設計的概括。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：連續石邊上等距的短金屬凸粒
 
@@ -46,7 +46,7 @@
 
 修訂：刪除統一高度及保證救援說法，改問可觀察的空隙效果。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：門板下緣與地面之間的空隙
 
@@ -98,7 +98,7 @@
 
 修訂：刪除全港欄杆統一防坐動機，改考圖示形狀的直接效果。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：欄杆頂部向下彎的圓弧邊
 
@@ -148,7 +148,7 @@
 
 修訂：保留先落後上；移除未量證的縮短停站幅度。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：車門中央直行箭嘴與兩側候車箭嘴
 
@@ -221,7 +221,7 @@
 
 修訂：移除未獲確認的潛意識設計動機，改問可見分區。
 
-模式：original
+模式：original／spotlight
 
 認圖線索：車門旁深色地板與車廂中央淺色地板
 
@@ -244,7 +244,7 @@
 
 修訂：採九巴官方主題；刪除未證實的車窗與樓梯連線象徵。
 
-模式：blurred／partial／original
+模式：blurred／partial／original／spotlight
 
 認圖線索：紅色車身上的銀白色脈搏形折線
 
@@ -367,7 +367,7 @@
 
 修訂：修正凹底一定避免積水的倒置說法，不虛構製造商設計理由。
 
-模式：original
+模式：original／spotlight
 
 認圖線索：倒扣膠杯底部朝上的圓形凹坑與一滴水
 
@@ -417,7 +417,7 @@
 
 修訂：限定有配套防洪板的凹槽；不保證任意入口完全防水。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：入口側邊直槽及槽內一小段銀色板材
 
@@ -465,7 +465,7 @@
 
 修訂：刪除所有亭頂一律向後傾斜的概括，以示意排水路徑出題。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：傾斜頂板低端連着垂直去水管
 
@@ -490,7 +490,7 @@
 
 修訂：保留表面水循環用途；不把減浪或消毒說成絕對成效。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：水面旁狹長排水格柵與向槽流動的水線
 
@@ -619,7 +619,7 @@
 
 修訂：移除機場快綫保證每人指定座位及控制售票的錯誤推論。
 
-模式：blurred／partial／original
+模式：blurred／partial／original／spotlight
 
 認圖線索：車廂座位旁的層架放着一個直立旅行喼
 
@@ -644,7 +644,7 @@
 
 修訂：不宣稱越舊越好；移除未證實的纖維孔隙與茶油保證。
 
-模式：blurred／partial／original
+模式：blurred／partial／original／spotlight
 
 認圖線索：掛在金屬圈上的長布袋，茶湯流入壺內
 
@@ -717,7 +717,7 @@
 
 修訂：修正光學單向且永不外洩的錯誤說法，不給不實私隱保證。
 
-模式：original
+模式：original／spotlight
 
 認圖線索：門板中的圓形廣角鏡與鏡筒邊緣
 
@@ -1145,7 +1145,7 @@
 
 修訂：保留對比辨識用途，刪除全港所有燈箱一律相同的概括。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：黑色燈組背板外的一圈白色輪廓
 
@@ -1222,7 +1222,7 @@
 
 修訂：保留邊界提示，移除所有路口必定同一顏色及配置的說法。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：下斜路緣前一排整齊凸點，旁邊另有長條紋
 
@@ -1412,7 +1412,7 @@
 
 修訂：把主觀效果與檔販歷史動機分開，不以配色推定安全或新鮮。
 
-模式：partial／original
+模式：partial／original／spotlight
 
 認圖線索：綠葉中間一道紅色綑帶
 
