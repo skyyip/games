@@ -1,3 +1,5 @@
+# Firebase 設定與部署
+
 ## 收藏及再挑戰券更新部署
 
 本次變更了抽卡價格、卡冊、造型白名單、週末五次上限及每日再挑戰券。請**先發布本資料夾最新完整`firestore.rules`，再上傳新版網站**，否則新購買與開局會被舊規則拒絕。無新增索引；沿用`firestore.indexes.json`。
@@ -8,8 +10,6 @@ firebase deploy --project sky-playground-millionaire --only firestore:rules
 ```
 
 也可在專案`sky-playground-millionaire`的Firestore Database → Rules，貼上完整規則檔後Publish。現有錢包不須重建，新增的每日券欄位以缺省值讀取；已購買卡片及造型繼續保留。
-
-# Firebase 設定與部署
 
 本遊戲只使用 **sky-playground-millionaire**，與其他遊戲獨立。公開 Web App 設定在 `src/firebase-settings.js`；不要把服務帳戶私鑰、OAuth 密碼或 CLI token 放進網站。
 
