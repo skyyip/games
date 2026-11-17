@@ -1,7 +1,7 @@
 name: Verify Millionaire sensory browsers
 on:
   push:
-    branches: [millionaire-showtime, main]
+    branches: [millionaire-showtime, millionaire-collections-refresh, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-showtime.yml]
   workflow_dispatch:
 permissions:

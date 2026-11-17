@@ -1,4 +1,4 @@
-import {GEAR,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS} from '../src/economy.js';
+import {GEAR,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,GOLD_STRIDE,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
 import {ROOM_POOLS,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE} from '../src/session-engine.js';
 import {QUESTIONS} from '../src/questions.js';
 import {QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
@@ -7,6 +7,9 @@ export function rewardRules(){
  const prefixes=CULTURE_CARDS.reduce((out,c)=>{(out[c.series]??=[]).push(c.id);return out;},{});
  const prefixCheck=Object.entries(prefixes).map(([id,ids])=>'(w.prefix=='+json(id)+'&&'+ids.map(key=>'w.cards.get('+json(key)+',0)>0').join('&&')+')').join('||');
  const placeholders={
+  __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*10),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_PRICE__:String(RETRY_PRICE),
+  __RETRY_POOL_IDS__: [1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids)).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
+  __RETRY_POOL_KEYS__:[1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids.map(id=>keys.get(id)))).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
   __GEAR_PRICE__:json(Object.fromEntries(GEAR.map(g=>[g.id,g.price]))),
   __COMMON__:json(NORMAL_CARDS),__FOIL__:json(FOIL_CARDS),
   __PREFIX_CHECK__:prefixCheck,
@@ -31,9 +34,10 @@ export function rewardRules(){
   function rwIsWeekend(){return (today()+4)%7 in [0,6];}
   function rwOwned(w){return (w.frame=='none'||(w.frame in __FRAMES__&&w.frame in w.owned))&&(w.theme=='default'||(w.theme in __THEMES__&&w.theme in w.owned))&&(w.exit=='default'||(w.exit in __EXITS__&&w.exit in w.owned))&&(w.prefix==''||__PREFIX_CHECK__);}
   function rwCreate(w,uid){
-   return w.keys().hasOnly(['uid','spent','bonus','draws','cards','owned','frame','theme','exit','prefix','pass','passUses','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
+   return w.keys().hasOnly(['uid','spent','bonus','draws','cards','owned','frame','theme','exit','prefix','pass','passUses','retryBoughtDay','retryUsedDay','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
     &&w.uid==uid&&w.spent is int&&w.spent==0&&w.bonus is int&&w.bonus==0&&w.draws is int&&w.draws==0&&w.cards=={}&&w.owned==[]
     &&w.frame=='none'&&w.theme=='default'&&w.exit=='default'&&w.prefix==''&&w.pass is int&&w.pass==-1&&w.passUses is int&&w.passUses==0
+    &&w.retryBoughtDay is int&&w.retryBoughtDay==-1&&w.retryUsedDay is int&&w.retryUsedDay==-1
     &&w.practiceDay is int&&w.practiceDay==-1&&w.practiceEarned is int&&w.practiceEarned==0&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
     &&w.revision is int&&w.revision==0&&w.op=='create'&&w.item==''&&w.receipt==''&&w.createdAt==request.time&&w.updatedAt==request.time&&exists(player(uid));
   }
@@ -42,9 +46,9 @@ export function rewardRules(){
    return w.receipt is string&&w.receipt.matches('^[a-f0-9-]{36}$')&&r.uid==uid&&r.op==w.op&&r.item==w.item&&r.revision==w.revision&&r.cost==w.spent-o.spent&&r.createdAt==request.time;
   }
   function rwDraw(w,o,gold){
-   let seed=o.createdAt.toMillis();let slot=(seed+o.draws*37)%126;
-   let id=gold?__FOIL__[(seed+o.draws*5)%6]:(slot<120?__COMMON__[int(slot / 10)]:__FOIL__[slot-120]);
-   return rwChanged(w,o,['spent','draws','cards','receipt'])&&w.item==id&&w.spent==o.spent+(gold?50000:5000)&&w.draws is int&&w.draws==o.draws+1
+   let seed=o.createdAt.toMillis();let slot=(seed+o.draws*37)%__DRAW_SLOTS__;
+   let id=gold?__FOIL__[(seed+o.draws*__GOLD_STRIDE__)%__FOIL_COUNT__]:(slot<__NORMAL_SLOTS__?__COMMON__[int(slot / 10)]:__FOIL__[slot-__NORMAL_SLOTS__]);
+   return rwChanged(w,o,['spent','draws','cards','receipt'])&&w.item==id&&w.spent==o.spent+(gold?__GOLD_PRICE__:__DRAW_PRICE__)&&w.draws is int&&w.draws==o.draws+1
     &&w.cards.diff(o.cards).affectedKeys().hasOnly([id])&&w.cards[id] is int&&w.cards[id]==o.cards.get(id,0)+1;
   }
   function rwBuy(w,o){let price=__GEAR_PRICE__[w.item];return rwChanged(w,o,['spent','owned','receipt'])&&!(w.item in o.owned)&&w.owned==o.owned.concat([w.item])&&w.spent==o.spent+price;}
@@ -52,21 +56,22 @@ export function rewardRules(){
    return rwReceipt(w,o,uid)&&get(player(uid)).data.total+o.bonus-o.spent>=w.spent-o.spent&&(
     w.op=='draw'?rwDraw(w,o,false):w.op=='gold'?rwDraw(w,o,true):w.op=='buy'?rwBuy(w,o):
     w.op=='equip'?(rwChanged(w,o,['frame','theme','exit','prefix','receipt'])&&w.spent==o.spent&&w.item in ['frame','theme','exit','prefix']&&rwOwned(w)):
-    (w.op=='pass'&&rwChanged(w,o,['pass','passUses','spent','receipt'])&&o.pass!=rwWeekend()&&w.pass is int&&w.pass==rwWeekend()&&w.passUses==0&&w.spent==o.spent+100000));
+    (w.op=='pass'&&rwChanged(w,o,['pass','passUses','spent','receipt'])&&o.pass!=rwWeekend()&&w.pass is int&&w.pass==rwWeekend()&&w.passUses==0&&w.spent==o.spent+__PASS_PRICE__)
+    ||(w.op=='retry-ticket'&&rwChanged(w,o,['retryBoughtDay','spent','receipt'])&&o.get('retryBoughtDay',-1)!=today()&&w.retryBoughtDay is int&&w.retryBoughtDay==today()&&w.spent==o.spent+__RETRY_PRICE__));
   }
   function rwStart(w,o,uid){
    let r=getAfter(rwActivePath(uid,w)).data;
-   return rwChanged(w,o,['activeSession','activeKind','activeRoom','passUses','bonus'])&&o.activeSession==''&&w.item==r.id&&w.activeSession==r.id&&w.activeKind==r.kind&&w.activeRoom==r.room
+   return rwChanged(w,o,['activeSession','activeKind','activeRoom','passUses','bonus','retryUsedDay'])&&o.activeSession==''&&w.item==r.id&&w.activeSession==r.id&&w.activeKind==r.kind&&w.activeRoom==r.room
     &&r.startedAt==request.time&&r.uid==uid&&r.phase=='playing'&&(
-     r.kind=='weekend'?(w.passUses is int&&o.get('passUses',0)<3&&w.passUses==o.get('passUses',0)+1&&w.bonus==o.bonus):
-     (r.kind=='room'&&w.get('passUses',0)==o.get('passUses',0)&&w.bonus==o.bonus));
+     r.kind=='weekend'?(w.passUses is int&&o.get('passUses',0)<__PASS_LIMIT__&&w.passUses==o.get('passUses',0)+1&&w.bonus==o.bonus&&w.get('retryUsedDay',-1)==o.get('retryUsedDay',-1)):
+     (w.get('passUses',0)==o.get('passUses',0)&&w.bonus==o.bonus&&(r.kind=='retry'?(o.get('retryBoughtDay',-1)==today()&&o.get('retryUsedDay',-1)!=today()&&w.retryUsedDay is int&&w.retryUsedDay==today()):(r.kind=='room'&&w.get('retryUsedDay',-1)==o.get('retryUsedDay',-1)))));
   }
   function rwSettle(w,o,uid){
    let r=getAfter(rwActivePath(uid,o)).data;
    let oldEarned=o.practiceDay==r.day?o.practiceEarned:0;
    let reward=r.correct*500>5000?5000:r.correct*500;
    let capped=100000-oldEarned<reward?100000-oldEarned:reward;
-   let credit=r.kind=='weekend'?capped:0;
+   let credit=r.kind=='weekend'?capped:r.kind=='retry'?r.payout:0;
    return rwChanged(w,o,['bonus','activeSession','activeKind','activeRoom','practiceDay','practiceEarned'])
     &&o.activeSession!=''&&w.item==o.activeSession&&get(rwActivePath(uid,o)).data.phase!='finished'&&r.phase=='finished'&&r.credited==true&&r.endedAt==request.time&&r.credit==credit
     &&w.bonus==o.bonus+credit&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
@@ -82,13 +87,13 @@ export function rewardRules(){
    return rwChanged(w,o,['bonus'])&&uid in before.players&&after.updatedAt==request.time&&w.bonus==o.bonus+rrCreditAmount(before,uid)
     &&(before.rebates[uid]!=after.rebates[uid]||before.refunds[uid]!=after.refunds[uid]||before.paidTo!=after.paidTo);
   }
-  function rwRetire(w,o){
+  function rwRetire(w,o,uid){
    return rwChanged(w,o,['activeSession','activeKind','activeRoom'])&&o.activeSession!=''&&w.item==o.activeSession&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
-    &&(!(o.activeKind in ['room','weekend'])||(o.activeKind=='room'&&(!exists(rrPath(o.activeRoom))||!get(rrPath(o.activeRoom)).data.keys().hasAny(['entryFee']))));
+    &&(!(o.activeKind in ['room','weekend','retry'])||(o.activeKind=='room'&&(!exists(rrPath(o.activeRoom))||!get(rrPath(o.activeRoom)).data.keys().hasAny(['entryFee'])))||!exists(rwActivePath(uid,o))||get(rwActivePath(uid,o)).data.phase=='finished');
   }
   function rwUpdate(w,o,uid){
    return w.updatedAt==request.time&&w.revision is int&&w.revision==o.revision+1&&w.spent is int&&w.spent>=0&&w.spent<=1000000000000&&w.bonus is int&&w.bonus>=0&&w.bonus<=1000000000000
-    &&(w.op in ['draw','gold','buy','equip','pass']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
+    &&(w.op in ['draw','gold','buy','equip','pass','retry-ticket']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
   }
   match /hkm_wallets/{uid}{
    allow get:if owner(uid);allow list,delete:if false;
@@ -98,7 +103,7 @@ export function rewardRules(){
     allow get:if owner(uid);allow list,update,delete:if false;
     allow create:if owner(uid)&&id.matches('^[a-f0-9-]{36}$')&&request.resource.data.keys().hasOnly(['uid','op','item','cost','revision','createdAt'])
      &&request.resource.data.createdAt==request.time&&request.resource.data.uid==uid
-     &&getAfter(rwPath(uid)).data.receipt==id&&getAfter(rwPath(uid)).data.op in ['draw','gold','buy','equip','pass']
+     &&getAfter(rwPath(uid)).data.receipt==id&&getAfter(rwPath(uid)).data.op in ['draw','gold','buy','equip','pass','retry-ticket']
      &&request.resource.data.op==getAfter(rwPath(uid)).data.op&&request.resource.data.item==getAfter(rwPath(uid)).data.item
      &&request.resource.data.revision==getAfter(rwPath(uid)).data.revision&&getAfter(rwPath(uid)).data.updatedAt==request.time
      &&request.resource.data.cost==getAfter(rwPath(uid)).data.spent-get(rwPath(uid)).data.spent;
@@ -115,9 +120,14 @@ export function rewardRules(){
    let ids=topic=='sport'?__SPORT_IDS__:__PLACE_IDS__;let answers=topic=='sport'?__SPORT_KEYS__:__PLACE_KEYS__;let stride=topic=='sport'?__SPORT_STRIDE__:__PLACE_STRIDE__;
    let slot=(seed*17+index*stride)%ids.size();return [ids[slot],answers[slot]];
   }
+  function rsRetryQuestion(r){
+   let tier=int(r.index / 5);let ids=__RETRY_POOL_IDS__;let answers=__RETRY_POOL_KEYS__;
+   let offset=5+(r.seed%int((ids.size()-5) / 5))*5;
+   let slot=(r.day*__RETRY_DAYSTEP__[tier]+(offset+r.index%5)*__RETRY_SLOTSTEP__[tier]+tier*11)%ids.size();return [ids[slot],answers[slot]];
+  }
   function rsQuestion(r){
    return r.kind=='room'?(r.topic=='all'?question(r.seed,r.index<3?r.index:r.index<7?r.index+2:r.index+3):rsRoomQuestion(r.seed,r.index,r.topic))
-    :question(r.seed,r.index);
+    :r.kind=='retry'?rsRetryQuestion(r):question(r.seed,r.index);
   }
   function rsTimely(r){return (r.kind=='room'||r.day==today())&&request.time>=r.questionAt&&request.time<=r.questionAt+duration.value(cap(r.index)+2000,'ms');}
   function rsCreate(r,uid,id,roomId){
@@ -129,7 +139,7 @@ export function rewardRules(){
     &&r.answers=={}&&r.seen==[]&&r.payout is int&&r.payout==0&&r.credit is int&&r.credit==0&&r.credited==false&&r.reason==''
     &&w.op=='start-session'&&w.item==id&&w.activeSession==id&&w.activeKind==r.kind&&w.activeRoom==r.room&&w.updatedAt==request.time
     &&(roomId!=''?(r.kind=='room'&&r.room==roomId&&id==roomId&&r.count==10&&get(rrPath(roomId)).data.status=='playing'&&uid in get(rrPath(roomId)).data.players&&r.seed==get(rrPath(roomId)).data.seed&&r.topic==get(rrPath(roomId)).data.topic&&r.questionAt==get(rrPath(roomId)).data.startedAt&&request.time<get(rrPath(roomId)).data.startedAt+duration.value(__ROOM_DURATION__,'s')):
-     (r.room==''&&r.topic=='all'&&r.count==15&&r.questionAt==request.time&&r.kind=='weekend'&&id.matches('^weekend_[a-f0-9-]{36}$')&&rwIsWeekend()&&get(rwPath(uid)).data.pass==rwWeekend()&&get(rwPath(uid)).data.get('passUses',0)<3));
+     (r.room==''&&r.topic=='all'&&r.count==15&&r.questionAt==request.time&&((r.kind=='weekend'&&id.matches('^weekend_[a-f0-9-]{36}$')&&rwIsWeekend()&&get(rwPath(uid)).data.pass==rwWeekend()&&get(rwPath(uid)).data.get('passUses',0)<__PASS_LIMIT__)||(r.kind=='retry'&&id.matches('^retry_[a-f0-9-]{36}$')&&get(rwPath(uid)).data.get('retryBoughtDay',-1)==today()&&get(rwPath(uid)).data.get('retryUsedDay',-1)!=today()))));
   }
   function rsLife(r,o){
    let changed=r.diff(o).affectedKeys();
