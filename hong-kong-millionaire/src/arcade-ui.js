@@ -1,3 +1,4 @@
+import {createTransitionRetry,timingWait} from './transition-retry.js';
 import {questionView} from './question-view.js';
 import {paintQuestionImage} from './visual-effects.js';
 import {optionOrder} from './choice-order.js';
@@ -20,12 +21,13 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  const button=(text,fn,disabled=false,cls='outline')=>{const b=el('button',text,cls);b.type='button';b.disabled=!!disabled;b.onclick=fn;return b;};
  const now=()=>cloud.sessionNow?.()??Date.now();
  const reviewReady=()=>sessionReviewReady(run,room,cloud.sessionSafeNow?.()??now());
+ const transitionRetry=createTransitionRetry();
  let autoPaused=false,retryAt=0,failureCount=0;const rebated=new Set();
  const resetFailures=()=>{autoPaused=false;retryAt=0;failureCount=0;};
  const automaticReady=()=>!autoPaused&&performance.now()>=retryAt;
- function failed(error){if(['room-wait','not-expired','not-ready'].includes(error?.code??error?.message)){retryAt=performance.now()+400;return;}failureCount++;const code=String(error?.code??error?.message??'').replace(/^firestore\//,'');autoPaused=['permission-denied','unauthenticated','not-configured'].includes(code)||failureCount>=3;retryAt=performance.now()+Math.min(8000,1000*2**(failureCount-1));}
+ function failed(error){if(timingWait(error)){retryAt=performance.now()+400;return;}failureCount++;const code=String(error?.code??error?.message??'').replace(/^firestore\//,'');autoPaused=['permission-denied','unauthenticated','not-configured'].includes(code)||failureCount>=3;retryAt=performance.now()+Math.min(8000,1000*2**(failureCount-1));}
  const descriptor=r=>({id:r.id,kind:r.kind,room:r.room});
- function setIdentity(next){if(uid===next)return;resetFailures();rebated.clear();uid=next;epoch++;loadId++;stopRoom?.();stopRun?.();stopRoom=stopRun=null;run=room=state=pending=null;starting=auto=false;view='home';dialog.close();hint.close();}
+ function setIdentity(next){if(uid===next)return;resetFailures();transitionRetry.reset();rebated.clear();uid=next;epoch++;loadId++;stopRoom?.();stopRun?.();stopRoom=stopRun=null;run=room=state=pending=null;starting=auto=false;view='home';dialog.close();hint.close();}
  async function bounded(promise){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error('request-timeout'),{code:'unavailable'})),10000);})]);}finally{clearTimeout(timer);}}
  async function wallet(){const actor=uid,version=epoch,next=await cloud.wallet();if(uid===actor&&epoch===version){if(!state||next.wallet.revision>=state.wallet.revision){state=next;onChange(next);}}return next;}
  async function operation(key,fn,label='正在連接…'){
@@ -46,9 +48,15 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(finished)wallet().then(()=>{if(run?.id===next.id){render();celebrateMillion(next);}}).catch(()=>{});
  }
  async function move(action,{automatic=false}={}){
-  if(automatic&&!automaticReady())return;if(!automatic)resetFailures();
+  if(automatic&&!automaticReady())return;if(!automatic){resetFailures();transitionRetry.reset();}
   if(!run||run.phase==='finished'||pending)return;const old=run;
-  await operation('move',async current=>{const next=await cloud.moveSession(descriptor(old),action,{expected:{index:old.index,phase:old.phase,questionAt:old.questionAt}});if(current())acceptRun(next);},action.type==='answer'?'答案傳送中…':'正在更新本局…');
+  await operation('move',async current=>{
+   let next,calibrated=false;const canCalibrate=automatic&&typeof cloud.syncSessionClock==='function';
+   try{next=await cloud.moveSession(descriptor(old),action,{expected:{index:old.index,phase:old.phase,questionAt:old.questionAt}});}
+   catch(error){if(!canCalibrate||!timingWait(error)||!current())throw error;next=await cloud.syncSessionClock(descriptor(old));calibrated=true;}
+   if(current()&&canCalibrate&&!calibrated&&snapshotKey(next)===snapshotKey(old))next=await cloud.syncSessionClock(descriptor(old));
+   if(current()&&next)acceptRun(next);
+  },action.type==='answer'?'答案傳送中…':automatic?'正在同步下一題…':'正在更新本局…');
  }
  async function startWeekend(kind='weekend'){if(!canStart()){status('先完成目前的每日熱座，再加入額外挑戰。');return;}await operation('start',async current=>{const next=await cloud.startSession({kind});if(current()){await bindRun(next,{calibrate:false});wallet().catch(()=>{});}});}
  async function startRoomSession(manual=false){
@@ -127,10 +135,12 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  function clock(allowAction=true){
   if(!dialog.open)return;updateRoomProgress();if(view==='room'&&room?.status==='playing'&&!pending&&!starting&&automaticReady()){startRoomSession();return;}if(view!=='game'||!run||run.phase==='finished')return;const clockAt=now(),node=$('arcade-clock');if(node)node.textContent=run.phase==='playing'?'剩餘 '+Math.ceil(sessionRemaining(run,clockAt)/1000)+' 秒':run.kind==='room'?(isRevealed()?'下一題 ':'揭曉倒數 ')+Math.max(0,((isRevealed()?run.questionAt+ROOM_INTERVAL:run.questionAt+QUESTION_MS)-clockAt)/1000).toFixed(1)+' 秒':'本題已揭曉';
   const key=snapshotKey(run)+':'+isRevealed();if(allowAction&&lastRender!==key){lastRender=key;render();return;}if(visualAnimation)visualAnimation.currentTime=Math.max(0,Math.min(QUESTION_MS,clockAt-run.questionAt));
-  if(!allowAction||auto||pending||!automaticReady())return;const safeAt=cloud.sessionSafeNow?.()??clockAt,action=run.phase==='playing'&&sessionRemaining(run,safeAt)<=0?{type:'timeout'}:run.kind==='room'&&run.phase==='reveal'&&safeAt>=run.questionAt+ROOM_INTERVAL?{type:'next'}:null;if(action){auto=true;move(action,{automatic:true}).finally(()=>{auto=false;});}
+  if(!allowAction||auto||pending||!automaticReady())return;const safeAt=cloud.sessionSafeNow?.()??clockAt,action=run.phase==='playing'&&sessionRemaining(run,safeAt)<=0?{type:'timeout'}:run.kind==='room'&&run.phase==='reveal'&&safeAt>=run.questionAt+ROOM_INTERVAL?{type:'next'}:null;if(action){const key=snapshotKey(run)+':'+action.type;if(transitionRetry.exhausted(key)){autoPaused=true;status('本題同步暫停；已提交的答案仍保留。請按「重新連接」核對。');return;}if(!transitionRetry.begin(key))return;auto=true;move(action,{automatic:true}).finally(()=>{auto=false;});}
  }
- async function recover(){if(pending)return;resetFailures();await operation('recover',async current=>{const next=run?await cloud.getSession(descriptor(run)):await cloud.activeSession();if(!current())return;if(next){await bindRun(next);if(next.kind==='room'&&room?.id!==next.room){await attach(next.room);view='game';}}else{let payload;try{payload=JSON.parse(localStorage.getItem('sky.hkm.pending-room.'+uid));}catch{}if(payload){const id=await cloud.createRoom(payload);if(current()){localStorage.removeItem('sky.hkm.pending-room.'+uid);await attach(id);}}}wallet().catch(()=>{});});}
- async function open(){setIdentity(getUser()?.uid??null);if(!uid){login();return;}dialog.showModal();view='home';if(!pending)resetFailures();render();if(!canStart()){status('請先完成目前的每日熱座。');return;}const ticket=++loadId;await operation('open',async current=>{await wallet();const next=await cloud.activeSession();if(!current()||ticket!==loadId)return;if(next){await bindRun(next);if(next.kind==='room'){await attach(next.room);view='game';}}});}
+ async function recover(){if(pending)return;resetFailures();transitionRetry.reset();await operation('recover',async current=>{const next=run?await cloud.getSession(descriptor(run)):await cloud.activeSession();if(!current())return;if(next){await bindRun(next);if(next.kind==='room'&&room?.id!==next.room){await attach(next.room);view='game';}}else{let payload;try{payload=JSON.parse(localStorage.getItem('sky.hkm.pending-room.'+uid));}catch{}if(payload){const id=await cloud.createRoom(payload);if(current()){localStorage.removeItem('sky.hkm.pending-room.'+uid);await attach(id);}}}wallet().catch(()=>{});});}
+ async function open(){setIdentity(getUser()?.uid??null);if(!uid){login();return;}dialog.showModal();view='home';if(!pending){resetFailures();transitionRetry.reset();}render();if(!canStart()){status('請先完成目前的每日熱座。');return;}const ticket=++loadId;await operation('open',async current=>{await wallet();const next=await cloud.activeSession();if(!current()||ticket!==loadId)return;if(next){await bindRun(next);if(next.kind==='room'){await attach(next.room);view='game';}}});}
+ function reconnectVisible(){if(!document.hidden&&dialog.open&&view==='game'&&run?.phase!=='finished'&&!pending)recover();}
+ document.addEventListener('visibilitychange',reconnectVisible);window.addEventListener('pageshow',event=>{if(event.persisted)reconnectVisible();});
  $('arcade-retry').onclick=recover;$('arcade-lobby').onclick=()=>{view='home';render();};dialog.addEventListener('close',()=>{hint.close();visualObserver?.disconnect();visualAnimation?.cancel();visualObserver=visualAnimation=null;});setInterval(clock,150);
  for(const type of ['copy','cut','contextmenu','selectstart','dragstart'])dialog.addEventListener(type,event=>{if(view==='game'&&run?.phase!=='finished'&&event.target.closest?.('.arcade-question,.arcade-options,.arcade-visual'))event.preventDefault();});
  return {open,setIdentity,get run(){return run;},get visibleRun(){return dialog.open&&view==='game'?run:null;}};

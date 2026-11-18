@@ -1,7 +1,7 @@
 name: Verify Millionaire rewards
 on:
   push:
-    branches: [millionaire-rewards, millionaire-room-rework, millionaire-visual-bank, millionaire-room-launch-ux, millionaire-full-qa, millionaire-showtime, millionaire-collections-refresh, main]
+    branches: [millionaire-rewards, millionaire-room-rework, millionaire-visual-bank, millionaire-room-launch-ux, millionaire-full-qa, millionaire-showtime, millionaire-collections-refresh, millionaire-room-countdown-fix, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rewards.yml]
   workflow_dispatch:
 permissions:
@@ -69,6 +69,8 @@ jobs:
         working-directory: .
         env:
           HKM_TEST_URL: http://127.0.0.1:5445/games/hong-kong-millionaire/
+          HKM_BUILD_DIR: /tmp/games-built-rewards
+          BBL_ESBUILD_MODULE: ${{ github.workspace }}/tools/node_modules/esbuild/lib/main.js
         run: |
           /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps firefox webkit
           sudo apt-get install -y pulseaudio
@@ -79,6 +81,7 @@ jobs:
             printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
             GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/browser-check.mjs
             GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/showtime-browser-check.mjs
+            GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/rewards-browser-check.mjs
           done
       - name: Save browser preview images
         if: always()
