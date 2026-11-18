@@ -50,13 +50,13 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /games/frogger-jump/
   Cache-Control: no-cache, no-store, must-revalidate
-/games/grid-rush-in-order/index.html
-  Cache-Control: no-cache, no-store, must-revalidate
-/games/grid-rush-in-order/
-  Cache-Control: no-cache, no-store, must-revalidate
 /games/grid-rush/index.html
   Cache-Control: no-cache, no-store, must-revalidate
 /games/grid-rush/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush-in-order/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush-in-order/
   Cache-Control: no-cache, no-store, must-revalidate
 /games/hong-kong-millionaire/index.html
   Cache-Control: no-cache, no-store, must-revalidate
@@ -138,9 +138,9 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /games/frogger-jump/sw.js
   Cache-Control: no-cache, no-store, must-revalidate
-/games/grid-rush-in-order/sw.js
-  Cache-Control: no-cache, no-store, must-revalidate
 /games/grid-rush/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush-in-order/sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 /games/hong-kong-millionaire/sw.js
   Cache-Control: no-cache, no-store, must-revalidate
