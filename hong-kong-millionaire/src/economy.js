@@ -50,6 +50,8 @@ export const GEAR=Object.freeze([
  {id:'theme-porcelain',kind:'theme',name:'青花瓷磚風',price:120000,description:'鈷藍釉線、細花與米白瓷磚，將冰室花紋放進日常答題。'},
  {id:'exit-redvan',kind:'exit',name:'紅Van接你走',price:50000,description:'割禾青後紅Van載你離場，支援裝置可播放「落車啦唔該！」。'}
 ]);
+const gearKindOrder={frame:0,theme:1,exit:2};
+export const DISPLAY_GEAR=Object.freeze([...GEAR].sort((a,b)=>gearKindOrder[a.kind]-gearKindOrder[b.kind]||a.price-b.price));
 export const NORMAL_CARDS=Object.freeze(CULTURE_CARDS.filter(c=>!c.foil).map(c=>c.id));
 export const FOIL_CARDS=Object.freeze(CULTURE_CARDS.filter(c=>c.foil).map(c=>c.id));
 export const cardById=id=>CULTURE_CARDS.find(c=>c.id===id);

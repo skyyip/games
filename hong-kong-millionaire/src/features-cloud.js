@@ -70,15 +70,15 @@ export async function startSession(c,uid,{kind,room=''}){
  return run.phase==='finished'?run:resumeSession(c,uid,descriptor);
 }
 export async function moveSession(c,uid,descriptor,action,{expected=null}={}){
- const ref=sessionRef(c,uid,descriptor);let finish=false;
- await c.runTransaction(c.db,async t=>{const snap=await t.get(ref);if(!snap.exists())throw Error('run-missing');const raw=snap.data(),old=normalizeRun(raw);
+ const ref=sessionRef(c,uid,descriptor);let finish=false,sent=null;
+ await c.runTransaction(c.db,async t=>{sent=null;const snap=await t.get(ref);if(!snap.exists())throw Error('run-missing');const raw=snap.data(),old=normalizeRun(raw);
   if(old.phase==='finished'||expected&&(old.index!==expected.index||old.phase!==expected.phase||old.questionAt!==expected.questionAt))return;
   const next=sessionAct(old,action,sessionClock.lowerBound());if(next.phase==='finished'){finish=true;return;}const patch={updatedAt:c.serverTimestamp()};
   for(const key of ['phase','index','correct','timeMs','outcome','choice','halfFor','phoneFor','audienceFor'])if(next[key]!==old[key])patch[key]=next[key];
   if(next.questionAt!==old.questionAt)patch.questionAt=old.kind==='room'?afterInterval(c,raw.questionAt):c.serverTimestamp();
   if(next.answerAt!==old.answerAt){patch.answerAt=next.answerAt===null?null:c.serverTimestamp();if(next.answerAt!==null){patch.seen=next.seen;patch['answers.'+old.index]={...next.answers[old.index],startedAt:raw.questionAt,answeredAt:c.serverTimestamp()};}}
-  t.update(ref,patch);
- });const current=await getSession(c,uid,descriptor);return finish||sessionTerminal(current)?settleSession(c,uid,descriptor):current;
+  sent=performance.now();t.update(ref,patch);
+ });const current=await getSession(c,uid,descriptor);if(sent!==null&&current)sessionClock.observe(current.updatedAt,sent,performance.now());return finish||sessionTerminal(current)?settleSession(c,uid,descriptor):current;
 }
 export async function settleSession(c,uid,descriptor){
  const ref=sessionRef(c,uid,descriptor);
