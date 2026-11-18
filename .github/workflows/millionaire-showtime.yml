@@ -44,6 +44,9 @@ jobs:
         env:
           HKM_TEST_URL: http://127.0.0.1:5459/games/hong-kong-millionaire/
         run: |
+          # GitHub mounts this directory as pwuser, while container steps run as root.
+          # Firefox requires the existing home directory to belong to its user.
+          chown "$(id -u):$(id -g)" "$HOME"
           for engine in chromium firefox webkit; do
             printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
             GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/showtime-browser-check.mjs
