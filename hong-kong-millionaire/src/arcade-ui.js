@@ -16,8 +16,8 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
  document.body.append(dialog);const $=id=>dialog.querySelector('#'+id);dialog.querySelector('.close-button').onclick=()=>dialog.close();
  const hint=el('dialog');hint.id='arcade-hint';hint.innerHTML='<button class="close-button" type="button" aria-label="關閉提示">×</button><h2 id="arcade-hint-title"></h2><div id="arcade-hint-body"></div>';document.body.append(hint);hint.querySelector('button').onclick=()=>hint.close();
  let visualObserver=null,visualAnimation=null;
- let uid=null,epoch=0,state=null,room=null,run=null,view='home',selection=null,pending=null,stopRoom=null,stopRun=null,starting=false,auto=false,lastRender='',loadId=0,roomFetch=0;
- const status=text=>{$('arcade-status').textContent=text;};
+ let uid=null,epoch=0,state=null,room=null,run=null,view='home',selection=null,pending=null,stopRoom=null,stopRun=null,starting=false,auto=false,lastRender='',paintedQuizKey='',loadId=0,roomFetch=0;
+ const status=text=>{const node=$('arcade-status');if(node.textContent!==text)node.textContent=text;};
  const button=(text,fn,disabled=false,cls='outline')=>{const b=el('button',text,cls);b.type='button';b.disabled=!!disabled;b.onclick=fn;return b;};
  const now=()=>cloud.sessionNow?.()??Date.now();
  const reviewReady=()=>sessionReviewReady(run,room,cloud.sessionSafeNow?.()??now());
@@ -51,12 +51,12 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(automatic&&!automaticReady())return;if(!automatic){resetFailures();transitionRetry.reset();}
   if(!run||run.phase==='finished'||pending)return;const old=run;
   await operation('move',async current=>{
-   let next,calibrated=false;const canCalibrate=automatic&&typeof cloud.syncSessionClock==='function';
+   let next,calibrated=false;const canCalibrate=typeof cloud.syncSessionClock==='function';
    try{next=await cloud.moveSession(descriptor(old),action,{expected:{index:old.index,phase:old.phase,questionAt:old.questionAt}});}
    catch(error){if(!canCalibrate||!timingWait(error)||!current())throw error;next=await cloud.syncSessionClock(descriptor(old));calibrated=true;}
    if(current()&&canCalibrate&&!calibrated&&snapshotKey(next)===snapshotKey(old))next=await cloud.syncSessionClock(descriptor(old));
    if(current()&&next)acceptRun(next);
-  },action.type==='answer'?'答案傳送中…':automatic?'正在同步下一題…':'正在更新本局…');
+  },action.type==='answer'?'答案傳送中…':automatic?'正在同步下一題…':action.type==='next'?'正在載入下一題…':action.type==='life'?'正在取用錦囊…':'正在結算本局…');
  }
  async function startWeekend(kind='weekend'){if(!canStart()){status('先完成目前的每日熱座，再加入額外挑戰。');return;}await operation('start',async current=>{const next=await cloud.startSession({kind});if(current()){await bindRun(next,{calibrate:false});wallet().catch(()=>{});}});}
  async function startRoomSession(manual=false){
@@ -91,12 +91,12 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(p.mode==='text'||q.textOnly){const art=el('span','','quiz-mascot');art.dataset.icon='bao';visual.append(art);}else{image=new Image();image.src=ART[q.art];visual.append(image);}
   const badge=el('small',revealed?'完整插畫':MODE_NAMES[p.mode]);visual.append(badge);if(selection!==null&&run.phase==='playing'&&showtime)visual.append(el('small',showtime.prompt(run),'arcade-host-caption'));list.append(visual,el('h3',shown.question,'arcade-question'));
   if(image){const paint=()=>{visualAnimation?.cancel();visualAnimation=paintQuestionImage(image,visual,q,{...p,complete:revealed,key:run.uid+':'+run.id+':'+run.index},now()-run.questionAt,QUESTION_MS);};paint();visualObserver=new ResizeObserver(paint);visualObserver.observe(visual);}
-  const options=el('div','','arcade-options'),removed=sessionRemoved(run);for(const [display,i]of optionOrder(run,q.id).entries()){const b=button('ABCD'[display]+'　'+q.options[i],()=>{selection=i;render();},!!pending||run.phase!=='playing'||removed.includes(i),'answer-option');b.dataset.choice=i;b.setAttribute('aria-pressed',String(selection===i||run.phase==='reveal'&&run.choice===i));if(removed.includes(i))b.textContent='ABCD'[display]+'　已刪除';if(revealed){if(i===q.answer)b.classList.add('correct');if(i===run.choice&&run.outcome==='wrong')b.classList.add('wrong');}options.append(b);}list.append(options);
+  const options=el('div','','arcade-options'),removed=sessionRemoved(run);for(const [display,i]of optionOrder(run,q.id).entries()){const b=button('ABCD'[display]+'　'+q.options[i],()=>{selection=i;render();},run.phase!=='playing'||removed.includes(i),'answer-option');b.dataset.choice=i;b.setAttribute('aria-pressed',String(selection===i||run.phase==='reveal'&&run.choice===i));if(removed.includes(i))b.textContent='ABCD'[display]+'　已刪除';if(revealed){if(i===q.answer)b.classList.add('correct');if(i===run.choice&&run.outcome==='wrong')b.classList.add('wrong');}options.append(b);}list.append(options);
   if(run.phase==='playing'){
-   const actions=el('div','','arcade-actions');actions.append(button(selection===null?'選一個答案':'確定答案',()=>move({type:'answer',choice:selection}),selection===null||!!pending,'primary'),button(run.kind==='room'?'提早交卷':'割禾青',()=>{hint.querySelector('h2').textContent='確定提早離場？';hint.querySelector('#arcade-hint-body').replaceChildren(el('p',run.kind==='room'?'剩餘題目不作答，按目前成績交卷。':'帶走 '+money(run.correct?PRIZES[run.correct-1]:0)+' 成績。'),button('確認離場',()=>{hint.close();move({type:'walk'});},false,'primary'));hint.showModal();},!!pending));list.append(actions);
-   const lives=el('div','','arcade-lives');for(const [kind,label,key]of [['half','50:50','halfFor'],['phone','問朋友','phoneFor'],['audience','問觀眾','audienceFor']])lives.append(button(label+(run[key]>=0?'・已使用':''),()=>life(kind),!!pending||run[key]>=0&&run[key]!==run.index));list.append(lives);
+   const actions=el('div','','arcade-actions');actions.append(button(selection===null?'選一個答案':'確定答案',()=>move({type:'answer',choice:selection}),selection===null,'primary'),button(run.kind==='room'?'提早交卷':'割禾青',()=>{hint.querySelector('h2').textContent='確定提早離場？';hint.querySelector('#arcade-hint-body').replaceChildren(el('p',run.kind==='room'?'剩餘題目不作答，按目前成績交卷。':'帶走 '+money(run.correct?PRIZES[run.correct-1]:0)+' 成績。'),button('確認離場',()=>{hint.close();move({type:'walk'});},false,'primary'));hint.showModal();},false));list.append(actions);
+   const lives=el('div','','arcade-lives');for(const [kind,label,key]of [['half','50:50','halfFor'],['phone','問朋友','phoneFor'],['audience','問觀眾','audienceFor']])lives.append(button(label+(run[key]>=0?'・已使用':''),()=>life(kind),run[key]>=0&&run[key]!==run.index));list.append(lives);
   }else if(!revealed)list.append(el('p','已作答，倒數結束後一起揭曉。','arcade-await'));
-  else{const reveal=el('section','','arcade-reveal');reveal.append(el('h3',run.outcome==='correct'?'答啱！':'本題'+({wrong:'答錯',timeout:'時間到',walk:'已放棄'}[run.outcome]??'已結束')));if(run.kind!=='room')reveal.append(el('p',q.explanation),button('下一題',()=>move({type:'next'}),!!pending,'primary'));else reveal.append(el('p','答案：'+q.options[q.answer]),button('查看解說',()=>{hint.querySelector('h2').textContent='香港小知識';hint.querySelector('#arcade-hint-body').replaceChildren(el('p',(q.observation?'認圖線索：'+q.observation.clue+'。':'')+q.explanation));hint.showModal();}));list.append(reveal);}
+  else{const reveal=el('section','','arcade-reveal');reveal.append(el('h3',run.outcome==='correct'?'答啱！':'本題'+({wrong:'答錯',timeout:'時間到',walk:'已放棄'}[run.outcome]??'已結束')));if(run.kind!=='room')reveal.append(el('p',q.explanation),button('下一題',()=>move({type:'next'}),false,'primary'));else reveal.append(el('p','答案：'+q.options[q.answer]),button('查看解說',()=>{hint.querySelector('h2').textContent='香港小知識';hint.querySelector('#arcade-hint-body').replaceChildren(el('p',(q.observation?'認圖線索：'+q.observation.clue+'。':'')+q.explanation));hint.showModal();}));list.append(reveal);}
   clock(false);
  }
  function home(list){
@@ -131,7 +131,18 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   updateRoomProgress();
  }
  async function loadRooms(){await operation('rooms',async current=>{const rows=await cloud.myRooms();if(!current())return;view='history';const list=$('arcade-content');list.replaceChildren(el('h3','我的房間紀錄'));for(const r of rows)list.append(button(r.id+' · '+money(r.pool)+' · '+({lobby:'等候',playing:'對戰',finished:'已結算',cancelled:'已取消'}[r.status]),()=>operation('room',()=>attach(r.id))));if(!rows.length)list.append(el('p','開房或參加對戰後，會在這裏留下紀錄。'));});}
- function render(){if(!dialog.open)return;visualObserver?.disconnect();visualAnimation?.cancel();visualObserver=visualAnimation=null;dialog.classList.toggle('arcade-playing',view==='game'&&run?.phase!=='finished');dialog.dataset.view=view;const list=$('arcade-content');if(view==='history'){updateRoomProgress();return;}list.replaceChildren();if(view==='game')quiz(list);else if(view==='room')roomView(list);else if(view==='create')create(list);else if(view==='join')join(list);else home(list);$('arcade-retry').disabled=!!pending;$('arcade-lobby').disabled=!!pending;updateRoomProgress();if(view==='room'&&room?.status==='playing'&&!pending&&!starting&&automaticReady()&&room.players.includes(uid)&&!(run?.room===room.id&&run.phase==='finished')&&now()<room.startedAt+ROOM_DURATION)queueMicrotask(startRoomSession);}
+ function syncPending(){
+  if(view==='game')for(const b of $('arcade-content').querySelectorAll('button')){if(!b.hasAttribute('data-base-disabled'))b.dataset.baseDisabled=String(b.disabled);b.disabled=!!pending||b.dataset.baseDisabled==='true';}
+  $('arcade-retry').disabled=!!pending;$('arcade-lobby').disabled=!!pending;
+ }
+ function render(){
+  if(!dialog.open)return;dialog.classList.toggle('arcade-playing',view==='game'&&run?.phase!=='finished');dialog.dataset.view=view;
+  const list=$('arcade-content'),key=view==='game'&&run?.phase!=='finished'?[snapshotKey(run),selection,isRevealed()].join('|'):'';
+  if(key&&key===paintedQuizKey&&list.querySelector('.arcade-score')){syncPending();updateRoomProgress();return;}
+  paintedQuizKey=key;visualObserver?.disconnect();visualAnimation?.cancel();visualObserver=visualAnimation=null;
+  if(view==='history'){updateRoomProgress();return;}list.replaceChildren();if(view==='game')quiz(list);else if(view==='room')roomView(list);else if(view==='create')create(list);else if(view==='join')join(list);else home(list);
+  syncPending();updateRoomProgress();if(view==='room'&&room?.status==='playing'&&!pending&&!starting&&automaticReady()&&room.players.includes(uid)&&!(run?.room===room.id&&run.phase==='finished')&&now()<room.startedAt+ROOM_DURATION)queueMicrotask(startRoomSession);
+ }
  function clock(allowAction=true){
   if(!dialog.open)return;updateRoomProgress();if(view==='room'&&room?.status==='playing'&&!pending&&!starting&&automaticReady()){startRoomSession();return;}if(view!=='game'||!run||run.phase==='finished')return;const clockAt=now(),node=$('arcade-clock');if(node)node.textContent=run.phase==='playing'?'剩餘 '+Math.ceil(sessionRemaining(run,clockAt)/1000)+' 秒':run.kind==='room'?(isRevealed()?'下一題 ':'揭曉倒數 ')+Math.max(0,((isRevealed()?run.questionAt+ROOM_INTERVAL:run.questionAt+QUESTION_MS)-clockAt)/1000).toFixed(1)+' 秒':'本題已揭曉';
   const key=snapshotKey(run)+':'+isRevealed();if(allowAction&&lastRender!==key){lastRender=key;render();return;}if(visualAnimation)visualAnimation.currentTime=Math.max(0,Math.min(QUESTION_MS,clockAt-run.questionAt));

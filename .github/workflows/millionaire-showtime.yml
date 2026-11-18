@@ -1,7 +1,7 @@
 name: Verify Millionaire sensory browsers
 on:
   push:
-    branches: [millionaire-showtime, millionaire-collections-refresh, millionaire-room-countdown-fix, main]
+    branches: [millionaire-showtime, millionaire-collections-refresh, millionaire-room-countdown-fix, millionaire-mobile-retry-fix, main]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-showtime.yml]
   workflow_dispatch:
 permissions:
@@ -12,7 +12,14 @@ concurrency:
 jobs:
   browsers:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    container: mcr.microsoft.com/playwright:v1.58.2-noble
+    timeout-minutes: 18
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PULSE_RUNTIME_PATH: /tmp/hkm-pulse-runtime
+      PULSE_STATE_PATH: /tmp/hkm-pulse-state
+      PULSE_COOKIE: /tmp/hkm-pulse-cookie
+      PULSE_SERVER: unix:/tmp/hkm-pulse-runtime/native
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,9 +29,11 @@ jobs:
         run: |
           for game in tools hong-kong-millionaire beat-bad-luck career-365 frogger-jump your-dream-career mo-lei-tau-studio; do npm ci --prefix "$game"; done
           npm install --prefix /tmp/hkm-playwright --no-save --package-lock=false playwright@1.58.2
-          /tmp/hkm-playwright/node_modules/.bin/playwright install --with-deps chromium firefox webkit
-          sudo apt-get install -y pulseaudio
-          pulseaudio --start --exit-idle-time=-1
+          apt-get update
+          apt-get install -y --no-install-recommends pulseaudio python3 git
+          mkdir -p "$PULSE_RUNTIME_PATH" "$PULSE_STATE_PATH"
+          chmod 700 "$PULSE_RUNTIME_PATH" "$PULSE_STATE_PATH"
+          pulseaudio --daemonize=yes --exit-idle-time=-1 --use-pid-file=no --log-target=file:/tmp/hkm-pulse.log
           pactl load-module module-null-sink sink_name=hkm_ci
           pactl set-default-sink hkm_ci
           BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" PLAYGROUND_BASE_PATH=/games/ node tools/build-site.mjs /tmp/games-built-sensory
@@ -35,12 +44,14 @@ jobs:
         env:
           HKM_TEST_URL: http://127.0.0.1:5459/games/hong-kong-millionaire/
         run: |
+          # GitHub mounts this directory as pwuser, while container steps run as root.
+          # Firefox requires the existing home directory to belong to its user.
+          chown "$(id -u):$(id -g)" "$HOME"
           for engine in chromium firefox webkit; do
             printf "export {%s as chromium} from '/tmp/hkm-playwright/node_modules/playwright/index.mjs';\n" "$engine" > "/tmp/hkm-$engine.mjs"
             GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/showtime-browser-check.mjs
-            if [ "$engine" = webkit ]; then
-              BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" HKM_BUILD_DIR=/tmp/games-built-sensory GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/rewards-browser-check.mjs
-            fi
+            GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/browser-check.mjs
+            BBL_ESBUILD_MODULE="$PWD/tools/node_modules/esbuild/lib/main.js" HKM_BUILD_DIR=/tmp/games-built-sensory GRID_RUSH_PLAYWRIGHT_MODULE="/tmp/hkm-$engine.mjs" node hong-kong-millionaire/scripts/rewards-browser-check.mjs
           done
       - uses: actions/upload-artifact@v4
         if: always()
@@ -49,3 +60,6 @@ jobs:
           path: |
             /tmp/hkm-show-*.png
             /tmp/hkm-sensory-http.log
+            /tmp/hkm-pulse.log
+            /tmp/games-built-sensory
+          include-hidden-files: true
