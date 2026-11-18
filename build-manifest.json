@@ -1,6 +1,6 @@
 {
-  "version": "8aa1b05f8265d876",
-  "builtAt": 1794924576337,
+  "version": "511cc8a835bbaaf9",
+  "builtAt": 1794926047189,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -323,7 +323,7 @@
     "hong-kong-millionaire/node_modules/firebase/app/dist/esm/index.esm.js": "built/chunk-F2JKNEH6.js",
     "hong-kong-millionaire/node_modules/firebase/auth/dist/esm/index.esm.js": "built/chunk-L4T6I2L2.js",
     "hong-kong-millionaire/node_modules/firebase/firestore/dist/esm/index.esm.js": "built/chunk-CBGWJXQL.js",
-    "hong-kong-millionaire/src/features-cloud.js": "built/chunk-ABEBXOO6.js",
+    "hong-kong-millionaire/src/features-cloud.js": "built/chunk-KXI2IP34.js",
     "beat-bad-luck/src/player-cloud.js": "built/chunk-SYGG4RBN.js",
     "career-365/node_modules/firebase/app/dist/esm/index.esm.js": "built/chunk-NOGRIELK.js",
     "career-365/node_modules/firebase/auth/dist/esm/index.esm.js": "built/chunk-6GIWVIDA.js",
@@ -344,7 +344,7 @@
     "your-dream-career/src/app.js": "built/app-HG3TPK4H.js",
     "tap-and-spill/index-pg-inline-0.js": "built/index-pg-inline-0-E6YARUUY.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
-    "hong-kong-millionaire/src/app.js": "built/app-3DZOTARP.js",
+    "hong-kong-millionaire/src/app.js": "built/app-F6LDJLRO.js",
     "grid-rush/src/landing.js": "built/landing-AHO4LOY4.js",
     "just-a-sec/src/app.js": "built/app-GHP7FF3D.js",
     "line-up/src/app.js": "built/app-WJFIRFMB.js",
