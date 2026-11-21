@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function validRunResult(data) {
+      return data is map
+        && data.keys().hasOnly(['hp', 'correct', 'survived', 'submittedAt'])
+        && data.hp is int && data.hp >= 0 && data.hp <= 100
+        && data.correct is int && data.correct >= 0 && data.correct <= 10
+        && data.survived is bool && data.submittedAt is int;
+    }
+    function validLeaderboard(data, uid) {
+      return data.keys().hasOnly(['uid', 'displayName', 'bestHp', 'bestCorrect', 'runs', 'updatedAt'])
+        && data.uid == uid
+        && data.displayName is string && data.displayName.size() <= 50
+        && data.bestHp is int && data.bestHp >= 0 && data.bestHp <= 100
+        && data.bestCorrect is int && data.bestCorrect >= 0 && data.bestCorrect <= 10
+        && data.runs is int && data.runs >= 1 && data.updatedAt is timestamp;
+    }
+    match /users/{uid} {
+      allow read, create, update: if signedIn() && request.auth.uid == uid;
+      allow delete: if false;
+      match /runs/{runId} {
+        allow read: if signedIn() && request.auth.uid == uid;
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['faction','survived','hp','coins','correct','createdAt'])
+          && request.resource.data.hp is int && request.resource.data.hp >= 0 && request.resource.data.hp <= 100
+          && request.resource.data.correct is int && request.resource.data.correct >= 0 && request.resource.data.correct <= 10
+          && request.resource.data.faction in ['women','men','dog','cat','duo']
+          && request.resource.data.survived is bool;
+        allow update, delete: if false;
+      }
+    }
+    match /leaderboard/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid
+        && validLeaderboard(request.resource.data, uid) && request.resource.data.runs == 1;
+      allow update: if signedIn() && request.auth.uid == uid
+        && validLeaderboard(request.resource.data, uid)
+        && resource.data.uid == uid
+        && request.resource.data.runs == resource.data.runs + 1
+        && request.resource.data.bestHp >= resource.data.bestHp
+        && (request.resource.data.bestHp > resource.data.bestHp
+          || request.resource.data.bestCorrect >= resource.data.bestCorrect);
+      allow delete: if false;
+    }
+    match /challenges/{challengeId} {
+      allow read: if signedIn() && (
+        resource.data.ownerUid == request.auth.uid
+        || resource.data.get('guestUid', null) == request.auth.uid
+        || resource.data.status == 'waiting'
+      );
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['ownerUid','ownerName','faction','seed','status','createdAt','expiresAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerName is string && request.resource.data.ownerName.size() <= 50
+        && request.resource.data.faction in ['women','men','dog','cat','duo']
+        && request.resource.data.seed is int && request.resource.data.status == 'waiting'
+        && request.resource.data.expiresAt is int && request.resource.data.expiresAt > request.time.toMillis();
+      allow update: if signedIn() && (
+        (resource.data.status == 'waiting'
+          && resource.data.get('guestUid', null) == null
+          && resource.data.ownerUid != request.auth.uid
+          && resource.data.expiresAt > request.time.toMillis()
+          && request.resource.data.guestUid == request.auth.uid
+          && request.resource.data.guestName is string && request.resource.data.guestName.size() <= 50
+          && request.resource.data.status == 'accepted'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['guestUid','guestName','status']))
+        ||
+        (resource.data.ownerUid == request.auth.uid
+          && resource.data.get('ownerResult', null) == null
+          && validRunResult(request.resource.data.ownerResult)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerResult','status'])
+          && request.resource.data.status == (resource.data.get('guestResult', null) != null ? 'completed' : resource.data.status))
+        ||
+        (resource.data.get('guestUid', null) == request.auth.uid
+          && resource.data.get('guestResult', null) == null
+          && validRunResult(request.resource.data.guestResult)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['guestResult','status'])
+          && request.resource.data.status == (resource.data.get('ownerResult', null) != null ? 'completed' : resource.data.status))
+      );
+      allow delete: if false;
+    }
+  }
+}
