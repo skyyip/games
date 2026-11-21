@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f2e8"><meta name="description" content="你真的懂他／她／牠嗎？高血壓求生模擬器。十題之內，證明你有多懂對方。">
+  <link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css">
+  <title>你真的懂他／她／牠嗎？｜高血壓求生模擬器</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar"><a class="brand" id="homeLink" href="#home" aria-label="返回首頁"><span class="brand-mark">?!</span><span>關係求生研究所</span></a><div class="top-actions"><button id="collectionBtn" class="small-btn"><img class="ui-icon tiny-icon" src="./assets/icons/cards.png" alt="" aria-hidden="true"> 收藏 <b id="cardCount">0</b></button><button id="soundBtn" class="icon-btn" aria-label="切換音效"><img class="ui-icon sound-icon" src="./assets/icons/sound.png" alt="" aria-hidden="true"></button></div></header>
+    <main id="app" aria-live="polite">
+      <section id="home" class="screen home-screen">
+        <div class="hero-copy"><p class="eyebrow">FIELD TEST 001 / RELATIONSHIP SURVIVAL</p><h1>你真的懂<br><span>他／她／牠</span>嗎？</h1><p class="subtitle">高血壓求生模擬器</p><p class="intro">你有多懂，玩過先知。</p><div class="hero-actions"><button id="startBtn" class="primary-btn">開始求生 <span>→</span></button><button id="howBtn" class="secondary-btn">玩法說明</button></div><div class="mini-stats"><span><b>100</b> HP</span><span><b>10</b> SEC</span><span><b>10</b> Q</span></div></div>
+        <div class="hero-art" aria-hidden="true"><div class="sticker sticker-top">你確定？</div><div class="polaroid"><div class="fake-photo"><img src="./assets/illustrations/woman.webp" alt="" aria-hidden="true"><i>?</i></div><p>「你再想清楚一次。」</p></div><div class="burst">生還<br>機率？</div><div class="scribble">GOOD<br>LUCK!</div></div>
+        <section class="faction-section"><div class="section-heading"><span class="eyebrow">CHOOSE YOUR BOSS</span><h2>選擇你的挑戰陣營</h2></div><div class="faction-grid" id="factionGrid">
+          <button class="faction-card pink selected" data-faction="women"><img class="faction-emoji" src="./assets/icons/woman.png" alt="" aria-hidden="true"><b>她的心思</b><small>讀心？你先讀空氣。</small></button>
+          <button class="faction-card yellow" data-faction="men"><img class="faction-emoji" src="./assets/icons/man.png" alt="" aria-hidden="true"><b>他的心思</b><small>「沒事」真的沒事？</small></button>
+          <button class="faction-card orange" data-faction="dog"><img class="faction-emoji" src="./assets/icons/dog.png" alt="" aria-hidden="true"><b>狗狗心思</b><small>尾巴搖不代表一切。</small></button>
+          <button class="faction-card purple" data-faction="cat"><img class="faction-emoji" src="./assets/icons/cat.png" alt="" aria-hidden="true"><b>貓主子心思</b><small>你只是牠的室友。</small></button>
+          <button class="faction-card duo" data-faction="duo"><img class="faction-emoji" src="./assets/icons/duo.png" alt="" aria-hidden="true"><b>雙人默契</b><small>兩個人一起接受審判。</small><em>解鎖模式</em></button>
+        </div></section>
+        <div class="home-footer"><span>本遊戲純屬娛樂，不構成關係或動物行為診斷。</span><span>LOCAL SAVE · NO ACCOUNT NEEDED</span></div>
+      </section>
+      <section id="game" class="screen game-screen hidden">
+        <div class="game-head"><div class="game-title"><span class="eyebrow" id="roundFaction">她的心思</span><h2><span id="questionNo">01</span><small> / 10</small></h2></div><button id="quitBtn" class="text-btn" aria-label="離開本局">退出 ×</button></div>
+        <div class="status-row"><div class="hp-wrap"><div class="hp-label"><img class="ui-icon hp-icon" src="./assets/icons/heart.png" alt="" aria-hidden="true"><b id="hpValue">100</b><small>HP</small></div><div class="hp-track"><div id="hpBar" class="hp-bar"></div></div></div><div class="timer-wrap"><div class="timer-number" id="timer">10.0</div><small>SEC</small></div></div>
+        <div class="question-card"><div class="question-meta"><span id="questionTag">01 / 情境題</span><span id="questionDifficulty">WARM UP</span></div><div class="question-visual" id="questionVisual"><img class="question-icon" src="./assets/icons/spark.png" alt="" aria-hidden="true"><small>OBSERVE</small></div><h3 id="questionText">題目載入中</h3><p id="questionHint" class="question-hint" aria-live="polite"></p><div id="interaction" class="interaction hidden"></div><div id="answers" class="answers"></div></div>
+        <div class="game-bottom"><button id="pigHintBtn" class="hint-btn"><img class="ui-icon tiny-icon" src="./assets/icons/pig.png" alt="" aria-hidden="true"> 提示 <small>−5 HP</small></button><span id="hintLeft">× 2</span><div class="progress-dots" id="progressDots"></div></div>
+      </section>
+      <section id="result" class="screen result-screen hidden"><div class="result-top"><span class="eyebrow">OFFICIAL SURVIVAL REPORT</span><h2 id="resultTitle">你活下來了？</h2><p id="resultSubtitle"></p></div><div class="result-summary"><div class="result-stat"><small>HP LEFT</small><b id="resultHp">0</b></div><div class="result-stat"><small>COINS</small><b id="resultCoins">0 SC</b></div><div class="result-stat"><small>CORRECT</small><b id="resultCorrect">0 / 10</b></div></div><div class="poster-preview-wrap"><canvas id="posterPreview" width="540" height="960" aria-label="戰績海報預覽"></canvas></div><div class="result-actions"><button id="downloadPoster" class="primary-btn"><img class="ui-icon tiny-icon" src="./assets/icons/cards.png" alt="" aria-hidden="true"> 下載戰績海報</button><button id="sharePoster" class="secondary-btn"><img class="ui-icon tiny-icon" src="./assets/icons/duo.png" alt="" aria-hidden="true"> 分享戰績</button><button id="againBtn" class="secondary-btn"><img class="ui-icon tiny-icon" src="./assets/icons/lightning.png" alt="" aria-hidden="true"> 再挑戰一次</button></div><p class="result-footnote" id="resultQuote"></p></section>
+      <section id="collection" class="screen collection-screen hidden"><div class="game-head"><div><span class="eyebrow">YOUR SURVIVAL TROPHIES</span><h2>求生收藏冊</h2></div><button id="backBtn" class="text-btn">← 返回</button></div><div class="collection-summary"><b id="collectionCoins">0 SC</b><span>累積求生幣</span></div><div id="collectionGrid" class="collection-grid"></div></section>
+    </main>
+    <footer class="site-footer"><span>© 關係求生研究所</span><span>STAY CALM. PROBABLY.</span></footer>
+  </div>
+  <dialog id="modal"><div class="modal-inner"><button class="modal-close" id="modalClose" aria-label="關閉">×</button><div id="modalContent"></div></div></dialog>
+  <script type="module" src="src/app.js"></script>
+</body></html>

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {BANK,FACTIONS} from '../src/questions.js';
+test('five factions have at least ten playable questions',()=>{assert.deepEqual(Object.keys(BANK),['women','men','dog','cat','duo']);for(const [id,questions] of Object.entries(BANK)){assert.ok(questions.length>=10,id);for(const q of questions){assert.equal(q.opts.length,4);assert.ok(q.correct>=0&&q.correct<4);assert.ok(q.text&&q.why)}}});
+test('all faction metadata is present',()=>{for(const id of Object.keys(BANK)){assert.ok(FACTIONS[id].name);assert.ok(FACTIONS[id].emoji);assert.match(FACTIONS[id].color,/^#/)} });
