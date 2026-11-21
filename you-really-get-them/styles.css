@@ -327,3 +327,5 @@ dialog { border-radius: 0; }
  .interaction .scene-illustration{height:92px;width:min(100%,165px)}
  .fake-photo{overflow:hidden}
 }
+
+.cloud-actions{grid-column:1/-1;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}.cloud-actions .secondary-btn{font-size:13px;padding:10px 14px}
