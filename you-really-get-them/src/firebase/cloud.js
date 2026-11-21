@@ -26,8 +26,23 @@ export async function initCloud(onChange=()=>{}){
   return {ready:true,user:auth.currentUser};
 }
 export const getCloudUser=()=>currentUser;
+export async function signInEmail(email,password){
+  const credential=authSdk.EmailAuthProvider.credential(email.trim(),password);
+  if(currentUser?.isAnonymous)return authSdk.linkWithCredential(currentUser,credential);
+  return authSdk.signInWithEmailAndPassword(auth,email.trim(),password);
+}
+export async function signUpEmail(email,password){
+  const credential=authSdk.EmailAuthProvider.credential(email.trim(),password);
+  if(currentUser?.isAnonymous)return authSdk.linkWithCredential(currentUser,credential);
+  return authSdk.createUserWithEmailAndPassword(auth,email.trim(),password);
+}
+export async function signInAnonymous(){return authSdk.signInAnonymously(auth);}
 export async function signInGoogle(){
   const provider=new authSdk.GoogleAuthProvider();
+  if(currentUser?.isAnonymous){
+    return /Mobi|Android|iPhone/i.test(navigator.userAgent)
+      ?authSdk.linkWithRedirect(currentUser,provider):authSdk.linkWithPopup(currentUser,provider);
+  }
   return /Mobi|Android|iPhone/i.test(navigator.userAgent)
     ?authSdk.signInWithRedirect(auth,provider):authSdk.signInWithPopup(auth,provider);
 }
