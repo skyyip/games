@@ -1,7 +1,7 @@
 import { firebaseConfig, firebaseReady } from './config.js';
 import { save } from '../storage.js';
 
-const SDK='https://www.gstatic.com/firebasejs/11.10.0';
+const SDK='https://www.gstatic.com/firebasejs/9.23.0';
 let auth,db,currentUser=null,authSdk,fs;
 
 export async function initCloud(onChange=()=>{}){
