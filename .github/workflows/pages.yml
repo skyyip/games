@@ -31,6 +31,8 @@ jobs:
       - run: npm ci --prefix beat-bad-luck
       - run: npm ci --prefix career-365
       - run: npm ci --prefix your-dream-career
+      - run: node --check you-really-get-them/src/app.js
+      - run: node --check you-really-get-them/src/firebase/cloud.js
       - run: npm test --prefix you-really-get-them
       - run: npm run check:seo --prefix tools
       - run: node tools/build-site.mjs _site
