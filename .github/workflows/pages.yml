@@ -1,4 +1,4 @@
-name: Deploy Grid Rush to Pages
+name: Deploy Sky Playground to Pages
 on:
   push:
     branches: [main]
@@ -31,6 +31,7 @@ jobs:
       - run: npm ci --prefix beat-bad-luck
       - run: npm ci --prefix career-365
       - run: npm ci --prefix your-dream-career
+      - run: npm test --prefix you-really-get-them
       - run: npm run check:seo --prefix tools
       - run: node tools/build-site.mjs _site
         env:
