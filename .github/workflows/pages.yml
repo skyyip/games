@@ -34,6 +34,7 @@ jobs:
       - run: node --check you-really-get-them/src/app.js
       - run: node --check you-really-get-them/src/firebase/cloud.js
       - run: npm test --prefix you-really-get-them
+      - run: node tools/seo.mjs
       - run: npm run check:seo --prefix tools
       - run: node tools/build-site.mjs _site
         env:
