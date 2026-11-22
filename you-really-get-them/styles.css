@@ -645,7 +645,10 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 1em;
   height: 1em;
+  flex: none;
+  font-size: 1.15em;
   line-height: 1;
   transform: none;
 }
