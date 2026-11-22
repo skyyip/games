@@ -264,3 +264,14 @@ test('player name settings button is visible only for authenticated non-anonymou
   const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
   assert.match(app, /button\.hidden=\!\(user\&\&\!user\.isAnonymous\)/);
 });
+
+
+test('mobile responsive guardrails keep the home headline readable and header compact', async () => {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
+  assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
+  assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
+  assert.match(sw, /you-really-get-them-v35/);
+});
