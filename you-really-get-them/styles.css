@@ -862,3 +862,8 @@ dialog:has(.leaderboard-faction-tabs) {
     white-space: nowrap;
   }
 }
+
+/* Account actions live in the More menu with the other secondary actions. */
+.action-menu-panel .account-menu-btn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.action-menu-panel .account-menu-btn[hidden] { display: none !important; }
+.action-menu-divider { height: 1px; margin: 2px 0; background: #aaa; }
