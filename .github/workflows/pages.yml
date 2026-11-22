@@ -44,5 +44,6 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+      - run: sleep 15
       - id: d
         uses: actions/deploy-pages@v4
