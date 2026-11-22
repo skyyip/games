@@ -123,7 +123,7 @@ test('Firestore rules accept the current 12-question game data shape', async () 
   assert.match(rules, /data\.correct <= 12/);
   assert.match(rules, /validDimensions\(request\.resource\.data\.dimensions\)/);
   assert.match(rules, /validProfileMetadata\(request\.resource\.data\)/);
-  assert.match(rules, /request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)[\s\S]*?hasOnly\(\['displayName', 'photoURL', 'updatedAt'\]\)/);
+  assert.match(rules, /request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)[\s\S]*?hasOnly\(\['displayName', 'playerName', 'photoURL', 'updatedAt'\]\)/);
   assert.match(rules, /request\.resource\.data\.keys\(\)\.hasOnly\(\['displayName', 'photoURL', 'updatedAt'\]\)/);
   assert.match(rules, /request\.resource\.data\.createdAt is timestamp/);
   assert.match(rules, /data\.submittedAt is int/);
@@ -211,4 +211,21 @@ test('duo mode clearly separates setup, phone handoff, answering and result revi
   assert.match(app, /測試者的猜測/);
   assert.match(css, /\.game-screen\.duo-mode \.answers \{ grid-template-columns: 1fr/);
   assert.match(css, /\.duo-answer-compare/);
+});
+
+test('players can set a persistent display name used throughout the game', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const cloud = readFileSync(new URL('../src/firebase/cloud.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+
+  assert.match(html, /id="playerNameBtn"/);
+  assert.match(app, /function showPlayerNameModal\(\)/);
+  assert.match(app, /saveCloudProfile\(\{playerName:name\}\)/);
+  assert.match(app, /playerName=profile\?\.playerName/);
+  assert.match(cloud, /currentPlayerName=name/);
+  assert.match(cloud, /playerName:name/);
+  assert.match(cloud, /currentPlayerName\|\|currentUser\.displayName/);
+  assert.match(rules, /data\.playerName is string && data\.playerName\.size\(\) <= 20/);
 });
