@@ -90,7 +90,7 @@ service cloud.firestore {
         && request.auth.uid == uid
         && validProfileMetadata(request.resource.data)
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['displayName', 'playerName', 'photoURL', 'updatedAt']);
+          .hasOnly(['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt']);
       allow delete: if false;
 
       match /runs/{runId} {
