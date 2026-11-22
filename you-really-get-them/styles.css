@@ -461,3 +461,8 @@ dialog:has(.score-list) { width: min(720px, calc(100% - 30px)); }
 @media(max-width:600px){.mode-selector{gap:9px;margin:16px 0 7px}.mode-card{min-height:72px;padding:10px}.mode-card b{font-size:14px}.mode-card small{font-size:10px}.air-report{padding:12px}.air-score-row{grid-template-columns:75px minmax(0,1fr) 30px;gap:7px}}
 
 .game-screen.air-mode .status-row{grid-template-columns:1fr}
+
+
+/* Question illustration fallback when a browser or cache cannot decode WebP. */
+.scene-fallback{display:grid;place-items:center;width:100%;height:135px;font-size:76px;line-height:1;filter:drop-shadow(3px 4px 0 #17171718)}
+@media(max-width:600px){.question-visual .scene-fallback{height:120px;font-size:68px}}
