@@ -150,7 +150,7 @@ function showCollection(){
   const cost=50;saveData=loadSave();
   const owned=new Set(saveData.cards);
   ['w_1','m_1'].forEach(id=>owned.add(id));
-  saveData.cards=[...new Set([...saveData.cards,'w_1','m_1'])];save(saveData);
+  saveData.cards=[...new Set([...saveData.cards,'w_1','m_1'])];save(saveData);updateSaveUI();
   $('collectionCoins').textContent=`${saveData.coins} SC`;$('collectionGrid').innerHTML='';
   cards.forEach(card=>{
     const has=owned.has(card.id)||owned.has(card.name),d=document.createElement('article');
