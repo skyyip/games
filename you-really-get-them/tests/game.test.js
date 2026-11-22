@@ -173,6 +173,10 @@ test('duo mode uses five setup questions and a separate pass-the-phone test flow
   assert.match(app, /function startDuoSetup\(\)[\s\S]*?\$\('modal'\)\.showModal\(\);renderDuoSetup\(0\)/);
   assert.match(app, /function beginDuoTest\(\)/);
   assert.match(app, /function answerDuoTest\(choice\)/);
+  assert.match(app, /function stopHoldAnimation\(\)/);
+  assert.match(app, /function setupHold\(\)[\s\S]*?holdFrame=frame=requestAnimationFrame\(loop\)/);
+  assert.match(app, /function answer\(choice\)[\s\S]*?stopHoldAnimation\(\)/);
+  assert.match(app, /function feedback\(msg\)[\s\S]*?stopHoldAnimation\(\)/);
   assert.match(app, /function finishDuoTest\(\)/);
   assert.match(app, /duoExpected\.push\(Number\(e\.target\.closest\('\[data-duo-expected\]'\)\.dataset\.duoExpected\)\)/);
   assert.match(app, /duoExpected\[i\]===duoTestAnswers\[i\]/);
@@ -196,7 +200,7 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v33/);
+  assert.match(sw, /you-really-get-them-v34/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
