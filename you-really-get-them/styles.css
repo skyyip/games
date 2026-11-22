@@ -761,3 +761,32 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   .player-name-btn { max-width: 104px; padding: 8px 7px; font-size: 11px; }
   .top-actions #authBtn { padding: 8px 9px; font-size: 11px; }
 }
+
+/* Mobile layout guardrails: preserve readable hierarchy and prevent header overflow. */
+@media (max-width: 600px) {
+  .hero-copy h1 {
+    white-space: nowrap;
+    font-size: clamp(18px, 5.4vw, 24px);
+    letter-spacing: -.8px;
+  }
+  .hero-copy h1 br { display: none; }
+}
+@media (max-width: 420px) {
+  .brand { min-width: 0; gap: 7px; }
+  .brand > span:last-child {
+    min-width: 0;
+    max-width: 82px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .player-name-btn { max-width: 72px; }
+  .top-actions #authBtn { max-width: 78px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .action-menu > summary { padding-left: 8px; padding-right: 8px; }
+}
+@media (max-width: 360px) {
+  .brand > span:last-child { display: none; }
+  .player-name-btn { max-width: 62px; }
+  .top-actions #authBtn { max-width: 68px; }
+}
