@@ -49,14 +49,16 @@ service cloud.firestore {
         && data.submittedAt is int;
     }
 
-    function validLeaderboard(data, uid) {
+    function validLeaderboard(data, uid, faction) {
       return data.keys().hasAll([
-          'uid', 'displayName', 'bestHp', 'bestCorrect', 'runs', 'updatedAt'
+          'uid', 'faction', 'displayName', 'bestHp', 'bestCorrect', 'runs', 'updatedAt'
         ])
         && data.keys().hasOnly([
-          'uid', 'displayName', 'bestHp', 'bestCorrect', 'runs', 'updatedAt'
+          'uid', 'faction', 'displayName', 'bestHp', 'bestCorrect', 'runs', 'updatedAt'
         ])
         && data.uid == uid
+        && data.faction == faction
+        && faction in ['women', 'men', 'dog', 'cat', 'duo']
         && data.displayName is string
         && data.displayName.size() <= 50
         && data.bestHp is int
@@ -118,16 +120,17 @@ service cloud.firestore {
       }
     }
 
-    match /leaderboard/{uid} {
+    match /leaderboard/{entryId} {
       allow read: if true;
       allow create: if signedIn()
-        && request.auth.uid == uid
-        && validLeaderboard(request.resource.data, uid)
+        && validLeaderboard(request.resource.data, request.auth.uid, request.resource.data.faction)
+        && entryId == request.auth.uid + '_' + request.resource.data.faction
         && request.resource.data.runs == 1;
       allow update: if signedIn()
-        && request.auth.uid == uid
-        && validLeaderboard(request.resource.data, uid)
-        && resource.data.uid == uid
+        && validLeaderboard(request.resource.data, request.auth.uid, request.resource.data.faction)
+        && entryId == request.auth.uid + '_' + request.resource.data.faction
+        && resource.data.uid == request.auth.uid
+        && resource.data.faction == request.resource.data.faction
         && request.resource.data.runs == resource.data.runs + 1
         && request.resource.data.bestHp >= resource.data.bestHp
         && (request.resource.data.bestHp > resource.data.bestHp
