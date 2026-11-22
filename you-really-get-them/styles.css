@@ -477,3 +477,50 @@ dialog:has(.score-list) { width: min(720px, calc(100% - 30px)); }
   .hero-art { transform: scale(.88); }
   .hero-art .polaroid p { font-size: 10px; }
 }
+
+
+/* Mobile game-flow pass: readable questions, reliable touch targets and compact result layout. */
+@media (max-width: 600px) {
+  .app-shell { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+  .game-screen { padding-top: 18px; padding-bottom: 30px; }
+  .game-head { margin-bottom: 14px; }
+  .status-row { grid-template-columns: minmax(0, 1fr) 88px; gap: 12px; margin-bottom: 15px; }
+  .timer-wrap { padding: 5px 6px; }
+  .timer-number { font-size: 22px; }
+  .question-card { padding: 14px; box-shadow: 5px 5px 0 var(--ink); }
+  .question-visual { height: 112px; margin: 11px auto 10px; }
+  .question-visual .scene-illustration { max-height: 100%; max-width: 100%; object-fit: contain; }
+  .question-card h3 { margin: 12px 0 8px; font-size: clamp(18px, 4.9vw, 21px); line-height: 1.45; overflow-wrap: anywhere; }
+  .question-hint { margin: 0 0 12px; line-height: 1.65; overflow-wrap: anywhere; }
+  .answers { gap: 8px; }
+  .answer-btn { min-height: 72px; padding: 10px 9px; font-size: 13px; line-height: 1.45; }
+  .interaction { padding: 11px; margin: 10px 0; }
+  .tap-button, .hold-zone { min-height: 52px; touch-action: manipulation; }
+  .hold-zone { min-height: 72px; user-select: none; -webkit-user-select: none; }
+  .scratch-pad { height: 104px; touch-action: none; }
+  .game-bottom { align-items: center; margin-top: 15px; }
+  .progress-dots { gap: 4px; }
+  .progress-dots i { width: 8px; height: 8px; }
+  .result-screen { padding-top: 22px; }
+  .result-top h2 { font-size: clamp(30px, 8vw, 40px); }
+  .result-summary { margin: 18px 0 20px; }
+  .result-stat { min-width: 0; }
+  .result-stat small { font-size: 9px; }
+  .result-stat b { font-size: clamp(17px, 5vw, 21px); }
+  .air-report { text-align: left; }
+  .air-score-row { grid-template-columns: 74px minmax(0, 1fr) 28px; }
+  .poster-preview-wrap { width: min(310px, 82vw); margin: 18px auto 22px; }
+  .result-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .result-actions button { min-width: 0; min-height: 48px; padding: 10px 8px; font-size: 12px; overflow-wrap: anywhere; }
+  .result-actions #downloadPoster { grid-column: 1 / -1; }
+}
+@media (max-width: 360px) {
+  .app-shell { padding-left: 12px; padding-right: 12px; }
+  .question-card { padding: 12px; }
+  .answers { grid-template-columns: 1fr; }
+  .answer-btn { min-height: 58px; }
+  .game-bottom { gap: 6px; }
+  .result-actions { grid-template-columns: 1fr; }
+  .result-actions #downloadPoster { grid-column: auto; }
+}
+button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
