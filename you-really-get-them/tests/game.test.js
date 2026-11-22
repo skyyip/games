@@ -90,6 +90,7 @@ test('mobile question, result, poster and cloud counts stay aligned', async () =
   const poster = readFileSync(resolve(root, 'src/poster/poster.js'), 'utf8');
   const css = readFileSync(resolve(root, 'styles.css'), 'utf8');
   assert.match(app, /questionCount=12/);
+  assert.match(app, /Number\(r\.questionCount\)\|\|12/);
   assert.match(app, /pick\(BANK\[faction\],5,/);
   assert.match(app, /pick\(AIR_BANK\[faction\],4,/);
   assert.match(app, /pick\(MIXED_BANK\[faction\],3,/);
@@ -193,7 +194,7 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v31/);
+  assert.match(sw, /you-really-get-them-v32/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
