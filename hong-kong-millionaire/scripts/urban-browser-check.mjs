@@ -1,3 +1,4 @@
+import {questionView} from '../src/question-view.js';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {URBAN_QUESTIONS} from '../src/urban-questions.js';
@@ -33,7 +34,7 @@ try{
   let match;
   for(let day=DAY;day<DAY+90&&!match;day++)for(let index=0;index<15;index++)if(questionId(day,index)===q.id){match={day,index};break;}
   assert(match,q.id+' unreachable');const value=planned(match.day,match.index);await seed(value);
-  assert.equal(await page.locator('#question-title').textContent(),q.question);
+  assert.equal(await page.locator('#question-title').textContent(),questionView(q).question);
   const mode=presentation(match.day,match.index).mode;
   assert.equal(await page.locator('#question-image').isVisible(),mode!=='text');
   if(mode!=='text'){await page.locator('#question-image').evaluate(image=>image.decode());assert(await page.locator('#question-image').evaluate(image=>image.naturalWidth>0&&Math.abs(image.naturalWidth/image.naturalHeight-1.6)<.01));}
@@ -46,7 +47,7 @@ try{
    const colors=await page.locator('#question-share-preview').evaluate(image=>{const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);const pixels=ctx.getImageData(80,198,920,414).data,colors=new Set();for(let i=0;i<pixels.length;i+=16)colors.add(pixels[i]+','+pixels[i+1]+','+pixels[i+2]);return colors.size;});
    assert(colors>8,q.id+' share image crop is empty');checks++;
   }
-  await page.locator('#copy-question-share').click();const shared=await page.evaluate(()=>globalThis.__sharedText);assert(shared.includes(q.question));assert(!shared.includes(q.explanation));assert(!shared.includes(q.hint));
+  await page.locator('#copy-question-share').click();const shared=await page.evaluate(()=>globalThis.__sharedText);assert(shared.includes(questionView(q).question));assert(!shared.includes(q.explanation));assert(!shared.includes(q.hint));
   await page.locator('#native-question-share').click();const file=await page.evaluate(()=>globalThis.__sharedFile);assert.equal(file.name,'hk-millionaire-'+q.id+'.png');assert(file.size>1000);
   if(q.id==='u08'){
    const download=page.waitForEvent('download');await page.locator('#download-question-card').click();const image=await download;assert.equal(image.suggestedFilename(),'hk-millionaire-u08.png');await image.saveAs('/tmp/hkm-u08-share.png');

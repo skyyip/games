@@ -11,7 +11,7 @@ export async function createQuestionCard(q,artURL){
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
  if(!ctx)throw Error('canvas-unavailable');
  const font=size=>`${size}px system-ui, sans-serif`,width=936;
- ctx.font=font(36);const questionLines=lines(ctx,q.question,width);
+ ctx.font=font(36);const questionLines=lines(ctx,q.textQuestion??q.question,width);
  ctx.font=font(29);const options=q.options.map((option,i)=>lines(ctx,'ABCD'[i]+'）'+option,width-44));
  const questionY=q.textOnly?222:694;
  canvas.width=1080;canvas.height=questionY+questionLines.length*51+50+options.reduce((height,value)=>height+value.length*43+24,0)+112;
@@ -29,8 +29,7 @@ export async function createQuestionCard(q,artURL){
   const rasterContext=raster.getContext('2d');if(!rasterContext)throw Error('canvas-unavailable');
   rasterContext.drawImage(image,0,0,800,500);
   const iw=raster.width,ih=raster.height;
-  const cropWidth=Math.sqrt(iw*ih*.1*(936/430)),cropHeight=cropWidth*430/936;
-  const crop=q.observation?(q.observation.overview??(q.modes.includes('partial')?q.observation.crop:{x:0,y:0,width:800,height:500})):{x:Math.max(0,Math.min(iw-cropWidth,(q.focus?.x??50)*iw/100-cropWidth/2)),y:Math.max(0,Math.min(ih-cropHeight,(q.focus?.y??50)*ih/100-cropHeight/2)),width:cropWidth,height:cropHeight};
+  const crop={x:0,y:0,width:iw,height:ih};
   const scale=Math.min(936/crop.width,430/crop.height),dw=crop.width*scale,dh=crop.height*scale;
   ctx.drawImage(raster,crop.x,crop.y,crop.width,crop.height,72+(936-dw)/2,190+(430-dh)/2,dw,dh);
   ctx.strokeStyle='#243335';ctx.lineWidth=4;ctx.strokeRect(72,190,936,430);

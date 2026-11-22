@@ -45,16 +45,16 @@ test('room entry bounds, eight-character codes and fair shared fee',()=>{
 test('all submitted rooms can settle immediately; disconnected rooms retain a grace period',()=>{
  const room={status:'playing',startedAt:NOW,players:['a','b'],scores:{a:{finished:true},b:{finished:false}}};
  assert(!roomCanFinish(room,NOW+1000));room.scores.b.finished=true;assert(roomCanFinish(room,NOW+1000));
- room.scores.b.finished=false;assert(!roomCanFinish(room,NOW+304999));assert(roomCanFinish(room,NOW+305000));
+ room.scores.b.finished=false;assert(!roomCanFinish(room,NOW+354999));assert(roomCanFinish(room,NOW+355000));
 });
 test('room explanations wait for the shared deadline or all submissions, including early departure',()=>{
  const room={id:'r',status:'playing',players:['a','b'],scores:{a:{finished:true},b:{finished:false}}};
  let run=newSession({id:'r',uid:'a',kind:'room',seed:19,room:'r'},NOW,NOW);
  run=sessionFinish(sessionAct(run,{type:'walk'},NOW+1000),NOW+1000);
- assert(!sessionReviewReady(run,room,NOW+24999));assert(sessionReviewReady(run,room,NOW+25000));
+ assert(!sessionReviewReady(run,room,NOW+29999));assert(sessionReviewReady(run,room,NOW+30000));
  room.scores.b.finished=true;assert(sessionReviewReady(run,room,NOW+1000));
  assert(!sessionReviewReady(run,{...room,id:'another'},NOW+1000));
- assert(!sessionReviewReady({...run,phase:'reveal'},room,NOW+25000));
+ assert(!sessionReviewReady({...run,phase:'reveal'},room,NOW+30000));
  assert(sessionReviewReady({...run,kind:'weekend'},null,NOW+1000));
 });
 test('weekend ticket use cannot be reset by repurchasing the same weekend',()=>{

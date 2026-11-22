@@ -2,7 +2,7 @@ name: Verify Millionaire Firestore rules
 
 on:
   push:
-    branches: [main, fix/millionaire-answer-rules]
+    branches: [millionaire-simplify-30s, main, fix/millionaire-answer-rules]
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rules.yml]
   pull_request:
     paths: [hong-kong-millionaire/**, .github/workflows/millionaire-rules.yml]

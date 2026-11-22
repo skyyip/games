@@ -1,7 +1,7 @@
 import {rewardRules} from './reward-rules.mjs';
 import {readFile,writeFile} from 'node:fs/promises';
 import {QUESTIONS} from '../src/questions.js';
-import {PRIZES,BANK_VERSION,QUESTION_PLANS} from '../src/game.js';
+import {PRIZES,BANK_VERSION,QUESTION_PLANS,QUESTION_MS} from '../src/game.js';
 import {COLLECTIONS as C} from '../src/schema.js';
 const pools=QUESTION_PLANS[BANK_VERSION],json=JSON.stringify,answers=new Map(QUESTIONS.map(q=>[q.id,q.answer]));
 const choose=values=>`tier == 0 ? ${values[0]} : tier == 1 ? ${values[1]} : ${values[2]}`;
@@ -29,7 +29,7 @@ service cloud.firestore {
   function prize(n) { return n==0?0:${json(PRIZES)}[n-1]; }
   function floorPrize(n) { return n>=10?60000:n>=5?8000:0; }
   function titles(n) { return n>=1000000?['ordinary','neighbour','expert','peak','millionaire']:n>=500000?['ordinary','neighbour','expert','peak']:n>=60000?['ordinary','neighbour','expert']:n>=8000?['ordinary','neighbour']:['ordinary']; }
-  function cap(index) { return 25000; }
+  function cap(index) { return ${QUESTION_MS}; }
   function timely(r) { return r.day==today() && request.time<=r.questionAt+duration.value(cap(r.index)+2000,'ms'); }
   function elapsed(r) { let ms=r.answerAt.toMillis()-r.questionAt.toMillis(); return ms>cap(r.index)?cap(r.index):ms; }
   function lifeLeft(r) { return (r.halfFor==-1?1:0)+(r.phoneFor==-1?1:0)+(r.audienceFor==-1?1:0); }
