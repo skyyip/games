@@ -124,7 +124,7 @@ test('Firestore rules accept the current 12-question game data shape', async () 
   assert.match(rules, /validDimensions\(request\.resource\.data\.dimensions\)/);
   assert.match(rules, /validProfileMetadata\(request\.resource\.data\)/);
   assert.match(rules, /request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)[\s\S]*?hasOnly\(\['displayName', 'playerName', 'photoURL', 'updatedAt'\]\)/);
-  assert.match(rules, /request\.resource\.data\.keys\(\)\.hasOnly\(\['displayName', 'photoURL', 'updatedAt'\]\)/);
+  assert.match(rules, /request\.resource\.data\.keys\(\)\.hasOnly\(\['displayName', 'playerName', 'photoURL', 'updatedAt'\]\)/);
   assert.match(rules, /request\.resource\.data\.createdAt is timestamp/);
   assert.match(rules, /data\.submittedAt is int/);
 });
@@ -137,7 +137,7 @@ test('Spark cloud profiles never accept client-managed currency or cards', async
   const cloud = readFileSync(resolve('.', 'src/firebase/cloud.js'), 'utf8');
 
   const profileRules = rules.slice(rules.indexOf('match /users/{uid}'), rules.indexOf('match /leaderboard/{uid}'));
-  assert.match(profileRules, /allow create:[\s\S]*?keys\(\)\.hasOnly\(\['displayName', 'photoURL', 'updatedAt'\]\)/);
+  assert.match(profileRules, /allow create:[\s\S]*?keys\(\)\.hasOnly\(\['displayName', 'playerName', 'photoURL', 'updatedAt'\]\)/);
   assert.match(profileRules, /allow update:[\s\S]*?affectedKeys\(\)[\s\S]*?hasOnly\(\['displayName', 'photoURL', 'updatedAt'\]\)/);
   assert.doesNotMatch(cloud, /coins:data\.coins|cards:data\.cards|coins:local\.coins|cards:local\.cards/);
   assert.match(cloud, /Cloud profile stores identity metadata only/);
