@@ -47,7 +47,7 @@ body {
 .hero-copy { max-width: 570px; }
 .eyebrow { letter-spacing: .13em; font-size: 10px; font-weight: 900; }
 .hero-copy h1 {
-  font-size: clamp(48px,7.4vw,88px); line-height: .98;
+  font-size: clamp(33.6px,5.18vw,61.6px); line-height: .98;
   letter-spacing: -.075em; margin: 18px 0 12px; font-weight: 1000;
 }
 .hero-copy h1 span {
@@ -218,7 +218,7 @@ dialog { border-radius: 0; }
   .app-shell { padding-left: 16px; padding-right: 16px; }
   .topbar { min-height: 60px; }
   .home-screen { padding-top: 24px; }
-  .hero-copy h1 { font-size: clamp(47px,13vw,66px); }
+  .hero-copy h1 { font-size: clamp(32.9px,9.1vw,46.2px); }
   .hero-art { min-height: 245px; }
   .faction-section { margin-top: 14px; padding-top: 18px; }
   .section-heading { display: block; }
