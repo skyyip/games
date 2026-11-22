@@ -441,3 +441,7 @@ dialog:has(.score-list) { width: min(720px, calc(100% - 30px)); }
   .hero-art .fake-photo i { font-size: 36px; }
   .hero-art .polaroid p { font-size: 11px; margin-top: 11px; }
 }
+
+
+/* Center the start and how-to actions beneath faction selection. */
+.hero-actions { justify-content: center; }
