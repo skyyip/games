@@ -81,6 +81,13 @@ test('mobile question, result, poster and cloud counts stay aligned', async () =
   assert.match(html, /id="resultCorrect">0 \/ 12/);
   assert.match(poster, /questionCount\|\|12/);
   assert.match(cloud, /questionCount\|\|12/);
+  assert.match(app, /const cost=50/);
+  assert.match(app, /state\.coins\+=25/);
+  assert.match(app, /signUpEmail\(email\(\),password\(\)\)/);
+  assert.match(app, /signInGoogle/);
+  assert.match(cloud, /createUserWithEmailAndPassword/);
+  assert.match(cloud, /signInWithRedirect/);
+  assert.match(cloud, /linkWithCredential/);
   assert.match(css, /@media \(max-width: 600px\)/);
   assert.match(css, /\.answer-btn \{ min-height: 72px/);
   assert.match(css, /\.result-actions #downloadPoster \{ grid-column: 1 \/ -1/);
