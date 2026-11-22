@@ -352,3 +352,31 @@ dialog { border-radius: 0; }
 .draw-card-btn{grid-column:1/-1;width:100%;min-height:50px}
 @media(max-width:360px){.answers{gap:7px}.answer-btn{min-height:64px;padding:9px 7px;font-size:12px}.run-coins{font-size:10px;padding:6px}}
 @media(max-width:760px){.game-bottom{gap:7px}.hint-btn{min-height:44px}.run-coins{margin-left:auto}}
+
+
+/* Hero refinement: title -20%, keep the question mark outside the pink label,
+   and scale down the hero illustration to preserve visual balance. */
+.hero-copy h1 {
+  font-size: clamp(26.88px, 4.144vw, 49.28px);
+}
+.hero-copy h1 span {
+  display: inline;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  margin: 0;
+  padding: 0 .12em .08em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.hero-art { min-height: 280px; }
+.hero-art .polaroid { width: 208px; }
+.hero-art .fake-photo { height: 188px; }
+@media (max-width: 760px) {
+  .hero-copy h1 { font-size: clamp(26.32px, 7.28vw, 36.96px); }
+  .hero-art { min-height: 196px; }
+  .hero-art .polaroid { width: 172px; padding: 12px 12px 18px; }
+  .hero-art .fake-photo { height: 148px; }
+  .hero-art .fake-photo i { font-size: 40px; }
+  .hero-art .polaroid p { font-size: 12px; margin-top: 12px; }
+}
