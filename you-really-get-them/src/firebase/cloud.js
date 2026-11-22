@@ -102,10 +102,19 @@ export async function saveCloudProfile({playerName}={}){
   if(!currentUser)return;
   const name=String(playerName||'').trim();
   if(!name||name.length>20)throw new Error('玩家名稱需為 1 至 20 個字元');
+  const ref=fs.doc(db,'users',currentUser.uid),snap=await fs.getDoc(ref);
+  const previous=snap.exists()?snap.data():null;
+  if(previous?.playerName===name){currentPlayerName=name;return name;}
+  const changedAt=previous?.playerNameUpdatedAt?.toMillis?.()||0;
+  if(previous?.playerName&&changedAt&&Date.now()-changedAt<90*24*60*60*1000){
+    const nextDate=new Date(changedAt+90*24*60*60*1000).toLocaleDateString('zh-HK');
+    throw new Error(`玩家名稱每 90 日只可更改一次，下次可於 ${nextDate} 更改。`);
+  }
   // Cloud profile stores identity metadata only. Coins and cards stay local.
-  await fs.setDoc(fs.doc(db,'users',currentUser.uid),{
+  await fs.setDoc(ref,{
     displayName:(currentUser.displayName||'玩家').slice(0,50),
     playerName:name,
+    playerNameUpdatedAt:fs.serverTimestamp(),
     photoURL:currentUser.photoURL||'',
     updatedAt:fs.serverTimestamp()
   },{merge:true});

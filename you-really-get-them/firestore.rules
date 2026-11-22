@@ -34,6 +34,7 @@ service cloud.firestore {
           || (data.playerName is string && data.playerName.size() <= 20))
         && (!('favoriteCards' in data)
           || (data.favoriteCards is list && data.favoriteCards.size() <= 100))
+        && (!('playerNameUpdatedAt' in data) || data.playerNameUpdatedAt is timestamp)
         && data.photoURL is string
         && data.photoURL.size() <= 2048
         && data.updatedAt is timestamp;
@@ -76,6 +77,15 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function validPlayerNameUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny(['playerName'])
+        ? request.resource.data.playerNameUpdatedAt == request.time
+          && (!('playerNameUpdatedAt' in resource.data)
+            || resource.data.playerNameUpdatedAt <= request.time - duration.value(90, 'd'))
+        : request.resource.data.get('playerNameUpdatedAt', null)
+          == resource.data.get('playerNameUpdatedAt', null);
+    }
+
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
 
@@ -83,14 +93,18 @@ service cloud.firestore {
       // old documents, but clients cannot add, change, or delete them.
       allow create: if signedIn()
         && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt'])
-        && validProfileMetadata(request.resource.data);
+        && request.resource.data.keys().hasOnly(['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt'])
+        && validProfileMetadata(request.resource.data)
+        && (!('playerName' in request.resource.data)
+          || request.resource.data.playerName == ''
+          || request.resource.data.get('playerNameUpdatedAt', null) == request.time);
 
       allow update: if signedIn()
         && request.auth.uid == uid
         && validProfileMetadata(request.resource.data)
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt']);
+          .hasOnly(['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt'])
+        && validPlayerNameUpdate();
       allow delete: if false;
 
       match /runs/{runId} {

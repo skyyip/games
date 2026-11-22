@@ -200,7 +200,7 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v39/);
+  assert.match(sw, /you-really-get-them-v40/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -241,6 +241,12 @@ test('players can set a persistent display name used throughout the game', async
   assert.match(cloud, /playerName:name/);
   assert.match(cloud, /currentPlayerName\|\|currentUser\.displayName/);
   assert.match(rules, /data\.playerName is string && data\.playerName\.size\(\) <= 20/);
+  assert.match(cloud, /Date\.now\(\)-changedAt<90\*24\*60\*60\*1000/);
+  assert.match(cloud, /playerNameUpdatedAt:fs\.serverTimestamp\(\)/);
+  assert.match(rules, /duration\.value\(90, 'd'\)/);
+  assert.match(rules, /validPlayerNameUpdate\(\)/);
+  assert.match(app, /玩家名稱每 90 日只可更改一次/);
+  assert.match(app, /playerNameUpdatedAt=profile\?\.playerNameUpdatedAt\?\.toMillis\?\.\(\)\|\|0/);
 });
 
 
@@ -275,7 +281,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v39/);
+  assert.match(sw, /you-really-get-them-v40/);
 });
 
 
@@ -287,7 +293,7 @@ test('game performance uses linear Fisher-Yates shuffle and avoids repeated scra
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.match(app, /getContext\('2d',\{willReadFrequently:true\}\)/);
   assert.match(app, /pointerdown',e=>\{down=true;rect=c\.getBoundingClientRect\(\)/);
-  assert.match(sw, /you-really-get-them-v39/);
+  assert.match(sw, /you-really-get-them-v40/);
 });
 
 
@@ -308,7 +314,7 @@ test('all shipped image assets are included in the versioned offline cache', asy
   for (const asset of ['woman.webp', 'man.webp', 'dog.webp', 'cat.webp', 'duo.webp', 'scratch.webp']) {
     assert.ok(sw.includes(`'./assets/illustrations/${asset}'`), asset);
   }
-  assert.match(sw, /you-really-get-them-v39/);
+  assert.match(sw, /you-really-get-them-v40/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
 
