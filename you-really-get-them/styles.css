@@ -871,3 +871,19 @@ dialog:has(.leaderboard-faction-tabs) {
 /* Prevent legacy header sizing rules from truncating account actions in the dropdown. */
 .top-actions .action-menu-panel .account-menu-btn { max-width: none; }
 .top-actions .action-menu-panel #authBtn { max-width: none; }
+
+/* Account actions: compact inline icons, aligned with the button labels. */
+.action-menu-panel .account-menu-btn::before {
+  content: "";
+  display: block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  background: center / contain no-repeat;
+}
+.action-menu-panel #playerNameBtn::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1b18' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M5 21v-2a7 7 0 0 1 14 0v2'/%3E%3C/svg%3E");
+}
+.action-menu-panel #authBtn::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1b18' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 17l5-5-5-5'/%3E%3Cpath d='M15 12H3'/%3E%3Cpath d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6'/%3E%3C/svg%3E");
+}
