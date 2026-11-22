@@ -21,16 +21,10 @@ export async function initCloud(onChange=()=>{}){
       console.error('Firebase auth persistence setup failed',persistenceError);
     }
   }
-  let redirectError=null;
-  try {
-    await authSdk.getRedirectResult(auth);
-  } catch (error) {
-    redirectError=error;
-    console.error('Google sign-in redirect failed',error);
-  }
-  // Wait for Firebase's first auth-state event before exposing the login UI.
-  await new Promise(resolve=>{
-    let initialized=false;
+  // Subscribe before processing the redirect so iOS browsers cannot miss
+  // the initial persisted/redirected auth state.
+  let initialized=false;
+  const authStateReady=new Promise(resolve=>{
     authSdk.onAuthStateChanged(auth,user=>{
       currentUser=user;
       onChange(user);
@@ -41,6 +35,23 @@ export async function initCloud(onChange=()=>{}){
       if(!initialized){initialized=true;resolve(null)}
     });
   });
+  let redirectError=null,redirectUser=null;
+  try {
+    const result=await authSdk.getRedirectResult(auth);
+    redirectUser=result?.user||null;
+  } catch (error) {
+    redirectError=error;
+    console.error('Google sign-in redirect failed',error);
+  }
+  await authStateReady;
+  // Some mobile browsers resolve the redirect result after the first auth
+  // observer callback. Prefer Firebase's current user, then the redirect user.
+  const resolvedUser=auth.currentUser||redirectUser||currentUser;
+  if(resolvedUser?.uid!==currentUser?.uid){
+    currentUser=resolvedUser;
+    onChange(currentUser);
+    if(currentUser)syncProfileFromCloud().catch(error=>console.error('Firebase profile sync failed',error));
+  }
   return {ready:true,user:currentUser,redirectError};
 }
 export const getCloudUser=()=>currentUser;
