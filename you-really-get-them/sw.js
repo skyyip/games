@@ -1,4 +1,4 @@
-const CACHE='you-really-get-them-v11';
+const CACHE='you-really-get-them-v12';
 const FILES=[
   './','./index.html','./styles.css','./manifest.webmanifest',
   './src/app.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
