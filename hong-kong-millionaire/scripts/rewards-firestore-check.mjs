@@ -4,7 +4,7 @@ import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/ru
 import * as sdk from 'firebase/firestore';
 import * as feature from '../src/features-cloud.js';
 import {emptyWallet,isWeekend,WEEKEND_LIMIT} from '../src/economy.js';
-import {newSession,sessionQuestion} from '../src/session-engine.js';
+import {newSession,sessionQuestion,ROOM_INTERVAL} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
 import {sessionClock} from '../src/session-clock.js';
 if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('demo emulator required');
@@ -95,7 +95,7 @@ try{
  const clockHost=await seed('clockHost'),clockGuest=await seed('clockGuest'),clockId=await ok(feature.createRoom(clockHost,'clockHost',{entryFee:1000}));
  await ok(feature.joinRoom(clockGuest,'clockGuest',clockId));await ok(feature.startRoom(clockHost,'clockHost',clockId));
  let clockRun=await ok(feature.startSession(clockHost,'clockHost',{kind:'room',room:clockId}));clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'answer',choice:sessionQuestion(clockRun).answer}));
- await env.withSecurityRulesDisabled(async ctx=>{const stamp=new sdk.Timestamp(Math.floor(Date.now()/1000)-30,123456000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId,'sessions','clockHost'),{questionAt:stamp});});
+ await env.withSecurityRulesDisabled(async ctx=>{const stamp=new sdk.Timestamp(Math.floor(Date.now()/1000)-Math.ceil(ROOM_INTERVAL/1000)-2,123456000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId,'sessions','clockHost'),{questionAt:stamp});});
  clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'next'}));const raw=(await sdk.getDoc(ref(clockHost,'hkm_rooms',clockId,'sessions','clockHost'))).data();assert.equal(raw.questionAt.nanoseconds,623456000);assert.equal(clockRun.index,1);checks+=2;
  await no(sdk.updateDoc(ref(clockGuest,'hkm_rooms',clockId),{feeShare:0,updatedAt:sdk.serverTimestamp()}));
  // Resume a finished room with an expired private session without replaying ten timeouts.
