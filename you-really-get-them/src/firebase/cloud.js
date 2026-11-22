@@ -12,18 +12,34 @@ export async function initCloud(onChange=()=>{}){
   const app=appSdk.initializeApp(firebaseConfig);
   auth=authSdk.getAuth(app);
   db=fs.getFirestore(app);
-  await authSdk.getRedirectResult(auth).catch(()=>{});
-  authSdk.onAuthStateChanged(auth,async user=>{
+  try {
+    await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
+  } catch (error) {
+    console.warn('Firebase local persistence unavailable; using session persistence',error);
+    await authSdk.setPersistence(auth,authSdk.browserSessionPersistence).catch(persistenceError=>{
+      console.error('Firebase auth persistence setup failed',persistenceError);
+    });
+  }
+  let redirectError=null;
+  try {
+    await authSdk.getRedirectResult(auth);
+  } catch (error) {
+    redirectError=error;
+    console.error('Google sign-in redirect failed',error);
+  }
+  authSdk.onAuthStateChanged(auth,user=>{
     currentUser=user;
-    if(user){
-      try{
-        const profile=await syncProfileFromCloud();
-        save({coins:profile.coins||0,cards:profile.cards||[],runs:profile.runs||0,bestHp:profile.bestHp||0});
-      }catch(error){console.error('Firebase profile sync failed',error);}
-    }
+    // Restore the signed-in UI immediately; Firestore must not block auth state.
     onChange(user);
-  });
-  return {ready:true,user:auth.currentUser};
+    if(user){
+      syncProfileFromCloud()
+        .then(profile=>{
+          if(profile)save({coins:profile.coins||0,cards:profile.cards||[],runs:profile.runs||0,bestHp:profile.bestHp||0});
+        })
+        .catch(error=>console.error('Firebase profile sync failed',error));
+    }
+  },error=>console.error('Firebase auth state listener failed',error));
+  return {ready:true,user:auth.currentUser,redirectError};
 }
 export const getCloudUser=()=>currentUser;
 export async function signInEmail(email,password){
