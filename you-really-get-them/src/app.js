@@ -120,6 +120,7 @@ function showCollection(){
     const roll=Math.random()*100,chosen=cards.find((card,i)=>roll<cards.slice(0,i+1).reduce((sum,item)=>sum+item.chance,0))||cards[0];
     if(s.cards.includes(chosen.name)){s.coins+=15;save(s);openModal(`<h2>重複卡！轉換成 15 SC</h2><p>再次抽到「${chosen.name}」，已自動回收一半抽卡費用。</p>`)}
     else{s.cards.push(chosen.name);save(s);openModal(`<h2>🎉 ${chosen.rarity} 卡入手！</h2><p>你抽到「${chosen.name}」！</p><p>收藏卡只作紀念，不影響遊戲公平性。</p>`)}
+    if(getCloudUser())saveCloudProfile(s).catch(console.error);
     updateSaveUI();showCollection();
   };
   $('collectionGrid').append(g);show('collection')
