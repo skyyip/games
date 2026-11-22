@@ -1,3 +1,4 @@
+import {questionView} from '../src/question-view.js';
 // Real built pages and all 67 new question records; Firebase is deliberately disabled here.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -31,7 +32,7 @@ try{
  for(const q of COMIC_QUESTIONS){
   let match;for(let day=DAY;day<DAY+180&&!match;day++)for(let index=0;index<15;index++)if(questionId(day,index)===q.id){match={day,index};break;}
   assert(match,q.id+' unreachable');const value=planned(match.day,match.index);await seed(value);
-  assert.equal(await p.locator('#question-title').textContent(),q.question);assert.equal(await p.locator('#options button').count(),4);
+  assert.equal(await p.locator('#question-title').textContent(),questionView(q).question);assert.equal(await p.locator('#options button').count(),4);
   const mode=presentation(match.day,match.index).mode;
   if(mode!=='text'){await p.locator('#question-image').evaluate(img=>img.decode());assert.equal(await p.locator('#question-image').evaluate(img=>img.naturalWidth/img.naturalHeight),1.6);}
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

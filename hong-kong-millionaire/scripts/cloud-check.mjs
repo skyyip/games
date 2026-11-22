@@ -4,7 +4,7 @@ import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {hkDay,dayEnd,questionFor,newRun,act,BANK_VERSION} from '../src/game.js';
+import {hkDay,dayEnd,questionFor,newRun,act,BANK_VERSION,QUESTION_MS} from '../src/game.js';
 const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
 const dir=await mkdtemp(join(tmpdir(),'hkm-cloud-')),NOW=Date.UTC(2026,10,14,4),nativeNow=Date.now;
 const qa=globalThis.__HKM_CLOUD_QA={now:NOW,uid:'qa-account-0001',data:new Map(),calls:[],tail:Promise.resolve(),allowedBanks:[BANK_VERSION]};
@@ -68,7 +68,7 @@ try{
  // A full win waiting for settlement must still finish as complete after midnight.
  r=await cloud.claimDaily();for(let i=0;i<15;i++){r=act(r,{type:'answer',choice:questionFor(r).answer},qa.now+100,{autoFinish:false});if(i<14)r=act(r,{type:'next'},qa.now+200);}qa.data.set('hkm_players/'+qa.uid+'/runs/'+r.day,r);qa.now=dayEnd(r.day)+1000;await cloud.resumeAccount();assert.equal((await cloud.currentRun(r.day)).reason,'complete');checks++;
  // A timed-out unfinished question settles on resume, rather than resetting its deadline.
- r=await cloud.claimDaily();qa.now=r.questionAt+25001;const resumed=await cloud.resumeAccount();assert.equal(resumed.run.reason,'timeout');assert.equal(resumed.run.payout,0);checks++;
+ r=await cloud.claimDaily();qa.now=r.questionAt+QUESTION_MS+1;const resumed=await cloud.resumeAccount();assert.equal(resumed.run.reason,'timeout');assert.equal(resumed.run.payout,0);checks++;
  // First-answer loss: persist the answer, retain its reveal when settlement is rejected, then settle once.
  const originalUid=qa.uid;qa.uid='qa-first-wrong';let first=await cloud.claimDaily();qa.failSettlement=true;
  await assert.rejects(()=>cloud.move(first.day,{type:'answer',choice:(questionFor(first).answer+1)%4}),error=>error.stage==='settlement'&&error.run?.phase==='reveal'&&error.run.outcome==='wrong');
