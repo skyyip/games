@@ -8,16 +8,18 @@ export async function initCloud(onChange=()=>{}){
   const appSdk=await import(`${SDK}/firebase-app.js`);
   authSdk=await import(`${SDK}/firebase-auth.js`);
   fs=await import(`${SDK}/firebase-firestore.js`);
-  const app=appSdk.initializeApp(firebaseConfig);
+  const app=appSdk.getApps().length?appSdk.getApp():appSdk.initializeApp(firebaseConfig);
   auth=authSdk.getAuth(app);
   db=fs.getFirestore(app);
   try {
     await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
   } catch (error) {
     console.warn('Firebase local persistence unavailable; using session persistence',error);
-    await authSdk.setPersistence(auth,authSdk.browserSessionPersistence).catch(persistenceError=>{
+    try {
+      await authSdk.setPersistence(auth,authSdk.browserSessionPersistence);
+    } catch (persistenceError) {
       console.error('Firebase auth persistence setup failed',persistenceError);
-    });
+    }
   }
   let redirectError=null;
   try {
@@ -26,16 +28,20 @@ export async function initCloud(onChange=()=>{}){
     redirectError=error;
     console.error('Google sign-in redirect failed',error);
   }
-  authSdk.onAuthStateChanged(auth,user=>{
-    currentUser=user;
-    // Restore the signed-in UI immediately; Firestore must not block auth state.
-    onChange(user);
-    if(user){
-      syncProfileFromCloud()
-        .catch(error=>console.error('Firebase profile sync failed',error));
-    }
-  },error=>console.error('Firebase auth state listener failed',error));
-  return {ready:true,user:auth.currentUser,redirectError};
+  // Wait for Firebase's first auth-state event before exposing the login UI.
+  await new Promise(resolve=>{
+    let initialized=false;
+    authSdk.onAuthStateChanged(auth,user=>{
+      currentUser=user;
+      onChange(user);
+      if(user)syncProfileFromCloud().catch(error=>console.error('Firebase profile sync failed',error));
+      if(!initialized){initialized=true;resolve(user)}
+    },error=>{
+      console.error('Firebase auth state listener failed',error);
+      if(!initialized){initialized=true;resolve(null)}
+    });
+  });
+  return {ready:true,user:currentUser,redirectError};
 }
 export const getCloudUser=()=>currentUser;
 export async function signInEmail(email,password){
@@ -51,12 +57,21 @@ export async function signUpEmail(email,password){
 export async function signInAnonymous(){return authSdk.signInAnonymously(auth);}
 export async function signInGoogle(){
   const provider=new authSdk.GoogleAuthProvider();
-  if(currentUser?.isAnonymous){
-    return /Mobi|Android|iPhone/i.test(navigator.userAgent)
-      ?authSdk.linkWithRedirect(currentUser,provider):authSdk.linkWithPopup(currentUser,provider);
+  provider.setCustomParameters({prompt:'select_account'});
+  const user=auth.currentUser||currentUser;
+  const mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/i.test(navigator.platform);
+  const redirect=()=>user?.isAnonymous
+    ?authSdk.linkWithRedirect(user,provider)
+    :authSdk.signInWithRedirect(auth,provider);
+  if(mobile)return redirect();
+  try {
+    return user?.isAnonymous
+      ?await authSdk.linkWithPopup(user,provider)
+      :await authSdk.signInWithPopup(auth,provider);
+  } catch(error) {
+    if(error.code==='auth/popup-blocked')return redirect();
+    throw error;
   }
-  return /Mobi|Android|iPhone/i.test(navigator.userAgent)
-    ?authSdk.signInWithRedirect(auth,provider):authSdk.signInWithPopup(auth,provider);
 }
 export async function signOutGoogle(){return authSdk.signOut(auth);}
 export async function syncProfileFromCloud(){
