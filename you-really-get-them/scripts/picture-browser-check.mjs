@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import {pathToFileURL} from 'node:url';
+import {readFile} from 'node:fs/promises';
+import {BANK,AIR_BANK,MIXED_BANK} from '../src/questions.js';
+import {PICTURE_BANK} from '../src/picture-questions.js';
+if(!process.env.GRID_RUSH_PLAYWRIGHT_MODULE)throw Error('Set GRID_RUSH_PLAYWRIGHT_MODULE to an installed Playwright module.');
+const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
+const base=process.env.YRGT_TEST_URL||'http://127.0.0.1:4173/';
+const browser=await chromium.launch({headless:true}),errors=[];let checks=0;
+const allCards=['w_1','w_2','w_3','m_1','m_2','m_3','d_1','d_2','d_3','c_1','c_2','c_3'];
+async function open(width=390,{offline=false,fixture=false}={}){
+ const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:offline?'allow':'block'});
+ await context.addInitScript(()=>{Math.random=()=>.999999;});
+ if(!offline)await context.route('**/src/firebase/config.js',r=>r.fulfill({contentType:'text/javascript',body:'export const firebaseConfig={};export const firebaseReady=false;'}));
+ if(fixture)await context.route('**/src/app.js',async r=>r.fulfill({contentType:'text/javascript',body:await readFile(new URL('../src/app.js',import.meta.url),'utf8')+`\nglobalThis.pictureQA={show(f,i){faction=f;questions=[{...BANK[f][i],kind:'classic',legacyIndex:i}];index=0;hp=100;show('game');renderQuestion();},picture(f){faction=f;questions=[{...PICTURE_BANK[f][0],kind:'classic',legacyIndex:-1}];index=0;hp=100;show('game');renderQuestion();}};`}));
+ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base,{waitUntil:'networkidle'});return {context,page};
+}
+async function inspectQuestion(page,q){
+ assert.equal(await page.locator('#scratch,#scratchMeter,.scratch-pad').count(),0);checks++;
+ const photo=page.locator('#questionVisual .scene-photo'),img=photo.locator('img');await img.evaluate(i=>i.decode());
+ if(q.picture){
+  assert.equal(await page.locator('#questionVisual figcaption').textContent(),q.picture.title);
+  assert.equal(await photo.getAttribute('aria-label'),q.picture.alt);assert((await page.locator('#questionTag').textContent()).includes('圖片情境題'));
+  assert((await img.getAttribute('src')).includes('picture-stories'));await page.locator('#questionVisual summary').click();assert(await page.locator('#questionVisual details').getAttribute('open')!==null);await page.locator('#questionVisual summary').click();checks+=5;
+ }
+ const geometry=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth,caption:document.querySelector('#questionVisual figcaption').getBoundingClientRect().bottom,question:document.querySelector('#questionText').getBoundingClientRect().top}));
+ assert(geometry.scroll<=geometry.width+1);assert(geometry.caption<=geometry.question);assert(await page.locator('#answers .answer-btn').first().isEnabled());checks+=3;
+}
+async function round(faction,width){
+ const {context,page}=await open(width);await page.locator(`[data-faction="${faction}"]`).click();await page.locator('#startBtn').click();let pictures=0;
+ for(let i=0;i<12;i++){
+  await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);
+  const text=await page.locator('#questionText').textContent(),q=[...BANK[faction],...PICTURE_BANK[faction],...AIR_BANK[faction],...MIXED_BANK[faction]].find(q=>q.text===text);assert(q);await inspectQuestion(page,q);
+  if(q.picture){pictures++;if(pictures===1)await page.screenshot({path:`/tmp/yrgt-picture-${faction}-${width}.png`,fullPage:true});}
+  if(await page.locator('#tapBtn').count())for(let n=0;n<15;n++)await page.locator('#tapBtn').click({force:true});
+  const values=q.profiles?.map(p=>p.reduce((a,b)=>a+b,0));const choice=q.correct??values.indexOf(Math.max(...values));await page.locator('#answers .answer-btn').nth(choice).click();
+ }
+ await page.locator('#result').waitFor({state:'visible'});assert.equal(pictures,2);assert.equal(await page.locator('#resultCorrect').textContent(),'12 / 12');checks+=2;await context.close();
+}
+try{
+ await Promise.all([round('women',390),round('men',1280),round('dog',390),round('cat',320)]);
+ // The pass-the-phone answers stay private until all five guesses are complete.
+ {const {context,page}=await open();await page.locator('[data-faction="duo"]').click();await page.locator('#startBtn').click();let setupPictures=0,testPictures=0;
+  for(let i=0;i<5;i++){if(await page.locator('#modalContent .picture-polaroid').count()){setupPictures++;await page.locator('#modalContent .scene-photo img').evaluate(i=>i.decode());}await page.locator('.duo-setup-answers button').first().click();}
+  await page.locator('#duoBeginTest').click();
+  for(let i=0;i<5;i++){await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);if(await page.locator('#questionVisual .picture-polaroid').count()){testPictures++;assert.equal(await page.locator('#questionVisual figcaption').textContent(),'兩個人的下一格');}assert.equal(await page.locator('.duo-answer-compare').count(),0);await page.locator('#answers button').first().click();}
+  await page.locator('.duo-results').waitFor();assert.equal(setupPictures,1);assert.equal(testPictures,1);assert.equal(await page.locator('.duo-answer-compare').count(),5);checks+=9;await context.close();}
+ // Existing ownership, rarity and 50-SC / duplicate-25-SC economics survive the album art replacement.
+ for(const width of [320,390,1280]){const {context,page}=await open(width);await page.evaluate(cards=>localStorage.setItem('yrgt-save-v1:guest',JSON.stringify({coins:500,cards,runs:3,bestHp:100})),width===1280?allCards:['w_1','m_1']);await page.locator('#actionMenu summary').click();await page.locator('#collectionBtn').click();assert.equal(await page.locator('.flash-card-polaroid').count(),12);
+  const frames=await page.locator('.flash-card-art').evaluateAll(nodes=>nodes.map(n=>({bg:getComputedStyle(n).backgroundImage,pos:getComputedStyle(n).backgroundPosition,ratio:n.clientWidth/n.clientHeight})));assert.equal(new Set(frames.map(f=>f.pos)).size,12);assert(frames.every(f=>f.bg.includes('collection-polaroids')&&Math.abs(f.ratio-.75)<.025));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=4;
+  await page.screenshot({path:`/tmp/yrgt-collection-polaroid-${width}.png`,fullPage:true});
+  if(width===390){await page.locator('.draw-card-btn').click();await page.locator('#modal .flash-card-polaroid-large').waitFor();assert.equal(await page.locator('#modal .flash-card-polaroid figcaption').textContent(),'仙氣布偶皇');let state=await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')));assert.equal(state.coins,450);assert(state.cards.includes('c_3'));await page.locator('#modalClose').click();await page.locator('.draw-card-btn').click();await page.waitForFunction(()=>document.querySelector('#modalContent').textContent.includes('重複閃卡'));state=await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')));assert.equal(state.coins,425);checks+=4;}
+  await context.close();}
+ // Removed scratch question no longer creates an interaction; remaining interaction controls still respond.
+ {const {context,page}=await open(390,{fixture:true});await page.evaluate(()=>pictureQA.show('women',1));assert.equal(await page.locator('#interaction').isVisible(),false);checks++;
+  for(const [f,id,selector]of [['women',3,'#tapBtn'],['women',5,'.runaway-answer'],['women',7,'#holdBtn'],['dog',6,'#treatBtn'],['cat',6,'#cupBtn']]){await page.evaluate(([f,id])=>pictureQA.show(f,id),[f,id]);assert(await page.locator(selector).isVisible());if(id===7){await page.locator(selector).focus();await page.keyboard.down('Space');await page.waitForFunction(()=>document.querySelector('#questionHint').textContent.includes('承諾成立'));await page.keyboard.up('Space');}else if(id===3)for(let n=0;n<15;n++)await page.locator(selector).click({force:true});else if(id===6)await page.locator(selector).click();checks++;}
+  await context.route('**/assets/illustrations/picture-stories.webp',r=>r.abort());await page.evaluate(()=>pictureQA.picture('women'));await page.waitForFunction(()=>!!document.querySelector('.picture-description[open]'));assert((await page.locator('.picture-description p').textContent()).includes('微微上揚'));assert(await page.locator('#answers button').first().isEnabled());checks+=2;await context.close();}
+ // Actual source Service Worker serves the new module and both art atlases offline.
+ {const {context,page}=await open(390,{offline:true});await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await page.waitForFunction(async()=>{const c=await caches.open('you-really-get-them-v43');return !!await c.match('./assets/illustrations/picture-stories.webp')&&!!await c.match('./assets/illustrations/collection-polaroids.webp')&&!!await c.match('./src/picture-questions.js');});await context.setOffline(true);await page.reload({waitUntil:'load'});await page.locator('#startBtn').click();await page.locator('#questionVisual img').evaluate(i=>i.decode());assert.equal(await page.locator('#scratch').count(),0);checks++;await context.close();}
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,fullRounds:4,pictureQuestions:8,duoPicture:true,collectionCards:12,offline:true,pageErrors:errors.length}));
+}finally{await browser.close();}
