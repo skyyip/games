@@ -33,9 +33,6 @@ export async function initCloud(onChange=()=>{}){
     onChange(user);
     if(user){
       syncProfileFromCloud()
-        .then(profile=>{
-          if(profile)save({coins:profile.coins||0,cards:profile.cards||[],runs:profile.runs||0,bestHp:profile.bestHp||0});
-        })
         .catch(error=>console.error('Firebase profile sync failed',error));
     }
   },error=>console.error('Firebase auth state listener failed',error));
@@ -67,15 +64,17 @@ export async function syncProfileFromCloud(){
   if(!currentUser)return null;
   const ref=fs.doc(db,'users',currentUser.uid),snap=await fs.getDoc(ref);
   if(snap.exists())return snap.data();
-  const local=loadSave();
-  const profile={displayName:currentUser.displayName||'玩家',photoURL:currentUser.photoURL||'',coins:local.coins,cards:local.cards,runs:local.runs,bestHp:local.bestHp,updatedAt:fs.serverTimestamp()};
+  const profile={displayName:(currentUser.displayName||'玩家').slice(0,50),photoURL:currentUser.photoURL||'',updatedAt:fs.serverTimestamp()};
   await fs.setDoc(ref,profile);return profile;
 }
 export async function saveCloudProfile(data){
   if(!currentUser)return;
+  // Cloud profile stores identity metadata only. Coins and cards stay local:
+  // Firestore Rules intentionally reject client-side asset mutations.
   await fs.setDoc(fs.doc(db,'users',currentUser.uid),{
-    displayName:(currentUser.displayName||'玩家').slice(0,50),photoURL:currentUser.photoURL||'',
-    coins:data.coins,cards:data.cards,runs:data.runs,bestHp:data.bestHp,updatedAt:fs.serverTimestamp()
+    displayName:(currentUser.displayName||'玩家').slice(0,50),
+    photoURL:currentUser.photoURL||'',
+    updatedAt:fs.serverTimestamp()
   },{merge:true});
 }
 export async function recordCloudRun(result){
