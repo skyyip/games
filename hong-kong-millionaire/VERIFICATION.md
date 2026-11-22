@@ -9,7 +9,9 @@
 - 本機76項單元、56項核心、34項節目／精簡介面、129項商店／雙人房間／排行榜造型及378項街角題庫檢查通過；另有67題漫畫338項、60題日常設計303項、14題城市設計125項逐題檢查通過。舊圖片效果測試改為移除效果及固定題面的檢查，並非保留不存在的玩法。
 - 新增的30秒回歸在修改前失敗，修正版驗證29.999秒可作答、30秒到期。真正Firestore模擬器97項每日及236項商店／房間檢查通過，含第28秒真正答案寫入及完整再挑戰。
 - 全站29頁建置SEO檢查通過。新加入的其他遊戲原始HTML缺少canonical；沒有修改該遊戲，回歸工作流程改驗證產生器補上metadata後的實際上傳成品，保留所有29頁的檢查。
-- [三引擎檢查通過](https://github.com/skyyip/games/actions/runs/44985803279)：Chromium、Firefox及流動WebKit各34項節目／精簡介面、56項核心及129項商店／房間／造型檢查。[完整Firebase旅程](https://github.com/skyyip/games/actions/runs/44985803355)的103項真正Auth／Firestore瀏覽器檢查已通過；該run其後因SDK替身測試仍假設25秒到期而失敗，不能視為整體成功。兩個舊超時案例已改引用共同常數，本機SDK18項／114次交易、帳戶118項及真正離線快取8項檢查通過。合入其他遊戲最新main後的最終CI結果待確認。
+- [最新三引擎檢查全部通過](https://github.com/skyyip/games/actions/runs/45031509434)：Chromium、Firefox及流動WebKit各34項節目／精簡介面、56項核心及129項商店／房間／造型檢查，29頁測試建置release為`87f2becc0e7dc5c2`。
+- [最新完整流程](https://github.com/skyyip/games/actions/runs/45031509433)已通過97＋236項真正規則、103項真正Auth／Firestore瀏覽器旅程，以及SDK18項／114次交易、核心56、帳戶118、商店／房間129、街角378、離線8及節目34項。其後合併main使重複的Firefox／WebKit步驟取消，不能把該run稱為整體成功；三引擎另由上述成功工作流程覆蓋。舊超時測試資料均已改引用共同常數。
+- main在驗證期間有其他遊戲更新；上傳成品重新從`d1fb25d023c8f9cf2f16b2ff1c25edcb1ca5c762`建置，與上述CI來源相比，百萬富翁與建置工具的來源完全相同。最終release為`332a9fda0539e092`，29頁建置SEO及Chromium核心56、節目34、商店／房間／造型129項再次通過。586個檔案已發布至`downloads/games-site`，包含`.htaccess`，目錄755、檔案644；`SOURCE-COMMIT.txt`記錄實際建置來源，不把後續其他遊戲提交假稱為已測試版本。
 - 未直接操作實體iPhone、重做正式Google OAuth、部署正式Firestore或上傳GoDaddy。
 
 ## 手機題圖、導覽與再挑戰提交（2026年11月18日）
