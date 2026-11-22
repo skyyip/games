@@ -637,19 +637,19 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 }
 
 
-/* Enlarge the dropdown chevron by 10% and center it vertically. */
-.action-menu > summary {
-  line-height: 1;
-}
+/* Custom dropdown chevron, optically centered with the label. */
+.action-menu > summary { line-height: 1; }
 .action-menu > summary > .action-menu-chevron {
-  display: inline-grid;
-  place-items: center;
+  display: block;
   align-self: center;
-  width: 1em;
-  height: 1em;
-  flex: none;
-  font-size: 1.265em;
-  line-height: 1;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .action-menu-panel .secondary-btn .ui-icon {
   width: 21px;
