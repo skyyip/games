@@ -232,6 +232,8 @@ test('players can set a persistent display name used throughout the game', async
   assert.match(html, /id="playerNameBtn"[^>]*hidden/);
   assert.ok(styles.includes('.player-name-btn[hidden] { display: none !important; }'));
   assert.match(styles, /\.auth-actions button\{[^}]*height:48px;min-height:48px;padding:0 8px/);
+  assert.match(styles, /#modal \.auth-actions \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); \}/);
+  assert.match(styles, /#modal \.auth-actions button\[type="submit"\] \{ width: auto; min-width: 0; min-height: 48px; height: auto; margin-top: 0;/);
   assert.match(app, /function showPlayerNameModal\(\)/);
   assert.match(app, /saveCloudProfile\(\{playerName:name\}\)/);
   assert.match(app, /playerName=profile\?\.playerName/);
