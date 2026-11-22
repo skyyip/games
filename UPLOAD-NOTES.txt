@@ -1,11 +1,11 @@
 Latest combined website upload package
-Source: 83d4508153cc056c1ebac4bdc63a62743ec09423
+Source: 6aa3205e564c2866048cccbf7f14e55786e1a223
 
-New update: You Really Get Them question artwork now uses six comic snapshots in Polaroid frames, including interaction and duo questions. Source offline cache is v42. Questions, timing, scoring and Firebase rules are unchanged by this visual update.
+You Really Get Them update: 12 collectible Polaroid comic artworks; scratch-fog interaction and dedicated assets removed; 8 illustrated story questions (2 per normal 12-question round) plus 1 duo picture prompt. Image descriptions work with screen readers and expand on image failure. Existing ownership, rarity, draw economics, 30-second timing and cloud result shape are retained. Offline source cache is v43. No Firebase rules or index changes are needed for THIS game update.
 
-Validation: 21 game unit tests, 538 Chromium checks including four complete rounds, duo mode, six viewport widths and offline images; production hashed asset loading; 29-page build, SEO and release permissions passed.
+Validation: 23 unit tests; 274 Chromium checks covering full rounds, all picture questions, duo, collection and draw behavior, other interactions, image failure and offline assets; production hashed images; 29-page build, SEO and release permissions passed.
 
-Extract this ZIP and upload the CONTENTS of its enclosing folder to public_html/games/, including .htaccess.
-The package also retains the earlier 30-second and asynchronous Millionaire update. Deploy its matching hong-kong-millionaire/firestore.rules before uploading if not already done. Its real Firestore Emulator verification remains pending because of the environment network allowlist.
+Extract this ZIP and upload the CONTENTS of the enclosing folder to public_html/games/, including .htaccess.
+The archive retains the earlier Millionaire update, whose matching hong-kong-millionaire/firestore.rules must be deployed if not already done. Its real Firestore Emulator verification remains pending because of the environment network allowlist.
 
-The fixed downloads/games-site branch was updated following the user’s established upload workflow. This does not deploy the production website or Firebase rules.
+Updated through the established downloads/games-site workflow. No production website or Firebase deployment has been performed.
