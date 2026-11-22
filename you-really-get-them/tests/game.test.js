@@ -229,3 +229,20 @@ test('players can set a persistent display name used throughout the game', async
   assert.match(cloud, /currentPlayerName\|\|currentUser\.displayName/);
   assert.match(rules, /data\.playerName is string && data\.playerName\.size\(\) <= 20/);
 });
+
+
+test('favorite cards are stored per signed-in player and validated in Firestore', async () => {
+  const { readFileSync } = await import('node:fs');
+  const storage = readFileSync(new URL('../src/storage.js', import.meta.url), 'utf8');
+  const cloud = readFileSync(new URL('../src/firebase/cloud.js', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+  assert.match(storage, /setSaveScope\(uid\)/);
+  assert.match(storage, /\$\{KEY\}:\$\{scope\}/);
+  assert.match(cloud, /saveCloudFavoriteCards\(cards=\[\]\)/);
+  assert.match(cloud, /favoriteCards,updatedAt:fs\.serverTimestamp\(\)/);
+  assert.match(app, /setSaveScope\(user&&!user\.isAnonymous\?user\.uid:'guest'\)/);
+  assert.match(app, /persistFavoriteCards\(state\.cards\)/);
+  assert.match(rules, /data\.favoriteCards is list && data\.favoriteCards\.size\(\) <= 100/);
+  assert.match(rules, /hasOnly\(\['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt'\]\)/);
+});
