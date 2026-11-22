@@ -887,3 +887,57 @@ dialog:has(.leaderboard-faction-tabs) {
 .action-menu-panel #authBtn::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1b18' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 17l5-5-5-5'/%3E%3Cpath d='M15 12H3'/%3E%3Cpath d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6'/%3E%3C/svg%3E");
 }
+
+/* Shared comic snapshots, cropped from the six-scene atlas inside instant-photo frames. */
+.scene-polaroid {
+  display: block;
+  width: 184px;
+  max-width: calc(100% - 18px);
+  margin: 5px auto 10px;
+  padding: 8px 8px 12px;
+  border: 1px solid #b6ad9d;
+  background: #fffefa;
+  box-shadow: 3px 5px 0 #17171724;
+  transform: rotate(-3deg);
+  font-size: 12px;
+}
+.scene-photo {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid #30281d;
+}
+.scene-polaroid .scene-illustration {
+  display: block;
+  position: absolute;
+  width: 300%;
+  height: 200%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  object-fit: fill;
+  filter: none;
+}
+.scene-polaroid figcaption {
+  margin-top: 9px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: .08em;
+  text-align: center;
+}
+.scene-polaroid .scene-fallback { height: 100%; font-size: 64px; }
+.question-visual { height: 234px!important; padding: 6px 12px 14px; background: transparent!important; border: 0; }
+.question-visual > small { bottom: 0; right: 0; border: 0; background: transparent; }
+.interaction .scene-polaroid { width: 126px; padding: 6px 6px 9px; margin: 0 auto 12px; transform: rotate(3deg); }
+.interaction .scene-polaroid figcaption { font-size: 11px; margin-top: 6px; }
+.game-screen.duo-mode .question-visual { height: auto!important; padding-bottom: 25px; }
+.game-screen.duo-mode .question-visual strong { font-size: 17px; }
+@media(max-width: 480px) {
+  .question-visual { height: 210px!important; }
+  .question-visual .scene-polaroid { width: 164px; }
+}
