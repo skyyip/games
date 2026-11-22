@@ -287,3 +287,25 @@ test('game performance uses linear Fisher-Yates shuffle and avoids repeated scra
   assert.match(app, /pointerdown',e=>\{down=true;rect=c\.getBoundingClientRect\(\)/);
   assert.match(sw, /you-really-get-them-v36/);
 });
+
+
+test('all shipped image assets are included in the versioned offline cache', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { resolve } = await import('node:path');
+  const sw = readFileSync(resolve('.', 'sw.js'), 'utf8');
+  const html = readFileSync(resolve('.', 'index.html'), 'utf8');
+  const imageAssets = [
+    'cards.png', 'cat.png', 'dog.png', 'duo.png', 'heart.png',
+    'lightning.png', 'man.png', 'paw-cup.png', 'pig.png', 'press.png',
+    'sneaker.png', 'sound.png', 'spark.png', 'sponge.png', 'treat.png',
+    'woman.png'
+  ];
+  for (const asset of imageAssets) {
+    assert.ok(sw.includes(`'./assets/icons/${asset}'`), asset);
+  }
+  for (const asset of ['woman.webp', 'man.webp', 'dog.webp', 'cat.webp', 'duo.webp', 'scratch.webp']) {
+    assert.ok(sw.includes(`'./assets/illustrations/${asset}'`), asset);
+  }
+  assert.match(sw, /you-really-get-them-v37/);
+  assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
+});

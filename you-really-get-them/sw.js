@@ -1,10 +1,16 @@
-const CACHE='you-really-get-them-v36';
+const CACHE='you-really-get-them-v37';
 const FILES=[
   './','./index.html','./styles.css','./manifest.webmanifest',
   './src/app.js','./src/firebase/cloud.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
   './assets/illustrations/woman.webp','./assets/illustrations/man.webp',
   './assets/illustrations/dog.webp','./assets/illustrations/cat.webp',
-  './assets/illustrations/duo.webp','./assets/illustrations/scratch.webp'
+  './assets/illustrations/duo.webp','./assets/illustrations/scratch.webp',
+  './assets/icons/cards.png','./assets/icons/cat.png','./assets/icons/dog.png',
+  './assets/icons/duo.png','./assets/icons/heart.png','./assets/icons/lightning.png',
+  './assets/icons/man.png','./assets/icons/paw-cup.png','./assets/icons/pig.png',
+  './assets/icons/press.png','./assets/icons/sneaker.png','./assets/icons/sound.png',
+  './assets/icons/spark.png','./assets/icons/sponge.png','./assets/icons/treat.png',
+  './assets/icons/woman.png'
 ];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));
