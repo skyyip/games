@@ -4,7 +4,7 @@ import {COLLECTIONS} from './schema.js';
 import {emptyWallet,walletAction,walletBalance,weekendKey,isWeekend,practiceReward,randomSeed,WEEKEND_LIMIT} from './economy.js';
 import {newSession,sessionAct,sessionFinish,sessionTerminal,roomWinner,asyncRoom,ROOM_ASYNC_WINDOW,ROOM_INTERVAL,ROOM_FEE_RESERVE,ROOM_LIMIT,roomFeeShare,roomCanFinish,roomCode,roomEntry} from './session-engine.js';
 import {normalizeRun} from './cloud-transition.js';
-import {hkDay} from './game.js';
+import {hkDay,QUESTION_MS} from './game.js';
 export const FEATURE_COLLECTIONS=Object.freeze({wallets:'hkm_wallets',styles:'hkm_styles',rooms:'hkm_rooms'});
 const player=(c,uid)=>c.doc(c.db,COLLECTIONS.players,uid),walletRef=(c,uid)=>c.doc(c.db,FEATURE_COLLECTIONS.wallets,uid),roomRef=(c,id)=>c.doc(c.db,FEATURE_COLLECTIONS.rooms,id);
 const sessionRef=(c,uid,s)=>s.kind==='room'?c.doc(c.db,FEATURE_COLLECTIONS.rooms,s.room,'sessions',uid):c.doc(c.db,COLLECTIONS.players,uid,'sessions',s.id);
@@ -47,7 +47,7 @@ export async function syncSessionClock(c,uid,descriptor){
 export async function resumeSession(c,uid,descriptor){
  let run=await syncSessionClock(c,uid,descriptor);if(!run||run.phase==='finished')return run;
  const time=sessionClock.lowerBound(),roomEnded=run.kind==='room'&&time>=(asyncRoom(run)?run.deadlineAt:run.questionAt+(run.count-run.index)*ROOM_INTERVAL);
- if(run.phase==='playing'&&(roomEnded||time>=run.questionAt+25000||run.kind!=='room'&&hkDay(time)!==run.day))run=await moveSession(c,uid,descriptor,{type:'timeout'});
+ if(run.phase==='playing'&&(roomEnded||time>=run.questionAt+QUESTION_MS||run.kind!=='room'&&hkDay(time)!==run.day))run=await moveSession(c,uid,descriptor,{type:'timeout'});
  if(run.phase==='reveal'&&(roomEnded||sessionTerminal(run,time)||run.kind!=='room'&&run.day!==hkDay(time)))run=await settleSession(c,uid,descriptor);
  return run;
 }

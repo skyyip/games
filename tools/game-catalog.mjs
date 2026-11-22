@@ -194,10 +194,18 @@ export const games = [
     steps: ['Start the sixty-second bun tower challenge.', 'Follow the game prompts to climb and collect buns.', 'Explore the wishes and dress the harbour parade performers.'], related: ['beat-bad-luck', 'pot-toss'],
   },
   {
+    slug:'you-really-get-them',name:'Do You Really Get Them?',zh:'你真的懂他／她／牠嗎？',genre:'Quiz',players:[1,2],topic:'Relationship and Pet Understanding Quiz',guide:false,
+    description:'Play a funny survival quiz about understanding your partner, friends and pets. Choose one of five factions, answer ten timed questions and try to keep your 100 HP intact.',
+    intro:'A Traditional Chinese comic quiz with five factions: women, men, dogs, cats and duo mode. Each run has ten ten-second questions, interactive events, hints, collectible cards and a shareable result poster. Local progress is stored in this browser; asynchronous friend challenges and cloud records require Firebase setup.',
+    chinese:'繁體中文漫畫風格問答遊戲。選擇她、他、狗狗、貓主子或雙人默契陣營，每局十題、每題十秒，以100 HP挑戰生存；包含限時互動、提示、收藏卡及戰績海報。本機紀錄保存在瀏覽器，好友非同步挑戰及雲端紀錄需完成 Firebase 設定。',
+    steps:['Choose a faction and start a ten-question run. Duo mode unlocks after three completed runs.', 'Answer each ten-second question and complete optional interaction events while protecting your 100 HP. Hints cost HP.', 'Review your survival result, collect cards and export a shareable poster. Local progress stays in this browser; Firebase-backed cloud features require setup.'],
+    related:['memory-trace','line-up'],
+  },
+  {
     slug:'hong-kong-millionaire',name:'Hong Kong Millionaire',zh:'香港百萬富翁',genre:'Quiz',players:[1,4],topic:'Daily Hong Kong Culture Quiz',guide:false,languages:['zh-Hant'],
     description:'Play Hong Kong Millionaire, a Hong Kong street-comic quiz with Hong Kong culture, daily illustrated puzzles, three lifelines and a million-dollar prize ladder.',
-    intro:'A daily Traditional Chinese Hong Kong quiz. Answer 15 questions with 25 second clocks, three once-only lifelines and safety nets at questions five and ten. Guest progress stays in this browser for today; signed-in players can save records and join rankings after Firebase setup.',
-    chinese:'每日一次的香港文化問答。十五題四選一，加入原創插畫的模糊、局部、鏡像與象形示意；第五及第十題為保險線，錦囊各用一次。匿名只保留今日進度，登入可累積虛擬獎金、稱號、錯題本及文化圖鑑。',
+    intro:'A daily Traditional Chinese Hong Kong quiz. Answer 15 questions with 30 second clocks, three once-only lifelines and safety nets at questions five and ten. Guest progress stays in this browser for today; signed-in players can save records and join rankings after Firebase setup.',
+    chinese:'每日一次的香港文化問答。十五題四選一，每題30秒，以完整原創插畫輔助理解香港知識；第五及第十題為保險線，錦囊各用一次。匿名只保留今日進度，登入可累積虛擬獎金、稱號、錯題本及文化圖鑑。',
     steps:['Choose guest play or sign in before starting the daily challenge.','Read the question, use optional lifelines, and confirm your final answer before time runs out.','Keep your earned virtual prize when walking away or timing out, then share a spoiler-free result and read the culture explanations.'],related:['memory-trace','frogger-jump']
   },
 ];

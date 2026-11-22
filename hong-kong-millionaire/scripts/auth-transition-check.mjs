@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {newRun,act,hkDay,questionFor} from '../src/game.js';
+import {newRun,act,hkDay,questionFor,QUESTION_MS} from '../src/game.js';
 import {LEDGER_KEY} from '../src/ledger.js';
 const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
@@ -81,7 +81,7 @@ try{
  // Account profile failures cannot stop or turn an anonymous result into cloud-sync pending.
  {const {c,p}=await open({guest:saved('finished')});await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.failAccount=true);await login(p);assert((await p.locator('#account-status').textContent()).includes('今日匿名局仍可'));await p.locator('[data-close="account-dialog"]').first().click();assert(await p.locator('#result-screen').isVisible());await noCloudGameWrites(p);await c.close();checks+=2;}
  // The anonymous timer can finish while an account read is delayed, without a stale rollback.
- {const {c,p}=await open({guest:saved()});await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.holdAccount=true);await login(p);await p.evaluate(()=>globalThis.__hkmQaNow+=25001);await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key)).run.phase==='finished',LEDGER_KEY);await p.evaluate(()=>hkmAuthQA.releaseAccount());await p.waitForFunction(()=>document.querySelector('#account-status').textContent.includes('今日匿名局'));await p.locator('[data-close="account-dialog"]').first().click();assert(await p.locator('#result-screen').isVisible());assert.equal((await state(p)).run.reason,'timeout');await noCloudGameWrites(p);await c.close();checks+=2;}
+ {const {c,p}=await open({guest:saved()});await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.holdAccount=true);await login(p);await p.evaluate(ms=>globalThis.__hkmQaNow+=ms,QUESTION_MS+1);await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key)).run.phase==='finished',LEDGER_KEY);await p.evaluate(()=>hkmAuthQA.releaseAccount());await p.waitForFunction(()=>document.querySelector('#account-status').textContent.includes('今日匿名局'));await p.locator('[data-close="account-dialog"]').first().click();assert(await p.locator('#result-screen').isVisible());assert.equal((await state(p)).run.reason,'timeout');await noCloudGameWrites(p);await c.close();checks+=2;}
  // Without a guest attempt, cloud errors still show a retry and can recover normally.
  {const {c,p}=await open();await login(p);await p.locator('[data-close="account-dialog"]').first().click();await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.failMove=true);await p.locator('#life-half').click();await p.locator('#retry-sync').waitFor({state:'visible'});assert((await p.locator('#game-status').textContent()).includes('未獲允許'));await p.evaluate(()=>hkmAuthQA.failMove=false);await p.locator('#retry-sync').click();await p.locator('#retry-sync').waitFor({state:'hidden'});await p.locator('#life-half').click();await p.waitForFunction(()=>document.querySelectorAll('.is-removed').length===2);assert.equal((await state(p)).owner,'google-player');await c.close();checks+=3;}
  // A late rejected cloud action after logout cannot reopen the old pending-game screen.

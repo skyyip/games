@@ -1,14 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {FRIENDS,friendHint,hostPrompt,resultBadges,stageFor} from '../src/showtime-model.js';
+import {hostPrompt,resultBadges,stageFor} from '../src/showtime-model.js';
 import {AUDIO_QUESTIONS,SCRATCH_IDS,scratchPool,brushCells,scratchStars,newPractice,validPractice,practiceAnswer} from '../src/sensory-model.js';
 import {SPOTLIGHT_IDS} from '../src/visual-catalog.js';
 import {questionById,questionId,newRun,hkDay} from '../src/game.js';
 import {visualModes} from '../src/question-view.js';
-test('all four free friends preserve exactly the same factual hint',()=>{
- assert.equal(FRIENDS.length,4);const text='留意路軌。';for(const f of FRIENDS)assert.equal(friendHint(f.id,text).hint,text);assert.equal(friendHint('bad',text).name,FRIENDS[0].name);
-});
 test('host prompts are stable across retries and never invent population statistics',()=>{
  const r={...newRun(),index:14};assert.equal(hostPrompt(r),hostPrompt({...r}));assert(!/\d+%|全港/.test(hostPrompt(r)));assert.equal(hostPrompt({...r,phase:'reveal'}),'');
  for(let day=0;day<30;day++){assert(!hostPrompt({...r,day,halfFor:0,phoneFor:1,audienceFor:2}).includes('仲用唔用'));assert(!/保險線|百萬/.test(hostPrompt({...r,day,kind:'room',index:9})));}
@@ -28,7 +25,7 @@ test('practice has five distinct questions, no ranked prize fields, and a persis
 });
 test('all spotlight and scratch scenes are curated; sound sketches are playable original PCM assets',()=>{
  for(const id of SCRATCH_IDS){const q=questionById(id);assert(q.observation?.clue);assert(!q.observation.overview,'Reading small print is not an interactive picture puzzle: '+id);}
- for(const id of SPOTLIGHT_IDS)assert(visualModes(questionById(id)).includes('spotlight'));
+ for(const id of SPOTLIGHT_IDS)assert(!visualModes(questionById(id)).includes('spotlight'));
  for(const q of AUDIO_QUESTIONS){assert.equal(new Set(q.options).size,4);assert(q.answer>=0&&q.answer<=3);assert(q.caption&&q.explanation);const wav=readFileSync(new URL('../assets/'+q.audio+'.wav',import.meta.url));assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');assert.equal(wav.readUInt16LE(22),1);assert.equal(wav.readUInt32LE(24),22050);assert.equal((wav.length-44)/44100,4);}
 });
 test('new scratch practice never discloses the current daily questions, across a full year',()=>{

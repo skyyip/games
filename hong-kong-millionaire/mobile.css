@@ -28,3 +28,8 @@
  .is-playing .visual-frame:has(#question-image[hidden]){height:clamp(64px,14dvh,110px);flex:0 0 clamp(64px,14dvh,110px)}
  .arcade-playing .arcade-visual:not(:has(img)){height:clamp(55px,14dvh,105px);flex:0 0 clamp(55px,14dvh,105px)}
 }
+
+/* Reserve the entire decorated avatar, including its frame, within each rank slot. */
+.board-list .rank-no{width:44px;height:44px;flex:0 0 44px;overflow:hidden;position:relative}
+.board-list .rank-no>.rank-avatar{width:30px;height:30px;margin:0;font-size:16px}
+.board-list .rank-avatar[class*="frame-"]::after{inset:-20%}

@@ -4,14 +4,14 @@ import {newSession,sessionAct,sessionQuestion,sessionQid,sessionRemaining,sessio
 const NOW=Date.UTC(2026,10,22,4);
 const room={id:'AB23CD45',mode:'async',status:'playing',startedAt:NOW,players:['a','b'],scores:{a:{finished:false},b:{finished:false}}};
 const start=(uid,at)=>newSession({id:room.id,room:room.id,uid,kind:'room',seed:19,roomMode:'async',deadlineAt:roomDeadline(room)},at,NOW);
-test('players start the same questions hours apart with independent 25-second clocks',()=>{
+test('players start the same questions hours apart with independent 30-second clocks',()=>{
  let a=start('a',NOW),b=start('b',NOW+6*3600000);
  assert.equal(a.questionAt,NOW);assert.equal(b.questionAt,NOW+6*3600000);
  assert.deepEqual(Array.from({length:10},(_,i)=>sessionQid(a,i)),Array.from({length:10},(_,i)=>sessionQid(b,i)));
- assert.equal(sessionRemaining(b,b.questionAt+1000),24000);
+ assert.equal(sessionRemaining(b,b.questionAt+1000),29000);
  a=sessionAct(a,{type:'answer',choice:sessionQuestion(a).answer},NOW+500);
  a=sessionAct(a,{type:'next'},NOW+800);assert.equal(a.questionAt,NOW+800);
- assert.equal(sessionAct(b,{type:'timeout'},b.questionAt+25000).outcome,'timeout');
+ assert.equal(sessionAct(b,{type:'timeout'},b.questionAt+30000).outcome,'timeout');
  assert.equal(b.index,0);
 });
 test('a room settles at exactly 24 hours or immediately after all submissions',()=>{

@@ -26,7 +26,7 @@ export class RoomFixture {
  if(name==='account')return clone(p);if(name==='resumeAccount')return {profile:clone(p),run:null};if(name==='currentRun')return null;if(name==='wallet')return this.state(uid);
  if(name==='shop'){const a=args[0];if(this.receipts.has(a.requestId))return {...this.state(uid),outcome:this.receipts.get(a.requestId)};person.w=walletAction(p,w,a,hkDay(now));this.receipts.set(a.requestId,person.w.item);if(this.failShop){this.failShop=false;throw Error('unavailable');}return {...this.state(uid),outcome:person.w.item};}
  if(name==='publicStyles')return Object.fromEntries(args[0].map(u=>[u,{frame:this.person(u).w.frame,prefix:this.person(u).w.prefix}]));
- if(name==='leaderboard')return [{uid,displayName:p.displayName,prize:1000000,timeMs:10000,lifelinesLeft:3,total:p.total,games:3}];
+ if(name==='leaderboard')return this.boardRows??[{uid,displayName:p.displayName,prize:1000000,timeMs:10000,lifelinesLeft:3,total:p.total,games:3}];
  if(name==='history')return [{...newRun(hkDay(now),now,uid),phase:'finished',correct:15,payout:1000000,reason:'complete',timeMs:12345,endedAt:now}];
  if(name==='getRoom')return clone(this.rooms.get(args[0])??null);if(name==='myRooms')return [...this.rooms.values()].filter(r=>r.players.includes(uid)).map(clone);
  if(name==='createRoom'){const a=args[0];if(this.rooms.has(a.code))return a.code;w.spent+=a.entryFee+15000;this.rooms.set(a.code,{id:a.code,hostUid:uid,hostName:p.displayName,topic:a.topic,mode:'async',entryFee:a.entryFee,pool:a.entryFee,feeShare:0,players:[uid],names:{[uid]:p.displayName},scores:{[uid]:{correct:0,timeMs:0,finished:false}},rebates:{[uid]:false},refunds:{[uid]:false},seed:12345,status:'lobby',createdAt:now,startedAt:null,winner:'',paidTo:''});return a.code;}
