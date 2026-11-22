@@ -32,6 +32,8 @@ service cloud.firestore {
         && data.displayName.size() <= 50
         && (!('playerName' in data)
           || (data.playerName is string && data.playerName.size() <= 20))
+        && (!('favoriteCards' in data)
+          || (data.favoriteCards is list && data.favoriteCards.size() <= 100))
         && data.photoURL is string
         && data.photoURL.size() <= 2048
         && data.updatedAt is timestamp;
@@ -81,7 +83,7 @@ service cloud.firestore {
       // old documents, but clients cannot add, change, or delete them.
       allow create: if signedIn()
         && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['displayName', 'playerName', 'photoURL', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt'])
         && validProfileMetadata(request.resource.data);
 
       allow update: if signedIn()
