@@ -219,8 +219,11 @@ test('players can set a persistent display name used throughout the game', async
   const cloud = readFileSync(new URL('../src/firebase/cloud.js', import.meta.url), 'utf8');
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+  const styles = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
 
   assert.match(html, /id="playerNameBtn"/);
+  assert.match(html, /id="playerNameBtn"[^>]*hidden/);
+  assert.match(styles, /\.player-name-btn\\\[hidden\\\]\\s*\\{\\s*display:\\s*none\\s*!important;/);
   assert.match(app, /function showPlayerNameModal\(\)/);
   assert.match(app, /saveCloudProfile\(\{playerName:name\}\)/);
   assert.match(app, /playerName=profile\?\.playerName/);
