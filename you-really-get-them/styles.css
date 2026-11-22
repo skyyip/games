@@ -793,3 +793,72 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   .player-name-btn { max-width: 62px; }
   .top-actions #authBtn { max-width: 68px; }
 }
+
+
+/* Fixed-width, predictable leaderboard layout across viewport sizes. */
+dialog:has(.leaderboard-faction-tabs) {
+  width: min(680px, calc(100vw - 24px));
+}
+#modal .modal-inner:has(.leaderboard-faction-tabs) {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+#leaderboardContent {
+  width: 100%;
+  min-width: 0;
+}
+.leaderboard-list {
+  width: 100%;
+  table-layout: fixed;
+}
+.leaderboard-head,
+.leaderboard-row {
+  grid-template-columns: 52px minmax(0, 1fr) 96px 88px;
+  gap: 10px;
+  padding: 11px 14px;
+}
+.leaderboard-head span:nth-child(n+3) {
+  text-align: right;
+  white-space: nowrap;
+}
+.leaderboard-faction-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+.leaderboard-faction-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.leaderboard-row {
+  min-height: 54px;
+}
+.leaderboard-row.top-rank {
+  background: #fff8d8;
+}
+.leaderboard-row.top-rank:nth-child(even) {
+  background: #fff2c2;
+}
+@media (max-width: 520px) {
+  #modal .modal-inner:has(.leaderboard-faction-tabs) {
+    padding: 22px 13px;
+  }
+  .leaderboard-head,
+  .leaderboard-row {
+    grid-template-columns: 38px minmax(0, 1fr) 70px 64px;
+    gap: 6px;
+    padding: 10px 8px;
+  }
+  .leaderboard-head {
+    font-size: 9px;
+  }
+  .leaderboard-name {
+    min-width: 0;
+  }
+  .leaderboard-head span {
+    white-space: nowrap;
+  }
+}
