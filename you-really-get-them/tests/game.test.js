@@ -107,5 +107,5 @@ test('Firestore rules accept the current 12-question game data shape', async () 
   assert.match(rules, /validDimensions\(request\.resource\.data\.dimensions\)/);
   assert.match(rules, /validProfile\(request\.resource\.data\)/);
   assert.match(rules, /request\.resource\.data\.createdAt is timestamp/);
-  assert.match(rules, /request\.resource\.data\.submittedAt is int/);
+  assert.match(rules, /data\\.submittedAt is int/);
 });
