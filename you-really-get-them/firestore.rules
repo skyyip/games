@@ -28,7 +28,6 @@ service cloud.firestore {
 
     function validProfileMetadata(data) {
       return data.keys().hasAll(['displayName', 'photoURL', 'updatedAt'])
-        && data.keys().hasOnly(['displayName', 'playerName', 'photoURL', 'updatedAt'])
         && data.displayName is string
         && data.displayName.size() <= 50
         && (!('playerName' in data)
