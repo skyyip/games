@@ -746,6 +746,9 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 }
 
 
+/* Keep the native hidden attribute effective despite shared button display styles. */
+.player-name-btn[hidden] { display: none !important; }
+
 /* Player identity stays visible in the header during gameplay. */
 .player-name-btn { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #modal .auth-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 2px solid var(--ink); background: #fff; font: inherit; }
