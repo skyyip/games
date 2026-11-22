@@ -689,3 +689,59 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
     background: var(--paper);
   }
 }
+
+
+/* Duo mode: make each hand-off phase visually distinct and easy to scan. */
+#modal .duo-flow { padding-top: 8px; }
+#modal .duo-flow h2 { margin: 10px 0 8px; font-size: clamp(23px, 5vw, 30px); line-height: 1.25; }
+#modal .duo-role-label { display: inline-flex; align-items: center; min-height: 30px; padding: 5px 10px; border: 2px solid var(--ink); background: var(--purple); font-size: 11px; font-weight: 950; letter-spacing: .03em; }
+#modal .duo-flow-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#modal .duo-step-count { font: 900 14px 'DM Mono', monospace; }
+#modal .duo-lead { margin: 8px 0 18px; color: #555; font-size: 14px; line-height: 1.65; }
+#modal .duo-progress { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin: 17px 0; }
+#modal .duo-progress i { height: 8px; border: 1px solid var(--ink); background: #fff; }
+#modal .duo-progress i.active { background: var(--green); }
+#modal .duo-question-count { margin: 18px 0 7px; color: #666; font-size: 12px; font-weight: 850; }
+#modal .duo-question-text { margin: 0 0 12px; font-size: 19px; line-height: 1.5; }
+#modal .duo-answer-instruction { margin: 0 0 9px; font-size: 12px; font-weight: 900; }
+#modal .duo-setup-answers { grid-template-columns: 1fr; gap: 9px; }
+#modal .duo-setup-answers .answer-btn { display: flex; align-items: center; gap: 11px; min-height: 58px; padding: 10px 13px; }
+.duo-option-letter { display: inline-grid; flex: 0 0 30px; width: 30px; height: 30px; place-items: center; border: 2px solid var(--ink); background: var(--yellow); font: 900 13px 'DM Mono', monospace; }
+#modal .duo-footnote { margin: 14px 0 0; color: #777; font-size: 11px; line-height: 1.5; }
+#modal .duo-complete-icon { display: grid; width: 58px; height: 58px; margin: 22px auto 12px; place-items: center; border: 3px solid var(--ink); background: var(--green); box-shadow: 4px 4px 0 var(--ink); font-size: 32px; font-weight: 950; }
+#modal .duo-kicker { margin: 8px 0 0; color: #666; font-size: 12px; font-weight: 900; letter-spacing: .08em; }
+#modal .duo-notice { display: grid; gap: 5px; margin: 20px 0; padding: 14px; border: 2px dashed var(--ink); background: #fff8d7; font-size: 13px; line-height: 1.55; }
+#modal .duo-notice b { font-size: 14px; }
+#modal .duo-main-action, #modal .duo-secondary-action { width: 100%; min-height: 52px; margin-top: 10px; }
+#modal .duo-results { max-height: min(76vh, 760px); overflow-y: auto; }
+#modal .duo-score { margin: 5px 0; font: 950 54px/1 'DM Mono', monospace; }
+#modal .duo-score small { font-size: 20px; }
+#modal .duo-result-list { display: grid; gap: 11px; margin: 20px 0; }
+#modal .duo-result-row { padding: 13px; border: 2px solid var(--ink); background: #fff; box-shadow: 3px 3px 0 var(--ink); text-align: left; }
+#modal .duo-result-row.is-match { border-left: 7px solid #55b96a; }
+#modal .duo-result-row.is-miss { border-left: 7px solid #ed7777; }
+#modal .duo-result-heading { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
+#modal .duo-result-row p { margin: 9px 0; color: var(--ink); font-weight: 800; line-height: 1.5; }
+#modal .duo-answer-compare { display: grid; gap: 8px; }
+#modal .duo-answer-compare > div { display: grid; gap: 3px; padding: 8px; background: var(--paper); }
+#modal .duo-answer-compare small { color: #666; font-size: 10px; }
+#modal .duo-answer-compare b { font-size: 12px; line-height: 1.45; }
+.game-screen.duo-mode .status-row, .game-screen.duo-mode #pigHintBtn, .game-screen.duo-mode #hintLeft { display: none !important; }
+.game-screen.duo-mode .question-visual { min-height: 88px; height: auto; padding: 14px; background: #fff0fb; }
+.game-screen.duo-mode .question-visual strong { font-size: 23px; font-weight: 950; }
+.game-screen.duo-mode .question-visual small { color: #555; }
+.game-screen.duo-mode .question-card h3 { margin-top: 16px; }
+.game-screen.duo-mode .question-hint { color: #333; font-size: 14px; line-height: 1.6; }
+.game-screen.duo-mode .answers { grid-template-columns: 1fr; gap: 11px; }
+.game-screen.duo-mode .answer-btn { display: flex; align-items: center; gap: 11px; min-height: 62px; font-size: 15px; }
+.game-screen.duo-mode .answer-btn.duo-selected { background: var(--green); border-width: 3px; opacity: 1; }
+.game-screen.duo-mode .game-bottom { display: flex; align-items: center; }
+.game-screen.duo-mode .progress-dots { margin-left: auto; }
+.game-screen.duo-mode .progress-dots i { width: 13px; height: 13px; }
+@media (max-width: 600px) {
+  #modal { max-height: calc(100dvh - 24px); overflow-y: auto; }
+  #modal .modal-inner { padding: 19px 16px; }
+  #modal .duo-results { max-height: none; }
+  .game-screen.duo-mode .question-card { padding: 16px; }
+  .game-screen.duo-mode .question-card h3 { font-size: 20px; }
+}
