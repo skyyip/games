@@ -26,26 +26,12 @@ service cloud.firestore {
         && validDimension(dimensions[4]);
     }
 
-    function validProfile(data) {
-      return data.keys().hasAll([
-          'displayName', 'photoURL', 'coins', 'cards', 'runs', 'bestHp', 'updatedAt'
-        ])
-        && data.keys().hasOnly([
-          'displayName', 'photoURL', 'coins', 'cards', 'runs', 'bestHp', 'updatedAt'
-        ])
+    function validProfileMetadata(data) {
+      return data.keys().hasAll(['displayName', 'photoURL', 'updatedAt'])
         && data.displayName is string
         && data.displayName.size() <= 50
         && data.photoURL is string
         && data.photoURL.size() <= 2048
-        && data.coins is int
-        && data.coins >= 0
-        && data.cards is list
-        && data.cards.size() <= 12
-        && data.runs is int
-        && data.runs >= 0
-        && data.bestHp is int
-        && data.bestHp >= 0
-        && data.bestHp <= 100
         && data.updatedAt is timestamp;
     }
 
@@ -86,9 +72,19 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
-      allow create, update: if signedIn()
+
+      // New profiles contain metadata only. Legacy asset fields may remain on
+      // old documents, but clients cannot add, change, or delete them.
+      allow create: if signedIn()
         && request.auth.uid == uid
-        && validProfile(request.resource.data);
+        && request.resource.data.keys().hasOnly(['displayName', 'photoURL', 'updatedAt'])
+        && validProfileMetadata(request.resource.data);
+
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && validProfileMetadata(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'photoURL', 'updatedAt']);
       allow delete: if false;
 
       match /runs/{runId} {
