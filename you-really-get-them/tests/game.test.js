@@ -200,7 +200,10 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v40/);
+  assert.ok(sw.includes("'./assets/collection-cards.svg'"));
+  assert.match(css, /collection-cards\\.svg/);
+  assert.equal((app.match(/art:\\d+,rarity:/g) || []).length, 12);
+  assert.match(sw, /you-really-get-them-v41/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -281,7 +284,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v40/);
+  assert.match(sw, /you-really-get-them-v41/);
 });
 
 
@@ -293,7 +296,7 @@ test('game performance uses linear Fisher-Yates shuffle and avoids repeated scra
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.match(app, /getContext\('2d',\{willReadFrequently:true\}\)/);
   assert.match(app, /pointerdown',e=>\{down=true;rect=c\.getBoundingClientRect\(\)/);
-  assert.match(sw, /you-really-get-them-v40/);
+  assert.match(sw, /you-really-get-them-v41/);
 });
 
 
@@ -302,6 +305,8 @@ test('all shipped image assets are included in the versioned offline cache', asy
   const { resolve } = await import('node:path');
   const sw = readFileSync(resolve('.', 'sw.js'), 'utf8');
   const html = readFileSync(resolve('.', 'index.html'), 'utf8');
+  const app = readFileSync(resolve('.', 'src/app.js'), 'utf8');
+  const css = readFileSync(resolve('.', 'styles.css'), 'utf8');
   const imageAssets = [
     'cards.png', 'cat.png', 'dog.png', 'duo.png', 'heart.png',
     'lightning.png', 'man.png', 'paw-cup.png', 'pig.png', 'press.png',
@@ -314,7 +319,7 @@ test('all shipped image assets are included in the versioned offline cache', asy
   for (const asset of ['woman.webp', 'man.webp', 'dog.webp', 'cat.webp', 'duo.webp', 'scratch.webp']) {
     assert.ok(sw.includes(`'./assets/illustrations/${asset}'`), asset);
   }
-  assert.match(sw, /you-really-get-them-v40/);
+  assert.match(sw, /you-really-get-them-v41/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
 
