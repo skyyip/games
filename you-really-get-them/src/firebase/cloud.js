@@ -1,5 +1,5 @@
 import { firebaseConfig, firebaseReady } from './config.js';
-import { save } from '../storage.js';
+import { loadSave, save } from '../storage.js';
 
 const SDK='https://www.gstatic.com/firebasejs/9.23.0';
 let auth,db,currentUser=null,authSdk,fs;
@@ -67,7 +67,8 @@ export async function syncProfileFromCloud(){
   if(!currentUser)return null;
   const ref=fs.doc(db,'users',currentUser.uid),snap=await fs.getDoc(ref);
   if(snap.exists())return snap.data();
-  const profile={displayName:currentUser.displayName||'玩家',photoURL:currentUser.photoURL||'',coins:0,cards:[],runs:0,bestHp:0,updatedAt:fs.serverTimestamp()};
+  const local=loadSave();
+  const profile={displayName:currentUser.displayName||'玩家',photoURL:currentUser.photoURL||'',coins:local.coins,cards:local.cards,runs:local.runs,bestHp:local.bestHp,updatedAt:fs.serverTimestamp()};
   await fs.setDoc(ref,profile);return profile;
 }
 export async function saveCloudProfile(data){
@@ -80,7 +81,7 @@ export async function saveCloudProfile(data){
 export async function recordCloudRun(result){
   if(!currentUser)return;
   await fs.addDoc(fs.collection(db,'users',currentUser.uid,'runs'),{
-    faction:result.faction,mode:result.mode||'classic',questionCount:result.questionCount||10,dimensions:result.dimensions||null,survived:result.survived,hp:result.hp,coins:result.coins,correct:result.correct,createdAt:fs.serverTimestamp()
+    faction:result.faction,mode:result.mode||'classic',questionCount:result.questionCount||12,dimensions:result.dimensions||null,survived:result.survived,hp:result.hp,coins:result.coins,correct:result.correct,createdAt:fs.serverTimestamp()
   });
   const ref=fs.doc(db,'leaderboard',currentUser.uid);
   await fs.runTransaction(db,async tx=>{
