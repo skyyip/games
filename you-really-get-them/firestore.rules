@@ -28,8 +28,11 @@ service cloud.firestore {
 
     function validProfileMetadata(data) {
       return data.keys().hasAll(['displayName', 'photoURL', 'updatedAt'])
+        && data.keys().hasOnly(['displayName', 'playerName', 'photoURL', 'updatedAt'])
         && data.displayName is string
         && data.displayName.size() <= 50
+        && (!('playerName' in data)
+          || (data.playerName is string && data.playerName.size() <= 20))
         && data.photoURL is string
         && data.photoURL.size() <= 2048
         && data.updatedAt is timestamp;
@@ -79,14 +82,14 @@ service cloud.firestore {
       // old documents, but clients cannot add, change, or delete them.
       allow create: if signedIn()
         && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['displayName', 'photoURL', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['displayName', 'playerName', 'photoURL', 'updatedAt'])
         && validProfileMetadata(request.resource.data);
 
       allow update: if signedIn()
         && request.auth.uid == uid
         && validProfileMetadata(request.resource.data)
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['displayName', 'photoURL', 'updatedAt']);
+          .hasOnly(['displayName', 'playerName', 'photoURL', 'updatedAt']);
       allow delete: if false;
 
       match /runs/{runId} {
