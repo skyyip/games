@@ -92,3 +92,20 @@ test('mobile question, result, poster and cloud counts stay aligned', async () =
   assert.match(css, /\.answer-btn \{ min-height: 72px/);
   assert.match(css, /\.result-actions #downloadPoster \{ grid-column: 1 \/ -1/);
 });
+
+
+test('Firestore rules accept the current 12-question game data shape', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { resolve } = await import('node:path');
+  const rules = readFileSync(resolve('.', 'firestore.rules'), 'utf8');
+
+  assert.match(rules, /request\.resource\.data\.mode == 'mixed'/);
+  assert.match(rules, /request\.resource\.data\.questionCount == 12/);
+  assert.match(rules, /request\.resource\.data\.correct <= 12/);
+  assert.match(rules, /data\.bestCorrect <= 12/);
+  assert.match(rules, /data\.correct <= 12/);
+  assert.match(rules, /validDimensions\(request\.resource\.data\.dimensions\)/);
+  assert.match(rules, /validProfile\(request\.resource\.data\)/);
+  assert.match(rules, /request\.resource\.data\.createdAt is timestamp/);
+  assert.match(rules, /request\.resource\.data\.submittedAt is int/);
+});
