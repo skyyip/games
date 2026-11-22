@@ -669,3 +669,13 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
     bottom: auto;
   }
 }
+
+/* Keep the full hero headline on one line on mobile. */
+@media (max-width: 600px) {
+  .hero-copy h1 {
+    white-space: nowrap;
+    font-size: clamp(16px, 5.5vw, 21px);
+    letter-spacing: -.8px;
+  }
+  .hero-copy h1 br { display: none; }
+}
