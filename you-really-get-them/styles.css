@@ -423,3 +423,21 @@ dialog:has(.score-list) { width: min(720px, calc(100% - 30px)); }
   .leader-hp, .leader-correct { font-size: 12px; }
   .rank-number { width: 25px; height: 25px; font-size: 10px; }
 }
+
+
+/* Hero refinement: title -10%, more line spacing, illustration scaled in proportion. */
+.hero-copy h1 {
+  font-size: clamp(24.19px, 3.73vw, 44.35px);
+  line-height: 1.2;
+}
+.hero-art { min-height: 252px; }
+.hero-art .polaroid { width: 187px; }
+.hero-art .fake-photo { height: 169px; }
+@media (max-width: 760px) {
+  .hero-copy h1 { font-size: clamp(23.69px, 6.55vw, 33.26px); }
+  .hero-art { min-height: 176px; }
+  .hero-art .polaroid { width: 155px; padding: 11px 11px 16px; }
+  .hero-art .fake-photo { height: 133px; }
+  .hero-art .fake-photo i { font-size: 36px; }
+  .hero-art .polaroid p { font-size: 11px; margin-top: 11px; }
+}
