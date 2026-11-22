@@ -163,3 +163,15 @@ test('leaderboard is stored and queried independently by faction', async () => {
     index.fields.map(field => field.fieldPath).join(',') === 'faction,bestHp,bestCorrect'
   ));
 });
+
+test('duo mode uses five setup questions and a separate pass-the-phone test flow', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(app, /duoSetupQuestions=shuffle\(BANK\.duo\)\.slice\(0,5\)/);
+  assert.match(app, /function beginDuoTest\(\)/);
+  assert.match(app, /function answerDuoTest\(choice\)/);
+  assert.match(app, /function finishDuoTest\(\)/);
+  assert.match(html, /雙人互測模式/);
+  assert.match(html, /情侶／好友現場出題拷問/);
+});
