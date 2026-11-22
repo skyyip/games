@@ -200,9 +200,6 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.ok(sw.includes("'./assets/collection-cards.svg'"));
-  assert.match(css, /collection-cards\\.svg/);
-  assert.equal((app.match(/art:\\d+,rarity:/g) || []).length, 12);
   assert.match(sw, /you-really-get-them-v41/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
@@ -319,6 +316,9 @@ test('all shipped image assets are included in the versioned offline cache', asy
   for (const asset of ['woman.webp', 'man.webp', 'dog.webp', 'cat.webp', 'duo.webp', 'scratch.webp']) {
     assert.ok(sw.includes(`'./assets/illustrations/${asset}'`), asset);
   }
+  assert.ok(sw.includes("'./assets/collection-cards.svg'"));
+  assert.match(css, /collection-cards\.svg/);
+  assert.equal((app.match(/art:\d+,rarity:/g) || []).length, 12);
   assert.match(sw, /you-really-get-them-v41/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
