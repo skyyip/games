@@ -64,7 +64,7 @@ async function showHistory(){
 async function showLeaderboard(selected=faction){
   const render=async active=>{
     const rows=await getLeaderboard(active);
-    const content=rows.length?'<div class="score-list leaderboard-list"><div class="leaderboard-head"><span>排名</span><span>玩家</span><span>最高 HP</span><span>答對</span></div>'+rows.map((r,i)=>`<article class="leaderboard-row ${i<3?'top-rank':''}"><b class="rank-number">${i+1}</b><strong class="leader-name">${safe(r.displayName||'玩家')}</strong><b class="leader-hp">${Number(r.bestHp)||0}<small> HP</small></b><b class="leader-correct">${Number(r.bestCorrect)||0}<small>/12</small></b></article>`).join('')+'</div>':'<p class="score-empty">這個陣營暫時沒有上榜玩家，完成一場挑戰即可登榜。</p>';
+    const content=rows.length?'<div class="score-list leaderboard-list" role="table" aria-label="陣營排行榜"><div class="leaderboard-head" role="row"><span role="columnheader">名次</span><span role="columnheader">玩家名稱</span><span role="columnheader">最高 HP</span><span role="columnheader">答對題數</span></div>'+rows.map((r,i)=>`<article class="leaderboard-row ${i<3?'top-rank':''}" role="row"><b class="rank-number" role="cell">${i+1}</b><strong class="leader-name" role="cell">${safe(r.displayName||'玩家')}</strong><b class="leader-hp" role="cell">${Number(r.bestHp)||0}<small> HP</small></b><b class="leader-correct" role="cell">${Number(r.bestCorrect)||0}<small>/12</small></b></article>`).join('')+'</div>':'<p class="score-empty">這個陣營暫時沒有上榜玩家，完成一場挑戰即可登榜。</p>';
     $('leaderboardContent').innerHTML=content;
     document.querySelectorAll('[data-leaderboard-faction]').forEach(button=>{
       button.classList.toggle('active',button.dataset.leaderboardFaction===active);
@@ -72,7 +72,7 @@ async function showLeaderboard(selected=faction){
     });
   };
   const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  openModal(`<h2>陣營排行榜 TOP 50</h2><p class="score-intro">各陣營獨立排名，依最高剩餘 HP、答對題數排序。玩家自評榜單，並非防作弊競技排名。</p><div class="leaderboard-faction-tabs" role="group" aria-label="選擇排行榜陣營">${Object.entries(FACTIONS).map(([id,item])=>`<button type="button" class="leaderboard-faction-tab" data-leaderboard-faction="${id}" aria-pressed="false">${safe(item.name)}</button>`).join('')}</div><div id="leaderboardContent" aria-live="polite"><p class="score-empty">排行榜載入中…</p></div>`);
+  openModal(`<h2>陣營排行榜 TOP 50</h2><p class="score-intro">各陣營獨立排名，先比較最高剩餘 HP，再比較答對題數。每個陣營獨立計算；此榜單為玩家自評紀錄。</p><div class="leaderboard-faction-tabs" role="group" aria-label="選擇排行榜陣營">${Object.entries(FACTIONS).map(([id,item])=>`<button type="button" class="leaderboard-faction-tab" data-leaderboard-faction="${id}" aria-pressed="false">${safe(item.name)}</button>`).join('')}</div><div id="leaderboardContent" aria-live="polite"><p class="score-empty">排行榜載入中…</p></div>`);
   document.querySelectorAll('[data-leaderboard-faction]').forEach(button=>{
     button.onclick=()=>render(button.dataset.leaderboardFaction).catch(e=>{
       $('leaderboardContent').innerHTML=`<p class="score-empty">排行榜暫時無法讀取：${safe(e.message)}</p>`;
