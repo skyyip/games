@@ -263,7 +263,7 @@ test('favorite cards are stored per signed-in player and validated in Firestore'
   assert.match(app, /setSaveScope\(user&&!user\.isAnonymous\?user\.uid:'guest'\)/);
   assert.match(app, /persistFavoriteCards\(state\.cards\)/);
   assert.match(rules, /data\.favoriteCards is list && data\.favoriteCards\.size\(\) <= 100/);
-  assert.match(rules, /hasOnly\(\['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt'\]\)/);
+  assert.match(rules, /hasOnly\(\['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt'\]\)/);
 });
 
 
