@@ -1,1 +1,45 @@
-const CACHE='you-really-get-them-v2';const FILES=['./','./index.html','./styles.css','./manifest.webmanifest','./src/app.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match('./index.html'))))});
+const CACHE='you-really-get-them-v37';
+const FILES=[
+  './','./index.html','./styles.css','./manifest.webmanifest',
+  './src/app.js','./src/firebase/cloud.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
+  './assets/illustrations/woman.webp','./assets/illustrations/man.webp',
+  './assets/illustrations/dog.webp','./assets/illustrations/cat.webp',
+  './assets/illustrations/duo.webp','./assets/illustrations/scratch.webp',
+  './assets/icons/cards.png','./assets/icons/cat.png','./assets/icons/dog.png',
+  './assets/icons/duo.png','./assets/icons/heart.png','./assets/icons/lightning.png',
+  './assets/icons/man.png','./assets/icons/paw-cup.png','./assets/icons/pig.png',
+  './assets/icons/press.png','./assets/icons/sneaker.png','./assets/icons/sound.png',
+  './assets/icons/spark.png','./assets/icons/sponge.png','./assets/icons/treat.png',
+  './assets/icons/woman.png'
+];
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil(caches.keys().then(keys=>Promise.all(
+    keys.filter(key=>key!==CACHE).map(key=>caches.delete(key))
+  )).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;
+  const requestUrl=new URL(event.request.url);
+  // Firebase SDK and OAuth endpoints must always use the network, never SW cache.
+  if(requestUrl.origin!==self.location.origin)return;
+  event.respondWith((async()=>{
+    const cached=await caches.match(event.request);
+    if(cached)return cached;
+    try{
+      const response=await fetch(event.request);
+      if(response.ok){
+        const copy=response.clone();
+        caches.open(CACHE).then(cache=>cache.put(event.request,copy));
+      }
+      return response;
+    }catch(error){
+      if(event.request.mode==='navigate'){
+        return (await caches.match('./index.html'))||Response.error();
+      }
+      return Response.error();
+    }
+  })());
+});
