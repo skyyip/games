@@ -325,3 +325,17 @@ test('leaderboard keeps a fixed-width readable layout on desktop and mobile', as
   assert.match(css, /@media \(max-width: 520px\)[\s\S]*?grid-template-columns: 38px minmax\(0, 1fr\) 70px 64px/);
   assert.match(css, /\.leaderboard-faction-tabs\s*\{[\s\S]*?flex-wrap: nowrap;[\s\S]*?overflow-x: auto/);
 });
+
+
+test('player name and sign-in controls are grouped inside the More dropdown', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
+  const menu = html.slice(html.indexOf('id="actionMenu"'), html.indexOf('</details>'));
+  assert.match(menu, /id="playerNameBtn"[^>]*hidden/);
+  assert.match(menu, /id="authBtn"/);
+  assert.ok(menu.indexOf('id="playerNameBtn"') < menu.indexOf('id="authBtn"'));
+  assert.match(menu, /action-menu-divider/);
+  assert.doesNotMatch(html.slice(0, html.indexOf('id="actionMenu"')), /id="(?:playerNameBtn|authBtn)"/);
+  assert.match(css, /\.action-menu-panel \.account-menu-btn\[hidden\] \{ display: none !important; \}/);
+});
