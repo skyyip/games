@@ -1,6 +1,8 @@
 import {chooseVisualMode,visualSpec} from './question-view.js';
 import {QUESTIONS} from './questions.js';
 import {questionId,questionById,QUESTION_PLANS,BANK_VERSION,hkDay,dayEnd,hash,PRIZES,QUESTION_MS} from './game.js';
+export const ROOM_ASYNC_WINDOW=24*60*60*1000;
+export const asyncRoom=run=>run?.roomMode==='async';
 export const ROOM_QUESTIONS=10,ROOM_REVEAL_MS=2500,ROOM_INTERVAL=QUESTION_MS+ROOM_REVEAL_MS;
 export const TOPICS=Object.freeze([{id:'all',name:'香港綜合'},{id:'sport',name:'體育專場'},{id:'places',name:'地理與景點'}]);
 const topicMatch={all:()=>true,sport:q=>/體育|奧運|賽馬|劍擊|運動/.test(q.category),places:q=>/景點|郊遊|地質|水塘|地名|圍村|文物徑|地理|山|海岸|古蹟/.test(q.category)};
@@ -14,12 +16,12 @@ export function sessionQid(run,index=run.index){
 }
 export const sessionQuestion=run=>questionById(sessionQid(run));
 export const sessionLimit=()=>QUESTION_MS;
-export const sessionRemaining=(run,now=Date.now())=>run.phase==='playing'?Math.max(0,Math.min(run.questionAt+sessionLimit(run),run.kind==='room'?Infinity:dayEnd(run.day))-now):0;
-export const sessionTerminal=run=>run.phase==='reveal'&&(run.kind==='room'?run.index===run.count-1||run.outcome==='walk':run.outcome!=='correct'||run.correct===15);
+export const sessionRemaining=(run,now=Date.now())=>run.phase==='playing'?Math.max(0,Math.min(run.questionAt+sessionLimit(run),run.kind==='room'?(asyncRoom(run)?run.deadlineAt:Infinity):dayEnd(run.day))-now):0;
+export const sessionTerminal=(run,now=Date.now())=>run.phase==='reveal'&&(asyncRoom(run)&&now>=run.deadlineAt|| (run.kind==='room'?run.index===run.count-1||run.outcome==='walk':run.outcome!=='correct'||run.correct===15));
 export const sessionSpent=run=>run.timeMs+(run.answerAt===null?0:Math.max(0,Math.min(sessionLimit(run),run.answerAt-run.questionAt)));
-export function newSession({id,uid,kind,seed,topic='all',room=''},now=Date.now(),roomStartedAt=null){
+export function newSession({id,uid,kind,seed,topic='all',room='',roomMode,deadlineAt},now=Date.now(),roomStartedAt=null){
  if(!['weekend','retry','room'].includes(kind)||!Number.isInteger(seed)||seed<0||seed>1000000000||!ROOM_POOLS[topic])throw Error('invalid-session');
- return {id,uid,kind,seed,topic,room,bankVersion:BANK_VERSION,day:hkDay(now),count:kind==='room'?ROOM_QUESTIONS:15,phase:'playing',index:0,correct:0,timeMs:0,startedAt:now,questionAt:kind==='room'?roomStartedAt:now,answerAt:null,endedAt:null,outcome:'',choice:-1,halfFor:-1,phoneFor:-1,audienceFor:-1,answers:{},seen:[],payout:0,credit:0,credited:false,reason:'',updatedAt:now};
+ return {id,uid,kind,seed,topic,room,...(kind==='room'&&roomMode==='async'?{roomMode,deadlineAt}:{}),bankVersion:BANK_VERSION,day:hkDay(now),count:kind==='room'?ROOM_QUESTIONS:15,phase:'playing',index:0,correct:0,timeMs:0,startedAt:now,questionAt:kind==='room'&&roomMode!=='async'?roomStartedAt:now,answerAt:null,endedAt:null,outcome:'',choice:-1,halfFor:-1,phoneFor:-1,audienceFor:-1,answers:{},seen:[],payout:0,credit:0,credited:false,reason:'',updatedAt:now};
 }
 export function sessionRemoved(run){if(run.halfFor!==run.index)return [];const q=sessionQuestion(run),wrong=[0,1,2,3].filter(i=>i!==q.answer),keep=wrong[hash(run.seed+q.id)%3];return wrong.filter(i=>i!==keep);}
 export function sessionVotes(run){
@@ -28,9 +30,12 @@ export function sessionVotes(run){
  const weights=[0,1,2,3].map(i=>removed.includes(i)?0:i===leader?61:10+(hash(seed+':'+i)%20)),total=weights.reduce((a,b)=>a+b),votes=weights.map(n=>Math.floor(n/total*100));
  let rest=100-votes.reduce((a,b)=>a+b);for(let i=0;rest;i=(i+1)%4)if(!removed.includes(i)){votes[i]++;rest--;}return votes;
 }
-export function sessionPresentation(run,now=Date.now()){const q=sessionQuestion(run),revealed=run.phase!=='playing'&&(run.kind!=='room'||now>=run.questionAt+QUESTION_MS),mode=revealed?'original':chooseVisualMode(q,run.seed,run.index);return visualSpec(q,mode);}
+export function sessionPresentation(run,now=Date.now()){const q=sessionQuestion(run),revealed=run.phase!=='playing'&&(run.kind!=='room'||!asyncRoom(run)&&now>=run.questionAt+QUESTION_MS),mode=revealed?'original':chooseVisualMode(q,run.seed,run.index);return visualSpec(q,mode);}
 export function sessionReviewReady(run,room,now=Date.now()){
- return run?.phase==='finished'&&(run.kind!=='room'||now>=run.questionAt+QUESTION_MS||room?.id===run.room&&(room.status==='finished'||roomComplete(room)));
+ if(run?.phase!=='finished')return false;
+ if(run.kind!=='room')return true;
+ const complete=room?.id===run.room&&(room.status==='finished'||room.status==='cancelled'||roomComplete(room));
+ return complete||!asyncRoom(run)&&now>=run.questionAt+QUESTION_MS;
 }
 function reveal(run,choice,outcome,now){return {...run,phase:'reveal',choice,outcome,correct:run.correct+(outcome==='correct'?1:0),answerAt:now,updatedAt:now,seen:[...run.seen,sessionQid(run)],answers:{...run.answers,[run.index]:{qid:sessionQid(run),choice,outcome,startedAt:run.questionAt,answeredAt:now}}};}
 export function sessionFinish(run,now=Date.now()){
@@ -42,6 +47,7 @@ export function sessionFinish(run,now=Date.now()){
 export function sessionAct(run,action,now=Date.now()){
  if(run.phase==='finished')throw Error('already-finished');
  if(run.phase==='playing'&&sessionRemaining(run,now)<=0)return reveal(run,-1,'timeout',now);
+ if(asyncRoom(run)&&now>=run.deadlineAt&&run.phase==='reveal')return sessionFinish(run,now);
  if(run.kind!=='room'&&run.day!==hkDay(now))return sessionFinish(run,now);
  if(action.type==='answer'){
   if(run.phase!=='playing'||!Number.isInteger(action.choice)||action.choice<0||action.choice>3||sessionRemoved(run).includes(action.choice))throw Error('invalid-choice');
@@ -51,8 +57,8 @@ export function sessionAct(run,action,now=Date.now()){
  if(action.type==='timeout')throw Error('not-expired');
  if(action.type==='life'){const key={half:'halfFor',phone:'phoneFor',audience:'audienceFor'}[action.kind];if(run.phase!=='playing'||!key||run[key]!==-1)throw Error('life-used');return {...run,[key]:run.index,updatedAt:now};}
  if(action.type==='next'){
-  if(run.phase!=='reveal'||sessionTerminal(run))throw Error('not-ready');
-  const questionAt=run.kind==='room'?run.questionAt+ROOM_INTERVAL:now;if(now<questionAt)throw Error('room-wait');
+  if(run.phase!=='reveal'||sessionTerminal(run,now))throw Error('not-ready');
+  const questionAt=run.kind==='room'&&!asyncRoom(run)?run.questionAt+ROOM_INTERVAL:now;if(now<questionAt)throw Error('room-wait');
   return {...run,phase:'playing',index:run.index+1,timeMs:sessionSpent(run),questionAt,answerAt:null,choice:-1,outcome:'',updatedAt:now};
  }
  if(action.type==='finish')return sessionFinish(run,now);
@@ -63,6 +69,7 @@ export function roomWinner(room,sessions){return room.players.map((uid,order)=>(
 export const ROOM_LIMIT=4,ROOM_FEE=30000,ROOM_FEE_RESERVE=15000,ROOM_DURATION=ROOM_QUESTIONS*ROOM_INTERVAL,ROOM_GRACE=30000;
 export const roomFeeShare=count=>{if(!Number.isInteger(count)||count<2||count>ROOM_LIMIT)throw Error('room-size');return ROOM_FEE/count;};
 export const roomComplete=room=>room.players.every(uid=>room.scores[uid]?.finished);
-export const roomCanFinish=(room,now=Date.now())=>room.status==='playing'&&(roomComplete(room)||now>=room.startedAt+ROOM_DURATION+ROOM_GRACE);
+export const roomDeadline=room=>room.startedAt+(room.mode==='async'?ROOM_ASYNC_WINDOW:ROOM_DURATION+ROOM_GRACE);
+export const roomCanFinish=(room,now=Date.now())=>room.status==='playing'&&(roomComplete(room)||now>=roomDeadline(room));
 export function roomCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a=new Uint8Array(8);crypto.getRandomValues(a);return Array.from(a,n=>chars[n%chars.length]).join('');}
 export function roomEntry(value){if(!Number.isInteger(value)||value<1000||value>500000)throw Error('invalid-entry');return value;}

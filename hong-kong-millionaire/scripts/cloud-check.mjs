@@ -18,11 +18,11 @@ function snap(path){return {exists:()=>q.data.has(path),data:()=>copy(q.data.get
 export const SDK_VERSION='test-sdk',browserLocalPersistence='local';
 export function initializeApp(config,name){q.calls.push({kind:'app',config,name});return {options:config,name};}
 export function getAuth(app){return {app,get currentUser(){return q.uid?{uid:q.uid,email:'private@example.test'}:null;}};}
-export async function setPersistence(){};export function getFirestore(){return {};}
+export async function setPersistence(){};export function initializeFirestore(app,settings){q.calls.push({kind:'firestore-settings',settings});return {};}
 export function onAuthStateChanged(auth,cb){cb(auth.currentUser);return ()=>{};}
 export function doc(db,...parts){return parts.join('/');}export function collection(db,...parts){return parts.join('/');}
 export function serverTimestamp(){return {__server:true};}export async function getDoc(ref){return snap(ref);}
-export async function getDocFromServer(ref){q.calls.push({kind:'server-read',ref});if(q.failServerRead){q.failServerRead--;throw {code:'unavailable'};}return snap(ref);}
+export async function getDocFromServer(ref){q.calls.push({kind:'server-read',ref});if(q.failServerRead){q.failServerRead--;throw {code:'unavailable'};}if(ref.includes('/runs/')&&q.failRunReads){q.failRunReads--;throw {code:'unavailable'};}return snap(ref);}
 export async function updateDoc(ref,patch){q.data.set(ref,{...q.data.get(ref),...resolve(patch)});}
 function patched(old,patch){const value=copy(old);for(const [key,item]of Object.entries(resolve(patch))){const parts=key.split('.');let map=value;for(const name of parts.slice(0,-1))map=map[name]??={};map[parts.at(-1)]=item;}return value;}
 export function runTransaction(db,cb){const task=q.tail.then(async()=>{let writing=false;const writes=[];const t={async get(ref){if(writing)throw Error('read-after-write');return snap(ref);},set(ref,value){writing=true;writes.push({ref,value});},update(ref,value){writing=true;writes.push({ref,value,update:true});}};const value=await cb(t);if(q.failCommit||q.failSettlement&&writes.some(w=>w.ref.startsWith('hkm_results/')))throw {code:'permission-denied'};for(const w of writes)if(w.value.bankVersion&&!q.allowedBanks.includes(w.value.bankVersion))throw {code:'permission-denied'};for(const w of writes)q.data.set(w.ref,w.update?patched(q.data.get(w.ref),w.value):resolve(w.value));q.calls.push({kind:'transaction',paths:writes.map(w=>w.ref)});return value;});q.tail=task.catch(()=>{});return task;}
@@ -46,14 +46,15 @@ try{
  assert.equal((await cloud.account()).activeDay,null);assert.equal(await cloud.currentRun(hkDay(),{server:true}),null);
  assert(qa.calls.some(c=>c.kind==='server-read'));assert(cloud.errorText({code:'permission-denied'}).includes('permission-denied'));assert(cloud.errorText({code:'permission-denied'}).includes('Firestore 規則'));checks++;
  qa.allowedBanks=[BANK_VERSION];
- let r=await cloud.claimDaily();assert.equal(r.questionAt,NOW);assert.equal(r.seen.length,0);assert.equal((await cloud.claimDaily()).startedAt,r.startedAt);checks++;
+ const transactionCount=qa.calls.filter(c=>c.kind==='transaction').length;await cloud.account();assert.equal(qa.calls.filter(c=>c.kind==='transaction').length,transactionCount);checks++;
+ qa.failRunReads=2;let r=await cloud.claimDaily();assert.equal(qa.failRunReads,0);assert.equal(qa.calls.filter(c=>c.kind==='transaction'&&c.paths.some(p=>p.endsWith('/runs/'+r.day))).length,1);checks++;assert.deepEqual(qa.calls.find(c=>c.kind==='firestore-settings').settings,{experimentalAutoDetectLongPolling:true,useFetchStreams:false});assert.equal(r.questionAt,NOW);assert.equal(r.seen.length,0);assert.equal((await cloud.claimDaily()).startedAt,r.startedAt);checks++;
  const at=r.questionAt;for(const kind of ['half','phone','audience']){qa.now+=100;r=await cloud.move(r.day,{type:'life',kind});assert.equal(r.questionAt,at);await assert.rejects(()=>cloud.move(r.day,{type:'life',kind}),/life-used/);}checks++;
  const firstExpected={index:r.index,phase:r.phase,questionAt:r.questionAt};qa.failCommit=true;
  await assert.rejects(()=>cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected}),error=>error.code==='permission-denied'&&error.stage==='answer-write');
  assert.equal((await cloud.currentRun(r.day)).phase,'playing');qa.failCommit=false;checks++;
  for(let i=0;i<15;i++){qa.now+=1000;
  if(i===0){
-  qa.failServerRead=1;await assert.rejects(()=>cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected}),error=>error.code==='unavailable'&&error.stage==='progress-read');
+  qa.failServerRead=3;await assert.rejects(()=>cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected}),error=>error.code==='unavailable'&&error.stage==='progress-read');
   assert.equal((await cloud.currentRun(r.day)).correct,1);
   r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer},{expected:firstExpected});assert.equal(r.correct,1);checks++;
  }else r=await cloud.move(r.day,{type:'answer',choice:questionFor(r).answer});assert.equal(r.correct,i+1);assert.equal(r.seen.length,i+1);if(i<14){qa.now+=20000;r=await cloud.move(r.day,{type:'next'});if(i===0){const before=JSON.stringify(r);r=await cloud.move(r.day,{type:'answer',choice:0},{expected:firstExpected});assert.equal(JSON.stringify(r),before);checks++;}}}

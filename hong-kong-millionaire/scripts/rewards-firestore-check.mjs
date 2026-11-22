@@ -60,7 +60,7 @@ try{
   await ok(feature.startRoom(people[0],uids[0],id));
   const beforeLaunch=(await sdk.getDoc(ref(people[0],'hkm_rooms',id))).data();
   const runs=await Promise.all(people.map((person,i)=>ok(feature.startSession(person,uids[i],{kind:'room',room:id}))));
-  assert.equal(new Set(runs.map(r=>r.questionAt)).size,1);checks++;
+  assert(runs.every(r=>r.roomMode==='async'&&r.questionAt>=beforeLaunch.startedAt.toMillis()&&r.deadlineAt===Math.floor(beforeLaunch.startedAt.toMillis())+86400000));checks++;
   const afterLaunch=(await sdk.getDoc(ref(people[0],'hkm_rooms',id))).data();assert(beforeLaunch.updatedAt.isEqual(afterLaunch.updatedAt));assert.deepEqual(afterLaunch.rebates,beforeLaunch.rebates);checks+=2;
   await Promise.all(people.map((person,i)=>ok(feature.claimRoom(person,uids[i],id))));
   for(let i=0;i<count;i++){const w=await feature.wallet(people[i],uids[i]);assert.equal(w.balance,1000000-entryFee-30000/count);checks++;}
@@ -89,19 +89,37 @@ try{
  await no(sdk.updateDoc(ref(skewHost,'hkm_rooms',skewId,'sessions','skewGuest'),{updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'),{questionAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(skewGuest,'hkm_rooms',skewId,'sessions','skewGuest'),{correct:10,updatedAt:sdk.serverTimestamp()}));
- // Nanosecond precision survives the half-second room interval.
+ // New async rounds start when each player requests their next question.
  const clockHost=await seed('clockHost'),clockGuest=await seed('clockGuest'),clockId=await ok(feature.createRoom(clockHost,'clockHost',{entryFee:1000}));
  await ok(feature.joinRoom(clockGuest,'clockGuest',clockId));await ok(feature.startRoom(clockHost,'clockHost',clockId));
  let clockRun=await ok(feature.startSession(clockHost,'clockHost',{kind:'room',room:clockId}));clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'answer',choice:sessionQuestion(clockRun).answer}));
  await env.withSecurityRulesDisabled(async ctx=>{const stamp=new sdk.Timestamp(Math.floor(Date.now()/1000)-30,123456000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId,'sessions','clockHost'),{questionAt:stamp});});
- clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'next'}));const raw=(await sdk.getDoc(ref(clockHost,'hkm_rooms',clockId,'sessions','clockHost'))).data();assert.equal(raw.questionAt.nanoseconds,623456000);assert.equal(clockRun.index,1);checks+=2;
+ clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'next'}));const raw=(await sdk.getDoc(ref(clockHost,'hkm_rooms',clockId,'sessions','clockHost'))).data();assert(raw.questionAt.toMillis()>Date.now()-5000);assert.equal(clockRun.index,1);checks+=2;
  await no(sdk.updateDoc(ref(clockGuest,'hkm_rooms',clockId),{feeShare:0,updatedAt:sdk.serverTimestamp()}));
  // Resume a finished room with an expired private session without replaying ten timeouts.
  const staleHost=await seed('staleHost'),staleGuest=await seed('staleGuest'),staleId=await ok(feature.createRoom(staleHost,'staleHost',{entryFee:1000}));
  await ok(feature.joinRoom(staleGuest,'staleGuest',staleId));await ok(feature.startRoom(staleHost,'staleHost',staleId));
  const staleRun=await ok(feature.startSession(staleHost,'staleHost',{kind:'room',room:staleId}));
- await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-400000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId,'sessions','staleHost'),{questionAt:stamp});});
+ await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-400000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId,'sessions','staleHost'),{questionAt:stamp,deadlineAt:sdk.Timestamp.fromMillis(Date.now()-1000)});});
  const recovered=await ok(feature.resumeSession(staleHost,'staleHost',staleRun));assert.equal(recovered.phase,'finished');assert.equal(recovered.correct,0);assert.equal((await feature.wallet(staleHost,'staleHost')).wallet.activeSession,'');checks+=3;
+ // A late participant starts from their own server time while the shared deadline stays immutable.
+ const asyncHost=await seed('asyncHost'),asyncGuest=await seed('asyncGuest'),asyncId=await ok(feature.createRoom(asyncHost,'asyncHost',{entryFee:1000}));
+ await ok(feature.joinRoom(asyncGuest,'asyncGuest',asyncId));await ok(feature.startRoom(asyncHost,'asyncHost',asyncId));
+ await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',asyncId),{startedAt:sdk.Timestamp.fromMillis(Date.now()-6*3600000)});});
+ let asyncRun=await ok(feature.startSession(asyncGuest,'asyncGuest',{kind:'room',room:asyncId}));
+ assert(asyncRun.questionAt>Date.now()-5000);assert(asyncRun.deadlineAt>Date.now()+17*3600000);checks+=2;
+ await no(sdk.updateDoc(ref(asyncGuest,'hkm_rooms',asyncId,'sessions','asyncGuest'),{deadlineAt:sdk.Timestamp.fromMillis(Date.now()+48*3600000),updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(ref(asyncHost,'hkm_rooms',asyncId),{mode:'live',updatedAt:sdk.serverTimestamp()}));
+ asyncRun=await ok(feature.moveSession(asyncGuest,'asyncGuest',asyncRun,{type:'answer',choice:sessionQuestion(asyncRun).answer}));
+ asyncRun=await ok(feature.moveSession(asyncGuest,'asyncGuest',asyncRun,{type:'next'}));assert.equal(asyncRun.index,1);checks++;
+ // Expiry blocks fresh starts, new answers and late scoreboard reports, but clears an existing private run.
+ await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore(),expired=sdk.Timestamp.fromMillis(Date.now()-1000);await sdk.updateDoc(sdk.doc(db,'hkm_rooms',asyncId),{startedAt:sdk.Timestamp.fromMillis(expired.toMillis()-86400000)});await sdk.updateDoc(sdk.doc(db,'hkm_rooms',asyncId,'sessions','asyncGuest'),{deadlineAt:expired});});
+ await assert.rejects(feature.startSession(asyncHost,'asyncHost',{kind:'room',room:asyncId}));checks++;
+ const beforeExpire=(await sdk.getDoc(ref(asyncGuest,'hkm_rooms',asyncId,'sessions','asyncGuest'))).data(),qid=sessionQuestion(asyncRun).id;
+ await no(sdk.updateDoc(ref(asyncGuest,'hkm_rooms',asyncId,'sessions','asyncGuest'),{phase:'reveal',correct:beforeExpire.correct+1,answerAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp(),outcome:'correct',choice:sessionQuestion(asyncRun).answer,seen:beforeExpire.seen.concat([qid]),['answers.'+beforeExpire.index]:{qid,choice:sessionQuestion(asyncRun).answer,outcome:'correct',startedAt:beforeExpire.questionAt,answeredAt:sdk.serverTimestamp()}}));
+ const expiredRun=await ok(feature.resumeSession(asyncGuest,'asyncGuest',asyncRun));assert.equal(expiredRun.phase,'finished');assert.equal((await feature.getRoom(asyncGuest,'asyncGuest',asyncId)).scores.asyncGuest.finished,false);assert.equal((await feature.wallet(asyncGuest,'asyncGuest')).wallet.activeSession,'');checks+=3;
+ const expiredRoom=await ok(feature.finaliseRoom(asyncHost,'asyncHost',asyncId));assert.equal(expiredRoom.status,'cancelled');checks++;
+ for(const [person,who]of [[asyncHost,'asyncHost'],[asyncGuest,'asyncGuest']]){await ok(feature.claimRoom(person,who,asyncId));assert.equal((await feature.wallet(person,who)).balance,985000);checks++;}
  const dangling=await seed('dangling');await ok(feature.wallet(dangling,'dangling'));await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets','dangling'),{activeSession:'weekend_missing',activeKind:'weekend'});});
  assert.equal(await ok(feature.activeSession(dangling,'dangling')),null);assert.equal((await feature.wallet(dangling,'dangling')).wallet.activeSession,'');checks++;
  const legacy=await seed('legacy');await ok(feature.wallet(legacy,'legacy'));
@@ -111,5 +129,5 @@ try{
  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','legacy'),{activeDay:hkDay(),activeKind:'retired'});});
  await ok(sdk.updateDoc(ref(legacy,'hkm_players','legacy'),{activeDay:null,activeKind:'daily',lastSettledDay:hkDay(),updatedAt:sdk.serverTimestamp()}));
  assert.equal((await feature.wallet(legacy,'legacy')).profile.lastSettledDay,hkDay());checks++;
- console.log('Rewards Firestore: '+checks+' checks passed: fair 2/3/4-player escrow, immediate settlement, refunds, protected quotas and precise shared clock.');
+ console.log('Rewards Firestore: '+checks+' checks passed: fair 2/3/4-player escrow, immediate settlement, refunds, protected quotas and independent async clocks.');
 }finally{await env.cleanup();}

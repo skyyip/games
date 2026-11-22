@@ -1,6 +1,6 @@
 import {act} from './game.js';
 const numeric=value=>{const n=value?.toMillis?.()??value;return typeof n==='number'?Math.floor(n):n;};
-export function normalizeRun(raw){if(!raw)return null;return {...raw,...Object.fromEntries(['startedAt','questionAt','answerAt','endedAt','updatedAt'].map(k=>[k,numeric(raw[k])])),answers:Object.fromEntries(Object.entries(raw.answers??{}).map(([k,a])=>[k,{...a,startedAt:numeric(a.startedAt),answeredAt:numeric(a.answeredAt)}]))};}
+export function normalizeRun(raw){if(!raw)return null;return {...raw,...Object.fromEntries(['startedAt','questionAt','answerAt','endedAt','updatedAt','deadlineAt'].map(k=>[k,numeric(raw[k])])),answers:Object.fromEntries(Object.entries(raw.answers??{}).map(([k,a])=>[k,{...a,startedAt:numeric(a.startedAt),answeredAt:numeric(a.answeredAt)}]))};}
 // Shared by the production transaction and the real Rules Emulator tests.
 export function transitionPatch(raw,action,now,serverTimestamp,expected=null){
  const old=normalizeRun(raw);

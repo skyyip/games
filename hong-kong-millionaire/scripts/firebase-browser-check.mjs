@@ -67,20 +67,21 @@ try{
  for(const client of [host,guest])await client.page.locator('#lobby-arcade').click();
  await host.page.getByRole('button',{name:'我來開房'}).click();await host.page.locator('input[name=entryFee]').fill('1000');await host.page.getByRole('button',{name:'確認開房',exact:true}).click();await host.page.locator('.room-code-panel strong').waitFor();const code=await host.page.locator('.room-code-panel strong').textContent();
  await guest.page.getByRole('button',{name:'輸入代號'}).click();await guest.page.locator('input[name=code]').fill(code.toLowerCase());await guest.page.getByRole('button',{name:'查看房間',exact:true}).click();await guest.page.getByRole('button',{name:'確認付款並加入',exact:true}).click();
- await host.page.getByRole('button',{name:'開始對戰',exact:true}).click();for(const client of [host,guest])await client.page.locator('.arcade-question').waitFor();
+ await host.page.getByRole('button',{name:'更新房間狀態',exact:true}).click();await host.page.getByRole('button',{name:'鎖定名單，開放挑戰',exact:true}).click();await guest.page.getByRole('button',{name:'更新房間狀態',exact:true}).click();for(const client of [host,guest]){await client.page.getByRole('button',{name:'開始／繼續我的挑戰',exact:true}).click();await client.page.locator('.arcade-question').waitFor();}
  for(let i=0;i<10;i++){
   for(const client of [host,guest])await client.page.waitForFunction(n=>document.querySelector('.arcade-score')?.textContent.includes('第 '+n+'／10 題')&&!!document.querySelector('.arcade-actions'),i+1,{timeout:40000});
-  const h=await roomRun(host.page),g=await roomRun(guest.page);check(h.index===i&&g.index===i&&h.questionAt===g.questionAt,'Shared question and exact server deadline');
+  const h=await roomRun(host.page),g=await roomRun(guest.page);check(h.index===i&&g.index===i&&h.roomMode==='async'&&g.roomMode==='async'&&h.deadlineAt===g.deadlineAt,'Shared questions with independent server clocks');
   if(i===2){const order=await guest.page.locator('.arcade-options button').evaluateAll(bs=>bs.map(b=>b.dataset.choice));await guest.load();await guest.page.locator('#lobby-arcade').click();await guest.page.locator('.arcade-question').waitFor();check(JSON.stringify(await guest.page.locator('.arcade-options button').evaluateAll(bs=>bs.map(b=>b.dataset.choice)))===JSON.stringify(order),'Reload preserves shuffled options');}
   if(i===3){await guest.context.setOffline(true);await guest.page.waitForTimeout(2500);await guest.context.setOffline(false);await guest.page.locator('#arcade-retry').click();await guest.page.locator('.arcade-question').waitFor();check((await roomRun(guest.page)).questionAt===g.questionAt,'Reconnect preserves deadline');}
   await roomAnswer(host.page);
   if(i===9)check(await host.page.locator('#arcade-review-open').isDisabled(),'Early finisher cannot reveal answer');
   await roomAnswer(guest.page,i!==9);
+  if(i<9)for(const client of [host,guest])await client.page.getByRole('button',{name:'下一題',exact:true}).click();
   console.log('Firebase browser: both players submitted room question '+(i+1)+'.');
  }
- await host.page.waitForFunction(()=>{const b=document.querySelector('#arcade-review-open');return b&&!b.disabled;});check(true,'All submissions unlock review immediately');
- for(const client of [host,guest])await client.page.getByRole('button',{name:'查看房間及結算',exact:true}).click();
- await guest.page.getByRole('button',{name:'立即核對全場結果',exact:true}).click();await host.page.getByRole('button',{name:'領取全池 $2,000',exact:true}).click();await host.page.waitForFunction(()=>!document.querySelector('#arcade-retry').disabled);
+ await host.page.getByRole('button',{name:'查看房間及結算',exact:true}).click();await host.page.getByRole('button',{name:'查看我的答卷',exact:true}).click();check(await host.page.locator('#arcade-review-open').isEnabled(),'All submissions unlock review after an explicit room refresh');await host.page.getByRole('button',{name:'查看房間及結算',exact:true}).click();
+ await guest.page.getByRole('button',{name:'查看房間及結算',exact:true}).click();
+ await guest.page.getByRole('button',{name:'立即核對全場結果',exact:true}).click();await host.page.getByRole('button',{name:'更新房間狀態',exact:true}).click();await host.page.getByRole('button',{name:'領取全池 $2,000',exact:true}).click();await host.page.waitForFunction(()=>!document.querySelector('#arcade-retry').disabled);
  const finalRoom=await call(host.page,'getRoom',code);check(finalRoom.status==='finished'&&finalRoom.winner===uid&&finalRoom.paidTo===uid,'Any member can finalise; winner claims');
  check((await call(host.page,'wallet')).balance===hostBalance-14000&&(await call(guest.page,'wallet')).balance===guestBalance-16000,'Shared opening fee and winner pool');const won=(await call(host.page,'wallet')).balance;await assert.rejects(()=>call(host.page,'claimRoom',code),/already-claimed/);check((await call(host.page,'wallet')).balance===won,'Pool cannot be claimed twice');check((await call(host.page,'myRooms')).some(r=>r.id===code),'Room history query');
  // Cancellation refunds the entire reserve and entry. No money is seeded by an admin.
