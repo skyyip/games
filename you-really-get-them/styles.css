@@ -555,3 +555,28 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 @media (max-width: 600px) {
   .question-card h3 { margin-top: 9px; margin-bottom: 7px; }
 }
+
+
+/* Faction-specific leaderboard filters. */
+.leaderboard-faction-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 14px 0;
+}
+.leaderboard-faction-tab {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #ded6c8);
+  border-radius: 999px;
+  background: #fffdf8;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.leaderboard-faction-tab.active {
+  border-color: #29251f;
+  background: #29251f;
+  color: #fff;
+}
