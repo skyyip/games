@@ -1,5 +1,5 @@
 import {BANK,FACTIONS} from './questions.js';import {beep,setMuted,isMuted} from './audio.js';import {loadSave,save,addCoins,addCard} from './storage.js';import {drawPoster,exportPoster} from './poster/poster.js';import {initCloud,getCloudUser,signInGoogle,signInEmail,signUpEmail,signInAnonymous,signOutGoogle,saveCloudProfile,recordCloudRun,getCloudRuns,getLeaderboard,createChallenge,joinChallenge,submitChallengeResult,getChallenge} from './firebase/cloud.js';
-const $=id=>document.getElementById(id);const icon=(name,cls='ui-icon')=>`<img class="${cls}" src="./assets/icons/${name}.png" alt="" aria-hidden="true">`;const questionIcons={'✨':'spark','🧠':'spark','⚡':'lightning','🐶':'dog','🐱':'cat','💅':'woman','🧢':'man','🫶':'duo'};const factionIllustrations={women:'woman',men:'man',dog:'dog',cat:'cat',duo:'duo'};const illustration=name=>`<img class="scene-illustration" src="./assets/illustrations/${name}.webp" alt="" aria-hidden="true">`;const screens=['home','game','result','collection'];let challengeId=new URLSearchParams(location.search).get('challenge'),challengeData=null,challengeSeed=null,challengeRunPending=false;let faction='women',questions=[],index=0,hp=100,correct=0,coins=0,streak=0,hints=2,timer=20,tick=null,interactionTimer=null,interactionDone=false,interactionPenaltyApplied=false,answered=false,runId=0,lastResult=null,saveData=loadSave();
+const $=id=>document.getElementById(id);const icon=(name,cls='ui-icon')=>`<img class="${cls}" src="./assets/icons/${name}.png" alt="" aria-hidden="true">`;const questionIcons={'✨':'spark','🧠':'spark','⚡':'lightning','🐶':'dog','🐱':'cat','💅':'woman','🧢':'man','🫶':'duo'};const factionIllustrations={women:'woman',men:'man',dog:'dog',cat:'cat',duo:'duo'};const illustration=name=>`<img class="scene-illustration" src="./assets/illustrations/${name}.webp" alt="" aria-hidden="true">`;const screens=['home','game','result','collection'];let challengeId=new URLSearchParams(location.search).get('challenge'),challengeData=null,challengeSeed=null,challengeRunPending=false,challengeLoading=false;let faction='women',questions=[],index=0,hp=100,correct=0,coins=0,streak=0,hints=2,timer=20,tick=null,interactionTimer=null,interactionDone=false,interactionPenaltyApplied=false,answered=false,runId=0,lastResult=null,saveData=loadSave();
 const quotes=['死因：你竟然選了這個。','死因：自信得令人擔心。','死因：你把「隨便」當成真的。','死因：讀空氣能力仍在下載。','死因：這題你真的想太久。'];
 function seededShuffle(items,seed){let state=seed>>>0;const random=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296};const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out}
 function show(name){screens.forEach(s=>$(s).classList.toggle('hidden',s!==name));window.scrollTo({top:0,behavior:'smooth'})}function shuffle(a){return [...a].sort(()=>Math.random()-.5)}function updateSaveUI(){saveData=loadSave();$('cardCount').textContent=saveData.cards.length}
@@ -60,18 +60,28 @@ async function showChallengeStatus(){
     openModal(`<h2>好友挑戰結果</h2><p>${d.ownerName}：${score(d.ownerResult)}</p><p>${d.guestName||'受邀玩家'}：${score(d.guestResult)}</p><p>${d.status==='completed'?'雙方已完成，可以比較成績。':'等待另一位玩家完成挑戰。'}</p>`);
   }catch(e){openModal(`<h2>讀取失敗</h2><p>${e.message}</p>`)}
 }
+function clearChallengeUrl(){
+  const url=new URL(location.href);
+  url.searchParams.delete('challenge');
+  history.replaceState(null,'',url);
+}
 async function loadChallengeContext(){
+  if(challengeLoading||!challengeId)return;
+  challengeLoading=true;
   try{
     const d=await getChallenge(challengeId);
     if(d&&[d.ownerUid,d.guestUid].includes(getCloudUser().uid)){
       challengeData=d;faction=d.faction;challengeSeed=d.seed;
       challengeRunPending=d.ownerUid===getCloudUser().uid?!d.ownerResult:!d.guestResult;
       document.querySelectorAll('.faction-card').forEach(b=>b.classList.toggle('selected',b.dataset.faction===faction));
+      clearChallengeUrl();
       if(challengeRunPending){openModal(`<h2>好友挑戰已載入</h2><p>與 ${d.ownerName} 進行相同題目挑戰。</p><button class="primary-btn" id="resumeChallenge">開始挑戰</button>`);$('resumeChallenge').onclick=()=>{$('modal').close();start()}}
       return;
     }
     await acceptChallenge();
+    if(challengeData)clearChallengeUrl();
   }catch(e){openModal(`<h2>無法載入挑戰</h2><p>${e.message}</p>`)}
+  finally{challengeLoading=false}
 }
 
 function showAuthModal(){
