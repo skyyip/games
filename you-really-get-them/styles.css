@@ -580,3 +580,58 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   background: #29251f;
   color: #fff;
 }
+
+
+/* Header action dropdown: keep secondary actions beside sign-in. */
+.top-actions { align-items: center; gap: 10px; }
+.action-menu { position: relative; }
+.action-menu > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 8px 13px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 900;
+  user-select: none;
+}
+.action-menu > summary::-webkit-details-marker { display: none; }
+.action-menu[open] > summary { box-shadow: 1px 1px 0 var(--ink); transform: translate(2px,2px); }
+.action-menu-panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 9px);
+  right: 0;
+  display: grid;
+  gap: 8px;
+  width: min(232px, calc(100vw - 32px));
+  padding: 11px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.action-menu-panel .secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: left;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.action-menu-panel .sound-menu-btn .sound-icon { width: 19px; height: 19px; }
+.action-menu-panel .sound-menu-btn.is-muted { opacity: .65; }
+@media (max-width: 420px) {
+  .top-actions { gap: 7px; }
+  .action-menu > summary { min-height: 40px; padding: 7px 10px; }
+  .small-btn { min-height: 40px; padding: 7px 10px; font-size: 12px; }
+}
