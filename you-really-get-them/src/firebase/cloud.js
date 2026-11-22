@@ -1,5 +1,4 @@
 import { firebaseConfig, firebaseReady } from './config.js';
-import { loadSave, save } from '../storage.js';
 
 const SDK='https://www.gstatic.com/firebasejs/9.23.0';
 let auth,db,currentUser=null,authSdk,fs;
