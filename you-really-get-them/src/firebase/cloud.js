@@ -81,13 +81,14 @@ export async function recordCloudRun(result){
   await fs.addDoc(fs.collection(db,'users',currentUser.uid,'runs'),{
     faction:result.faction,mode:result.mode||'classic',questionCount:result.questionCount||12,dimensions:result.dimensions||null,survived:result.survived,hp:result.hp,coins:result.coins,correct:result.correct,createdAt:fs.serverTimestamp()
   });
-  const ref=fs.doc(db,'leaderboard',currentUser.uid);
+  const faction=result.faction;
+  const ref=fs.doc(db,'leaderboard',`${currentUser.uid}_${faction}`);
   await fs.runTransaction(db,async tx=>{
     const snap=await tx.get(ref),previous=snap.exists()?snap.data():null;
     const bestHp=Math.max(previous?.bestHp||0,result.hp);
     const bestCorrect=!previous||result.hp>previous.bestHp?result.correct:
       result.hp===previous.bestHp?Math.max(previous.bestCorrect||0,result.correct):previous.bestCorrect;
-    tx.set(ref,{uid:currentUser.uid,displayName:(currentUser.displayName||'玩家').slice(0,50),bestHp,bestCorrect,runs:(previous?.runs||0)+1,updatedAt:fs.serverTimestamp()});
+    tx.set(ref,{uid:currentUser.uid,faction,displayName:(currentUser.displayName||'玩家').slice(0,50),bestHp,bestCorrect,runs:(previous?.runs||0)+1,updatedAt:fs.serverTimestamp()});
   });
 }
 export async function getCloudRuns(){
@@ -96,8 +97,8 @@ export async function getCloudRuns(){
   const snap=await fs.getDocs(q);
   return snap.docs.map(d=>({...d.data(),createdAt:d.data().createdAt?.toDate?.().toLocaleString()||''}));
 }
-export async function getLeaderboard(){
-  const q=fs.query(fs.collection(db,'leaderboard'),fs.orderBy('bestHp','desc'),fs.orderBy('bestCorrect','desc'),fs.limit(50));
+export async function getLeaderboard(faction){
+  const q=fs.query(fs.collection(db,'leaderboard'),fs.where('faction','==',faction),fs.orderBy('bestHp','desc'),fs.orderBy('bestCorrect','desc'),fs.limit(50));
   const snap=await fs.getDocs(q);return snap.docs.map(d=>d.data());
 }
 export async function createChallenge(faction){
