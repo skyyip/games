@@ -311,3 +311,17 @@ test('all shipped image assets are included in the versioned offline cache', asy
   assert.match(sw, /you-really-get-them-v37/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
+
+
+test('leaderboard keeps a fixed-width readable layout on desktop and mobile', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
+  assert.match(app, /role="table" aria-label="陣營排行榜"/);
+  assert.match(app, /columnheader">玩家名稱/);
+  assert.match(app, /columnheader">答對題數/);
+  assert.match(css, /dialog:has\(\.leaderboard-faction-tabs\)\s*\{\s*width: min\(680px, calc\(100vw - 24px\)\)/);
+  assert.match(css, /\.leaderboard-head,\s*\.leaderboard-row\s*\{\s*grid-template-columns: 52px minmax\(0, 1fr\) 96px 88px/);
+  assert.match(css, /@media \(max-width: 520px\)[\s\S]*?grid-template-columns: 38px minmax\(0, 1fr\) 70px 64px/);
+  assert.match(css, /\.leaderboard-faction-tabs\s*\{[\s\S]*?flex-wrap: nowrap;[\s\S]*?overflow-x: auto/);
+});
