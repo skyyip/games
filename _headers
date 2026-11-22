@@ -1,0 +1,178 @@
+/games/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/release.json
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/sitemap.xml
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/llms.txt
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/balance-bridge/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/balance-bridge/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/beat-bad-luck/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/beat-bad-luck/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/bun-rush/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/bun-rush/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/career-365/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/career-365/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/cha-chaan-mop/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/cha-chaan-mop/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/city-is-dying/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/city-is-dying/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/dice-party/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/dice-party/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/feet-up-cafe/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/feet-up-cafe/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/flick-force/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/flick-force/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/floating-balance/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/floating-balance/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/frogger-jump/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/frogger-jump/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush-in-order/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush-in-order/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/hong-kong-millionaire/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/hong-kong-millionaire/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/just-a-sec/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/just-a-sec/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/line-up/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/line-up/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/mahjong-match/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/mahjong-match/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/marble-maze/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/marble-maze/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/memory-trace/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/memory-trace/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/mo-lei-tau-studio/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/mo-lei-tau-studio/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/pikmin-fling/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/pikmin-fling/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/poker-party/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/poker-party/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/pot-toss/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/pot-toss/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/roach-rush/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/roach-rush/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/stone-skip/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/stone-skip/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/tap-and-spill/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/tap-and-spill/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/your-dream-career/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/your-dream-career/
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/balance-bridge/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/beat-bad-luck/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/bun-rush/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/career-365/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/cha-chaan-mop/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/city-is-dying/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/dice-party/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/feet-up-cafe/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/flick-force/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/floating-balance/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/frogger-jump/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush-in-order/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/grid-rush/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/hong-kong-millionaire/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/just-a-sec/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/line-up/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/mahjong-match/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/marble-maze/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/memory-trace/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/mo-lei-tau-studio/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/pikmin-fling/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/poker-party/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/pot-toss/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/roach-rush/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/stone-skip/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/tap-and-spill/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/your-dream-career/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/games/built/*
+  Cache-Control: public, max-age=31536000, immutable

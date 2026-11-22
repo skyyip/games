@@ -1,0 +1,9 @@
+Hong Kong Millionaire asynchronous update
+Source: eb9b8c82702c278d5b3568f8a9cd4f6561778f88
+
+Extract this archive and upload its CONTENTS to public_html/games/, including .htaccess.
+Do not upload an extra enclosing directory.
+Deploy the matching hong-kong-millionaire/firestore.rules from the source commit before uploading the website. Firestore indexes are unchanged.
+
+Validation: 85 unit tests, 20 SDK adapter checks, 369 browser checks, rule-generation checks, build, SEO and release permissions passed.
+Real Firestore Emulator validation is PENDING: the current environment blocks storage.googleapis.com. This archive does not deploy the website or Firebase rules.
