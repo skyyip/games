@@ -142,3 +142,24 @@ test('Spark cloud profiles never accept client-managed currency or cards', async
   assert.doesNotMatch(cloud, /coins:data\.coins|cards:data\.cards|coins:local\.coins|cards:local\.cards/);
   assert.match(cloud, /Cloud profile stores identity metadata only/);
 });
+
+
+test('leaderboard is stored and queried independently by faction', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { resolve } = await import('node:path');
+  const cloud = readFileSync(resolve('.', 'src/firebase/cloud.js'), 'utf8');
+  const app = readFileSync(resolve('.', 'src/app.js'), 'utf8');
+  const rules = readFileSync(resolve('.', 'firestore.rules'), 'utf8');
+  const indexes = JSON.parse(readFileSync(resolve('.', 'firestore.indexes.json'), 'utf8'));
+
+  assert.match(cloud, /leaderboard',\`\$\{currentUser\.uid\}_\$\{faction\}\`/);
+  assert.match(cloud, /where\('faction','==',faction\)/);
+  assert.match(app, /data-leaderboard-faction/);
+  assert.match(app, /我的戰績/);
+  assert.match(rules, /data\.faction == faction/);
+  assert.match(rules, /entryId == request\.auth\.uid \+ '_' \+ request\.resource\.data\.faction/);
+  assert.ok(indexes.indexes.some(index =>
+    index.collectionGroup === 'leaderboard' &&
+    index.fields.map(field => field.fieldPath).join(',') === 'faction,bestHp,bestCorrect'
+  ));
+});
