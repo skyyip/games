@@ -223,7 +223,7 @@ test('players can set a persistent display name used throughout the game', async
 
   assert.match(html, /id="playerNameBtn"/);
   assert.match(html, /id="playerNameBtn"[^>]*hidden/);
-  assert.match(styles, /\.player-name-btn\\\[hidden\\\]\\s*\\{\\s*display:\\s*none\\s*!important;/);
+  assert.ok(styles.includes('.player-name-btn[hidden] { display: none !important; }'));
   assert.match(app, /function showPlayerNameModal\(\)/);
   assert.match(app, /saveCloudProfile\(\{playerName:name\}\)/);
   assert.match(app, /playerName=profile\?\.playerName/);
