@@ -682,3 +682,10 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   }
   .hero-copy h1 br { display: none; }
 }
+
+/* Touch devices should not retain desktop hover highlighting after an answer tap. */
+@media (hover: none), (pointer: coarse) {
+  .answer-btn:hover {
+    background: var(--paper);
+  }
+}
