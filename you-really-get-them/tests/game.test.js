@@ -169,6 +169,7 @@ test('duo mode uses five setup questions and a separate pass-the-phone test flow
   const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(app, /duoSetupQuestions=shuffle\(BANK\.duo\)\.slice\(0,5\)/);
+  assert.match(app, /function startDuoSetup\(\)[\s\S]*?\$\('modal'\)\.showModal\(\);renderDuoSetup\(0\)/);
   assert.match(app, /function beginDuoTest\(\)/);
   assert.match(app, /function answerDuoTest\(choice\)/);
   assert.match(app, /function finishDuoTest\(\)/);
