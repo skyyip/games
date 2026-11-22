@@ -112,6 +112,10 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /games/tap-and-spill/
   Cache-Control: no-cache, no-store, must-revalidate
+/games/you-really-get-them/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/you-really-get-them/
+  Cache-Control: no-cache, no-store, must-revalidate
 /games/your-dream-career/index.html
   Cache-Control: no-cache, no-store, must-revalidate
 /games/your-dream-career/
@@ -169,6 +173,8 @@
 /games/stone-skip/sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 /games/tap-and-spill/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/you-really-get-them/sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 /games/your-dream-career/sw.js
   Cache-Control: no-cache, no-store, must-revalidate
