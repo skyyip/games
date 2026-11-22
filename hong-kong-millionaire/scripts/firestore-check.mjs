@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import {doc,getDoc,setDoc,updateDoc,writeBatch,serverTimestamp,Timestamp,collection,getDocs,query,limit} from 'firebase/firestore';
-import {newRun,act,questionFor,hkDay,spent,nextProfile,livesLeft} from '../src/game.js';
+import {newRun,act,questionFor,hkDay,spent,nextProfile,livesLeft,QUESTION_MS} from '../src/game.js';
 import {normalizeRun,transitionPatch} from '../src/cloud-transition.js';
 import {COLLECTIONS as C} from '../src/schema.js';
 if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('Run with firebase emulators:exec; no production access.');
@@ -55,10 +55,14 @@ try{
  const won=await settle(a);assert.equal(won.payout,1000000);assert.equal((await getDoc(a.pRef)).data().total,1000000);checks++;
  await assertFails(updateDoc(a.pRef,{total:2000000,games:2,updatedAt:serverTimestamp()}));await assertFails(updateDoc(a.rRef,{phase:'playing',updatedAt:serverTimestamp()}));checks+=2;
  await assertSucceeds(getDocs(query(collection(anon,C.results),limit(20))));await assertFails(getDocs(collection(anon,C.results)));checks+=2;
+ // The previous 25s rules reject this ordinary answer even with their 2s grace.
+ const late=await begin('rules-late-answer');
+ await env.withSecurityRulesDisabled(async context=>{const stamp=Timestamp.fromMillis(Date.now()-28000);await updateDoc(doc(context.firestore(),C.players,late.uid,'runs',String(late.day)),{questionAt:stamp,startedAt:stamp});});
+ const lateRun=normalizeRun(await raw(late));const accepted=await move(late,{type:'answer',choice:questionFor(lateRun).answer});assert.equal(accepted.outcome,'correct');checks++;
  // Both first-answer failure and voluntary exit must use the same protected transition and settlement.
  for(const type of ['wrong','walk','timeout']){
   const b=await begin('rules-'+type);
-  if(type==='timeout')await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),C.players,b.uid,'runs',String(b.day)),{questionAt:Timestamp.fromMillis(Date.now()-26000),startedAt:Timestamp.fromMillis(Date.now()-27000)});});
+  if(type==='timeout')await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),C.players,b.uid,'runs',String(b.day)),{questionAt:Timestamp.fromMillis(Date.now()-QUESTION_MS-1000),startedAt:Timestamp.fromMillis(Date.now()-QUESTION_MS-2000)});});
   const r=normalizeRun(await raw(b));await move(b,type==='wrong'?{type:'answer',choice:(questionFor(r).answer+1)%4}:{type});
   const done=await settle(b);assert.equal(done.reason,type);assert.equal(done.payout,0);assert.equal((await getDoc(b.pRef)).data().games,1);checks+=3;
  }

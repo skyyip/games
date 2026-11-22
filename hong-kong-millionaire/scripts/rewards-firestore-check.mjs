@@ -45,6 +45,8 @@ try{
  await assert.rejects(feature.shop(retry,'retry',{type:'retry-ticket',requestId:crypto.randomUUID()}),/retry-bought/);checks++;
  let retryRun=await ok(feature.startSession(retry,'retry',{kind:'retry'}));
  await no(sdk.updateDoc(ref(retry,'hkm_wallets','retry'),{retryUsedDay:-1,revision:(await feature.wallet(retry,'retry')).wallet.revision+1,op:'start-session',updatedAt:sdk.serverTimestamp()}));
+ // Extra sessions must also allow a genuine answer after the former 25s cap.
+ await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-28000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','retry','sessions',retryRun.id),{questionAt:stamp,startedAt:stamp});});
  for(let i=0;i<15;i++){retryRun=await ok(feature.moveSession(retry,'retry',retryRun,{type:'answer',choice:sessionQuestion(retryRun).answer}));if(i<14)retryRun=await ok(feature.moveSession(retry,'retry',retryRun,{type:'next'}));}
  assert.equal(retryRun.payout,1000000);assert.equal(retryRun.credit,1000000);assert.equal((await feature.wallet(retry,'retry')).balance,1900000);assert.equal((await feature.wallet(retry,'retry')).profile.total,1000000);checks+=4;
  await ok(feature.settleSession(retry,'retry',retryRun));assert.equal((await feature.wallet(retry,'retry')).balance,1900000);checks++;
