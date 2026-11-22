@@ -134,19 +134,38 @@ function showAuthModal(){
 }
 function showCollection(){
   const cards=[
-    {name:'求生菜鳥',rarity:'N',chance:42},{name:'空氣閱讀員',rarity:'N',chance:25},
-    {name:'冷靜觀察家',rarity:'R',chance:14},{name:'情緒拆彈手',rarity:'R',chance:10},
-    {name:'傳說級讀心者',rarity:'SR',chance:5},{name:'人類使用說明書',rarity:'SR',chance:2},
-    {name:'行走式測謊機',rarity:'SSR',chance:1},{name:'宇宙級讀空氣王',rarity:'UR',chance:1}
+    {id:'w_1',name:'傲嬌雙馬尾',emoji:'👧',rarity:'R',chance:58/4,desc:'口頭禪是「我才沒有生氣呢！」'},
+    {id:'w_2',name:'名偵探女友',emoji:'🕵️‍♀️',rarity:'SR',chance:30/4,desc:'憑藉一根頭髮就能還原完整案發現場',skill:'微表情透視：刪除 2 個錯誤選項（技能尚未啟用）'},
+    {id:'w_3',name:'白月光天使',emoji:'👼',rarity:'SSR',chance:12/4,desc:'傳說中永遠講道理、不翻舊帳的夢幻生物',skill:'免死金牌：抵銷一次一擊必殺（技能尚未啟用）'},
+    {id:'m_1',name:'鋼鐵直男',emoji:'🗿',rarity:'R',chance:58/4,desc:'大腦裡只有一個齒輪在轉的純真生物'},
+    {id:'m_2',name:'電競肝帝',emoji:'🎮',rarity:'SR',chance:30/4,desc:'發誓「再打最後一場就去睡覺」的男人'},
+    {id:'m_3',name:'傳說霸總',emoji:'💼',rarity:'SSR',chance:12/4,desc:'自帶黑卡與「女人妳成功引起我注意」氣場'},
+    {id:'d_1',name:'短腿柯基',emoji:'🍞',rarity:'R',chance:58/4,desc:'底盤過低，每次上下樓梯都像在爬山'},
+    {id:'d_2',name:'拆家哈士奇',emoji:'🐺',rarity:'SR',chance:30/4,desc:'西伯利亞裝修大隊長，專精沙發爆破',skill:'混亂邪惡：重排選項，通關賞金翻倍（技能尚未啟用）'},
+    {id:'d_3',name:'倔強柴將軍',emoji:'🐕',rarity:'SSR',chance:12/4,desc:'散步一旦啟動煞車，八匹馬都拉不動'},
+    {id:'c_1',name:'十橘九胖',emoji:'🍊',rarity:'R',chance:58/4,desc:'只要聽見開罐器聲響就能光速瞬移'},
+    {id:'c_2',name:'虛空黑貓',emoji:'🐈‍⬛',rarity:'SR',chance:30/4,desc:'完美融入陰影，只露出兩顆發光大眼'},
+    {id:'c_3',name:'仙氣布偶皇',emoji:'🐈',rarity:'SSR',chance:12/4,desc:'顏值即正義，看你宛如看卑微兩腳獸',skill:'時間凍結：倒數計時凍結 6 秒（技能尚未啟用）'}
   ];
-  const cost=30;saveData=loadSave();$('collectionCoins').textContent=`${saveData.coins} SC`;$('collectionGrid').innerHTML='';
-  cards.forEach(card=>{const owned=saveData.cards.includes(card.name),d=document.createElement('div');d.className='collect-card '+(!owned?'locked':'');d.innerHTML=`<span class="rarity">${card.rarity}</span><strong>${owned?card.name:'???'}</strong><small>${owned?'已收藏 · 關係求生紀念卡':'尚未收藏'}</small>`;$('collectionGrid').append(d)});
-  const g=document.createElement('button');g.className='primary-btn draw-card-btn';g.textContent=`花費 ${cost} SC 抽一張卡`;g.disabled=saveData.coins<cost;g.onclick=()=>{
-    const s=loadSave();if(s.coins<cost)return;s.coins-=cost;
-    const roll=Math.random()*100,chosen=cards.find((card,i)=>roll<cards.slice(0,i+1).reduce((sum,item)=>sum+item.chance,0))||cards[0];
-    if(s.cards.includes(chosen.name)){s.coins+=15;save(s);openModal(`<h2>重複卡！轉換成 15 SC</h2><p>再次抽到「${chosen.name}」，已自動回收一半抽卡費用。</p>`)}
-    else{s.cards.push(chosen.name);save(s);openModal(`<h2>🎉 ${chosen.rarity} 卡入手！</h2><p>你抽到「${chosen.name}」！</p><p>收藏卡只作紀念，不影響遊戲公平性。</p>`)}
-    if(getCloudUser())saveCloudProfile(s).catch(console.error);
+  const cost=50;saveData=loadSave();
+  const owned=new Set(saveData.cards);
+  ['w_1','m_1'].forEach(id=>owned.add(id));
+  saveData.cards=[...new Set([...saveData.cards,'w_1','m_1'])];save(saveData);
+  $('collectionCoins').textContent=`${saveData.coins} SC`;$('collectionGrid').innerHTML='';
+  cards.forEach(card=>{
+    const has=owned.has(card.id)||owned.has(card.name),d=document.createElement('article');
+    d.className=`collect-card rarity-${card.rarity.toLowerCase()} ${has?'':'locked'}`;
+    d.innerHTML=`<span class="rarity">${card.rarity}</span><div class="flash-card-art" aria-hidden="true">${card.emoji}</div><strong>${has?card.name:'???'}</strong><small>${has?card.desc:'尚未解鎖 · 閃卡抽抽樂'}</small>${has&&card.skill?`<small class="card-skill">${card.skill}</small>`:''}`;
+    $('collectionGrid').append(d);
+  });
+  const g=document.createElement('button');g.className='primary-btn draw-card-btn';g.textContent=`花費 ${cost} SC 抽一張閃卡`;g.disabled=saveData.coins<cost;g.onclick=()=>{
+    const state=loadSave();if(state.coins<cost)return;state.coins-=cost;
+    const roll=Math.random()*100;let cumulative=0;
+    const rarity=roll<58?'R':roll<88?'SR':'SSR';
+    const pool=cards.filter(card=>card.rarity===rarity),chosen=pool[Math.floor(Math.random()*pool.length)];
+    if(state.cards.includes(chosen.id)||state.cards.includes(chosen.name)){state.coins+=25;save(state);openModal(`<h2>重複閃卡！轉換成 25 SC</h2><p>再次抽到「${chosen.name}」，已回收一半抽卡費用。</p>`)}
+    else{state.cards.push(chosen.id);save(state);openModal(`<h2>✨ ${chosen.rarity} 閃卡入手！</h2><p style="font-size:3rem;text-align:center">${chosen.emoji}</p><h3>${chosen.name}</h3><p>${chosen.desc}</p>${chosen.skill?`<p>${chosen.skill}</p>`:''}`)}
+    if(getCloudUser())saveCloudProfile(state).catch(console.error);
     updateSaveUI();showCollection();
   };
   $('collectionGrid').append(g);show('collection')
