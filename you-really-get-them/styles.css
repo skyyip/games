@@ -757,7 +757,7 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 .player-name-btn { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #modal .auth-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 2px solid var(--ink); background: #fff; font: inherit; }
 #modal .auth-form label { display: block; margin: 10px 0 5px; font-size: 13px; font-weight: 900; }
-#modal .auth-form button[type="submit"] { width: 100%; min-height: 48px; margin-top: 12px; }
+#modal .auth-form button[type="submit"] { width: 100%; min-height: 48px; }
 @media (max-width: 600px) {
   .topbar { gap: 8px; }
   .top-actions { gap: 6px; }
