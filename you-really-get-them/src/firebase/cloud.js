@@ -1,7 +1,7 @@
 import { firebaseConfig, firebaseReady } from './config.js';
 
 const SDK='https://www.gstatic.com/firebasejs/9.23.0';
-let auth,db,currentUser=null,authSdk,fs;
+let auth,db,currentUser=null,currentPlayerName='',authSdk,fs;
 
 export async function initCloud(onChange=()=>{}){
   if(!firebaseReady)return {ready:false,user:null};
@@ -25,10 +25,15 @@ export async function initCloud(onChange=()=>{}){
   // the initial persisted/redirected auth state.
   let initialized=false;
   const authStateReady=new Promise(resolve=>{
-    authSdk.onAuthStateChanged(auth,user=>{
+    authSdk.onAuthStateChanged(auth,async user=>{
       currentUser=user;
-      onChange(user);
-      if(user)syncProfileFromCloud().catch(error=>console.error('Firebase profile sync failed',error));
+      currentPlayerName='';
+      let profile=null;
+      if(user){
+        try{profile=await syncProfileFromCloud()}catch(error){console.error('Firebase profile sync failed',error)}
+      }
+      currentPlayerName=profile?.playerName||'';
+      onChange(user,profile);
       if(!initialized){initialized=true;resolve(user)}
     },error=>{
       console.error('Firebase auth state listener failed',error);
@@ -55,6 +60,7 @@ export async function initCloud(onChange=()=>{}){
   return {ready:true,user:currentUser,redirectError};
 }
 export const getCloudUser=()=>currentUser;
+export const getCloudPlayerName=()=>currentPlayerName;
 export async function signInEmail(email,password){
   const credential=authSdk.EmailAuthProvider.credential(email.trim(),password);
   if(currentUser?.isAnonymous)return authSdk.linkWithCredential(currentUser,credential);
@@ -89,18 +95,22 @@ export async function syncProfileFromCloud(){
   if(!currentUser)return null;
   const ref=fs.doc(db,'users',currentUser.uid),snap=await fs.getDoc(ref);
   if(snap.exists())return snap.data();
-  const profile={displayName:(currentUser.displayName||'玩家').slice(0,50),photoURL:currentUser.photoURL||'',updatedAt:fs.serverTimestamp()};
+  const profile={displayName:(currentUser.displayName||'玩家').slice(0,50),playerName:'',photoURL:currentUser.photoURL||'',updatedAt:fs.serverTimestamp()};
   await fs.setDoc(ref,profile);return profile;
 }
-export async function saveCloudProfile(data){
+export async function saveCloudProfile({playerName}={}){
   if(!currentUser)return;
-  // Cloud profile stores identity metadata only. Coins and cards stay local:
-  // Firestore Rules intentionally reject client-side asset mutations.
+  const name=String(playerName||'').trim();
+  if(!name||name.length>20)throw new Error('玩家名稱需為 1 至 20 個字元');
+  // Cloud profile stores identity metadata only. Coins and cards stay local.
   await fs.setDoc(fs.doc(db,'users',currentUser.uid),{
     displayName:(currentUser.displayName||'玩家').slice(0,50),
+    playerName:name,
     photoURL:currentUser.photoURL||'',
     updatedAt:fs.serverTimestamp()
   },{merge:true});
+  currentPlayerName=name;
+  return name;
 }
 export async function recordCloudRun(result){
   if(!currentUser)return;
@@ -114,7 +124,7 @@ export async function recordCloudRun(result){
     const bestHp=Math.max(previous?.bestHp||0,result.hp);
     const bestCorrect=!previous||result.hp>previous.bestHp?result.correct:
       result.hp===previous.bestHp?Math.max(previous.bestCorrect||0,result.correct):previous.bestCorrect;
-    tx.set(ref,{uid:currentUser.uid,faction,displayName:(currentUser.displayName||'玩家').slice(0,50),bestHp,bestCorrect,runs:(previous?.runs||0)+1,updatedAt:fs.serverTimestamp()});
+    tx.set(ref,{uid:currentUser.uid,faction,displayName:(currentPlayerName||currentUser.displayName||'玩家').slice(0,50),bestHp,bestCorrect,runs:(previous?.runs||0)+1,updatedAt:fs.serverTimestamp()});
   });
 }
 export async function getCloudRuns(){
@@ -131,7 +141,7 @@ export async function createChallenge(faction){
   if(!currentUser)throw new Error('請先使用 Google 登入');
   const seed=Math.floor(Math.random()*0xffffffff);
   const ref=await fs.addDoc(fs.collection(db,'challenges'),{
-    ownerUid:currentUser.uid,ownerName:(currentUser.displayName||'玩家').slice(0,50),faction,seed,
+    ownerUid:currentUser.uid,ownerName:(currentPlayerName||currentUser.displayName||'玩家').slice(0,50),faction,seed,
     status:'waiting',createdAt:fs.serverTimestamp(),expiresAt:Date.now()+7*86400000
   });
   return {id:ref.id,seed,url:`${location.origin}${location.pathname}?challenge=${ref.id}`};
@@ -145,7 +155,7 @@ export async function joinChallenge(id){
     const d=snap.data();
     if(d.ownerUid===currentUser.uid)throw new Error('不能接受自己建立的邀請');
     if(d.status!=='waiting'||d.guestUid||d.expiresAt<Date.now())throw new Error('邀請已被接受或已過期');
-    tx.update(ref,{guestUid:currentUser.uid,guestName:(currentUser.displayName||'玩家').slice(0,50),status:'accepted'});
+    tx.update(ref,{guestUid:currentUser.uid,guestName:(currentPlayerName||currentUser.displayName||'玩家').slice(0,50),status:'accepted'});
   });
   const snap=await fs.getDoc(ref);return {id:snap.id,...snap.data()};
 }
