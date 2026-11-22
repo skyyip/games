@@ -548,3 +548,10 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 @media (max-width: 600px) {
   .question-card h3 { font-size: clamp(12.96px, 3.528vw, 15.12px); }
 }
+
+
+/* Tighten vertical spacing around the question prompt. */
+.question-card h3 { margin-top: 11px; margin-bottom: 9px; }
+@media (max-width: 600px) {
+  .question-card h3 { margin-top: 9px; margin-bottom: 7px; }
+}
