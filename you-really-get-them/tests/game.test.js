@@ -200,7 +200,7 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v36/);
+  assert.match(sw, /you-really-get-them-v37/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -273,7 +273,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v36/);
+  assert.match(sw, /you-really-get-them-v37/);
 });
 
 
@@ -285,7 +285,7 @@ test('game performance uses linear Fisher-Yates shuffle and avoids repeated scra
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.match(app, /getContext\('2d',\{willReadFrequently:true\}\)/);
   assert.match(app, /pointerdown',e=>\{down=true;rect=c\.getBoundingClientRect\(\)/);
-  assert.match(sw, /you-really-get-them-v36/);
+  assert.match(sw, /you-really-get-them-v37/);
 });
 
 
