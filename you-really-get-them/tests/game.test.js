@@ -176,3 +176,22 @@ test('duo mode uses five setup questions and a separate pass-the-phone test flow
   assert.match(html, /雙人互測模式/);
   assert.match(html, /情侶／好友現場出題拷問/);
 });
+
+
+test('Google authentication restores redirect state before enabling the UI', async () => {
+  const { readFileSync } = await import('node:fs');
+  const cloud = readFileSync(new URL('../src/firebase/cloud.js', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+
+  assert.match(cloud, /await authSdk\.getRedirectResult\(auth\)/);
+  assert.match(cloud, /await new Promise\(resolve=>[\s\S]*?authSdk\.onAuthStateChanged/);
+  assert.match(cloud, /return \{ready:true,user:currentUser,redirectError\}/);
+  assert.match(cloud, /const user=auth\.currentUser\|\|currentUser/);
+  assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
+  assert.match(app, /auth\/unauthorized-domain/);
+  assert.match(app, /auth\/popup-closed-by-user/);
+  assert.match(sw, /you-really-get-them-v23/);
+  assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
+  assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
+});
