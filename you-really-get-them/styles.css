@@ -635,3 +635,19 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   .action-menu > summary { min-height: 40px; padding: 7px 10px; }
   .small-btn { min-height: 40px; padding: 7px 10px; font-size: 12px; }
 }
+
+
+/* Align the dropdown chevron optically and give every menu action an icon. */
+.action-menu > summary > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1em;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+.action-menu-panel .secondary-btn .ui-icon {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+}
