@@ -275,3 +275,15 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
   assert.match(sw, /you-really-get-them-v35/);
 });
+
+
+test('game performance uses linear Fisher-Yates shuffle and avoids repeated scratch-canvas layout reads', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(app, /function shuffle\(a\)\{const out=\[\.\.\.a\];for\(let i=out\.length-1;i>0;i--\)/);
+  assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
+  assert.match(app, /getContext\('2d',\{willReadFrequently:true\}\)/);
+  assert.match(app, /pointerdown',e=>\{down=true;rect=c\.getBoundingClientRect\(\)/);
+  assert.match(sw, /you-really-get-them-v36/);
+});
