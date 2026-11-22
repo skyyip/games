@@ -64,7 +64,7 @@ export async function saveCloudProfile(data){
 export async function recordCloudRun(result){
   if(!currentUser)return;
   await fs.addDoc(fs.collection(db,'users',currentUser.uid,'runs'),{
-    faction:result.faction,survived:result.survived,hp:result.hp,coins:result.coins,correct:result.correct,createdAt:fs.serverTimestamp()
+    faction:result.faction,mode:result.mode||'classic',questionCount:result.questionCount||10,dimensions:result.dimensions||null,survived:result.survived,hp:result.hp,coins:result.coins,correct:result.correct,createdAt:fs.serverTimestamp()
   });
   const ref=fs.doc(db,'leaderboard',currentUser.uid);
   await fs.runTransaction(db,async tx=>{
