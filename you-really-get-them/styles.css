@@ -867,3 +867,7 @@ dialog:has(.leaderboard-faction-tabs) {
 .action-menu-panel .account-menu-btn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .action-menu-panel .account-menu-btn[hidden] { display: none !important; }
 .action-menu-divider { height: 1px; margin: 2px 0; background: #aaa; }
+
+/* Prevent legacy header sizing rules from truncating account actions in the dropdown. */
+.top-actions .action-menu-panel .account-menu-btn { max-width: none; }
+.top-actions .action-menu-panel #authBtn { max-width: none; }
