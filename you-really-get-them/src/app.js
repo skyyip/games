@@ -49,16 +49,27 @@ async function showHistory(){
     const rows=await getCloudRuns();
     const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const content=rows.length?'<div class="score-list history-list">'+rows.map(r=>`<article class="score-row history-row"><div class="score-main"><strong>${safe(FACTIONS[r.faction]?.name||r.faction)} · ${r.mode==='mixed'?'雙重求生':r.mode==='air'?'閱讀空氣':'經典求生'}</strong><small>${safe(r.createdAt||'時間未提供')}</small></div><div class="score-metrics"><span><small>達標</small><b>${Number(r.correct)||0}/${Number(r.questionCount)||10}</b></span><span><small>剩餘 HP</small><b>${Number(r.hp)||0}</b></span><span><small>求生幣</small><b>${Number(r.coins)||0} SC</b></span></div><span class="score-status ${r.survived?'is-survived':'is-failed'}">${r.survived?'成功生還':'挑戰失敗'}</span></article>`).join('')+'</div>':'<p class="score-empty">尚無雲端戰績，完成一場挑戰後就會出現在這裡。</p>';
-    openModal(`<h2>歷史戰績</h2><p class="score-intro">最近 30 場雲端同步紀錄</p>${content}`);
+    openModal(`<h2>我的戰績</h2><p class="score-intro">最近 30 場雲端同步紀錄</p>${content}`);
   }catch(e){openModal(`<h2>讀取失敗</h2><p>${e.message}</p>`)}
 }
-async function showLeaderboard(){
-  try{
-    const rows=await getLeaderboard();
-    const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const content=rows.length?'<div class="score-list leaderboard-list"><div class="leaderboard-head"><span>排名</span><span>玩家</span><span>最高 HP</span><span>答對</span></div>'+rows.map((r,i)=>`<article class="leaderboard-row ${i<3?'top-rank':''}"><b class="rank-number">${i+1}</b><strong class="leader-name">${safe(r.displayName||'玩家')}</strong><b class="leader-hp">${Number(r.bestHp)||0}<small> HP</small></b><b class="leader-correct">${Number(r.bestCorrect)||0}<small>/12</small></b></article>`).join('')+'</div>':'<p class="score-empty">目前還沒有排行榜資料，完成挑戰後即可上榜。</p>';
-    openModal(`<h2>排行榜 TOP 50</h2><p class="score-intro">依最高剩餘 HP 排序；玩家自評榜單，並非防作弊競技排名。</p>${content}`);
-  }catch(e){openModal(`<h2>排行榜暫時無法讀取</h2><p>${e.message}</p>`)}
+async function showLeaderboard(selected=faction){
+  const render=async active=>{
+    const rows=await getLeaderboard(active);
+    const content=rows.length?'<div class="score-list leaderboard-list"><div class="leaderboard-head"><span>排名</span><span>玩家</span><span>最高 HP</span><span>答對</span></div>'+rows.map((r,i)=>`<article class="leaderboard-row ${i<3?'top-rank':''}"><b class="rank-number">${i+1}</b><strong class="leader-name">${safe(r.displayName||'玩家')}</strong><b class="leader-hp">${Number(r.bestHp)||0}<small> HP</small></b><b class="leader-correct">${Number(r.bestCorrect)||0}<small>/12</small></b></article>`).join('')+'</div>':'<p class="score-empty">這個陣營暫時沒有上榜玩家，完成一場挑戰即可登榜。</p>';
+    $('leaderboardContent').innerHTML=content;
+    document.querySelectorAll('[data-leaderboard-faction]').forEach(button=>{
+      button.classList.toggle('active',button.dataset.leaderboardFaction===active);
+      button.setAttribute('aria-pressed',String(button.dataset.leaderboardFaction===active));
+    });
+  };
+  const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  openModal(`<h2>陣營排行榜 TOP 50</h2><p class="score-intro">各陣營獨立排名，依最高剩餘 HP、答對題數排序。玩家自評榜單，並非防作弊競技排名。</p><div class="leaderboard-faction-tabs" role="group" aria-label="選擇排行榜陣營">${Object.entries(FACTIONS).map(([id,item])=>`<button type="button" class="leaderboard-faction-tab" data-leaderboard-faction="${id}" aria-pressed="false">${safe(item.name)}</button>`).join('')}</div><div id="leaderboardContent" aria-live="polite"><p class="score-empty">排行榜載入中…</p></div>`);
+  document.querySelectorAll('[data-leaderboard-faction]').forEach(button=>{
+    button.onclick=()=>render(button.dataset.leaderboardFaction).catch(e=>{
+      $('leaderboardContent').innerHTML=`<p class="score-empty">排行榜暫時無法讀取：${safe(e.message)}</p>`;
+    });
+  });
+  try{await render(selected)}catch(e){$('leaderboardContent').innerHTML=`<p class="score-empty">排行榜暫時無法讀取：${safe(e.message)}</p>`}
 }
 async function showChallengeStatus(){
   if(!getCloudUser()){openModal('<h2>請先 Google 登入</h2><p>登入後才能查看好友挑戰成績。</p>');return}
