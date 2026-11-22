@@ -531,6 +531,10 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 
 /* Reduce question prompt typography by 20% on desktop and mobile. */
 .question-card h3 { font-size: clamp(17.6px, 2.96vw, 23.2px); }
+@media (max-width: 760px) {
+  .question-card h3 { font-size: 16.8px; }
+}
 @media (max-width: 600px) {
   .question-card h3 { font-size: clamp(14.4px, 3.92vw, 16.8px); }
 }
+
