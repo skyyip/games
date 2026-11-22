@@ -37,12 +37,20 @@ async function acceptChallenge(){
 }
 async function showHistory(){
   if(!getCloudUser()){openModal('<h2>請先 Google 登入</h2><p>登入後即可查看跨裝置同步的歷史戰績。</p>');return}
-  try{const rows=await getCloudRuns();openModal(`<h2>歷史戰績</h2>${rows.length?rows.map(r=>`<p>${FACTIONS[r.faction]?.name||r.faction} · ${r.correct}/10 · ${r.hp} HP · ${r.createdAt}</p>`).join(''):'<p>尚無雲端戰績。</p>'}`)}
-  catch(e){openModal(`<h2>讀取失敗</h2><p>${e.message}</p>`)}
+  try{
+    const rows=await getCloudRuns();
+    const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const content=rows.length?'<div class="score-list history-list">'+rows.map(r=>`<article class="score-row history-row"><div class="score-main"><strong>${safe(FACTIONS[r.faction]?.name||r.faction)}</strong><small>${safe(r.createdAt||'時間未提供')}</small></div><div class="score-metrics"><span><small>答對</small><b>${Number(r.correct)||0}/10</b></span><span><small>剩餘 HP</small><b>${Number(r.hp)||0}</b></span><span><small>求生幣</small><b>${Number(r.coins)||0} SC</b></span></div><span class="score-status ${r.survived?'is-survived':'is-failed'}">${r.survived?'成功生還':'挑戰失敗'}</span></article>`).join('')+'</div>':'<p class="score-empty">尚無雲端戰績，完成一場挑戰後就會出現在這裡。</p>';
+    openModal(`<h2>歷史戰績</h2><p class="score-intro">最近 30 場雲端同步紀錄</p>${content}`);
+  }catch(e){openModal(`<h2>讀取失敗</h2><p>${e.message}</p>`)}
 }
 async function showLeaderboard(){
-  try{const rows=await getLeaderboard();openModal(`<h2>排行榜 TOP 50</h2><p>玩家自評榜單，並非防作弊競技排名。</p>${rows.length?rows.map((r,i)=>`<p>${i+1}. ${String(r.displayName||'玩家').replace(/[<>&"']/g,'')} · ${r.bestHp} HP · ${r.bestCorrect}/10</p>`).join(''):'<p>目前還沒有排行榜資料。</p>'}`)}
-  catch(e){openModal(`<h2>排行榜暫時無法讀取</h2><p>${e.message}</p>`)}
+  try{
+    const rows=await getLeaderboard();
+    const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const content=rows.length?'<div class="score-list leaderboard-list"><div class="leaderboard-head"><span>排名</span><span>玩家</span><span>最高 HP</span><span>答對</span></div>'+rows.map((r,i)=>`<article class="leaderboard-row ${i<3?'top-rank':''}"><b class="rank-number">${i+1}</b><strong class="leader-name">${safe(r.displayName||'玩家')}</strong><b class="leader-hp">${Number(r.bestHp)||0}<small> HP</small></b><b class="leader-correct">${Number(r.bestCorrect)||0}<small>/10</small></b></article>`).join('')+'</div>':'<p class="score-empty">目前還沒有排行榜資料，完成挑戰後即可上榜。</p>';
+    openModal(`<h2>排行榜 TOP 50</h2><p class="score-intro">依最高剩餘 HP 排序；玩家自評榜單，並非防作弊競技排名。</p>${content}`);
+  }catch(e){openModal(`<h2>排行榜暫時無法讀取</h2><p>${e.message}</p>`)}
 }
 async function showChallengeStatus(){
   if(!getCloudUser()){openModal('<h2>請先 Google 登入</h2><p>登入後才能查看好友挑戰成績。</p>');return}
