@@ -184,14 +184,16 @@ test('Google authentication restores redirect state before enabling the UI', asy
   const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 
-  assert.match(cloud, /await authSdk\.getRedirectResult\(auth\)/);
-  assert.match(cloud, /await new Promise\(resolve=>[\s\S]*?authSdk\.onAuthStateChanged/);
+  assert.match(cloud, /const authStateReady=new Promise\(resolve=>[\s\S]*?authSdk\.onAuthStateChanged/);
+  assert.ok(cloud.indexOf('authSdk.onAuthStateChanged') < cloud.indexOf('authSdk.getRedirectResult'));
+  assert.match(cloud, /const result=await authSdk\.getRedirectResult\(auth\)/);
+  assert.match(cloud, /const resolvedUser=auth\.currentUser\|\|redirectUser\|\|currentUser/);
   assert.match(cloud, /return \{ready:true,user:currentUser,redirectError\}/);
   assert.match(cloud, /const user=auth\.currentUser\|\|currentUser/);
   assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v23/);
+  assert.match(sw, /you-really-get-them-v24/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
