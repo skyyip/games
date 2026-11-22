@@ -328,7 +328,7 @@ dialog { border-radius: 0; }
  .fake-photo{overflow:hidden}
 }
 
-.cloud-actions{grid-column:1/-1;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}.cloud-actions .secondary-btn{font-size:13px;padding:10px 14px}
+.cloud-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin:14px 0}.cloud-actions .secondary-btn{font-size:13px;padding:10px 14px}
 
 /* Authentication modal */
 .auth-form{display:grid;gap:9px;margin-top:16px}
