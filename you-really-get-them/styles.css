@@ -744,3 +744,16 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   .game-screen.duo-mode .question-card { padding: 16px; }
   .game-screen.duo-mode .question-card h3 { font-size: 20px; }
 }
+
+
+/* Player identity stays visible in the header during gameplay. */
+.player-name-btn { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#modal .auth-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 2px solid var(--ink); background: #fff; font: inherit; }
+#modal .auth-form label { display: block; margin: 10px 0 5px; font-size: 13px; font-weight: 900; }
+#modal .auth-form button[type="submit"] { width: 100%; min-height: 48px; margin-top: 12px; }
+@media (max-width: 600px) {
+  .topbar { gap: 8px; }
+  .top-actions { gap: 6px; }
+  .player-name-btn { max-width: 104px; padding: 8px 7px; font-size: 11px; }
+  .top-actions #authBtn { padding: 8px 9px; font-size: 11px; }
+}
