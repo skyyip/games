@@ -637,7 +637,7 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
 }
 
 
-/* Enlarge the dropdown chevron by 15% and center it vertically. */
+/* Enlarge the dropdown chevron by 10% and center it vertically. */
 .action-menu > summary {
   line-height: 1;
 }
@@ -648,7 +648,7 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   width: 1em;
   height: 1em;
   flex: none;
-  font-size: 1.15em;
+  font-size: 1.265em;
   line-height: 1;
 }
 .action-menu-panel .secondary-btn .ui-icon {
