@@ -246,3 +246,10 @@ test('favorite cards are stored per signed-in player and validated in Firestore'
   assert.match(rules, /data\.favoriteCards is list && data\.favoriteCards\.size\(\) <= 100/);
   assert.match(rules, /hasOnly\(\['displayName', 'playerName', 'favoriteCards', 'photoURL', 'updatedAt'\]\)/);
 });
+
+
+test('player name settings button is visible only for authenticated non-anonymous users', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  assert.match(app, /button\.hidden=\!\(user\&\&\!user\.isAnonymous\)/);
+});
