@@ -113,7 +113,7 @@ async function loadChallengeContext(){
 
 function updatePlayerNameUI(){
   const button=$('playerNameBtn'),user=getCloudUser();
-  button.hidden=!user;
+  button.hidden=!(user&&!user.isAnonymous);
   button.textContent=playerName?`玩家：${playerName}`:'設定玩家名稱';
   button.title=playerName?`玩家名稱：${playerName}（點擊修改）`:'設定你的玩家名稱';
 }
