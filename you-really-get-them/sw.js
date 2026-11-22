@@ -1,4 +1,4 @@
-const CACHE='you-really-get-them-v32';
+const CACHE='you-really-get-them-v33';
 const FILES=[
   './','./index.html','./styles.css','./manifest.webmanifest',
   './src/app.js','./src/firebase/cloud.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
