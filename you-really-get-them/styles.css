@@ -654,3 +654,18 @@ button:focus-visible { outline: 3px solid #245cda; outline-offset: 3px; }
   height: 21px;
   object-fit: contain;
 }
+
+/* Keep the two hero stickers apart on narrow screens. */
+@media (max-width: 600px) {
+  .hero-art .burst {
+    top: auto;
+    right: auto;
+    bottom: 8px;
+    left: 2%;
+  }
+  .hero-art .scribble {
+    top: 8px;
+    right: 2%;
+    bottom: auto;
+  }
+}
