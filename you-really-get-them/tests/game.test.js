@@ -15,22 +15,22 @@ test('five factions have at least ten playable classic questions', () => {
 });
 
 
-test('101-question attachment entries are playable and preserve HP penalties', () => {
-  const expected = { women: 21, men: 20, dog: 10, cat: 10 };
+test('151-question attachment entries and two duo examples are playable', () => {
+  const expected = { women: 30, men: 30, dog: 30, cat: 30, duo: 33 };
   for (const [id, count] of Object.entries(expected)) {
-    const attached = BANK[id].filter(q => q.tag === '101 題史詩完全版');
+    const attached = BANK[id].filter(q => q.tag === '附件完整題庫');
     assert.equal(attached.length, count, id);
     for (const q of attached) {
       assert.equal(q.opts.length, 4);
       assert.equal(q.damageByOption.length, 4);
       assert.equal(q.damageByOption[q.correct], null);
       q.damageByOption.forEach((damage, index) => {
-        if (index !== q.correct) assert.ok(Number.isInteger(damage) && damage >= 25 && damage <= 100);
+        if (index !== q.correct && damage !== null) assert.ok(Number.isInteger(damage) && damage >= 25 && damage <= 100);
       });
+      assert.ok(q.text && q.why);
     }
   }
 });
-
 test('all faction metadata is present', () => {
   for (const id of Object.keys(BANK)) {
     assert.ok(FACTIONS[id].name);
