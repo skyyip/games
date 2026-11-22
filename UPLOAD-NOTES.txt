@@ -1,12 +1,11 @@
 Latest combined website upload package
-Source: 76a459eccd0bc94685dcc7b891b6ecbfffb86049
-Includes main 684f67d and Millionaire asynchronous update eb9b8c8.
+Source: 83d4508153cc056c1ebac4bdc63a62743ec09423
 
-Extract the archive and upload its CONTENTS to public_html/games/, including .htaccess. Do not add another enclosing folder.
+New update: You Really Get Them question artwork now uses six comic snapshots in Polaroid frames, including interaction and duo questions. Source offline cache is v42. Questions, timing, scoring and Firebase rules are unchanged by this visual update.
 
-Deploy the matching hong-kong-millionaire/firestore.rules from the source commit before uploading. This version retains main’s 30-second questions and adds 24-hour asynchronous rooms. Indexes are unchanged.
+Validation: 21 game unit tests, 538 Chromium checks including four complete rounds, duo mode, six viewport widths and offline images; production hashed asset loading; 29-page build, SEO and release permissions passed.
 
-Validation: 82 Millionaire unit tests, 20 SDK adapter checks, 284 browser checks, the existing new-game unit suite, rule generation, 29-page build, SEO and file permissions passed.
-Real Firestore Emulator verification remains PENDING because storage.googleapis.com is blocked in the current environment.
+Extract this ZIP and upload the CONTENTS of its enclosing folder to public_html/games/, including .htaccess.
+The package also retains the earlier 30-second and asynchronous Millionaire update. Deploy its matching hong-kong-millionaire/firestore.rules before uploading if not already done. Its real Firestore Emulator verification remains pending because of the environment network allowlist.
 
-This fixed download branch was manually updated at the user’s explicit request. No production website or Firebase deployment was performed.
+The fixed downloads/games-site branch was updated following the user’s established upload workflow. This does not deploy the production website or Firebase rules.
