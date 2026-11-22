@@ -195,3 +195,18 @@ test('Google authentication restores redirect state before enabling the UI', asy
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
+
+test('duo mode clearly separates setup, phone handoff, answering and result review', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
+  assert.match(app, /STEP 1 · 出題者設定/);
+  assert.match(app, /選擇你自己的答案/);
+  assert.match(app, /我已接過手機，開始作答/);
+  assert.match(app, /測試者作答 · 不設時限/);
+  assert.match(app, /出題者本人/);
+  assert.match(app, /出題者的答案/);
+  assert.match(app, /測試者的猜測/);
+  assert.match(css, /\.game-screen\.duo-mode \.answers \{ grid-template-columns: 1fr/);
+  assert.match(css, /\.duo-answer-compare/);
+});
