@@ -459,3 +459,5 @@ dialog:has(.score-list) { width: min(720px, calc(100% - 30px)); }
 .air-score-row>b{font:900 12px 'DM Mono',monospace;text-align:right}
 .air-report>p{margin:13px 0 0;color:#625b4d;font-size:12px;line-height:1.6}
 @media(max-width:600px){.mode-selector{gap:9px;margin:16px 0 7px}.mode-card{min-height:72px;padding:10px}.mode-card b{font-size:14px}.mode-card small{font-size:10px}.air-report{padding:12px}.air-score-row{grid-template-columns:75px minmax(0,1fr) 30px;gap:7px}}
+
+.game-screen.air-mode .status-row{grid-template-columns:1fr}
