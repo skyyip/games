@@ -1,7 +1,7 @@
-const CACHE='you-really-get-them-v22';
+const CACHE='you-really-get-them-v23';
 const FILES=[
   './','./index.html','./styles.css','./manifest.webmanifest',
-  './src/app.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
+  './src/app.js','./src/firebase/cloud.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
   './assets/illustrations/woman.webp','./assets/illustrations/man.webp',
   './assets/illustrations/dog.webp','./assets/illustrations/cat.webp',
   './assets/illustrations/duo.webp','./assets/illustrations/scratch.webp'
@@ -16,6 +16,9 @@ self.addEventListener('activate',event=>{
 });
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
+  const requestUrl=new URL(event.request.url);
+  // Firebase SDK and OAuth endpoints must always use the network, never SW cache.
+  if(requestUrl.origin!==self.location.origin)return;
   event.respondWith((async()=>{
     const cached=await caches.match(event.request);
     if(cached)return cached;
