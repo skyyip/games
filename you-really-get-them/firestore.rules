@@ -23,7 +23,10 @@ service cloud.firestore {
       match /runs/{runId} {
         allow read: if signedIn() && request.auth.uid == uid;
         allow create: if signedIn() && request.auth.uid == uid
-          && request.resource.data.keys().hasOnly(['faction','survived','hp','coins','correct','createdAt'])
+          && request.resource.data.keys().hasOnly(['faction','mode','questionCount','dimensions','survived','hp','coins','correct','createdAt'])
+          && request.resource.data.mode in ['classic','air']
+          && request.resource.data.questionCount in [5,10]
+          && (request.resource.data.dimensions == null || (request.resource.data.dimensions is list && request.resource.data.dimensions.size() == 5))
           && request.resource.data.hp is int && request.resource.data.hp >= 0 && request.resource.data.hp <= 100
           && request.resource.data.correct is int && request.resource.data.correct >= 0 && request.resource.data.correct <= 10
           && request.resource.data.faction in ['women','men','dog','cat','duo']
