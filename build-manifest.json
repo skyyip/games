@@ -1,7 +1,8 @@
 {
-  "version": "49370e044c4360a8",
-  "builtAt": 1795526814257,
+  "version": "372f6fbfb91c5213",
+  "builtAt": 1795528029680,
   "assets": {
+    "you-really-get-them/assets/illustrations/gacha-polaroids.webp": "assets/gacha-polaroids-cf2a9c691793.webp",
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
     "beat-bad-luck/assets/icons/website-logo-512.png": "assets/website-logo-512-01020184b434.png",
@@ -365,7 +366,7 @@
     "pot-toss/src/app.js": "built/app-47BX46QU.js",
     "roach-rush/src/app.js": "built/app-TDKY3AXT.js",
     "stone-skip/src/app.js": "built/app-DXOHJEBY.js",
-    "you-really-get-them/src/app.js": "built/app-SJ7GOCEG.js",
+    "you-really-get-them/src/app.js": "built/app-IZ3GLKPW.js",
     "your-dream-career/src/app.js": "built/app-OKS2TK65.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
     "hong-kong-millionaire/src/app.js": "built/app-TT5YUFRL.js",
@@ -396,7 +397,7 @@
     "pot-toss/styles.css": "built/styles-SH7PW436.css",
     "roach-rush/styles.css": "built/styles-EMU7TNYL.css",
     "stone-skip/styles.css": "built/styles-TBA3T5NJ.css",
-    "you-really-get-them/styles.css": "built/styles-5CLXVROR.css",
+    "you-really-get-them/styles.css": "built/styles-FIQXLPXI.css",
     "your-dream-career/styles.css": "built/styles-EPARVTUD.css",
     "your-dream-career/dream.css": "built/dream-LNLKTEYZ.css",
     "hong-kong-millionaire/mobile.css": "built/mobile-S5Q2IMBB.css",
