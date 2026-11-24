@@ -994,3 +994,63 @@ dialog:has(.leaderboard-faction-tabs) {
 .incident-evidence summary{cursor:pointer;font-size:13px;font-weight:700;padding:10px 0;min-height:44px}
 .incident-evidence blockquote{margin:8px 0;padding:10px;border-left:4px solid var(--ink);background:#f2ead8;font-size:13px;line-height:1.7}
 @media(max-width:480px){.incident-report{padding:15px}.incident-heading h3{font-size:21px}}
+
+/* Duo uses mint across entry, setup, handoff and play so it is distinct from Cat. */
+:root{--duo-bg:#c8efe5;--duo-ink:#175a4d}
+.faction-card.duo{background:var(--duo-bg);border-color:var(--duo-ink)}
+#modal:has(.duo-flow){background:#eaf8f3;border-color:var(--duo-ink)}
+#modal .duo-flow{background:#eaf8f3}
+#modal .duo-role-label{background:var(--duo-bg);color:var(--duo-ink);border-color:var(--duo-ink)}
+.game-screen.duo-mode{background:#eaf8f3;border-radius:6px;padding-left:12px;padding-right:12px}
+.game-screen.duo-mode .question-card{background:#f8fffc;border-color:var(--duo-ink)}
+.game-screen.duo-mode .game-title .eyebrow{background:var(--duo-bg);border-color:var(--duo-ink)}
+.game-screen.duo-mode .answer-btn,#modal .duo-setup-answers .answer-btn{align-items:flex-start}
+.answer-letter{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border:2px solid var(--ink);background:var(--yellow);font:bold 13px monospace}
+#answers .answer-btn{display:flex;align-items:flex-start;gap:10px;text-align:left}
+.answer-copy{min-width:0;overflow-wrap:anywhere;line-height:1.6}
+.reward-breakdown{margin:18px 0;padding:18px;border:2px solid var(--ink);background:#fff9d6;text-align:left}
+.reward-breakdown>div{display:flex;justify-content:space-between;gap:14px;padding:9px 0;font-size:14px;line-height:1.5}
+.reward-breakdown b{white-space:nowrap}
+.reward-breakdown .reward-total{border-top:2px dashed var(--ink);margin-top:7px;padding-top:14px;font-weight:900;font-size:18px}
+.reward-breakdown p{margin:8px 0 0;font-size:12px;line-height:1.6}
+.result-certification{display:inline-block;padding:8px 12px;border:3px solid #236444;background:#d9f4cf;transform:rotate(-3deg);font-size:17px}
+.result-certification[hidden]{display:none}
+.result-top #resultSubtitle{font-size:15px;line-height:1.75;overflow-wrap:anywhere}
+@media(max-width:600px){
+  .topbar{height:calc(64px + env(safe-area-inset-top,0px));min-height:64px;padding-top:max(8px,env(safe-area-inset-top,0px));padding-bottom:8px}
+  .game-hud{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:12;background:var(--paper);padding:8px 0;border-bottom:2px solid var(--ink);margin-bottom:14px}
+  .duo-mode .game-hud{background:#eaf8f3}
+  .game-hud .game-head{gap:8px;margin:0 0 6px}
+  .game-hud .game-title{min-width:0;gap:8px}
+  .game-hud .game-title .eyebrow{max-width:none;white-space:normal;overflow:visible;text-overflow:clip;letter-spacing:0;font-size:11px;line-height:1.45;padding:4px 6px}
+  .game-hud .game-title h2{font-size:25px;white-space:nowrap;flex:none}
+  .game-hud .status-row{margin:0;grid-template-columns:minmax(0,1fr) 78px;gap:10px}
+  .game-hud .hp-label{margin:0 0 3px}
+  .game-hud .hp-label b{font-size:21px}
+  .game-hud .hp-track{height:9px}
+  .game-hud .timer-wrap{padding:3px 5px}
+  .game-hud .timer-number{font-size:22px}
+  #game .question-visual{scroll-margin-top:calc(184px + env(safe-area-inset-top,0px))}
+  #game .question-visual:not(.has-picture-question):not(.is-reviewing){height:160px!important;min-height:0;padding-top:0;margin:8px 0 14px}
+  #game .question-visual:not(.has-picture-question):not(.is-reviewing) .scene-polaroid{width:126px;padding:5px 5px 8px;margin:0 auto 5px}
+  #game .question-card h3{font-size:17px;line-height:1.65;letter-spacing:0}
+  #game .answers{grid-template-columns:1fr;gap:11px}
+  #game .answer-btn{min-height:64px;padding:12px;font-size:15px;line-height:1.6;touch-action:manipulation}
+  #game .answer-btn:disabled{opacity:1}
+  #game .question-hint{font-size:14px;line-height:1.75}
+  .game-screen:has(.answer-review:not([hidden])){padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  .answer-review .primary-btn{position:fixed;z-index:15;bottom:calc(12px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:720px;min-height:54px;box-shadow:4px 4px 0 var(--ink)}
+  .clue-panel{padding:10px 12px}
+  .clue-panel p{font-size:13px;line-height:1.65}
+  .run-coins{font-size:12px;white-space:nowrap}
+  .game-bottom{flex-wrap:wrap;gap:8px}
+  .progress-dots{flex:0 0 100%;justify-content:center;margin-top:4px}
+  .text-btn,.photo-flip-btn,.action-menu>summary{min-height:44px}
+  #modal{max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain}
+  #modal .modal-inner{padding:18px 16px}
+  #modal .auth-form input{font-size:16px;min-height:48px}
+  #modal .duo-results{overflow:visible;max-height:none}
+  .result-top h2{font-size:30px;line-height:1.3;overflow-wrap:anywhere}
+  .result-actions{grid-template-columns:1fr}
+  .result-actions button{min-height:52px;font-size:14px}
+}

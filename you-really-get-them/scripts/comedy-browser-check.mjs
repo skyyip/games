@@ -12,7 +12,7 @@ async function open(width=390,{reducedMotion='no-preference'}={}){
  const context=await browser.newContext({viewport:{width,height:900},isMobile:width<500,hasTouch:width<500,reducedMotion,serviceWorkers:'block'});
  await context.addInitScript(installBrowserFirebaseFixture);
  await context.addInitScript(()=>{
-  Math.random=()=>.999999;globalThis.comicCanvasText=[];globalThis.comicCanvasImages=[];
+  Math.random=()=>.999999;localStorage.setItem('yrgt-save-v1:guest',JSON.stringify({coins:17,cards:[],runs:0,bestHp:0}));globalThis.comicCanvasText=[];globalThis.comicCanvasImages=[];
   const drawImage=CanvasRenderingContext2D.prototype.drawImage;
   CanvasRenderingContext2D.prototype.drawImage=function(image,...args){comicCanvasImages.push(image.currentSrc||image.src);return drawImage.call(this,image,...args)};
   const original=CanvasRenderingContext2D.prototype.fillText;
@@ -40,7 +40,7 @@ async function round(faction,width){
   }
   await page.locator('#answers .answer-btn').nth(choice).click();await page.locator('.polaroid-back').waitFor({state:'visible'});
   assert(await page.locator('.polaroid-back blockquote').textContent());assert.equal(await page.locator('.scene-polaroid').getAttribute('aria-hidden'),null);
-  assert.equal(await page.locator('#answers button:enabled').count(),0);await geometry(page);checks+=3;
+  assert.equal(await page.locator('#answers button:enabled').count(),0);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),17);checks++;await geometry(page);checks+=3;
   const timer=await page.locator('#timer').textContent();await page.clock.fastForward(5000);
   assert.equal(await page.locator('#timer').textContent(),timer);assert.equal(await page.locator('#questionNo').textContent(),String(i+1).padStart(2,'0'));checks+=2;
   await page.locator('#photoFlipBtn').click();assert.equal(await page.locator('.polaroid-back').isVisible(),false);assert(await page.locator('#questionVisual .scene-photo').isVisible());
@@ -48,7 +48,7 @@ async function round(faction,width){
   if(q.picture&&images===1)await page.screenshot({path:`/tmp/yrgt-comedy-reveal-${faction}-${width}.png`,fullPage:true,animations:'disabled'});
   await page.locator('#nextQuestionBtn').click();
  }
- await page.locator('#result').waitFor({state:'visible'});assert.equal(images,2);assert.equal(await page.locator('#resultCorrect').textContent(),'11 / 12');
+ await page.locator('#result').waitFor({state:'visible'});const hp=Number(await page.locator('#resultHp').textContent()),reward=100+hp*2;assert.equal(await page.locator('#resultCoins').textContent(),`${reward} SC`);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),17+reward);assert((await page.locator('#rewardBreakdown').textContent()).includes('100 SC'));checks+=3;assert.equal(images,2);assert.equal(await page.locator('#resultCorrect').textContent(),'11 / 12');
  const incident=page.locator('#incidentReport .incident-evidence').first();assert.equal(await incident.getAttribute('data-round'),String(wrong.round));
  await incident.locator('summary').click();assert((await incident.locator('blockquote').textContent()).includes(wrong.q.opts[wrong.choice]));
  assert((await page.locator('#incidentReport').textContent()).includes('完成 12/12 題'));assert((await page.locator('#incidentReport').textContent()).includes('發現 6 個線索'));
@@ -65,7 +65,7 @@ async function round(faction,width){
   Object.defineProperty(navigator,'share',{value:async data=>{globalThis.sharedComic={title:data.title,text:data.text,type:data.files[0].type,size:data.files[0].size}},configurable:true});
  });
  await page.locator('#sharePoster').click();await page.waitForFunction(()=>globalThis.sharedComic);
- const shared=await page.evaluate(()=>sharedComic);assert.equal(shared.title,'我的求生事故報告');assert(shared.text.includes('本局完成 12/12 題'));assert(shared.type==='image/png'&&shared.size>10000);checks+=3;
+ const shared=await page.evaluate(()=>sharedComic);assert.equal(shared.title,'我的求生事故報告');assert(shared.text.includes('本局完成 12/12 題'));assert(shared.type==='image/png'&&shared.size>10000);assert(shared.text.includes(await page.locator('#resultTitle').textContent()));assert(shared.text.includes(`${reward} SC`));checks+=5;
 
  await page.locator('#againBtn').click();await page.locator('#answers .answer-btn').first().waitFor();
  assert.equal(await page.locator('.polaroid-back').count(),0);assert.equal(await page.locator('#answerReview').isVisible(),false);checks+=2;
@@ -80,7 +80,7 @@ try{
   assert.equal(await page.locator('#hpValue').textContent(),'60');await page.clock.fastForward(10000);assert.equal(await page.locator('#hpValue').textContent(),'60');checks+=3;
   await page.locator('#nextQuestionBtn').click();await page.clock.runFor(30100);await page.locator('#nextQuestionBtn').click();await page.clock.runFor(30100);
   assert.equal(await page.locator('#nextQuestionBtn').textContent(),'查看本日事故報告 →');await page.locator('#nextQuestionBtn').click();await page.locator('#result').waitFor({state:'visible'});
-  assert((await page.locator('#incidentReport').textContent()).includes('完成 3/12 題'));assert((await page.locator('#incidentReport').textContent()).includes('腦內排練超時王'));
+  assert.equal(await page.locator('#resultCoins').textContent(),'10 SC');assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),27);checks+=2;assert((await page.locator('#incidentReport').textContent()).includes('完成 3/12 題'));assert((await page.locator('#incidentReport').textContent()).includes('腦內排練超時王'));
   await page.locator('#incidentReport .incident-evidence summary').click();assert((await page.locator('#incidentReport blockquote').textContent()).includes('時間到，尚未作答'));checks+=4;await context.close();
  }
  assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,fullRounds:4,reviewPausesTimer:true,truthfulIncidents:true,posterExport:true,timeout:true,pageErrors:errors.length}));
