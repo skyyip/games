@@ -9,55 +9,40 @@ export async function initCloud(onChange=()=>{}){
   authSdk=await import(`${SDK}/firebase-auth.js`);
   fs=await import(`${SDK}/firebase-firestore.js`);
   const app=appSdk.getApps().length?appSdk.getApp():appSdk.initializeApp(firebaseConfig);
-  auth=authSdk.getAuth(app);
-  db=fs.getFirestore(app);
+  // Restore first-party storage without eagerly loading the cross-domain
+  // redirect helper, which can be blocked on iOS browsers.
   try {
-    await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
-  } catch (error) {
-    console.warn('Firebase local persistence unavailable; using session persistence',error);
-    try {
-      await authSdk.setPersistence(auth,authSdk.browserSessionPersistence);
-    } catch (persistenceError) {
-      console.error('Firebase auth persistence setup failed',persistenceError);
-    }
+    auth=authSdk.initializeAuth(app,{
+      persistence:[authSdk.browserLocalPersistence,authSdk.browserSessionPersistence]
+    });
+  } catch(error) {
+    if(error.code!=='auth/already-initialized')throw error;
+    auth=authSdk.getAuth(app);
   }
-  // Subscribe before processing the redirect so iOS browsers cannot miss
-  // the initial persisted/redirected auth state.
-  let initialized=false;
-  const authStateReady=new Promise(resolve=>{
-    authSdk.onAuthStateChanged(auth,async user=>{
+  db=fs.getFirestore(app);
+  let revision=0;
+  const authStateReady=new Promise((resolve,reject)=>{
+    authSdk.onAuthStateChanged(auth,user=>{
+      const version=++revision;
       currentUser=user;
       currentPlayerName='';
-      let profile=null;
-      if(user){
-        try{profile=await syncProfileFromCloud()}catch(error){console.error('Firebase profile sync failed',error)}
-      }
-      currentPlayerName=profile?.playerName||'';
-      onChange(user,profile);
-      if(!initialized){initialized=true;resolve(user)}
-    },error=>{
-      console.error('Firebase auth state listener failed',error);
-      if(!initialized){initialized=true;resolve(null)}
-    });
+      // Identity must be usable even while a Firestore read/write is pending.
+      onChange(user,null,{profileLoaded:false});
+      resolve(user);
+      if(!user)return;
+      syncProfileFromCloud(user).then(profile=>{
+        if(version!==revision)return;
+        currentPlayerName=profile?.playerName||'';
+        onChange(user,profile,{profileLoaded:true});
+      }).catch(error=>{
+        if(version!==revision)return;
+        console.error('Firebase profile sync failed',error);
+        onChange(user,null,{profileLoaded:false,profileError:error});
+      });
+    },reject);
   });
-  let redirectError=null,redirectUser=null;
-  try {
-    const result=await authSdk.getRedirectResult(auth);
-    redirectUser=result?.user||null;
-  } catch (error) {
-    redirectError=error;
-    console.error('Google sign-in redirect failed',error);
-  }
   await authStateReady;
-  // Some mobile browsers resolve the redirect result after the first auth
-  // observer callback. Prefer Firebase's current user, then the redirect user.
-  const resolvedUser=auth.currentUser||redirectUser||currentUser;
-  if(resolvedUser?.uid!==currentUser?.uid){
-    currentUser=resolvedUser;
-    onChange(currentUser);
-    if(currentUser)syncProfileFromCloud().catch(error=>console.error('Firebase profile sync failed',error));
-  }
-  return {ready:true,user:currentUser,redirectError};
+  return {ready:true,user:currentUser};
 }
 export const getCloudUser=()=>currentUser;
 export const getCloudPlayerName=()=>currentPlayerName;
@@ -76,26 +61,20 @@ export async function signInGoogle(){
   const provider=new authSdk.GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
   const user=auth.currentUser||currentUser;
-  const mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/i.test(navigator.platform);
-  const redirect=()=>user?.isAnonymous
-    ?authSdk.linkWithRedirect(user,provider)
-    :authSdk.signInWithRedirect(auth,provider);
-  if(mobile)return redirect();
-  try {
-    return user?.isAnonymous
-      ?await authSdk.linkWithPopup(user,provider)
-      :await authSdk.signInWithPopup(auth,provider);
-  } catch(error) {
-    if(error.code==='auth/popup-blocked')return redirect();
-    throw error;
-  }
+  // Keep the user gesture and the app page alive on mobile as well as desktop.
+  // A blocked popup is reported to the user; redirecting would reintroduce
+  // the third-party storage dependency.
+  return user?.isAnonymous
+    ?authSdk.linkWithPopup(user,provider,authSdk.browserPopupRedirectResolver)
+    :authSdk.signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver);
 }
 export async function signOutGoogle(){return authSdk.signOut(auth);}
-export async function syncProfileFromCloud(){
-  if(!currentUser)return null;
-  const ref=fs.doc(db,'users',currentUser.uid),snap=await fs.getDoc(ref);
+export async function syncProfileFromCloud(user=currentUser){
+  if(!user)return null;
+  const ref=fs.doc(db,'users',user.uid),snap=await fs.getDoc(ref);
+  if(currentUser?.uid!==user.uid)return null;
   if(snap.exists())return snap.data();
-  const profile={displayName:(currentUser.displayName||'玩家').slice(0,50),playerName:'',photoURL:currentUser.photoURL||'',updatedAt:fs.serverTimestamp()};
+  const profile={displayName:(user.displayName||'玩家').slice(0,50),playerName:'',photoURL:user.photoURL||'',updatedAt:fs.serverTimestamp()};
   await fs.setDoc(ref,profile);return profile;
 }
 export async function saveCloudProfile({playerName}={}){

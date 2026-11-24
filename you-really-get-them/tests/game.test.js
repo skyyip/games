@@ -105,7 +105,6 @@ test('mobile question, result, poster and cloud counts stay aligned', async () =
   assert.match(app, /signUpEmail\(email\(\),password\(\)\)/);
   assert.match(app, /signInGoogle/);
   assert.match(cloud, /createUserWithEmailAndPassword/);
-  assert.match(cloud, /signInWithRedirect/);
   assert.match(cloud, /linkWithCredential/);
   assert.match(css, /@media \(max-width: 600px\)/);
   assert.match(css, /\.answer-btn \{ min-height: 72px/);
@@ -186,22 +185,13 @@ test('duo mode uses five setup questions and a separate pass-the-phone test flow
 });
 
 
-test('Google authentication restores redirect state before enabling the UI', async () => {
+test('authentication messages and offline cache include the current login flow', async () => {
   const { readFileSync } = await import('node:fs');
-  const cloud = readFileSync(new URL('../src/firebase/cloud.js', import.meta.url), 'utf8');
   const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
-
-  assert.match(cloud, /const authStateReady=new Promise\(resolve=>[\s\S]*?authSdk\.onAuthStateChanged/);
-  assert.ok(cloud.indexOf('authSdk.onAuthStateChanged') < cloud.indexOf('authSdk.getRedirectResult'));
-  assert.match(cloud, /const result=await authSdk\.getRedirectResult\(auth\)/);
-  assert.match(cloud, /const resolvedUser=auth\.currentUser\|\|redirectUser\|\|currentUser/);
-  assert.match(cloud, /return \{ready:true,user:currentUser,redirectError\}/);
-  assert.match(cloud, /const user=auth\.currentUser\|\|currentUser/);
-  assert.match(cloud, /auth\/popup-blocked[\s\S]*?return redirect\(\)/);
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v43/);
+  assert.match(sw, /you-really-get-them-v44/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -282,7 +272,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v43/);
+  assert.match(sw, /you-really-get-them-v44/);
 });
 
 
@@ -293,7 +283,7 @@ test('game performance uses linear Fisher-Yates shuffle after the removed intera
   assert.match(app, /function shuffle\(a\)\{const out=\[\.\.\.a\];for\(let i=out\.length-1;i>0;i--\)/);
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.doesNotMatch(app, /setupScratch|scratch-pad|scratchMeter|刮開怒氣黑霧/);
-  assert.match(sw, /you-really-get-them-v43/);
+  assert.match(sw, /you-really-get-them-v44/);
 });
 
 
@@ -319,7 +309,7 @@ test('all shipped image assets are included in the versioned offline cache', asy
   assert.ok(sw.includes("'./src/picture-questions.js'"));
   assert.match(css, /collection-polaroids\.webp/);
   assert.equal((app.match(/art:\d+,rarity:/g) || []).length, 12);
-  assert.match(sw, /you-really-get-them-v43/);
+  assert.match(sw, /you-really-get-them-v44/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
 

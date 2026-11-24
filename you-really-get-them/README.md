@@ -24,6 +24,14 @@ npm test
 - 登入 Google 後可同步玩家資料、查閱個人歷史戰績、參與公開排行榜及建立非同步好友挑戰。
 - 好友邀請有效期七天；雙方以相同陣營及題目順序完成挑戰。
 
+## iOS Chrome 登入修正（2026-11-24）
+
+- Google 登入及訪客升級均由按鈕直接開啟 Firebase 授權視窗，依照 [Firebase 官方建議](https://firebase.google.com/docs/auth/web/redirect-best-practices#option_2_switch_to_signinwithpopup) 避免跨網域轉址讀取第三方儲存的問題。視窗被封鎖時顯示錯誤並可重試，不會自動跳回轉址流程。
+- 初始化使用 Firebase 本機儲存，若不支援則使用工作階段儲存，並先恢復登入狀態；玩家名稱及收藏於 Firestore 資料讀取成功後才同步。資料延遲或失敗不會將玩家顯示為未登入，亦不會因此寫入空白收藏。登出或切換帳戶後，過期的資料讀取結果不會套用。
+- 離線快取更新為 v44；Firestore 規則及索引無需修改。
+- `npm test`：31 項通過。設定已安裝的 Playwright 模組路徑後，執行 `GRID_RUSH_PLAYWRIGHT_MODULE=/path/to/playwright npm run test:auth`，驗證登入、重新整理、登出、重試、訪客綁定及雲端失敗，共 37 項檢查。測試使用 Chromium、iOS Chrome UA 及 Firebase SDK 測試替身，不代表真實 iOS 或正式 Google OAuth 已驗證。
+- 部署後須以 iOS Chrome 一般分頁完成一次實際 Google 授權，確認顯示已登入、重新整理仍已登入，以及登出後重新整理仍為未登入。瀏覽器需允許第一方網站資料；封鎖彈出視窗時須先允許後重新按登入。
+
 ## Firebase Spark 設定
 
 本專案使用 Firebase Web SDK CDN，無需安裝 Firebase npm 套件，也不部署 Cloud Functions。
