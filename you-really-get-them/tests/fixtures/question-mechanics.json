@@ -1,0 +1,90 @@
+{
+  "BANK": {
+    "women": {
+      "count": 40,
+      "sha256": "f08a07a98ba8b1d0d7336e28f9c8a29f1232983b2895e3f3b04d23d803ff71f7"
+    },
+    "men": {
+      "count": 40,
+      "sha256": "df84aedc7b810d5b2769e6d8c0ff000f60ac33a04998634e160b4f9f87e59f6c"
+    },
+    "dog": {
+      "count": 40,
+      "sha256": "5cc960f7af872babcdca7ab6b3d4408a06cc0a5830541f71b8b2ac66ad593bca"
+    },
+    "cat": {
+      "count": 40,
+      "sha256": "e72755b48420e31b0221cf3f950ea36f5d323bb3769df67cd75010ceff190b99"
+    },
+    "duo": {
+      "count": 43,
+      "sha256": "e53c0e70a5516c20349771558c2595bee512d3ed314c3fe48f7760a8abc80b75"
+    }
+  },
+  "AIR_BANK": {
+    "women": {
+      "count": 5,
+      "sha256": "1f4a7841bfd75ba2f4a989971948ae7a8169e7d6480f46a80d734ba58d64195b"
+    },
+    "men": {
+      "count": 5,
+      "sha256": "a5d23ec55fc713aa16094a84401c03ea44424f07b6a8e5ec868406acb248c44c"
+    },
+    "dog": {
+      "count": 5,
+      "sha256": "3a5221ec378684970db39cdff50245de1c8ebcc5058e190e4eb980a0a9965bc5"
+    },
+    "cat": {
+      "count": 5,
+      "sha256": "0555b149b6e222989597a201093d5c0875f888763218c70b8590a00d8224b46c"
+    },
+    "duo": {
+      "count": 5,
+      "sha256": "55efc7ca971d867ebfb5d56da3b183cefc8a97c13292fef1bc3d6bcfdb867e37"
+    }
+  },
+  "MIXED_BANK": {
+    "women": {
+      "count": 4,
+      "sha256": "0fbd4fa7eb2c48ae4c4463666aca466ca238bcc352bbbac1ab55add83479430b"
+    },
+    "men": {
+      "count": 4,
+      "sha256": "0fbd4fa7eb2c48ae4c4463666aca466ca238bcc352bbbac1ab55add83479430b"
+    },
+    "dog": {
+      "count": 4,
+      "sha256": "9a2a60c1dfff7a366435e247209ded916003b02b4b6d83b79824350f4e02b9cd"
+    },
+    "cat": {
+      "count": 4,
+      "sha256": "8e69f2021d38393a7249e0aa7e150839062d95341f2968329a7033c5051dfbb2"
+    },
+    "duo": {
+      "count": 4,
+      "sha256": "0fbd4fa7eb2c48ae4c4463666aca466ca238bcc352bbbac1ab55add83479430b"
+    }
+  },
+  "PICTURE_BANK": {
+    "women": {
+      "count": 2,
+      "sha256": "2406081f7ce503fdb759e396fffb74ff0cdb1a74cf40199eda3e843e73ba1d24"
+    },
+    "men": {
+      "count": 2,
+      "sha256": "ec98dc99e0dd35bcb82ca8bfbeaab9614d9f587f8eaf59310d628a93c02a27ae"
+    },
+    "dog": {
+      "count": 2,
+      "sha256": "0b273e3bce0c47f19815607d24d094ad29bad82b7a298eeb3bbf99180a966655"
+    },
+    "cat": {
+      "count": 2,
+      "sha256": "e8f61084eb9951024170d2f7b7e7bf6b168c3151cfccfad6d1ad7c7c83271a78"
+    },
+    "duo": {
+      "count": 1,
+      "sha256": "940db0f8d8fe89d27db941c4f8fcec1472fecc2363444d56e5f347c3de7d4193"
+    }
+  }
+}
