@@ -176,7 +176,7 @@ test('duo mode uses five setup questions and a separate pass-the-phone test flow
   assert.match(app, /function stopHoldAnimation\(\)/);
   assert.match(app, /function setupHold\(\)[\s\S]*?holdFrame=frame=requestAnimationFrame\(loop\)/);
   assert.match(app, /function answer\(choice\)[\s\S]*?stopHoldAnimation\(\)/);
-  assert.match(app, /function feedback\(msg\)[\s\S]*?stopHoldAnimation\(\)/);
+  assert.match(app, /function feedback\(msg,previousHp=hp\)[\s\S]*?stopHoldAnimation\(\)/);
   assert.match(app, /function finishDuoTest\(\)/);
   assert.match(app, /duoExpected\.push\(Number\(e\.target\.closest\('\[data-duo-expected\]'\)\.dataset\.duoExpected\)\)/);
   assert.match(app, /duoExpected\[i\]===duoTestAnswers\[i\]/);
@@ -191,7 +191,7 @@ test('authentication messages and offline cache include the current login flow',
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v44/);
+  assert.match(sw, /you-really-get-them-v45/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -272,7 +272,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v44/);
+  assert.match(sw, /you-really-get-them-v45/);
 });
 
 
@@ -283,7 +283,7 @@ test('game performance uses linear Fisher-Yates shuffle after the removed intera
   assert.match(app, /function shuffle\(a\)\{const out=\[\.\.\.a\];for\(let i=out\.length-1;i>0;i--\)/);
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.doesNotMatch(app, /setupScratch|scratch-pad|scratchMeter|刮開怒氣黑霧/);
-  assert.match(sw, /you-really-get-them-v44/);
+  assert.match(sw, /you-really-get-them-v45/);
 });
 
 
@@ -309,7 +309,7 @@ test('all shipped image assets are included in the versioned offline cache', asy
   assert.ok(sw.includes("'./src/picture-questions.js'"));
   assert.match(css, /collection-polaroids\.webp/);
   assert.equal((app.match(/art:\d+,rarity:/g) || []).length, 12);
-  assert.match(sw, /you-really-get-them-v44/);
+  assert.match(sw, /you-really-get-them-v45/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
 
