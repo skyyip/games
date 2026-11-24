@@ -272,7 +272,7 @@ function showAuthModal(){
 let drawing=false;
 function cardArt(card,label,large=false){
   const columns=4,rows=card.atlas?4:3,x=card.art%columns*100/(columns-1),y=Math.floor(card.art/columns)*100/(rows-1);
-  return `<figure class="flash-card-polaroid rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${card.atlas==='pets'?' pet-card-art':card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div><figcaption>${escapeText(label)}</figcaption></figure>`;
+  return `<figure class="flash-card-polaroid rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${card.atlas==='life'?' life-card-art':card.atlas==='pets'?' pet-card-art':card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div><figcaption>${escapeText(label)}</figcaption></figure>`;
 }
 function followHologram(root){
   root.onpointermove=root.onpointerdown=event=>{
@@ -291,7 +291,6 @@ function renderCollection(){
   $('gachaDraw').disabled=drawing||saveData.coins<DRAW_COST;
   $('gachaDraw').setAttribute('aria-label',drawing?'開盲盒中，請稍候':`花費 ${DRAW_COST} SC 抽一張閃卡`);
   $('gachaPrice').textContent=drawing?'開盲盒中…':`${DRAW_COST} SC / 每抽`;
-  $('gachaOdds').innerHTML=RARITIES.map(tier=>`<span class="odds-${tier.id.toLowerCase()}"><b>${tier.id}</b> ${tier.rate}%</span>`).join('');
   $('gachaDraw').onclick=drawGacha;
   $('collectionGrid').replaceChildren();
   const rarityOrder=RARITIES.map(tier=>tier.id);
@@ -309,7 +308,7 @@ function renderCollection(){
   }
   followHologram($('collectionGrid'));
 }
-function showCollection(){renderCollection();if(!drawing)$('gachaStatus').textContent=saveData.coins<DRAW_COST?'求生幣不足 100 SC；完成一般求生場次即可累積。':'';show('collection')}
+function showCollection(){renderCollection();if(!drawing)$('gachaStatus').textContent=saveData.coins<DRAW_COST?'求生幣不足 100 SC':'';show('collection')}
 function drawGacha(){
   if(drawing)return;
   const outcome=purchaseDraw(loadSave());if(!outcome){renderCollection();$('gachaStatus').textContent='求生幣不足 100 SC，暫時不能抽卡。';return}
@@ -321,7 +320,7 @@ function drawGacha(){
   }
   persistFavoriteCards(outcome.save.cards);updateSaveUI();$('collectionCoins').textContent=`${outcome.save.coins} SC`;
   $('gachaDraw').disabled=true;$('gachaDraw').setAttribute('aria-label','開盲盒中，請稍候');$('gachaPrice').textContent='開盲盒中…';$('gachaMachine').setAttribute('aria-busy','true');$('gachaMachine').classList.add('is-drawing');
-  $('gachaStatus').textContent='咔嚓！開盲盒中……';
+  $('gachaStatus').textContent='';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!reduced&&!isMuted())navigator.vibrate?.([60,30,90]);beep('click');
   setTimeout(()=>{
@@ -329,7 +328,7 @@ function drawGacha(){
     if((getCloudUser()?.uid||'guest')!==scope){$('gachaDraw').disabled=loadSave().coins<DRAW_COST;$('gachaPrice').textContent=`${DRAW_COST} SC / 每抽`;return;}
     if(!$('collection').classList.contains('hidden')){
       renderCollection();const {card,duplicate}=outcome;
-      $('gachaStatus').textContent=duplicate?`重複閃卡！回收 ${DUPLICATE_REFUND} SC。`:`${card.rarity} ${card.name} 已加入收藏！`;
+      $('gachaStatus').textContent='';
       openModal(`<section class="gacha-result rarity-${card.rarity.toLowerCase()}"><h2>${duplicate?'重複閃卡！':card.rarity+' 閃卡入手！'}</h2>${cardArt(card,card.name,true)}<p>${card.desc}</p><p class="gacha-receipt">花費 ${DRAW_COST} SC${duplicate?` · 重複回收 ${DUPLICATE_REFUND} SC`:''}</p><button type="button" class="primary-btn" id="keepGachaCard">收進收藏冊 →</button></section>`);
       $('keepGachaCard').onclick=()=>$('modal').close();followHologram($('modalContent'));beep(card.rarity==='SSR'?'win':'good');
     }

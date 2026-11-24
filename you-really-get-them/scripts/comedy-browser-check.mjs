@@ -49,6 +49,9 @@ async function round(faction,width){
   await page.locator('#nextQuestionBtn').click();
  }
  await page.locator('#result').waitFor({state:'visible'});const hp=Number(await page.locator('#resultHp').textContent()),reward=100+hp*2;assert.equal(await page.locator('#resultCoins').textContent(),`${reward} SC`);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),17+reward);assert((await page.locator('#rewardBreakdown').textContent()).includes('100 SC'));checks+=3;assert.equal(images,2);assert.equal(await page.locator('#resultCorrect').textContent(),'11 / 12');
+ const poster=await page.locator('#posterPreview').evaluate(c=>({width:c.width,height:c.height,display:c.getBoundingClientRect().width}));
+ assert.equal(poster.width,1080);assert.equal(poster.height,1920);assert(poster.display>Math.min(270,width*.7));checks+=3;
+ await page.locator('.poster-preview-wrap').screenshot({path:`/tmp/yrgt-enlarged-poster-${width}.png`,animations:'disabled'});
  const incident=page.locator('#incidentReport .incident-evidence').first();assert.equal(await incident.getAttribute('data-round'),String(wrong.round));
  await incident.locator('summary').click();assert((await incident.locator('blockquote').textContent()).includes(wrong.q.opts[wrong.choice]));
  assert((await page.locator('#incidentReport').textContent()).includes('完成 12/12 題'));assert((await page.locator('#incidentReport').textContent()).includes('發現 6 個線索'));

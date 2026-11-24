@@ -50,7 +50,23 @@ export const CARDS=[
  {id:'c_12',name:'緬因城堡領主',art:12,atlas:'pets',rarity:'SR',desc:'城堡可以係玩具，氣場必須按真皇宮計'},
  {id:'c_13',name:'孟加拉紙箱探險家',art:13,atlas:'pets',rarity:'SR',desc:'野外探險路線：紙箱入口到紙箱另一個入口'},
  {id:'c_14',name:'挪威森林守護者',art:14,atlas:'pets',rarity:'SSR',desc:'守護遠古森林，順便守住窗邊最佳曬太陽位'},
- {id:'c_15',name:'斯芬克斯太陽王',art:15,atlas:'pets',rarity:'SSR',desc:'頭冠可以發光，瞓覺仍然要霸住最暖張被'}
+ {id:'c_15',name:'斯芬克斯太陽王',art:15,atlas:'pets',rarity:'SSR',desc:'頭冠可以發光，瞓覺仍然要霸住最暖張被'},
+ {id:'w_8',name:'毛毯充電員',art:0,atlas:'life',rarity:'N',desc:'今日社交電量歸零，熱茶同毛毯正在搶修'},
+ {id:'w_9',name:'雨夜掃街達人',art:1,atlas:'life',rarity:'R',desc:'落雨可以淋濕條街，唔可以淋濕我袋雞蛋仔'},
+ {id:'w_10',name:'行程控場總監',art:2,atlas:'life',rarity:'SR',desc:'三個行事曆互相打交，佢仲有空幫你訂埋位'},
+ {id:'w_11',name:'休息結界女王',art:3,atlas:'life',rarity:'SSR',desc:'鬧鐘都要先預約，先可以打擾本宮休息'},
+ {id:'m_8',name:'最後薯條守衛',art:4,atlas:'life',rarity:'N',desc:'呢條唔係普通薯條，係本餐最後的尊嚴'},
+ {id:'m_9',name:'傢俬組裝勇者',art:5,atlas:'life',rarity:'R',desc:'凳終於企得穩，多出嚟粒螺絲先核對清楚再慶功'},
+ {id:'m_10',name:'公園大導演',art:6,atlas:'life',rarity:'SR',desc:'只係幫你影張相，個姿勢已經準備攞金像獎'},
+ {id:'m_11',name:'星際補眠法師',art:7,atlas:'life',rarity:'SSR',desc:'宇宙可以繼續膨脹，佢堅持再瞓五分鐘'},
+ {id:'d_16',name:'雪納瑞試味總編',art:8,atlas:'life',rarity:'N',desc:'碗未擺低，兩撇鬍鬚已經準備發表食評'},
+ {id:'d_17',name:'西施沙龍紅星',art:9,atlas:'life',rarity:'R',desc:'髮型未完成，影相檔期已經排到下個禮拜'},
+ {id:'d_18',name:'阿富汗秀髮巨星',art:10,atlas:'life',rarity:'SR',desc:'風扇只開一格，客廳已經變咗洗頭水廣告'},
+ {id:'d_19',name:'聖伯納雪山救援王',art:11,atlas:'life',rarity:'SSR',desc:'穿過風雪去救援，放工仍然想你幫佢搓肚腩'},
+ {id:'c_16',name:'俄藍廚房門神',art:12,atlas:'life',rarity:'N',desc:'門關咗三分鐘，已經準備向罐頭部提出申訴'},
+ {id:'c_17',name:'阿比書架巡察員',art:13,atlas:'life',rarity:'R',desc:'站得高唔代表望得遠，但可以望清你偷食乜'},
+ {id:'c_18',name:'德文星艦通訊官',art:14,atlas:'life',rarity:'SR',desc:'兩隻耳仔接收全宇宙訊號，唯獨聽唔到「落嚟」'},
+ {id:'c_19',name:'安哥拉月宮館長',art:15,atlas:'life',rarity:'SSR',desc:'藏書三千卷，最鍾意瞓喺你而家要睇嗰頁'}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';
