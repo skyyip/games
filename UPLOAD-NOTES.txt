@@ -1,11 +1,12 @@
 Latest combined website upload package
-Source: 6aa3205e564c2866048cccbf7f14e55786e1a223
+Source: 661dedd82af5e84254cbe778c8b180486b776630
 
-You Really Get Them update: 12 collectible Polaroid comic artworks; scratch-fog interaction and dedicated assets removed; 8 illustrated story questions (2 per normal 12-question round) plus 1 duo picture prompt. Image descriptions work with screen readers and expand on image failure. Existing ownership, rarity, draw economics, 30-second timing and cloud result shape are retained. Offline source cache is v43. No Firebase rules or index changes are needed for THIS game update.
+You Really Get Them update: Google sign-in and anonymous account upgrades use Firebase popups on mobile and desktop. Initialization restores first-party local/session auth storage without eagerly loading the cross-domain redirect helper. Authenticated identity is shown before Firestore profile synchronization. Pending/failed profile reads do not trigger empty favorite-card writes or premature player-name prompts; stale profile results after logout/account switching are ignored. Offline source cache is v44. No Firestore rules or index changes are required for THIS update.
 
-Validation: 23 unit tests; 274 Chromium checks covering full rounds, all picture questions, duo, collection and draw behavior, other interactions, image failure and offline assets; production hashed images; 29-page build, SEO and release permissions passed.
+Validation: 31 Node tests; 37 auth browser checks against source and built upload pages (Chromium with iOS Chrome UA and a Firebase SDK double); 274 existing picture/collection/game browser checks; 29-page build, SEO and release permissions checks passed. These checks do not verify real iOS/WebKit or production Google OAuth. After upload, verify Google sign-in, refresh, and logout/refresh in an actual iOS Chrome tab on the production HTTPS domain. Allow first-party website storage and, if blocked, allow the sign-in popup before retrying.
 
-Extract this ZIP and upload the CONTENTS of the enclosing folder to public_html/games/, including .htaccess.
+The previous Polaroid collection and picture-story updates are retained, as are all other games in the existing combined upload.
+Extract this ZIP and upload the CONTENTS of its enclosing folder to public_html/games/, including .htaccess.
 The archive retains the earlier Millionaire update, whose matching hong-kong-millionaire/firestore.rules must be deployed if not already done. Its real Firestore Emulator verification remains pending because of the environment network allowlist.
 
 Updated through the established downloads/games-site workflow. No production website or Firebase deployment has been performed.
