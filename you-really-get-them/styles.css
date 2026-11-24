@@ -1054,3 +1054,89 @@ dialog:has(.leaderboard-faction-tabs) {
   .result-actions{grid-template-columns:1fr}
   .result-actions button{min-height:52px;font-size:14px}
 }
+
+/* Retro capsule shop: printed metal, thick ink and a single oversized red button. */
+.gacha-shop{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;margin:24px 0 38px;padding:24px;border:5px solid var(--ink);background:#ffec7c;box-shadow:8px 8px 0 var(--ink)}
+.gacha-copy h3{font-size:clamp(25px,4vw,36px);line-height:1.25;margin:12px 0 16px;letter-spacing:-.03em}
+.gacha-copy p{font-size:15px;line-height:1.8;margin:12px 0}
+.gacha-odds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:20px 0}
+.gacha-odds span{display:flex;justify-content:space-between;gap:6px;padding:9px;border:2px solid var(--ink);background:#fffefa;font-size:14px}
+.gacha-odds .odds-n{background:#e4e7e9}.gacha-odds .odds-r{background:#c9eaff}.gacha-odds .odds-sr{background:#e8d1ff}.gacha-odds .odds-ssr{background:linear-gradient(100deg,#ffd4ef,#ccf7ff,#fff6b5)}
+.gacha-copy .gacha-fineprint{font-size:12px;line-height:1.7}
+.gacha-machine{position:relative;align-self:start;isolation:isolate;padding:15px 17px 22px;border:7px solid var(--ink);border-radius:25px 25px 9px 9px;background:#ff7560;box-shadow:6px 6px 0 var(--ink);transform-origin:50% 95%}
+.machine-marquee{position:relative;z-index:1;margin:-31px auto 12px;padding:8px;border:4px solid var(--ink);background:#a9f2e8;transform:rotate(-3deg);text-align:center;font:1000 23px/1.15 monospace;box-shadow:3px 3px 0 var(--ink)}
+.machine-marquee small{display:block;font-size:10px;letter-spacing:.12em;margin-top:5px}
+.capsule-globe{position:relative;height:175px;border:5px solid var(--ink);border-radius:48% 48% 14px 14px;background:linear-gradient(125deg,#ffffffbd 4%,#ffffff55 32%,#b4e9ee 33%,#e0ffff 80%);overflow:hidden;box-shadow:inset -12px -8px 0 #428b9833}
+.capsule-globe::after{content:"";position:absolute;left:13%;top:12%;width:16%;height:48%;border-radius:50%;background:#ffffff9c;transform:rotate(16deg)}
+.capsule-globe i{position:absolute;left:var(--cx,12%);top:var(--cy,48%);width:52px;height:52px;border:3px solid var(--ink);border-radius:50%;background:linear-gradient(var(--capsule,#dba6ff) 0 47%,var(--ink) 47% 53%,#fff9e4 53%);transform:rotate(var(--cr,15deg))}
+.capsule-globe i:nth-child(2){--cx:36%;--cy:62%;--capsule:#8de3ff;--cr:-22deg}.capsule-globe i:nth-child(3){--cx:64%;--cy:56%;--capsule:#ffdf47;--cr:25deg}.capsule-globe i:nth-child(4){--cx:22%;--cy:20%;--capsule:#ffb1cf;--cr:-12deg}.capsule-globe i:nth-child(5){--cx:52%;--cy:23%;--capsule:#a5ee8d;--cr:30deg}.capsule-globe i:nth-child(6){--cx:3%;--cy:76%;--capsule:#ffbd72;--cr:8deg}.capsule-globe i:nth-child(7){--cx:67%;--cy:82%;--capsule:#c6b1ff;--cr:-14deg}.capsule-globe i:nth-child(8){--cx:40%;--cy:85%;--capsule:#ff99a0;--cr:30deg}
+.machine-console{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:15px 0 12px}
+.machine-slot{width:30px;height:11px;border:3px solid var(--ink);background:#fff0be;box-shadow:0 8px 0 -2px #c34b3b;transform:rotate(-12deg)}
+.gacha-trigger{display:flex;flex:0 0 146px;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:146px;min-height:108px;padding:12px 8px;border:5px solid var(--ink);border-radius:50%;background:#e93838;color:#fff;box-shadow:0 8px 0 #7f1414,0 10px 0 3px var(--ink);cursor:pointer;touch-action:manipulation;transform:none}
+.gacha-trigger>span{font-size:25px;font-weight:950;text-shadow:2px 2px 0 #551111}
+.gacha-trigger>small{font-size:12px;font-weight:800}
+.gacha-trigger:active:enabled{transform:translateY(7px);box-shadow:0 1px 0 #7f1414,0 3px 0 3px var(--ink)!important}
+.gacha-trigger:disabled{background:#915555;cursor:not-allowed;opacity:1}
+.gacha-trigger:focus-visible{outline:4px solid #fff;outline-offset:4px}
+.capsule-hatch{position:relative;height:54px;margin-top:18px;border:4px solid var(--ink);border-radius:8px;background:#392e32;overflow:visible}
+.gacha-capsule{position:absolute;width:48px;height:48px;left:calc(50% - 24px);top:0;opacity:0;transform:translateY(-30px)}
+.gacha-capsule span{position:absolute;left:0;width:48px;height:24px;border:3px solid var(--ink);background:#bda4ff;border-radius:30px 30px 0 0}
+.gacha-capsule span+span{top:22px;background:#fff5cd;border-radius:0 0 30px 30px}
+.machine-feet{position:absolute;bottom:-14px;left:18px;right:18px;height:12px;border-left:24px solid var(--ink);border-right:24px solid var(--ink)}
+.gacha-status{grid-column:1/-1;margin:4px 0 0;min-height:48px;padding:12px;border:2px dashed var(--ink);background:#fffefa;font-size:14px;line-height:1.65}
+.is-drawing{animation:machine-rattle .12s linear 6}
+.is-drawing .capsule-globe i{animation:capsule-hop .3s ease-in-out 3 alternate}
+.is-drawing .gacha-capsule{animation:capsule-drop 1.2s ease-out both}
+.is-drawing .gacha-capsule span:first-child{animation:capsule-open 1.2s ease-in both}
+@keyframes machine-rattle{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg) translateX(-3px)}75%{transform:rotate(3deg) translateX(3px)}}
+@keyframes capsule-hop{to{transform:translateY(-26px) rotate(55deg)}}
+@keyframes capsule-drop{0%,30%{opacity:0;transform:translateY(-60px) rotate(-80deg)}50%{opacity:1;transform:translateY(4px) rotate(20deg)}65%{opacity:1;transform:translateY(-18px) rotate(-12deg)}85%,100%{opacity:1;transform:translateY(0) rotate(0)}}
+@keyframes capsule-open{0%,75%{transform:translateY(0)}100%{transform:translateY(-26px) rotate(-30deg)}}
+.collection-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:28px 0 16px}
+.collection-heading h3{font-size:21px;margin:0}.collection-heading span{font-size:12px;white-space:nowrap}
+
+/* Rarity finishes are also applied to the revealed print, not only the album tile. */
+.collect-card.rarity-n{background:#f6f6f3;border-color:#969fa7}
+.collect-card.rarity-r{background:#f2faff;border-color:#2389e8;box-shadow:4px 4px 0 var(--ink),0 0 12px #299dff50}
+.collect-card.rarity-sr{background:#f5eaff;border-color:#914ee9}
+.collect-card.rarity-ssr{background:linear-gradient(130deg,#ffd0ed,#bff8f4,#fff3ab,#d1b8ff);background-size:250% 250%;border-color:#745bd1;animation:foil-shift 7s ease infinite}
+.collect-card .rarity{background:#fffefa!important;color:var(--ink);font-size:11px}
+.flash-card-polaroid{position:relative;isolation:isolate;border-width:3px;transform:rotate(-2deg);transition:transform .15s ease;overflow:hidden}
+.flash-card-polaroid.rarity-n{border-color:#a1a8ae;background:#f7f8f7;box-shadow:3px 4px 0 #17171724}
+.flash-card-polaroid.rarity-r{border-color:#238eea;box-shadow:0 0 12px #2a9df85e,3px 4px 0 #17171724}
+.flash-card-polaroid.rarity-sr{border-color:#9351e8;background:#f4eaff}
+.flash-card-polaroid.rarity-ssr{padding:7px 7px 14px;border:3px solid #644bb1;background:linear-gradient(120deg,#ffabd8,#b8f4ff,#fff6a1,#bea0ff,#ffabd8);background-size:300% 300%;animation:foil-shift 5s ease infinite}
+.flash-card-art{position:relative;isolation:isolate;overflow:hidden}
+.new-card-art{background-image:url('./assets/illustrations/gacha-polaroids.webp');background-size:400% 400%}
+.rarity-sr>.flash-card-art::after{content:"";position:absolute;inset:-20%;pointer-events:none;background:linear-gradient(110deg,transparent 25%,#fff1 36%,#fff9 46%,#e2bdffb0 50%,transparent 65%);transform:translateX(-140%);animation:metal-sweep 3.7s ease-in-out infinite}
+.holo-card{transform:perspective(750px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));touch-action:pan-y}
+.holo-card>.flash-card-art::before,.holo-card>.flash-card-art::after{content:"";position:absolute;inset:0;pointer-events:none}
+.holo-card>.flash-card-art::before{z-index:2;background:radial-gradient(circle at var(--light-x,50%) var(--light-y,40%),#fff9 0,transparent 46%);mix-blend-mode:screen}
+.holo-card>.flash-card-art::after{z-index:1;background:repeating-linear-gradient(130deg,#ff4dc950 0%,#7af6ff50 15%,#ffe95370 30%,#b397ff60 45%,#ff4dc950 60%);background-size:260% 260%;mix-blend-mode:color-dodge;opacity:.6;animation:holo-drift 5s linear infinite}
+.holo-card:focus-visible{outline:3px solid #191919;outline-offset:3px;--light-x:50%;--light-y:50%}
+.collect-card.locked,.collect-card.locked .flash-card-polaroid{animation:none;box-shadow:3px 3px 0 #17171733}
+.collect-card.locked .flash-card-art::before,.collect-card.locked .flash-card-art::after{display:none}
+.gacha-result{text-align:center;overflow-wrap:anywhere;padding-top:8px}
+.gacha-result-kicker{font:800 11px monospace;letter-spacing:.06em}
+.gacha-result h2{margin:12px 0;font-size:26px}
+.gacha-result .flash-card-polaroid-large{width:min(100%,260px);margin:20px auto;animation:card-pop .55s cubic-bezier(.18,.9,.3,1.25) both}
+.gacha-result .flash-card-polaroid-large.rarity-ssr{animation:card-pop .55s cubic-bezier(.18,.9,.3,1.25) both,foil-shift 5s ease infinite}
+.gacha-receipt{padding:10px;border:2px dashed var(--ink);background:#fff3b4;font-size:13px}
+#keepGachaCard{width:100%;margin-top:12px;min-height:50px}
+@keyframes metal-sweep{0%,30%{transform:translateX(-140%)}75%,100%{transform:translateX(140%)}}
+@keyframes holo-drift{from{background-position:0% 0%}to{background-position:260% 260%}}
+@keyframes card-pop{0%{opacity:0;scale:.65;translate:0 24px}65%{opacity:1;scale:1.06;translate:0 -8px}100%{opacity:1;scale:1;translate:0 0}}
+@media(max-width:600px){
+ .gacha-shop{grid-template-columns:1fr;gap:26px;padding:20px 16px;margin-top:20px;border-width:4px;box-shadow:5px 5px 0 var(--ink)}
+ .gacha-machine{width:250px;max-width:100%;justify-self:center;padding-left:13px;padding-right:13px}
+ .gacha-copy h3{font-size:27px}.gacha-odds{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.gacha-odds span{display:grid;padding:7px 3px;text-align:center;gap:3px;font-size:12px}
+ .gacha-copy p{font-size:14px}.gacha-status{font-size:13px}
+ .collection-heading{align-items:flex-start;flex-direction:column;gap:6px}.collection-heading h3{font-size:20px}
+ .collect-card{padding:9px;min-width:0}.collect-card strong{font-size:14px;line-height:1.5;overflow-wrap:anywhere}.collect-card small{font-size:11px;line-height:1.55}.collect-card .rarity{font-size:10px}
+ .flash-card-polaroid{width:100%;padding:4px 4px 10px}.flash-card-polaroid figcaption{font-size:10px;letter-spacing:0}
+ .gacha-result .flash-card-polaroid-large{width:min(100%,240px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .gacha-machine,.gacha-machine *,.collect-card,.flash-card-polaroid,.flash-card-art::before,.flash-card-art::after{animation:none!important;transition:none!important}
+ .holo-card{transform:none!important}
+}

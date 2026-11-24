@@ -1,3 +1,4 @@
+import {CARDS,RARITIES,DRAW_COST,DUPLICATE_REFUND,purchaseDraw} from './gacha.js';
 import {settleRun} from './settlement.js';
 import {COMIC_SCENES,comicReveal,answerRecord,buildIncidentReport} from './comedy.js';
 import {PICTURE_BANK} from './picture-questions.js';
@@ -257,45 +258,67 @@ function showAuthModal(){
   $('anonymousSignIn').onclick=()=>run(signInAnonymous);
   if($('anonymousSignOut'))$('anonymousSignOut').onclick=()=>run(signOutGoogle);
 }
-function showCollection(){
-  const cardArt=(card,label,large=false)=>{const x=(card.art%4)*100/3,y=Math.floor(card.art/4)*50;return '<figure class="flash-card-polaroid'+(large?' flash-card-polaroid-large':'')+'"><div class="flash-card-art" role="img" aria-label="'+label+'" style="--art-x:'+x+'%;--art-y:'+y+'%"></div><figcaption>'+label+'</figcaption></figure>'};
-  const cards=[
-    {id:'w_1',name:'傲嬌雙馬尾',emoji:'👧',art:0,rarity:'R',chance:58/4,desc:'口頭禪是「我才沒有生氣呢！」'},
-    {id:'w_2',name:'名偵探女友',emoji:'🕵️‍♀️',art:1,rarity:'SR',chance:30/4,desc:'憑藉一根頭髮就能還原完整案發現場',skill:'微表情透視：刪除 2 個錯誤選項（技能尚未啟用）'},
-    {id:'w_3',name:'白月光天使',emoji:'👼',art:2,rarity:'SSR',chance:12/4,desc:'傳說中永遠講道理、不翻舊帳的夢幻生物',skill:'免死金牌：抵銷一次一擊必殺（技能尚未啟用）'},
-    {id:'m_1',name:'鋼鐵直男',emoji:'🗿',art:3,rarity:'R',chance:58/4,desc:'大腦裡只有一個齒輪在轉的純真生物'},
-    {id:'m_2',name:'電競肝帝',emoji:'🎮',art:4,rarity:'SR',chance:30/4,desc:'發誓「再打最後一場就去睡覺」的男人'},
-    {id:'m_3',name:'傳說霸總',emoji:'💼',art:5,rarity:'SSR',chance:12/4,desc:'自帶黑卡與「女人妳成功引起我注意」氣場'},
-    {id:'d_1',name:'短腿柯基',emoji:'🍞',art:6,rarity:'R',chance:58/4,desc:'底盤過低，每次上下樓梯都像在爬山'},
-    {id:'d_2',name:'拆家哈士奇',emoji:'🐺',art:7,rarity:'SR',chance:30/4,desc:'西伯利亞裝修大隊長，專精沙發爆破',skill:'混亂邪惡：重排選項，通關賞金翻倍（技能尚未啟用）'},
-    {id:'d_3',name:'倔強柴將軍',emoji:'🐕',art:8,rarity:'SSR',chance:12/4,desc:'散步一旦啟動煞車，八匹馬都拉不動'},
-    {id:'c_1',name:'十橘九胖',emoji:'🍊',art:9,rarity:'R',chance:58/4,desc:'只要聽見開罐器聲響就能光速瞬移'},
-    {id:'c_2',name:'虛空黑貓',emoji:'🐈‍⬛',art:10,rarity:'SR',chance:30/4,desc:'完美融入陰影，只露出兩顆發光大眼'},
-    {id:'c_3',name:'仙氣布偶皇',emoji:'🐈',art:11,rarity:'SSR',chance:12/4,desc:'顏值即正義，看你宛如看卑微兩腳獸',skill:'時間凍結：倒數計時凍結 6 秒（技能尚未啟用）'}
-  ];
-  const cost=50;saveData=loadSave();
-  const owned=new Set(saveData.cards);
-  ['w_1','m_1'].forEach(id=>owned.add(id));
-  saveData.cards=[...new Set([...saveData.cards,'w_1','m_1'])];save(saveData);persistFavoriteCards(saveData.cards);updateSaveUI();
-  $('collectionCoins').textContent=`${saveData.coins} SC`;$('collectionGrid').innerHTML='';
-  cards.forEach(card=>{
-    const has=owned.has(card.id)||owned.has(card.name),d=document.createElement('article');
-    d.className=`collect-card rarity-${card.rarity.toLowerCase()} ${has?'':'locked'}`;
-    d.innerHTML=`<span class="rarity">${card.rarity}</span>${cardArt(card,has?card.name:'未解鎖收藏卡')}<strong>${has?card.name:'???'}</strong><small>${has?card.desc:'尚未解鎖 · 閃卡抽抽樂'}</small>${has&&card.skill?`<small class="card-skill">${card.skill}</small>`:''}`;
-    $('collectionGrid').append(d);
-  });
-  const g=document.createElement('button');g.className='primary-btn draw-card-btn';g.textContent=`花費 ${cost} SC 抽一張閃卡`;g.disabled=saveData.coins<cost;g.onclick=()=>{
-    const state=loadSave();if(state.coins<cost)return;state.coins-=cost;
-    const roll=Math.random()*100;let cumulative=0;
-    const rarity=roll<58?'R':roll<88?'SR':'SSR';
-    const pool=cards.filter(card=>card.rarity===rarity),chosen=pool[Math.floor(Math.random()*pool.length)];
-    if(state.cards.includes(chosen.id)||state.cards.includes(chosen.name)){state.coins+=25;save(state);persistFavoriteCards(state.cards);openModal(`<h2>重複閃卡！轉換成 25 SC</h2><p>再次抽到「${chosen.name}」，已回收一半抽卡費用。</p>`)}
-    else{state.cards.push(chosen.id);save(state);persistFavoriteCards(state.cards);openModal(`<h2>✨ ${chosen.rarity} 閃卡入手！</h2>${cardArt(chosen,chosen.name,true)}<h3>${chosen.name}</h3><p>${chosen.desc}</p>${chosen.skill?`<p>${chosen.skill}</p>`:''}`)}
-    updateSaveUI();showCollection();
-  };
-  $('collectionGrid').append(g);show('collection')
+let drawing=false;
+function cardArt(card,label,large=false){
+  const columns=4,rows=card.atlas==='new'?4:3,x=card.art%columns*100/(columns-1),y=Math.floor(card.art/columns)*100/(rows-1);
+  return `<figure class="flash-card-polaroid rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div><figcaption>${escapeText(label)}</figcaption></figure>`;
 }
-$('playerNameBtn').onclick=showPlayerNameModal;$('authBtn').onclick=async()=>{try{if(getCloudUser()&&!getCloudUser().isAnonymous)await signOutGoogle();else showAuthModal()}catch(e){openModal(`<h2>登出失敗</h2><p>${e.message}</p>`)}};$('leaderboardBtn').onclick=showLeaderboard;$('historyBtn').onclick=showHistory;$('inviteBtn').onclick=makeChallenge;$('challengeAgainBtn').onclick=makeChallenge;$('challengeStatusBtn').onclick=showChallengeStatus;$('homeLink').onclick=e=>{e.preventDefault();if(!$('game').classList.contains('hidden')){$('quitBtn').click();return}if(!$('modal').open)show('home')};$('startBtn').onclick=start;$('factionGrid').addEventListener('click',e=>{const b=e.target.closest('[data-faction]');if(b)selectFaction(b.dataset.faction)});$('howBtn').onclick=()=>openModal('<h2>雙重求生玩法</h2><ol><li>每局 12 題：3 題經典求生、2 題圖片情境、4 題閱讀空氣、3 題混合情境，題型會隨機交錯。</li><li>每題 30 秒，初始 100 HP；答錯會扣血，超時扣 40 HP。</li><li>經典題保留連打等互動及豬隊友提示；圖片題可點選照片上的數字觀察線索，也可開啟文字描述，沿用相同計分；情境題按觀察力、同理心、角色理解、洞察力及時機感評分。</li><li>作答後會翻到拍立得背面揭曉角色心聲；計時暫停，按「下一題」繼續。</li><li>答對可累積連擊；求生幣只在本局結算時發放：成功存活固定獲得 100 SC，再加剩餘 HP × 2（滿血共 300 SC）；陣亡固定獲得 10 SC 醫藥費。</li><li>每次抽卡消耗 50 SC；抽中重複卡會回收 25 SC。</li><li>結果會分開顯示「了解對方」及「讀懂氣氛」兩項能力，並按本局實際選擇生成可下載分享的求生事故報告。</li></ol><p>本遊戲純屬娛樂，不代表真實人物心理或動物行為診斷。</p>');$('quitBtn').onclick=()=>openModal('<h2>確定放棄治療？</h2><p>離開本局不會獲得求生幣或紀錄。</p><button class="primary-btn" id="confirmQuit">確認離開</button>');$('modalContent').addEventListener('click',e=>{if(e.target.closest('[data-duo-expected]')){duoExpected.push(Number(e.target.closest('[data-duo-expected]').dataset.duoExpected));renderDuoSetup(duoExpected.length)}if(e.target.closest('#duoBeginTest')){ $('modal').close();beginDuoTest()}if(e.target.id==='duoPlayAgain'){ $('modal').close();startDuoSetup()}if(e.target.id==='duoCloseResult')$('modal').close();if(e.target.id==='confirmQuit'){$('modal').close();duoTestPhase=false;clearInterval(tick);clearTimeout(interactionTimer);clearTimeout(nextTimer);stopHoldAnimation();show('home')}});$('pigHintBtn').onclick=useHint;$('collectionBtn').onclick=showCollection;$('backBtn').onclick=()=>show('home');$('againBtn').onclick=start;$('downloadPoster').onclick=download;$('sharePoster').onclick=share;$('soundBtn').onclick=()=>{setMuted(!isMuted());$('soundBtn').classList.toggle('is-muted',isMuted());$('soundBtn').setAttribute('aria-label',isMuted()?'開啟音效':'關閉音效')};$('modal').addEventListener('close',()=>{playerNameModalOpen=false});$('modalClose').onclick=()=>$('modal').close();updateSaveUI();$('authBtn').textContent='登入狀態載入中…';$('authBtn').disabled=true;initCloud((user,profile,{profileLoaded=false,profileError}={})=>{setSaveScope(user&&!user.isAnonymous?user.uid:'guest');const scopedSave=loadSave();if(user&&!user.isAnonymous&&profileLoaded){const cloudCards=Array.isArray(profile?.favoriteCards)?profile.favoriteCards:scopedSave.cards;scopedSave.cards=[...new Set(cloudCards)];save(scopedSave);if(!Array.isArray(profile?.favoriteCards))persistFavoriteCards(scopedSave.cards)}saveData=loadSave();playerName=profile?.playerName||getCloudPlayerName()||'';playerNameUpdatedAt=profile?.playerNameUpdatedAt?.toMillis?.()||0;updatePlayerNameUI();$('playerNameBtn').disabled=Boolean(user&&!profileLoaded&&!profileError);const b=$('authBtn');b.disabled=false;b.title=user&&!profileLoaded?(profileError?'已登入；雲端玩家資料暫時未能同步。':'已登入；雲端玩家資料同步中…'):'';b.textContent=user?(user.isAnonymous?'訪客 · 升級':`登出 · ${(playerName||user.displayName||user.email||'玩家').slice(0,8)}`):'登入';updateSaveUI();if(user&&profileLoaded&&!playerName){if($('modal').open&&$('emailAuthForm'))pendingPlayerNamePrompt=true;else showPlayerNameModal()}if(user&&profileLoaded&&challengeId&&!challengeData)loadChallengeContext()}).then(({ready})=>{if(!ready){$('playerNameBtn').hidden=true;$('authBtn').disabled=true;$('authBtn').textContent='Google 登入未設定';$('authBtn').title='請先設定 Firebase Web App';['leaderboardBtn','historyBtn','inviteBtn','challengeAgainBtn','challengeStatusBtn'].forEach(id=>$(id).disabled=true)}}).catch(e=>{ $('authBtn').disabled=true;$('authBtn').textContent='登入服務暫時不可用';$('authBtn').title=e.message||'Firebase 初始化失敗';console.error('Firebase initialization failed:',e) });if(challengeId&&getCloudUser())loadChallengeContext();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+function followHologram(root){
+  root.onpointermove=root.onpointerdown=event=>{
+    const card=event.target.closest('.holo-card');if(!card||card.closest('.locked')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const rect=card.getBoundingClientRect(),x=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width)),y=Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height));
+    card.style.setProperty('--light-x',`${x*100}%`);card.style.setProperty('--light-y',`${y*100}%`);card.style.setProperty('--rx',`${(y-.5)*-12}deg`);card.style.setProperty('--ry',`${(x-.5)*12}deg`);
+  };
+  root.onpointerout=root.onpointercancel=event=>{const card=event.target.closest('.holo-card');if(card&&!card.contains(event.relatedTarget)){card.style.removeProperty('--rx');card.style.removeProperty('--ry');card.style.removeProperty('--light-x');card.style.removeProperty('--light-y')}};
+}
+function renderCollection(){
+  saveData=loadSave();const owns=card=>saveData.cards.includes(card.id)||saveData.cards.includes(card.name);
+  const starters=CARDS.filter(card=>['w_1','m_1'].includes(card.id)&&!owns(card));
+  if(starters.length){saveData.cards.push(...starters.map(card=>card.id));save(saveData);persistFavoriteCards(saveData.cards)}
+  updateSaveUI();$('collectionCoins').textContent=`${saveData.coins} SC`;
+  $('collectionCount').textContent=`已收藏 ${CARDS.filter(owns).length} / ${CARDS.length} 張`;
+  $('gachaDraw').disabled=drawing||saveData.coins<DRAW_COST;
+  $('gachaDraw').setAttribute('aria-label',drawing?'開盲盒中，請稍候':`花費 ${DRAW_COST} SC 抽一張閃卡`);
+  $('gachaPrice').textContent=drawing?'開盲盒中…':`${DRAW_COST} SC / 每抽`;
+  $('gachaOdds').innerHTML=RARITIES.map(tier=>`<span class="odds-${tier.id.toLowerCase()}"><b>${tier.id}</b> ${tier.rate}%</span>`).join('');
+  $('gachaDraw').onclick=drawGacha;
+  $('collectionGrid').replaceChildren();
+  CARDS.forEach(card=>{
+    const has=owns(card),item=document.createElement('article');item.className=`collect-card rarity-${card.rarity.toLowerCase()} ${has?'':'locked'}`;item.dataset.card=card.id;
+    item.innerHTML=`<span class="rarity">${card.rarity} · ${RARITIES.find(tier=>tier.id===card.rarity).name}</span>${cardArt(card,has?card.name:'未解鎖收藏卡')}<strong>${has?card.name:'???'}</strong><small>${has?card.desc:'未解鎖 · 等待扭蛋機派送'}</small>${has&&card.skill?`<small class="card-skill">${card.skill}</small>`:''}`;
+    if(!has)item.querySelector('.holo-card')?.removeAttribute('tabindex');
+    $('collectionGrid').append(item);
+  });
+  followHologram($('collectionGrid'));
+}
+function showCollection(){renderCollection();if(!drawing)$('gachaStatus').textContent=saveData.coins<DRAW_COST?'求生幣不足 100 SC；完成一般求生場次即可累積。':'大紅掣已就緒，今日會遇到哪位求生隊友？';show('collection')}
+function drawGacha(){
+  if(drawing)return;
+  const outcome=purchaseDraw(loadSave());if(!outcome){renderCollection();$('gachaStatus').textContent='求生幣不足 100 SC，暫時不能抽卡。';return}
+  const scope=getCloudUser()?.uid||'guest';drawing=true;
+  // Debit and ownership are committed together before the cosmetic animation.
+  save(outcome.save);const stored=loadSave();
+  if(stored.coins!==outcome.save.coins||JSON.stringify(stored.cards)!==JSON.stringify(outcome.save.cards)){
+    drawing=false;$('gachaStatus').textContent='未能儲存抽卡結果，請允許網站儲存資料後再試。';renderCollection();return;
+  }
+  persistFavoriteCards(outcome.save.cards);updateSaveUI();$('collectionCoins').textContent=`${outcome.save.coins} SC`;
+  $('gachaDraw').disabled=true;$('gachaDraw').setAttribute('aria-label','開盲盒中，請稍候');$('gachaPrice').textContent='開盲盒中…';$('gachaMachine').setAttribute('aria-busy','true');$('gachaMachine').classList.add('is-drawing');
+  $('gachaStatus').textContent='咔嚓！膠囊滾出中……卡牌與餘額已儲存。';
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduced&&!isMuted())navigator.vibrate?.([60,30,90]);beep('click');
+  setTimeout(()=>{
+    drawing=false;$('gachaMachine').classList.remove('is-drawing');$('gachaMachine').setAttribute('aria-busy','false');
+    if((getCloudUser()?.uid||'guest')!==scope){$('gachaDraw').disabled=loadSave().coins<DRAW_COST;$('gachaPrice').textContent=`${DRAW_COST} SC / 每抽`;return;}
+    if(!$('collection').classList.contains('hidden')){
+      renderCollection();const {card,duplicate}=outcome;
+      $('gachaStatus').textContent=duplicate?`重複閃卡！回收 ${DUPLICATE_REFUND} SC。`:`${card.rarity} ${card.name} 已加入收藏！`;
+      openModal(`<section class="gacha-result rarity-${card.rarity.toLowerCase()}"><span class="gacha-result-kicker">${duplicate?'隊友再次報到':'NEW SURVIVOR UNLOCKED'}</span><h2>${duplicate?'重複閃卡！':card.rarity+' 閃卡入手！'}</h2>${cardArt(card,card.name,true)}<h3>${card.name}</h3><p>${card.desc}</p><p class="gacha-receipt">花費 ${DRAW_COST} SC${duplicate?` · 重複回收 ${DUPLICATE_REFUND} SC`:''}</p><button type="button" class="primary-btn" id="keepGachaCard">收進收藏冊 →</button></section>`);
+      $('keepGachaCard').onclick=()=>$('modal').close();followHologram($('modalContent'));beep(card.rarity==='SSR'?'win':'good');
+    }
+  },reduced?0:1250);
+}
+
+$('playerNameBtn').onclick=showPlayerNameModal;$('authBtn').onclick=async()=>{try{if(getCloudUser()&&!getCloudUser().isAnonymous)await signOutGoogle();else showAuthModal()}catch(e){openModal(`<h2>登出失敗</h2><p>${e.message}</p>`)}};$('leaderboardBtn').onclick=showLeaderboard;$('historyBtn').onclick=showHistory;$('inviteBtn').onclick=makeChallenge;$('challengeAgainBtn').onclick=makeChallenge;$('challengeStatusBtn').onclick=showChallengeStatus;$('homeLink').onclick=e=>{e.preventDefault();if(!$('game').classList.contains('hidden')){$('quitBtn').click();return}if(!$('modal').open)show('home')};$('startBtn').onclick=start;$('factionGrid').addEventListener('click',e=>{const b=e.target.closest('[data-faction]');if(b)selectFaction(b.dataset.faction)});$('howBtn').onclick=()=>openModal('<h2>雙重求生玩法</h2><ol><li>每局 12 題：3 題經典求生、2 題圖片情境、4 題閱讀空氣、3 題混合情境，題型會隨機交錯。</li><li>每題 30 秒，初始 100 HP；答錯會扣血，超時扣 40 HP。</li><li>經典題保留連打等互動及豬隊友提示；圖片題可點選照片上的數字觀察線索，也可開啟文字描述，沿用相同計分；情境題按觀察力、同理心、角色理解、洞察力及時機感評分。</li><li>作答後會翻到拍立得背面揭曉角色心聲；計時暫停，按「下一題」繼續。</li><li>答對可累積連擊；求生幣只在本局結算時發放：成功存活固定獲得 100 SC，再加剩餘 HP × 2（滿血共 300 SC）；陣亡固定獲得 10 SC 醫藥費。</li><li>每次抽卡消耗 100 SC；N 57%、R 30%、SR 10%、SSR 3%；重複卡回收 25 SC。</li><li>結果會分開顯示「了解對方」及「讀懂氣氛」兩項能力，並按本局實際選擇生成可下載分享的求生事故報告。</li></ol><p>本遊戲純屬娛樂，不代表真實人物心理或動物行為診斷。</p>');$('quitBtn').onclick=()=>openModal('<h2>確定放棄治療？</h2><p>離開本局不會獲得求生幣或紀錄。</p><button class="primary-btn" id="confirmQuit">確認離開</button>');$('modalContent').addEventListener('click',e=>{if(e.target.closest('[data-duo-expected]')){duoExpected.push(Number(e.target.closest('[data-duo-expected]').dataset.duoExpected));renderDuoSetup(duoExpected.length)}if(e.target.closest('#duoBeginTest')){ $('modal').close();beginDuoTest()}if(e.target.id==='duoPlayAgain'){ $('modal').close();startDuoSetup()}if(e.target.id==='duoCloseResult')$('modal').close();if(e.target.id==='confirmQuit'){$('modal').close();duoTestPhase=false;clearInterval(tick);clearTimeout(interactionTimer);clearTimeout(nextTimer);stopHoldAnimation();show('home')}});$('pigHintBtn').onclick=useHint;$('collectionBtn').onclick=showCollection;$('backBtn').onclick=()=>show('home');$('againBtn').onclick=start;$('downloadPoster').onclick=download;$('sharePoster').onclick=share;$('soundBtn').onclick=()=>{setMuted(!isMuted());$('soundBtn').classList.toggle('is-muted',isMuted());$('soundBtn').setAttribute('aria-label',isMuted()?'開啟音效':'關閉音效')};$('modal').addEventListener('close',()=>{playerNameModalOpen=false});$('modalClose').onclick=()=>$('modal').close();updateSaveUI();$('authBtn').textContent='登入狀態載入中…';$('authBtn').disabled=true;initCloud((user,profile,{profileLoaded=false,profileError}={})=>{setSaveScope(user&&!user.isAnonymous?user.uid:'guest');const scopedSave=loadSave();if(user&&!user.isAnonymous&&profileLoaded){const cloudCards=Array.isArray(profile?.favoriteCards)?profile.favoriteCards:scopedSave.cards;scopedSave.cards=[...new Set(cloudCards)];save(scopedSave);if(!Array.isArray(profile?.favoriteCards))persistFavoriteCards(scopedSave.cards)}saveData=loadSave();playerName=profile?.playerName||getCloudPlayerName()||'';playerNameUpdatedAt=profile?.playerNameUpdatedAt?.toMillis?.()||0;updatePlayerNameUI();$('playerNameBtn').disabled=Boolean(user&&!profileLoaded&&!profileError);const b=$('authBtn');b.disabled=false;b.title=user&&!profileLoaded?(profileError?'已登入；雲端玩家資料暫時未能同步。':'已登入；雲端玩家資料同步中…'):'';b.textContent=user?(user.isAnonymous?'訪客 · 升級':`登出 · ${(playerName||user.displayName||user.email||'玩家').slice(0,8)}`):'登入';updateSaveUI();if(user&&profileLoaded&&!playerName){if($('modal').open&&$('emailAuthForm'))pendingPlayerNamePrompt=true;else showPlayerNameModal()}if(user&&profileLoaded&&challengeId&&!challengeData)loadChallengeContext()}).then(({ready})=>{if(!ready){$('playerNameBtn').hidden=true;$('authBtn').disabled=true;$('authBtn').textContent='Google 登入未設定';$('authBtn').title='請先設定 Firebase Web App';['leaderboardBtn','historyBtn','inviteBtn','challengeAgainBtn','challengeStatusBtn'].forEach(id=>$(id).disabled=true)}}).catch(e=>{ $('authBtn').disabled=true;$('authBtn').textContent='登入服務暫時不可用';$('authBtn').title=e.message||'Firebase 初始化失敗';console.error('Firebase initialization failed:',e) });if(challengeId&&getCloudUser())loadChallengeContext();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
 
 // Close the header menu after an action, or when the user clicks away / presses Escape.
