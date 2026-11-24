@@ -1084,6 +1084,8 @@ dialog:has(.leaderboard-faction-tabs) {
 .gacha-capsule span+span{top:22px;background:#fff5cd;border-radius:0 0 30px 30px}
 .machine-feet{position:absolute;bottom:-14px;left:18px;right:18px;height:12px;border-left:24px solid var(--ink);border-right:24px solid var(--ink)}
 .gacha-status{grid-column:1/-1;margin:4px 0 0;min-height:48px;padding:12px;border:2px dashed var(--ink);background:#fffefa;font-size:14px;line-height:1.65}
+.gacha-status:empty{display:none}
+.gacha-rules{font-size:12px;line-height:1.7}.gacha-rules summary{cursor:pointer;width:fit-content;padding:8px 0;text-decoration:underline;text-underline-offset:3px}.gacha-rules p{font-size:12px}
 .is-drawing{animation:machine-rattle .12s linear 6}
 .is-drawing .capsule-globe i{animation:capsule-hop .3s ease-in-out 3 alternate}
 .is-drawing .gacha-capsule{animation:capsule-drop 1.2s ease-out both}
@@ -1094,6 +1096,13 @@ dialog:has(.leaderboard-faction-tabs) {
 @keyframes capsule-open{0%,75%{transform:translateY(0)}100%{transform:translateY(-26px) rotate(-30deg)}}
 .collection-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:28px 0 16px}
 .collection-heading h3{font-size:21px;margin:0}.collection-heading span{font-size:12px;white-space:nowrap}
+.collection-summary{justify-content:space-between;gap:12px}.collection-summary span{font-size:13px}
+.collection-groups{display:grid;gap:36px}
+.collection-faction{min-width:0;--faction-color:var(--pink)}
+.collection-faction.faction-men{--faction-color:var(--yellow)}.collection-faction.faction-dog{--faction-color:var(--orange)}.collection-faction.faction-cat{--faction-color:var(--purple)}
+.collection-faction-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding:12px 14px;border:3px solid var(--ink);background:var(--faction-color);box-shadow:4px 4px 0 var(--ink)}
+.collection-faction-heading h3{margin:0;font-size:22px}.collection-faction-heading span{font:800 13px 'DM Mono',monospace;white-space:nowrap}
+.collect-card .flash-card-polaroid figcaption{font-size:14px;line-height:1.5}
 
 /* Rarity finishes are also applied to the revealed print, not only the album tile. */
 .collect-card.rarity-n{background:#f6f6f3;border-color:#969fa7}
@@ -1108,6 +1117,7 @@ dialog:has(.leaderboard-faction-tabs) {
 .flash-card-polaroid.rarity-ssr{padding:7px 7px 14px;border:3px solid #644bb1;background:linear-gradient(120deg,#ffabd8,#b8f4ff,#fff6a1,#bea0ff,#ffabd8);background-size:300% 300%;animation:foil-shift 5s ease infinite}
 .flash-card-art{position:relative;isolation:isolate;overflow:hidden}
 .new-card-art{background-image:url('./assets/illustrations/gacha-polaroids.webp');background-size:400% 400%}
+.pet-card-art{background-image:url('./assets/illustrations/pet-breeds.webp');background-size:400% 400%}
 .rarity-sr>.flash-card-art::after{content:"";position:absolute;inset:-20%;pointer-events:none;background:linear-gradient(110deg,transparent 25%,#fff1 36%,#fff9 46%,#e2bdffb0 50%,transparent 65%);transform:translateX(-140%);animation:metal-sweep 3.7s ease-in-out infinite}
 .holo-card{transform:perspective(750px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));touch-action:pan-y}
 .holo-card>.flash-card-art::before,.holo-card>.flash-card-art::after{content:"";position:absolute;inset:0;pointer-events:none}
@@ -1134,6 +1144,7 @@ dialog:has(.leaderboard-faction-tabs) {
  .collection-heading{align-items:flex-start;flex-direction:column;gap:6px}.collection-heading h3{font-size:20px}
  .collect-card{padding:9px;min-width:0}.collect-card strong{font-size:14px;line-height:1.5;overflow-wrap:anywhere}.collect-card small{font-size:11px;line-height:1.55}.collect-card .rarity{font-size:10px}
  .flash-card-polaroid{width:100%;padding:4px 4px 10px}.flash-card-polaroid figcaption{font-size:10px;letter-spacing:0}
+ .collect-card .flash-card-polaroid figcaption{font-size:12px}.collection-faction-heading h3{font-size:19px}.collection-groups{gap:28px}
  .gacha-result .flash-card-polaroid-large{width:min(100%,240px)}
 }
 @media(prefers-reduced-motion:reduce){

@@ -34,7 +34,23 @@ export const CARDS=[
  {id:'w_7',name:'零食案情分析師',art:12,atlas:'new',rarity:'SR',desc:'用紅線連起所有線索，只為查出誰吃了最後一塊餅'},
  {id:'m_7',name:'鑊氣料理大師',art:13,atlas:'new',rarity:'SR',desc:'廚房只有三平方米，出餐氣勢卻有三百坪'},
  {id:'d_7',name:'星際柯基司令',art:14,atlas:'new',rarity:'SSR',desc:'征服宇宙的第一步，是確保太空糧準時供應'},
- {id:'c_7',name:'沙發宇宙皇帝',art:15,atlas:'new',rarity:'SSR',desc:'整個客廳都在版圖內，你只能租用沙發邊緣'}
+ {id:'c_7',name:'沙發宇宙皇帝',art:15,atlas:'new',rarity:'SSR',desc:'整個客廳都在版圖內，你只能租用沙發邊緣'},
+ {id:'d_8',name:'博美保安隊長',art:0,atlas:'pets',rarity:'N',desc:'體積係迷你裝，門鐘警報卻係演唱會級'},
+ {id:'d_9',name:'比格聞案專員',art:1,atlas:'pets',rarity:'N',desc:'跟住一隻襪的氣味，查出全家洗衣動線'},
+ {id:'d_10',name:'金毛迎賓主任',art:2,atlas:'pets',rarity:'R',desc:'你只係落樓倒垃圾，佢已準備好重逢典禮'},
+ {id:'d_11',name:'臘腸梳化長租客',art:3,atlas:'pets',rarity:'R',desc:'四隻腳都好短，租用梳化的面積卻好長'},
+ {id:'d_12',name:'邊牧戰術教練',art:4,atlas:'pets',rarity:'SR',desc:'波已按顏色排好，正在等你交訓練功課'},
+ {id:'d_13',name:'貴婦紙巾造型師',art:5,atlas:'pets',rarity:'SR',desc:'髮型一絲不亂，地板已完成紙巾雪景工程'},
+ {id:'d_14',name:'薩摩耶雲端艦長',art:6,atlas:'pets',rarity:'SSR',desc:'微笑已連上雲端，掉毛量足夠再造三朵雲'},
+ {id:'d_15',name:'斑點消防超人',art:7,atlas:'pets',rarity:'SSR',desc:'披風一揚，第一宗任務係救返梳化底個波'},
+ {id:'c_8',name:'英短包裹驗收官',art:8,atlas:'pets',rarity:'N',desc:'快遞未拆，業權已經由貓屁股完成轉讓'},
+ {id:'c_9',name:'暹羅深夜主唱',art:9,atlas:'pets',rarity:'N',desc:'凌晨三點開騷，全屋都係被邀請的觀眾'},
+ {id:'c_10',name:'美短鍵盤總監',art:10,atlas:'pets',rarity:'R',desc:'你打完一千字，佢一掌幫你加咗六行句號'},
+ {id:'c_11',name:'異短梳化抱枕',art:11,atlas:'pets',rarity:'R',desc:'睇落似抱枕，抱之前仍然要本人批准'},
+ {id:'c_12',name:'緬因城堡領主',art:12,atlas:'pets',rarity:'SR',desc:'城堡可以係玩具，氣場必須按真皇宮計'},
+ {id:'c_13',name:'孟加拉紙箱探險家',art:13,atlas:'pets',rarity:'SR',desc:'野外探險路線：紙箱入口到紙箱另一個入口'},
+ {id:'c_14',name:'挪威森林守護者',art:14,atlas:'pets',rarity:'SSR',desc:'守護遠古森林，順便守住窗邊最佳曬太陽位'},
+ {id:'c_15',name:'斯芬克斯太陽王',art:15,atlas:'pets',rarity:'SSR',desc:'頭冠可以發光，瞓覺仍然要霸住最暖張被'}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';
