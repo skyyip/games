@@ -18,7 +18,7 @@ function firstQuestionSeed(faction,target){
  throw Error('No seed for '+faction+'/'+target);
 }
 try{
- for(const [faction,index,button]of [['women',3,'tapBtn'],['women',5,null],['women',7,'holdBtn'],['dog',6,'treatBtn'],['cat',6,'cupBtn']]){
+ for(const [faction,index,button]of [['women',3,null],['women',5,null],['women',7,null],['dog',6,'treatBtn'],['cat',6,'cupBtn']]){
   const context=await browser.newContext({viewport:{width:390,height:900},isMobile:true,hasTouch:true,serviceWorkers:'block',reducedMotion:'reduce'});
   await context.addInitScript(installBrowserFirebaseFixture);
   await context.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'text/javascript',body:firebaseSDKSource}));
@@ -26,7 +26,7 @@ try{
   await page.clock.install();await page.goto(base);await page.locator(`[data-faction="${faction}"]`).click();
   await page.evaluate(seed=>{Math.random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296)},firstQuestionSeed(faction,index));
   await page.locator('#startBtn').click();assert.equal(await page.locator('#questionText').textContent(),BANK[faction][index].text);checks++;
-  await page.locator('#pigHintBtn').click();if(button)assert(await page.locator('#'+button).isVisible());checks++;
+  await page.locator('#pigHintBtn').click();if(button)assert(await page.locator('#'+button).isVisible());checks++;if([3,7].includes(index)){assert.equal(await page.locator('#tapBtn,#holdBtn').count(),0);assert.equal(await page.locator('#interaction').isVisible(),false);await page.clock.runFor(4000);assert.equal(await page.locator('#hpValue').textContent(),'95');await page.locator('#answers button').nth(BANK[faction][index].correct).click();assert.equal(await page.locator('#hpValue').textContent(),'95');checks+=4;}
   const images=await page.evaluate(async()=>Promise.all([...document.images].map(async img=>{try{await img.decode()}catch{}return {src:img.src,loaded:img.complete&&img.naturalWidth>0}})));
   assert(images.length>10);for(const img of images)assert(img.loaded,img.src);checks+=images.length;
   const urls=await page.locator('#interaction img.ui-icon,#questionHint img').evaluateAll(nodes=>nodes.map(n=>n.src));
@@ -34,6 +34,6 @@ try{
   if(index===7)await page.screenshot({path:'/tmp/yrgt-fixed-hold-icons.png',fullPage:true,animations:'disabled'});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks++;await context.close();
  }
- assert.deepEqual([...icons].sort(),['dog','lightning','paw-cup','pig','press','sneaker','treat']);assert.deepEqual(failedImages,[]);assert.deepEqual(errors,[]);checks+=3;
+ assert.deepEqual([...icons].sort(),['dog','paw-cup','pig','sneaker','treat']);assert.deepEqual(failedImages,[]);assert.deepEqual(errors,[]);checks+=3;
  console.log(JSON.stringify({checks,dynamicIcons:icons.size,interactionTypes:5,brokenImages:failedImages.length,pageErrors:errors.length}));
 }finally{await browser.close()}

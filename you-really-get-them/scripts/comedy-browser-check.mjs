@@ -32,10 +32,7 @@ async function round(faction,width){
   assert.equal(await page.locator('#answerReview').isVisible(),false);assert.equal(await page.locator('.polaroid-back').count(),0);checks+=2;
   let choice=q.correct??q.profiles.map(p=>p.reduce((a,b)=>a+b,0)).reduce((best,value,j,all)=>value>all[best]?j:best,0);
   if(q.picture){
-   images++;assert.equal(await page.locator('.clue-pin').count(),3);assert.equal(await page.locator('#cluePanel').isVisible(),true);
-   const hp=await page.locator('#hpValue').textContent();
-   for(const button of await page.locator('.clue-pin').all()){await button.focus();await page.keyboard.press('Enter');assert.equal(await button.getAttribute('aria-pressed'),'true');checks++;}
-   await page.locator('.clue-pin').first().click();assert((await page.locator('#clueStatus').textContent()).startsWith('已發現 3 / 3'));assert.equal(await page.locator('#hpValue').textContent(),hp);checks+=4;
+   images++;assert.equal(await page.locator('.clue-pin,#cluePanel').count(),0);checks++;
    if(images===1){choice=(choice+1)%4;wrong={round:i+1,q,choice};await page.screenshot({path:`/tmp/yrgt-comedy-clues-${faction}-${width}.png`,fullPage:true,animations:'disabled'});}
   }
   await page.locator('#answers .answer-btn').nth(choice).click();await page.locator('.polaroid-back').waitFor({state:'visible'});
@@ -54,7 +51,7 @@ async function round(faction,width){
  await page.locator('.poster-preview-wrap').screenshot({path:`/tmp/yrgt-enlarged-poster-${width}.png`,animations:'disabled'});
  const incident=page.locator('#incidentReport .incident-evidence').first();assert.equal(await incident.getAttribute('data-round'),String(wrong.round));
  await incident.locator('summary').click();assert((await incident.locator('blockquote').textContent()).includes(wrong.q.opts[wrong.choice]));
- assert((await page.locator('#incidentReport').textContent()).includes('完成 12/12 題'));assert((await page.locator('#incidentReport').textContent()).includes('發現 6 個線索'));
+ assert((await page.locator('#incidentReport').textContent()).includes('完成 12/12 題'));assert(!(await page.locator('#incidentReport').textContent()).includes('個線索'));
  const imagesDrawn=await page.evaluate(()=>comicCanvasImages);assert.equal(imagesDrawn.length,2);assert(imagesDrawn.every(url=>url.includes('.png')||url.includes('.webp')));checks+=2;
  const canvasText=await page.evaluate(()=>comicCanvasText.join(''));assert(canvasText.includes('本日求生事故報告'));assert(canvasText.includes(wrong.q.opts[wrong.choice]));checks+=8;await geometry(page);
  await writeFile(`/tmp/yrgt-comedy-poster-${faction}.png`,Buffer.from((await page.locator('#posterPreview').evaluate(c=>c.toDataURL('image/png'))).split(',')[1],'base64'));

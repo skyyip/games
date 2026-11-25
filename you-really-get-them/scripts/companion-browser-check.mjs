@@ -28,7 +28,7 @@ async function stored(page){return page.evaluate(()=>JSON.parse(localStorage.get
 async function fits(page){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks++}
 try{
  for(const width of [320,390,1280]){
-  const {page,context}=await open('w_2',width);assert.equal(await page.locator('#equippedName').textContent(),'名偵探女友');await start(page);
+  const {page,context}=await open('w_2',width);assert.equal(await page.locator('#equippedName').textContent(),'名偵探女友');assert.equal(await page.locator('#home #companionName').textContent(),'重讀案情');assert((await page.locator('#home #companionEffect').textContent()).includes('每局一次'));assert.equal(await page.locator('#companionPicker').getAttribute('href'),'#collection');await fits(page);await page.screenshot({path:`/tmp/yrgt-companion-home-${width}.png`,fullPage:true,animations:'disabled'});await start(page);assert.equal(await page.locator('#game #companionPortrait,#game #companionName,#game #companionEffect').count(),0);checks+=4;
   const original=await page.locator('#questionText').textContent(),answers=await page.locator('#answers button').allTextContents(),hp=await page.locator('#hpValue').textContent();
   await page.locator('#companionUse').click();const clue=await page.locator('#questionText mark').textContent();assert(original.includes(clue));assert.equal(await page.locator('#questionText').textContent(),original);assert.deepEqual(await page.locator('#answers button').allTextContents(),answers);assert.equal(await page.locator('#hpValue').textContent(),hp);
   assert.equal(await page.locator('#companionLine').textContent(),'證據一直喺度，你個腦剛才落咗樓買嘢。');assert(await page.locator('#companionUse').isDisabled());checks+=7;await fits(page);
@@ -71,7 +71,7 @@ try{
   }
 
   {
-   const {page,context}=await open('m_2',390,{fixture:true});await start(page);await page.evaluate(()=>companionQA.question());await page.locator('#companionUse').click();await page.clock.runFor(3100);assert.equal(await page.locator('#timer').textContent(),'30.0');assert.equal(await page.locator('#hpValue').textContent(),'88');assert((await page.locator('#questionHint').textContent()).includes('誠意不足'));checks+=3;await context.close();
+   const {page,context}=await open('m_2',390,{fixture:true});await start(page);await page.evaluate(()=>companionQA.question());await page.locator('#companionUse').click();await page.clock.runFor(3100);assert.equal(await page.locator('#timer').textContent(),'30.0');assert.equal(await page.locator('#hpValue').textContent(),'100');assert.equal(await page.locator('#tapBtn,#holdBtn').count(),0);checks+=3;await context.close();
   }
 
   for(const hp of [0,1,29,30,80,100]){

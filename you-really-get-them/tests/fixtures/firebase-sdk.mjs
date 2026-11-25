@@ -36,6 +36,14 @@ export const setDoc=async(ref,data,options)=>{state.writes.push({ref,data,option
 export const collection=(db,...parts)=>parts.join('/');
 export const addDoc=async(ref,data)=>{state.writes.push({ref,data});return {id:'fixture-run'}};
 export const runTransaction=async(db,action)=>action({get:async ref=>state.transactionRead?.(ref)||{exists:()=>false},set:(ref,data)=>state.writes.push({ref,data})});
+export const where=(field,op,value)=>{
+ if(value!==null&&typeof value==='object')throw Error('Unsupported field value: a custom '+value.constructor.name+' object');
+ (state.queries??=[]).push({field,op,value});return {field,op,value};
+};
+export const orderBy=(field,direction)=>({field,direction});
+export const limit=count=>({count});
+export const query=(ref,...constraints)=>({ref,constraints});
+export const getDocs=async()=>{if(state.queryError)throw Error(state.queryError);return {docs:(state.leaderboardRows||[]).map(row=>({data:()=>row}))}};
 export const serverTimestamp=()=>123;
 `;
 

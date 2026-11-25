@@ -32,9 +32,6 @@ function plannedSeed(faction){
  throw Error('No scenario seed for '+faction);
 }
 async function completeInteraction(page){
- // This suite checks content and scoring; test:pictures exercises the physical tap target.
- if(await page.locator('#tapBtn').isVisible())await page.locator('#tapBtn').evaluate(button=>{for(let n=0;n<15;n++)button.click()});
- if(await page.locator('#holdBtn').isVisible()){await page.locator('#holdBtn').focus();await page.keyboard.down('Space');await page.clock.runFor(1700);await page.keyboard.up('Space')}
  if(await page.locator('#treatBtn').isVisible())await page.locator('#treatBtn').click();if(await page.locator('#cupBtn').isVisible())await page.locator('#cupBtn').click();
 }
 async function round(faction,width){
