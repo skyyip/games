@@ -57,8 +57,8 @@ test('message reveal, incident evidence and poster summary cite the actual full 
   const report=buildIncidentReport([record]);assert.equal((record.success?report.best:report.incident).choice,record.choice);
  }
 });
-test('all 116 teammates have individual situational lines that do not mutate questions or skills',()=>{
- assert.deepEqual(Object.keys(PRIVATE_LINES).sort(),CARDS.map(c=>c.id).sort());assert.equal(new Set(Object.values(PRIVATE_LINES).map(([,line])=>line)).size,116);
+test('all 132 teammates have individual situational lines that do not mutate questions or skills',()=>{
+ assert.deepEqual(Object.keys(PRIVATE_LINES).sort(),CARDS.map(c=>c.id).sort());assert.equal(new Set(Object.values(PRIVATE_LINES).map(([,line])=>line)).size,132);
  for(const card of CARDS){const [topic,line]=PRIVATE_LINES[card.id],q={topic,text:'測試情境'},before=JSON.stringify(card);assert.equal(companionBanter(card,q),line);assert.equal(companionBanter(card,{topic:'unrelated',text:''}),null);assert.equal(JSON.stringify(card),before)}
  assert.equal(companionBanter(null,{text:'遊戲'}),null);assert.match(companionBanter(CARDS.find(c=>c.id==='d_2'),{text:'你剛收拾好梳化。'}),/唔係我屋企/);
 });

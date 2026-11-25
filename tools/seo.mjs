@@ -62,8 +62,9 @@ export function applySeo(source, page) {
   const game = page === 'index.html' ? null : games.find(item => page === `${item.slug}/index.html`);
   if (page !== 'index.html' && !game) throw Error(`Missing SEO catalog entry: ${page}`);
   const url = game ? gameUrl(game) : siteUrl;
-  const title = game ? `${game.name} — ${game.topic} | Sky Playground` : 'Free Browser Games & Local Party Games | Sky Playground';
-  const description = game?.description ?? 'Play free browser games at Sky Playground: quick solo challenges, puzzles and local party games for 2–6 players. No account or app download needed.';
+  const chineseLanding = game?.slug === 'you-really-get-them';
+  const title = chineseLanding ? `${game.zh}｜高血壓求生模擬器` : game ? `${game.name} — ${game.topic} | Sky Playground` : 'Free Browser Games & Local Party Games | Sky Playground';
+  const description = chineseLanding ? game.chinese : game?.description ?? 'Play free browser games at Sky Playground: quick solo challenges, puzzles and local party games for 2–6 players. No account or app download needed.';
   const graph = game ? [
     { '@type': 'WebPage', '@id': url + '#page', url, name: title, description, inLanguage: game.languages ?? ['en', 'zh-Hant'], mainEntity: { '@id': url + '#game' }, breadcrumb: { '@id': url + '#breadcrumbs' } },
     gameSchema(game),
@@ -87,8 +88,8 @@ export function applySeo(source, page) {
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sky Playground">
-<meta property="og:locale" content="en_US">
-<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:locale" content="${chineseLanding ? 'zh_TW' : 'en_US'}">
+<meta property="og:locale:alternate" content="${chineseLanding ? 'en_US' : 'zh_TW'}">
 <meta property="og:title" content="${escape(title)}">
 <meta property="og:description" content="${escape(description)}">
 <meta property="og:url" content="${url}">

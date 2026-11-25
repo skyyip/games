@@ -122,7 +122,23 @@ export const CARDS=[
  {id:'c_30',name:'捲耳鉛筆鑑定員',art:12,atlas:'metro',rarity:'N',desc:'每支筆都要先過爪檢，合格的也可能被推落地下'},
  {id:'c_31',name:'英長茶墊領主',art:13,atlas:'metro',rarity:'R',desc:'茶還未泡好，最舒服的位置已經完成永久登記'},
  {id:'c_32',name:'東短音控總監',art:14,atlas:'metro',rarity:'SR',desc:'兩隻耳仔收齊全場聲音，唯獨選擇性忽略你的叫名'},
- {id:'c_33',name:'襤褸貓銀河郵差',art:15,atlas:'metro',rarity:'SSR',desc:'星際信件準時送達，信封拆完的紙袋請留給本喵'}
+ {id:'c_33',name:'襤褸貓銀河郵差',art:15,atlas:'metro',rarity:'SSR',desc:'星際信件準時送達，信封拆完的紙袋請留給本喵'},
+ {"id":"w_26","name":"鬧鐘談判員","art":0,"atlas":"night","rarity":"N","desc":"鬧鐘第三次申請開會，本人仍在棉被內審閱議程"},
+ {"id":"w_27","name":"宵夜護送員","art":1,"atlas":"night","rarity":"R","desc":"雨傘濕咗半邊，懷裡的蛋撻仍然乾爽抵埗"},
+ {"id":"w_28","name":"飯煲鑑證官","art":2,"atlas":"night","rarity":"SR","desc":"一揭飯煲蓋，連失蹤嗰粒粟米都要出庭作供"},
+ {"id":"w_29","name":"棉被月宮女皇","art":3,"atlas":"night","rarity":"SSR","desc":"月光可以照遍銀河，唔好照醒朕個午睡"},
+ {"id":"m_26","name":"孤襪配對員","art":4,"atlas":"night","rarity":"N","desc":"兩隻黑襪望落一樣，配對經歷卻足夠拍三季懸疑劇"},
+ {"id":"m_27","name":"買餸補給隊長","art":5,"atlas":"night","rarity":"R","desc":"只買兩棵菜，摺車內已經出現一個迷你街市"},
+ {"id":"m_28","name":"戲票守門員","art":6,"atlas":"night","rarity":"SR","desc":"戲未開場，爆米花已經通過三次品質抽驗"},
+ {"id":"m_29","name":"遙控器宇宙騎士","art":7,"atlas":"night","rarity":"SSR","desc":"守護全宇宙睇劇自由，偶爾仍然搵唔到音量掣"},
+ {"id":"d_34","name":"巴仙吉門鐘旁聽員","art":8,"atlas":"night","rarity":"N","desc":"門鐘響一次，兩隻耳仔即時通過加開聆訊"},
+ {"id":"d_35","name":"巴吉度野餐巡官","art":9,"atlas":"night","rarity":"R","desc":"耳仔低過野餐籃，聞到的情報卻永遠高你一班"},
+ {"id":"d_36","name":"牛頭㹴洗衣督察","art":10,"atlas":"night","rarity":"SR","desc":"機械車巡地，蛋形頭督察只負責核對毛巾夠唔夠軟"},
+ {"id":"d_37","name":"愛爾蘭獵狼星園守衛","art":11,"atlas":"night","rarity":"SSR","desc":"身高足以看守星門，遇到小朋友仍然放慢腳步"},
+ {"id":"c_34","name":"科拉特紙箱審計員","art":12,"atlas":"night","rarity":"N","desc":"新箱剛放低，銀灰審計員已經查緊邊角有冇少一寸"},
+ {"id":"c_35","name":"哈瓦那紙袋掌櫃","art":13,"atlas":"night","rarity":"R","desc":"一身朱古力毛，收租只接受空袋同尊重"},
+ {"id":"c_36","name":"塞爾凱克暖衣總管","art":14,"atlas":"night","rarity":"SR","desc":"一身鬈毛比毛巾更蓬鬆，仍堅持檢查你件衫夠唔夠暖"},
+ {"id":"c_37","name":"涅瓦假面棉被星君","art":15,"atlas":"night","rarity":"SSR","desc":"藍眼睛掌管夜空，四隻爪掌管你今晚仲有幾多張被"}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

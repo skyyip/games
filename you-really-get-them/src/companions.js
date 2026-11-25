@@ -121,7 +121,23 @@ export const SKILLS={
  'c_30':{kind:'clue',name:'鉛筆圈案',quip:'筆唔畀你咬，重點已經圈咗。'},
  'c_31':{kind:'bonus',name:'茶墊收租',quip:'茶可以唔飲，茶墊租金照收。'},
  'c_32':{kind:'time',name:'音控靜鐘',quip:'倒數推低個 fader，五秒後再推返。'},
- 'c_33':{kind:'bonus',name:'銀河郵資退回',quip:'寄到生還地址，郵資退你二十。'}
+ 'c_33':{kind:'bonus',name:'銀河郵資退回',quip:'寄到生還地址，郵資退你二十。'},
+ "w_26":{"kind":"time","name":"鬧鐘延後表決","quip":"暫停五秒，唔代表批准再瞓五個鐘。"},
+ "w_27":{"kind":"bonus","name":"蛋撻運費回贈","quip":"護送生還成功，退返二十蚊運費。"},
+ "w_28":{"kind":"clue","name":"飯香追證","quip":"呢句仲熱，先睇清楚再落判斷。"},
+ "w_29":{"kind":"time","name":"月宮午休令","quip":"五秒靜音，月亮今日唔加班。"},
+ "m_26":{"kind":"clue","name":"襪紋比對","quip":"先對呢條紋，唔好靠對襪的直覺。"},
+ "m_27":{"kind":"bonus","name":"街市找續","quip":"生還先找續，爛咗嗰張單都照認。"},
+ "m_28":{"kind":"time","name":"預告片加映","quip":"加映五秒，正片仍然要你自己睇。"},
+ "m_29":{"kind":"clue","name":"宇宙字幕重播","quip":"字幕一直都喺度，今次畀你睇多眼。"},
+ "d_34":{"kind":"clue","name":"門聲取證","quip":"本汪聽到重點，已經用耳仔指畀你睇。"},
+ "d_35":{"kind":"bonus","name":"野餐餅碎津貼","quip":"餅碎我巡走，二十SC留畀你。"},
+ "d_36":{"kind":"time","name":"洗衣機暫緩轉動","quip":"停五秒先，呢個腦仲未脫水完成。"},
+ "d_37":{"kind":"clue","name":"星園路牌重讀","quip":"星光唔包帶路，呢句先係路牌。"},
+ "c_34":{"kind":"clue","name":"箱角覆核","quip":"箱有四角，線索唔使你逐角搵。"},
+ "c_35":{"kind":"bonus","name":"紙袋業權分紅","quip":"紙袋歸朕，二十SC分畀租客。"},
+ "c_36":{"kind":"time","name":"暖衣保溫五秒","quip":"腦仲未暖返，准你多焗五秒。"},
+ "c_37":{"kind":"bonus","name":"棉被星河租金","quip":"有命收工先領租，星君唔收醫藥費。"}
 };
 export function equippedCompanion(data){
  const card=CARDS.find(card=>card.id===data.equippedCard);

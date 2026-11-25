@@ -111,9 +111,9 @@ test('a pending new-profile write cannot delay the restored identity',async t=>{
   assert.equal(changes[1][2].profileLoaded,true);
 });
 
-test('the full 116-card collection survives a cloud save and subsequent profile read',async t=>{
+test('the full 132-card collection survives a cloud save and subsequent profile read',async t=>{
   const cards=CARDS.map(card=>card.id),user={uid:'collector'};
-  assert.equal(cards.length,116);
+  assert.equal(cards.length,132);
   const {state,cloud}=await loadCloud(t,{user});const changes=[];
   await cloud.initCloud((...args)=>changes.push(args));await flush();
   assert.deepEqual(await cloud.saveCloudFavoriteCards(cards),cards);

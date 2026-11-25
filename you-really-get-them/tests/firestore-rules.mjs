@@ -18,26 +18,26 @@ before(async()=>{
 });
 beforeEach(async()=>environment.clearFirestore());
 after(async()=>{await environment?.cleanup()});
-test('an owner can create and read the complete 116-card collection',async()=>{
+test('an owner can create and read the complete 132-card collection',async()=>{
  const db=environment.authenticatedContext('owner').firestore(),cards=CARDS.map(c=>c.id);
  await assertSucceeds(setDoc(doc(db,'users/owner'),metadata(cards)));
  const saved=await assertSucceeds(getDoc(doc(db,'users/owner')));assert.deepEqual(saved.data().favoriteCards,cards);
 });
-test('an owner can update from 100 through 116 to the 200-card capacity',async()=>{
+test('an owner can update from 100 through 132 to the 200-card capacity',async()=>{
  const db=environment.authenticatedContext('owner').firestore(),ref=doc(db,'users/owner');
- for(const count of [100,116,200])await assertSucceeds(setDoc(ref,metadata(list(count))));
+ for(const count of [100,132,200])await assertSucceeds(setDoc(ref,metadata(list(count))));
 });
 test('201 entries and a non-list favoriteCards value are rejected',async()=>{
  const db=environment.authenticatedContext('owner').firestore(),ref=doc(db,'users/owner');
  await assertFails(setDoc(ref,metadata(list(201))));await assertFails(setDoc(ref,metadata('not-a-list')));
 });
 test('unauthenticated and other-account access remain rejected',async()=>{
- const owner=environment.authenticatedContext('owner').firestore();await setDoc(doc(owner,'users/owner'),metadata(list(116)));
+ const owner=environment.authenticatedContext('owner').firestore();await setDoc(doc(owner,'users/owner'),metadata(list(132)));
  for(const context of [environment.unauthenticatedContext(),environment.authenticatedContext('other')]){
-  const ref=doc(context.firestore(),'users/owner');await assertFails(getDoc(ref));await assertFails(setDoc(ref,metadata(list(116))));
+  const ref=doc(context.firestore(),'users/owner');await assertFails(getDoc(ref));await assertFails(setDoc(ref,metadata(list(132))));
  }
 });
 test('a larger collection does not permit adding cloud coin fields',async()=>{
  const db=environment.authenticatedContext('owner').firestore();
- await assertFails(setDoc(doc(db,'users/owner'),{...metadata(list(116)),coins:999999}));
+ await assertFails(setDoc(doc(db,'users/owner'),{...metadata(list(132)),coins:999999}));
 });

@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {resolve} from 'node:path';
+import {CARDS} from '../src/gacha.js';
+import {SKILLS} from '../src/companions.js';
 import {emptyWallet,rewardWallet,drawWallet,leaderboardUpdate} from '../src/wallet-model.js';
 import {walletTransaction} from '../src/firebase/wallet-transaction.js';
 const address=process.env.FIRESTORE_EMULATOR_HOST;
@@ -55,7 +57,7 @@ test('replaying a receipt, changing an old ledger entry, deleting a wallet or re
 });
 test('forged amount, revision or unrelated bond changes are rejected without partial writes',async()=>{
  const db=database();await seed(db);
- for(const mutate of [s=>{s.wallet.coins=999;s.op.delta=999;s.run.coins=999},s=>{s.wallet.revision=2;s.op.revision=2},s=>{s.wallet.bonds.m_1=25},s=>{s.wallet.bonds.c_3=1}])await assertFails(commitRun(db,'run_12345678',receipt(),mutate));
+ for(const mutate of [s=>{s.wallet.coins=999;s.op.delta=999;s.run.coins=999},s=>{s.wallet.revision=2;s.op.revision=2},s=>{s.wallet.bonds.m_1=25},s=>{s.wallet.bonds.c_3=1},s=>{s.wallet.bonds.unknown_card=1}])await assertFails(commitRun(db,'run_12345678',receipt(),mutate));
  assert.equal((await getDoc(walletRef(db))).data().coins,0);
 });
 test('early death pays only ten and never gains a bond or contract stamp',async()=>{
@@ -102,4 +104,22 @@ test('real concurrent draws against one balance cannot overdraw or award two car
  const db=database();await seed(db,{coins:100});
  const draw=(id,cardId)=>walletTransaction({fs:firestore,db,uid:'owner',id,kind:'draw'},async(tx,{walletRef,opRef,profileRef,wallet,profile})=>{const next=drawWallet(wallet,profile.favoriteCards,cardId);tx.set(walletRef,{...next.wallet,lastOperation:id,updatedAt:serverTimestamp()});tx.set(opRef,{...next.operation,createdAt:serverTimestamp()});tx.set(profileRef,{favoriteCards:next.cards,updatedAt:serverTimestamp()},{merge:true});return {applied:true}});
  const outcomes=await Promise.allSettled([draw('draw_12345678','c_3'),draw('draw_22345678','w_3')]);assert.equal(outcomes.filter(r=>r.status==='fulfilled').length,1);assert.equal((await getDoc(walletRef(db))).data().coins,0);assert.equal((await getDoc(doc(db,'users/owner'))).data().favoriteCards.length,4);
+});
+
+test('all sixteen night cards can be bought with their matching names and normal debit',async()=>{
+ const db=database();await seed(db,{coins:1600});
+ for(const [i,card]of CARDS.filter(c=>c.atlas==='night').entries())await assertSucceeds(commitDraw(db,'draw_night_'+String(i).padStart(8,'0'),card.id));
+ assert.equal((await getDoc(walletRef(db))).data().coins,0);
+ const cards=(await getDoc(doc(db,'users/owner'))).data().favoriteCards;
+ for(const card of CARDS.filter(c=>c.atlas==='night'))assert(cards.includes(card.id));
+});
+test('night teammates settle the unchanged reward and gain exactly one cosmetic bond',async()=>{
+ const db=database(),cards=CARDS.filter(c=>c.atlas==='night');await seed(db,{cards:cards.map(c=>c.id)});
+ let total=0;
+ for(const [i,card]of cards.entries()){
+  const amount=SKILLS[card.id].kind==='bonus'?320:300,payload=receipt({companionId:card.id,result:{faction:'women',hp:100,correct:12,coins:amount}}),id='run_night_'+String(i).padStart(8,'0');
+  const before=(await getDoc(walletRef(db))).data(),next=rewardWallet(before,payload,cards.map(c=>c.id)),batch=writeBatch(db);
+  batch.set(walletRef(db),{...next.wallet,lastOperation:id,updatedAt:serverTimestamp()});batch.set(doc(db,'users/owner/walletOps',id),{...next.operation,createdAt:serverTimestamp()});batch.set(doc(db,'users/owner/runs',id),{faction:'women',mode:'mixed',questionCount:12,dimensions:null,survived:true,hp:100,coins:amount,correct:12,createdAt:serverTimestamp()});await assertSucceeds(batch.commit());total+=amount;
+ }
+ const wallet=(await getDoc(walletRef(db))).data();assert.equal(wallet.coins,total);assert.deepEqual(Object.values(wallet.bonds),Array(16).fill(1));
 });

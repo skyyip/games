@@ -7,9 +7,9 @@ import {BANK,AIR_BANK,MIXED_BANK} from '../src/questions.js';
 import {PICTURE_BANK} from '../src/picture-questions.js';
 import {loadSave,save,setSaveScope} from '../src/storage.js';
 const data=id=>({cards:[id],equippedCard:id});
-test('all 116 cards have individual names and lines; every rarity offers all three fixed abilities',()=>{
- assert.equal(CARDS.length,116);assert.deepEqual(Object.keys(SKILLS).sort(),CARDS.map(c=>c.id).sort());
- assert.equal(new Set(Object.values(SKILLS).map(s=>s.name)).size,116);assert.equal(new Set(Object.values(SKILLS).map(s=>s.quip)).size,116);
+test('all 132 cards have individual names and lines; every rarity offers all three fixed abilities',()=>{
+ assert.equal(CARDS.length,132);assert.deepEqual(Object.keys(SKILLS).sort(),CARDS.map(c=>c.id).sort());
+ assert.equal(new Set(Object.values(SKILLS).map(s=>s.name)).size,132);assert.equal(new Set(Object.values(SKILLS).map(s=>s.quip)).size,132);
  for(const r of RARITIES){const skills=CARDS.filter(c=>c.rarity===r.id).map(c=>SKILLS[c.id]);assert.deepEqual([...new Set(skills.map(s=>s.kind))].sort(),['bonus','clue','time'])}
  assert.equal(SKILLS.w_2.name,'重讀案情');assert.equal(SKILLS.m_2.name,'真・最後五秒');assert.equal(SKILLS.w_22.name,'收工津貼');
 });
@@ -30,12 +30,12 @@ test('active assistance is once per run, cannot be used after an answer, settlem
  const clue=createCompanionRun(data('w_2'));assert.equal(useCompanion(clue,{clue:''}),false);assert.equal(clue.used,false);
  assert.equal(useCompanion(createCompanionRun(data('w_22'))),false);
 });
-test('all 460 normal questions have a verbatim scenario clue, with grading unchanged',()=>{
+test('all 508 normal questions have a verbatim scenario clue, with grading unchanged',()=>{
  let count=0;
  for(const bank of [BANK,AIR_BANK,MIXED_BANK,PICTURE_BANK])for(const faction of ['women','men','dog','cat'])for(const q of bank[faction]){
   assert(q.clue?.length>=3);assert(q.text.includes(q.clue),q.text);assert.notEqual(q.clue,q.text);assert.equal(q.opts.length,4);count++;
  }
- assert.equal(count,460);assert.equal(BANK.women[10].clue,'你打機遲到半小時，她笑住話「玩得開心就好」');
+ assert.equal(count,508);assert.equal(BANK.women[10].clue,'你打機遲到半小時，她笑住話「玩得開心就好」');
 });
 test('stipend is exactly 20 only on survival, never stacks with active skills or carries to another account',()=>{
  const run=createCompanionRun(data('w_22'),{scope:'owner'});
