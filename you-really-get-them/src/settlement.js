@@ -1,7 +1,8 @@
 const endings={women:'今晚睡陽台',men:'被兄弟笑一輩子',dog:'遛狗主導權永久易手',cat:'成為貓抓板',duo:'默契小船原地翻側'};
 
 // Rewards are credited once at settlement, never for individual answers.
-export function settleRun(hp,faction){
+export function settleRun(hp,faction,companion=null){
+  const companionReward=hp>0&&companion?.kind==='bonus'?20:0;
   const survived=hp>0,base=survived?100:0,hpBonus=survived?hp*2:0,medical=survived?0:10;
   let title,quote,certification='';
   if(!survived){
@@ -18,5 +19,5 @@ export function settleRun(hp,faction){
     title='有驚無險生還者';
     quote='成功存活，仍有幾個雷區值得覆盤。下次記得先讀空氣，再開口。';
   }
-  return {survived,base,hpBonus,medical,coins:base+hpBonus+medical,title,quote,certification};
+  return {survived,base,hpBonus,medical,companionReward,coins:base+hpBonus+medical+companionReward,title,quote,certification};
 }

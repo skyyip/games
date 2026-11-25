@@ -138,3 +138,16 @@ test('signed-out and anonymous players do not write cloud favorites',async t=>{
     assert.deepEqual(state.writes,[]);
   }
 });
+
+
+test('assisted runs save personal history without entering the public leaderboard; unused equipment remains eligible',async t=>{
+ const {state,cloud}=await loadCloud(t,{user:{uid:'companion-player'}});await cloud.initCloud();await flush();
+ const result={faction:'women',mode:'mixed',questionCount:12,survived:true,hp:100,coins:320,correct:12};
+ await cloud.recordCloudRun(result,{leaderboard:false});
+ assert.deepEqual(state.writes.map(w=>w.ref),['users/companion-player/runs']);
+ assert.equal(state.writes[0].data.coins,320);
+ assert(!('assisted' in state.writes[0].data));
+ state.writes=[];await cloud.recordCloudRun({...result,coins:300});
+ assert.deepEqual(state.writes.map(w=>w.ref),['users/companion-player/runs','leaderboard/companion-player_women']);
+ state.writes=[];await cloud.recordCloudRun(result);assert.equal(state.writes.at(-1).ref,'leaderboard/companion-player_women');
+});

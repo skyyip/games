@@ -33,6 +33,9 @@ export const getFirestore=()=>({});
 export const doc=(db,...parts)=>parts.join('/');
 export const getDoc=ref=>{state.reads.push(ref);return state.readProfile(ref)};
 export const setDoc=async(ref,data,options)=>{state.writes.push({ref,data,options});await state.writeProfile?.(ref,data)};
+export const collection=(db,...parts)=>parts.join('/');
+export const addDoc=async(ref,data)=>{state.writes.push({ref,data});return {id:'fixture-run'}};
+export const runTransaction=async(db,action)=>action({get:async ref=>state.transactionRead?.(ref)||{exists:()=>false},set:(ref,data)=>state.writes.push({ref,data})});
 export const serverTimestamp=()=>123;
 `;
 

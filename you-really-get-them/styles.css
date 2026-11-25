@@ -1150,3 +1150,33 @@ dialog:has(.leaderboard-faction-tabs) {
  .gacha-machine,.gacha-machine *,.collect-card,.flash-card-polaroid,.flash-card-art::before,.flash-card-art::after{animation:none!important;transition:none!important}
  .holo-card{transform:none!important}
 }
+
+/* One companion, one small intervention; foil finishes still follow card rarity. */
+.companion-picker{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin:24px 0 0;padding:14px 16px;border:3px solid var(--ink);background:#d8f2ed;color:var(--ink);font:inherit;cursor:pointer;box-shadow:4px 4px 0 var(--ink);text-align:left}
+.companion-picker b{flex:1;min-width:0}.companion-picker>span:first-child{font-size:13px}
+.companion-selection{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 12px;padding:14px;border:3px solid var(--ink);background:#d8f2ed}
+.companion-selection strong{min-width:0}.companion-selection button{flex-shrink:0}
+.card-skill{display:grid;gap:5px;text-align:left;border-top:2px solid var(--ink);padding-top:10px;margin-top:auto}
+.card-skill strong{font-size:14px}.card-skill small{font-size:12px;line-height:1.6}
+.equip-companion{width:100%;min-height:44px;justify-content:center;margin-top:6px;padding:8px!important;white-space:normal}
+.equip-companion[aria-pressed=true]{background:#a8ef9b;box-shadow:inset 2px 2px 0 var(--ink)}
+.companion-bar{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:10px;margin:16px 0;padding:12px;border:3px solid var(--ink);background:#d8f2ed;box-shadow:4px 4px 0 var(--ink)}
+.companion-bar[hidden]{display:none}.companion-portrait{width:52px;overflow:hidden;pointer-events:none}.companion-portrait .flash-card-polaroid{width:100%;margin:0;padding:3px;border-width:2px;box-shadow:none;transform:none}.companion-portrait figcaption{display:none}
+.companion-copy{display:grid;gap:5px;min-width:0}.companion-copy strong{font-size:14px;line-height:1.6;overflow-wrap:anywhere}.companion-copy>span{font-size:12px;line-height:1.6}
+.companion-bar button{min-height:44px;padding:9px 12px;white-space:normal}.companion-bar button[hidden]{display:none}
+#companionLine{grid-column:2/-1;margin:0;font-size:13px;line-height:1.7}#companionLine:empty{display:none}
+.companion-bar.is-paused{background:#ffe853}.companion-bar.is-paused .companion-portrait{animation:companion-unplug .45s ease both}
+.companion-clue{background:#ffe853;color:#171717;box-shadow:0 3px 0 #171717;padding:1px 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.companion-result{border-top:2px dashed var(--ink);padding-top:12px;line-height:1.7;font-size:13px}
+@keyframes companion-unplug{0%{transform:rotate(0)}35%{transform:rotate(-12deg) translateY(-7px)}70%{transform:rotate(6deg)}100%{transform:rotate(0)}}
+@media(max-width:420px){.companion-bar{grid-template-columns:42px minmax(0,1fr);padding:10px}.companion-portrait{width:42px}.companion-bar button{grid-column:1/-1;width:100%}#companionLine{grid-column:1/-1}.companion-selection{align-items:flex-start;flex-direction:column}.companion-picker{gap:8px;padding:12px}.companion-picker>span:first-child{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.companion-bar.is-paused .companion-portrait{animation:none}}
+.companion-clock{display:none}.is-paused .companion-clock{display:flex;grid-column:1/-1;justify-content:center;align-items:center;gap:4px;font-size:27px}.companion-clock i{font-style:normal;animation:unplug-clock .5s ease-out both}
+.companion-payday{display:flex;align-items:center;justify-content:center;gap:14px;max-width:100%;overflow:hidden;padding:12px 0 20px}
+.companion-payday .flash-card-polaroid{width:60px;flex:none;margin:0;padding:3px;transform:rotate(-8deg)}.companion-payday figcaption{display:none}
+.payday-coins{display:flex;gap:3px}.payday-coins i{display:grid;place-items:center;width:27px;height:27px;border:2px solid var(--ink);border-radius:50%;background:#ffe853;color:var(--ink);font:bold 11px monospace;animation:payday-drop .65s cubic-bezier(.3,.8,.3,1) both}.payday-coins i:nth-child(2){animation-delay:.1s}.payday-coins i:nth-child(3){animation-delay:.2s}
+.payday-coupon{display:grid;gap:4px;padding:7px;border:2px dashed var(--ink);font-size:10px;background:#fffdf8;transform:rotate(9deg);animation:payday-drop .8s ease-out both}.payday-coupon b{border:2px solid #af202f;color:#af202f;font-size:12px}
+@keyframes unplug-clock{from{transform:translateX(0)}to{transform:translateX(24px) rotate(16deg)}}
+@keyframes payday-drop{0%{opacity:0;translate:-20px -18px}65%{opacity:1;translate:0 6px}100%{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){.companion-clock i,.payday-coins i,.payday-coupon{animation:none}}
+.reward-breakdown>.companion-result{display:block;font-size:13px;line-height:1.7}

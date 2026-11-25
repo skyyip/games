@@ -108,11 +108,12 @@ export async function saveCloudFavoriteCards(cards=[]){
   },{merge:true});
   return favoriteCards;
 }
-export async function recordCloudRun(result){
+export async function recordCloudRun(result,{leaderboard=true}={}){
   if(!currentUser)return;
   await fs.addDoc(fs.collection(db,'users',currentUser.uid,'runs'),{
     faction:result.faction,mode:result.mode||'classic',questionCount:result.questionCount||12,dimensions:result.dimensions||null,survived:result.survived,hp:result.hp,coins:result.coins,correct:result.correct,createdAt:fs.serverTimestamp()
   });
+  if(!leaderboard)return;
   const faction=result.faction;
   const ref=fs.doc(db,'leaderboard',`${currentUser.uid}_${faction}`);
   await fs.runTransaction(db,async tx=>{
