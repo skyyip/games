@@ -82,7 +82,23 @@ export const CARDS=[
  {id:'c_20',name:'土耳其梵水務探員',art:12,atlas:'festival',rarity:'N',desc:'水龍頭滴一聲，立即啟動免費但不保證有用的巡查'},
  {id:'c_21',name:'伯曼包裹派送員',art:13,atlas:'festival',rarity:'R',desc:'派送流程：先坐住你份件，再決定幾時肯簽收'},
  {id:'c_22',name:'索馬利解謎教授',art:14,atlas:'festival',rarity:'SR',desc:'研究食物益智玩具五分鐘，發表一篇直接推翻的論文'},
- {id:'c_23',name:'西伯利亞星夜車長',art:15,atlas:'festival',rarity:'SSR',desc:'下一站銀河，請先把腿上的貓移到安全位置再落車'}
+ {id:'c_23',name:'西伯利亞星夜車長',art:15,atlas:'festival',rarity:'SSR',desc:'下一站銀河，請先把腿上的貓移到安全位置再落車'},
+ {id:'w_16',name:'升降機耐性專員',art:0,atlas:'weekend',rarity:'N',desc:'樓層燈行得慢，腦內晚餐菜單已經開到第三版'},
+ {id:'w_17',name:'雨中花束保全',art:1,atlas:'weekend',rarity:'R',desc:'自己可以濕半邊，花束今日必須全勤乾爽'},
+ {id:'w_18',name:'拼圖收尾偵探',art:2,atlas:'weekend',rarity:'SR',desc:'最後一塊找了十分鐘，最可疑的證人係旁邊隻貓'},
+ {id:'w_19',name:'天台花園魔導士',art:3,atlas:'weekend',rarity:'SSR',desc:'召喚滿天花開，仍然記得收回晾緊嗰件衫'},
+ {id:'m_16',name:'洗衣塔管理員',art:4,atlas:'weekend',rarity:'N',desc:'衫已疊成摩天大樓，單身襪仲在等失散多年的另一半'},
+ {id:'m_17',name:'牛油果鑑定師',art:5,atlas:'weekend',rarity:'R',desc:'摸了五個才選中，成熟時間仍然保留神秘感'},
+ {id:'m_18',name:'微型單位建築師',art:6,atlas:'weekend',rarity:'SR',desc:'客廳只得幾步，佢的傢俬規劃已經有三條地鐵線'},
+ {id:'m_19',name:'米餅馴龍王',art:7,atlas:'weekend',rarity:'SSR',desc:'傳說巨龍終於肯聽指令，條件係每輪訓練都有宵夜'},
+ {id:'d_24',name:'波士頓洗衣保安',art:8,atlas:'weekend',rarity:'N',desc:'守住全家洗衣籃，但失蹤襪子的去向暫不評論'},
+ {id:'d_25',name:'蝴蝶犬迎風司儀',art:9,atlas:'weekend',rarity:'R',desc:'耳仔一開場，風扇都以為自己請咗專業舞蹈團'},
+ {id:'d_26',name:'紐芬蘭浴池救生員',art:10,atlas:'weekend',rarity:'SR',desc:'救回三隻膠鴨之後，堅持先領取摸摸服務獎'},
+ {id:'d_27',name:'靈緹銀河速遞',art:11,atlas:'weekend',rarity:'SSR',desc:'光速送到你面前，簽收方式係陪佢落街行一圈'},
+ {id:'c_24',name:'雪鞋襪子扣留官',art:12,atlas:'weekend',rarity:'N',desc:'襪子沒有丟失，只是尚未獲本喵批准離境'},
+ {id:'c_25',name:'孟買燈下影帝',art:13,atlas:'weekend',rarity:'R',desc:'燈未開時係一團影，燈開之後係一團有眼神的影'},
+ {id:'c_26',name:'埃及貓地圖探險家',art:14,atlas:'weekend',rarity:'SR',desc:'讀懂整張探險地圖，最後仍決定霸住你要看的位置'},
+ {id:'c_27',name:'巴厘月光舞王',art:15,atlas:'weekend',rarity:'SSR',desc:'身披月光優雅登場，下一秒準備追一條不太優雅的鞋帶'}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

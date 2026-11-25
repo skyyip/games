@@ -1112,6 +1112,7 @@ dialog:has(.leaderboard-faction-tabs) {
 .flash-card-polaroid.rarity-ssr{padding:7px 7px 14px;border:3px solid #644bb1;background:linear-gradient(120deg,#ffabd8,#b8f4ff,#fff6a1,#bea0ff,#ffabd8);background-size:300% 300%;animation:foil-shift 5s ease infinite}
 .flash-card-art{position:relative;isolation:isolate;overflow:hidden}
 .new-card-art{background-image:url('./assets/illustrations/gacha-polaroids.webp');background-size:400% 400%}
+.weekend-card-art{background-image:url('./assets/illustrations/weekend-polaroids.webp');background-size:400% 400%}
 .festival-card-art{background-image:url('./assets/illustrations/festival-polaroids.webp');background-size:400% 400%}
 .life-card-art{background-image:url('./assets/illustrations/everyday-polaroids.webp');background-size:400% 400%}
 .pet-card-art{background-image:url('./assets/illustrations/pet-breeds.webp');background-size:400% 400%}
