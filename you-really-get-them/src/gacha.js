@@ -66,7 +66,23 @@ export const CARDS=[
  {id:'c_16',name:'俄藍廚房門神',art:12,atlas:'life',rarity:'N',desc:'門關咗三分鐘，已經準備向罐頭部提出申訴'},
  {id:'c_17',name:'阿比書架巡察員',art:13,atlas:'life',rarity:'R',desc:'站得高唔代表望得遠，但可以望清你偷食乜'},
  {id:'c_18',name:'德文星艦通訊官',art:14,atlas:'life',rarity:'SR',desc:'兩隻耳仔接收全宇宙訊號，唯獨聽唔到「落嚟」'},
- {id:'c_19',name:'安哥拉月宮館長',art:15,atlas:'life',rarity:'SSR',desc:'藏書三千卷，最鍾意瞓喺你而家要睇嗰頁'}
+ {id:'c_19',name:'安哥拉月宮館長',art:15,atlas:'life',rarity:'SSR',desc:'藏書三千卷，最鍾意瞓喺你而家要睇嗰頁'},
+ {id:'w_12',name:'充電線拆彈員',art:0,atlas:'festival',rarity:'N',desc:'只想叉一格電，卻先要解開三代耳機的恩怨'},
+ {id:'w_13',name:'夜市小食平衡師',art:1,atlas:'festival',rarity:'R',desc:'一盤包辦甜鹹辣，下一步先研究手可以放哪裡'},
+ {id:'w_14',name:'排隊路線軍師',art:2,atlas:'festival',rarity:'SR',desc:'別人睇燈飾，她已規劃好避開三條長龍的副本'},
+ {id:'w_15',name:'拿鐵預言女神',art:3,atlas:'festival',rarity:'SSR',desc:'拉花看得見未來，內容大概係聽朝仲要返工'},
+ {id:'m_12',name:'巴士夢醒旅人',art:4,atlas:'festival',rarity:'N',desc:'瞓前仲在旺角，醒後窗外已經開始人生新章'},
+ {id:'m_13',name:'野餐補給官',art:5,atlas:'festival',rarity:'R',desc:'只約咗兩個人，裝備卻足夠成立一個戶外分店'},
+ {id:'m_14',name:'反骨雨傘工程師',art:6,atlas:'festival',rarity:'SR',desc:'風把傘吹反，他把客廳變成雨具研發中心'},
+ {id:'m_15',name:'電競宵夜大帝',art:7,atlas:'festival',rarity:'SSR',desc:'全隊等緊開局，他堅持先完成三文治主線任務'},
+ {id:'d_20',name:'惠比特毛毯可頌',art:8,atlas:'festival',rarity:'N',desc:'賽道上跑得快，搶張被時更快進入休眠'},
+ {id:'d_21',name:'瑪爾濟斯泡泡雲',art:9,atlas:'festival',rarity:'R',desc:'洗完似朵雲，甩水嗰刻全屋一齊落雨'},
+ {id:'d_22',name:'伯恩山列車長',art:10,atlas:'festival',rarity:'SR',desc:'列車準時開出，沿途各站都想停低討摸摸'},
+ {id:'d_23',name:'秋田紅葉守衛',art:11,atlas:'festival',rarity:'SSR',desc:'守住整片秋色，順便思考回家路線可否再繞一圈'},
+ {id:'c_20',name:'土耳其梵水務探員',art:12,atlas:'festival',rarity:'N',desc:'水龍頭滴一聲，立即啟動免費但不保證有用的巡查'},
+ {id:'c_21',name:'伯曼包裹派送員',art:13,atlas:'festival',rarity:'R',desc:'派送流程：先坐住你份件，再決定幾時肯簽收'},
+ {id:'c_22',name:'索馬利解謎教授',art:14,atlas:'festival',rarity:'SR',desc:'研究食物益智玩具五分鐘，發表一篇直接推翻的論文'},
+ {id:'c_23',name:'西伯利亞星夜車長',art:15,atlas:'festival',rarity:'SSR',desc:'下一站銀河，請先把腿上的貓移到安全位置再落車'}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

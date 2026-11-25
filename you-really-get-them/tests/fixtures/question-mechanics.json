@@ -1,90 +1,90 @@
 {
   "BANK": {
     "women": {
-      "count": 40,
-      "sha256": "f08a07a98ba8b1d0d7336e28f9c8a29f1232983b2895e3f3b04d23d803ff71f7"
+      "count": 50,
+      "sha256": "833b7ac4d300c088e7bfe88dbdbba241aad13087259c1586ef38812575f661b5"
     },
     "men": {
-      "count": 40,
-      "sha256": "df84aedc7b810d5b2769e6d8c0ff000f60ac33a04998634e160b4f9f87e59f6c"
+      "count": 50,
+      "sha256": "266cca0c0248b66f4e42b427b4e3cb74a90463e4ca61dc269ae6f31700fc6aac"
     },
     "dog": {
-      "count": 40,
-      "sha256": "5cc960f7af872babcdca7ab6b3d4408a06cc0a5830541f71b8b2ac66ad593bca"
+      "count": 50,
+      "sha256": "9d54894a62732fe27302fe52fb4c5cc24ad84a3469d64a5ced5db1ba38f0eb1a"
     },
     "cat": {
-      "count": 40,
-      "sha256": "e72755b48420e31b0221cf3f950ea36f5d323bb3769df67cd75010ceff190b99"
+      "count": 50,
+      "sha256": "aed6d2a06c2659b7fc120bc96fc12417e5fe9d0566cdfbb567d5c8428df5581c"
     },
     "duo": {
-      "count": 43,
-      "sha256": "e53c0e70a5516c20349771558c2595bee512d3ed314c3fe48f7760a8abc80b75"
+      "count": 59,
+      "sha256": "aee216ed63511a92499589436526e731d6a34a62551d42d90f2efd10b542ddb3"
     }
   },
   "AIR_BANK": {
     "women": {
-      "count": 5,
-      "sha256": "1f4a7841bfd75ba2f4a989971948ae7a8169e7d6480f46a80d734ba58d64195b"
+      "count": 8,
+      "sha256": "288ebee604ccb972d3a442fee5cf8489bbde927d6f61634e582a04d933dbc386"
     },
     "men": {
-      "count": 5,
-      "sha256": "a5d23ec55fc713aa16094a84401c03ea44424f07b6a8e5ec868406acb248c44c"
+      "count": 8,
+      "sha256": "56dbe63398044302fcd0b175ef80d7e5bd9c58cd5d0b0b301c9b681d3e4b676a"
     },
     "dog": {
-      "count": 5,
-      "sha256": "3a5221ec378684970db39cdff50245de1c8ebcc5058e190e4eb980a0a9965bc5"
+      "count": 8,
+      "sha256": "fb426ae2e4fbfbe589e89d081615e7cd257f4b3de6681b9f9cf60b0f2ffb20f7"
     },
     "cat": {
-      "count": 5,
-      "sha256": "0555b149b6e222989597a201093d5c0875f888763218c70b8590a00d8224b46c"
+      "count": 8,
+      "sha256": "94ce7e036b5e48dc02fd7525b7a539b1b0fa12b25a28a12cdb24ce2391f8d212"
     },
     "duo": {
       "count": 5,
-      "sha256": "55efc7ca971d867ebfb5d56da3b183cefc8a97c13292fef1bc3d6bcfdb867e37"
+      "sha256": "3837d31f8375b73733349fc637f21d7fa0d26abb1224dded4c6b18f0bc383ad0"
     }
   },
   "MIXED_BANK": {
     "women": {
-      "count": 4,
-      "sha256": "0fbd4fa7eb2c48ae4c4463666aca466ca238bcc352bbbac1ab55add83479430b"
+      "count": 7,
+      "sha256": "247d9163f5a29ab2a16cccd3c94827960789e9f41ccb7f734080908609794f3f"
     },
     "men": {
-      "count": 4,
-      "sha256": "0fbd4fa7eb2c48ae4c4463666aca466ca238bcc352bbbac1ab55add83479430b"
+      "count": 7,
+      "sha256": "47ab04b1c7b97837ac79b00c4155532c33aca367f7a19fbb3bfe96e7b01f8280"
     },
     "dog": {
-      "count": 4,
-      "sha256": "9a2a60c1dfff7a366435e247209ded916003b02b4b6d83b79824350f4e02b9cd"
+      "count": 7,
+      "sha256": "c5d9e0f4ae437b5e1dfac7339a72ea7d0df393bfec93d1ee4a96f4400be8e122"
     },
     "cat": {
-      "count": 4,
-      "sha256": "8e69f2021d38393a7249e0aa7e150839062d95341f2968329a7033c5051dfbb2"
+      "count": 7,
+      "sha256": "45a84ed0a1e46927d2969b8ed7229022c46caa0b8b2584549572bbd28c1406c0"
     },
     "duo": {
       "count": 4,
-      "sha256": "0fbd4fa7eb2c48ae4c4463666aca466ca238bcc352bbbac1ab55add83479430b"
+      "sha256": "92468ed87e93c7522a9be7c7c0e2e83547024364b58007f1a21fde71ea0deae3"
     }
   },
   "PICTURE_BANK": {
     "women": {
       "count": 2,
-      "sha256": "2406081f7ce503fdb759e396fffb74ff0cdb1a74cf40199eda3e843e73ba1d24"
+      "sha256": "c4a7feefffeec859a57ba36b6e1a83b3688f1634e697f09b68135dd2c42a2ba8"
     },
     "men": {
       "count": 2,
-      "sha256": "ec98dc99e0dd35bcb82ca8bfbeaab9614d9f587f8eaf59310d628a93c02a27ae"
+      "sha256": "3f78d4dcfff633cef27bd67b943645d0984ef97f620f2b852b3e4c71d2852d88"
     },
     "dog": {
       "count": 2,
-      "sha256": "0b273e3bce0c47f19815607d24d094ad29bad82b7a298eeb3bbf99180a966655"
+      "sha256": "1f2a1d066e94c5815b4604712da0411cda0fd68ed8100ca5de0a5be491cbe57f"
     },
     "cat": {
       "count": 2,
-      "sha256": "e8f61084eb9951024170d2f7b7e7bf6b168c3151cfccfad6d1ad7c7c83271a78"
+      "sha256": "9f08c76ce854407333dee69305dfc7c95aa094e593a4c78e616d9c6ce5469f24"
     },
     "duo": {
       "count": 1,
-      "sha256": "940db0f8d8fe89d27db941c4f8fcec1472fecc2363444d56e5f347c3de7d4193"
+      "sha256": "2f28f92437546f8366940d632374225ac1b90082ac2c9442a990587d9de86ef5"
     }
   }
 }

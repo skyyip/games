@@ -6,23 +6,27 @@ import {BANK,AIR_BANK,MIXED_BANK} from '../src/questions.js';
 import {PICTURE_BANK} from '../src/picture-questions.js';
 const banks={BANK,AIR_BANK,MIXED_BANK,PICTURE_BANK};
 const baseline=JSON.parse(readFileSync(new URL('./fixtures/question-mechanics.json',import.meta.url),'utf8'));
-const mechanics=q=>Object.fromEntries(['correct','damageByOption','profiles','picture','emoji','tag'].map(key=>[key,q[key]??null]));
+const mechanics=q=>{
+ const options=Array.from({length:4},(_,i)=>({correct:q.correct===i,damage:q.damageByOption?.[i]??null,profile:q.profiles?.[i]??null}));
+ options.sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:JSON.stringify(a)>JSON.stringify(b)?1:0);
+ return {options,picture:q.picture??null,emoji:q.emoji??null,tag:q.tag??null};
+};
 
-test('reviewed copy retains every existing answer index, damage table, profile and illustration in order',()=>{
+test('reviewed copy retains existing option/scoring pairs, question order and illustrations in order',()=>{
  for(const [kind,bank]of Object.entries(banks))for(const [faction,rows]of Object.entries(bank)){
   const previous=baseline[kind][faction];
   const actual=createHash('sha256').update(JSON.stringify(rows.slice(0,previous.count).map(mechanics))).digest('hex');
   assert.equal(actual,previous.sha256,`${kind}/${faction}`);
  }
 });
-test('eighty new playable scenarios expand every faction without duplicate prompts',()=>{
+test('sixty additional playable scenarios expand all five factions without duplicates',()=>{
  const all=Object.values(banks).flatMap(bank=>Object.values(bank).flat());
- assert.equal(all.length,337);assert.equal(new Set(all.map(q=>q.text)).size,337);
+ assert.equal(all.length,397);assert.equal(new Set(all.map(q=>q.text)).size,397);
  for(const faction of ['women','men','dog','cat','duo']){
-  assert.equal(BANK[faction].length,faction==='duo'?59:50);
-  const added=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='街坊新副本');assert.equal(added.length,16,faction);
+  assert.equal(BANK[faction].length,faction==='duo'?71:58);
+  const added=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='反差求生');assert.equal(added.length,12,faction);
  }
- assert.equal(all.filter(q=>q.tag==='街坊新副本').length,80);
+ assert.equal(all.filter(q=>q.tag==='反差求生').length,60);
 });
 test('all prompts, choices and explanations stay complete and readable in a mobile round',()=>{
  for(const bank of Object.values(banks))for(const rows of Object.values(bank))for(const q of rows){
@@ -33,10 +37,19 @@ test('all prompts, choices and explanations stay complete and readable in a mobi
 });
 test('the cat hybrid rewards leaving a retreating cat alone instead of continuing to hold it',()=>{
  const q=MIXED_BANK.cat[2],scores=q.profiles.map(p=>p.reduce((a,b)=>a+b,0));
- assert.equal(scores.indexOf(Math.max(...scores)),0);assert.match(q.opts[0],/放牠離開/);assert.match(q.opts[2],/繼續抱/);
+ assert.match(q.opts[scores.indexOf(Math.max(...scores))],/放牠離開/);assert(q.opts.some(o=>o.includes('繼續抱')));
 });
 test('duo expansion asks personal preferences instead of declaring an official correct response',()=>{
  for(const q of BANK.duo.slice(43)){
   assert.match(q.text,/我|我們/);assert(!q.why.includes('正解'));
  }
+});
+
+test('normal question answers balance all four positions without a consistently longest answer',()=>{
+ const counts=[0,0,0,0];let longest=0,total=0;
+ for(const bank of Object.values(banks))for(const [faction,rows]of Object.entries(bank))if(faction!=='duo')for(const q of rows){
+  const best=q.correct??q.profiles.map(p=>p.reduce((a,b)=>a+b,0)).reduce((b,v,i,a)=>v>a[b]?i:b,0);
+  counts[best]++;total++;if(q.opts[best].length>Math.max(...q.opts.filter((_,i)=>i!==best).map(o=>o.length)))longest++;
+ }
+ assert.deepEqual(counts,[79,79,79,79]);assert(longest/total<.35);
 });

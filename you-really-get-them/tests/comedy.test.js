@@ -34,8 +34,8 @@ test('a clean run does not manufacture an accident and titles depend on observed
 
 test('the report describes the chosen mistake rather than assigning another option to the player',()=>{
  const q=PICTURE_BANK.cat[0];
- assert.match(answerRecord(q,{round:1,choice:3}).incident,/沙發業權/);
- assert.match(comicReveal(q,{faction:'cat',choice:3}).thought,/沙發業權/);
- assert.match(answerRecord(q,{round:1,choice:0}).incident,/任摸通行證/);
+ assert.match(answerRecord(q,{round:1,choice:3}).incident,/抱/);
+ assert.match(comicReveal(q,{faction:'cat',choice:3}).thought,/抱/);
+ assert.match(answerRecord(q,{round:1,choice:0}).incident,/摸肚/);
  assert.match(answerRecord(q,{round:1}).incident,/錯過現場回應/);
 });
