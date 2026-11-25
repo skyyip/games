@@ -98,7 +98,15 @@ export const CARDS=[
  {id:'c_24',name:'雪鞋襪子扣留官',art:12,atlas:'weekend',rarity:'N',desc:'襪子沒有丟失，只是尚未獲本喵批准離境'},
  {id:'c_25',name:'孟買燈下影帝',art:13,atlas:'weekend',rarity:'R',desc:'燈未開時係一團影，燈開之後係一團有眼神的影'},
  {id:'c_26',name:'埃及貓地圖探險家',art:14,atlas:'weekend',rarity:'SR',desc:'讀懂整張探險地圖，最後仍決定霸住你要看的位置'},
- {id:'c_27',name:'巴厘月光舞王',art:15,atlas:'weekend',rarity:'SSR',desc:'身披月光優雅登場，下一秒準備追一條不太優雅的鞋帶'}
+ {id:'c_27',name:'巴厘月光舞王',art:15,atlas:'weekend',rarity:'SSR',desc:'身披月光優雅登場，下一秒準備追一條不太優雅的鞋帶'},
+ {id:'w_20',name:'霓虹夜巷探店員',art:0,atlas:'bonus',rarity:'SR',desc:'地圖負責認路，鼻子負責把宵夜支線開到天光'},
+ {id:'w_21',name:'早餐光速女俠',art:1,atlas:'bonus',rarity:'SSR',desc:'太陽剛打卡，她的多士咖啡已經完成救援部署'},
+ {id:'m_20',name:'洗碗泡泡武士',art:2,atlas:'bonus',rarity:'SR',desc:'手握百潔布出征，唯一剋星係煎完蛋忘記浸水個鑊'},
+ {id:'m_21',name:'客廳露營宇宙王',art:3,atlas:'bonus',rarity:'SSR',desc:'離開梳化三步就到營地，最遠的補給站係雪櫃'},
+ {id:'d_28',name:'喜樂蒂街角導遊',art:4,atlas:'bonus',rarity:'SR',desc:'熟悉全區散步路線，但每一棵樹都想加開導賞'},
+ {id:'d_29',name:'大白熊雪雲守門員',art:5,atlas:'bonus',rarity:'SSR',desc:'守住通往雪山的大門，回家卻想守住你塊餅乾'},
+ {id:'c_28',name:'玩具虎紙箱王子',art:6,atlas:'bonus',rarity:'SR',desc:'王國用紙皮建造，租金只接受準時開罐頭'},
+ {id:'c_29',name:'新加坡星光導航員',art:7,atlas:'bonus',rarity:'SSR',desc:'指引星河百萬條航線，最佳路線仍然直達你的膝頭'}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

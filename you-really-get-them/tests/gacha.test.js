@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {CARDS,RARITIES,DRAW_COST,DUPLICATE_REFUND,rollRarity,purchaseDraw} from '../src/gacha.js';
 
 test('new collection preserves all legacy IDs and provides all four rarity pools',()=>{
- assert.equal(CARDS.length,92);assert.equal(new Set(CARDS.map(c=>c.id)).size,92);
+ assert.equal(CARDS.length,100);assert.equal(new Set(CARDS.map(c=>c.id)).size,100);
  for(const prefix of ['w','m','d','c'])for(let i=1;i<=3;i++)assert(CARDS.some(c=>c.id===`${prefix}_${i}`&&!c.atlas));
- assert.deepEqual(RARITIES.map(r=>[r.id,CARDS.filter(c=>c.rarity===r.id).length]),[['N',24],['R',24],['SR',22],['SSR',22]]);
+ assert.deepEqual(RARITIES.map(r=>[r.id,CARDS.filter(c=>c.rarity===r.id).length]),[['N',24],['R',24],['SR',26],['SSR',26]]);
  const art=new Set();for(const c of CARDS.filter(c=>c.atlas==='new'))art.add(c.art);assert.equal(art.size,16);
  assert(CARDS.filter(c=>c.rarity==='N').every(c=>c.atlas==='new'&&c.art<8||c.atlas==='pets'&&[0,1,8,9].includes(c.art)||['life','festival','weekend'].includes(c.atlas)&&[0,4,8,12].includes(c.art)));
 });
@@ -56,4 +56,11 @@ test('sixteen weekend cards extend every faction across all rarities with distin
  const cards=CARDS.filter(c=>c.atlas==='weekend');assert.equal(cards.length,16);
  assert.deepEqual(cards.map(c=>c.art),Array.from({length:16},(_,i)=>i));
  for(const prefix of ['w_','m_','d_','c_'])assert.deepEqual(cards.filter(c=>c.id.startsWith(prefix)).map(c=>c.rarity),RARITIES.map(t=>t.id));
+});
+
+test('eight bonus foil cards provide SR and SSR per faction and fit the existing cloud favorites limit',()=>{
+ const cards=CARDS.filter(c=>c.atlas==='bonus');assert.equal(cards.length,8);
+ assert.deepEqual(cards.map(c=>c.art),Array.from({length:8},(_,i)=>i));
+ for(const prefix of ['w_','m_','d_','c_'])assert.deepEqual(cards.filter(c=>c.id.startsWith(prefix)).map(c=>c.rarity),['SR','SSR']);
+ assert(CARDS.length<=100);
 });
