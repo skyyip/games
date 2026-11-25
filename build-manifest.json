@@ -1,8 +1,8 @@
 {
-  "version": "3f4f321f9a627f49",
-  "builtAt": 1795570992976,
+  "version": "3921bb199dd1fcb0",
+  "builtAt": 1795572082441,
   "assets": {
-    "you-really-get-them/assets/illustrations/weekend-polaroids.webp": "assets/weekend-polaroids-de85c44bb3d2.webp",
+    "you-really-get-them/assets/illustrations/bonus-polaroids.webp": "assets/bonus-polaroids-4a29a42bdf38.webp",
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
     "beat-bad-luck/assets/icons/website-logo-512.png": "assets/website-logo-512-01020184b434.png",
@@ -333,6 +333,7 @@
     "you-really-get-them/assets/illustrations/pet-breeds.webp": "assets/pet-breeds-a0e1d13af575.webp",
     "you-really-get-them/assets/illustrations/picture-stories.webp": "assets/picture-stories-2fd0c2834923.webp",
     "you-really-get-them/assets/illustrations/question-polaroids.webp": "assets/question-polaroids-974633b58822.webp",
+    "you-really-get-them/assets/illustrations/weekend-polaroids.webp": "assets/weekend-polaroids-de85c44bb3d2.webp",
     "you-really-get-them/assets/illustrations/woman.webp": "assets/woman-48eaeb556a15.webp"
   },
   "entries": {
@@ -370,7 +371,7 @@
     "pot-toss/src/app.js": "built/app-47BX46QU.js",
     "roach-rush/src/app.js": "built/app-TDKY3AXT.js",
     "stone-skip/src/app.js": "built/app-DXOHJEBY.js",
-    "you-really-get-them/src/app.js": "built/app-D7EOGB5Y.js",
+    "you-really-get-them/src/app.js": "built/app-T3N6NHS7.js",
     "your-dream-career/src/app.js": "built/app-OKS2TK65.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
     "hong-kong-millionaire/src/app.js": "built/app-TT5YUFRL.js",
@@ -401,7 +402,7 @@
     "pot-toss/styles.css": "built/styles-SH7PW436.css",
     "roach-rush/styles.css": "built/styles-EMU7TNYL.css",
     "stone-skip/styles.css": "built/styles-TBA3T5NJ.css",
-    "you-really-get-them/styles.css": "built/styles-VO2SDJ3C.css",
+    "you-really-get-them/styles.css": "built/styles-WKRIKJRW.css",
     "your-dream-career/styles.css": "built/styles-EPARVTUD.css",
     "your-dream-career/dream.css": "built/dream-LNLKTEYZ.css",
     "hong-kong-millionaire/mobile.css": "built/mobile-S5Q2IMBB.css",
