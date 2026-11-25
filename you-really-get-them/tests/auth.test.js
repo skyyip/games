@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
 import {firebaseSDKSource} from './fixtures/firebase-sdk.mjs';
+import {CARDS} from '../src/gacha.js';
 
 let fixtureId=0;
 function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no});return {promise,resolve,reject}}
@@ -108,4 +109,32 @@ test('a pending new-profile write cannot delay the restored identity',async t=>{
   assert.equal(state.writes[0].ref,'users/new-user');
   pending.resolve();await flush();
   assert.equal(changes[1][2].profileLoaded,true);
+});
+
+test('the full 116-card collection survives a cloud save and subsequent profile read',async t=>{
+  const cards=CARDS.map(card=>card.id),user={uid:'collector'};
+  assert.equal(cards.length,116);
+  const {state,cloud}=await loadCloud(t,{user});const changes=[];
+  await cloud.initCloud((...args)=>changes.push(args));await flush();
+  assert.deepEqual(await cloud.saveCloudFavoriteCards(cards),cards);
+  const write=state.writes.at(-1);assert.equal(write.ref,'users/collector');
+  assert.deepEqual(write.data.favoriteCards,cards);assert.deepEqual(write.options,{merge:true});
+  state.readProfile=async()=>profile({playerName:'收藏玩家',favoriteCards:write.data.favoriteCards});
+  state.emit(user);await flush();
+  assert.deepEqual(changes.at(-1)[1].favoriteCards,cards);
+});
+
+test('cloud favorites keep a bounded 200-entry list and exclude non-string values',async t=>{
+  const {state,cloud}=await loadCloud(t,{user:{uid:'collector'}});await cloud.initCloud();await flush();
+  const cards=Array.from({length:205},(_,i)=>`card_${i}`);
+  const saved=await cloud.saveCloudFavoriteCards([null,42,...cards]);
+  assert.deepEqual(saved,cards.slice(0,200));assert.deepEqual(state.writes.at(-1).data.favoriteCards,saved);
+});
+
+test('signed-out and anonymous players do not write cloud favorites',async t=>{
+  for(const user of [null,{uid:'guest',isAnonymous:true}]){
+    const {state,cloud}=await loadCloud(t,{user});await cloud.initCloud();await flush();
+    assert.equal(await cloud.saveCloudFavoriteCards(CARDS.map(card=>card.id)),undefined);
+    assert.deepEqual(state.writes,[]);
+  }
 });

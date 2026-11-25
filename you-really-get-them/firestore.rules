@@ -33,7 +33,7 @@ service cloud.firestore {
         && (!('playerName' in data)
           || (data.playerName is string && data.playerName.size() <= 20))
         && (!('favoriteCards' in data)
-          || (data.favoriteCards is list && data.favoriteCards.size() <= 100))
+          || (data.favoriteCards is list && data.favoriteCards.size() <= 200))
         && (!('playerNameUpdatedAt' in data) || data.playerNameUpdatedAt is timestamp)
         && data.photoURL is string
         && data.photoURL.size() <= 2048

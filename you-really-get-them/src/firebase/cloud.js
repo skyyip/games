@@ -102,7 +102,7 @@ export async function saveCloudProfile({playerName}={}){
 }
 export async function saveCloudFavoriteCards(cards=[]){
   if(!currentUser||currentUser.isAnonymous)return;
-  const favoriteCards=[...new Set(cards.filter(card=>typeof card==='string').slice(0,100))];
+  const favoriteCards=[...new Set(cards.filter(card=>typeof card==='string').slice(0,200))];
   await fs.setDoc(fs.doc(db,'users',currentUser.uid),{
     favoriteCards,updatedAt:fs.serverTimestamp()
   },{merge:true});

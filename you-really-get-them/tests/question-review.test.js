@@ -21,12 +21,12 @@ test('reviewed copy retains existing option/scoring pairs, question order and il
 });
 test('sixty additional playable scenarios expand all five factions without duplicates',()=>{
  const all=Object.values(banks).flatMap(bank=>Object.values(bank).flat());
- assert.equal(all.length,517);assert.equal(new Set(all.map(q=>q.text)).size,517);
+ assert.equal(all.length,577);assert.equal(new Set(all.map(q=>q.text)).size,577);
  for(const faction of ['women','men','dog','cat','duo']){
-  assert.equal(BANK[faction].length,faction==='duo'?95:74);
-  const added=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='街角番外');assert.equal(added.length,12,faction);
+  assert.equal(BANK[faction].length,faction==='duo'?107:82);
+  const added=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='城市加場');assert.equal(added.length,12,faction);
  }
- assert.equal(all.filter(q=>q.tag==='街角番外').length,60);
+ assert.equal(all.filter(q=>q.tag==='城市加場').length,60);
 });
 test('all prompts, choices and explanations stay complete and readable in a mobile round',()=>{
  for(const bank of Object.values(banks))for(const rows of Object.values(bank))for(const q of rows){
@@ -51,5 +51,5 @@ test('normal question answers balance all four positions without a consistently 
   const best=q.correct??q.profiles.map(p=>p.reduce((a,b)=>a+b,0)).reduce((b,v,i,a)=>v>a[b]?i:b,0);
   counts[best]++;total++;if(q.opts[best].length>Math.max(...q.opts.filter((_,i)=>i!==best).map(o=>o.length)))longest++;
  }
- assert.deepEqual(counts,[103,103,103,103]);assert(longest/total<.35);
+ assert.deepEqual(counts,[115,115,115,115]);assert(longest/total<.35);
 });

@@ -106,7 +106,23 @@ export const CARDS=[
  {id:'d_28',name:'喜樂蒂街角導遊',art:4,atlas:'bonus',rarity:'SR',desc:'熟悉全區散步路線，但每一棵樹都想加開導賞'},
  {id:'d_29',name:'大白熊雪雲守門員',art:5,atlas:'bonus',rarity:'SSR',desc:'守住通往雪山的大門，回家卻想守住你塊餅乾'},
  {id:'c_28',name:'玩具虎紙箱王子',art:6,atlas:'bonus',rarity:'SR',desc:'王國用紙皮建造，租金只接受準時開罐頭'},
- {id:'c_29',name:'新加坡星光導航員',art:7,atlas:'bonus',rarity:'SSR',desc:'指引星河百萬條航線，最佳路線仍然直達你的膝頭'}
+ {id:'c_29',name:'新加坡星光導航員',art:7,atlas:'bonus',rarity:'SSR',desc:'指引星河百萬條航線，最佳路線仍然直達你的膝頭'},
+ {id:'w_22',name:'零錢考古專員',art:0,atlas:'metro',rarity:'N',desc:'只想找兩個硬幣，卻先挖出上季超市小票文明'},
+ {id:'w_23',name:'海風票尾守衛',art:1,atlas:'metro',rarity:'R',desc:'頭髮可以跟海風開會，船票必須留在本次行程'},
+ {id:'w_24',name:'轉乘路線策劃師',art:2,atlas:'metro',rarity:'SR',desc:'研究三個出口五條路，最後替大家省下兩級樓梯'},
+ {id:'w_25',name:'星夜月台守護者',art:3,atlas:'metro',rarity:'SSR',desc:'手提星光照亮末班車，仍會提醒你上車前先睇清方向'},
+ {id:'m_22',name:'衣架解結員',art:4,atlas:'metro',rarity:'N',desc:'只是想晾一件衫，衣架卻先組成八人聯合防線'},
+ {id:'m_23',name:'街角栗子嚮導',art:5,atlas:'metro',rarity:'R',desc:'沿住香味行五十步，成功把散步升級成栗子補給任務'},
+ {id:'m_24',name:'相機電池補給官',art:6,atlas:'metro',rarity:'SR',desc:'可以忘記午餐地點，但每個口袋都有一格後備電量'},
+ {id:'m_25',name:'星圖模型製造師',art:7,atlas:'metro',rarity:'SSR',desc:'模型還未上色，腦內已經完成整個宇宙的首航儀式'},
+ {id:'d_30',name:'日本尖嘴拖鞋巡官',art:8,atlas:'metro',rarity:'N',desc:'今日輪班守住兩隻拖鞋，主人本人暫時未獲批准取回'},
+ {id:'d_31',name:'葡水花園見習生',art:9,atlas:'metro',rarity:'R',desc:'負責陪水壺開工，並以濕腳印確認每一處都巡過'},
+ {id:'d_32',name:'古牧洗衣列車長',art:10,atlas:'metro',rarity:'SR',desc:'瀏海遮住視線也不影響準時抵達摸摸服務站'},
+ {id:'d_33',name:'藏獒金雲守門將',art:11,atlas:'metro',rarity:'SSR',desc:'坐鎮萬重金雲，聽到零食袋時仍然會即時下凡'},
+ {id:'c_30',name:'捲耳鉛筆鑑定員',art:12,atlas:'metro',rarity:'N',desc:'每支筆都要先過爪檢，合格的也可能被推落地下'},
+ {id:'c_31',name:'英長茶墊領主',art:13,atlas:'metro',rarity:'R',desc:'茶還未泡好，最舒服的位置已經完成永久登記'},
+ {id:'c_32',name:'東短音控總監',art:14,atlas:'metro',rarity:'SR',desc:'兩隻耳仔收齊全場聲音，唯獨選擇性忽略你的叫名'},
+ {id:'c_33',name:'襤褸貓銀河郵差',art:15,atlas:'metro',rarity:'SSR',desc:'星際信件準時送達，信封拆完的紙袋請留給本喵'}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

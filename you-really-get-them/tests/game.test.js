@@ -42,7 +42,7 @@ test('all faction metadata is present', () => {
 test('reading-the-room mode has the expanded faction scenarios', () => {
   assert.deepEqual(Object.keys(AIR_BANK), ['women', 'men', 'dog', 'cat', 'duo']);
   for (const [id, questions] of Object.entries(AIR_BANK)) {
-    assert.equal(questions.length, id === 'duo' ? 5 : 14, id);
+    assert.equal(questions.length, id === 'duo' ? 5 : 16, id);
     for (const q of questions) {
       assert.equal(q.opts.length, 4);
       assert.equal(q.profiles.length, 4);
@@ -58,7 +58,7 @@ test('reading-the-room mode has the expanded faction scenarios', () => {
 test('mixed survival mode has the expanded faction scenarios', () => {
   assert.deepEqual(Object.keys(MIXED_BANK), ['women', 'men', 'dog', 'cat', 'duo']);
   for (const [id, questions] of Object.entries(MIXED_BANK)) {
-    assert.equal(questions.length, id === 'duo' ? 4 : 13, id);
+    assert.equal(questions.length, id === 'duo' ? 4 : 15, id);
     for (const q of questions) {
       assert.equal(q.opts.length, 4);
       assert.equal(q.profiles.length, 4);
@@ -75,8 +75,8 @@ test('every faction run uses the 5 + 4 + 3 twelve-question mix', () => {
   for (const id of Object.keys(BANK)) {
     assert.ok(BANK[id].length >= 5, id);
     assert.equal(5 + 4 + 3, 12, id);
-    assert.equal(AIR_BANK[id].length, id === 'duo' ? 5 : 14, id);
-    assert.equal(MIXED_BANK[id].length, id === 'duo' ? 4 : 13, id);
+    assert.equal(AIR_BANK[id].length, id === 'duo' ? 5 : 16, id);
+    assert.equal(MIXED_BANK[id].length, id === 'duo' ? 4 : 15, id);
   }
 });
 
@@ -189,7 +189,7 @@ test('authentication messages and offline cache include the current login flow',
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v53/);
+  assert.match(sw, /you-really-get-them-v54/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -251,7 +251,7 @@ test('favorite cards are stored per signed-in player and validated in Firestore'
   assert.match(cloud, /favoriteCards,updatedAt:fs\.serverTimestamp\(\)/);
   assert.match(app, /setSaveScope\(user&&!user\.isAnonymous\?user\.uid:'guest'\)/);
   assert.match(app, /persistFavoriteCards\(outcome\.save\.cards\)/);
-  assert.match(rules, /data\.favoriteCards is list && data\.favoriteCards\.size\(\) <= 100/);
+  assert.match(rules, /data\.favoriteCards is list && data\.favoriteCards\.size\(\) <= 200/);
   assert.match(rules, /hasOnly\(\['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt'\]\)/);
 });
 
@@ -270,7 +270,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v53/);
+  assert.match(sw, /you-really-get-them-v54/);
 });
 
 
@@ -281,7 +281,7 @@ test('game performance uses linear Fisher-Yates shuffle after the removed intera
   assert.match(app, /function shuffle\(a\)\{const out=\[\.\.\.a\];for\(let i=out\.length-1;i>0;i--\)/);
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.doesNotMatch(app, /setupScratch|scratch-pad|scratchMeter|刮開怒氣黑霧/);
-  assert.match(sw, /you-really-get-them-v53/);
+  assert.match(sw, /you-really-get-them-v54/);
 });
 
 
@@ -308,7 +308,7 @@ test('all shipped image assets are included in the versioned offline cache', asy
   assert.match(css, /collection-polaroids\.webp/);
   assert.ok(sw.includes("'./src/gacha.js'"));
   assert.ok(sw.includes("'./assets/illustrations/gacha-polaroids.webp'"));
-  assert.match(sw, /you-really-get-them-v53/);
+  assert.match(sw, /you-really-get-them-v54/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
 

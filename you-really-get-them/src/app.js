@@ -272,7 +272,7 @@ function showAuthModal(){
 let drawing=false;
 function cardArt(card,label,large=false){
   const columns=4,rows=card.atlas==='bonus'?2:card.atlas?4:3,x=card.art%columns*100/(columns-1),y=Math.floor(card.art/columns)*100/(rows-1);
-  return `<figure class="flash-card-polaroid rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${card.atlas==='bonus'?' bonus-card-art':card.atlas==='weekend'?' weekend-card-art':card.atlas==='festival'?' festival-card-art':card.atlas==='life'?' life-card-art':card.atlas==='pets'?' pet-card-art':card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div><figcaption>${escapeText(label)}</figcaption></figure>`;
+  return `<figure class="flash-card-polaroid rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${card.atlas==='metro'?' metro-card-art':card.atlas==='bonus'?' bonus-card-art':card.atlas==='weekend'?' weekend-card-art':card.atlas==='festival'?' festival-card-art':card.atlas==='life'?' life-card-art':card.atlas==='pets'?' pet-card-art':card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div><figcaption>${escapeText(label)}</figcaption></figure>`;
 }
 function followHologram(root){
   root.onpointermove=root.onpointerdown=event=>{
