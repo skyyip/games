@@ -1,24 +1,36 @@
-# 116張收藏所需的 Firestore 更新
+# 帳戶SC錢包、合約及羈絆所需的Firestore更新
 
-本版將收藏同步容量由100提高至200，讓116張卡可完整保存。請先發布新規則，再上傳網站更新；否則超過100張的同步會被舊規則拒絕。網站ZIP不會自動發布Firebase設定。
+請先發布本版完整規則，再上傳網站。ZIP只包含網站檔案，不會自動發布Firebase規則。
 
-1. 開啟 [本版 firestore.rules](https://github.com/skyyip/games/blob/work/you-really-get-them/firestore.rules)，使用檔案的完整內容。
-2. 在 Firebase Console 選擇 **you-really-get-them** 專案，進入 **Firestore Database → Rules**。
-3. 貼上完整規則並按 **Publish／發布**。
-4. 上傳網站更新後，登入收藏超過100張的帳戶，確認重新整理仍可看到完整收藏。
+1. 開啟 [完整 firestore.rules](https://github.com/skyyip/games/blob/work/you-really-get-them/firestore.rules)，複製整份內容。
+2. Firebase Console選擇 **you-really-get-them** → **Firestore Database → Rules**。
+3. 貼上完整內容並按 **Publish／發布**。
+4. 上傳網站ZIP的內容（含`.htaccess`）到網站的`games/`目錄，所有裝置重新載入新版。
+5. 登入後確認帳戶SC可同步；完成一局後重新整理，再以另一裝置登入同一帳戶核對餘額及收藏。
 
-規則只把 `favoriteCards.size() <= 100` 改成 `<= 200`；原有本人帳戶限制、欄位限制、名稱修改間隔和戰績規則保留。索引及Cloud Functions均無需更新。本次沒有代為部署正式Firebase。
+## 資料位置與舊SC政策
 
-## 驗證狀態
+- 現行餘額、羈絆及合約：`users/{uid}/wallet/main`。
+- 結算／抽卡流水：`users/{uid}/walletOps/{operationId}`。
+- 對應戰績：`users/{uid}/runs/{operationId}`。
+- 收藏仍在`users/{uid}.favoriteCards`，容量沿用200，已包含先前116張收藏所需的更新。
+- **新雲端錢包從0開始。舊SC完整留在原本機存檔，不匯入、不合併訪客或其他裝置餘額。** 帳戶快取改用v2，原v1檔案保留。已擁有收藏可合併保存，不會把舊幣值當作新錢包餘額。
 
-程式測試涵蓋116張保存與回讀、200張容量、非字串過濾，以及未登入／匿名帳戶不寫入。瀏覽器另使用Firebase SDK測試替身，確認116張完整恢復並於抽卡後送出完整清單。
+## 規則保護與操作方式
 
-實際Firestore規則執行測試尚未完成：目前環境阻擋官方模擬器下載，加入 `storage.googleapis.com` 的環境確認未完成，沒有更改網絡設定。SDK測試不等同Firestore規則驗收。
+錢包只准帳戶本人讀取；建立時必須為0。之後每次加減幣都必須在同一交易內建立新流水，符合原有獎勵公式或100 SC抽卡／25 SC重複退款規則，並同時保存戰績或卡牌。流水不可修改或刪除；重試不再入帳。羈絆及印章只能隨合資格結算更新，不影響技能數值或SC。
 
-已備妥 `tests/firestore-rules.mjs`，涵蓋116張建立與回讀、100→116→200更新、201張／非清單拒絕、未登入／其他帳戶拒絕，以及不能藉此寫入求生幣。可在有官方Firestore Emulator及已安裝 `firebase`、`@firebase/rules-unit-testing` 的環境執行：
+訪客與匿名模式仍使用本機SC；登入帳戶SC未確認時暫停抽卡。離線結算保留待同步紀錄，連線後核對。同一帳戶的多裝置交易不採本機餘額覆蓋雲端。
+
+本版仍使用Firebase Spark，**不需Cloud Functions、不需新增索引**。原有名稱修改間隔、個人資料限制、好友挑戰及排行榜規則保留。遊戲成績仍是瀏覽器自評，不是完整防作弊競技系統；抽卡的客戶端亂數機制也沒有改成可信任伺服器抽選。
+
+## 本機驗證
+
+備有`tests/wallet-rules.mjs`及`tests/firestore-rules.mjs`，只接受本機模擬器，使用`demo-`測試專案，不連正式資料庫。前者檢查0起點、跨帳戶／匿名拒絕、直接改幣拒絕、流水不可重寫、合約／羈絆條件、精確退款，以及實際並行結算和抽卡。後者驗證116／200張收藏與既有個人資料限制。
 
 ```bash
-FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 YRGT_RULES_TEST_PACKAGE_JSON=/path/to/package.json npm run test:rules
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8099 YRGT_RULES_TEST_PACKAGE_JSON=/path/to/package.json npm run test:wallet-rules
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8099 YRGT_RULES_TEST_PACKAGE_JSON=/path/to/package.json npm run test:rules
 ```
 
-`YRGT_RULES_TEST_PACKAGE_JSON` 指向這兩個測試套件所在專案的package.json；若安裝於本遊戲目錄，可省略該變數。測試只接受本機模擬器，使用 `demo-yrgt-card-capacity` 測試專案，不連正式資料庫。
+`YRGT_RULES_TEST_PACKAGE_JSON`指向已安裝`firebase`、`@firebase/rules-unit-testing`的專案package.json。瀏覽器流程使用SDK替身；正式iPhone、Google OAuth與正式Firebase權限須由部署後的實際帳戶驗收。本次沒有代為發布正式Firebase設定。

@@ -1,3 +1,5 @@
+import {walletTransaction} from './wallet-transaction.js';
+import {emptyWallet,normalizeCards,rewardWallet,drawWallet,leaderboardUpdate} from '../wallet-model.js';
 import { firebaseConfig, firebaseReady } from './config.js';
 
 const SDK='https://www.gstatic.com/firebasejs/9.23.0';
@@ -75,7 +77,7 @@ export async function syncProfileFromCloud(user=currentUser){
   if(currentUser?.uid!==user.uid)return null;
   if(snap.exists())return snap.data();
   const profile={displayName:(user.displayName||'玩家').slice(0,50),playerName:'',photoURL:user.photoURL||'',updatedAt:fs.serverTimestamp()};
-  await fs.setDoc(ref,profile);return profile;
+  await fs.setDoc(ref,profile,{merge:true});return profile;
 }
 export async function saveCloudProfile({playerName}={}){
   if(!currentUser)return;
@@ -89,7 +91,7 @@ export async function saveCloudProfile({playerName}={}){
     const nextDate=new Date(changedAt+90*24*60*60*1000).toLocaleDateString('zh-HK');
     throw new Error(`玩家名稱每 90 日只可更改一次，下次可於 ${nextDate} 更改。`);
   }
-  // Cloud profile stores identity metadata only. Coins and cards stay local.
+  // Identity metadata is separate from the transactional SC wallet.
   await fs.setDoc(ref,{
     displayName:(currentUser.displayName||'玩家').slice(0,50),
     playerName:name,
@@ -101,12 +103,13 @@ export async function saveCloudProfile({playerName}={}){
   return name;
 }
 export async function saveCloudFavoriteCards(cards=[]){
-  if(!currentUser||currentUser.isAnonymous)return;
-  const favoriteCards=[...new Set(cards.filter(card=>typeof card==='string').slice(0,200))];
-  await fs.setDoc(fs.doc(db,'users',currentUser.uid),{
-    favoriteCards,updatedAt:fs.serverTimestamp()
-  },{merge:true});
-  return favoriteCards;
+ const user=currentUser;if(!user||user.isAnonymous)return;
+ const incoming=normalizeCards(cards),ref=fs.doc(db,'users',user.uid);
+ return fs.runTransaction(db,async tx=>{
+  const snap=await tx.get(ref);if(currentUser?.uid!==user.uid)return;
+  const favoriteCards=normalizeCards([...(snap.exists()?snap.data().favoriteCards||[]:[]),...incoming]);
+  tx.set(ref,{...(snap.exists()?{}:profileMetadata(user)),favoriteCards,updatedAt:fs.serverTimestamp()},{merge:true});return favoriteCards;
+ });
 }
 export async function recordCloudRun(result,{leaderboard=true}={}){
   if(!currentUser)return;
@@ -174,4 +177,63 @@ export async function getChallenge(id){
   if(!currentUser||!id)return null;
   const snap=await fs.getDoc(fs.doc(db,'challenges',id));
   return snap.exists()?{id:snap.id,...snap.data()}:null;
+}
+
+function profileMetadata(user){return {displayName:(user.displayName||'玩家').slice(0,50),playerName:'',photoURL:user.photoURL||'',updatedAt:fs.serverTimestamp()}}
+function walletUser(expectedUid){
+ const user=currentUser;
+ if(!user||user.isAnonymous||(expectedUid&&user.uid!==expectedUid))throw Object.assign(Error('請先登入原帳戶，再同步SC。'),{code:'wallet/account-changed'});
+ return user;
+}
+function operationRef(uid,id){
+ if(!/^(run|draw)_[A-Za-z0-9_-]{8,70}$/.test(id||''))throw Error('流水編號無效，沒有改動SC。');
+ return fs.doc(db,'users',uid,'walletOps',id);
+}
+export async function initializeCloudWallet(expectedUid,localCards=[]){
+ const user=walletUser(expectedUid),walletRef=fs.doc(db,'users',user.uid,'wallet','main'),profileRef=fs.doc(db,'users',user.uid);
+ try{return await fs.runTransaction(db,async tx=>{
+  const [walletSnap,profileSnap]=await Promise.all([tx.get(walletRef),tx.get(profileRef)]);walletUser(user.uid);
+  const profile=profileSnap.exists()?profileSnap.data():profileMetadata(user);
+  const cards=normalizeCards([...(profile.favoriteCards||[]),...normalizeCards(localCards),'w_1','m_1']);
+  if(!profileSnap.exists()||JSON.stringify(cards)!==JSON.stringify(profile.favoriteCards||[]))tx.set(profileRef,{...profile,favoriteCards:cards,updatedAt:fs.serverTimestamp()},{merge:true});
+  const wallet=walletSnap.exists()?walletSnap.data():emptyWallet();
+  if(!walletSnap.exists())tx.set(walletRef,{...wallet,updatedAt:fs.serverTimestamp()});
+  return {wallet,cards};
+ });}catch(error){walletUser(user.uid);if(error.code!=='permission-denied')throw error;const [wallet,profile]=await Promise.all([fs.getDocFromServer(walletRef),fs.getDocFromServer(profileRef)]);walletUser(user.uid);if(!wallet.exists())throw error;return {wallet:wallet.data(),cards:normalizeCards(profile.exists()?profile.data().favoriteCards||[]:[])}}
+}
+export function watchCloudWallet(onWallet,onError,expectedUid){
+ const user=walletUser(expectedUid),ref=fs.doc(db,'users',user.uid,'wallet','main');
+ return fs.onSnapshot(ref,{includeMetadataChanges:true},snap=>{
+  if(currentUser?.uid!==user.uid)return;
+  if(snap.exists())onWallet(snap.data(),{fromCache:snap.metadata.fromCache});
+ },error=>{if(currentUser?.uid===user.uid)onError(error)});
+}
+export async function readCloudCards(expectedUid){
+ const user=walletUser(expectedUid),snap=await fs.getDocFromServer(fs.doc(db,'users',user.uid));walletUser(user.uid);
+ return normalizeCards(snap.exists()?snap.data().favoriteCards||[]:[]);
+}
+export async function settleCloudWallet(receipt,expectedUid){
+ const user=walletUser(expectedUid);operationRef(user.uid,receipt.id);
+ if(!receipt.id.startsWith('run_'))throw Error('結算流水編號無效。');
+ return walletTransaction({fs,db,uid:user.uid,id:receipt.id,kind:'run',assertOwner:()=>walletUser(user.uid)},async(tx,{walletRef,opRef,wallet,profile})=>{
+  const cards=normalizeCards(profile.favoriteCards||[]),next=rewardWallet(wallet,receipt,cards),result=receipt.result;
+  let boardRef,board;
+  if(next.operation.ranked){boardRef=fs.doc(db,'leaderboard',`${user.uid}_${result.faction}`);const snap=await tx.get(boardRef);board=leaderboardUpdate(snap.exists()?snap.data():null,result,{...user,playerName:profile.playerName||currentPlayerName})}
+  walletUser(user.uid);const updatedWallet={...next.wallet,lastOperation:receipt.id,updatedAt:fs.serverTimestamp()};
+  tx.set(walletRef,updatedWallet);tx.set(opRef,{...next.operation,createdAt:fs.serverTimestamp()});
+  tx.set(fs.doc(db,'users',user.uid,'runs',receipt.id),{faction:result.faction,mode:'mixed',questionCount:12,dimensions:result.dimensions||null,survived:result.hp>0,hp:result.hp,coins:next.operation.delta,correct:result.correct,createdAt:fs.serverTimestamp()});
+  if(board)tx.set(boardRef,{...board,updatedAt:fs.serverTimestamp()});
+  return {wallet:updatedWallet,cards,operation:next.operation,contract:next.contract,applied:true};
+ });
+}
+export async function drawCloudWallet(pending,expectedUid){
+ const user=walletUser(expectedUid);operationRef(user.uid,pending.id);
+ if(!pending.id.startsWith('draw_'))throw Error('抽卡流水編號無效。');
+ return walletTransaction({fs,db,uid:user.uid,id:pending.id,kind:'draw',assertOwner:()=>walletUser(user.uid)},async(tx,{walletRef,opRef,profileRef,wallet,profile})=>{
+  const cards=normalizeCards(profile.favoriteCards||[]),next=drawWallet(wallet,cards,pending.cardId),updatedWallet={...next.wallet,lastOperation:pending.id,updatedAt:fs.serverTimestamp()};walletUser(user.uid);
+  tx.set(walletRef,updatedWallet);tx.set(opRef,{...next.operation,createdAt:fs.serverTimestamp()});
+  const previousCards=profile.favoriteCards||[];
+  tx.set(profileRef,{favoriteCards:next.duplicate?previousCards:[...previousCards,next.card.id],updatedAt:fs.serverTimestamp()},{merge:true});
+  return {...next,wallet:updatedWallet,applied:true};
+ });
 }

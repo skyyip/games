@@ -86,7 +86,7 @@ try{
    const {page,context}=await open('w_22',390,{fixture:true});await page.evaluate(()=>companionQA.challenge());await page.evaluate(()=>__yrgtFirebase.emit({uid:'fixture',isAnonymous:true}));await page.waitForFunction(()=>document.querySelector('#authBtn').textContent.includes('訪客'));await page.locator('#startBtn').evaluate(n=>n.click());assert.equal(await page.locator('#companionBar').isVisible(),false);checks++;await context.close();
   }
   {
-   const {page,context}=await open('w_22',390,{fixture:true});await start(page);await page.evaluate(()=>__yrgtFirebase.emit({uid:'another',isAnonymous:false}));await page.evaluate(()=>document.querySelector('#modal').close());await page.evaluate(()=>companionQA.settle(100));assert.equal(await page.locator('#resultCoins').textContent(),'300 SC');checks++;await context.close();
+   const {page,context}=await open('w_22',390,{fixture:true});await start(page);await page.evaluate(()=>__yrgtFirebase.emit({uid:'another',isAnonymous:false}));await page.evaluate(()=>document.querySelector('#modal').close());await page.evaluate(()=>companionQA.settle(100));assert.equal(await page.locator('#home').isVisible(),true);assert.equal(await page.locator('#game').isVisible(),false);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),123);checks+=3;await context.close();
   }
  }
  assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,cards:CARDS.length,sourceFixtures:process.env.YRGT_SOURCE_FIXTURES==='1',pageErrors:errors.length}));

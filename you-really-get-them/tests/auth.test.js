@@ -128,7 +128,7 @@ test('cloud favorites keep a bounded 200-entry list and exclude non-string value
   const {state,cloud}=await loadCloud(t,{user:{uid:'collector'}});await cloud.initCloud();await flush();
   const cards=Array.from({length:205},(_,i)=>`card_${i}`);
   const saved=await cloud.saveCloudFavoriteCards([null,42,...cards]);
-  assert.deepEqual(saved,cards.slice(0,200));assert.deepEqual(state.writes.at(-1).data.favoriteCards,saved);
+  assert.deepEqual(saved,['w_1',...cards.slice(0,199)]);assert.deepEqual(state.writes.at(-1).data.favoriteCards,saved);
 });
 
 test('signed-out and anonymous players do not write cloud favorites',async t=>{

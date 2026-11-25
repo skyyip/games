@@ -80,18 +80,18 @@ try{
   const {context,page}=await open(390,{reducedMotion:'reduce'}),cards=CARDS.map(c=>c.id);
   await page.evaluate(cards=>{
    __yrgtFirebase.readProfile=async()=>({exists:()=>true,data:()=>({playerName:'完整收藏',favoriteCards:cards})});
-   localStorage.setItem('yrgt-save-v1:google-player',JSON.stringify({coins:300,cards:[],runs:4,bestHp:80}));
+   localStorage.setItem('yrgt-save-v1:google-player',JSON.stringify({coins:300,cards:[],runs:4,bestHp:80}));__yrgtFirebase.documents['users/google-player']={displayName:'完整收藏',photoURL:'',playerName:'完整收藏',favoriteCards:cards};__yrgtFirebase.documents['users/google-player/wallet/main']={coins:300,revision:0,lastOperation:'',bonds:{},contracts:[]};
   },cards);
   await page.locator('#actionMenu').evaluate(n=>n.open=true);await page.locator('#authBtn').click();await page.locator('#googleSignIn').click();
   await page.waitForFunction(()=>document.querySelector('#authBtn').textContent.startsWith('登出 · 完整收藏'));
   await page.locator('#actionMenu').evaluate(n=>n.open=true);await page.locator('#collectionBtn').click();
   assert.equal(await page.locator('.collect-card:not(.locked)').count(),116);
   assert.equal(await page.locator('#collectionCount').textContent(),'已收藏 116 / 116 張');
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:google-player')).cards.length),116);
-  await draw(page,0,0);
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).cards.length),116);
+  await page.waitForFunction(()=>document.querySelector('#walletStatus').textContent.includes('已同步'));await draw(page,0,0);
   const write=await page.evaluate(()=>__yrgtFirebase.writes.filter(w=>w.data.favoriteCards).at(-1));
   assert.equal(write.ref,'users/google-player');assert.deepEqual(write.data.favoriteCards,cards);assert.equal('coins' in write.data,false);
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:google-player')).coins),225);checks+=7;
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).coins),225);checks+=7;
   await context.close();
  }
  // Motion preferences disable both foil motion and device vibration.

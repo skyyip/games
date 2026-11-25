@@ -86,6 +86,104 @@ service cloud.firestore {
           == resource.data.get('playerNameUpdatedAt', null);
     }
 
+
+    // SC lives in an account-only transactional wallet; profile coin fields remain forbidden.
+    function walletOwner(uid) {
+      return signedIn() && request.auth.uid == uid
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    function cardIds() { return ['w_1','w_2','w_3','m_1','m_2','m_3','d_1','d_2','d_3','c_1','c_2','c_3','w_4','m_4','d_4','c_4','w_5','m_5','d_5','c_5','w_6','m_6','d_6','c_6','w_7','m_7','d_7','c_7','d_8','d_9','d_10','d_11','d_12','d_13','d_14','d_15','c_8','c_9','c_10','c_11','c_12','c_13','c_14','c_15','w_8','w_9','w_10','w_11','m_8','m_9','m_10','m_11','d_16','d_17','d_18','d_19','c_16','c_17','c_18','c_19','w_12','w_13','w_14','w_15','m_12','m_13','m_14','m_15','d_20','d_21','d_22','d_23','c_20','c_21','c_22','c_23','w_16','w_17','w_18','w_19','m_16','m_17','m_18','m_19','d_24','d_25','d_26','d_27','c_24','c_25','c_26','c_27','w_20','w_21','m_20','m_21','d_28','d_29','c_28','c_29','w_22','w_23','w_24','w_25','m_22','m_23','m_24','m_25','d_30','d_31','d_32','d_33','c_30','c_31','c_32','c_33']; }
+    function bonusCardIds() { return ['m_3','d_3','c_1','w_4','c_4','m_6','d_6','m_7','d_10','d_13','d_15','c_11','c_12','c_15','m_8','d_16','d_17','d_19','c_19','w_13','m_13','m_15','d_21','c_21','w_17','w_19','m_19','d_26','c_24','m_20','d_29','c_28','w_22','w_23','m_23','d_32','c_31','c_33']; }
+    function cardName(id) { return {'w_1':'傲嬌雙馬尾','w_2':'名偵探女友','w_3':'白月光天使','m_1':'鋼鐵直男','m_2':'電競肝帝','m_3':'傳說霸總','d_1':'短腿柯基','d_2':'拆家哈士奇','d_3':'倔強柴將軍','c_1':'十橘九胖','c_2':'虛空黑貓','c_3':'仙氣布偶皇','w_4':'珍奶續命員','m_4':'電車瞓覺王','d_4':'空碗控訴犬','c_4':'紙箱業主','w_5':'餐牌選擇困難','m_5':'樹枝見習勇者','d_5':'散步手掣犬','c_5':'鍵盤監工','w_6':'雨天搬運隊長','m_6':'開樽蓋英雄','d_6':'拖鞋尋寶員','c_6':'水杯測試官','w_7':'零食案情分析師','m_7':'鑊氣料理大師','d_7':'星際柯基司令','c_7':'沙發宇宙皇帝','d_8':'博美保安隊長','d_9':'比格聞案專員','d_10':'金毛迎賓主任','d_11':'臘腸梳化長租客','d_12':'邊牧戰術教練','d_13':'貴婦紙巾造型師','d_14':'薩摩耶雲端艦長','d_15':'斑點消防超人','c_8':'英短包裹驗收官','c_9':'暹羅深夜主唱','c_10':'美短鍵盤總監','c_11':'異短梳化抱枕','c_12':'緬因城堡領主','c_13':'孟加拉紙箱探險家','c_14':'挪威森林守護者','c_15':'斯芬克斯太陽王','w_8':'毛毯充電員','w_9':'雨夜掃街達人','w_10':'行程控場總監','w_11':'休息結界女王','m_8':'最後薯條守衛','m_9':'傢俬組裝勇者','m_10':'公園大導演','m_11':'星際補眠法師','d_16':'雪納瑞試味總編','d_17':'西施沙龍紅星','d_18':'阿富汗秀髮巨星','d_19':'聖伯納雪山救援王','c_16':'俄藍廚房門神','c_17':'阿比書架巡察員','c_18':'德文星艦通訊官','c_19':'安哥拉月宮館長','w_12':'充電線拆彈員','w_13':'夜市小食平衡師','w_14':'排隊路線軍師','w_15':'拿鐵預言女神','m_12':'巴士夢醒旅人','m_13':'野餐補給官','m_14':'反骨雨傘工程師','m_15':'電競宵夜大帝','d_20':'惠比特毛毯可頌','d_21':'瑪爾濟斯泡泡雲','d_22':'伯恩山列車長','d_23':'秋田紅葉守衛','c_20':'土耳其梵水務探員','c_21':'伯曼包裹派送員','c_22':'索馬利解謎教授','c_23':'西伯利亞星夜車長','w_16':'升降機耐性專員','w_17':'雨中花束保全','w_18':'拼圖收尾偵探','w_19':'天台花園魔導士','m_16':'洗衣塔管理員','m_17':'牛油果鑑定師','m_18':'微型單位建築師','m_19':'米餅馴龍王','d_24':'波士頓洗衣保安','d_25':'蝴蝶犬迎風司儀','d_26':'紐芬蘭浴池救生員','d_27':'靈緹銀河速遞','c_24':'雪鞋襪子扣留官','c_25':'孟買燈下影帝','c_26':'埃及貓地圖探險家','c_27':'巴厘月光舞王','w_20':'霓虹夜巷探店員','w_21':'早餐光速女俠','m_20':'洗碗泡泡武士','m_21':'客廳露營宇宙王','d_28':'喜樂蒂街角導遊','d_29':'大白熊雪雲守門員','c_28':'玩具虎紙箱王子','c_29':'新加坡星光導航員','w_22':'零錢考古專員','w_23':'海風票尾守衛','w_24':'轉乘路線策劃師','w_25':'星夜月台守護者','m_22':'衣架解結員','m_23':'街角栗子嚮導','m_24':'相機電池補給官','m_25':'星圖模型製造師','d_30':'日本尖嘴拖鞋巡官','d_31':'葡水花園見習生','d_32':'古牧洗衣列車長','d_33':'藏獒金雲守門將','c_30':'捲耳鉛筆鑑定員','c_31':'英長茶墊領主','c_32':'東短音控總監','c_33':'襤褸貓銀河郵差'}[id]; }
+    function validWallet(data) {
+      return data.keys().hasAll(['coins','revision','lastOperation','bonds','contracts','updatedAt'])
+        && data.keys().hasOnly(['coins','revision','lastOperation','bonds','contracts','updatedAt'])
+        && data.coins is int && data.coins >= 0 && data.coins <= 1000000000
+        && data.revision is int && data.revision >= 0
+        && data.lastOperation is string
+        && data.bonds is map && data.bonds.keys().hasOnly(cardIds())
+        && data.contracts is list && data.contracts.size() <= 4
+        && data.contracts.toSet().size() == data.contracts.size()
+        && data.contracts.hasOnly(['on_time','no_hint','solo','healthy'])
+        && data.updatedAt == request.time;
+    }
+    function contractMet(op) {
+      return op.completed == 12 && (
+        (op.contractId == 'on_time' && op.timeouts == 0)
+        || (op.contractId == 'no_hint' && op.hintsUsed == 0)
+        || (op.contractId == 'solo' && op.skillUsed == false)
+        || (op.contractId == 'healthy' && op.hp >= 30)
+      );
+    }
+    function validRewardOp(op) {
+      return op.keys().hasAll(['kind','delta','revision','hp','completed','companionId','contractId','contractEarned','timeouts','hintsUsed','skillUsed','ranked','createdAt'])
+        && op.keys().hasOnly(['kind','delta','revision','hp','completed','companionId','contractId','contractEarned','timeouts','hintsUsed','skillUsed','ranked','createdAt'])
+        && op.kind == 'run' && op.revision is int
+        && op.hp is int && op.hp >= 0 && op.hp <= 100
+        && op.completed is int && op.completed >= 1 && op.completed <= 12
+        && (op.completed == 12 || op.hp == 0)
+        && op.companionId is string && (op.companionId == '' || op.companionId in cardIds())
+        && op.timeouts is int && op.timeouts >= 0 && op.timeouts <= op.completed
+        && op.hintsUsed is int && op.hintsUsed >= 0 && op.hintsUsed <= 2
+        && op.skillUsed is bool && op.ranked is bool
+        && (!op.skillUsed || (op.companionId != '' && !(op.companionId in bonusCardIds())))
+        && op.ranked == !op.skillUsed
+        && op.contractId in ['none','on_time','no_hint','solo','healthy']
+        && op.contractEarned is bool && op.contractEarned == contractMet(op)
+        && op.delta is int && op.delta == (op.hp > 0
+          ? 100 + op.hp * 2 + (op.companionId in bonusCardIds() ? 20 : 0) : 10)
+        && op.createdAt == request.time;
+    }
+    function validDrawOp(uid, op) {
+      let before = get(/databases/$(database)/documents/users/$(uid)).data.get('favoriteCards', []);
+      let after = getAfter(/databases/$(database)/documents/users/$(uid)).data.get('favoriteCards', []);
+      return op.keys().hasAll(['kind','delta','revision','cardId','cardName','duplicate','createdAt'])
+        && op.keys().hasOnly(['kind','delta','revision','cardId','cardName','duplicate','createdAt'])
+        && op.kind == 'draw' && op.revision is int && op.cardId in cardIds()
+        && op.cardName == cardName(op.cardId)
+        && op.duplicate is bool && op.duplicate == before.hasAny([op.cardId, op.cardName])
+        && op.delta is int && op.delta == (op.duplicate ? -75 : -100)
+        && (op.duplicate ? after == before : (
+          after.size() == before.size() + 1
+          && after.hasAll(before) && after.hasAny([op.cardId])
+          && after.toSet().difference(before.toSet()).hasOnly([op.cardId])
+        )) && op.createdAt == request.time;
+    }
+    function validRunReceipt(uid, id, op) {
+      let run = getAfter(/databases/$(database)/documents/users/$(uid)/runs/$(id)).data;
+      return !exists(/databases/$(database)/documents/users/$(uid)/runs/$(id))
+        && run.hp == op.hp && run.coins == op.delta
+        && run.correct <= op.completed && run.survived == (op.hp > 0)
+        && run.createdAt == request.time;
+    }
+    function validProgress(before, after, op) {
+      return (op.completed == 12 && op.companionId != '' ? (
+          after.bonds.diff(before.bonds).affectedKeys().hasOnly([op.companionId])
+          && after.bonds.get(op.companionId, 0) is int
+          && after.bonds.get(op.companionId, 0) == before.bonds.get(op.companionId, 0) + 1
+          && after.bonds.get(op.companionId, 0) <= 1000000000
+        ) : after.bonds == before.bonds)
+        && (op.contractEarned ? (
+          after.contracts.hasAll(before.contracts)
+          && after.contracts.hasAny([op.contractId])
+          && after.contracts.size() == before.contracts.size() + (op.contractId in before.contracts ? 0 : 1)
+          && after.contracts.toSet().difference(before.contracts.toSet()).hasOnly([op.contractId])
+        ) : after.contracts == before.contracts);
+    }
+    function validWalletTransition(uid, id, before, after, op) {
+      return id.matches('^(run|draw)_[A-Za-z0-9_-]{8,70}$')
+        && !exists(/databases/$(database)/documents/users/$(uid)/walletOps/$(id))
+        && validWallet(after) && after.revision == before.revision + 1
+        && after.lastOperation == id && op.revision == after.revision
+        && after.coins == before.coins + op.delta
+        && (op.kind == 'run'
+          ? validRewardOp(op) && validRunReceipt(uid, id, op) && validProgress(before, after, op)
+            && (op.companionId == '' || get(/databases/$(database)/documents/users/$(uid)).data
+              .get('favoriteCards', []).hasAny([op.companionId]))
+          : op.kind == 'draw' && before.coins >= 100 && validDrawOp(uid, op)
+            && after.bonds == before.bonds && after.contracts == before.contracts);
+    }
+
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
 
@@ -106,6 +204,29 @@ service cloud.firestore {
           .hasOnly(['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt'])
         && validPlayerNameUpdate();
       allow delete: if false;
+
+
+      match /wallet/main {
+        allow read: if walletOwner(uid);
+        allow create: if walletOwner(uid) && validWallet(request.resource.data)
+          && request.resource.data.coins == 0 && request.resource.data.revision == 0
+          && request.resource.data.lastOperation == ''
+          && request.resource.data.bonds == {} && request.resource.data.contracts == [];
+        allow update: if walletOwner(uid)
+          && validWalletTransition(uid, request.resource.data.lastOperation, resource.data,
+            request.resource.data, getAfter(/databases/$(database)/documents/users/$(uid)/walletOps/$(request.resource.data.lastOperation)).data);
+        allow delete: if false;
+      }
+      match /walletOps/{operationId} {
+        allow read: if walletOwner(uid);
+        allow create: if walletOwner(uid)
+          && exists(/databases/$(database)/documents/users/$(uid)/wallet/main)
+          && validWalletTransition(uid, operationId,
+            get(/databases/$(database)/documents/users/$(uid)/wallet/main).data,
+            getAfter(/databases/$(database)/documents/users/$(uid)/wallet/main).data,
+            request.resource.data);
+        allow update, delete: if false;
+      }
 
       match /runs/{runId} {
         allow read: if signedIn() && request.auth.uid == uid;

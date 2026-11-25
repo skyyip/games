@@ -139,7 +139,7 @@ test('Spark cloud profiles never accept client-managed currency or cards', async
   assert.match(profileRules, /allow create:[\s\S]*?keys\(\)\.hasOnly\(\['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt']\)/);
   assert.match(profileRules, /allow update:[\s\S]*?affectedKeys\(\)[\s\S]*?hasOnly\(\['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt']\)/);
   assert.doesNotMatch(cloud, /coins:data\.coins|cards:data\.cards|coins:local\.coins|cards:local\.cards/);
-  assert.match(cloud, /Cloud profile stores identity metadata only/);
+  assert.match(cloud, /Identity metadata is separate from the transactional SC wallet/);
 });
 
 
@@ -185,7 +185,7 @@ test('authentication messages and offline cache include the current login flow',
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(app, /auth\/unauthorized-domain/);
   assert.match(app, /auth\/popup-closed-by-user/);
-  assert.match(sw, /you-really-get-them-v57/);
+  assert.match(sw, /you-really-get-them-v58/);
   assert.match(sw, /\.\/src\/firebase\/cloud\.js/);
   assert.match(sw, /requestUrl\.origin!==self\.location\.origin/);
 });
@@ -242,10 +242,10 @@ test('favorite cards are stored per signed-in player and validated in Firestore'
   const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
   const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
   assert.match(storage, /setSaveScope\(uid\)/);
-  assert.match(storage, /\$\{KEY\}:\$\{scope\}/);
+  assert.match(storage, /yrgt-save-v2/);assert.match(storage, /yrgt-save-v1/);
   assert.match(cloud, /saveCloudFavoriteCards\(cards=\[\]\)/);
   assert.match(cloud, /favoriteCards,updatedAt:fs\.serverTimestamp\(\)/);
-  assert.match(app, /setSaveScope\(user&&!user\.isAnonymous\?user\.uid:'guest'\)/);
+  assert.match(app, /setSaveScope\(nextScope\)/);
   assert.match(app, /persistFavoriteCards\(outcome\.save\.cards\)/);
   assert.match(rules, /data\.favoriteCards is list && data\.favoriteCards\.size\(\) <= 200/);
   assert.match(rules, /hasOnly\(\['displayName', 'playerName', 'playerNameUpdatedAt', 'favoriteCards', 'photoURL', 'updatedAt'\]\)/);
@@ -266,7 +266,7 @@ test('mobile responsive guardrails keep the home headline readable and header co
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.hero-copy h1 \{[\s\S]*?font-size: clamp\(18px, 5\.4vw, 24px\)/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*?\.brand > span:last-child[\s\S]*?text-overflow: ellipsis/);
   assert.match(css, /@media \(max-width: 360px\)[\s\S]*?\.brand > span:last-child \{ display: none; \}/);
-  assert.match(sw, /you-really-get-them-v57/);
+  assert.match(sw, /you-really-get-them-v58/);
 });
 
 
@@ -277,7 +277,7 @@ test('game performance uses linear Fisher-Yates shuffle after the removed intera
   assert.match(app, /function shuffle\(a\)\{const out=\[\.\.\.a\];for\(let i=out\.length-1;i>0;i--\)/);
   assert.doesNotMatch(app, /function shuffle\(a\)\{return \[\.\.\.a\]\.sort\(\(\)=>Math\.random\(\)-\.5\)/);
   assert.doesNotMatch(app, /setupScratch|scratch-pad|scratchMeter|刮開怒氣黑霧/);
-  assert.match(sw, /you-really-get-them-v57/);
+  assert.match(sw, /you-really-get-them-v58/);
 });
 
 
@@ -304,7 +304,7 @@ test('all shipped image assets are included in the versioned offline cache', asy
   assert.match(css, /collection-polaroids\.webp/);
   assert.ok(sw.includes("'./src/gacha.js'"));
   assert.ok(sw.includes("'./assets/illustrations/gacha-polaroids.webp'"));
-  assert.match(sw, /you-really-get-them-v57/);
+  assert.match(sw, /you-really-get-them-v58/);
   assert.match(html, /\.\/assets\/(?:icons|illustrations)\//);
 });
 
