@@ -1,3 +1,4 @@
+import {findPlayableQuestion,playableScenes} from '../tests/fixtures/round-scenes.mjs';
 import {CARDS} from '../src/gacha.js';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
@@ -31,9 +32,9 @@ async function round(faction,width){
  const {context,page}=await open(width);await page.locator(`[data-faction="${faction}"]`).click();await page.locator('#startBtn').click();let pictures=0;
  for(let i=0;i<12;i++){
   await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);
-  const text=await page.locator('#questionText').textContent(),q=[...BANK[faction],...PICTURE_BANK[faction],...AIR_BANK[faction],...MIXED_BANK[faction]].find(q=>q.text===text);assert(q);await inspectQuestion(page,q);
+  const text=await page.locator('#questionText').textContent(),q=findPlayableQuestion(text,faction);assert(q);await inspectQuestion(page,q);
   if(q.picture){pictures++;if(pictures===1)await page.screenshot({path:`/tmp/yrgt-picture-${faction}-${width}.png`,fullPage:true});}
-  const values=q.profiles?.map(p=>p.reduce((a,b)=>a+b,0));const choice=q.correct??values.indexOf(Math.max(...values));await page.locator('#answers .answer-btn').nth(choice).click();await page.locator('#nextQuestionBtn').click();
+  const values=q.profiles?.map(p=>p.reduce((a,b)=>a+b,0));const choice=q.correct??values.indexOf(Math.max(...values));await page.locator('#answers .answer-btn').nth(choice).click();if(q.message)await page.locator('#sendMessageBtn').click();await page.locator('#nextQuestionBtn').click();
  }
  await page.locator('#result').waitFor({state:'visible'});assert.equal(pictures,2);assert.equal(await page.locator('#resultCorrect').textContent(),'12 / 12');checks+=2;await context.close();
 }
@@ -57,8 +58,8 @@ try{
   for(const [f,id,selector]of [['women',5,'.runaway-answer'],['dog',6,'#treatBtn'],['cat',6,'#cupBtn']]){await page.evaluate(([f,id])=>pictureQA.show(f,id),[f,id]);assert(await page.locator(selector).isVisible());if(id===6)await page.locator(selector).click();checks++;}
   await context.route('**/assets/illustrations/picture-stories.webp',r=>r.abort());await page.evaluate(()=>pictureQA.picture('women'));await page.waitForFunction(()=>!!document.querySelector('.picture-description[open]'));assert((await page.locator('.picture-description p').textContent()).includes('微微上揚'));assert(await page.locator('#answers button').first().isEnabled());checks+=2;await context.close();}
  // Actual source Service Worker serves the new module and both art atlases offline.
- {const {context,page}=await open(390,{offline:true});await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await page.waitForFunction(async()=>{const c=await caches.open('you-really-get-them-v56');return !!await c.match('./assets/illustrations/picture-stories.webp')&&!!await c.match('./assets/illustrations/collection-polaroids.webp')&&!!await c.match('./src/picture-questions.js')&&!!await c.match('./src/comedy.js');});await context.setOffline(true);await page.reload({waitUntil:'load'});await page.locator('#startBtn').click();await page.locator('#questionVisual img').evaluate(i=>i.decode());assert.equal(await page.locator('#scratch').count(),0);checks++;
-  for(let i=0;i<12;i++){const text=await page.locator('#questionText').textContent(),q=[...BANK.women,...PICTURE_BANK.women,...AIR_BANK.women,...MIXED_BANK.women].find(q=>q.text===text);const scores=q.profiles?.map(p=>p.reduce((a,b)=>a+b,0));const choice=q.correct??scores.indexOf(Math.max(...scores));await page.locator('#answers button').nth(choice).click();assert(await page.locator('.polaroid-back').isVisible());checks++;await page.locator('#nextQuestionBtn').click();}
+ {const {context,page}=await open(390,{offline:true});await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await page.waitForFunction(async()=>{const c=await caches.open('you-really-get-them-v57');return !!await c.match('./assets/illustrations/picture-stories.webp')&&!!await c.match('./assets/illustrations/collection-polaroids.webp')&&!!await c.match('./src/picture-questions.js')&&!!await c.match('./src/comedy.js');});await context.setOffline(true);await page.reload({waitUntil:'load'});await page.locator('#startBtn').click();await page.locator('#questionVisual img').evaluate(i=>i.decode());assert.equal(await page.locator('#scratch').count(),0);checks++;
+  for(let i=0;i<12;i++){const text=await page.locator('#questionText').textContent(),q=findPlayableQuestion(text,'women');const scores=q.profiles?.map(p=>p.reduce((a,b)=>a+b,0));const choice=q.correct??scores.indexOf(Math.max(...scores));await page.locator('#answers button').nth(choice).click();if(q.message)await page.locator('#sendMessageBtn').click();assert(await page.locator('.polaroid-back').isVisible());checks++;await page.locator('#nextQuestionBtn').click();}
   await page.locator('#result').waitFor({state:'visible'});assert((await page.locator('#incidentReport').textContent()).includes('完成 12/12 題'));const blob=await page.locator('#posterPreview').evaluate(c=>new Promise(resolve=>c.toBlob(b=>resolve(b?.size||0),'image/png')));assert(blob>10000);checks+=2;
   const before=(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')))).coins;await page.locator('#actionMenu').evaluate(n=>n.open=true);await page.locator('#collectionBtn').click();
   await page.evaluate(async()=>{const image=new Image();image.src=new URL('./assets/illustrations/metro-polaroids.webp',location.href).href;await image.decode()});

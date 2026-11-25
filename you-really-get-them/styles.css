@@ -1166,3 +1166,17 @@ dialog:has(.leaderboard-faction-tabs) {
 @keyframes payday-drop{0%{opacity:0;translate:-20px -18px}65%{opacity:1;translate:0 6px}100%{opacity:1;translate:0 0}}
 @media(prefers-reduced-motion:reduce){.companion-clock i,.payday-coins i,.payday-coupon{animation:none}}
 .reward-breakdown>.companion-result{display:block;font-size:13px;line-height:1.7}
+
+/* Story evidence and the message editor share the existing question/answer flow. */
+.story-evidence[hidden],.message-original[hidden],.message-confirm[hidden],.companion-banter[hidden]{display:none}
+.story-evidence{margin:18px 0;padding:14px;border:3px solid var(--ink);background:#fff0b1;text-align:left}
+.story-evidence>strong{font-size:14px}.story-evidence>p{font-size:13px;line-height:1.65}.story-evidence blockquote{margin:10px 0 0;padding:10px;border-left:4px solid var(--ink);background:#fffdf8;font-size:15px;font-weight:800;line-height:1.7}
+.message-original,.message-confirm{margin:18px 0;padding:14px;border:3px solid var(--ink);background:#e5f5ec;text-align:left;overflow-wrap:anywhere}
+.message-original>strong,.message-confirm>strong{display:block;font-size:14px}.message-original>small{display:block;margin-top:5px;font-size:12px;color:#414141}
+.message-bubble{margin:12px 0;padding:12px;border:2px solid var(--ink);background:#fffefa;box-shadow:3px 3px 0 var(--ink)}
+.message-bubble p{margin:4px 0;line-height:1.8;font-size:15px}.message-bubble p.is-edited{background:#ffe853;color:#171717;box-shadow:inset 3px 0 0 #171717;padding-left:9px;font-weight:800}
+.answer-btn.message-selected{background:#d2f3e5;box-shadow:inset 4px 0 0 var(--ink)}
+.message-confirm{background:#e8defc}.message-confirm>.primary-btn{width:100%;min-height:48px;justify-content:center;margin-top:8px}
+#messageStatus{margin:12px 0 0;font-size:13px;line-height:1.6}
+.companion-banter{padding:12px;border:2px dashed var(--ink);background:#fff1ab;text-align:left;font-size:14px;line-height:1.8}
+@media(max-width:420px){.story-evidence,.message-original,.message-confirm{padding:11px}.message-bubble{padding:10px}.message-bubble p{font-size:15px}}

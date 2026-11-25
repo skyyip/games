@@ -1,3 +1,4 @@
+import {findPlayableQuestion,playableScenes} from '../tests/fixtures/round-scenes.mjs';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {writeFile} from 'node:fs/promises';
@@ -28,14 +29,14 @@ async function round(faction,width){
  await page.locator(`[data-faction="${faction}"]`).click();await page.locator('#startBtn').click();let wrong=null,images=0;
  for(let i=0;i<12;i++){
   await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);
-  const text=await page.locator('#questionText').textContent(),q=[...BANK[faction],...PICTURE_BANK[faction],...AIR_BANK[faction],...MIXED_BANK[faction]].find(q=>q.text===text);assert(q);
+  const text=await page.locator('#questionText').textContent(),q=findPlayableQuestion(text,faction);assert(q);
   assert.equal(await page.locator('#answerReview').isVisible(),false);assert.equal(await page.locator('.polaroid-back').count(),0);checks+=2;
   let choice=q.correct??q.profiles.map(p=>p.reduce((a,b)=>a+b,0)).reduce((best,value,j,all)=>value>all[best]?j:best,0);
   if(q.picture){
    images++;assert.equal(await page.locator('.clue-pin,#cluePanel').count(),0);checks++;
    if(images===1){choice=(choice+1)%4;wrong={round:i+1,q,choice};await page.screenshot({path:`/tmp/yrgt-comedy-clues-${faction}-${width}.png`,fullPage:true,animations:'disabled'});}
   }
-  await page.locator('#answers .answer-btn').nth(choice).click();await page.locator('.polaroid-back').waitFor({state:'visible'});
+  await page.locator('#answers .answer-btn').nth(choice).click();if(q.message)await page.locator('#sendMessageBtn').click();await page.locator('.polaroid-back').waitFor({state:'visible'});
   assert(await page.locator('.polaroid-back blockquote').textContent());assert.equal(await page.locator('.scene-polaroid').getAttribute('aria-hidden'),null);
   assert.equal(await page.locator('#answers button:enabled').count(),0);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),17);checks++;await geometry(page);checks+=3;
   const timer=await page.locator('#timer').textContent();await page.clock.fastForward(5000);

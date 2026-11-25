@@ -1,3 +1,4 @@
+import {editedMessage} from './story-events.js';
 // The thoughts below belong to these fictional comic scenes, not to real people or pets.
 export const COMIC_SCENES={
   0:{"said":"冇關係，你玩得開心就好。","good":["你終於發現，時鐘唔係茶餐廳嘅裝飾。","好，先講遲到。遊戲戰績可以留返下集。"],"miss":["小食可以遲啲，先接住遲到嗰半個鐘。",null,"排位賽有原因，約會嘅時鐘亦有返工。","下次準時值得期待，今次感受都要有人聽。"],"accidents":["先用小食處理氣氛，把遲到的交代排到後面。",null,"先解釋遊戲多重要，尚未接住遲到造成的影響。","先談下次承諾，未處理這一次的感受。"],"best":"先承認遲到，成功關閉藉口發佈會。"},
@@ -13,7 +14,8 @@ export const COMIC_SCENES={
 const speakers={women:'她的內心小劇場',men:'他的內心小劇場',dog:'狗狗字幕組',cat:'貓主子字幕組',duo:'兩個人的字幕組'};
 export function comicReveal(q,{choice=null,success=false,faction='women',run=0}={}){
   const scene=COMIC_SCENES[q.picture?.art];
-  const selected=choice===null?'時間到，尚未作答':q.opts[choice];
+  const selected=choice===null?'時間到，尚未作答':q.message?editedMessage(q,choice).join(' '):q.opts[choice];
+  if(q.message&&choice!==null)return {speaker:`${q.message.speaker}的回覆`,said:q.message.replies[choice],thought:success?'只改一句，終於唔似用客服範本關心人。':'每句都似關心，合埋要再睇一次收件人需要。',selected,explanation:q.why};
   const thoughts=(success?scene?.good:scene?.miss?.[choice]?[scene.miss[choice]]:null)||(
     success?['好，呢句有聽入耳。今日可以少開一場解釋記者會。','你有先觀察再回應，字幕組終於唔使加班。']:
     ['你個答案一出，現場即刻需要一位氣氛消防員。','你講完好有自信，我聽完開始整理求生用品。']);
@@ -21,7 +23,7 @@ export function comicReveal(q,{choice=null,success=false,faction='women',run=0}=
 }
 export function answerRecord(q,{round,choice=null,success=false,hpLost=0}={}){
   const scene=COMIC_SCENES[q.picture?.art];
-  return {round,question:q.text,choice:choice===null?'時間到，尚未作答':q.opts[choice],timedOut:choice===null,success,hpLost,
+  return {...(q.story?{story:{...q.story,choiceIndex:choice}}:{}),round,question:q.text,choice:choice===null?'時間到，尚未作答':q.message?editedMessage(q,choice).join(' '):q.opts[choice],timedOut:choice===null,success,hpLost,
     incident:choice===null?'腦內排練過久，錯過現場回應。':scene?.accidents?.[choice]||'答案搶先出場，現場理解仍在路上。',best:scene?.best||'先看情境再回應，成功減少一場解釋記者會。'};
 }
 export function buildIncidentReport(records,{faction='women',questionCount=12}={}){

@@ -1,7 +1,7 @@
-const CACHE='you-really-get-them-v56';
+const CACHE='you-really-get-them-v57';
 const FILES=[
   './','./index.html','./styles.css','./manifest.webmanifest',
-  './src/app.js','./src/companions.js','./src/gacha.js','./src/settlement.js','./src/comedy.js','./src/picture-questions.js','./src/firebase/cloud.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
+  './src/app.js','./src/story-events.js','./src/banter.js','./src/companions.js','./src/gacha.js','./src/settlement.js','./src/comedy.js','./src/picture-questions.js','./src/firebase/cloud.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',
   './assets/illustrations/woman.webp','./assets/illustrations/man.webp',
   './assets/illustrations/dog.webp','./assets/illustrations/cat.webp',
   './assets/illustrations/duo.webp',

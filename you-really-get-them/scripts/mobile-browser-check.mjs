@@ -38,7 +38,7 @@ async function mobile(width,height){
   await page.locator('#answers button').last().scrollIntoViewIfNeeded();
   const hud=await page.locator('.game-hud').boundingBox(),header=await page.locator('.topbar').boundingBox();assert(hud.y>=header.y+header.height-1&&hud.y+hud.height<height);checks++;
  }
- await fits(page);await page.locator('#answers button').first().click();await page.locator('.polaroid-back').waitFor({state:'visible'});
+ await fits(page);await page.locator('#answers button').first().click();if(await page.locator('#sendMessageBtn').isVisible())await page.locator('#sendMessageBtn').click();await page.locator('.polaroid-back').waitFor({state:'visible'});
  if(width<=600){
   const next=await page.locator('#nextQuestionBtn').boundingBox();assert(next.y>=0&&next.y+next.height<=height&&next.height>=48);checks++;
   assert(await page.locator('#nextQuestionBtn').evaluate(n=>{const r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}));checks++;

@@ -1,3 +1,4 @@
+import {findPlayableQuestion,playableScenes} from '../tests/fixtures/round-scenes.mjs';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {firebaseSDKSource,installBrowserFirebaseFixture} from '../tests/fixtures/firebase-sdk.mjs';
@@ -7,7 +8,7 @@ import {PICTURE_BANK} from '../src/picture-questions.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.YRGT_TEST_URL||'http://127.0.0.1:4173/';
 const browser=await chromium.launch({headless:true});let checks=0;const errors=[];
-const allQuestions=Object.values({BANK,AIR_BANK,MIXED_BANK,PICTURE_BANK}).flatMap(bank=>Object.values(bank).flat());
+const allQuestions=playableScenes();
 async function open(id,width=390,{fixture=false,owned=[id],query='',reducedMotion='no-preference'}={}){
  const context=await browser.newContext({viewport:{width,height:844},isMobile:width<600,hasTouch:width<600,serviceWorkers:'block',reducedMotion});
  await context.addInitScript(installBrowserFirebaseFixture);
@@ -21,7 +22,7 @@ async function start(page){await page.locator('#startBtn').click()}
 async function answerBest(page){
  const text=await page.locator('#questionText').textContent(),q=allQuestions.find(q=>q.text===text);assert(q,text);
  const choice=q.correct??q.profiles.reduce((best,p,i,all)=>p.reduce((s,v)=>s+v,0)>all[best].reduce((s,v)=>s+v,0)?i:best,0);
- await page.locator('#answers button').nth(choice).evaluate(n=>{n.style.transform='none';n.click()});await page.locator('#answerReview').waitFor({state:'visible'});
+ await page.locator('#answers button').nth(choice).evaluate(n=>{n.style.transform='none';n.click()});if(q.message)await page.locator('#sendMessageBtn').click();await page.locator('#answerReview').waitFor({state:'visible'});
 }
 async function quit(page){await page.locator('#quitBtn').click();await page.locator('#confirmQuit').click()}
 async function stored(page){return page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')))}

@@ -1,3 +1,5 @@
+import {addStoryEvents} from '../src/story-events.js';
+import {findPlayableQuestion,playableScenes} from '../tests/fixtures/round-scenes.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
@@ -24,9 +26,10 @@ function plannedSeed(faction){
   let state=seed;const random=()=>((state=(Math.imul(state,1664525)+1013904223)>>>0)/4294967296);
   const shuffle=items=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out};
   if(faction==='duo'){if(shuffle(BANK.duo).slice(0,4).every(q=>q.tag==='城市加場'))return {seed};continue}
-  const classic=shuffle(BANK[faction]).slice(0,3);shuffle(PICTURE_BANK[faction]);
-  const air=shuffle(AIR_BANK[faction]).slice(0,4),hybrid=shuffle(MIXED_BANK[faction]).slice(0,3);
-  const added=Object.fromEntries(Object.entries({classic,air,hybrid}).map(([k,qs])=>[k,qs.filter(q=>q.tag==='城市加場').length]));
+  const classic=[...shuffle(BANK[faction]).slice(0,3),...shuffle(PICTURE_BANK[faction]).slice(0,2)].map(q=>({...q,kind:'classic'}));
+  const air=shuffle(AIR_BANK[faction]).slice(0,4).map(q=>({...q,kind:'air'})),hybrid=shuffle(MIXED_BANK[faction]).slice(0,3).map(q=>({...q,kind:'hybrid'}));
+  const round=addStoryEvents(shuffle([...classic,...air,...hybrid]),faction);
+  const added=Object.fromEntries(['classic','air','hybrid'].map(kind=>[kind,round.filter(q=>q.kind===kind&&q.tag==='城市加場').length]));
   if(Object.values(added).every(n=>n>0))return {seed,added};
  }
  throw Error('No scenario seed for '+faction);
@@ -38,11 +41,11 @@ async function round(faction,width){
  const {context,page}=await open(width),plan=plannedSeed(faction);await page.locator(`[data-faction="${faction}"]`).click();await seed(page,plan.seed);await page.locator('#startBtn').click();const added={classic:0,air:0,hybrid:0};
  for(let i=0;i<12;i++){
   await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);
-  const text=await page.locator('#questionText').textContent(),q=[...BANK[faction],...AIR_BANK[faction],...MIXED_BANK[faction],...PICTURE_BANK[faction]].find(q=>q.text===text);assert(q);
+  const text=await page.locator('#questionText').textContent(),q=findPlayableQuestion(text,faction);assert(q);
   const kind=page.locator('#questionTag');if(q.tag==='城市加場'){const label=await kind.textContent();added[label.includes('經典')?'classic':label.includes('閱讀')?'air':'hybrid']++;if(Object.values(added).reduce((a,b)=>a+b,0)===1)await page.screenshot({path:`/tmp/yrgt-question-prompt-${faction}.png`,fullPage:true,animations:'disabled'})}
   assert.deepEqual(await page.locator('#answers .answer-copy').allTextContents(),q.opts);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=2;
   await completeInteraction(page);
-  await page.locator('#answers button').nth(best(q)).evaluate(button=>button.click());assert((await page.locator('#questionHint').textContent()).includes(q.why));checks++;
+  await page.locator('#answers button').nth(best(q)).evaluate(button=>button.click());if(q.message)await page.locator('#sendMessageBtn').click();assert((await page.locator('#questionHint').textContent()).includes(q.why));checks++;
   await page.locator('#nextQuestionBtn').click();
  }
  await page.locator('#result').waitFor({state:'visible'});assert.equal(await page.locator('#resultCorrect').textContent(),'12 / 12');assert.equal(await page.locator('#resultCoins').textContent(),'300 SC');assert.deepEqual(added,plan.added);checks+=3;
