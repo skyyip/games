@@ -1,0 +1,22 @@
+const VERSION="a8b0fddad86671ce",SCOPE="you-really-get-them/",HTML='pg-html-'+SCOPE+'-'+VERSION,ASSETS='pg-assets-'+VERSION,FILES=["/games/you-really-get-them/","/games/you-really-get-them/index.html","/games/built/styles-4NLLE6RY.css","/games/assets/collection-polaroids-24273218bf93.webp","/games/assets/gacha-polaroids-cf2a9c691793.webp","/games/assets/night-polaroids-4e3245fc7a35.webp","/games/assets/metro-polaroids-0b5054b851db.webp","/games/assets/bonus-polaroids-4a29a42bdf38.webp","/games/assets/weekend-polaroids-de85c44bb3d2.webp","/games/assets/festival-polaroids-bb43a972b820.webp","/games/assets/everyday-polaroids-a3d9a0eed550.webp","/games/assets/pet-breeds-a0e1d13af575.webp","/games/built/inline-style-fd60b29b20ac.css","/games/built/chunk-76IJRKOE.js","/games/assets/cards-6d3f6f25c7ad.png","/games/assets/paw-cup-e8eb207f8da7.png","/games/assets/heart-748883dbb0c0.png","/games/assets/duo-a4cce8be0fc7.png","/games/assets/sound-147ede76e91a.png","/games/assets/woman-48eaeb556a15.webp","/games/assets/woman-519e7d63bd92.png","/games/assets/man-bfa79d5e3943.png","/games/assets/dog-1d83f61ab8d1.png","/games/assets/cat-dabd05223788.png","/games/assets/spark-abb3c7b26941.png","/games/assets/pig-dd47e9ba7001.png","/games/assets/lightning-151bde0be8f9.png","/games/built/app-YJOJHDWX.js","/games/assets/man-1d3ce535a57e.webp","/games/assets/dog-fa347c6e5db4.webp","/games/assets/cat-20e347cff867.webp","/games/assets/duo-7e72d55813f2.webp","/games/assets/sneaker-eca5fa1241ed.png","/games/assets/press-7d2788c0bd04.png","/games/assets/treat-a6517f3607b3.png","/games/assets/picture-stories-2fd0c2834923.webp","/games/assets/question-polaroids-974633b58822.webp","/games/assets/apple-touch-icon-89a88abcfed6.png","/games/assets/favicon-b8d749971090.png","/games/assets/icon-192-367907d68d11.png","/games/assets/icon-512-8515cdffc05b.png","/games/assets/icon-maskable-512-8515cdffc05b.png","/games/assets/playground-source-ef0805bddb25.png"],HOME="/games/you-really-get-them/index.html";
+const immutable=url=>/\/[^/]+-[a-zA-Z0-9]{8,}\.[a-z0-9]+$/.test(new URL(url,self.location.href).pathname);
+self.addEventListener('install',event=>event.waitUntil((async()=>{
+ const html=await caches.open(HTML),assets=await caches.open(ASSETS);
+ const response=await fetch(HOME,{cache:'reload'});if(!response.ok)throw Error('precache '+HOME);
+ await html.put(HOME,response.clone());for(const url of FILES)if(url.endsWith('/'))await html.put(url,response.clone());
+ const pending=FILES.filter(url=>url!==HOME&&!url.endsWith('/'));let next=0;
+ async function copy(){while(next<pending.length){const url=pending[next++];if(await assets.match(url))continue;
+  const previous=immutable(url)?await caches.match(url):null;
+  if(previous){await assets.put(url,previous);continue;}
+  const fresh=await fetch(url,{cache:immutable(url)?'default':'reload'});if(!fresh.ok)throw Error('precache '+url);await assets.put(url,fresh);
+ }}
+ await Promise.all(Array.from({length:Math.min(4,pending.length)},copy));
+})()));
+self.addEventListener('message',event=>{if(event.data?.type==='ACTIVATE_UPDATE')self.skipWaiting();});
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('pg-html-'+SCOPE+'-')&&key!==HTML)await caches.delete(key);await self.clients.claim();})()));
+function documentResponse(response){const headers=new Headers(response.headers);headers.set('Cache-Control','no-cache, no-store, must-revalidate');return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
+self.addEventListener('fetch',event=>{
+ const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;
+ if(event.request.mode==='navigate')event.respondWith((async()=>{const cache=await caches.open(HTML);try{const response=await fetch(event.request,{cache:'no-store'});if(response.ok){await cache.put(url.pathname,response.clone());return documentResponse(response);}}catch{}const cached=await cache.match(url.pathname)||await cache.match(HOME);return cached?documentResponse(cached):Response.error();})());
+ else if(immutable(url.href))event.respondWith((async()=>{const cache=await caches.open(ASSETS),cached=await cache.match(event.request)||await caches.match(event.request);if(cached)return cached;const fresh=await fetch(event.request);if(fresh.ok)await cache.put(event.request,fresh.clone());return fresh;})());
+});
