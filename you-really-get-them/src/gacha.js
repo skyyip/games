@@ -138,7 +138,23 @@ export const CARDS=[
  {"id":"c_34","name":"科拉特紙箱審計員","art":12,"atlas":"night","rarity":"N","desc":"新箱剛放低，銀灰審計員已經查緊邊角有冇少一寸"},
  {"id":"c_35","name":"哈瓦那紙袋掌櫃","art":13,"atlas":"night","rarity":"R","desc":"一身朱古力毛，收租只接受空袋同尊重"},
  {"id":"c_36","name":"塞爾凱克暖衣總管","art":14,"atlas":"night","rarity":"SR","desc":"一身鬈毛比毛巾更蓬鬆，仍堅持檢查你件衫夠唔夠暖"},
- {"id":"c_37","name":"涅瓦假面棉被星君","art":15,"atlas":"night","rarity":"SSR","desc":"藍眼睛掌管夜空，四隻爪掌管你今晚仲有幾多張被"}
+ {"id":"c_37","name":"涅瓦假面棉被星君","art":15,"atlas":"night","rarity":"SSR","desc":"藍眼睛掌管夜空，四隻爪掌管你今晚仲有幾多張被"},
+ {"id":"w_30","name":"交通卡餘額巡查員","art":0,"atlas":"commute","rarity":"N","desc":"閘機響一聲，腦內帳房已經翻到上星期杯奶茶"},
+ {"id":"w_31","name":"早餐防灑員","art":1,"atlas":"commute","rarity":"R","desc":"一手三文治一手咖啡，仍努力維持成年人表面上的從容"},
+ {"id":"w_32","name":"雨傘撤退策劃師","art":2,"atlas":"commute","rarity":"SR","desc":"用一把收好的傘，指揮全隊避開三個滴水位"},
+ {"id":"w_33","name":"截圖宇宙存檔官","art":3,"atlas":"commute","rarity":"SSR","desc":"保存三千張有用截圖，尋找時仍然要拜託宇宙搜尋"},
+ {"id":"m_30","name":"外賣袋考古員","art":4,"atlas":"commute","rarity":"N","desc":"袋底得返一張單，卻堅信最後一塊雞仲未正式失蹤"},
+ {"id":"m_31","name":"月台走位教練","art":5,"atlas":"commute","rarity":"R","desc":"讓出車門先入場，今日戰術只有大家都上到車"},
+ {"id":"m_32","name":"週末煎蛋指揮官","art":6,"atlas":"commute","rarity":"SR","desc":"鑊鏟一起，兩隻蛋都要跟住他的晨早交響曲入場"},
+ {"id":"m_33","name":"客廳露營星際領隊","art":7,"atlas":"commute","rarity":"SSR","desc":"穿住拖鞋探索梳化星系，補給點距離雪櫃只有四步"},
+ {"id":"d_38","name":"北京犬地氈領班","art":8,"atlas":"commute","rarity":"N","desc":"全屋地氈都檢查過，最軟嗰張由本人長期駐場"},
+ {"id":"d_39","name":"西高地白㹴雨靴巡更","art":9,"atlas":"commute","rarity":"R","desc":"雨靴未穿好，兩個濕腳印已經完成今日首次巡查"},
+ {"id":"d_40","name":"澳洲牧羊犬野餐統籌","art":10,"atlas":"commute","rarity":"SR","desc":"野餐籃排得整齊，眼神卻一直在核對每個人的小食進度"},
+ {"id":"d_41","name":"蘇格蘭獵鹿犬月台星將","art":11,"atlas":"commute","rarity":"SSR","desc":"看守銀河列車時刻，仍願意為一陣舒服的風停步"},
+ {"id":"c_38","name":"曼島貓鍵盤代班","art":12,"atlas":"commute","rarity":"N","desc":"尾巴短唔影響氣場，回車鍵一樣可以按出九行驚嘆號"},
+ {"id":"c_39","name":"沙特爾藍貓木箱掌櫃","art":13,"atlas":"commute","rarity":"R","desc":"灰藍毛配琥珀眼，木箱分店開張前先由屁股完成驗收"},
+ {"id":"c_40","name":"美國剛毛貓洗衣籃會長","art":14,"atlas":"commute","rarity":"SR","desc":"毛比毛巾更有個性，仍堅持由牠決定哪堆衫值得一睡"},
+ {"id":"c_41","name":"拉邦捲毛貓彗星旅人","art":15,"atlas":"commute","rarity":"SSR","desc":"一身鬈毛掠過星河，最後停在全宇宙最暖那塊墊上"}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

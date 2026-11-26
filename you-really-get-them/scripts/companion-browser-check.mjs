@@ -36,8 +36,8 @@ try{
   await page.screenshot({path:`/tmp/yrgt-companion-clue-${width}.png`,fullPage:true,animations:'disabled'});
   await answerBest(page);await page.locator('#companionUse').dispatchEvent('click');await page.locator('#nextQuestionBtn').click();assert.equal(await page.locator('#questionText mark').count(),0);assert(await page.locator('#companionUse').isDisabled());checks+=2;
   await quit(page);assert.equal((await stored(page)).coins,123);await start(page);assert(await page.locator('#companionUse').isEnabled());checks+=2;
-  await quit(page);await page.locator('#companionPicker').click();assert.equal(await page.locator('[data-equip="w_2"]').getAttribute('aria-pressed'),'true');assert.equal(await page.locator('[data-equip="c_3"]').count(),0);checks+=2;
-  await page.locator('[data-equip="m_1"]').click();assert.equal((await stored(page)).equippedCard,'m_1');await page.locator('#backBtn').click();assert.equal(await page.locator('#equippedName').textContent(),'鋼鐵直男');checks+=2;await fits(page);
+  await quit(page);await page.locator('#companionPicker').click();await page.locator('[data-card="w_2"] .card-open').click();assert.equal(await page.locator('[data-equip="w_2"]').getAttribute('aria-pressed'),'true');await page.locator('#modalClose').click();await page.locator('[data-card="c_3"] .card-open').click();assert.equal(await page.locator('[data-equip="c_3"]').count(),0);await page.locator('#modalClose').click();checks+=2;
+  await page.locator('[data-card="m_1"] .card-open').click();await page.locator('[data-equip="m_1"]').click();assert.equal((await stored(page)).equippedCard,'m_1');await page.locator('#backBtn').click();assert.equal(await page.locator('#equippedName').textContent(),'鋼鐵直男');checks+=2;await fits(page);
   // Equipment persists after a genuine refresh.
   await page.reload();await page.waitForFunction(()=>document.querySelector('#authBtn').textContent==='登入');
   assert.equal(await page.locator('#equippedName').textContent(),'鋼鐵直男');checks++;
@@ -64,7 +64,7 @@ try{
   const {page,context}=await open('w_2');await page.locator('[data-faction="duo"]').click();await start(page);for(let i=0;i<5;i++)await page.locator('[data-duo-expected="0"]').click();await page.locator('#duoBeginTest').click();assert.equal(await page.locator('#companionBar').isVisible(),false);checks++;await context.close();
  }
  {
-  const {page,context}=await open('w_2');await page.locator('#companionPicker').click();await page.evaluate(()=>{Storage.prototype.setItem=()=>{throw Error('blocked')}});await page.locator('[data-equip="m_1"]').click();assert.equal((await stored(page)).equippedCard,'w_2');assert((await page.locator('#companionSaveStatus').textContent()).includes('未能儲存'));checks+=2;await context.close();
+  const {page,context}=await open('w_2');await page.locator('#companionPicker').click();await page.evaluate(()=>{Storage.prototype.setItem=()=>{throw Error('blocked')}});await page.locator('[data-card="m_1"] .card-open').click();await page.locator('[data-equip="m_1"]').click();assert.equal((await stored(page)).equippedCard,'w_2');assert((await page.locator('#companionSaveStatus').textContent()).includes('未能儲存'));checks+=2;await context.close();
  }
  if(process.env.YRGT_SOURCE_FIXTURES==='1'){
   {

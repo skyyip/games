@@ -25,11 +25,11 @@ function plannedSeed(faction){
  for(let seed=1;seed<100000;seed++){
   let state=seed;const random=()=>((state=(Math.imul(state,1664525)+1013904223)>>>0)/4294967296);
   const shuffle=items=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out};
-  if(faction==='duo'){if(shuffle(BANK.duo).slice(0,4).every(q=>q.tag==='深夜求生局'))return {seed};continue}
+  if(faction==='duo'){if(shuffle(BANK.duo).slice(0,4).every(q=>q.tag==='放工彩蛋'))return {seed};continue}
   const classic=[...shuffle(BANK[faction]).slice(0,3),...shuffle(PICTURE_BANK[faction]).slice(0,2)].map(q=>({...q,kind:'classic'}));
   const air=shuffle(AIR_BANK[faction]).slice(0,4).map(q=>({...q,kind:'air'})),hybrid=shuffle(MIXED_BANK[faction]).slice(0,3).map(q=>({...q,kind:'hybrid'}));
   const round=addStoryEvents(shuffle([...classic,...air,...hybrid]),faction);
-  const added=Object.fromEntries(['classic','air','hybrid'].map(kind=>[kind,round.filter(q=>q.kind===kind&&q.tag==='深夜求生局').length]));
+  const added=Object.fromEntries(['classic','air','hybrid'].map(kind=>[kind,round.filter(q=>q.kind===kind&&q.tag==='放工彩蛋').length]));
   if(Object.values(added).every(n=>n>0))return {seed,added};
  }
  throw Error('No scenario seed for '+faction);
@@ -42,7 +42,7 @@ async function round(faction,width){
  for(let i=0;i<12;i++){
   await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);
   const text=await page.locator('#questionText').textContent(),q=findPlayableQuestion(text,faction);assert(q);
-  const kind=page.locator('#questionTag');if(q.tag==='深夜求生局'){const label=await kind.textContent();added[label.includes('經典')?'classic':label.includes('閱讀')?'air':'hybrid']++;if(Object.values(added).reduce((a,b)=>a+b,0)===1)await page.screenshot({path:`/tmp/yrgt-question-prompt-${faction}.png`,fullPage:true,animations:'disabled'})}
+  const kind=page.locator('#questionTag');if(q.tag==='放工彩蛋'){const label=await kind.textContent();added[label.includes('經典')?'classic':label.includes('閱讀')?'air':'hybrid']++;if(Object.values(added).reduce((a,b)=>a+b,0)===1)await page.screenshot({path:`/tmp/yrgt-question-prompt-${faction}.png`,fullPage:true,animations:'disabled'})}
   assert.deepEqual(await page.locator('#answers .answer-copy').allTextContents(),q.opts);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=2;
   await completeInteraction(page);
   await page.locator('#answers button').nth(best(q)).evaluate(button=>button.click());if(q.message)await page.locator('#sendMessageBtn').click();assert((await page.locator('#questionHint').textContent()).includes(q.why));checks++;
@@ -58,20 +58,20 @@ try{
    const q=bank[faction][i];
    await page.evaluate(([f,k,i])=>questionQA.normal(f,k,i),[faction,kind,i]);assert.equal(await page.locator('#questionText').textContent(),q.text);
    assert.deepEqual(await page.locator('#answers .answer-copy').allTextContents(),q.opts);await completeInteraction(page);await page.locator('#answers button').nth(best(q)).evaluate(b=>b.click());assert((await page.locator('#questionHint').textContent()).includes(q.why));
-   assert(await page.locator('.polaroid-back').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=5;renderedQuestions++;if(q.tag==='深夜求生局')renderedNew++;
+   assert(await page.locator('.polaroid-back').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=5;renderedQuestions++;if(q.tag==='放工彩蛋')renderedNew++;
   }
   for(let i=0;i<BANK.duo.length+1;i++){
    const q=[...BANK.duo,...PICTURE_BANK.duo][i];await page.evaluate(i=>questionQA.duo(i),i);assert.equal(await page.locator('.duo-question-text').textContent(),q.text);
-   assert.equal(await page.locator('.duo-setup-answers button').count(),4);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=3;renderedQuestions++;if(q.tag==='深夜求生局')renderedNew++;
+   assert.equal(await page.locator('.duo-setup-answers button').count(),4);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=3;renderedQuestions++;if(q.tag==='放工彩蛋')renderedNew++;
   }
-  assert.equal(renderedQuestions,628);assert.equal(renderedNew,60);await context.close();
+  assert.equal(renderedQuestions,688);assert.equal(renderedNew,60);await context.close();
  }
  await Promise.all([round('women',320),round('men',390),round('dog',430),round('cat',1280)]);
  // Select four new personal-preference prompts plus the existing picture through the real flow.
  {
   const {context,page}=await open();await page.locator('[data-faction="duo"]').click();await seed(page,plannedSeed('duo').seed);await page.locator('#startBtn').click();const choices=[2,3,1,0,2];let added=0;
   for(let i=0;i<5;i++){
-   const text=await page.locator('.duo-question-text').textContent();const q=[...BANK.duo,...PICTURE_BANK.duo].find(q=>q.text===text);assert(q);if(q.tag==='深夜求生局')added++;
+   const text=await page.locator('.duo-question-text').textContent();const q=[...BANK.duo,...PICTURE_BANK.duo].find(q=>q.text===text);assert(q);if(q.tag==='放工彩蛋')added++;
    await page.locator('.duo-setup-answers button').nth(choices[i]).click();
   }
   assert.equal(added,4);await page.locator('#duoBeginTest span').click();

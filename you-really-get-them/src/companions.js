@@ -137,7 +137,23 @@ export const SKILLS={
  "c_34":{"kind":"clue","name":"箱角覆核","quip":"箱有四角，線索唔使你逐角搵。"},
  "c_35":{"kind":"bonus","name":"紙袋業權分紅","quip":"紙袋歸朕，二十SC分畀租客。"},
  "c_36":{"kind":"time","name":"暖衣保溫五秒","quip":"腦仲未暖返，准你多焗五秒。"},
- "c_37":{"kind":"bonus","name":"棉被星河租金","quip":"有命收工先領租，星君唔收醫藥費。"}
+ "c_37":{"kind":"bonus","name":"棉被星河租金","quip":"有命收工先領租，星君唔收醫藥費。"},
+ "w_30":{"kind":"clue","name":"閘口資料重讀","quip":"卡可以冇錢，線索唔可以當睇唔見。"},
+ "w_31":{"kind":"time","name":"杯蓋緩衝區","quip":"先蓋好杯，個腦多五秒穩住。"},
+ "w_32":{"kind":"bonus","name":"乾爽撤退津貼","quip":"生還又冇淋濕，二十SC當搭車。"},
+ "w_33":{"kind":"clue","name":"截圖星圖索引","quip":"宇宙唔代答，幫你搵返呢句先。"},
+ "m_30":{"kind":"time","name":"袋底調查空檔","quip":"俾我五秒，我真係記得仲有一塊。"},
+ "m_31":{"kind":"clue","name":"黃線外重點","quip":"先睇清指示，唔使靠月台直覺。"},
+ "m_32":{"kind":"bonus","name":"早餐出勤找續","quip":"煎蛋唔包流心，生還津貼包二十。"},
+ "m_33":{"kind":"time","name":"帳篷星際慢鐘","quip":"星際五秒，唔包括再瞓一覺。"},
+ "d_38":{"kind":"clue","name":"地氈足跡核對","quip":"本汪趴低都見到呢句，你再望清楚。"},
+ "d_39":{"kind":"time","name":"雨靴抖水空檔","quip":"甩水五秒，你個腦唔使跟住一齊濕。"},
+ "d_40":{"kind":"bonus","name":"野餐統籌餅碎費","quip":"餅碎唔計，生還二十SC照畀。"},
+ "d_41":{"kind":"clue","name":"銀河月台指示","quip":"車唔會幫你揀，指示我再指一次。"},
+ "c_38":{"kind":"time","name":"鍵盤休眠五秒","quip":"鍵盤暫停代班，畀你自己諗五秒。"},
+ "c_39":{"kind":"clue","name":"木箱入庫覆核","quip":"收貨前先對呢句，唔係見箱就簽。"},
+ "c_40":{"kind":"bonus","name":"洗衣籃會費回贈","quip":"生還會員退二十SC，籃位照歸朕。"},
+ "c_41":{"kind":"time","name":"彗星慢行通告","quip":"彗星都肯慢五秒，你都可以諗清楚。"}
 };
 export function equippedCompanion(data){
  const card=CARDS.find(card=>card.id===data.equippedCard);

@@ -21,9 +21,9 @@ test('reviewed copy retains existing option/scoring pairs, question order and il
 });
 test('sixty additional playable scenarios expand all five factions without duplicates',()=>{
  const all=Object.values(banks).flatMap(bank=>Object.values(bank).flat());
- assert.equal(all.length,637);assert.equal(new Set(all.map(q=>q.text)).size,637);
+ assert.equal(all.length,697);assert.equal(new Set(all.map(q=>q.text)).size,697);
  for(const faction of ['women','men','dog','cat','duo']){
-  assert.equal(BANK[faction].length,faction==='duo'?119:90);
+  assert.equal(BANK[faction].length,faction==='duo'?131:98);
   const added=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='城市加場');assert.equal(added.length,12,faction);
  }
  assert.equal(all.filter(q=>q.tag==='城市加場').length,60);
@@ -51,12 +51,19 @@ test('normal question answers balance all four positions without a consistently 
   const best=q.correct??q.profiles.map(p=>p.reduce((a,b)=>a+b,0)).reduce((b,v,i,a)=>v>a[b]?i:b,0);
   counts[best]++;total++;if(q.opts[best].length>Math.max(...q.opts.filter((_,i)=>i!==best).map(o=>o.length)))longest++;
  }
- assert.deepEqual(counts,[127,127,127,127]);assert(longest/total<.35);
+ assert.deepEqual(counts,[139,139,139,139]);assert(longest/total<.35);
 });
 
 test('night expansion gives each faction twelve distinctive contextual prompts',()=>{
  for(const faction of ['women','men','dog','cat','duo']){
   const rows=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='深夜求生局');assert.equal(rows.length,12,faction);
+  if(faction!=='duo')assert.equal(rows.filter(q=>q.profiles).length,4);
+ }
+});
+
+test('end-of-day expansion adds twelve contextual prompts to every faction',()=>{
+ for(const faction of ['women','men','dog','cat','duo']){
+  const rows=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='放工彩蛋');assert.equal(rows.length,12,faction);
   if(faction!=='duo')assert.equal(rows.filter(q=>q.profiles).length,4);
  }
 });
