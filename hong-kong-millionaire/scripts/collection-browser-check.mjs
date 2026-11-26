@@ -1,0 +1,52 @@
+import {retryPrice} from '../src/economy.js';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {adapter,RoomFixture} from './room-browser-fixture.mjs';
+import {hkDay} from '../src/game.js';
+const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild'),{chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
+const base=process.env.HKM_TEST_URL,built=process.env.HKM_BUILD_DIR,manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8'));
+const art=Object.fromEntries(Object.entries(manifest.assets).filter(([name])=>name.startsWith('hong-kong-millionaire/assets/')).flatMap(([name,url])=>[[name.split('/').at(-1).replace('.svg',''),new URL('../'+url,base).href],[name.split('/').at(-1),new URL('../'+url,base).href]]));
+const bundle=await build({entryPoints:[fileURLToPath(new URL('../src/app.js',import.meta.url))],bundle:true,write:false,format:'esm',logLevel:'silent',plugins:[{name:'room-fixture',setup(b){b.onResolve({filter:/^\.\/cloud\.js$/},args=>args.importer.endsWith('/src/app.js')?{path:'fixture',namespace:'room'}:undefined);b.onLoad({filter:/.*/,namespace:'room'},()=>({contents:adapter,loader:'js'}));if(process.env.HKM_TEST_ARCADE_SOURCE)b.onLoad({filter:/\/src\/arcade-ui\.js$/},async args=>({contents:await readFile(process.env.HKM_TEST_ARCADE_SOURCE,'utf8'),loader:'js',resolveDir:fileURLToPath(new URL('../src/',import.meta.url))}));b.onLoad({filter:/\/src\/art\.js$/},()=>({contents:'export const ART='+JSON.stringify(art),loader:'js'}));}}]});
+const qa=new RoomFixture();qa.now=Date.UTC(2026,10,26,4);const calls=[];const originalRPC=qa.rpc.bind(qa);qa.rpc=(uid,name,args)=>{calls.push({uid,name});return originalRPC(uid,name,args);};const browser=await chromium.launch({headless:true}),errors=[];let checks=0;
+async function open(uid,width=390,height=844,entry=null,skew=0){
+ const mobile=['guest','shop'].includes(uid)&&browser.browserType().name()==='webkit';const c=await browser.newContext({viewport:{width,height},serviceWorkers:'block',...(mobile?{isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'}:{})});
+ await c.addInitScript(({uid,now,entry,skew})=>{globalThis.QA_UID=uid;globalThis.qaSkew=skew;globalThis.qaServerNow=now;globalThis.testNow=now+skew;const Native=Date;globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[globalThis.testNow]));}static now(){return globalThis.testNow;}};Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>{globalThis.copied=text;}}});if(entry)localStorage.setItem('sky.hk-millionaire.today.v1',JSON.stringify(entry));},{uid,now:qa.now,entry,skew});
+ await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+ await c.route(base,async r=>{const response=await r.fetch();await r.fulfill({response,body:(await response.text()).replace(/<script\b[^>]*type=["']module["'][^>]*>[\s\S]*?<\/script>/gi,'')});});
+ const harness=new URL('room-qa.js',base).href;await c.route(harness,r=>r.fulfill({contentType:'text/javascript',body:bundle.outputFiles[0].text}));
+ const page=await c.newPage();page.setDefaultTimeout(15000);page.on('pageerror',e=>errors.push(e.message));await page.exposeBinding('qaRPC',(_,method,args)=>qa.rpc(uid,method,args));await page.exposeBinding('qaWatch',({page},type,key,d)=>{qa.subscriptions.push({page,type,key,d,uid});setTimeout(()=>qa.broadcast(),0);});
+ await page.goto(base,{waitUntil:'networkidle'});await page.addScriptTag({type:'module',url:harness});await page.waitForFunction(()=>!document.querySelector('#google-login').disabled);return {c,page,harness};
+}
+try{
+ const owner=qa.person('fresh');owner.w.owned=['frame-ferry','theme-island'];owner.w.frame='frame-ferry';owner.w.theme='theme-island';owner.w.cards['peng-chau-lane']=1;
+ for(const width of [320,390,1280]){
+  const {c,page,harness}=await open('fresh',width,900);
+  const restored=()=>page.waitForFunction(()=>document.documentElement.dataset.hkmTheme==='theme-island'&&document.body.dataset.hkmFrame==='frame-ferry');
+  await restored();assert.equal(await page.evaluate(()=>localStorage.getItem('sky.hk-millionaire.today.v1')),null);checks+=2;
+  await page.reload({waitUntil:'networkidle'});await page.addScriptTag({type:'module',url:harness});await restored();await page.screenshot({path:'/tmp/hkm-collection-restored-'+width+'.png',fullPage:true});checks++;
+  await page.locator('#lobby-collection').click();await page.locator('[data-tab=cards]').click();
+  await page.locator('.culture-face img').evaluateAll(images=>Promise.all(images.map(i=>{i.loading='eager';return i.decode();})));
+  assert.equal(await page.locator('.culture-tile').count(),42);assert.equal(await page.locator('.card-series').count(),7);checks+=2;
+  await page.locator('.culture-tile').filter({hasText:'坪洲小巷'}).click();await page.locator('#culture-card-dialog').waitFor({state:'visible'});
+  const bounds=await page.evaluate(()=>{const dialog=document.querySelector('#culture-card-dialog'),button=dialog.querySelector('.close-button').getBoundingClientRect(),face=dialog.querySelector('.culture-face').getBoundingClientRect(),container=dialog.getBoundingClientRect();return {separate:button.bottom<=face.top,right:Math.abs(dialog.querySelector('.detail-toolbar').getBoundingClientRect().right-button.right),width:button.width,height:button.height,overflow:dialog.scrollWidth>dialog.clientWidth};});
+  assert(bounds.separate,JSON.stringify(bounds));assert(bounds.right<1,JSON.stringify(bounds));assert(bounds.width>=44&&bounds.height>=44);assert(!bounds.overflow);checks+=4;
+  await page.screenshot({path:'/tmp/hkm-collection-detail-'+width+'.png',fullPage:true});await page.locator('.card-done').click();
+  await page.locator('[data-tab=gear]').click();await page.locator('.theme-preview img').evaluateAll(images=>Promise.all(images.map(i=>{i.loading='eager';return i.decode();})));
+  assert.equal(await page.locator('[data-gear-id]').count(),20);assert.equal(await page.locator('#collection-dialog').evaluate(n=>n.scrollWidth>n.clientWidth),false);checks+=2;
+  await page.screenshot({path:'/tmp/hkm-collection-gear-'+width+'.png',fullPage:true});await page.locator('#collection-dialog .close-button').click();
+  assert.equal(qa.dailyRuns.size,0);assert(!calls.some(v=>v.name==='claimDaily'));checks+=2;await c.close();
+ }
+ const other=await open('another');await other.page.waitForFunction(()=>document.documentElement.dataset.hkmTheme==='default'&&document.body.dataset.hkmFrame==='none');assert.equal(qa.person('fresh').w.theme,'theme-island');checks+=2;await other.c.close();
+ const {c,page,harness}=await open('shop');await page.locator('#lobby-collection').click();await page.locator('[data-tab=tickets]').click();
+ assert.equal(await page.locator('.original-price').textContent(),'$100,000');assert.equal(await page.locator('.daily-discount').textContent(),'今日'+(retryPrice(hkDay(qa.now))/10000)+'折');checks+=2;
+ const balance=qa.state('shop').balance;await page.getByRole('button',{name:'購買今天再挑戰券',exact:true}).click();
+ // Change the day immediately before confirming, before the UI's periodic refresh.
+ qa.now=Date.UTC(2026,10,26,16);await page.evaluate(now=>{testNow=now;qaServerNow=now;document.querySelector('#shop-confirm-buy').click();},qa.now);
+ await page.waitForFunction(()=>document.querySelector('#shop-status').textContent.includes('折扣已更新'));assert.equal(qa.state('shop').balance,balance);assert.equal(qa.person('shop').w.retryBoughtDay,-1);checks+=2;
+ await page.getByRole('button',{name:'購買今天再挑戰券',exact:true}).click();await page.locator('#shop-confirm-buy').click();await page.waitForFunction(()=>!document.querySelector('#shop-refresh').disabled);
+ assert.equal(qa.state('shop').balance,balance-retryPrice(hkDay(qa.now)));assert(await page.getByRole('button',{name:'今天已購買',exact:true}).isDisabled());checks+=2;
+ const receipt=qa.person('shop').w.receipt,paid=qa.person('shop').w.spent;await qa.rpc('shop','shop',[{type:'retry-ticket',requestId:receipt,day:hkDay(qa.now)-1,price:1}]);assert.equal(qa.person('shop').w.spent,paid);checks++;
+ await page.reload({waitUntil:'networkidle'});await page.evaluate(now=>{testNow=now;qaServerNow=now;},qa.now);await page.addScriptTag({type:'module',url:harness});await page.locator('#lobby-collection').click();await page.locator('[data-tab=tickets]').click();assert(await page.getByRole('button',{name:'今天已購買',exact:true}).isDisabled());checks++;
+ await c.close();const stale=await open('expired');await stale.page.locator('#lobby-collection').click();await stale.page.locator('[data-tab=tickets]').click();await stale.page.getByRole('button',{name:'購買今天再挑戰券',exact:true}).click();qa.now+=86400000;await stale.page.locator('#shop-confirm-buy').click();await stale.page.waitForFunction(()=>document.querySelector('#shop-status').textContent.includes('quote-expired'));assert.equal(qa.person('expired').w.spent,0);assert(await stale.page.locator('#shop-recover').isHidden());assert.equal(await stale.page.evaluate(()=>localStorage.getItem('sky.hkm.shop.pending.expired')),null);checks+=3;await stale.c.close();assert.deepEqual(errors,[]);console.log('Collection browser: '+checks+' checks passed: refresh, account separation, 42 cards, 20 cosmetics, separate close button and midnight discount confirmation.');
+}finally{await browser.close();}

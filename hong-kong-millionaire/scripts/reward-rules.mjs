@@ -7,7 +7,7 @@ export function rewardRules(){
  const prefixes=CULTURE_CARDS.reduce((out,c)=>{(out[c.series]??=[]).push(c.id);return out;},{});
  const prefixCheck=Object.entries(prefixes).map(([id,ids])=>'(w.prefix=='+json(id)+'&&'+ids.map(key=>'w.cards.get('+json(key)+',0)>0').join('&&')+')').join('||');
  const placeholders={
-  __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*10),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_PRICE__:String(RETRY_PRICE),
+  __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*10),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_UNIT__:String(RETRY_PRICE/10),
   __RETRY_POOL_IDS__: [1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids)).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
   __RETRY_POOL_KEYS__:[1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids.map(id=>keys.get(id)))).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
   __GEAR_PRICE__:json(Object.fromEntries(GEAR.map(g=>[g.id,g.price]))),
@@ -31,6 +31,7 @@ export function rewardRules(){
   function rwActivePath(uid,w){return w.activeKind=='room'?rrSession(w.activeRoom,uid):rsPath(uid,w.activeSession);}
   function rwChanged(w,o,keys){return w.diff(o).affectedKeys().hasOnly(keys.concat(['revision','op','item','updatedAt']));}
   function rwWeekend(){let d=today();let n=(d+4)%7;return n==0?d-1:d+(6-n+7)%7;}
+  function rwRetryPrice(day){let seed=(day*48271+1013904223)%2147483647;let bucket=((seed*48271+1013904223)%2147483647)%5;return __RETRY_UNIT__*(5+bucket);}
   function rwIsWeekend(){return (today()+4)%7 in [0,6];}
   function rwOwned(w){return (w.frame=='none'||(w.frame in __FRAMES__&&w.frame in w.owned))&&(w.theme=='default'||(w.theme in __THEMES__&&w.theme in w.owned))&&(w.exit=='default'||(w.exit in __EXITS__&&w.exit in w.owned))&&(w.prefix==''||__PREFIX_CHECK__);}
   function rwCreate(w,uid){
@@ -57,7 +58,7 @@ export function rewardRules(){
     w.op=='draw'?rwDraw(w,o,false):w.op=='gold'?rwDraw(w,o,true):w.op=='buy'?rwBuy(w,o):
     w.op=='equip'?(rwChanged(w,o,['frame','theme','exit','prefix','receipt'])&&w.spent==o.spent&&w.item in ['frame','theme','exit','prefix']&&rwOwned(w)):
     (w.op=='pass'&&rwChanged(w,o,['pass','passUses','spent','receipt'])&&o.pass!=rwWeekend()&&w.pass is int&&w.pass==rwWeekend()&&w.passUses==0&&w.spent==o.spent+__PASS_PRICE__)
-    ||(w.op=='retry-ticket'&&rwChanged(w,o,['retryBoughtDay','spent','receipt'])&&o.get('retryBoughtDay',-1)!=today()&&w.retryBoughtDay is int&&w.retryBoughtDay==today()&&w.spent==o.spent+__RETRY_PRICE__));
+    ||(w.op=='retry-ticket'&&rwChanged(w,o,['retryBoughtDay','spent','receipt'])&&o.get('retryBoughtDay',-1)!=today()&&w.retryBoughtDay is int&&w.retryBoughtDay==today()&&w.spent==o.spent+rwRetryPrice(today())));
   }
   function rwStart(w,o,uid){
    let r=getAfter(rwActivePath(uid,w)).data;

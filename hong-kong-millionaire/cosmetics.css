@@ -23,3 +23,13 @@ html[data-hkm-theme=theme-porcelain] body{background-color:#e7eee4;background-im
 .theme-preview.theme-atlas>img{position:absolute;width:200%;height:300%;max-width:none;object-fit:fill}
 html[data-hkm-theme^="theme-"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.12;background-image:url('./assets/theme-panels.webp');background-size:200% 300%;background-repeat:no-repeat}
 html[data-hkm-theme=theme-cafe] body::after{background-position:0 0}html[data-hkm-theme=theme-ink] body::after{background-position:100% 0}html[data-hkm-theme=theme-harbour] body::after{background-position:0 50%}html[data-hkm-theme=theme-tram] body::after{background-position:100% 50%}html[data-hkm-theme=theme-lantern] body::after{background-position:0 100%}html[data-hkm-theme=theme-porcelain] body::after{background-position:100% 100%}
+
+html[data-hkm-theme=theme-village] body{background-color:#dce1ce;background-image:linear-gradient(#fff9e5d9,#fff9e5d9),url('./assets/theme-village.svg');background-size:auto,500px 500px}html[data-hkm-theme=theme-village] :is(.question-panel,dialog){border-color:#486550;box-shadow:5px 6px 0 #dce1ce}html[data-hkm-theme=theme-village] body::after{background-image:url('./assets/theme-village.svg');background-size:500px 500px;background-repeat:repeat;opacity:.08}
+
+html[data-hkm-theme=theme-island] body{background-color:#d4e3df;background-image:linear-gradient(#fff9e5d9,#fff9e5d9),url('./assets/theme-island.svg');background-size:auto,500px 500px}html[data-hkm-theme=theme-island] :is(.question-panel,dialog){border-color:#34697a;box-shadow:5px 6px 0 #d4e3df}html[data-hkm-theme=theme-island] body::after{background-image:url('./assets/theme-island.svg');background-size:500px 500px;background-repeat:repeat;opacity:.08}
+
+html[data-hkm-theme=theme-workshop] body{background-color:#eadbc0;background-image:linear-gradient(#fff9e5d9,#fff9e5d9),url('./assets/theme-workshop.svg');background-size:auto,500px 500px}html[data-hkm-theme=theme-workshop] :is(.question-panel,dialog){border-color:#806145;box-shadow:5px 6px 0 #eadbc0}html[data-hkm-theme=theme-workshop] body::after{background-image:url('./assets/theme-workshop.svg');background-size:500px 500px;background-repeat:repeat;opacity:.08}
+.profile-avatar.frame-ferry::after{background-image:url('./assets/frame-ferry.svg')}
+.profile-avatar.frame-waffle::after{background-image:url('./assets/frame-waffle.svg')}
+.profile-avatar.frame-bamboo::after{background-image:url('./assets/frame-bamboo.svg')}
+.profile-avatar.frame-tile::after{background-image:url('./assets/frame-tile.svg')}

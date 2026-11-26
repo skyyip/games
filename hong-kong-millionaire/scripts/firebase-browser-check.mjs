@@ -1,8 +1,9 @@
+import {retryPrice} from '../src/economy.js';
 // Full application + real Firebase SDK + Auth/Firestore emulators. No cloud adapter.
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {questionFor} from '../src/game.js';
+import {questionFor,hkDay} from '../src/game.js';
 import {sessionQuestion} from '../src/session-engine.js';
 const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild');
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
@@ -90,7 +91,7 @@ try{
  await host.page.locator('#arcade-dialog .close-button').click();const retryBefore=await call(host.page,'wallet');await call(host.page,'shop',{type:'retry-ticket',requestId:crypto.randomUUID()});await host.page.locator('#lobby-arcade').click();await host.page.getByRole('button',{name:'開始再挑戰',exact:true}).click();await host.page.locator('.arcade-question').waitFor();
  check(await host.page.locator('#arcade-dialog').evaluate(n=>Math.abs(n.getBoundingClientRect().width-innerWidth)<1),'Retry fills the mobile viewport');
  for(let i=0;i<15;i++){await roomAnswer(host.page);if(i<14){await host.page.getByRole('button',{name:'下一題',exact:true}).click();await host.page.waitForFunction(n=>document.querySelector('.arcade-score')?.textContent.includes('第 '+n+'／15 題')&&!document.querySelector('#arcade-retry').disabled,i+2);}}
- const retryAfter=await call(host.page,'wallet');check(retryAfter.balance===retryBefore.balance-100000+1000000,'Retry prize credited exactly once');check(retryAfter.profile.total===retryBefore.profile.total,'Retry preserves pure daily totals');check(retryAfter.wallet.activeSession==='','Retry leaves no stuck active session');
+ const retryAfter=await call(host.page,'wallet');check(retryAfter.balance===retryBefore.balance-retryPrice(hkDay())+1000000,'Retry prize credited exactly once');check(retryAfter.profile.total===retryBefore.profile.total,'Retry preserves pure daily totals');check(retryAfter.wallet.activeSession==='','Retry leaves no stuck active session');
  if(await host.page.locator('#celebration-dialog').isVisible())await host.page.locator('#celebration-dialog .close-button').click();
  await host.page.locator('#arcade-dialog .close-button').click();await host.page.locator('#account-open').click();await host.page.locator('#logout').click();await host.page.locator('#signed-out').waitFor({state:'visible'});await host.page.waitForFunction(()=>!document.querySelector('#google-login').disabled);check(await host.page.locator('#google-login').isEnabled(),'Logout restores login controls');
  await host.page.locator('#email').fill('guest@example.test');await host.page.locator('#reset-password').click();await host.page.waitForFunction(()=>document.querySelector('#account-status').textContent.includes('重設密碼郵件'));check(true,'Password reset sent through Auth emulator');

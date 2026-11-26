@@ -100,3 +100,5 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .answer-letter{flex:none;font-weight:700;line-height:inherit}.answer-text{min-width:0}.option>span:last-child{min-width:0}
 
 .room-seat.is-winner{background:#fff0a6;border:3px solid #806017}.winner-name{display:inline-block;background:#ffe36b;color:#253d32;font-weight:900;padding:.12em .4em;border-radius:5px;overflow-wrap:anywhere}.room-seat.is-winner .winner-name{font-size:inherit}
+
+.detail-toolbar{display:flex;justify-content:flex-end;align-items:center;min-height:44px;margin-bottom:10px}.detail-toolbar .close-button{position:static;flex:none;margin:0;width:44px;min-height:44px}.daily-discount{display:inline-block;margin:0 8px;padding:3px 8px;background:#ffe36b;border:1px solid #806017;border-radius:5px;font-weight:800}.original-price{color:#626b5e}.culture-card-dialog>.detail-toolbar{margin:0 0 8px}

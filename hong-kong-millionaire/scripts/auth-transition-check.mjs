@@ -103,9 +103,9 @@ try{
   assert.equal((await state(p)).state,'pending');assert(!await p.locator('#game-screen').isVisible());await p.evaluate(()=>hkmAuthQA.failClaim=false);await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).state,'confirmed');await c.close();checks+=3;
  }
  // Hong Kong date / shared challenge label updates while the lobby stays open across midnight.
- {const {c,p}=await open();assert((await p.locator('#today-label').textContent()).includes('11月15日'));assert((await p.locator('#challenge-label').textContent()).includes('第 2 回'));
-  await p.evaluate(()=>globalThis.__hkmQaNow=Date.UTC(2026,10,15,16));await p.waitForFunction(()=>document.querySelector('#today-label').textContent.includes('11月16日'));
-  assert((await p.locator('#challenge-label').textContent()).includes('第 3 回'));assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);await c.close();checks+=4;
+ {const {c,p}=await open();await p.evaluate(()=>globalThis.__hkmQaNow=Date.UTC(2026,10,26,4));await p.waitForFunction(()=>document.querySelector('#today-label').textContent.includes('11月26日'));assert((await p.locator('#challenge-label').textContent()).includes('第 1 回'));
+  await p.evaluate(()=>globalThis.__hkmQaNow=Date.UTC(2026,10,26,16));await p.waitForFunction(()=>document.querySelector('#today-label').textContent.includes('11月27日'));
+  assert((await p.locator('#challenge-label').textContent()).includes('第 2 回'));assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);await c.close();checks+=4;
  }
  // A rejected first answer exposes its code beside the retry button, then retries the same answer.
  {const {c,p}=await open({restoredUid:'cached-google-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});

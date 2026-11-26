@@ -35,8 +35,8 @@ test('every added question is reachable in the daily plan and its semantic answe
 test('new local knowledge reaches weekend, retry and comprehensive neighbour rooms through their actual pools',()=>{
  for(const kind of ['weekend','retry','room']){
   const found=new Set();
-  for(let seed=1;seed<=500;seed++){
-   const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+seed%160)*86400000);
+  for(let offset=0;offset<5;offset++)for(let seed=0;seed<246;seed++){
+   const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+offset)*86400000);
    for(let index=0;index<run.count;index++){const id=sessionQid(run,index);if(ids.has(id))found.add(id)}
   }
   assert.equal(found.size,60,kind);

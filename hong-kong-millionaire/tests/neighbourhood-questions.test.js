@@ -6,7 +6,7 @@ import {newRun,questionId,questionFor,act} from '../src/game.js';
 import {newSession,sessionQid} from '../src/session-engine.js';
 const DAY=20783,ids=new Set(bank.map(q=>q.id));
 test('60 new neighbourhood records preserve distinct topics, sources and balanced progression',()=>{
- assert.equal(bank.length,60);assert.deepEqual(QUESTIONS.slice(-60),bank);
+ assert.equal(bank.length,60);assert.deepEqual(QUESTIONS.filter(q=>q.id.startsWith('n')),bank);
  assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,QUESTIONS.length);
  assert.deepEqual([1,2,3].map(t=>bank.filter(q=>q.tier===t).length),[20,20,20]);
  assert.deepEqual([0,1,2,3].map(a=>bank.filter(q=>q.answer===a).length),[15,15,15,15]);
@@ -17,12 +17,12 @@ test('60 new neighbourhood records preserve distinct topics, sources and balance
  }
 });
 test('all additions are reachable, retain their difficulty stage and grade both correct and wrong answers',()=>{
- const found=new Map();for(let day=DAY;day<DAY+226;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!found.has(id))found.set(id,{day,index});}
+ const found=new Map();for(let day=DAY;day<DAY+246;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!found.has(id))found.set(id,{day,index});}
  assert.equal(found.size,60);
  for(const q of bank){const {day,index}=found.get(q.id),now=day*86400000+3600000,run={...newRun(day,now),index,correct:index};assert.equal(questionFor(run).id,q.id);assert.equal(q.tier,Math.floor(index/5)+1);assert.equal(act(run,{type:'answer',choice:q.answer},now+1000).outcome,'correct');assert.equal(act(run,{type:'answer',choice:(q.answer+1)%4},now+1000).outcome,'wrong');}
 });
 test('the new bank is drawn by weekend, retry and comprehensive room sessions without repeats',()=>{
- for(const kind of ['weekend','retry','room']){const found=new Set();for(let offset=0;offset<5;offset++)for(let seed=0;seed<226;seed++){const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+offset)*86400000),seen=new Set();for(let i=0;i<run.count;i++){const id=sessionQid(run,i);assert(!seen.has(id));seen.add(id);if(ids.has(id))found.add(id);}}assert.equal(found.size,60,kind);}
+ for(const kind of ['weekend','retry','room']){const found=new Set();for(let offset=0;offset<5;offset++)for(let seed=0;seed<246;seed++){const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+offset)*86400000),seen=new Set();for(let i=0;i<run.count;i++){const id=sessionQid(run,i);assert(!seen.has(id));seen.add(id);if(ids.has(id))found.add(id);}}assert.equal(found.size,60,kind);}
 });
 test('nearby historical dates and similar traditions remain correctly scoped',()=>{
  const byId=Object.fromEntries(bank.map(q=>[q.id,q]));

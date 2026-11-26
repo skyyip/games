@@ -166,7 +166,7 @@ async function initAuth(){
    put('account-status','正在連接你的香港足跡…');
    try{
     const mark=ledger.readAccount(user.uid),requested=accountRequested||mark?.owner===user.uid;
-    const state=requested?await timeout(cloud.resumeAccount()):{profile:null,run:null};
+    const state=requested?await timeout(cloud.resumeAccount()):{profile:await timeout(cloud.account()),run:null};
     if(!current())return;profile=state.profile;
     if(state.run?.uid===user.uid){run=state.run;owner=user.uid;pending=false;pendingAttempt=null;syncMessage='';visualKey='';put('game-status','');if(canRecordAccount())ledger.markCloud(owner,run);}
     put('account-status',requested?'帳戶已連接。':'已登入，可以開始今日挑戰。');

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARDS,unlockedPrefixes,weekendKey,isWeekend,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,SERIES,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
+import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARDS,unlockedPrefixes,weekendKey,isWeekend,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,SERIES,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE,retryPrice,retryDiscount} from '../src/economy.js';
 import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,sessionReviewReady,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
 import {hkDay,dayEnd,questionId} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
@@ -11,7 +11,7 @@ test('purchases spend an available balance without reducing career prize totals'
  assert.throws(()=>walletAction({total:0},old,{type:'gold'},DAY),/insufficient-balance/);
 });
 test('draws are replay-stable and every gold draw is a foil',()=>{
- const profile={total:1000000};let wallet=emptyWallet('p',1001);const foils=new Set();
+ const profile={total:FOIL_CARDS.length*GOLD_PRICE};let wallet=emptyWallet('p',1001);const foils=new Set();
  for(let i=0;i<FOIL_CARDS.length;i++){const expected=drawnCard(wallet,true);assert.equal(drawnCard({...wallet},true),expected);wallet=walletAction(profile,wallet,{type:'gold'},DAY);foils.add(wallet.item);assert(CULTURE_CARDS.find(c=>c.id===wallet.item).foil);}
  assert.equal(foils.size,FOIL_CARDS.length);assert.equal(wallet.draws,FOIL_CARDS.length);assert.equal(wallet.spent,FOIL_CARDS.length*GOLD_PRICE);
 });
@@ -82,9 +82,9 @@ test('new prices and daily retry purchase preserve existing ticket and profile s
  const p={total:1000000},old=emptyWallet('a',0),day=hkDay(NOW);
  assert.equal(walletAction(p,old,{type:'draw'},day).spent,DRAW_PRICE);assert.equal(walletAction(p,old,{type:'gold'},day).spent,GOLD_PRICE);
  assert.equal(walletAction(p,old,{type:'pass'},day).spent,WEEKEND_PASS_PRICE);assert.equal(WEEKEND_LIMIT,5);
- const bought=walletAction(p,old,{type:'retry-ticket'},day);assert.equal(bought.spent,RETRY_PRICE);assert.equal(bought.retryBoughtDay,day);
+ const bought=walletAction(p,old,{type:'retry-ticket'},day);assert.equal(bought.spent,retryPrice(day));assert.equal(bought.retryBoughtDay,day);
  assert.throws(()=>walletAction(p,bought,{type:'retry-ticket'},day),/retry-bought/);assert.equal(walletAction(p,bought,{type:'retry-ticket'},day+1).retryBoughtDay,day+1);
- assert.throws(()=>walletAction({total:99999},old,{type:'retry-ticket'},day),/insufficient-balance/);assert.equal(p.total,1000000);
+ assert.throws(()=>walletAction({total:retryPrice(day)-1},old,{type:'retry-ticket'},day),/insufficient-balance/);assert.equal(p.total,1000000);
 });
 test('retry draws fifteen unique questions excluding today’s pure daily bank, across all tiers',()=>{
  for(let day=DAY;day<DAY+365;day++)for(const seed of [0,1,7,999999999]){
@@ -94,4 +94,13 @@ test('retry draws fifteen unique questions excluding today’s pure daily bank, 
  let r=newSession({id:'retry',uid:'p',kind:'retry',seed:16},NOW);
  for(let i=0;i<15;i++){r=sessionAct(r,{type:'answer',choice:sessionQuestion(r).answer},NOW+1000+i*100);if(i<14)r=sessionAct(r,{type:'next'},NOW+1050+i*100);}
  assert.equal(sessionFinish(r,NOW+3000).payout,1000000);
+});
+
+test('daily offers are shared, bounded and reject stale or forged confirmation prices',()=>{
+ const rates=new Set();for(let d=DAY;d<DAY+365;d++){const rate=retryDiscount(d);rates.add(rate);assert(Number.isInteger(rate)&&rate>=5&&rate<=9);assert.equal(retryPrice(d),RETRY_PRICE/10*rate);assert.equal(retryPrice(d),retryPrice(d));}
+ assert.equal(rates.size,5);
+ const old=emptyWallet('offer',0),profile={total:1000000};
+ assert.throws(()=>walletAction(profile,old,{type:'retry-ticket',day:DAY-1,price:retryPrice(DAY-1)},DAY),/quote-expired/);
+ assert.throws(()=>walletAction(profile,old,{type:'retry-ticket',day:DAY,price:1},DAY),/quote-expired/);
+ assert.equal(walletAction(profile,old,{type:'retry-ticket',day:DAY,price:retryPrice(DAY)},DAY).spent,retryPrice(DAY));
 });

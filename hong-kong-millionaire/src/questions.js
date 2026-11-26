@@ -1,3 +1,4 @@
+import {DISTRICT_QUESTIONS} from './district-questions.js';
 import {NEIGHBOURHOOD_QUESTIONS} from './neighbourhood-questions.js';
 import {LOCAL_QUESTIONS} from './local-questions.js';
 import {STREET_OBSERVATION_QUESTIONS} from './street-observation-questions.js';
@@ -2186,4 +2187,4 @@ export const CORE_QUESTIONS=Object.freeze([
   }
 ].map(q=>Object.freeze({...q,options:Object.freeze(q.options),source:Object.freeze(q.source),focus:Object.freeze(q.focus)})));
 
-export const QUESTIONS=Object.freeze([...CORE_QUESTIONS,...URBAN_QUESTIONS,...COMIC_QUESTIONS,...DAILY_DESIGN_QUESTIONS,...STREET_OBSERVATION_QUESTIONS,...LOCAL_QUESTIONS,...NEIGHBOURHOOD_QUESTIONS]);
+export const QUESTIONS=Object.freeze([...CORE_QUESTIONS,...URBAN_QUESTIONS,...COMIC_QUESTIONS,...DAILY_DESIGN_QUESTIONS,...STREET_OBSERVATION_QUESTIONS,...LOCAL_QUESTIONS,...NEIGHBOURHOOD_QUESTIONS,...DISTRICT_QUESTIONS]);

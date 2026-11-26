@@ -17,7 +17,7 @@ export const hkDay=(now=Date.now())=>Math.floor((now+HK_OFFSET)/DAY_MS);
 export const dayEnd=day=>(day+1)*DAY_MS-HK_OFFSET;
 export const seasonForDay=day=>new Date(day*DAY_MS).toISOString().slice(0,7);
 export const dayLabel=day=>new Intl.DateTimeFormat('zh-HK',{timeZone:'UTC',month:'long',day:'numeric'}).format(new Date(day*DAY_MS));
-export const challengeNumber=day=>Math.max(1,day-hkDay(Date.UTC(2026,10,13,16))+1);
+export const challengeNumber=day=>Math.max(1,day-hkDay(Date.UTC(2026,10,25,16))+1);
 export function hash(text){let h=2166136261;for(const c of String(text))h=Math.imul(h^c.codePointAt(0),16777619);return h>>>0;}
 export function questionId(day,index,version=BANK_VERSION){const tier=Math.floor(index/5),pool=QUESTION_PLANS[version]?.[tier];if(!pool)throw Error('bank-version');const slot=(day*pool.dayStep+(index%5)*pool.slotStep+tier*11)%pool.ids.length;return pool.ids[slot];}
 export const questionById=id=>byId.get(id);

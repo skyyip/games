@@ -1,6 +1,9 @@
 import {hkDay} from './game.js';
-export const DRAW_PRICE=30000,GOLD_PRICE=80000,WEEKEND_PASS_PRICE=80000,WEEKEND_LIMIT=5,RETRY_PRICE=100000;
-export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'叮叮地膽'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'}]);
+export const DRAW_PRICE=10000,GOLD_PRICE=80000,WEEKEND_PASS_PRICE=80000,WEEKEND_LIMIT=5,RETRY_PRICE=100000;
+export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'叮叮地膽'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'},{id:'villages',name:'圍村與離島',prefix:'村落地膽'},{id:'crafts',name:'匠人手作',prefix:'手藝收藏家'}]);
+// Shared date-derived offer: identical on every device; Firestore recomputes it.
+export function retryDiscount(day=hkDay()){const seed=(day*48271+1013904223)%2147483647;return 5+((seed*48271+1013904223)%2147483647)%5;}
+export const retryPrice=(day=hkDay())=>RETRY_PRICE/10*retryDiscount(day);
 const tourism='https://www.discoverhongkong.com/tc/explore.html',ich='https://www.icho.hk/tc/web/icho/home.html';
 const cards=[
  ['hotdog','transport','熱狗巴士',false,'「熱狗」是香港人對昔日沒有空調巴士的俗稱，記錄公共交通設備的變遷。',tourism],
@@ -32,7 +35,19 @@ const cards=[
  ['sampan','harbour','避風塘舢舨',false,'舢舨與漁船展現香港水上生活的一面，今天部分地區仍可見這些船隻。',tourism],
  ['junk-sunset','harbour','紅帆夕照',false,'中式帆船與維港構成香港常見旅遊意象；圖中帆船是原創文化示意。',tourism],
  ['lighthouse-foil','harbour','燈塔與海風',true,'燈塔和助航設施為海上航行提供參考；插畫並非特定燈塔的工程或航海資料。','https://www.mardep.gov.hk/tc/'],
- ['harbour-night-foil','harbour','維港星夜',true,'維港夜景來自兩岸建築、船隻與水面倒影的交織，每次渡海都能發現不同風景。',tourism]
+ ['harbour-night-foil','harbour','維港星夜',true,'維港夜景來自兩岸建築、船隻與水面倒影的交織，每次渡海都能發現不同風景。',tourism],
+ ["peng-chau-lane","villages","坪洲小巷",false,"坪洲的街巷與海岸，保留島上生活和昔日工業的記憶。卡面是原創小島情境，不是特定街道實景。","https://www.gohk.gov.hk/tc/districts/is.php"],
+ ["tai-o-bridge","villages","大澳橫水橋",false,"大澳橫水橋連接水道兩旁社區，來往街巷與棚屋一帶的步伐，寫下水鄉日常。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/tai-o.html"],
+ ["lamma-bay","villages","榕樹灣日常",false,"榕樹灣是南丫島的重要聚落，街坊、碼頭與海邊食店交織成離島生活。圖中店舖並非特定商戶。","https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Lamma+Island"],
+ ["tsang-house","villages","曾大屋青磚",false,"曾大屋是沙田著名的客家圍村建築，青磚、天井與圍牆留下宗族聚居的歷史。插畫不作建築測繪用途。","https://www.amo.gov.hk/tc/home/index.html"],
+ ["lai-chi-wo-foil","villages","荔枝窩古樹",true,"荔枝窩的客家村落與周邊樹林，呈現人與自然相依的社區記憶。閃光只屬視覺效果，不增加答題能力。","https://www.gohk.gov.hk/tc/search/spot.php"],
+ ["cheung-chau-pier-foil","villages","長洲碼頭夜航",true,"碼頭的船燈與街燈，連起長洲街坊出入市區的日常。卡面記錄海邊氣氛，並非即時航班資訊。","https://www.sunferry.com.hk/zh/"],
+ ["bamboo-steamer","crafts","竹蒸籠手藝",false,"傳統蒸籠以竹材製作，兼顧透氣、保溫與蒸氣疏導。一籠點心上枱之前，器物早已默默做足後勤。","https://www.icho.hk/documents/Education/edu_booklet/edu_booklet_2.pdf"],
+ ["salt-crystals","crafts","鹽田結晶",false,"西貢鹽田梓保留曬鹽的文化記憶。海水、陽光與工序，讓看似平凡的鹽粒多了一層地方故事。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/yim-tin-tsai.html"],
+ ["eggroll-workshop","crafts","手工蛋卷",false,"蛋漿烘成薄片後趁熱捲起，放涼後成為酥脆蛋卷。師傅手勢俐落，慢半拍就可能由蛋卷變碎餅。","https://www.wenweipo.com/a/202603/22/AP69bf4840e4b04d7d56d995d2.html"],
+ ["neon-workshop","crafts","霓虹屈管",false,"霓虹光管製作及造型技藝，把玻璃管塑成街頭文字與圖案。欣賞光影，也記住招牌背後的匠人。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf"],
+ ["paper-lion-foil","crafts","紙紮醒獅",true,"竹篾、紙張與彩繪組成傳統紮作的生動面貌。醒獅圖案是本遊戲原創演繹，不指特定派別或師傅作品。","https://www.icho.hk/tc/web/icho/home.html"],
+ ["painted-porcelain-foil","crafts","廣彩瓷光",true,"廣彩在瓷器上繪飾彩色圖案，花鳥與金彩展現工藝心思；它不等同只用鈷藍線條裝飾的青花。","https://www.icho.hk/tc/web/icho/home.html"]
 ];
 export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source])=>Object.freeze({id,series,name,foil,story,source})));
 export const GEAR=Object.freeze([
@@ -48,7 +63,14 @@ export const GEAR=Object.freeze([
  {id:'theme-tram',kind:'theme',name:'叮叮綠窗風',price:100000,description:'電車綠、黃銅窗框與軌道幾何，陪你遊走港島。'},
  {id:'theme-lantern',kind:'theme',name:'廟街花燈風',price:180000,description:'朱紅、暖金與燈籠花紋，留住香港夜市的熱鬧。'},
  {id:'theme-porcelain',kind:'theme',name:'青花瓷磚風',price:120000,description:'鈷藍釉線、細花與米白瓷磚，將冰室花紋放進日常答題。'},
- {id:'exit-redvan',kind:'exit',name:'紅Van接你走',price:50000,description:'割禾青後紅Van載你離場，支援裝置可播放「落車啦唔該！」。'}
+ {id:'exit-redvan',kind:'exit',name:'紅Van接你走',price:50000,description:'割禾青後紅Van載你離場，支援裝置可播放「落車啦唔該！」。'},
+ {"id":"frame-ferry","kind":"frame","name":"天星船繩框","price":42000,"description":"綠白船身與船繩結，裝起一程渡海回憶。"},
+ {"id":"frame-waffle","kind":"frame","name":"雞蛋仔金邊框","price":56000,"description":"一格格金黃泡泡，街頭小食也可以做頭像邊框。"},
+ {"id":"frame-bamboo","kind":"frame","name":"竹藝巧手框","price":68000,"description":"竹節與綁結細節，向本地傳統手藝致意。"},
+ {"id":"frame-tile","kind":"frame","name":"唐樓花磚框","price":90000,"description":"墨綠與橘紅花磚，將舊街樓梯的記憶帶上榜。"},
+ {"id":"theme-village","kind":"theme","name":"圍村青磚風","price":140000,"description":"青磚、屋脊與榕樹剪影，配清晰淺色答題紙面。"},
+ {"id":"theme-island","kind":"theme","name":"離島海風","price":170000,"description":"碼頭欄杆、小船與海藍色，留住慢一拍的島上日常。"},
+ {"id":"theme-workshop","kind":"theme","name":"香港手作坊","price":130000,"description":"竹編、瓷彩與溫暖工枱色，展示純外觀的匠人風格。"}
 ]);
 const gearKindOrder={frame:0,theme:1,exit:2};
 export const DISPLAY_GEAR=Object.freeze([...GEAR].sort((a,b)=>gearKindOrder[a.kind]-gearKindOrder[b.kind]||a.price-b.price));
@@ -78,7 +100,7 @@ export function walletAction(profile,wallet,action,day=hkDay()){
   else{if(!['frame','theme','exit'].includes(action.slot))throw Error('invalid-item');const reset=action.slot==='frame'?'none':'default';if(action.id!==reset&&(!wallet.owned.includes(action.id)||gearById(action.id)?.kind!==action.slot))throw Error('not-owned');next[action.slot]=action.id;}
   next.item=action.slot;
  }else if(action.type==='pass'){if(wallet.pass===weekendKey(day))throw Error('already-owned');cost=WEEKEND_PASS_PRICE;next.pass=weekendKey(day);next.passUses=0;}
- else if(action.type==='retry-ticket'){if(wallet.retryBoughtDay===day)throw Error('retry-bought');cost=RETRY_PRICE;next.retryBoughtDay=day;}
+ else if(action.type==='retry-ticket'){if(wallet.retryBoughtDay===day)throw Error('retry-bought');if(action.day!==undefined&&action.day!==day)throw Error('quote-expired');cost=retryPrice(day);if(action.price!==undefined&&action.price!==cost)throw Error('quote-expired');next.retryBoughtDay=day;}
  else throw Error('invalid-item');
  if(walletBalance(profile,wallet)<cost)throw Error('insufficient-balance');next.spent+=cost;return next;
 }

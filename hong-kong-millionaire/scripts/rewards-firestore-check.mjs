@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import * as sdk from 'firebase/firestore';
 import * as feature from '../src/features-cloud.js';
-import {emptyWallet,isWeekend,WEEKEND_LIMIT} from '../src/economy.js';
+import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,walletAction} from '../src/economy.js';
 import {newSession,sessionQuestion,ROOM_INTERVAL} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
 import {sessionClock} from '../src/session-clock.js';
@@ -16,6 +16,22 @@ async function seed(uid,total=1000000){await env.withSecurityRulesDisabled(async
 const ok=async p=>{const r=await assertSucceeds(p);checks++;return r;},no=async p=>{await assertFails(p);checks++;};
 try{
  await env.clearFirestore();
+ // Economic prices and ownership are enforced by the real rules, independently of UI quotes.
+ const pricing=await seed('pricing');let priceState=await ok(feature.wallet(pricing,'pricing'));
+ const normalReceipt=crypto.randomUUID();priceState=await ok(feature.shop(pricing,'pricing',{type:'draw',requestId:normalReceipt}));
+ assert.equal(priceState.balance,1000000-DRAW_PRICE);assert.equal(priceState.profile.total,1000000);checks+=2;
+ const drawRevision=priceState.wallet.revision;priceState=await ok(feature.shop(pricing,'pricing',{type:'draw',requestId:normalReceipt}));assert.equal(priceState.wallet.revision,drawRevision);checks++;
+ for(const [slot,id]of [['frame','frame-bamboo'],['theme','theme-island']]){
+  await assert.rejects(feature.shop(pricing,'pricing',{type:'equip',slot,id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
+  await ok(feature.shop(pricing,'pricing',{type:'buy',id,requestId:crypto.randomUUID()}));
+  priceState=await ok(feature.shop(pricing,'pricing',{type:'equip',slot,id,requestId:crypto.randomUUID()}));assert.equal(priceState.wallet[slot],id);checks++;
+ }
+ for(const quote of [{day:hkDay()-1,price:retryPrice(hkDay()-1)},{day:hkDay(),price:1}]){await assert.rejects(feature.shop(pricing,'pricing',{type:'retry-ticket',...quote,requestId:crypto.randomUUID()}),/quote-expired/);checks++;}
+ // A forged, self-consistent receipt must still fail if it underpays the server's day price.
+ priceState=await feature.wallet(pricing,'pricing');const forgedId=crypto.randomUUID(),forged=walletAction(priceState.profile,priceState.wallet,{type:'retry-ticket',requestId:forgedId},hkDay());forged.spent--;
+ const forgedBatch=sdk.writeBatch(pricing.db);forgedBatch.update(ref(pricing,'hkm_wallets','pricing'),{...forged,updatedAt:sdk.serverTimestamp()});forgedBatch.set(ref(pricing,'hkm_wallets','pricing','receipts',forgedId),{uid:'pricing',op:forged.op,item:forged.item,cost:retryPrice(hkDay())-1,revision:forged.revision,createdAt:sdk.serverTimestamp()});await no(forgedBatch.commit());
+ const validTicket=crypto.randomUUID(),beforeTicket=priceState.balance;priceState=await ok(feature.shop(pricing,'pricing',{type:'retry-ticket',day:hkDay(),price:retryPrice(hkDay()),requestId:validTicket}));assert.equal(priceState.balance,beforeTicket-retryPrice(hkDay()));checks++;
+ priceState=await ok(feature.shop(pricing,'pricing',{type:'retry-ticket',day:hkDay()-1,price:1,requestId:validTicket}));assert.equal(priceState.balance,beforeTicket-retryPrice(hkDay()));checks++;
  const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{cards:{'tram-foil':100},updatedAt:sdk.serverTimestamp()}));
@@ -41,15 +57,15 @@ try{
  await assert.rejects(feature.startSession(retry,'retry',{kind:'retry'}),/retry-ticket-required/);checks++;
  const ticketReceipt=crypto.randomUUID();await ok(feature.shop(retry,'retry',{type:'retry-ticket',requestId:ticketReceipt}));
  await ok(feature.shop(retry,'retry',{type:'retry-ticket',requestId:ticketReceipt}));
- assert.equal((await feature.wallet(retry,'retry')).balance,900000);checks++;
+ assert.equal((await feature.wallet(retry,'retry')).balance,1000000-retryPrice(hkDay()));checks++;
  await assert.rejects(feature.shop(retry,'retry',{type:'retry-ticket',requestId:crypto.randomUUID()}),/retry-bought/);checks++;
  let retryRun=await ok(feature.startSession(retry,'retry',{kind:'retry'}));
  await no(sdk.updateDoc(ref(retry,'hkm_wallets','retry'),{retryUsedDay:-1,revision:(await feature.wallet(retry,'retry')).wallet.revision+1,op:'start-session',updatedAt:sdk.serverTimestamp()}));
  // Extra sessions must also allow a genuine answer after the former 25s cap.
  await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-28000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','retry','sessions',retryRun.id),{questionAt:stamp,startedAt:stamp});});
  for(let i=0;i<15;i++){retryRun=await ok(feature.moveSession(retry,'retry',retryRun,{type:'answer',choice:sessionQuestion(retryRun).answer}));if(i<14)retryRun=await ok(feature.moveSession(retry,'retry',retryRun,{type:'next'}));}
- assert.equal(retryRun.payout,1000000);assert.equal(retryRun.credit,1000000);assert.equal((await feature.wallet(retry,'retry')).balance,1900000);assert.equal((await feature.wallet(retry,'retry')).profile.total,1000000);checks+=4;
- await ok(feature.settleSession(retry,'retry',retryRun));assert.equal((await feature.wallet(retry,'retry')).balance,1900000);checks++;
+ assert.equal(retryRun.payout,1000000);assert.equal(retryRun.credit,1000000);assert.equal((await feature.wallet(retry,'retry')).balance,2000000-retryPrice(hkDay()));assert.equal((await feature.wallet(retry,'retry')).profile.total,1000000);checks+=4;
+ await ok(feature.settleSession(retry,'retry',retryRun));assert.equal((await feature.wallet(retry,'retry')).balance,2000000-retryPrice(hkDay()));checks++;
  await assert.rejects(feature.startSession(retry,'retry',{kind:'retry'}),/retry-ticket-required/);checks++;
  await ok(feature.syncSessionClock(retry,'retry',retryRun)); // Another tab may already have settled during recovery.
  for(const count of [2,3,4]){
