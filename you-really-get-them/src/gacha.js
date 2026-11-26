@@ -170,7 +170,23 @@ export const CARDS=[
  {"id":"c_42","name":"美國短尾貓襪子藏寶員","art":12,"atlas":"outing","rarity":"N","desc":"尾巴短一截，收藏襪子的版圖卻已經延伸到隔籬洗衣籃"},
  {"id":"c_43","name":"緬甸貓窗台咖啡師","art":13,"atlas":"outing","rarity":"R","desc":"專業監督人類喝咖啡，自己堅持只飲乾淨清水"},
  {"id":"c_44","name":"歐西貓盆栽監察員","art":14,"atlas":"outing","rarity":"SR","desc":"不負責澆水，只負責確認你每次搬花盆都有留返通道"},
- {"id":"c_45","name":"澳洲霧貓陽台星霧館長","art":15,"atlas":"outing","rarity":"SSR","desc":"星霧再多都先關好防護窗，安全看銀河先係真正識享受"}
+ {"id":"c_45","name":"澳洲霧貓陽台星霧館長","art":15,"atlas":"outing","rarity":"SSR","desc":"星霧再多都先關好防護窗，安全看銀河先係真正識享受"},
+ {"id":"w_38","name":"散紙分流員","art":0,"atlas":"homecoming","rarity":"N","desc":"硬幣一粒粒分得清楚，買奶茶嗰張十蚊仍然永遠藏最底"},
+ {"id":"w_39","name":"衣櫃天氣預報員","art":1,"atlas":"homecoming","rarity":"R","desc":"窗外落雨又出太陽，衣櫃今日已經開過三次應變會議"},
+ {"id":"w_40","name":"客廳遙距導演","art":2,"atlas":"homecoming","rarity":"SR","desc":"遙控器一舉，全屋演員立即申請只做觀眾"},
+ {"id":"w_41","name":"零食星球保管官","art":3,"atlas":"homecoming","rarity":"SSR","desc":"守住一罐星形曲奇，仍會先問你今晚想唔想食甜"},
+ {"id":"m_38","name":"膠袋摺疊學徒","art":4,"atlas":"homecoming","rarity":"N","desc":"把袋摺成三角形很熟練，把袋收返櫃入面仍然要記得"},
+ {"id":"m_39","name":"冰箱便條傳令員","art":5,"atlas":"homecoming","rarity":"R","desc":"便利貼顏色分得清楚，仍然唔想把買兩棵菜變成軍事行動"},
+ {"id":"m_40","name":"星期八鬧鐘法官","art":6,"atlas":"homecoming","rarity":"SR","desc":"法槌一落宣布再睡五分鐘，鬧鐘當庭提出上訴"},
+ {"id":"m_41","name":"手電筒銀河巡夜員","art":7,"atlas":"homecoming","rarity":"SSR","desc":"照亮整條走廊，主要目的仍然係唔好踩到自己隻拖鞋"},
+ {"id":"d_46","name":"沙皮犬毛巾旁聽員","art":8,"atlas":"homecoming","rarity":"N","desc":"額頭自帶三層會議紀錄，最想討論的係張毛巾夠唔夠軟"},
+ {"id":"d_47","name":"凱利藍㹴雨傘巡更","art":9,"atlas":"homecoming","rarity":"R","desc":"雨傘未開，兩撇鬍鬚已經完成門口濕度報告"},
+ {"id":"d_48","name":"新斯科舍玩具鴨專員","art":10,"atlas":"homecoming","rarity":"SR","desc":"誘鴨尋回犬今日只追回玩具，湖邊真鴨不在工作名單"},
+ {"id":"d_49","name":"特伏丹星夜巡邏長","art":11,"atlas":"homecoming","rarity":"SSR","desc":"長毛星際保安巡遍梳化，最常回報的仍然係想你陪行多半圈"},
+ {"id":"c_46","name":"布米拉襪籃合議員","art":12,"atlas":"homecoming","rarity":"N","desc":"銀毛合議庭已經坐好，襪子能否離籃暫時押後宣判"},
+ {"id":"c_47","name":"科尼斯捲毛毛毯編輯","art":13,"atlas":"homecoming","rarity":"R","desc":"毛毯一摺一摺審過，最滿意的段落仍然係自己瞓嗰段"},
+ {"id":"c_48","name":"托金斯枕頭調解員","art":14,"atlas":"homecoming","rarity":"SR","desc":"看似溫柔地坐着，實際正在協調全家今晚仲有幾多枕頭可用"},
+ {"id":"c_49","name":"烏拉爾捲毛星霧法官","art":15,"atlas":"homecoming","rarity":"SSR","desc":"星霧再閃都先看安全窗，捲毛法官不受空頭罐頭承諾影響"}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';

@@ -1212,3 +1212,5 @@ dialog:has(.leaderboard-faction-tabs) {
 .normal-color-art{background-size:400% 300%}.normal-color-0{background-image:url('./assets/illustrations/normal-color-0.webp')}.normal-color-1{background-image:url('./assets/illustrations/normal-color-1.webp')}.normal-color-2{background-image:url('./assets/illustrations/normal-color-2.webp')}.collection-screen .collect-card.rarity-n.locked .flash-card-art{filter:none}
 
 .outing-card-art{background-image:url('./assets/illustrations/outing-polaroids.webp');background-size:400% 400%}
+
+.homecoming-card-art{background-image:url('./assets/illustrations/homecoming-polaroids.webp');background-size:400% 400%}

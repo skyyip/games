@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {CARDS,RARITIES,DRAW_COST,DUPLICATE_REFUND,rollRarity,purchaseDraw} from '../src/gacha.js';
 
 test('new collection preserves all legacy IDs and provides all four rarity pools',()=>{
- assert.equal(CARDS.length,164);assert.equal(new Set(CARDS.map(c=>c.id)).size,164);
+ assert.equal(CARDS.length,180);assert.equal(new Set(CARDS.map(c=>c.id)).size,180);
  for(const prefix of ['w','m','d','c'])for(let i=1;i<=3;i++)assert(CARDS.some(c=>c.id===`${prefix}_${i}`&&!c.atlas));
- assert.deepEqual(RARITIES.map(r=>[r.id,CARDS.filter(c=>c.rarity===r.id).length]),[['N',40],['R',40],['SR',42],['SSR',42]]);
+ assert.deepEqual(RARITIES.map(r=>[r.id,CARDS.filter(c=>c.rarity===r.id).length]),[['N',44],['R',44],['SR',46],['SSR',46]]);
  const art=new Set();for(const c of CARDS.filter(c=>c.atlas==='new'))art.add(c.art);assert.equal(art.size,16);
- assert(CARDS.filter(c=>c.rarity==='N').every(c=>c.atlas==='new'&&c.art<8||c.atlas==='pets'&&[0,1,8,9].includes(c.art)||['life','festival','weekend','metro','night','commute','outing'].includes(c.atlas)&&[0,4,8,12].includes(c.art)));
+ assert(CARDS.filter(c=>c.rarity==='N').every(c=>c.atlas==='new'&&c.art<8||c.atlas==='pets'&&[0,1,8,9].includes(c.art)||['life','festival','weekend','metro','night','commute','outing','homecoming'].includes(c.atlas)&&[0,4,8,12].includes(c.art)));
 });
 test('fixed rarity boundaries yield exactly 57/30/10/3 percent without ownership bias',()=>{
  const counts={N:0,R:0,SR:0,SSR:0};for(let i=0;i<10000;i++)counts[rollRarity(i/10000)]++;
@@ -84,5 +84,10 @@ test('sixteen commute cards add distinct art and one of every rarity per faction
 
 test('sixteen outing cards extend every faction and rarity with full-color art slots',()=>{
  const cards=CARDS.filter(c=>c.atlas==='outing');assert.equal(cards.length,16);assert.deepEqual(cards.map(c=>c.art),Array.from({length:16},(_,i)=>i));
+ for(const prefix of ['w_','m_','d_','c_'])assert.deepEqual(cards.filter(c=>c.id.startsWith(prefix)).map(c=>c.rarity),RARITIES.map(r=>r.id));
+});
+
+test('sixteen homecoming cards add one of every rarity per faction without reused art slots',()=>{
+ const cards=CARDS.filter(c=>c.atlas==='homecoming');assert.equal(cards.length,16);assert.deepEqual(cards.map(c=>c.art),Array.from({length:16},(_,i)=>i));
  for(const prefix of ['w_','m_','d_','c_'])assert.deepEqual(cards.filter(c=>c.id.startsWith(prefix)).map(c=>c.rarity),RARITIES.map(r=>r.id));
 });

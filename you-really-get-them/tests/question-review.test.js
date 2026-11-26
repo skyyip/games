@@ -21,9 +21,9 @@ test('reviewed copy retains existing option/scoring pairs, question order and il
 });
 test('sixty additional playable scenarios expand all five factions without duplicates',()=>{
  const all=Object.values(banks).flatMap(bank=>Object.values(bank).flat());
- assert.equal(all.length,757);assert.equal(new Set(all.map(q=>q.text)).size,757);
+ assert.equal(all.length,817);assert.equal(new Set(all.map(q=>q.text)).size,817);
  for(const faction of ['women','men','dog','cat','duo']){
-  assert.equal(BANK[faction].length,faction==='duo'?143:106);
+  assert.equal(BANK[faction].length,faction==='duo'?155:114);
   const added=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='城市加場');assert.equal(added.length,12,faction);
  }
  assert.equal(all.filter(q=>q.tag==='城市加場').length,60);
@@ -51,7 +51,7 @@ test('normal question answers balance all four positions without a consistently 
   const best=q.correct??q.profiles.map(p=>p.reduce((a,b)=>a+b,0)).reduce((b,v,i,a)=>v>a[b]?i:b,0);
   counts[best]++;total++;if(q.opts[best].length>Math.max(...q.opts.filter((_,i)=>i!==best).map(o=>o.length)))longest++;
  }
- assert.deepEqual(counts,[151,151,151,151]);assert(longest/total<.35);
+ assert.deepEqual(counts,[163,163,163,163]);assert(longest/total<.35);
 });
 
 test('night expansion gives each faction twelve distinctive contextual prompts',()=>{
@@ -70,4 +70,8 @@ test('end-of-day expansion adds twelve contextual prompts to every faction',()=>
 
 test('weekend theater adds twelve new playable scenarios to each faction',()=>{
  for(const faction of ['women','men','dog','cat','duo']){const rows=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='週末小劇場');assert.equal(rows.length,12,faction);if(faction!=='duo')assert.equal(rows.filter(q=>q.profiles).length,4)}
+});
+
+test('home-court scenes add twelve playable prompts to each faction',()=>{
+ for(const faction of ['women','men','dog','cat','duo']){const rows=Object.values(banks).flatMap(bank=>bank[faction]).filter(q=>q.tag==='屋企小法庭');assert.equal(rows.length,12,faction);if(faction!=='duo')assert.equal(rows.filter(q=>q.profiles).length,4)}
 });

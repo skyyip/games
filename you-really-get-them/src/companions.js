@@ -169,7 +169,23 @@ export const SKILLS={
  "c_42":{"kind":"clue","name":"襪紋藏寶圖","quip":"先跟呢句走，唔使翻遍全屋襪。"},
  "c_43":{"kind":"bonus","name":"窗台服務費退回","quip":"人類生還先退二十，咖啡唔包朕飲。"},
  "c_44":{"kind":"time","name":"盆栽驗收空檔","quip":"驗收慢五秒，唔准急住伸爪。"},
- "c_45":{"kind":"clue","name":"星霧觀景對焦","quip":"朕幫你對焦呢句，唔係對焦答案。"}
+ "c_45":{"kind":"clue","name":"星霧觀景對焦","quip":"朕幫你對焦呢句，唔係對焦答案。"},
+ "w_38":{"kind":"bonus","name":"散紙找續入袋","quip":"生還先找續，二十SC今次唔使翻袋底。"},
+ "w_39":{"kind":"clue","name":"衣標氣象覆核","quip":"先讀呢句，唔好靠昨日天氣估今日。"},
+ "w_40":{"kind":"time","name":"廣告空檔五秒","quip":"今次冇廣告，淨係畀你個腦抖五秒。"},
+ "w_41":{"kind":"bonus","name":"曲奇星港找續","quip":"生還靠你自己，星港退你二十SC。"},
+ "m_38":{"kind":"clue","name":"袋角重點展開","quip":"先打開呢句，唔係打開成個雜物櫃。"},
+ "m_39":{"kind":"bonus","name":"便條出勤找續","quip":"傳令完成仲生還，二十SC唔使報銷單。"},
+ "m_40":{"kind":"clue","name":"鬧鐘口供重讀","quip":"法庭只重讀證據，唔幫你宣判答案。"},
+ "m_41":{"kind":"time","name":"巡夜靜鐘五秒","quip":"燈照常亮，倒數先休息五秒。"},
+ "d_46":{"kind":"time","name":"毛巾候審空檔","quip":"旁聽五秒先，個腦唔使皺埋一份。"},
+ "d_47":{"kind":"time","name":"收傘慢行五秒","quip":"甩水先抖五秒，思考唔使趕住落雨。"},
+ "d_48":{"kind":"bonus","name":"玩具回收津貼","quip":"玩具追回仲生還，二十SC照單退。"},
+ "d_49":{"kind":"clue","name":"星夜足跡覆核","quip":"重點喺呢度，唔使跟住想像條路亂衝。"},
+ "c_46":{"kind":"clue","name":"襪籃證物重讀","quip":"證物唔包答案，呢句先畀你覆核。"},
+ "c_47":{"kind":"bonus","name":"毛毯版稅回贈","quip":"有命收工先退版稅，二十SC唔扣被角。"},
+ "c_48":{"kind":"time","name":"枕頭調解五秒","quip":"調解先停五秒，唔使急住同個腦吵架。"},
+ "c_49":{"kind":"clue","name":"星霧判詞覆核","quip":"朕重讀呢句，唔係替你圈出答案。"}
 };
 export function equippedCompanion(data){
  const card=CARDS.find(card=>card.id===data.equippedCard);
