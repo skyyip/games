@@ -30,12 +30,12 @@ test('active assistance is once per run, cannot be used after an answer, settlem
  const clue=createCompanionRun(data('w_2'));assert.equal(useCompanion(clue,{clue:''}),false);assert.equal(clue.used,false);
  assert.equal(useCompanion(createCompanionRun(data('w_22'))),false);
 });
-test('all 652 normal questions have a verbatim scenario clue, with grading unchanged',()=>{
+test('all 660 normal questions have a verbatim scenario clue, with grading unchanged',()=>{
  let count=0;
  for(const bank of [BANK,AIR_BANK,MIXED_BANK,PICTURE_BANK])for(const faction of ['women','men','dog','cat'])for(const q of bank[faction]){
   assert(q.clue?.length>=3);assert(q.text.includes(q.clue),q.text);assert.notEqual(q.clue,q.text);assert.equal(q.opts.length,4);count++;
  }
- assert.equal(count,652);assert.equal(BANK.women[10].clue,'你打機遲到半小時，她笑住話「玩得開心就好」');
+ assert.equal(count,660);assert.equal(BANK.women[10].clue,'你打機遲到半小時，她笑住話「玩得開心就好」');
 });
 test('stipend is exactly 20 only on survival, never stacks with active skills or carries to another account',()=>{
  const run=createCompanionRun(data('w_22'),{scope:'owner'});

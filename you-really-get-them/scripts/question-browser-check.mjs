@@ -30,7 +30,7 @@ function plannedSeed(faction){
   const air=shuffle(AIR_BANK[faction]).slice(0,4).map(q=>({...q,kind:'air'})),hybrid=shuffle(MIXED_BANK[faction]).slice(0,3).map(q=>({...q,kind:'hybrid'}));
   const round=addStoryEvents(shuffle([...classic,...air,...hybrid]),faction);
   const added=Object.fromEntries(['classic','air','hybrid'].map(kind=>[kind,round.filter(q=>q.kind===kind&&q.tag==='屋企小法庭').length]));
-  if(Object.values(added).every(n=>n>0))return {seed,added};
+  if(Object.values(added).every(n=>n>0)&&round.some(q=>q.picture?.atlas==='everyday'))return {seed,added};
  }
  throw Error('No scenario seed for '+faction);
 }
@@ -38,17 +38,19 @@ async function completeInteraction(page){
  if(await page.locator('#treatBtn').isVisible())await page.locator('#treatBtn').click();if(await page.locator('#cupBtn').isVisible())await page.locator('#cupBtn').click();
 }
 async function round(faction,width){
- const {context,page}=await open(width),plan=plannedSeed(faction);await page.locator(`[data-faction="${faction}"]`).click();await seed(page,plan.seed);await page.locator('#startBtn').click();const added={classic:0,air:0,hybrid:0};
+ const {context,page}=await open(width),plan=plannedSeed(faction);await page.locator(`[data-faction="${faction}"]`).click();await seed(page,plan.seed);await page.locator('#startBtn').click();const added={classic:0,air:0,hybrid:0};let newPictures=0;
  for(let i=0;i<12;i++){
   await page.waitForFunction(n=>document.querySelector('#questionNo').textContent===String(n).padStart(2,'0'),i+1);
   const text=await page.locator('#questionText').textContent(),q=findPlayableQuestion(text,faction);assert(q);
+  assert.equal(await page.locator('#timer').textContent(),'35.0');assert.equal(await page.locator('#rewardSyncStatus').count(),0);checks+=2;
+  if(q.picture?.atlas==='everyday'){await page.locator('#questionVisual img').evaluate(i=>i.decode());assert((await page.locator('#questionVisual img').getAttribute('src')).includes('picture-stories-everyday'));newPictures++;checks++}
   const kind=page.locator('#questionTag');if(q.tag==='屋企小法庭'){const label=await kind.textContent();added[label.includes('經典')?'classic':label.includes('閱讀')?'air':'hybrid']++;if(Object.values(added).reduce((a,b)=>a+b,0)===1)await page.screenshot({path:`/tmp/yrgt-question-prompt-${faction}.png`,fullPage:true,animations:'disabled'})}
   assert.deepEqual(await page.locator('#answers .answer-copy').allTextContents(),q.opts);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=2;
   await completeInteraction(page);
   await page.locator('#answers button').nth(best(q)).evaluate(button=>button.click());if(q.message)await page.locator('#sendMessageBtn').click();assert((await page.locator('#questionHint').textContent()).includes(q.why));checks++;
   await page.locator('#nextQuestionBtn').click();
  }
- await page.locator('#result').waitFor({state:'visible'});assert.equal(await page.locator('#resultCorrect').textContent(),'12 / 12');assert.equal(await page.locator('#resultCoins').textContent(),'300 SC');assert.deepEqual(added,plan.added);checks+=3;
+ await page.locator('#result').waitFor({state:'visible'});assert.equal(await page.locator('#resultCorrect').textContent(),'12 / 12');assert.equal(await page.locator('#resultCoins').textContent(),'300 SC');assert.deepEqual(added,plan.added);assert(newPictures>=1);checks+=4;
  await page.screenshot({path:`/tmp/yrgt-question-round-${faction}.png`,fullPage:true,animations:'disabled'});await context.close();
 }
 try{
@@ -60,11 +62,11 @@ try{
    assert.deepEqual(await page.locator('#answers .answer-copy').allTextContents(),q.opts);await completeInteraction(page);await page.locator('#answers button').nth(best(q)).evaluate(b=>b.click());assert((await page.locator('#questionHint').textContent()).includes(q.why));
    assert(await page.locator('.polaroid-back').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=5;renderedQuestions++;if(q.tag==='屋企小法庭')renderedNew++;
   }
-  for(let i=0;i<BANK.duo.length+1;i++){
+  for(let i=0;i<BANK.duo.length+PICTURE_BANK.duo.length;i++){
    const q=[...BANK.duo,...PICTURE_BANK.duo][i];await page.evaluate(i=>questionQA.duo(i),i);assert.equal(await page.locator('.duo-question-text').textContent(),q.text);
    assert.equal(await page.locator('.duo-setup-answers button').count(),4);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=3;renderedQuestions++;if(q.tag==='屋企小法庭')renderedNew++;
   }
-  assert.equal(renderedQuestions,808);assert.equal(renderedNew,60);await context.close();
+  assert.equal(renderedQuestions,818);assert.equal(renderedNew,60);await context.close();
  }
  await Promise.all([round('women',320),round('men',390),round('dog',430),round('cat',1280)]);
  // Select four new personal-preference prompts plus the existing picture through the real flow.

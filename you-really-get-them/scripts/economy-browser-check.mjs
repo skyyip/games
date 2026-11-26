@@ -19,7 +19,7 @@ async function open(width=390,{fixture=false}={}){
 async function synced(page){await page.waitForFunction(()=>{const uid=localStorage.getItem('yrgt-last-account-v2'),data=JSON.parse(localStorage.getItem('yrgt-save-v2:'+uid)||'null');return data?.walletRevision>=0&&data.coins===__yrgtFirebase.documents['users/'+uid+'/wallet/main']?.coins})}
 async function state(page){return page.evaluate(uid=>JSON.parse(localStorage.getItem('yrgt-save-v2:'+uid)),owner)}
 async function backend(page){return page.evaluate(path=>__yrgtFirebase.documents[path],walletPath)}
-async function paid(page){await page.waitForFunction(()=>document.querySelector('#rewardSyncStatus').textContent.includes('已存入帳戶'));await synced(page)}
+async function paid(page){await page.waitForFunction(()=>{const uid=localStorage.getItem('yrgt-last-account-v2'),data=JSON.parse(localStorage.getItem('yrgt-save-v2:'+uid)||'null');return data?.pendingRewards?.length===0&&Object.keys(__yrgtFirebase.documents).some(key=>key.startsWith('users/'+uid+'/walletOps/run_'))});await synced(page)}
 async function fits(page){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks++}
 async function answer(page,q){
  for(const id of ['treatBtn','cupBtn'])if(await page.locator('#'+id).isVisible())await page.locator('#'+id).click();
@@ -44,7 +44,7 @@ try{
   {
    const {context,page}=await open(390,{fixture:true});await page.locator('#startBtn').click();
    await page.evaluate(()=>{__yrgtFirebase.transactionError='unavailable';localStorage.setItem('yrgt-fixture-transaction-error','unavailable');window.dispatchEvent(new Event('offline'))});
-   await page.evaluate(()=>economyQA.complete());await page.locator('#result').waitFor({state:'visible'});assert.equal((await backend(page)).coins,0);assert.equal((await state(page)).pendingRewards.length,1);assert((await page.locator('#rewardSyncStatus').textContent()).includes('待同步'));const id=(await state(page)).pendingRewards[0].id;checks+=3;
+   await page.evaluate(()=>economyQA.complete());await page.locator('#result').waitFor({state:'visible'});assert.equal((await backend(page)).coins,0);assert.equal((await state(page)).pendingRewards.length,1);assert.equal(await page.locator('#rewardSyncStatus').count(),0);const id=(await state(page)).pendingRewards[0].id;checks+=3;
    await page.reload();await page.waitForFunction(()=>document.querySelector('#authBtn').textContent.startsWith('登出'));assert.equal((await state(page)).pendingRewards.length,1);assert.equal((await backend(page)).coins,0);await page.locator('#companionPicker').click();assert(await page.locator('#gachaDraw').isDisabled());checks+=3;
    await page.evaluate(()=>{__yrgtFirebase.transactionError=null;localStorage.removeItem('yrgt-fixture-transaction-error');window.dispatchEvent(new Event('online'))});await synced(page);await page.waitForFunction(uid=>JSON.parse(localStorage.getItem('yrgt-save-v2:'+uid)).pendingRewards.length===0,owner);
    assert.equal((await backend(page)).coins,300);assert.equal((await backend(page)).bonds.w_2,1);assert.equal(await page.evaluate(id=>Object.keys(__yrgtFirebase.documents).filter(key=>key.endsWith('/walletOps/'+id)).length,id),1);checks+=3;

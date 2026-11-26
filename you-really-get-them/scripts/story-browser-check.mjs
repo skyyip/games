@@ -12,7 +12,7 @@ async function open(width=390,{fixture=false,card='m_2'}={}){
  await context.addInitScript(card=>localStorage.setItem('yrgt-save-v1:guest',JSON.stringify({coins:17,cards:[card],equippedCard:card,runs:0,bestHp:0})),card);
  await context.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'text/javascript',body:firebaseSDKSource}));
  if(fixture)await context.route('**/src/app.js',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text())+`
- import {MESSAGE_SCENES as fixtureMessages} from './story-events.js';globalThis.storyQA={setup(f){faction=f;duoTestPhase=false;questions=addStoryEvents([...BANK[f].slice(0,3).map(q=>({...q,kind:'classic'})),...PICTURE_BANK[f].map(q=>({...q,kind:'classic'})),...AIR_BANK[f].slice(0,4).map(q=>({...q,kind:'air'})),...MIXED_BANK[f].slice(0,3).map(q=>({...q,kind:'hybrid'}))],f);index=1;hp=100;runAnswers=[];runSettled=false;companionRun=null;show('game');renderQuestion()},callback(){index=8;renderQuestion()},message(f){this.setup(f);questions=[fixtureMessages[f]];index=0;renderQuestion()},challenge(){challengeId='fixture';challengeRunPending=true},records:()=>runAnswers,specialCount:()=>questions.filter(q=>q.story||q.message).length};`})});
+ import {MESSAGE_SCENES as fixtureMessages} from './story-events.js';globalThis.storyQA={setup(f){faction=f;duoTestPhase=false;questions=addStoryEvents([...BANK[f].slice(0,3).map(q=>({...q,kind:'classic'})),...PICTURE_BANK[f].slice(0,2).map(q=>({...q,kind:'classic'})),...AIR_BANK[f].slice(0,4).map(q=>({...q,kind:'air'})),...MIXED_BANK[f].slice(0,3).map(q=>({...q,kind:'hybrid'}))],f);index=1;hp=100;runAnswers=[];runSettled=false;companionRun=null;show('game');renderQuestion()},callback(){index=8;renderQuestion()},message(f){this.setup(f);questions=[fixtureMessages[f]];index=0;renderQuestion()},challenge(){challengeId='fixture';challengeRunPending=true},records:()=>runAnswers,specialCount:()=>questions.filter(q=>q.story||q.message).length};`})});
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.clock.install({time:new Date('2026-11-25T00:00:00Z')});await page.clock.pauseAt(new Date('2026-11-25T00:00:01Z'));await page.goto(base);await page.waitForFunction(()=>document.querySelector('#authBtn').textContent==='登入');return {page,context};
 }
 async function fits(page){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks++}
@@ -45,7 +45,7 @@ try{
   const {page,context}=await open(390,{fixture:true});
   for(const [faction,arc]of Object.entries(STORY_ARCS))for(const choice of [0,1,2,3,null]){
    await page.evaluate(f=>storyQA.setup(f),faction);
-   if(choice===null){await page.clock.runFor(30100);await page.locator('#answerReview').waitFor({state:'visible'})}else await answer(page,arc.setup,choice);
+   if(choice===null){await page.clock.runFor(35100);await page.locator('#answerReview').waitFor({state:'visible'})}else await answer(page,arc.setup,choice);
    const record=(await page.evaluate(()=>storyQA.records()))[0];assert.equal(record.story.choiceIndex,choice);
    await page.evaluate(()=>storyQA.callback());assert.equal(await page.locator('#storyPanel blockquote').textContent(),choice===null?'時間到，尚未作答':arc.setup.opts[choice]);assert.equal(await page.locator('#questionText').textContent(),arc.followUps[choice??4].text);checks+=3;await fits(page);
   }
@@ -54,7 +54,7 @@ try{
    await page.clock.runFor(700);const before=await page.locator('#timer').textContent();
    for(let i=0;i<4;i++){await page.locator('#answers button').nth(i).click();assert.deepEqual(await page.locator('#messagePreview p').allTextContents(),editedMessage(q,i));assert.equal(await page.locator('#answerReview').isVisible(),false);assert.equal(await page.locator('#hpValue').textContent(),'100');checks+=3}
    assert.equal(await page.locator('#timer').textContent(),before);checks+=2;
-   if(choice===null){await page.clock.runFor(30100);assert.equal(await page.locator('#messageState').textContent(),'時間到 · 未發送');assert.equal((await page.evaluate(()=>storyQA.records()))[0].timedOut,true);checks+=2}
+   if(choice===null){await page.clock.runFor(35100);assert.equal(await page.locator('#messageState').textContent(),'時間到 · 未發送');assert.equal((await page.evaluate(()=>storyQA.records()))[0].timedOut,true);checks+=2}
    else{
     await page.locator('#answers button').nth(choice).click();await page.locator('#sendMessageBtn').focus();await page.keyboard.press('Enter');await page.locator('#answerReview').waitFor({state:'visible'});
     const records=await page.evaluate(()=>storyQA.records());assert.equal(records.length,1);assert.equal(records[0].choice,editedMessage(q,choice).join(' '));const hp=await page.locator('#hpValue').textContent();assert.equal(hp,choice===q.correct?'100':'84');

@@ -7,17 +7,17 @@ test('picture questions provide complete choices, explanations and descriptions 
  assert.deepEqual(Object.keys(PICTURE_BANK).sort(),Object.keys(FACTIONS).sort());
  const scenes=new Set();
  for(const [faction,questions]of Object.entries(PICTURE_BANK)){
-  assert.equal(questions.length,faction==='duo'?1:2,faction);
+  assert.equal(questions.length,faction==='duo'?3:4,faction);
   for(const q of questions){
    assert.equal(q.opts.length,4);assert.equal(new Set(q.opts).size,4);
    assert(Number.isInteger(q.correct)&&q.correct>=0&&q.correct<4);
    assert(q.text.length>15&&q.why.length>25);
    assert(q.picture.alt.length>20&&q.picture.title.length>2);
-   assert(Number.isInteger(q.picture.art)&&q.picture.art>=0&&q.picture.art<9);
+   assert(Number.isInteger(q.picture.art)&&q.picture.art>=0&&q.picture.art<19);
    assert(!scenes.has(q.picture.art));scenes.add(q.picture.art);
   }
  }
- assert.equal(scenes.size,9);
+ assert.equal(scenes.size,19);
 });
 
 test('the requested smile, branch and belly scenarios retain uncertainty and consent in their answers',()=>{

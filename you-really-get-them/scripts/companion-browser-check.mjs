@@ -47,7 +47,7 @@ try{
  {
   const {page,context}=await open('m_2');await start(page);await page.clock.runFor(1000);const before=await page.locator('#timer').textContent();await page.locator('#companionUse').click();
   assert(await page.locator('#companionBar').evaluate(n=>n.classList.contains('is-paused')));await page.clock.runFor(4900);assert.equal(await page.locator('#timer').textContent(),before);await page.clock.runFor(1100);assert(Number(await page.locator('#timer').textContent())<=Number(before)-.9);assert.equal(await page.locator('#companionBar').evaluate(n=>n.classList.contains('is-paused')),false);checks+=4;
-  await answerBest(page);await page.locator('#nextQuestionBtn').click();assert.equal(await page.locator('#timer').textContent(),'30.0');assert(await page.locator('#companionUse').isDisabled());checks+=2;await context.close();
+  await answerBest(page);await page.locator('#nextQuestionBtn').click();assert.equal(await page.locator('#timer').textContent(),'35.0');assert(await page.locator('#companionUse').isDisabled());checks+=2;await context.close();
  }
  // Real 12-question survival, including all mixed types, against source and upload builds.
  {
@@ -72,7 +72,7 @@ try{
   }
 
   {
-   const {page,context}=await open('m_2',390,{fixture:true});await start(page);await page.evaluate(()=>companionQA.question());await page.locator('#companionUse').click();await page.clock.runFor(3100);assert.equal(await page.locator('#timer').textContent(),'30.0');assert.equal(await page.locator('#hpValue').textContent(),'100');assert.equal(await page.locator('#tapBtn,#holdBtn').count(),0);checks+=3;await context.close();
+   const {page,context}=await open('m_2',390,{fixture:true});await start(page);await page.evaluate(()=>companionQA.question());await page.locator('#companionUse').click();await page.clock.runFor(3100);assert.equal(await page.locator('#timer').textContent(),'35.0');assert.equal(await page.locator('#hpValue').textContent(),'100');assert.equal(await page.locator('#tapBtn,#holdBtn').count(),0);checks+=3;await context.close();
   }
 
   for(const hp of [0,1,29,30,80,100]){

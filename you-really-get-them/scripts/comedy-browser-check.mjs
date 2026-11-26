@@ -76,10 +76,10 @@ try{
  await Promise.all([round('women',320),round('cat',390),round('dog',768),round('men',1280)]);
  // Timeouts generate one truthful incident and wait for the same review controls.
  {
-  const {context,page}=await open();await page.locator('#startBtn').click();await page.clock.runFor(30100);
+  const {context,page}=await open();await page.locator('#startBtn').click();await page.clock.runFor(35100);
   await page.locator('.polaroid-back').waitFor({state:'visible'});assert((await page.locator('#questionHint').textContent()).includes('時間到'));
   assert.equal(await page.locator('#hpValue').textContent(),'60');await page.clock.fastForward(10000);assert.equal(await page.locator('#hpValue').textContent(),'60');checks+=3;
-  await page.locator('#nextQuestionBtn').click();await page.clock.runFor(30100);await page.locator('#nextQuestionBtn').click();await page.clock.runFor(30100);
+  await page.locator('#nextQuestionBtn').click();await page.clock.runFor(35100);await page.locator('#nextQuestionBtn').click();await page.clock.runFor(35100);
   assert.equal(await page.locator('#nextQuestionBtn').textContent(),'查看本日事故報告 →');await page.locator('#nextQuestionBtn').click();await page.locator('#result').waitFor({state:'visible'});
   assert.equal(await page.locator('#resultCoins').textContent(),'10 SC');assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v1:guest')).coins),27);checks+=2;assert((await page.locator('#incidentReport').textContent()).includes('完成 3/12 題'));assert((await page.locator('#incidentReport').textContent()).includes('腦內排練超時王'));
   await page.locator('#incidentReport .incident-evidence summary').click();assert((await page.locator('#incidentReport blockquote').textContent()).includes('時間到，尚未作答'));checks+=4;await context.close();

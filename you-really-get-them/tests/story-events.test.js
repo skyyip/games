@@ -7,7 +7,7 @@ import {PICTURE_BANK} from '../src/picture-questions.js';
 import {CARDS} from '../src/gacha.js';
 import {answerRecord,comicReveal,buildIncidentReport} from '../src/comedy.js';
 const factions=['women','men','dog','cat'];
-const pool=f=>[...BANK[f].slice(0,3).map((q,i)=>({...q,kind:'classic',legacyIndex:i})),...PICTURE_BANK[f].map(q=>({...q,kind:'classic'})),...AIR_BANK[f].slice(0,4).map(q=>({...q,kind:'air'})),...MIXED_BANK[f].slice(0,3).map(q=>({...q,kind:'hybrid'}))];
+const pool=f=>[...BANK[f].slice(0,3).map((q,i)=>({...q,kind:'classic',legacyIndex:i})),...PICTURE_BANK[f].slice(0,2).map(q=>({...q,kind:'classic'})),...AIR_BANK[f].slice(0,4).map(q=>({...q,kind:'air'})),...MIXED_BANK[f].slice(0,3).map(q=>({...q,kind:'hybrid'}))];
 test('special scenes keep exactly 12 questions, five classic and seven profile scores, including two pictures',()=>{
  for(const faction of factions){
   const original=pool(faction),before=JSON.stringify(original),round=addStoryEvents(original,faction);
