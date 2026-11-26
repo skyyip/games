@@ -377,10 +377,12 @@ function showAuthModal(){
 let drawing=false;
 const collectionFilters={faction:'all',ownership:'all',rarity:'all',query:''};
 const collectionFactions=[['women','w_'],['men','m_'],['dog','d_'],['cat','c_']];
+const normalColorIds=["w_4","m_4","d_4","c_4","w_5","m_5","d_5","c_5","d_8","d_9","c_8","c_9","w_8","m_8","d_16","c_16","w_12","m_12","d_20","c_20","w_16","m_16","d_24","c_24","w_22","m_22","d_30","c_30","w_26","m_26","d_34","c_34","w_30","m_30","d_38","c_38"];
 function cardArt(card,label,large=false){
   const bond=bondStage(saveData.bonds?.[card.id]||0);
-  const columns=4,rows=card.atlas==='bonus'?2:card.atlas?4:3,x=card.art%columns*100/(columns-1),y=Math.floor(card.art/columns)*100/(rows-1);
-  return `<figure class="flash-card-polaroid bond-level-${bond.level} rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${card.atlas==='commute'?' commute-card-art':card.atlas==='night'?' night-card-art':card.atlas==='metro'?' metro-card-art':card.atlas==='bonus'?' bonus-card-art':card.atlas==='weekend'?' weekend-card-art':card.atlas==='festival'?' festival-card-art':card.atlas==='life'?' life-card-art':card.atlas==='pets'?' pet-card-art':card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div>${bond.level?`<span class="bond-sticker" aria-hidden="true">${bond.sticker}</span>`:''}<figcaption>${escapeText(label)}</figcaption></figure>`;
+  const normalIndex=normalColorIds.indexOf(card.id),art=normalIndex>=0?normalIndex%12:card.art;
+  const columns=4,rows=normalIndex>=0?3:card.atlas==='bonus'?2:card.atlas?4:3,x=art%columns*100/(columns-1),y=Math.floor(art/columns)*100/(rows-1);
+  return `<figure class="flash-card-polaroid bond-level-${bond.level} rarity-${card.rarity.toLowerCase()}${card.rarity==='SSR'?' holo-card':''}${large?' flash-card-polaroid-large':''}" ${card.rarity==='SSR'?'tabindex="0"':''}><div class="flash-card-art${normalIndex>=0?` normal-color-art normal-color-${Math.floor(normalIndex/12)}`:card.atlas==='commute'?' commute-card-art':card.atlas==='night'?' night-card-art':card.atlas==='metro'?' metro-card-art':card.atlas==='bonus'?' bonus-card-art':card.atlas==='weekend'?' weekend-card-art':card.atlas==='festival'?' festival-card-art':card.atlas==='life'?' life-card-art':card.atlas==='pets'?' pet-card-art':card.atlas==='new'?' new-card-art':''}" role="img" aria-label="${escapeText(label)}" style="--art-x:${x}%;--art-y:${y}%"></div>${bond.level?`<span class="bond-sticker" aria-hidden="true">${bond.sticker}</span>`:''}<figcaption>${escapeText(label)}</figcaption></figure>`;
 }
 function followHologram(root){
   root.onpointermove=root.onpointerdown=event=>{

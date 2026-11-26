@@ -30,7 +30,7 @@ try{
    assert.deepEqual(groups[i].ids,CARDS.filter(c=>c.id.startsWith(prefix)).sort((a,b)=>order.indexOf(a.rarity)-order.indexOf(b.rarity)).map(c=>c.id));checks++;
   }
   const urls=await page.locator('.flash-card-art').evaluateAll(nodes=>[...new Set(nodes.map(n=>getComputedStyle(n).backgroundImage.match(/url\(["']?(.*?)["']?\)/)[1]))]);
-  assert.equal(urls.length,10);await page.evaluate(async urls=>{await Promise.all(urls.map(async src=>{const image=new Image();image.src=src;await image.decode();if(!image.naturalWidth)throw Error(src)}))},urls);checks+=2;
+  assert.equal(urls.length,13);await page.evaluate(async urls=>{await Promise.all(urls.map(async src=>{const image=new Image();image.src=src;await image.decode();if(!image.naturalWidth)throw Error(src)}))},urls);checks+=2;
   const cases=[['N',0,0,'w_4'],['R',.57,pickCard('w_6'),'w_6'],['SR',.87,pickCard('w_7'),'w_7'],['SSR',.97,pickCard('c_7'),'c_7']];let balance=1000;
   for(const [rarity,tier,pick,id]of cases){
    await roll(page,tier,pick);await page.locator('#gachaShopDetails').evaluate(n=>n.open=true);await page.locator('#gachaDraw').click();balance-=100;
@@ -40,7 +40,7 @@ try{
    await page.clock.runFor(1350);await page.locator('.gacha-result').waitFor({state:'visible'});
    assert(await page.locator(`.gacha-result.rarity-${rarity.toLowerCase()}`).isVisible());assert((await page.locator('#collectionCount').textContent()).includes(`/ 148`));
    const art=page.locator('#modal .flash-card-art');const finish=await art.evaluate(n=>({after:getComputedStyle(n,'::after').animationName,bg:getComputedStyle(n).backgroundImage,glow:getComputedStyle(n.closest('figure')).boxShadow}));
-   assert(finish.bg.includes('gacha-polaroids'));checks+=3;
+   assert(finish.bg.includes(rarity==='N'?'normal-color-0':'gacha-polaroids'));checks+=3;
    if(rarity==='N'){assert.equal(finish.after,'none');checks++}
    if(rarity==='R'){assert.notEqual(finish.glow,'none');checks++}
    if(rarity==='SR'){assert(finish.after.includes('metal-sweep'));checks++}
@@ -65,7 +65,7 @@ try{
   const rolls={N:0,R:.57,SR:.87,SSR:.97};
   for(const [i,card]of pets.entries()){
    const pool=CARDS.filter(c=>c.rarity===card.rarity);await draw(page,rolls[card.rarity],(pool.findIndex(c=>c.id===card.id)+.5)/pool.length);
-   assert.equal(await page.locator('#modal figcaption').textContent(),card.name);assert((await page.locator('#modal .flash-card-art').evaluate(n=>getComputedStyle(n).backgroundImage)).includes(card.atlas==='commute'?'commute-polaroids':card.atlas==='night'?'night-polaroids':card.atlas==='metro'?'metro-polaroids':card.atlas==='bonus'?'bonus-polaroids':card.atlas==='weekend'?'weekend-polaroids':card.atlas==='festival'?'festival-polaroids':card.atlas==='life'?'everyday-polaroids':'pet-breeds'));
+   assert.equal(await page.locator('#modal figcaption').textContent(),card.name);assert((await page.locator('#modal .flash-card-art').evaluate(n=>getComputedStyle(n).backgroundImage)).includes(card.rarity==='N'?`normal-color-${Math.floor(CARDS.filter(c=>c.rarity==='N').findIndex(c=>c.id===card.id)/12)}`:card.atlas==='commute'?'commute-polaroids':card.atlas==='night'?'night-polaroids':card.atlas==='metro'?'metro-polaroids':card.atlas==='bonus'?'bonus-polaroids':card.atlas==='weekend'?'weekend-polaroids':card.atlas==='festival'?'festival-polaroids':card.atlas==='life'?'everyday-polaroids':'pet-breeds'));
    if(card.atlas==='bonus'){
     const crop=await page.locator('#modal .flash-card-art').evaluate(n=>({size:getComputedStyle(n).backgroundSize,y:n.style.getPropertyValue('--art-y')}));
     assert.equal(crop.size,'400% 200%');assert.equal(crop.y,card.art<4?'0%':'100%');checks+=2;

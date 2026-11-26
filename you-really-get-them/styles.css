@@ -1208,3 +1208,5 @@ dialog:has(.leaderboard-faction-tabs) {
 .collection-filters input,.collection-filters select{font-size:16px}
 
 #gachaTitle{min-width:0;flex:1}
+
+.normal-color-art{background-size:400% 300%}.normal-color-0{background-image:url('./assets/illustrations/normal-color-0.webp')}.normal-color-1{background-image:url('./assets/illustrations/normal-color-1.webp')}.normal-color-2{background-image:url('./assets/illustrations/normal-color-2.webp')}.collection-screen .collect-card.rarity-n.locked .flash-card-art{filter:none}
