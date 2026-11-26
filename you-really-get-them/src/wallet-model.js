@@ -1,8 +1,9 @@
 import {CARDS,DRAW_COST,DUPLICATE_REFUND} from './gacha.js';
 import {SKILLS} from './companions.js';
 import {settleRun} from './settlement.js';
-import {advanceProgress,evaluateContract} from './progression.js';
+import {advanceProgress} from './progression.js';
 export const MAX_COINS=1000000000;
+// Keep retired contract fields in the wire format to preserve existing wallets and rules.
 export const emptyWallet=()=>({coins:0,revision:0,lastOperation:'',bonds:{},contracts:[]});
 export function normalizeCards(cards=[]){
  return [...new Set((Array.isArray(cards)?cards:[]).filter(id=>typeof id==='string').map(id=>CARDS.find(card=>card.id===id||card.name===id)?.id||id))].slice(0,200);
@@ -10,17 +11,16 @@ export function normalizeCards(cards=[]){
 function validWallet(wallet){if(!Number.isSafeInteger(wallet.coins)||wallet.coins<0||wallet.coins>MAX_COINS||!Number.isSafeInteger(wallet.revision)||wallet.revision<0)throw Error('雲端錢包資料不完整，請稍後重試。')}
 export function rewardWallet(wallet,receipt,cards){
  validWallet(wallet);
- const {result,completed,companionId='',contractId='none',timeouts=0,hintsUsed=0,skillUsed=false}=receipt;
+ const {result,completed,companionId='',timeouts=0,hintsUsed=0,skillUsed=false}=receipt;
  if((completed!==12&&result.hp!==0)||!Number.isInteger(result.hp)||result.hp<0||result.hp>100||!Number.isInteger(completed)||completed<1||completed>12||!Number.isInteger(result.correct)||result.correct<0||result.correct>completed||!['women','men','dog','cat'].includes(result.faction)||![timeouts,hintsUsed].every(Number.isInteger)||timeouts<0||timeouts>completed||hintsUsed<0||hintsUsed>2||typeof skillUsed!=='boolean')throw Error('結算資料未完成，請重新開始一局。');
  if(companionId&&(!SKILLS[companionId]||!normalizeCards(cards).includes(companionId)))throw Error('隊友收藏尚未同步，稍後會重試本局結算。');
  const companion=companionId?SKILLS[companionId]:null;
  if(skillUsed&&(!companion||companion.kind==='bonus'))throw Error('主動技能紀錄不符，未有改動SC。');
  const reward=settleRun(result.hp,result.faction,companion).coins;
  if(result.coins!==reward||wallet.coins+reward>MAX_COINS)throw Error('結算金額不符，未有改動雲端SC。');
- const contract=evaluateContract(contractId,{completed,timeouts,hintsUsed,skillUsed,hp:result.hp});
- const progress=advanceProgress(wallet,{completed,companionId,contract});
+ const progress=advanceProgress(wallet,{completed,companionId});
  const ranked=!(skillUsed&&['clue','time'].includes(companion?.kind));
- return {wallet:{...wallet,...progress,coins:wallet.coins+reward,revision:wallet.revision+1},operation:{kind:'run',delta:reward,revision:wallet.revision+1,hp:result.hp,completed,companionId,contractId:contract?.id||'none',contractEarned:!!contract?.earned,timeouts,hintsUsed,skillUsed,ranked},contract};
+ return {wallet:{...wallet,...progress,coins:wallet.coins+reward,revision:wallet.revision+1},operation:{kind:'run',delta:reward,revision:wallet.revision+1,hp:result.hp,completed,companionId,contractId:'none',contractEarned:false,timeouts,hintsUsed,skillUsed,ranked}};
 }
 export function drawWallet(wallet,cards,cardId){
  validWallet(wallet);

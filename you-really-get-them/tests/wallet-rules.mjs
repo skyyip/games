@@ -49,8 +49,8 @@ test('direct balance edits, standalone ledger records and missing run receipts a
  const next=rewardWallet(emptyWallet(),receipt(),['m_1']);await assertFails(setDoc(doc(db,'users/owner/walletOps/run_12345678'),{...next.operation,createdAt:serverTimestamp()}));
  const batch=writeBatch(db);batch.set(walletRef(db),{...next.wallet,lastOperation:'run_12345678',updatedAt:serverTimestamp()});batch.set(doc(db,'users/owner/walletOps/run_12345678'),{...next.operation,createdAt:serverTimestamp()});await assertFails(batch.commit());
 });
-test('a legitimate settlement atomically credits the formula, one bond, one stamp and matching history',async()=>{
- const db=database();await seed(db);await assertSucceeds(commitRun(db));const wallet=(await getDoc(walletRef(db))).data();assert.equal(wallet.coins,300);assert.equal(wallet.bonds.m_1,1);assert.deepEqual(wallet.contracts,['on_time']);assert.equal((await getDoc(doc(db,'users/owner/runs/run_12345678'))).data().coins,300);
+test('a legitimate settlement atomically credits the formula, one bond, no new stamps and matching history',async()=>{
+ const db=database();await seed(db);await assertSucceeds(commitRun(db));const wallet=(await getDoc(walletRef(db))).data();assert.equal(wallet.coins,300);assert.equal(wallet.bonds.m_1,1);assert.deepEqual(wallet.contracts,[]);assert.equal((await getDoc(doc(db,'users/owner/runs/run_12345678'))).data().coins,300);
 });
 test('replaying a receipt, changing an old ledger entry, deleting a wallet or restoring zero are denied',async()=>{
  const db=database();await seed(db);await commitRun(db);await assertFails(commitRun(db));await assertFails(setDoc(doc(db,'users/owner/walletOps/run_12345678'),{kind:'draw'}));await assertFails(deleteDoc(doc(db,'users/owner/walletOps/run_12345678')));await assertFails(deleteDoc(walletRef(db)));await assertFails(setDoc(walletRef(db),{...emptyWallet(),updatedAt:serverTimestamp()}));assert.equal((await getDoc(walletRef(db))).data().coins,300);
@@ -79,7 +79,8 @@ test('a run cannot claim an unowned teammate or its stipend',async()=>{
 test('contract stamps must match the actual counters and cannot replace earlier stamps',async()=>{
  const db=database();await seed(db);
  for(const change of [{contractId:'on_time',timeouts:1},{contractId:'no_hint',hintsUsed:1},{contractId:'solo',skillUsed:true},{contractId:'healthy',result:{faction:'women',hp:29,correct:12,coins:158}}])await assertFails(commitRun(db,'run_12345678',receipt(change),s=>{s.op.contractEarned=true;s.wallet.contracts=[s.op.contractId]}));
- await commitRun(db);await assertFails(commitRun(db,'run_22345678',receipt({contractId:'no_hint'}),s=>{s.wallet.contracts=['no_hint']}));
+ await environment.withSecurityRulesDisabled(async context=>setDoc(doc(context.firestore(),'users/owner/wallet/main'),{...emptyWallet(),contracts:['healthy'],updatedAt:serverTimestamp()}));
+ await commitRun(db);assert.deepEqual((await getDoc(walletRef(db))).data().contracts,['healthy']);await assertFails(commitRun(db,'run_22345678',receipt({contractId:'no_hint'}),s=>{s.wallet.contracts=['no_hint']}));
 });
 test('draw writes debit and ownership together, validates the card and gives the exact duplicate refund',async()=>{
  const db=database();await seed(db,{coins:300});await assertSucceeds(commitDraw(db));assert.equal((await getDoc(walletRef(db))).data().coins,200);assert((await getDoc(doc(db,'users/owner'))).data().favoriteCards.includes('c_3'));

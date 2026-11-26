@@ -223,7 +223,7 @@ export async function settleCloudWallet(receipt,expectedUid){
   tx.set(walletRef,updatedWallet);tx.set(opRef,{...next.operation,createdAt:fs.serverTimestamp()});
   tx.set(fs.doc(db,'users',user.uid,'runs',receipt.id),{faction:result.faction,mode:'mixed',questionCount:12,dimensions:result.dimensions||null,survived:result.hp>0,hp:result.hp,coins:next.operation.delta,correct:result.correct,createdAt:fs.serverTimestamp()});
   if(board)tx.set(boardRef,{...board,updatedAt:fs.serverTimestamp()});
-  return {wallet:updatedWallet,cards,operation:next.operation,contract:next.contract,applied:true};
+  return {wallet:updatedWallet,cards,operation:next.operation,applied:true};
  });
 }
 export async function drawCloudWallet(pending,expectedUid){

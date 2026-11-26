@@ -1,4 +1,4 @@
-const CACHE='you-really-get-them-v63';
+const CACHE='you-really-get-them-v64';
 const FILES=[
   './','./index.html','./styles.css','./manifest.webmanifest',
   './src/app.js','./src/progression.js','./src/wallet-model.js','./src/story-events.js','./src/banter.js','./src/companions.js','./src/gacha.js','./src/settlement.js','./src/comedy.js','./src/picture-questions.js','./src/firebase/cloud.js','./src/firebase/wallet-transaction.js','./src/firebase/config.js','./src/questions.js','./src/audio.js','./src/storage.js','./src/poster/poster.js',

@@ -41,7 +41,7 @@ try{
   // Equipment persists after a genuine refresh.
   await page.reload();await page.waitForFunction(()=>document.querySelector('#authBtn').textContent==='登入');
   assert.equal(await page.locator('#equippedName').textContent(),'鋼鐵直男');checks++;
-  await page.locator('#companionPicker').click();await page.locator('#unequipCompanion').click();assert.equal((await stored(page)).equippedCard,null);await page.locator('#backBtn').click();await start(page);assert.equal(await page.locator('#companionBar').isVisible(),false);checks+=2;
+  await page.locator('#companionPicker').click();await page.locator('[data-card="m_1"] .card-open').click();await page.locator('[data-equip="m_1"]').click();assert.equal((await stored(page)).equippedCard,null);await page.locator('#backBtn').click();await start(page);assert.equal(await page.locator('#companionBar').isVisible(),false);checks+=2;
   await context.close();
  }
  {

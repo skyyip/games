@@ -88,7 +88,7 @@ try{
   assert.equal(await page.locator('.collect-card:not(.locked)').count(),180);
   assert.equal(await page.locator('#collectionCount').textContent(),'已收藏 180 / 180 張');
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).cards.length),180);
-  await page.waitForFunction(()=>document.querySelector('#walletStatus').textContent.includes('已同步'));await draw(page,0,0);
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')||'null')?.walletRevision>=0);await draw(page,0,0);
   const write=await page.evaluate(()=>__yrgtFirebase.writes.filter(w=>w.data.favoriteCards).at(-1));
   assert.equal(write.ref,'users/google-player');assert.deepEqual(write.data.favoriteCards,cards);assert.equal('coins' in write.data,false);
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).coins),225);checks+=7;

@@ -16,7 +16,7 @@ async function open(width=390,{fixture=false}={}){
  globalThis.economyQA={complete({value=100,completed=12,hintCount=0,used=false,timeouts=0}={}){hp=value;hints=2-hintCount;if(companionRun)companionRun.used=used;correct=completed-timeouts;classicCorrect=5;airScores=[28,28,28,28,28];runAnswers=Array.from({length:completed},(_,i)=>answerRecord(BANK[faction][i],{round:i+1,choice:i<timeouts?null:BANK[faction][i].correct,success:i>=timeouts}));return finish()},repeat:finish,context:()=>runContext};`})});
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.clock.install({time:new Date('2026-11-25T00:00:00Z')});await page.clock.pauseAt(new Date('2026-11-25T00:00:01Z'));await page.goto(base);await synced(page);return {context,page};
 }
-async function synced(page){await page.waitForFunction(()=>document.querySelector('#walletStatus').textContent==='帳戶SC已同步')}
+async function synced(page){await page.waitForFunction(()=>{const uid=localStorage.getItem('yrgt-last-account-v2'),data=JSON.parse(localStorage.getItem('yrgt-save-v2:'+uid)||'null');return data?.walletRevision>=0&&data.coins===__yrgtFirebase.documents['users/'+uid+'/wallet/main']?.coins})}
 async function state(page){return page.evaluate(uid=>JSON.parse(localStorage.getItem('yrgt-save-v2:'+uid)),owner)}
 async function backend(page){return page.evaluate(path=>__yrgtFirebase.documents[path],walletPath)}
 async function paid(page){await page.waitForFunction(()=>document.querySelector('#rewardSyncStatus').textContent.includes('已存入帳戶'));await synced(page)}
@@ -27,22 +27,22 @@ async function answer(page,q){
  await page.locator('#answers button').nth(choice).evaluate(button=>button.click());if(q.message)await page.locator('#sendMessageBtn').click();await page.locator('#nextQuestionBtn').click();
 }
 try{
- // Public flow: zero new account, real full run, contract stamp, then cloud-funded gacha.
+ // Public flow: zero new account, real full run, bonds without stamps, then cloud-funded gacha.
  for(const width of [320,390,1280]){
-  const {context,page}=await open(width);assert.equal(await page.locator('#walletCoins').textContent(),'0 SC');assert.equal((await backend(page)).coins,0);assert.equal(await page.evaluate(uid=>JSON.parse(localStorage.getItem('yrgt-save-v1:'+uid)).coins,owner),777);checks+=3;
-  await page.locator('#contractSelect').selectOption('no_hint');await page.locator('#startBtn').click();
+  const {context,page}=await open(width);assert.equal(await page.locator('#collectionCoins').textContent(),'0 SC');assert.equal((await backend(page)).coins,0);assert.equal(await page.evaluate(uid=>JSON.parse(localStorage.getItem('yrgt-save-v1:'+uid)).coins,owner),777);checks+=3;
+  await page.locator('#startBtn').click();
   for(let i=0;i<12;i++){const q=findPlayableQuestion(await page.locator('#questionText').textContent(),'women');assert(q);await answer(page,q)}
-  await page.locator('#result').waitFor({state:'visible'});await paid(page);assert.equal((await backend(page)).coins,300);assert.equal((await backend(page)).bonds.w_2,1);assert.deepEqual((await backend(page)).contracts,['no_hint']);assert((await page.locator('#progressResult').textContent()).includes('豬隊友今日放假'));assert.equal(await page.locator('#resultCoins').textContent(),'300 SC');checks+=5;await fits(page);
+  await page.locator('#result').waitFor({state:'visible'});await paid(page);assert.equal((await backend(page)).coins,300);assert.equal((await backend(page)).bonds.w_2,1);assert.deepEqual((await backend(page)).contracts,[]);assert(!(await page.locator('#progressResult').textContent()).includes('印章'));assert.equal(await page.locator('#resultCoins').textContent(),'300 SC');checks+=5;await fits(page);
   await page.screenshot({path:`/tmp/yrgt-contract-result-${width}.png`,fullPage:true,animations:'disabled'});
-  await page.reload();await synced(page);assert.equal(await page.locator('#walletCoins').textContent(),'300 SC');assert.equal((await backend(page)).bonds.w_2,1);checks+=2;
-  await page.locator('#companionPicker').click();assert((await page.locator('#legacyBalance').textContent()).includes('777'));assert((await page.locator('#bondProgress').textContent()).includes('1 / 3'));checks+=2;
+  await page.reload();await synced(page);assert.equal(await page.locator('#collectionCoins').textContent(),'300 SC');assert.equal((await backend(page)).bonds.w_2,1);checks+=2;
+  await page.locator('#companionPicker').click();assert.equal(await page.locator('#legacyBalance,.companion-selection').count(),0);await page.locator('[data-card="w_2"] .card-open').click();assert((await page.locator('.detail-bond').textContent()).includes('1 / 3'));await page.locator('#modalClose').click();checks+=2;
   const card=CARDS.find(c=>c.id==='c_3'),pool=CARDS.filter(c=>c.rarity===card.rarity),pick=(pool.indexOf(card)+.5)/pool.length;
   await page.evaluate(values=>{Math.random=()=>values.shift()??.5},[.99,pick]);await page.locator('#gachaShopDetails').evaluate(n=>n.open=true);await page.locator('#gachaDraw').click();await page.waitForFunction(path=>__yrgtFirebase.documents[path].coins===200,walletPath);await page.clock.runFor(10);await page.locator('.gacha-result').waitFor({state:'visible'});assert((await state(page)).cards.includes('c_3'));assert.equal((await state(page)).coins,200);assert.equal(await page.evaluate(uid=>JSON.parse(localStorage.getItem('yrgt-save-v1:'+uid)).coins,owner),777);checks+=3;await fits(page);await context.close();
  }
  if(process.env.YRGT_SOURCE_FIXTURES==='1'){
   // Offline reward survives refresh, then the same receipt is credited once on reconnect.
   {
-   const {context,page}=await open(390,{fixture:true});await page.locator('#contractSelect').selectOption('on_time');await page.locator('#startBtn').click();
+   const {context,page}=await open(390,{fixture:true});await page.locator('#startBtn').click();
    await page.evaluate(()=>{__yrgtFirebase.transactionError='unavailable';localStorage.setItem('yrgt-fixture-transaction-error','unavailable');window.dispatchEvent(new Event('offline'))});
    await page.evaluate(()=>economyQA.complete());await page.locator('#result').waitFor({state:'visible'});assert.equal((await backend(page)).coins,0);assert.equal((await state(page)).pendingRewards.length,1);assert((await page.locator('#rewardSyncStatus').textContent()).includes('待同步'));const id=(await state(page)).pendingRewards[0].id;checks+=3;
    await page.reload();await page.waitForFunction(()=>document.querySelector('#authBtn').textContent.startsWith('登出'));assert.equal((await state(page)).pendingRewards.length,1);assert.equal((await backend(page)).coins,0);await page.locator('#companionPicker').click();assert(await page.locator('#gachaDraw').isDisabled());checks+=3;
@@ -68,13 +68,13 @@ try{
    await page.locator('#startBtn').click();await page.locator('#companionUse').click();assert.equal(await page.locator('#questionText mark').count(),1);assert(await page.locator('#companionUse').isDisabled());assert.equal(await page.locator('.bond-skill-pop').count(),1);checks+=3;
    await page.locator('#quitBtn').click();await page.locator('#confirmQuit').click();assert.equal((await backend(page)).bonds.w_2,25);checks++;await context.close();
   }
-  // Contracts fail cosmetically, early death does not farm bonds, and repeat settlement cannot pay twice.
+  // Retired contracts never award, early death does not farm bonds, and repeat settlement cannot pay twice.
   {
-   const {context,page}=await open(390,{fixture:true});await page.locator('#contractSelect').selectOption('no_hint');await page.locator('#startBtn').click();await page.evaluate(()=>economyQA.complete({value:95,hintCount:1}));await paid(page);assert.equal((await backend(page)).coins,290);assert.deepEqual((await backend(page)).contracts,[]);assert((await page.locator('#progressResult').textContent()).includes('未達成'));checks+=3;
+   const {context,page}=await open(390,{fixture:true});await page.locator('#startBtn').click();await page.evaluate(()=>economyQA.complete({value:95,hintCount:1}));await paid(page);assert.equal((await backend(page)).coins,290);assert.deepEqual((await backend(page)).contracts,[]);assert(!(await page.locator('#progressResult').textContent()).includes('合約'));checks+=3;
    await page.evaluate(()=>economyQA.repeat());assert.equal((await backend(page)).coins,290);checks++;
    await page.locator('#againBtn').click();await page.evaluate(()=>economyQA.complete({value:0,completed:1}));await paid(page);assert.equal((await backend(page)).coins,300);assert.equal((await backend(page)).bonds.w_2,1);checks+=2;
-   await page.locator('#againBtn').click();await page.evaluate(()=>__yrgtFirebase.emit({uid:'other-player',displayName:'街坊乙',isAnonymous:false}));await synced(page);assert.equal(await page.locator('#game').isVisible(),false);assert.equal(await page.locator('#walletCoins').textContent(),'0 SC');assert.equal((await backend(page)).coins,300);checks+=3;
-   await page.evaluate(path=>{const w=__yrgtFirebase.documents[path];__yrgtFirebase.externalWrite(path,{...w,coins:700,revision:w.revision+1})},walletPath);assert.equal(await page.locator('#walletCoins').textContent(),'0 SC');checks++;await context.close();
+   await page.locator('#againBtn').click();await page.evaluate(()=>__yrgtFirebase.emit({uid:'other-player',displayName:'街坊乙',isAnonymous:false}));await synced(page);assert.equal(await page.locator('#game').isVisible(),false);assert.equal(await page.locator('#collectionCoins').textContent(),'0 SC');assert.equal((await backend(page)).coins,300);checks+=3;
+   await page.evaluate(path=>{const w=__yrgtFirebase.documents[path];__yrgtFirebase.externalWrite(path,{...w,coins:700,revision:w.revision+1})},walletPath);assert.equal(await page.locator('#collectionCoins').textContent(),'0 SC');checks++;await context.close();
   }
  }
  assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,viewports:3,legacyCoinsPreserved:true,cloudZeroStart:true,realFullRuns:3,sourceRecoveryCases:process.env.YRGT_SOURCE_FIXTURES==='1',pageErrors:errors.length}));

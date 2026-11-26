@@ -1,6 +1,8 @@
-# 180張卡、帳戶SC錢包、合約及羈絆所需的Firestore更新
+# 180張卡、帳戶SC錢包及羈絆所需的Firestore更新
 
-請先發布本版完整規則，再上傳網站。ZIP只包含網站檔案，不會自動發布Firebase規則。
+2026-11-26介面簡化版已移除求生合約；本次規則無變更，已發布180卡規則的網站無需再次發布。舊`contracts`資料原封保留作相容用途，新結算不再獲得印章。
+
+如尚未發布180卡規則，請先發布本版完整規則，再上傳網站。ZIP只包含網站檔案，不會自動發布Firebase規則。
 
 1. 開啟 [完整 firestore.rules](https://github.com/skyyip/games/blob/work/you-really-get-them/firestore.rules)，複製整份內容。
 2. Firebase Console選擇 **you-really-get-them** → **Firestore Database → Rules**。
@@ -10,7 +12,7 @@
 
 ## 資料位置與舊SC政策
 
-- 現行餘額、羈絆及合約：`users/{uid}/wallet/main`。
+- 現行餘額、羈絆及舊印章相容欄位：`users/{uid}/wallet/main`。
 - 結算／抽卡流水：`users/{uid}/walletOps/{operationId}`。
 - 對應戰績：`users/{uid}/runs/{operationId}`。
 - 收藏仍在`users/{uid}.favoriteCards`，容量沿用200，已包含180張收藏及新卡ID／津貼名單的更新。

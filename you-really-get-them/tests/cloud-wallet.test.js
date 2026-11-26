@@ -21,7 +21,7 @@ test('wallet starts at zero independently of legacy profile coins and adds the s
 test('same receipt submitted concurrently credits once, with history, bond, stamp and leaderboard in the same commit',async t=>{
  const {cloud,documents,state}=await setup(t);await cloud.initializeCloudWallet('owner');state.writes=[];
  const outcomes=await Promise.all([cloud.settleCloudWallet(receipt(),'owner'),cloud.settleCloudWallet(receipt(),'owner')]);
- assert.equal(outcomes.filter(result=>result.applied).length,1);assert.equal(documents['users/owner/wallet/main'].coins,300);assert.equal(documents['users/owner/wallet/main'].bonds.m_1,1);assert.deepEqual(documents['users/owner/wallet/main'].contracts,['on_time']);
+ assert.equal(outcomes.filter(result=>result.applied).length,1);assert.equal(documents['users/owner/wallet/main'].coins,300);assert.equal(documents['users/owner/wallet/main'].bonds.m_1,1);assert.deepEqual(documents['users/owner/wallet/main'].contracts,[]);
  assert.equal(documents['leaderboard/owner_women'].runs,1);assert.equal(documents['users/owner/runs/run_12345678'].coins,300);assert.equal(state.writes.filter(w=>w.ref==='users/owner/walletOps/run_12345678').length,1);
 });
 test('different device receipts accumulate without lost updates and a replay never repeats a bond level or reward',async t=>{

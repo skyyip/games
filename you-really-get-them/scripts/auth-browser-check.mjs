@@ -50,8 +50,8 @@ try{
     const {context,page}=await open();await login(page);await signedIn(page,'雲端玩家');
     assert.equal(await page.locator('#modal').evaluate(node=>node.open),false);
     assert.equal(await page.locator('#playerNameBtn').textContent(),'玩家：雲端玩家');
-    await page.waitForFunction(()=>document.querySelector('#walletStatus').textContent==='帳戶SC已同步');assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).cards),['w_1','c_1','m_1']);
-    await page.waitForFunction(()=>document.querySelector('#walletStatus').textContent==='帳戶SC已同步');assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).coins),0);checks+=4;
+    await page.waitForFunction(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')||'null')?.walletRevision>=0);assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).cards),['w_1','c_1','m_1']);
+    await page.waitForFunction(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')||'null')?.walletRevision>=0);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).coins),0);checks+=4;
     await page.reload();await signedIn(page,'雲端玩家');await context.close();
   }
   // A profile failure must neither log out the player nor overwrite favorites.
