@@ -4,7 +4,7 @@ import {QUESTIONS} from '../src/questions.js';
 import {QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
 const json=JSON.stringify,keys=new Map(QUESTIONS.map(q=>[q.id,q.answer]));
 export function rewardRules(){
- const prefixes=CULTURE_CARDS.reduce((out,c)=>{(out[c.series]??=[]).push(c.id);return out;},{});
+ const prefixes=CULTURE_CARDS.filter(c=>c.prefixRequired!==false).reduce((out,c)=>{(out[c.series]??=[]).push(c.id);return out;},{});
  const prefixCheck=Object.entries(prefixes).map(([id,ids])=>'(w.prefix=='+json(id)+'&&'+ids.map(key=>'w.cards.get('+json(key)+',0)>0').join('&&')+')').join('||');
  const placeholders={
   __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*10),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_UNIT__:String(RETRY_PRICE/10),

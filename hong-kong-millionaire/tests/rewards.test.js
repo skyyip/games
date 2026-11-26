@@ -104,3 +104,15 @@ test('daily offers are shared, bounded and reject stale or forged confirmation p
  assert.throws(()=>walletAction(profile,old,{type:'retry-ticket',day:DAY,price:1},DAY),/quote-expired/);
  assert.equal(walletAction(profile,old,{type:'retry-ticket',day:DAY,price:retryPrice(DAY)},DAY).spent,retryPrice(DAY));
 });
+
+test('expanding each existing series preserves its original six-card prefix entitlement',()=>{
+ assert.equal(CULTURE_CARDS.length,56);assert.equal(SERIES.length,7);
+ for(const series of SERIES){
+  const cards=CULTURE_CARDS.filter(c=>c.series===series.id),core=cards.filter(c=>c.prefixRequired!==false),extra=cards.filter(c=>c.prefixRequired===false);
+  assert.equal(cards.length,8);assert.equal(core.length,6);assert.equal(extra.length,2);assert.deepEqual(extra.map(c=>c.foil),[false,true]);
+  const wallet={...emptyWallet('p',0),cards:Object.fromEntries(core.map(c=>[c.id,1]))};
+  assert(unlockedPrefixes(wallet).some(s=>s.id===series.id));assert.equal(walletAction({total:0},wallet,{type:'equip',slot:'prefix',id:series.id},DAY).prefix,series.id);
+  const incomplete={...wallet,cards:{...wallet.cards,[core[0].id]:0,...Object.fromEntries(extra.map(c=>[c.id,1]))}};
+  assert(!unlockedPrefixes(incomplete).some(s=>s.id===series.id));
+ }
+});

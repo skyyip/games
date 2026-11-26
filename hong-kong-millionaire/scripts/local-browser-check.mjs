@@ -4,14 +4,15 @@ import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {LOCAL_QUESTIONS} from '../src/local-questions.js';
 import {NEIGHBOURHOOD_QUESTIONS} from '../src/neighbourhood-questions.js';
+import {FAMILIAR_QUESTIONS} from '../src/familiar-questions.js';
 import {DISTRICT_QUESTIONS} from '../src/district-questions.js';
-const bank=process.env.HKM_QUESTION_PACK==='district'?DISTRICT_QUESTIONS:process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
+const bank=process.env.HKM_QUESTION_PACK==='familiar'?FAMILIAR_QUESTIONS:process.env.HKM_QUESTION_PACK==='district'?DISTRICT_QUESTIONS:process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
 import {newRun,hkDay,questionId,act} from '../src/game.js';
 import {questionView} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL,KEY='qa.hkm.content-run',DAY=hkDay(Date.UTC(2026,10,26,4));
 const ids=new Set(bank.map(q=>q.id)),fixtures=new Map();
-for(let day=DAY;day<DAY+246;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!fixtures.has(id))fixtures.set(id,{day,index})}
+for(let day=DAY;day<DAY+266;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!fixtures.has(id))fixtures.set(id,{day,index})}
 assert.equal(fixtures.size,60);
 const browser=await chromium.launch({headless:true});let checks=0;const errors=[];
 try{

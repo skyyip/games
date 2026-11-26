@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import * as sdk from 'firebase/firestore';
 import * as feature from '../src/features-cloud.js';
-import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,walletAction} from '../src/economy.js';
+import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,walletAction,CULTURE_CARDS,SERIES,NORMAL_CARDS,FOIL_CARDS} from '../src/economy.js';
 import {newSession,sessionQuestion,ROOM_INTERVAL} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
 import {sessionClock} from '../src/session-clock.js';
@@ -32,6 +32,23 @@ try{
  const forgedBatch=sdk.writeBatch(pricing.db);forgedBatch.update(ref(pricing,'hkm_wallets','pricing'),{...forged,updatedAt:sdk.serverTimestamp()});forgedBatch.set(ref(pricing,'hkm_wallets','pricing','receipts',forgedId),{uid:'pricing',op:forged.op,item:forged.item,cost:retryPrice(hkDay())-1,revision:forged.revision,createdAt:sdk.serverTimestamp()});await no(forgedBatch.commit());
  const validTicket=crypto.randomUUID(),beforeTicket=priceState.balance;priceState=await ok(feature.shop(pricing,'pricing',{type:'retry-ticket',day:hkDay(),price:retryPrice(hkDay()),requestId:validTicket}));assert.equal(priceState.balance,beforeTicket-retryPrice(hkDay()));checks++;
  priceState=await ok(feature.shop(pricing,'pricing',{type:'retry-ticket',day:hkDay()-1,price:1,requestId:validTicket}));assert.equal(priceState.balance,beforeTicket-retryPrice(hkDay()));checks++;
+ // All fourteen additions are recognised by the independent server draw tables.
+ for(const card of CULTURE_CARDS.filter(card=>card.prefixRequired===false)){
+  const uid='card-'+card.id,cardsClient=await seed(uid);await ok(feature.wallet(cardsClient,uid));
+  const slot=card.foil?NORMAL_CARDS.length*10+FOIL_CARDS.indexOf(card.id):NORMAL_CARDS.indexOf(card.id)*10;
+  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{createdAt:sdk.Timestamp.fromMillis(slot)});});
+  const drawn=await ok(feature.shop(cardsClient,uid,{type:'draw',requestId:crypto.randomUUID()}));assert.equal(drawn.outcome,card.id);assert.equal(drawn.balance,1000000-DRAW_PRICE);checks+=2;
+ }
+ // Existing six-card entitlements remain equipable without either new card.
+ for(const series of SERIES){
+  const uid='prefix-'+series.id,client=await seed(uid);await ok(feature.wallet(client,uid));
+  const core=CULTURE_CARDS.filter(card=>card.series===series.id&&card.prefixRequired!==false),cards=Object.fromEntries(core.map(card=>[card.id,1]));
+  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards});});
+  const entitled=await ok(feature.shop(client,uid,{type:'equip',slot:'prefix',id:series.id,requestId:crypto.randomUUID()}));assert.equal(entitled.wallet.prefix,series.id);assert.equal(entitled.balance,1000000);checks+=2;
+  const extras=Object.fromEntries(CULTURE_CARDS.filter(card=>card.series===series.id&&card.prefixRequired===false).map(card=>[card.id,1]));
+  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:{...cards,...extras,[core[0].id]:0},prefix:''});});
+  const old=(await feature.wallet(client,uid)).wallet,id=crypto.randomUUID(),batch=sdk.writeBatch(client.db);batch.update(ref(client,'hkm_wallets',uid),{prefix:series.id,revision:old.revision+1,op:'equip',item:'prefix',receipt:id,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',id),{uid,op:'equip',item:'prefix',cost:0,revision:old.revision+1,createdAt:sdk.serverTimestamp()});await no(batch.commit());
+ }
  const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{cards:{'tram-foil':100},updatedAt:sdk.serverTimestamp()}));

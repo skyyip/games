@@ -47,9 +47,23 @@ const cards=[
  ["eggroll-workshop","crafts","手工蛋卷",false,"蛋漿烘成薄片後趁熱捲起，放涼後成為酥脆蛋卷。師傅手勢俐落，慢半拍就可能由蛋卷變碎餅。","https://www.wenweipo.com/a/202603/22/AP69bf4840e4b04d7d56d995d2.html"],
  ["neon-workshop","crafts","霓虹屈管",false,"霓虹光管製作及造型技藝，把玻璃管塑成街頭文字與圖案。欣賞光影，也記住招牌背後的匠人。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf"],
  ["paper-lion-foil","crafts","紙紮醒獅",true,"竹篾、紙張與彩繪組成傳統紮作的生動面貌。醒獅圖案是本遊戲原創演繹，不指特定派別或師傅作品。","https://www.icho.hk/tc/web/icho/home.html"],
- ["painted-porcelain-foil","crafts","廣彩瓷光",true,"廣彩在瓷器上繪飾彩色圖案，花鳥與金彩展現工藝心思；它不等同只用鈷藍線條裝飾的青花。","https://www.icho.hk/tc/web/icho/home.html"]
+ ["painted-porcelain-foil","crafts","廣彩瓷光",true,"廣彩在瓷器上繪飾彩色圖案，花鳥與金彩展現工藝心思；它不等同只用鈷藍線條裝飾的青花。","https://www.icho.hk/tc/web/icho/home.html"],
+ ["light-rail-car","transport","輕鐵月台",false,"黃色車身、月台與架空電線，記錄新界西北居民的日常節奏。插畫不代表特定車型或即時班次。","https://www.mtr.com.hk/ch/customer/services/light_rail_index.html",false],
+ ["peak-tram-foil","transport","山頂纜車斜陽",true,"斜坡上的纜車連起中環與山頂，自1888年起見證城市變化。卡面是原創情境，並非工程或車型圖。","https://www.thepeak.com.hk/zh-hant/heritage/history-of-the-peak-tram",false],
+ ["flower-cannon","heritage","花炮祝願",false,"傳統花炮會以裝飾精巧的花炮寄託社區祝願，背後連繫街坊協作及廟會文化。卡面描繪紙藝裝飾，不提供燃放示範。","https://www.icho.hk/tc/web/icho/home.html",false],
+ ["paper-windmill-foil","heritage","車公風車",true,"風車轉動的聲音，承載街坊祈求平安轉運的心意。閃光只是視覺效果，不保證運程或答題成功。","https://www.discoverhongkong.com/tc/explore/attractions/che-kung-temple.html",false],
+ ["siu-mai-skewer","snacks","街角燒賣",false,"蒸氣升起，一串黃皮魚肉燒賣配醬汁，就是熟悉的街頭小食時刻。各店配方不同，名稱不保證配料完全一樣。","https://www.discoverhongkong.com/tc/explore/dining.html",false],
+ ["red-bean-ice-foil","snacks","紅豆冰時光",true,"紅豆、奶與碎冰層層堆起，長匙一拌，把冰室午後慢慢攪勻。卡面不含品牌或固定食譜。","https://www.discoverhongkong.com/tc/explore/dining.html",false],
+ ["shoe-repair-stall","streets","街坊補鞋檔",false,"鞋楦、線軸與磨亮的工具，留住小店師傅修補日常的手勢。一雙舊鞋多走一程，亦多留一段街坊故事。","https://www.icho.hk/tc/web/icho/home.html",false],
+ ["letter-writer-foil","streets","代客寫信",true,"紙筆、信封與小桌子，記錄昔日代客寫信及填表的街頭服務。插畫是歷史情境，不代表今天仍在營業的店檔。","https://www.hkmemory.hk/tc/",false],
+ ["typhoon-shelter","harbour","銅鑼灣避風塘",false,"密密泊下的船隻與防波堤，讓繁華市區旁留住水上生活的畫面。插畫不作泊船或惡劣天氣航行指引。","https://www.mardep.gov.hk/tc/pub_services/npocguide.html",false],
+ ["lei-yue-mun-foil","harbour","鯉魚門夜潮",true,"狹窄海峽兩岸的燈火，連起渡船、石礦與漁港的城市記憶。卡面為原創海岸夜景，不是指定店舖實景。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/lei-yue-mun.html",false],
+ ["kat-hing-courtyard","villages","吉慶圍庭院",false,"錦田吉慶圍以圍牆、村門與聚落歷史聞名。圖中庭院是文化情境演繹，不作私人村屋或建築測繪用途。","https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Kat+Hing+Wai",false],
+ ["mui-wo-silvermine-foil","villages","梅窩銀礦灣",true,"梅窩海灣、碼頭與山巒，讓離島日常多了一份慢步調。昔日銀礦與今日海邊生活，共用同一段地方記憶。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/mui-wo.html",false],
+ ["scissor-repair","crafts","磨剪手藝",false,"磨石、剪刀與熟練手勢，記錄傳統磨剪服務。圖案只作文化收藏，並非刀具操作或維修教學。","https://www.icho.hk/tc/web/icho/home.html",false],
+ ["dough-figurine-foil","crafts","麵塑小人物",true,"小小麵糰在手中變成繽紛人物，捏、搓、點、壓都藏着師傅眼力。角色為原創，不仿照真人或影視人物。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf",false]
 ];
-export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source])=>Object.freeze({id,series,name,foil,story,source})));
+export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
 export const GEAR=Object.freeze([
  {id:'frame-rwb',kind:'frame',name:'紅白藍膠袋框',price:20000,description:'紅白藍條紋，帶住街坊回憶上榜。'},
  {id:'frame-neon',kind:'frame',name:'霓虹燈招牌框',price:100000,description:'柔和霓虹光暈；減少動態效果設定下保持靜態。'},
@@ -79,7 +93,7 @@ export const FOIL_CARDS=Object.freeze(CULTURE_CARDS.filter(c=>c.foil).map(c=>c.i
 export const cardById=id=>CULTURE_CARDS.find(c=>c.id===id);
 export const gearById=id=>GEAR.find(c=>c.id===id);
 export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wallet?.bonus??0)-(wallet?.spent??0));
-export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
+export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id&&c.prefixRequired!==false).every(c=>(wallet?.cards?.[c.id]??0)>0));
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
 export const isWeekend=(day=hkDay())=>[0,6].includes((day+4)%7);
 export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,retryBoughtDay:-1,retryUsedDay:-1,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}

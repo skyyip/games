@@ -1,4 +1,4 @@
-import {retryPrice} from '../src/economy.js';
+import {CULTURE_CARDS,SERIES,retryPrice} from '../src/economy.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath,pathToFileURL} from 'node:url';
@@ -19,7 +19,7 @@ async function open(uid,width=390,height=844,entry=null,skew=0){
  await page.goto(base,{waitUntil:'networkidle'});await page.addScriptTag({type:'module',url:harness});await page.waitForFunction(()=>!document.querySelector('#google-login').disabled);return {c,page,harness};
 }
 try{
- const owner=qa.person('fresh');owner.w.owned=['frame-ferry','theme-island'];owner.w.frame='frame-ferry';owner.w.theme='theme-island';owner.w.cards['peng-chau-lane']=1;
+ const owner=qa.person('fresh');owner.w.owned=['frame-ferry','theme-island'];owner.w.frame='frame-ferry';owner.w.theme='theme-island';owner.w.cards=Object.fromEntries(CULTURE_CARDS.filter(card=>card.prefixRequired!==false).map(card=>[card.id,1]));owner.w.prefix='villages';
  for(const width of [320,390,1280]){
   const {c,page,harness}=await open('fresh',width,900);
   const restored=()=>page.waitForFunction(()=>document.documentElement.dataset.hkmTheme==='theme-island'&&document.body.dataset.hkmFrame==='frame-ferry');
@@ -27,7 +27,7 @@ try{
   await page.reload({waitUntil:'networkidle'});await page.addScriptTag({type:'module',url:harness});await restored();await page.screenshot({path:'/tmp/hkm-collection-restored-'+width+'.png',fullPage:true});checks++;
   await page.locator('#lobby-collection').click();await page.locator('[data-tab=cards]').click();
   await page.locator('.culture-face img').evaluateAll(images=>Promise.all(images.map(i=>{i.loading='eager';return i.decode();})));
-  assert.equal(await page.locator('.culture-tile').count(),42);assert.equal(await page.locator('.card-series').count(),7);checks+=2;
+  assert.equal(await page.locator('.culture-tile').count(),56);assert.equal(await page.locator('.card-series').count(),7);assert.deepEqual(await page.locator('.card-series .culture-grid').evaluateAll(nodes=>nodes.map(n=>n.children.length)),Array(7).fill(8));assert(await page.locator('.card-series button').filter({hasText:'使用【叮叮地膽】前綴'}).isEnabled());checks+=4;
   await page.locator('.culture-tile').filter({hasText:'坪洲小巷'}).click();await page.locator('#culture-card-dialog').waitFor({state:'visible'});
   const bounds=await page.evaluate(()=>{const dialog=document.querySelector('#culture-card-dialog'),button=dialog.querySelector('.close-button').getBoundingClientRect(),face=dialog.querySelector('.culture-face').getBoundingClientRect(),container=dialog.getBoundingClientRect();return {separate:button.bottom<=face.top,right:Math.abs(dialog.querySelector('.detail-toolbar').getBoundingClientRect().right-button.right),width:button.width,height:button.height,overflow:dialog.scrollWidth>dialog.clientWidth};});
   assert(bounds.separate,JSON.stringify(bounds));assert(bounds.right<1,JSON.stringify(bounds));assert(bounds.width>=44&&bounds.height>=44);assert(!bounds.overflow);checks+=4;
@@ -37,6 +37,7 @@ try{
   await page.screenshot({path:'/tmp/hkm-collection-gear-'+width+'.png',fullPage:true});await page.locator('#collection-dialog .close-button').click();
   assert.equal(qa.dailyRuns.size,0);assert(!calls.some(v=>v.name==='claimDaily'));checks+=2;await c.close();
  }
+ qa.person('prefix').w.cards=Object.fromEntries(CULTURE_CARDS.filter(card=>card.series==='transport'&&card.prefixRequired!==false).map(card=>[card.id,1]));const prefix=await open('prefix');await prefix.page.locator('#lobby-collection').click();await prefix.page.locator('[data-tab=cards]').click();await prefix.page.getByRole('button',{name:'使用【叮叮地膽】前綴',exact:true}).click();await prefix.page.locator('#shop-confirm-buy').click();await prefix.page.waitForFunction(()=>!document.querySelector('#shop-refresh').disabled);assert.equal(qa.person('prefix').w.prefix,'transport');assert.equal(qa.person('prefix').w.spent,0);checks+=2;await prefix.c.close();
  const other=await open('another');await other.page.waitForFunction(()=>document.documentElement.dataset.hkmTheme==='default'&&document.body.dataset.hkmFrame==='none');assert.equal(qa.person('fresh').w.theme,'theme-island');checks+=2;await other.c.close();
  const {c,page,harness}=await open('shop');await page.locator('#lobby-collection').click();await page.locator('[data-tab=tickets]').click();
  assert.equal(await page.locator('.original-price').textContent(),'$100,000');assert.equal(await page.locator('.daily-discount').textContent(),'今日'+(retryPrice(hkDay(qa.now))/10000)+'折');checks+=2;
@@ -48,5 +49,5 @@ try{
  assert.equal(qa.state('shop').balance,balance-retryPrice(hkDay(qa.now)));assert(await page.getByRole('button',{name:'今天已購買',exact:true}).isDisabled());checks+=2;
  const receipt=qa.person('shop').w.receipt,paid=qa.person('shop').w.spent;await qa.rpc('shop','shop',[{type:'retry-ticket',requestId:receipt,day:hkDay(qa.now)-1,price:1}]);assert.equal(qa.person('shop').w.spent,paid);checks++;
  await page.reload({waitUntil:'networkidle'});await page.evaluate(now=>{testNow=now;qaServerNow=now;},qa.now);await page.addScriptTag({type:'module',url:harness});await page.locator('#lobby-collection').click();await page.locator('[data-tab=tickets]').click();assert(await page.getByRole('button',{name:'今天已購買',exact:true}).isDisabled());checks++;
- await c.close();const stale=await open('expired');await stale.page.locator('#lobby-collection').click();await stale.page.locator('[data-tab=tickets]').click();await stale.page.getByRole('button',{name:'購買今天再挑戰券',exact:true}).click();qa.now+=86400000;await stale.page.locator('#shop-confirm-buy').click();await stale.page.waitForFunction(()=>document.querySelector('#shop-status').textContent.includes('quote-expired'));assert.equal(qa.person('expired').w.spent,0);assert(await stale.page.locator('#shop-recover').isHidden());assert.equal(await stale.page.evaluate(()=>localStorage.getItem('sky.hkm.shop.pending.expired')),null);checks+=3;await stale.c.close();assert.deepEqual(errors,[]);console.log('Collection browser: '+checks+' checks passed: refresh, account separation, 42 cards, 20 cosmetics, separate close button and midnight discount confirmation.');
+ await c.close();const stale=await open('expired');await stale.page.locator('#lobby-collection').click();await stale.page.locator('[data-tab=tickets]').click();await stale.page.getByRole('button',{name:'購買今天再挑戰券',exact:true}).click();qa.now+=86400000;await stale.page.locator('#shop-confirm-buy').click();await stale.page.waitForFunction(()=>document.querySelector('#shop-status').textContent.includes('quote-expired'));assert.equal(qa.person('expired').w.spent,0);assert(await stale.page.locator('#shop-recover').isHidden());assert.equal(await stale.page.evaluate(()=>localStorage.getItem('sky.hkm.shop.pending.expired')),null);checks+=3;await stale.c.close();assert.deepEqual(errors,[]);console.log('Collection browser: '+checks+' checks passed: refresh, account separation, 56 cards, 20 cosmetics, separate close button and midnight discount confirmation.');
 }finally{await browser.close();}
