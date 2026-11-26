@@ -60,6 +60,7 @@ try{
   await no(sdk.updateDoc(ref(people[0],'hkm_rooms',id),{entryFee:1000,updatedAt:sdk.serverTimestamp()}));
   if(count===4){const fifth=await seed('fifth');await assert.rejects(feature.joinRoom(fifth,'fifth',id),/room-full/);checks++;}
   await ok(feature.startRoom(people[0],uids[0],id));
+  await no(sdk.updateDoc(ref(people[0],'hkm_rooms',id),{status:'cancelled',updatedAt:sdk.serverTimestamp()}));
   const beforeLaunch=(await sdk.getDoc(ref(people[0],'hkm_rooms',id))).data();
   const runs=await Promise.all(people.map((person,i)=>ok(feature.startSession(person,uids[i],{kind:'room',room:id}))));
   assert(runs.every(r=>r.roomMode==='async'&&r.questionAt>=beforeLaunch.startedAt.toMillis()&&r.deadlineAt===Math.floor(beforeLaunch.startedAt.toMillis())+86400000));checks++;
@@ -98,11 +99,11 @@ try{
  await env.withSecurityRulesDisabled(async ctx=>{const stamp=new sdk.Timestamp(Math.floor(Date.now()/1000)-30,123456000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',clockId,'sessions','clockHost'),{questionAt:stamp});});
  clockRun=await ok(feature.moveSession(clockHost,'clockHost',clockRun,{type:'next'}));const raw=(await sdk.getDoc(ref(clockHost,'hkm_rooms',clockId,'sessions','clockHost'))).data();assert(raw.questionAt.toMillis()>Date.now()-5000);assert.equal(clockRun.index,1);checks+=2;
  await no(sdk.updateDoc(ref(clockGuest,'hkm_rooms',clockId),{feeShare:0,updatedAt:sdk.serverTimestamp()}));
- // Resume a finished room with an expired private session without replaying ten timeouts.
+ // Resume a room past its 24-hour deadline without replaying ten timeouts.
  const staleHost=await seed('staleHost'),staleGuest=await seed('staleGuest'),staleId=await ok(feature.createRoom(staleHost,'staleHost',{entryFee:1000}));
  await ok(feature.joinRoom(staleGuest,'staleGuest',staleId));await ok(feature.startRoom(staleHost,'staleHost',staleId));
  const staleRun=await ok(feature.startSession(staleHost,'staleHost',{kind:'room',room:staleId}));
- await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-400000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId,'sessions','staleHost'),{questionAt:stamp,deadlineAt:sdk.Timestamp.fromMillis(Date.now()-1000)});});
+ await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.fromMillis(Date.now()-86401000);await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId),{startedAt:stamp});await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_rooms',staleId,'sessions','staleHost'),{questionAt:stamp,deadlineAt:sdk.Timestamp.fromMillis(stamp.toMillis()+86400000)});});
  const recovered=await ok(feature.resumeSession(staleHost,'staleHost',staleRun));assert.equal(recovered.phase,'finished');assert.equal(recovered.correct,0);assert.equal((await feature.wallet(staleHost,'staleHost')).wallet.activeSession,'');checks+=3;
  // A late participant starts from their own server time while the shared deadline stays immutable.
  const asyncHost=await seed('asyncHost'),asyncGuest=await seed('asyncGuest'),asyncId=await ok(feature.createRoom(asyncHost,'asyncHost',{entryFee:1000}));

@@ -230,7 +230,7 @@ export function rewardRules(){
    return v.updatedAt==request.time&&(
     changed.hasOnly(['players','names','scores','pool','rebates','refunds','updatedAt'])&&v.players!=o.players?rrJoin(v,o,id):
     changed.hasOnly(['status','startedAt','feeShare','updatedAt'])&&v.status=='playing'?(o.status=='lobby'&&uid==o.hostUid&&o.players.size()>=2&&request.time<o.createdAt+duration.value(1,'h')&&v.startedAt==request.time&&v.feeShare==int(30000 / o.players.size())):
-    changed.hasOnly(['status','updatedAt'])&&v.status=='cancelled'?(o.status=='lobby'&&uid==o.hostUid):
+    changed.hasOnly(['status','updatedAt'])&&v.status=='cancelled'&&o.status=='lobby'?(uid==o.hostUid):
     changed.hasOnly(['scores','updatedAt'])?rrReport(v,o,id):
     o.status=='playing'&&changed.hasOnly(['status','winner','winnerOrder','updatedAt'])?(uid in o.players&&(rrAll(o)||request.time>=o.startedAt+duration.value(o.get('mode','live')=='async'?__ASYNC_SECONDS__:__ROOM_DEADLINE__,'s'))&&(v.status=='finished'?rrWinner(v,o):(v.status=='cancelled'&&v.winner==''&&v.winnerOrder==-1&&rrNone(o)))):
     rrPayment(v,o,id));
