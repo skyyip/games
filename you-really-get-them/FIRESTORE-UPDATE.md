@@ -1,4 +1,4 @@
-# 148張卡、帳戶SC錢包、合約及羈絆所需的Firestore更新
+# 164張卡、帳戶SC錢包、合約及羈絆所需的Firestore更新
 
 請先發布本版完整規則，再上傳網站。ZIP只包含網站檔案，不會自動發布Firebase規則。
 
@@ -13,7 +13,7 @@
 - 現行餘額、羈絆及合約：`users/{uid}/wallet/main`。
 - 結算／抽卡流水：`users/{uid}/walletOps/{operationId}`。
 - 對應戰績：`users/{uid}/runs/{operationId}`。
-- 收藏仍在`users/{uid}.favoriteCards`，容量沿用200，已包含148張收藏及新卡ID／津貼名單的更新。
+- 收藏仍在`users/{uid}.favoriteCards`，容量沿用200，已包含164張收藏及新卡ID／津貼名單的更新。
 - **新雲端錢包從0開始。舊SC完整留在原本機存檔，不匯入、不合併訪客或其他裝置餘額。** 帳戶快取改用v2，原v1檔案保留。已擁有收藏可合併保存，不會把舊幣值當作新錢包餘額。
 
 ## 規則保護與操作方式

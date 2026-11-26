@@ -8,7 +8,7 @@ const base=process.env.YRGT_TEST_URL||'http://127.0.0.1:4173/';
 const browser=await chromium.launch({headless:true});let checks=0;const errors=[];
 const seed={coins:500,cards:['w_1','w_2','m_1','d_38','c_41'],equippedCard:'w_2',runs:3,bestHp:100,bonds:{w_2:2},contracts:[]};
 async function fit(page){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks++}
-async function focusCard(page,id){assert(await page.evaluate(id=>document.activeElement?.closest('.collect-card')?.dataset.card===id,id));checks++}
+async function focusCard(page,id){await page.waitForFunction(id=>document.activeElement?.closest('.collect-card')?.dataset.card===id,id);assert(await page.evaluate(id=>document.activeElement?.closest('.collect-card')?.dataset.card===id,id));checks++}
 async function reset(page){await page.locator('[data-collection-faction="all"]').click();await page.locator('#collectionOwnership').selectOption('all');await page.locator('#collectionRarity').selectOption('all');await page.locator('#collectionSearch').fill('')}
 try{
  for(const width of [320,390,1280]){
@@ -16,12 +16,12 @@ try{
   await context.addInitScript(installBrowserFirebaseFixture);await context.addInitScript(data=>localStorage.setItem('yrgt-save-v1:guest',JSON.stringify(data)),seed);
   await context.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'text/javascript',body:firebaseSDKSource}));
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.waitForFunction(()=>document.querySelector('#authBtn').textContent==='登入');await page.locator('#companionPicker').click();
-  assert.equal(await page.locator('.collect-card').count(),148);assert.equal(await page.locator('#gachaShopDetails').getAttribute('open'),null);assert(!(await page.locator('#gachaDraw').isVisible()));assert.equal(await page.locator('#collectionGrid [data-equip],#collectionGrid .card-skill,#collectionGrid small').count(),0);checks+=4;
+  assert.equal(await page.locator('.collect-card').count(),164);assert.equal(await page.locator('#gachaShopDetails').getAttribute('open'),null);assert(!(await page.locator('#gachaDraw').isVisible()));assert.equal(await page.locator('#collectionGrid [data-equip],#collectionGrid .card-skill,#collectionGrid small').count(),0);checks+=4;
   assert((await page.locator('[data-card="w_33"] figcaption').textContent()).includes('截圖宇宙存檔官'));assert((await page.locator('[data-card="w_33"] .card-open').getAttribute('aria-label')).includes('未收藏'));assert.equal(await page.locator('.is-equipped').count(),1);checks+=3;await fit(page);
   await page.screenshot({path:`/tmp/yrgt-collection-browser-${width}.png`,fullPage:false,animations:'disabled'});
   await page.locator('[data-collection-faction="dog"]').click();assert.equal(await page.locator('.collect-card').count(),CARDS.filter(c=>c.id.startsWith('d_')).length);assert.equal(await page.locator('.collection-faction').count(),1);checks+=2;
   await page.locator('#collectionOwnership').selectOption('owned');assert.equal(await page.locator('.collect-card').count(),1);await page.locator('#collectionRarity').selectOption('N');assert.equal(await page.locator('.collect-card').count(),1);await page.locator('#collectionRarity').selectOption('SSR');assert.equal(await page.locator('.collect-card').count(),0);assert(await page.locator('#collectionEmpty').isVisible());checks+=4;
-  await page.locator('#clearCollectionFilters').click();assert.equal(await page.locator('.collect-card').count(),148);assert(await page.locator('#collectionSearch').evaluate(n=>n===document.activeElement));checks+=2;
+  await page.locator('#clearCollectionFilters').click();assert.equal(await page.locator('.collect-card').count(),164);assert(await page.locator('#collectionSearch').evaluate(n=>n===document.activeElement));checks+=2;
   await page.locator('#collectionSearch').fill('截圖宇宙存檔官');assert.equal(await page.locator('.collect-card').count(),1);await page.locator('.card-open').click();assert.equal(await page.locator('#cardDetailTitle').textContent(),'截圖宇宙存檔官');assert.equal(await page.locator('#modal').getAttribute('aria-labelledby'),'cardDetailTitle');assert.equal(await page.locator('#modal [data-equip]').count(),0);checks+=4;await fit(page);await page.keyboard.press('Escape');await page.locator('#modal').waitFor({state:'hidden'});await focusCard(page,'w_33');
   await page.locator('#collectionSearch').fill('閘口資料重讀');assert.equal(await page.locator('.collect-card').count(),1);assert.equal(await page.locator('.collect-card').getAttribute('data-card'),'w_30');checks+=2;
   await reset(page);await page.locator('#collectionOwnership').selectOption('owned');assert.equal(await page.locator('.collect-card').count(),5);checks++;

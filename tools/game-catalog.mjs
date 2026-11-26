@@ -196,8 +196,8 @@ export const games = [
   {
     slug:'you-really-get-them',name:'Do You Really Get Them?',zh:'你真的懂他／她／牠嗎？',genre:'Quiz',players:[1,2],topic:'Relationship and Pet Understanding Quiz',guide:false,languages:['zh-Hant'],
     description:'Play a funny comic survival quiz about partners, friends and pets. Pick a faction, face twelve 30-second questions and protect your 100 HP, or try a five-question local duo test.',
-    intro:'A Traditional Chinese comic quiz with five factions. Normal runs contain twelve 30-second questions; the local duo test has five personal-preference questions. Collect 148 companion cards, earn cosmetic contract stamps and bond appearances, and export an incident poster. Signed-in SC, collections and cosmetic progress sync with Firebase; guest SC stays in this browser.',
-    chinese:'繁體中文漫畫求生問答，五個陣營帶你讀空氣。一般每局十二題、每題三十秒、初始100 HP；雙人互測五題，猜對方真正的偏好。收集148張拍立得隊友卡、合約印章及羈絆外觀，分享搞笑事故海報。登入帳戶可同步SC與收藏，訪客SC保存在本機。',
+    intro:'A Traditional Chinese comic quiz with five factions. Normal runs contain twelve 30-second questions; the local duo test has five personal-preference questions. Collect 164 companion cards, earn cosmetic contract stamps and bond appearances, and export an incident poster. Signed-in SC, collections and cosmetic progress sync with Firebase; guest SC stays in this browser.',
+    chinese:'繁體中文漫畫求生問答，五個陣營帶你讀空氣。一般每局十二題、每題三十秒、初始100 HP；雙人互測五題，猜對方真正的偏好。收集164張拍立得隊友卡、合約印章及羈絆外觀，分享搞笑事故海報。登入帳戶可同步SC與收藏，訪客SC保存在本機。',
     steps:['Choose a faction for a twelve-question run, or set five personal preferences for the local duo test.', 'Answer each 30-second question while protecting your 100 HP. Optional hints cost HP; active companion skills can be used once per run.', 'Review your incident poster, collect companion cards and earn cosmetic contract stamps and bond appearances. Signed-in SC and collection progress sync with Firebase; guest currency stays local.'],
     related:['memory-trace','line-up'],
   },

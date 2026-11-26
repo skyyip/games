@@ -23,7 +23,7 @@ try{
   await card.locator('a.card').click();await page.locator('#home h1').waitFor();assert((await page.title()).startsWith('你真的懂'));assert((await page.locator('meta[name=description]').getAttribute('content')).includes('十二題'));assert.equal(await page.locator('meta[property="og:locale"]').getAttribute('content'),'zh_TW');checks+=3;assert((await page.locator('#home h1').textContent()).includes('你真的懂'));assert((await page.locator('.hero-art').textContent()).includes('祝你生還'));assert.equal(await page.locator('.site-footer').textContent(),'© 關係求生研究所保持冷靜。盡量啦。');checks+=3;
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks++;
   if(width===390)await page.screenshot({path:'/tmp/yrgt-night-home-390.png',fullPage:true,animations:'disabled'});
-  await page.locator('#companionPicker').click();assert.equal(await page.locator('.collect-card').count(),148);checks++;
+  await page.locator('#companionPicker').click();assert.equal(await page.locator('.collect-card').count(),164);checks++;
   await page.goBack();await card.locator('h2').filter({hasText:'你真的懂'}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'zh-Hant');checks++;
   await context.close();
  }

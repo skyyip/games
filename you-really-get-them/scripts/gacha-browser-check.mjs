@@ -22,7 +22,7 @@ async function draw(page,tier,pick){await roll(page,tier,pick);await page.locato
 async function close(page){await page.locator('#keepGachaCard').click()}
 try{
  for(const width of [320,390,1280]){
-  const {context,page}=await open(width);assert.equal(await page.locator('.collect-card').count(),148);assert.equal(await page.locator('.gacha-shop .gacha-copy,.gacha-shop .gacha-odds,.gacha-shop details').count(),0);assert.equal(await page.locator('#gachaStatus').textContent(),'');checks++;
+  const {context,page}=await open(width);assert.equal(await page.locator('.collect-card').count(),164);assert.equal(await page.locator('.gacha-shop .gacha-copy,.gacha-shop .gacha-odds,.gacha-shop details').count(),0);assert.equal(await page.locator('#gachaStatus').textContent(),'');checks++;
   assert((await page.locator('#gachaDraw').textContent()).includes('100 SC'));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks+=4;
   const groups=await page.locator('.collection-faction').evaluateAll(nodes=>nodes.map(n=>({faction:n.dataset.cardFaction,ids:[...n.querySelectorAll('[data-card]')].map(c=>c.dataset.card)})));
   const order=['N','R','SR','SSR'];assert.deepEqual(groups.map(g=>g.faction),['women','men','dog','cat']);checks++;
@@ -30,7 +30,7 @@ try{
    assert.deepEqual(groups[i].ids,CARDS.filter(c=>c.id.startsWith(prefix)).sort((a,b)=>order.indexOf(a.rarity)-order.indexOf(b.rarity)).map(c=>c.id));checks++;
   }
   const urls=await page.locator('.flash-card-art').evaluateAll(nodes=>[...new Set(nodes.map(n=>getComputedStyle(n).backgroundImage.match(/url\(["']?(.*?)["']?\)/)[1]))]);
-  assert.equal(urls.length,13);await page.evaluate(async urls=>{await Promise.all(urls.map(async src=>{const image=new Image();image.src=src;await image.decode();if(!image.naturalWidth)throw Error(src)}))},urls);checks+=2;
+  assert.equal(urls.length,14);await page.evaluate(async urls=>{await Promise.all(urls.map(async src=>{const image=new Image();image.src=src;await image.decode();if(!image.naturalWidth)throw Error(src)}))},urls);checks+=2;
   const cases=[['N',0,0,'w_4'],['R',.57,pickCard('w_6'),'w_6'],['SR',.87,pickCard('w_7'),'w_7'],['SSR',.97,pickCard('c_7'),'c_7']];let balance=1000;
   for(const [rarity,tier,pick,id]of cases){
    await roll(page,tier,pick);await page.locator('#gachaShopDetails').evaluate(n=>n.open=true);await page.locator('#gachaDraw').click();balance-=100;
@@ -38,7 +38,7 @@ try{
    assert(await page.locator('#gachaDraw').isDisabled());assert.equal(await page.locator('#gachaMachine').getAttribute('aria-busy'),'true');
    await page.locator('#gachaDraw').dispatchEvent('click');assert.equal((await state(page)).coins,balance);checks+=7;
    await page.clock.runFor(1350);await page.locator('.gacha-result').waitFor({state:'visible'});
-   assert(await page.locator(`.gacha-result.rarity-${rarity.toLowerCase()}`).isVisible());assert((await page.locator('#collectionCount').textContent()).includes(`/ 148`));
+   assert(await page.locator(`.gacha-result.rarity-${rarity.toLowerCase()}`).isVisible());assert((await page.locator('#collectionCount').textContent()).includes(`/ 164`));
    const art=page.locator('#modal .flash-card-art');const finish=await art.evaluate(n=>({after:getComputedStyle(n,'::after').animationName,bg:getComputedStyle(n).backgroundImage,glow:getComputedStyle(n.closest('figure')).boxShadow}));
    assert(finish.bg.includes(rarity==='N'?'normal-color-0':'gacha-polaroids'));checks+=3;
    if(rarity==='N'){assert.equal(finish.after,'none');checks++}
@@ -61,16 +61,16 @@ try{
  }
  // Every new breed can actually be drawn and has the matching picture and name.
  {
-  const pets=CARDS.filter(c=>['pets','life','festival','weekend','bonus','metro','night','commute'].includes(c.atlas)),{context,page}=await open(390,{coins:12000,reducedMotion:'reduce'});
+  const pets=CARDS.filter(c=>['pets','life','festival','weekend','bonus','metro','night','commute','outing'].includes(c.atlas)),{context,page}=await open(390,{coins:13600,reducedMotion:'reduce'});
   const rolls={N:0,R:.57,SR:.87,SSR:.97};
   for(const [i,card]of pets.entries()){
    const pool=CARDS.filter(c=>c.rarity===card.rarity);await draw(page,rolls[card.rarity],(pool.findIndex(c=>c.id===card.id)+.5)/pool.length);
-   assert.equal(await page.locator('#modal figcaption').textContent(),card.name);assert((await page.locator('#modal .flash-card-art').evaluate(n=>getComputedStyle(n).backgroundImage)).includes(card.rarity==='N'?`normal-color-${Math.floor(CARDS.filter(c=>c.rarity==='N').findIndex(c=>c.id===card.id)/12)}`:card.atlas==='commute'?'commute-polaroids':card.atlas==='night'?'night-polaroids':card.atlas==='metro'?'metro-polaroids':card.atlas==='bonus'?'bonus-polaroids':card.atlas==='weekend'?'weekend-polaroids':card.atlas==='festival'?'festival-polaroids':card.atlas==='life'?'everyday-polaroids':'pet-breeds'));
+   assert.equal(await page.locator('#modal figcaption').textContent(),card.name);assert((await page.locator('#modal .flash-card-art').evaluate(n=>getComputedStyle(n).backgroundImage)).includes(card.atlas==='outing'?'outing-polaroids':card.rarity==='N'?`normal-color-${Math.floor(CARDS.filter(c=>c.rarity==='N').findIndex(c=>c.id===card.id)/12)}`:card.atlas==='commute'?'commute-polaroids':card.atlas==='night'?'night-polaroids':card.atlas==='metro'?'metro-polaroids':card.atlas==='bonus'?'bonus-polaroids':card.atlas==='weekend'?'weekend-polaroids':card.atlas==='festival'?'festival-polaroids':card.atlas==='life'?'everyday-polaroids':'pet-breeds'));
    if(card.atlas==='bonus'){
     const crop=await page.locator('#modal .flash-card-art').evaluate(n=>({size:getComputedStyle(n).backgroundSize,y:n.style.getPropertyValue('--art-y')}));
     assert.equal(crop.size,'400% 200%');assert.equal(crop.y,card.art<4?'0%':'100%');checks+=2;
    }
-   const save=await state(page);assert(save.cards.includes(card.id));assert.equal(save.coins,12000-(i+1)*100);checks+=4;
+   const save=await state(page);assert(save.cards.includes(card.id));assert.equal(save.coins,13600-(i+1)*100);checks+=4;
    if(i===pets.length-1)await page.locator('#modal').screenshot({path:'/tmp/yrgt-pet-SSR.png',animations:'disabled'});await close(page);
   }
   await context.close();
@@ -85,9 +85,9 @@ try{
   await page.locator('#actionMenu').evaluate(n=>n.open=true);await page.locator('#authBtn').click();await page.locator('#googleSignIn').click();
   await page.waitForFunction(()=>document.querySelector('#authBtn').textContent.startsWith('登出 · 完整收藏'));
   await page.locator('#actionMenu').evaluate(n=>n.open=true);await page.locator('#collectionBtn').click();
-  assert.equal(await page.locator('.collect-card:not(.locked)').count(),148);
-  assert.equal(await page.locator('#collectionCount').textContent(),'已收藏 148 / 148 張');
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).cards.length),148);
+  assert.equal(await page.locator('.collect-card:not(.locked)').count(),164);
+  assert.equal(await page.locator('#collectionCount').textContent(),'已收藏 164 / 164 張');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yrgt-save-v2:google-player')).cards.length),164);
   await page.waitForFunction(()=>document.querySelector('#walletStatus').textContent.includes('已同步'));await draw(page,0,0);
   const write=await page.evaluate(()=>__yrgtFirebase.writes.filter(w=>w.data.favoriteCards).at(-1));
   assert.equal(write.ref,'users/google-player');assert.deepEqual(write.data.favoriteCards,cards);assert.equal('coins' in write.data,false);
@@ -118,5 +118,5 @@ try{
   const {context,page}=await open(390,{coins:100});await page.evaluate(()=>{Storage.prototype.setItem=function(){throw new DOMException('blocked','QuotaExceededError')}});await roll(page,0,0);await page.locator('#gachaShopDetails').evaluate(n=>n.open=true);await page.locator('#gachaDraw').click();
   assert.equal((await state(page)).coins,100);assert.equal((await state(page)).cards.includes('w_4'),false);assert((await page.locator('#gachaStatus').textContent()).includes('未能儲存'));assert(await page.locator('#gachaDraw').isEnabled());checks+=4;await context.close();
  }
- assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,cards:148,newBreedDraws:16,newEverydayDraws:16,newFestivalDraws:16,newWeekendDraws:16,newBonusDraws:8,newMetroDraws:16,newNightDraws:16,newCommuteDraws:16,fullProfileSDKSync:true,factionRarityOrder:true,rarities:4,mobileWidths:[320,390],pointerHologram:true,atomicSave:true,reducedMotion:true,pageErrors:errors.length}));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,cards:164,newBreedDraws:16,newEverydayDraws:16,newFestivalDraws:16,newWeekendDraws:16,newBonusDraws:8,newMetroDraws:16,newNightDraws:16,newCommuteDraws:16,newOutingDraws:16,fullProfileSDKSync:true,factionRarityOrder:true,rarities:4,mobileWidths:[320,390],pointerHologram:true,atomicSave:true,reducedMotion:true,pageErrors:errors.length}));
 }finally{await browser.close()}

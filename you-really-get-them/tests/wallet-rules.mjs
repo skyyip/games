@@ -106,20 +106,20 @@ test('real concurrent draws against one balance cannot overdraw or award two car
  const outcomes=await Promise.allSettled([draw('draw_12345678','c_3'),draw('draw_22345678','w_3')]);assert.equal(outcomes.filter(r=>r.status==='fulfilled').length,1);assert.equal((await getDoc(walletRef(db))).data().coins,0);assert.equal((await getDoc(doc(db,'users/owner'))).data().favoriteCards.length,4);
 });
 
-test('all thirty-two night and commute cards can be bought with their matching names and normal debit',async()=>{
- const db=database();await seed(db,{coins:3200});
- for(const [i,card]of CARDS.filter(c=>['night','commute'].includes(c.atlas)).entries())await assertSucceeds(commitDraw(db,'draw_night_'+String(i).padStart(8,'0'),card.id));
+test('all forty-eight recent cards can be bought with their matching names and normal debit',async()=>{
+ const db=database();await seed(db,{coins:4800});
+ for(const [i,card]of CARDS.filter(c=>['night','commute','outing'].includes(c.atlas)).entries())await assertSucceeds(commitDraw(db,'draw_night_'+String(i).padStart(8,'0'),card.id));
  assert.equal((await getDoc(walletRef(db))).data().coins,0);
  const cards=(await getDoc(doc(db,'users/owner'))).data().favoriteCards;
- for(const card of CARDS.filter(c=>['night','commute'].includes(c.atlas)))assert(cards.includes(card.id));
+ for(const card of CARDS.filter(c=>['night','commute','outing'].includes(c.atlas)))assert(cards.includes(card.id));
 });
-test('night and commute teammates settle the unchanged reward and gain exactly one cosmetic bond',async()=>{
- const db=database(),cards=CARDS.filter(c=>['night','commute'].includes(c.atlas));await seed(db,{cards:cards.map(c=>c.id)});
+test('recent teammates settle the unchanged reward and gain exactly one cosmetic bond',async()=>{
+ const db=database(),cards=CARDS.filter(c=>['night','commute','outing'].includes(c.atlas));await seed(db,{cards:cards.map(c=>c.id)});
  let total=0;
  for(const [i,card]of cards.entries()){
   const amount=SKILLS[card.id].kind==='bonus'?320:300,payload=receipt({companionId:card.id,result:{faction:'women',hp:100,correct:12,coins:amount}}),id='run_night_'+String(i).padStart(8,'0');
   const before=(await getDoc(walletRef(db))).data(),next=rewardWallet(before,payload,cards.map(c=>c.id)),batch=writeBatch(db);
   batch.set(walletRef(db),{...next.wallet,lastOperation:id,updatedAt:serverTimestamp()});batch.set(doc(db,'users/owner/walletOps',id),{...next.operation,createdAt:serverTimestamp()});batch.set(doc(db,'users/owner/runs',id),{faction:'women',mode:'mixed',questionCount:12,dimensions:null,survived:true,hp:100,coins:amount,correct:12,createdAt:serverTimestamp()});await assertSucceeds(batch.commit());total+=amount;
  }
- const wallet=(await getDoc(walletRef(db))).data();assert.equal(wallet.coins,total);assert.deepEqual(Object.values(wallet.bonds),Array(32).fill(1));
+ const wallet=(await getDoc(walletRef(db))).data();assert.equal(wallet.coins,total);assert.deepEqual(Object.values(wallet.bonds),Array(48).fill(1));
 });

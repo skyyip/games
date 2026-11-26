@@ -153,7 +153,23 @@ export const SKILLS={
  "c_38":{"kind":"time","name":"鍵盤休眠五秒","quip":"鍵盤暫停代班，畀你自己諗五秒。"},
  "c_39":{"kind":"clue","name":"木箱入庫覆核","quip":"收貨前先對呢句，唔係見箱就簽。"},
  "c_40":{"kind":"bonus","name":"洗衣籃會費回贈","quip":"生還會員退二十SC，籃位照歸朕。"},
- "c_41":{"kind":"time","name":"彗星慢行通告","quip":"彗星都肯慢五秒，你都可以諗清楚。"}
+ "c_41":{"kind":"time","name":"彗星慢行通告","quip":"彗星都肯慢五秒，你都可以諗清楚。"},
+ "w_34":{"kind":"clue","name":"盒蓋尺寸對證","quip":"先核對呢句，唔好見個蓋就當啱。"},
+ "w_35":{"kind":"bonus","name":"手信找續基金","quip":"生還先找續，心意唔使貼運費。"},
+ "w_36":{"kind":"time","name":"輪班空檔五秒","quip":"下一更未開，個腦先抖五秒。"},
+ "w_37":{"kind":"clue","name":"星圖路牌重讀","quip":"星光再靚，都要先睇清楚呢句。"},
+ "m_34":{"kind":"time","name":"線材暫停糾纏","quip":"先鬆五秒，唔使連個腦都一齊打結。"},
+ "m_35":{"kind":"clue","name":"長櫈地標核對","quip":"先對呢個地標，唔使同個腦互相失散。"},
+ "m_36":{"kind":"bonus","name":"打撈收工津貼","quip":"豆腐救唔救到未知，生還二十SC照發。"},
+ "m_37":{"kind":"time","name":"宇宙停火五秒","quip":"停火五秒，答案仍然要你自己談。"},
+ "d_42":{"kind":"bonus","name":"雪路收工找續","quip":"雪路行完有命交更，二十SC畀你。"},
+ "d_43":{"kind":"time","name":"派件等候空檔","quip":"派件停五秒，思考唔使跟住吠。"},
+ "d_44":{"kind":"clue","name":"草地足跡覆核","quip":"線索喺呢度，唔使靠嗅覺亂估。"},
+ "d_45":{"kind":"bonus","name":"梳化星港停泊回贈","quip":"生還泊得穩，星港退二十SC。"},
+ "c_42":{"kind":"clue","name":"襪紋藏寶圖","quip":"先跟呢句走，唔使翻遍全屋襪。"},
+ "c_43":{"kind":"bonus","name":"窗台服務費退回","quip":"人類生還先退二十，咖啡唔包朕飲。"},
+ "c_44":{"kind":"time","name":"盆栽驗收空檔","quip":"驗收慢五秒，唔准急住伸爪。"},
+ "c_45":{"kind":"clue","name":"星霧觀景對焦","quip":"朕幫你對焦呢句，唔係對焦答案。"}
 };
 export function equippedCompanion(data){
  const card=CARDS.find(card=>card.id===data.equippedCard);

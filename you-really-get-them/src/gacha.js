@@ -154,7 +154,23 @@ export const CARDS=[
  {"id":"c_38","name":"曼島貓鍵盤代班","art":12,"atlas":"commute","rarity":"N","desc":"尾巴短唔影響氣場，回車鍵一樣可以按出九行驚嘆號"},
  {"id":"c_39","name":"沙特爾藍貓木箱掌櫃","art":13,"atlas":"commute","rarity":"R","desc":"灰藍毛配琥珀眼，木箱分店開張前先由屁股完成驗收"},
  {"id":"c_40","name":"美國剛毛貓洗衣籃會長","art":14,"atlas":"commute","rarity":"SR","desc":"毛比毛巾更有個性，仍堅持由牠決定哪堆衫值得一睡"},
- {"id":"c_41","name":"拉邦捲毛貓彗星旅人","art":15,"atlas":"commute","rarity":"SSR","desc":"一身鬈毛掠過星河，最後停在全宇宙最暖那塊墊上"}
+ {"id":"c_41","name":"拉邦捲毛貓彗星旅人","art":15,"atlas":"commute","rarity":"SSR","desc":"一身鬈毛掠過星河，最後停在全宇宙最暖那塊墊上"},
+ {"id":"w_34","name":"保鮮盒尋蓋員","art":0,"atlas":"outing","rarity":"N","desc":"盒有十二個，蓋有十五個，成功配對的暫時得兩對"},
+ {"id":"w_35","name":"手信分配協調員","art":1,"atlas":"outing","rarity":"R","desc":"每份心意都貼好記認，唯獨自己嗰包又差啲忘記留"},
+ {"id":"w_36","name":"家務輪班策劃師","art":2,"atlas":"outing","rarity":"SR","desc":"磁石在板上排得整齊，今日仍然有人想扮睇唔到垃圾桶"},
+ {"id":"w_37","name":"週末星圖守時官","art":3,"atlas":"outing","rarity":"SSR","desc":"可以畫出三條銀河路線，仍願意為一句想休息重新導航"},
+ {"id":"m_34","name":"電線收納實習生","art":4,"atlas":"outing","rarity":"N","desc":"只是想綁一條線，卻先發現六條線正在組織同學會"},
+ {"id":"m_35","name":"公園長櫈導航員","art":5,"atlas":"outing","rarity":"R","desc":"地圖標記三十個景點，真心推介的其實係有陰嗰張櫈"},
+ {"id":"m_36","name":"火鍋漏勺救援員","art":6,"atlas":"outing","rarity":"SR","desc":"每粒丸都有去向，失蹤豆腐由他負責打撈及公開道歉"},
+ {"id":"m_37","name":"零件宇宙外交官","art":7,"atlas":"outing","rarity":"SSR","desc":"負責協調小機械人停戰，第一條條款係別再踩住失蹤螺絲"},
+ {"id":"d_42","name":"阿拉斯加放工雪橇員","art":8,"atlas":"outing","rarity":"N","desc":"雪橇冇載人都行得好有使命感，到休息站就立即轉做毛毯"},
+ {"id":"d_43","name":"羅威納快遞旁聽員","art":9,"atlas":"outing","rarity":"R","desc":"每份件都想聞清楚，但簽收仍然堅持交返畀有拇指的人類"},
+ {"id":"d_44","name":"紅白雪達野餐偵察員","art":10,"atlas":"outing","rarity":"SR","desc":"草地、微風與野餐籃都巡過，最想匯報的仍然係散步路線"},
+ {"id":"d_45","name":"大丹犬梳化星航員","art":11,"atlas":"outing","rarity":"SSR","desc":"一坐落梳化，客廳太空站立即宣布進入大狗優先停泊時段"},
+ {"id":"c_42","name":"美國短尾貓襪子藏寶員","art":12,"atlas":"outing","rarity":"N","desc":"尾巴短一截，收藏襪子的版圖卻已經延伸到隔籬洗衣籃"},
+ {"id":"c_43","name":"緬甸貓窗台咖啡師","art":13,"atlas":"outing","rarity":"R","desc":"專業監督人類喝咖啡，自己堅持只飲乾淨清水"},
+ {"id":"c_44","name":"歐西貓盆栽監察員","art":14,"atlas":"outing","rarity":"SR","desc":"不負責澆水，只負責確認你每次搬花盆都有留返通道"},
+ {"id":"c_45","name":"澳洲霧貓陽台星霧館長","art":15,"atlas":"outing","rarity":"SSR","desc":"星霧再多都先關好防護窗，安全看銀河先係真正識享受"}
 ];
 export function rollRarity(value){
  if(value<.57)return 'N';
