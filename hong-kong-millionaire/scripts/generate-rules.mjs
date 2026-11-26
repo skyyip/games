@@ -6,7 +6,7 @@ import {COLLECTIONS as C} from '../src/schema.js';
 const pools=QUESTION_PLANS[BANK_VERSION],json=JSON.stringify,answers=new Map(QUESTIONS.map(q=>[q.id,q.answer]));
 const choose=values=>`tier == 0 ? ${values[0]} : tier == 1 ? ${values[1]} : ${values[2]}`;
 const slots=choose(pools.map((p,i)=>`(day*${p.dayStep}+(index%5)*${p.slotStep}+${i*11})%${p.ids.length}`));
-const ids=choose(pools.map(p=>json(p.ids))),keys=choose(pools.map(p=>json(p.ids.map(id=>answers.get(id)))));
+const ids=choose(pools.map(p=>json(p.ids))),keys=choose(pools.map(p=>json(p.ids.map(id=>answers.get(id)).join(','))));
 const source=`rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
@@ -19,13 +19,13 @@ service cloud.firestore {
   function result(uid,day) { let id=uid+'_'+string(day); return /databases/$(database)/documents/${C.results}/$(id); }
   function rank(uid) { return /databases/$(database)/documents/${C.rankings}/$(uid); }
   function season(uid,s) { let id=uid+'_'+s; return /databases/$(database)/documents/${C.seasons}/$(id); }
-  // Evaluate one tier only. A full-bank answer map exceeded the 1,000-expression budget.
+  // Evaluate one tier only; packed answer strings keep large pools below the expression budget.
   function question(day,index) {
    let tier=int(index / 5);
    let slot=${slots};
    let ids=${ids};
-   let answers=${keys};
-   return [ids[slot],answers[slot]];
+   let answers=(${keys}).split(',');
+   return [ids[slot],int(answers[slot])];
   }
   function prize(n) { return n==0?0:${json(PRIZES)}[n-1]; }
   function floorPrize(n) { return n>=10?60000:n>=5?8000:0; }

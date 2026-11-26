@@ -9,7 +9,7 @@ export function rewardRules(){
  const placeholders={
   __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*10),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_UNIT__:String(RETRY_PRICE/10),
   __RETRY_POOL_IDS__: [1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids)).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
-  __RETRY_POOL_KEYS__:[1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids.map(id=>keys.get(id)))).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
+  __RETRY_POOL_KEYS__:[1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids.map(id=>keys.get(id)).join(','))).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
   __GEAR_PRICE__:json(Object.fromEntries(GEAR.map(g=>[g.id,g.price]))),
   __COMMON__:json(NORMAL_CARDS),__FOIL__:json(FOIL_CARDS),
   __PREFIX_CHECK__:prefixCheck,
@@ -122,9 +122,9 @@ export function rewardRules(){
    let slot=(seed*17+index*stride)%ids.size();return [ids[slot],answers[slot]];
   }
   function rsRetryQuestion(r){
-   let tier=int(r.index / 5);let ids=__RETRY_POOL_IDS__;let answers=__RETRY_POOL_KEYS__;
+   let tier=int(r.index / 5);let ids=__RETRY_POOL_IDS__;let answers=(__RETRY_POOL_KEYS__).split(',');
    let offset=5+(r.seed%int((ids.size()-5) / 5))*5;
-   let slot=(r.day*__RETRY_DAYSTEP__[tier]+(offset+r.index%5)*__RETRY_SLOTSTEP__[tier]+tier*11)%ids.size();return [ids[slot],answers[slot]];
+   let slot=(r.day*__RETRY_DAYSTEP__[tier]+(offset+r.index%5)*__RETRY_SLOTSTEP__[tier]+tier*11)%ids.size();return [ids[slot],int(answers[slot])];
   }
   function rsQuestion(r){
    return r.kind=='room'?(r.topic=='all'?question(r.seed,r.index<3?r.index:r.index<7?r.index+2:r.index+3):rsRoomQuestion(r.seed,r.index,r.topic))

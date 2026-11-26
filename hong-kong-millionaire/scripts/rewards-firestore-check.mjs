@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import * as sdk from 'firebase/firestore';
 import * as feature from '../src/features-cloud.js';
-import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,walletAction,CULTURE_CARDS,SERIES,NORMAL_CARDS,FOIL_CARDS} from '../src/economy.js';
+import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,walletAction,CULTURE_CARDS,SERIES,NORMAL_CARDS,FOIL_CARDS,GEAR} from '../src/economy.js';
 import {newSession,sessionQuestion,ROOM_INTERVAL} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
 import {sessionClock} from '../src/session-clock.js';
@@ -13,7 +13,7 @@ let checks=0;
 const context=uid=>({...sdk,db:env.authenticatedContext(uid).firestore()});
 const ref=(c,...p)=>sdk.doc(c.db,...p);
 async function seed(uid,total=1000000){await env.withSecurityRulesDisabled(async ctx=>{const stamp=sdk.Timestamp.now();await sdk.setDoc(sdk.doc(ctx.firestore(),'hkm_players',uid),{uid,displayName:'街坊'+uid,total,bestPrize:1000000,games:1,titles:['ordinary','neighbour','expert','peak','millionaire'],unlocked:[],wrong:[],favourites:[],activeDay:null,activeKind:'daily',lastSettledDay:null,createdAt:stamp,updatedAt:stamp});});return context(uid);}
-const ok=async p=>{const r=await assertSucceeds(p);checks++;return r;},no=async p=>{await assertFails(p);checks++;};
+const ok=async p=>{const at=new Error().stack;try{const r=await assertSucceeds(p);checks++;return r;}catch(error){console.error('Rules operation failed after '+checks+' checks\n'+at);throw error;}},no=async p=>{await assertFails(p);checks++;};
 try{
  await env.clearFirestore();
  // Economic prices and ownership are enforced by the real rules, independently of UI quotes.
@@ -48,6 +48,14 @@ try{
   const extras=Object.fromEntries(CULTURE_CARDS.filter(card=>card.series===series.id&&card.prefixRequired===false).map(card=>[card.id,1]));
   await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:{...cards,...extras,[core[0].id]:0},prefix:''});});
   const old=(await feature.wallet(client,uid)).wallet,id=crypto.randomUUID(),batch=sdk.writeBatch(client.db);batch.update(ref(client,'hkm_wallets',uid),{prefix:series.id,revision:old.revision+1,op:'equip',item:'prefix',receipt:id,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',id),{uid,op:'equip',item:'prefix',cost:0,revision:old.revision+1,createdAt:sdk.serverTimestamp()});await no(batch.commit());
+ }
+ // New Hong Kong frames use their published price and require ownership before equip.
+ for(const id of ['frame-minibus','frame-dimsum','frame-bauhinia','frame-lion']){
+  const uid='new-'+id,client=await seed(uid),initial=await ok(feature.wallet(client,uid)),price=GEAR.find(g=>g.id===id).price;
+  await assert.rejects(feature.shop(client,uid,{type:'equip',slot:'frame',id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
+  const receipt=crypto.randomUUID(),next=walletAction(initial.profile,initial.wallet,{type:'buy',id,requestId:receipt});next.spent--;
+  const batch=sdk.writeBatch(client.db);batch.set(ref(client,'hkm_wallets',uid),{...next,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',receipt),{uid,op:'buy',item:id,cost:price-1,revision:next.revision,createdAt:sdk.serverTimestamp()});await no(batch.commit());
+  await ok(feature.shop(client,uid,{type:'buy',id,requestId:crypto.randomUUID()}));const equipped=await ok(feature.shop(client,uid,{type:'equip',slot:'frame',id,requestId:crypto.randomUUID()}));assert.equal(equipped.wallet.frame,id);assert.equal(equipped.balance,1000000-price);assert.equal(equipped.profile.total,1000000);checks+=3;
  }
  const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));

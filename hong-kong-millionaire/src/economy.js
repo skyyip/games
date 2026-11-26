@@ -61,7 +61,21 @@ const cards=[
  ["kat-hing-courtyard","villages","吉慶圍庭院",false,"錦田吉慶圍以圍牆、村門與聚落歷史聞名。圖中庭院是文化情境演繹，不作私人村屋或建築測繪用途。","https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Kat+Hing+Wai",false],
  ["mui-wo-silvermine-foil","villages","梅窩銀礦灣",true,"梅窩海灣、碼頭與山巒，讓離島日常多了一份慢步調。昔日銀礦與今日海邊生活，共用同一段地方記憶。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/mui-wo.html",false],
  ["scissor-repair","crafts","磨剪手藝",false,"磨石、剪刀與熟練手勢，記錄傳統磨剪服務。圖案只作文化收藏，並非刀具操作或維修教學。","https://www.icho.hk/tc/web/icho/home.html",false],
- ["dough-figurine-foil","crafts","麵塑小人物",true,"小小麵糰在手中變成繽紛人物，捏、搓、點、壓都藏着師傅眼力。角色為原創，不仿照真人或影視人物。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf",false]
+ ["dough-figurine-foil","crafts","麵塑小人物",true,"小小麵糰在手中變成繽紛人物，捏、搓、點、壓都藏着師傅眼力。角色為原創，不仿照真人或影視人物。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf",false],
+ ["cross-harbour-bus","transport","過海巴士日常",false,"車窗外的隧道入口，連起港九兩岸的返工路。插畫是文化情境，不代表特定路線、收費或現役車型。","https://www.td.gov.hk/tc/transport_in_hong_kong/public_transport/buses/index.html",false],
+ ["kai-tak-ferry-foil","transport","啟德碼頭海風",true,"啟德一帶的海濱與渡輪服務，記錄城市新舊岸線的相遇。卡面是文化情境演繹，非碼頭實景或航班資訊。","https://www.td.gov.hk/tc/transport_in_hong_kong/public_transport/ferries/service_details/",false],
+ ["hungry-ghost-theatre","heritage","盂蘭戲台",false,"紙紮、戲棚與街坊協力，構成潮籍盂蘭勝會的文化景象。插畫記錄社區傳統，不把信仰當作效果保證。","https://www.icho.hk/tc/web/icho/home.html",false],
+ ["hakka-unicorn-foil","heritage","坑口麒麟彩",true,"色彩鮮明的麒麟與鼓鑼，寄託西貢坑口客家社群的祝福。角色圖案是原創演繹，不仿照特定隊伍作品。","https://www.icho.hk/tc/web/icho/home.html",false],
+ ["sugar-onion-wrap","snacks","糖蔥餅小攤",false,"鬆脆糖蔥藏在薄餅皮裡，配上椰絲與芝麻，捲起一口懷舊。名字有蔥，實際主角卻是糖。","https://www.thinkhk.com/article/2019-11/01/37256.html",false],
+ ["pineapple-bun-foil","snacks","菠蘿油暖意",true,"酥皮菠蘿包夾上厚切牛油，讓冰室午後多了一份香氣。圖案是原創小食情境，各店配方與份量不同。","https://www.discoverhongkong.com/tc/explore/dining.html",false],
+ ["fruit-market-crates","streets","果欄木箱",false,"木箱、鮮果與熟練搬運的身影，記錄油麻地果欄的街頭節奏。卡面不指特定商戶或即時營業安排。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/yau-ma-tei.html",false],
+ ["night-dai-pai-dong-foil","streets","大牌檔鑊氣",true,"爐火、鐵枱與一碟即炒小菜，留住大牌檔的熱鬧氣氛。畫中攤檔是原創，不代表特定店家的牌照或菜單。","https://www.discoverhongkong.com/tc/explore/dining.html",false],
+ ["seafood-market","harbour","魚市場晨光",false,"清晨漁船靠岸，魚筐與忙碌身影接連海上與城市。插畫展現本地漁業生活，不提供食品處理或作業指引。","https://www.fmo.org.hk/",false],
+ ["star-ferry-rope-foil","harbour","碼頭船繩",true,"纜繩、木柱與小輪的水花，讓一次平常渡海也像值得收藏的片段。卡面不是船舶操作或繫泊示意。","https://www.starferry.com.hk/tc",false],
+ ["sha-tau-kok-lanterns","villages","沙頭角魚燈",false,"魚燈造型與街巷景色，記錄沙頭角社區的文化記憶。畫面為原創文化情境，不涉及邊境或開放安排。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/sha-tau-kok.html",false],
+ ["po-toi-shore-foil","villages","蒲台石岸",true,"花崗岩海岸、海浪與小小聚落，描繪蒲台島的海邊風景。欣賞景色亦要尊重居民與自然，圖案不作遠足路線指引。","https://www.discoverhongkong.com/tc/explore/great-outdoor/po-toi-island.html",false],
+ ["minibus-signwriting","crafts","小巴水牌",false,"一筆一畫的目的地水牌，把日常交通變成街頭字藝。卡面採原創抽象筆畫，不冒充師傅真跡或真實路線。","https://www.icho.hk/tc/web/icho/home.html",false],
+ ["wedding-embroidery-foil","crafts","裙褂金繡",true,"金銀線與紅色布面，縫出傳統裙褂的吉祥圖案。畫中繡工為原創演繹，不複製特定店家或匠人作品。","https://www.icho.hk/tc/web/icho/home.html",false]
 ];
 export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
 export const GEAR=Object.freeze([
@@ -84,7 +98,11 @@ export const GEAR=Object.freeze([
  {"id":"frame-tile","kind":"frame","name":"唐樓花磚框","price":90000,"description":"墨綠與橘紅花磚，將舊街樓梯的記憶帶上榜。"},
  {"id":"theme-village","kind":"theme","name":"圍村青磚風","price":140000,"description":"青磚、屋脊與榕樹剪影，配清晰淺色答題紙面。"},
  {"id":"theme-island","kind":"theme","name":"離島海風","price":170000,"description":"碼頭欄杆、小船與海藍色，留住慢一拍的島上日常。"},
- {"id":"theme-workshop","kind":"theme","name":"香港手作坊","price":130000,"description":"竹編、瓷彩與溫暖工枱色，展示純外觀的匠人風格。"}
+ {"id":"theme-workshop","kind":"theme","name":"香港手作坊","price":130000,"description":"竹編、瓷彩與溫暖工枱色，展示純外觀的匠人風格。"},
+ {"id":"frame-minibus","kind":"frame","name":"小巴水牌框","price":38000,"description":"紅綠水牌、窗角與手寫筆觸，帶住街坊節奏出場。"},
+ {"id":"frame-dimsum","kind":"frame","name":"茶樓蒸籠框","price":52000,"description":"竹蒸籠編紋與熱騰騰點心，把一盅兩件戴上頭像。"},
+ {"id":"frame-bauhinia","kind":"frame","name":"洋紫荊花框","price":75000,"description":"紫紅花瓣與葉脈環繞，留住香港街角的春色。"},
+ {"id":"frame-lion","kind":"frame","name":"醒獅彩繡框","price":110000,"description":"彩獅眉眼、繡紋與金線，醒目上榜但不增加答題能力。"}
 ]);
 const gearKindOrder={frame:0,theme:1,exit:2};
 export const DISPLAY_GEAR=Object.freeze([...GEAR].sort((a,b)=>gearKindOrder[a.kind]-gearKindOrder[b.kind]||a.price-b.price));
