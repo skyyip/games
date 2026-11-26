@@ -10,7 +10,8 @@ const ids=choose(pools.map(p=>json(p.ids))),keys=choose(pools.map(p=>json(p.ids.
 const source=`rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
-  function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+  function signedPlayer() { return request.auth != null && request.auth.token.get('firebase',{}).get('sign_in_provider','custom') != 'anonymous'; }
+  function owner(uid) { return signedPlayer() && request.auth.uid == uid; }
   function today() { return int((request.time.toMillis()+28800000) / 86400000); }
   function seasonNow() { let t=request.time+duration.value(8,'h'); return string(t.year())+'-'+(t.month()<10?'0':'')+string(t.month()); }
   function player(uid) { return /databases/$(database)/documents/${C.players}/$(uid); }

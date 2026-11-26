@@ -26,7 +26,7 @@ function gameSchema(game) {
 
 const faqs = [
   ['What is Sky Playground?', 'Sky Playground is a collection of free browser games by Sky Yip, including solo arcade challenges, puzzles and local party games.'],
-  ['Do I need to download an app or create an account?', 'No account or app download is needed to play. Open a game in a modern browser and enable JavaScript.'],
+  ['Do I need to download an app or create an account?', 'No app download is needed. Most games need no account; Hong Kong Millionaire requires Google or email sign-in. Enable JavaScript to play.'],
   ['Which games can friends play together?', 'Tap & Spill, Line Up, Just a Sec, Memory Trace, Dice & Delight and Pocket Poker support 2–6 people sharing one device. Mahjong Match is for two players. These are local games, with no online matchmaking.'],
   ['Can I play on a phone or desktop?', 'The games work in modern phone and desktop browsers. Motion-based games provide alternative controls; Flick Force uses a touch swipe or mouse drag.'],
   ['Which languages are available?', 'Use 中 / EN on the playground to choose Traditional Chinese or English. The selection carries into the games.'],
@@ -38,8 +38,8 @@ const styles = `.game-guide{box-sizing:border-box;width:100%;max-width:860px;min
 function guide(game) {
   if (!game) return `<section class="game-guide" id="about-games" aria-labelledby="about-games-title" lang="en" translate="no">
   <h2 id="about-games-title">Free browser games for quick breaks and shared screens</h2>
-  <p>Sky Playground is a collection of free games by Sky Yip. Play solo arcade challenges and puzzles, or pass one device between friends for a local party game. No account or app download is needed.</p>
-  <p lang="zh-Hant">Sky Playground 是由 Sky Yip 製作的免費網頁小遊戲集。可獨自挑戰反應、記憶及平衡遊戲，亦可與朋友共用一部裝置輪流玩派對遊戲；毋須註冊帳戶或下載應用程式。</p>
+  <p>Sky Playground is a collection of free games by Sky Yip. Play solo arcade challenges and puzzles, or pass one device between friends for a local party game. Most games need no account; Hong Kong Millionaire requires sign-in. No app download is needed.</p>
+  <p lang="zh-Hant">Sky Playground 是由 Sky Yip 製作的免費網頁小遊戲集。可獨自挑戰反應、記憶及平衡遊戲，亦可與朋友共用一部裝置輪流玩派對遊戲。大部分遊戲免登入；香港百萬富翁須先登入或註冊，毋須下載應用程式。</p>
   <nav aria-label="Choose a browser game"><a href="grid-rush/">Quick solo game: Grid Rush</a> · <a href="marble-maze/">Tilt puzzle: Marble &amp; Mist</a> · <a href="dice-party/">2–6 player dice game: Dice &amp; Delight</a> · <a href="mahjong-match/">Two-player tile game: Mahjong Match</a></nav>
   <h2>Questions about playing</h2>
   ${faqs.map(([q, a]) => `<h3>${escape(q)}</h3>\n  <p>${escape(a)}</p>`).join('\n  ')}
@@ -64,7 +64,7 @@ export function applySeo(source, page) {
   const url = game ? gameUrl(game) : siteUrl;
   const chineseLanding = game?.slug === 'you-really-get-them';
   const title = chineseLanding ? `${game.zh}｜高血壓求生模擬器` : game ? `${game.name} — ${game.topic} | Sky Playground` : 'Free Browser Games & Local Party Games | Sky Playground';
-  const description = chineseLanding ? game.chinese : game?.description ?? 'Play free browser games at Sky Playground: quick solo challenges, puzzles and local party games for 2–6 players. No account or app download needed.';
+  const description = chineseLanding ? game.chinese : game?.description ?? 'Play free browser games at Sky Playground: quick solo challenges, puzzles and local party games for 2–6 players. No app download needed.';
   const graph = game ? [
     { '@type': 'WebPage', '@id': url + '#page', url, name: title, description, inLanguage: game.languages ?? ['en', 'zh-Hant'], mainEntity: { '@id': url + '#game' }, breadcrumb: { '@id': url + '#breadcrumbs' } },
     gameSchema(game),
@@ -124,7 +124,7 @@ export async function writeDiscovery(out) {
   const urls = [siteUrl, ...games.map(gameUrl)];
   await writeFile(resolve(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${escape(url)}</loc></url>`).join('\n')}\n</urlset>\n`);
   // Optional human-readable inventory; AI indexing does not require llms.txt.
-  await writeFile(resolve(out, 'llms.txt'), `# Sky Playground\n\n> Free browser games by Sky Yip. English and Traditional Chinese.\n\nCanonical collection: ${siteUrl}\nNo account or app download is needed. JavaScript is required to play.\nParty games use one shared device, without online matchmaking.\n\n## Games\n\n${games.filter(game => game.listed !== false).map(game => `- [${game.name}](${gameUrl(game)}): ${playerLabel(game)}. ${game.intro}`).join('\n')}\n`);
+  await writeFile(resolve(out, 'llms.txt'), `# Sky Playground\n\n> Free browser games by Sky Yip. English and Traditional Chinese.\n\nCanonical collection: ${siteUrl}\nNo app download is needed. Most games need no account; Hong Kong Millionaire requires Google or email sign-in. JavaScript is required to play.\nParty games use one shared device, without online matchmaking.\n\n## Games\n\n${games.filter(game => game.listed !== false).map(game => `- [${game.name}](${gameUrl(game)}): ${playerLabel(game)}. ${game.intro}`).join('\n')}\n`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

@@ -1,11 +1,12 @@
-// Public daily-quiz controls, seeded with ordinary guest save files; no production auth.
+import {installContentAccount} from './content-account-fixture.mjs';
+// Daily-quiz controls with a test-only authenticated account adapter; no production writes.
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {LOCAL_QUESTIONS as bank} from '../src/local-questions.js';
 import {newRun,hkDay,questionId,act} from '../src/game.js';
 import {questionView} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
-const base=process.env.HKM_TEST_URL,KEY='sky.hk-millionaire.today.v1',DAY=hkDay(Date.UTC(2026,10,26,4));
+const base=process.env.HKM_TEST_URL,KEY='qa.hkm.content-run',DAY=hkDay(Date.UTC(2026,10,26,4));
 const ids=new Set(bank.map(q=>q.id)),fixtures=new Map();
 for(let day=DAY;day<DAY+160;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!fixtures.has(id))fixtures.set(id,{day,index})}
 assert.equal(fixtures.size,60);
@@ -13,6 +14,7 @@ const browser=await chromium.launch({headless:true});let checks=0;const errors=[
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
  await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+ await installContentAccount(context,base);
  await context.addInitScript(()=>{globalThis.HK_MILLIONAIRE_FIREBASE_CONFIG=null;const Native=Date;globalThis.__localNow=Number(localStorage.getItem('qa.local.now'))||Native.now();globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[__localNow]))}static now(){return __localNow}}});
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base,{waitUntil:'networkidle'});
  async function seed(q,width){

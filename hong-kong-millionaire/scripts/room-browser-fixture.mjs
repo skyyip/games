@@ -1,12 +1,12 @@
 import {emptyWallet,walletAction,walletBalance,practiceReward,WEEKEND_LIMIT} from '../src/economy.js';
 import {newSession,sessionAct,sessionFinish,sessionTerminal,roomFeeShare,roomCanFinish,roomWinner,roomDeadline} from '../src/session-engine.js';
-import {hkDay,newRun} from '../src/game.js';
+import {hkDay,newRun,act} from '../src/game.js';
 export const adapter=String.raw`
 const call=(name,...args)=>globalThis.qaRPC(name,args),uid=globalThis.QA_UID;
 export const sessionNow=()=>globalThis.qaServerNow??Date.now(),sessionSafeNow=sessionNow;
 export const configured=true;export async function prepareAuth(){}export async function observeAuth(cb){await cb(uid?{uid,email:uid+'@example.test'}:null);return ()=>{};}
 export function googleLogin(){return {task:Promise.resolve(),popup:{dispose(){}}};}export async function logout(){}export async function emailLogin(){}export async function resetPassword(){}
-export const account=()=>call('account'),resumeAccount=()=>call('resumeAccount'),currentRun=()=>call('currentRun'),claimDaily=()=>call('claimDaily'),move=()=>call('dailyMove'),settle=()=>call('dailySettle'),saveName=account,favourite=account;
+export const account=()=>call('account'),resumeAccount=()=>call('resumeAccount'),currentRun=()=>call('currentRun'),claimDaily=()=>call('claimDaily'),move=(day,a)=>call('dailyMove',a),settle=(day,reason)=>call('dailySettle',reason),saveName=account,favourite=account;
 export const wallet=()=>call('wallet'),shop=a=>call('shop',a),publicStyles=a=>call('publicStyles',a),leaderboard=()=>call('leaderboard'),history=()=>call('history');
 export const activeSession=()=>call('activeSession'),getSession=d=>call('getSession',d),syncSessionClock=d=>call('syncSessionClock',d),startSession=d=>call('startSession',d),moveSession=(d,a,o)=>call('moveSession',d,a,o),settleSession=d=>call('settleSession',d);
 export const createRoom=d=>call('createRoom',d),getRoom=id=>call('getRoom',id),joinRoom=id=>call('joinRoom',id),startRoom=id=>call('startRoom',id),cancelRoom=id=>call('cancelRoom',id),claimRoom=id=>call('claimRoom',id),finaliseRoom=id=>call('finaliseRoom',id),myRooms=()=>call('myRooms');
@@ -16,14 +16,16 @@ export function errorText(e){return '連接暫時未完成：'+(e.message??e.cod
 `;
 const clone=o=>structuredClone(o);
 export class RoomFixture {
- constructor(){this.now=Date.UTC(2026,10,14,4);this.people=new Map();this.rooms=new Map();this.sessions=new Map();this.receipts=new Map();this.subscriptions=[];this.delayHost=false;this.failShop=false;}
+ constructor(){this.now=Date.UTC(2026,10,14,4);this.people=new Map();this.dailyRuns=new Map();this.rooms=new Map();this.sessions=new Map();this.receipts=new Map();this.subscriptions=[];this.delayHost=false;this.failShop=false;}
  person(uid){if(!this.people.has(uid))this.people.set(uid,{p:{uid,displayName:'街坊'+uid,total:3000000,bestPrize:1000000,games:3,titles:['ordinary','neighbour','expert','peak','millionaire'],unlocked:['e01'],wrong:['e01'],favourites:[],activeDay:null,lastSettledDay:null},w:emptyWallet(uid,this.now)});return this.people.get(uid);}
  key(uid,id){return uid+':'+id;}
  state(uid){const {p,w}=this.person(uid);return {profile:clone(p),wallet:clone(w),balance:walletBalance(p,w)};}
  broadcast(){for(const s of this.subscriptions){const value=s.type==='room'?this.rooms.get(s.d):this.sessions.get(this.key(s.uid,s.d.id));if(value)s.page.evaluate(({key,value})=>globalThis.qaStreams?.[key]?.(value),{key:s.key,value:clone(value)}).catch(()=>{});}}
  async rpc(uid,name,args){
  const person=this.person(uid),{p,w}=person,now=this.now;
- if(name==='account')return clone(p);if(name==='resumeAccount')return {profile:clone(p),run:null};if(name==='currentRun')return null;if(name==='wallet')return this.state(uid);
+ if(name==='claimDaily'){const run=this.dailyRuns.get(uid)??newRun(hkDay(now),now,uid);this.dailyRuns.set(uid,run);return clone(run);}
+ if(name==='dailyMove'||name==='dailySettle'){const run=this.dailyRuns.get(uid),next=act(run,name==='dailyMove'?args[0]:{type:args[0]==='walk'?'walk':'finish'},now);this.dailyRuns.set(uid,next);return clone(next);}
+ if(name==='account')return clone(p);if(name==='resumeAccount')return {profile:clone(p),run:clone(this.dailyRuns.get(uid)??null)};if(name==='currentRun')return clone(this.dailyRuns.get(uid)??null);if(name==='wallet')return this.state(uid);
  if(name==='shop'){const a=args[0];if(this.receipts.has(a.requestId))return {...this.state(uid),outcome:this.receipts.get(a.requestId)};person.w=walletAction(p,w,a,hkDay(now));this.receipts.set(a.requestId,person.w.item);if(this.failShop){this.failShop=false;throw Error('unavailable');}return {...this.state(uid),outcome:person.w.item};}
  if(name==='publicStyles')return Object.fromEntries(args[0].map(u=>[u,{frame:this.person(u).w.frame,prefix:this.person(u).w.prefix}]));
  if(name==='leaderboard')return this.boardRows??[{uid,displayName:p.displayName,prize:1000000,timeMs:10000,lifelinesLeft:3,total:p.total,games:3}];

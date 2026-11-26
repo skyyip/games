@@ -98,3 +98,5 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 @media(max-width:620px){.lobby-facts>div{grid-template-columns:25px minmax(0,1fr);gap:4px 5px}.lobby-facts [data-icon]>.hk-icon{width:25px;height:25px}}
 
 .answer-letter{flex:none;font-weight:700;line-height:inherit}.answer-text{min-width:0}.option>span:last-child{min-width:0}
+
+.room-seat.is-winner{background:#fff0a6;border:3px solid #806017}.winner-name{display:inline-block;background:#ffe36b;color:#253d32;font-weight:900;padding:.12em .4em;border-radius:5px;overflow-wrap:anywhere}.room-seat.is-winner .winner-name{font-size:inherit}

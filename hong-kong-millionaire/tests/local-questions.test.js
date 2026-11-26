@@ -9,7 +9,7 @@ const DAY=20783,ids=new Set(LOCAL_QUESTIONS.map(q=>q.id));
 test('sixty local scenarios append unique, sourced, mobile-sized questions with balanced answer positions',()=>{
  assert.equal(LOCAL_QUESTIONS.length,60);assert.deepEqual(QUESTIONS.slice(-60),LOCAL_QUESTIONS);
  assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,QUESTIONS.length);
- assert.deepEqual([1,2,3].map(t=>LOCAL_QUESTIONS.filter(q=>q.tier===t).length),[20,20,20]);
+ assert.deepEqual([1,2,3].map(t=>LOCAL_QUESTIONS.filter(q=>q.tier===t).length),[20,37,3]);
  assert.deepEqual([0,1,2,3].map(a=>LOCAL_QUESTIONS.filter(q=>q.answer===a).length),[15,15,15,15]);
  for(const [i,q]of LOCAL_QUESTIONS.entries()){
   assert.equal(q.id,'l'+String(i+1).padStart(2,'0'));assert(Object.isFrozen(q)&&Object.isFrozen(q.options));

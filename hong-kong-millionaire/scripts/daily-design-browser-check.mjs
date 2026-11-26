@@ -1,3 +1,4 @@
+import {installContentAccount} from './content-account-fixture.mjs';
 import {questionView} from '../src/question-view.js';
 // Real built pages and all 60 new question records; Firebase is deliberately disabled here.
 import assert from 'node:assert/strict';
@@ -7,7 +8,7 @@ import {DAILY_DESIGN_QUESTIONS} from '../src/daily-design-questions.js';
 import {newRun,act,hkDay,questionId,questionFor,presentation,DAY_MS,HK_OFFSET} from '../src/game.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL||'http://127.0.0.1:5447/games/hong-kong-millionaire/';
-const built=process.env.HKM_BUILD_DIR||'/tmp/games-built-daily-design',KEY='sky.hk-millionaire.today.v1',DAY=hkDay(Date.UTC(2026,10,15,4));
+const built=process.env.HKM_BUILD_DIR||'/tmp/games-built-daily-design',KEY='qa.hkm.content-run',DAY=hkDay(Date.UTC(2026,10,15,4));
 const manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8'));
 const browser=await chromium.launch({headless:true}),errors=[],badResponses=[];let checks=0;
 function planned(day,index,version){
@@ -18,6 +19,7 @@ function planned(day,index,version){
 try{
  const c=await browser.newContext({viewport:{width:390,height:900},serviceWorkers:'block'});
  await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+ await installContentAccount(c,base);
  await c.addInitScript(()=>{
   globalThis.HK_MILLIONAIRE_FIREBASE_CONFIG=null;const Native=Date;globalThis.__dailyNow=Number(localStorage.getItem('qa.daily.now'))||Native.now();
   globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[globalThis.__dailyNow]));}static now(){return globalThis.__dailyNow;}};

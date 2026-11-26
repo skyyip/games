@@ -1,3 +1,4 @@
+import {installContentAccount} from './content-account-fixture.mjs';
 // The retained street knowledge bank now uses full illustrations and one stable question.
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {pathToFileURL} from 'node:url';
 import {STREET_OBSERVATION_QUESTIONS as bank} from '../src/street-observation-questions.js';
@@ -5,12 +6,13 @@ import {QUESTIONS} from '../src/questions.js';
 import {newRun,hkDay,questionId,presentation,questionFor,act} from '../src/game.js';
 import {questionView,visualModes} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE)),base=process.env.HKM_TEST_URL,built=process.env.HKM_BUILD_DIR;
-const manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8')),DAY=hkDay(Date.UTC(2026,10,16,4)),KEY='sky.hk-millionaire.today.v1';
+const manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8')),DAY=hkDay(Date.UTC(2026,10,16,4)),KEY='qa.hkm.content-run';
 const fixtures=new Map(),newIds=new Set(bank.map(q=>q.id));for(let day=DAY;day<DAY+1500;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(newIds.has(id)){const key=id+':'+presentation(day,index).mode;if(!fixtures.has(key))fixtures.set(key,{day,index});}}
 const browser=await chromium.launch({headless:true}),errors=[];let checks=0;
 try{
  const c=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
  await c.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+ await installContentAccount(c,base);
  await c.addInitScript(()=>{globalThis.HK_MILLIONAIRE_FIREBASE_CONFIG=null;const Native=Date;globalThis.__visualNow=Number(localStorage.getItem('qa.visual.now'))||Native.now();globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[__visualNow]));}static now(){return __visualNow;}};});
  const page=await c.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base,{waitUntil:'networkidle'});
  async function seed(q,mode,width=390,height=844){const match=fixtures.get(q.id+':'+mode);assert(match,q.id+' '+mode);const now=match.day*86400000+4*3600000,run={...newRun(match.day,now),index:match.index,correct:match.index};

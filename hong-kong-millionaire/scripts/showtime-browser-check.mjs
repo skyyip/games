@@ -1,15 +1,17 @@
+import {installContentAccount} from './content-account-fixture.mjs';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {newRun,hkDay,questionFor,questionId} from '../src/game.js';
 import {questionView} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
-const base=process.env.HKM_TEST_URL,KEY='sky.hk-millionaire.today.v1',NOW=Date.UTC(2026,10,22,4);
+const base=process.env.HKM_TEST_URL,KEY='qa.hkm.content-run',NOW=Date.UTC(2026,10,22,4);
 const browser=await chromium.launch({headless:true}),errors=[];let checks=0;
 const check=(value,message)=>{assert(value,message);checks++;};
 async function open(width=390,height=844,reducedMotion='no-preference'){
  const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',reducedMotion});
  await context.addInitScript(now=>{globalThis.HK_MILLIONAIRE_FIREBASE_CONFIG=null;globalThis.__showNow=Number(localStorage.getItem('qa.show.now'))||now;const Native=Date;globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[globalThis.__showNow]));}static now(){return globalThis.__showNow;}};const NativeContext=window.AudioContext;if(NativeContext)window.AudioContext=class extends NativeContext{constructor(...args){super(...args);globalThis.__audioContext=this;}createOscillator(){globalThis.__tones=(globalThis.__tones??0)+1;return super.createOscillator();}};Object.defineProperty(navigator,'clipboard',{value:{writeText:async t=>{globalThis.__share=t;}}});},NOW);
  await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+ await installContentAccount(context,base);
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base,{waitUntil:'networkidle'});return {context,page};
 }
 async function seed(page,{index=0,day=hkDay(NOW)}={}){const now=day*86400000+4*3600000,r={...newRun(day,now),index,correct:index};await page.evaluate(({run,key,now})=>{localStorage.setItem(key,JSON.stringify({day:run.day,owner:'guest',token:'showtime-qa',revision:1,run}));localStorage.setItem('qa.show.now',now);},{run:r,key:KEY,now});await page.reload({waitUntil:'networkidle'});await page.locator('#start').click();await page.locator('#game-screen').waitFor({state:'visible'});return r;}
@@ -17,7 +19,7 @@ try{
  const {context,page}=await open();
  check(await page.locator('.friend-picker,#friend-current-note,[name=show-friend],#sensory-dialog,[data-practice]').count()===0,'Partner and hidden practice controls are not installed');
  check(!(await page.locator('#lobby').innerText()).match(/街頭認圖|模糊|鏡像|今晚拍檔/),'Removed gameplay is absent from the lobby');
- await page.locator('#lobby-arcade').click();await page.locator('#account-dialog').waitFor({state:'visible'});check(await page.locator('#sensory-dialog').count()===0,'Guest arcade entry does not reopen hidden practice');await page.locator('[data-close="account-dialog"]').last().click();
+ await page.locator('#lobby-arcade').click();await page.locator('#arcade-dialog').waitFor({state:'visible'});check(await page.locator('#sensory-dialog').count()===0,'Signed-in arcade entry does not reopen hidden practice');await page.locator('#arcade-dialog .close-button').click();
  await page.locator('#show-settings summary').click();await page.locator('#show-sound').check();await page.locator('#start').click();await page.waitForFunction(()=>document.body.dataset.showStage==='warm');await page.waitForFunction(()=>globalThis.__tones>0);check(await page.evaluate(()=>__audioContext.state)==='running','Actual Web Audio remains available');
  const original=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).run.questionAt,KEY);await page.locator('#life-phone').click();await page.locator('#phone-dialog').waitFor({state:'visible'});check((await page.locator('#phone-title').textContent()).includes('香港地膽'),'Phone uses a generic helper');check((await page.locator('#phone-hint').textContent()).length>8,'Phone still supplies the factual hint');await page.locator('[data-close="phone-dialog"]').last().click();
  await page.reload({waitUntil:'networkidle'});await page.locator('#start').click();check(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).run.questionAt,KEY)===original,'Reload and hints do not reset the 30-second deadline');check(await page.locator('#timer').textContent()==='30','Daily starts with 30 seconds');

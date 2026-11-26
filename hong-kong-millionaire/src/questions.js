@@ -1460,7 +1460,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h01",
-    "tier": 3,
+    "tier": 2,
     "category": "郊遊",
     "question": "麥理浩徑官方分為多少段？",
     "explanation": "麥理浩徑全長約100公里，官方分為10段；每段長度及難度並不相同。",
@@ -1484,7 +1484,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h02",
-    "tier": 3,
+    "tier": 2,
     "category": "郊遊",
     "question": "港島徑官方分為多少段？",
     "explanation": "港島徑全長約50公里，官方分為8段，其中第8段包含龍脊一帶。",
@@ -1508,7 +1508,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h03",
-    "tier": 3,
+    "tier": 2,
     "category": "郊遊",
     "question": "鳳凰徑官方分為多少段？",
     "explanation": "鳳凰徑全長約70公里，官方分為12段，路線主要在大嶼山。",
@@ -1532,7 +1532,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h04",
-    "tier": 3,
+    "tier": 2,
     "category": "郊遊",
     "question": "衛奕信徑官方分為多少段？",
     "explanation": "衛奕信徑全長約78公里，官方分為10段，橫跨香港島與新界。",
@@ -1568,10 +1568,10 @@ export const CORE_QUESTIONS=Object.freeze([
     },
     "options": [
       "土地灣至大浪灣",
-      "赤柱峽道至黃泥涌水塘",
-      "北潭涌至浪茄",
-      "伯公坳至昂坪"
-    ],
+      "大潭道至土地灣",
+      "柏架山道至大潭道",
+      "黃泥涌峽至柏架山道"
+],
     "answer": 0,
     "focus": {
       "x": 55,
@@ -1593,9 +1593,9 @@ export const CORE_QUESTIONS=Object.freeze([
     "options": [
       "浪茄至北潭凹",
       "北潭涌至浪茄",
-      "伯公坳至昂坪",
-      "土地灣至大浪灣"
-    ],
+      "北潭凹至企嶺下",
+      "企嶺下至大老山"
+],
     "answer": 1,
     "focus": {
       "x": 55,
@@ -1616,10 +1616,10 @@ export const CORE_QUESTIONS=Object.freeze([
     },
     "options": [
       "北潭涌至浪茄",
-      "石梨貝水塘至城門水塘",
+      "北潭凹至企嶺下",
       "浪茄至北潭凹",
-      "土地灣至大浪灣"
-    ],
+      "企嶺下至大老山"
+],
     "answer": 2,
     "focus": {
       "x": 55,
@@ -1639,11 +1639,11 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.afcd.gov.hk/tc_chi/"
     },
     "options": [
-      "北潭涌至浪茄",
-      "伯公坳至昂坪",
-      "大埔頭至九龍坑山",
+      "陽明山莊至鰂魚涌",
+      "藍田至井欄樹",
+      "井欄樹至沙田坳",
       "赤柱峽道至黃泥涌水塘"
-    ],
+],
     "answer": 3,
     "focus": {
       "x": 55,
@@ -1664,10 +1664,10 @@ export const CORE_QUESTIONS=Object.freeze([
     },
     "options": [
       "伯公坳至昂坪",
-      "土地灣至大浪灣",
-      "赤柱峽道至黃泥涌水塘",
-      "北潭涌至浪茄"
-    ],
+      "南山至伯公坳",
+      "昂坪至深屈道",
+      "梅窩至南山"
+],
     "answer": 0,
     "focus": {
       "x": 50,
@@ -1676,7 +1676,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h10",
-    "tier": 3,
+    "tier": 2,
     "category": "郊遊",
     "question": "伯公坳主要位於哪兩座大嶼山山峰之間？",
     "explanation": "伯公坳是大嶼山鳳凰山與大東山之間的重要山坳。",
@@ -1711,11 +1711,11 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.afcd.gov.hk/tc_chi/"
     },
     "options": [
-      "港島冰川與九龍沙漠",
-      "長洲石灰洞與坪洲活火山",
+      "西貢沉積岩與新界東北火山岩",
+      "西貢花崗岩與新界東北石灰岩",
       "西貢火山岩與新界東北沉積岩",
-      "大澳鹽湖與旺角花崗岩林"
-    ],
+      "西貢火山岩與新界西北沉積岩"
+],
     "answer": 2,
     "focus": {
       "x": 55,
@@ -1724,7 +1724,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h12",
-    "tier": 3,
+    "tier": 2,
     "category": "歷史",
     "question": "尖沙咀鐘樓原本屬於哪一個鐵路設施？",
     "explanation": "鐘樓是前九廣鐵路尖沙咀總站的遺存，見證九龍鐵路及海旁的變遷。",
@@ -1748,7 +1748,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h13",
-    "tier": 3,
+    "tier": 2,
     "category": "文化",
     "question": "香港茶具文物館設於哪一個公園內？",
     "explanation": "茶具文物館設於香港公園內的旗桿屋，展示茶具及中國飲茶文化。",
@@ -1783,11 +1783,11 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.amo.gov.hk/tc/"
     },
     "options": [
-      "舊天星碼頭",
+      "舊細菌學研究所附屬宿舍",
       "舊病理學院",
-      "舊中央郵政局",
-      "舊皇后戲院"
-    ],
+      "舊精神病院",
+      "舊維多利亞醫院產科大樓"
+],
     "answer": 1,
     "focus": {
       "x": 50,
@@ -1796,7 +1796,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h15",
-    "tier": 3,
+    "tier": 2,
     "category": "歷史",
     "question": "聚星樓位於香港哪一條著名文物徑沿線？",
     "explanation": "聚星樓位於元朗屏山，是屏山文物徑沿線的重要古蹟。",
@@ -1831,11 +1831,11 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.amo.gov.hk/tc/"
     },
     "options": [
-      "流浮山",
+      "錦田",
       "八鄉",
-      "洪水橋",
+      "屏山",
       "新田"
-    ],
+],
     "answer": 3,
     "focus": {
       "x": 50,
@@ -1844,7 +1844,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h17",
-    "tier": 3,
+    "tier": 2,
     "category": "歷史",
     "question": "「曾大屋」位於香港哪一區？",
     "explanation": "曾大屋位於沙田，是香港具代表性的客家圍村建築之一。",
@@ -1868,7 +1868,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h18",
-    "tier": 3,
+    "tier": 2,
     "category": "歷史",
     "question": "「龍躍頭文物徑」主要位於哪個新界地區？",
     "explanation": "龍躍頭文物徑位於粉嶺一帶，串連鄧氏聚居地區的多處歷史建築。",
@@ -1954,10 +1954,10 @@ export const CORE_QUESTIONS=Object.freeze([
     "textOnly": true,
     "options": [
       "曾灶財",
-      "黃霑",
-      "羅貫中",
-      "金庸"
-    ],
+      "曾國藩",
+      "曾灶榮",
+      "曾財灶"
+],
     "answer": 0,
     "focus": {
       "x": 50,
@@ -1977,11 +1977,11 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.afcd.gov.hk/tc_chi/"
     },
     "options": [
-      "世界沙漠名錄",
+      "《世界遺產公約》世界遺產名錄",
       "拉姆薩爾公約國際重要濕地名錄",
-      "國際滑雪場名錄",
-      "世界珊瑚礁都市名錄"
-    ],
+      "聯合國教科文組織世界地質公園網絡",
+      "聯合國教科文組織生物圈保護區網絡"
+],
     "answer": 1,
     "focus": {
       "x": 50,
@@ -1990,7 +1990,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h23",
-    "tier": 3,
+    "tier": 2,
     "category": "自然",
     "question": "海下灣海岸公園最著名的海洋生態特色之一是甚麼？",
     "explanation": "西貢海下灣海岸公園具有豐富海洋生態，珊瑚群落是其中的重要特色。",
@@ -2014,7 +2014,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h24",
-    "tier": 3,
+    "tier": 2,
     "category": "自然",
     "question": "鶴咀海岸保護區位於香港哪個大區域？",
     "explanation": "鶴咀海岸保護區位於香港島東南部，是本地重要海岸及海洋保育地點。",
@@ -2038,7 +2038,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h25",
-    "tier": 3,
+    "tier": 2,
     "category": "郊遊",
     "question": "香港的「大東山」常見英文名稱是甚麼？",
     "explanation": "大東山的英文名稱是 Sunset Peak，位於大嶼山。",
@@ -2073,11 +2073,11 @@ export const CORE_QUESTIONS=Object.freeze([
       "url": "https://www.hkolympic.org/"
     },
     "options": [
-      "女子100米及200米蝶泳",
+      "女子100米及200米背泳",
       "女子100米及200米自由泳",
-      "女子50米及100米背泳",
-      "女子200米及400米蛙泳"
-    ],
+      "女子50米及100米自由泳",
+      "女子200米及400米自由泳"
+],
     "answer": 1,
     "focus": {
       "x": 53,
@@ -2124,9 +2124,9 @@ export const CORE_QUESTIONS=Object.freeze([
     "options": [
       "象形",
       "指事",
-      "假借",
+      "會意",
       "形聲"
-    ],
+],
     "answer": 3,
     "focus": {
       "x": 50,
@@ -2135,7 +2135,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h29",
-    "tier": 3,
+    "tier": 2,
     "category": "書法",
     "question": "「休」由人與木組合，用來表示人在樹旁休息的意象，通常屬於哪類構字？",
     "explanation": "「休」通常被用作會意字例子，由兩個構件組合表達新的意思。",
@@ -2160,7 +2160,7 @@ export const CORE_QUESTIONS=Object.freeze([
   },
   {
     "id": "h30",
-    "tier": 3,
+    "tier": 2,
     "category": "書法",
     "question": "傳統書法中，「篆、隸、楷、行、草」主要是在分類甚麼？",
     "explanation": "篆書、隸書、楷書、行書及草書是常見的漢字書體分類，不同書體有各自的筆畫及結構特徵。",

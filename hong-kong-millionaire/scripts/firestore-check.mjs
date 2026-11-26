@@ -31,6 +31,8 @@ async function settle(a){
 }
 try{
  await env.clearFirestore();const a=await begin('rules-player');
+ const anonymousAuth=env.authenticatedContext('rules-player',{firebase:{sign_in_provider:'anonymous'}}).firestore();
+ await assertFails(getDoc(doc(anonymousAuth,C.players,a.uid)));await assertFails(updateDoc(doc(anonymousAuth,C.players,a.uid),{displayName:'匿名嘗試',updatedAt:serverTimestamp()}));checks+=2;
  await assertFails(getDoc(doc(other,C.players,a.uid)));await assertFails(getDoc(doc(anon,C.players,a.uid)));await assertFails(updateDoc(a.pRef,{total:1000000,updatedAt:serverTimestamp()}));checks+=3;
  await assertFails(updateDoc(a.rRef,{index:14,correct:14,updatedAt:serverTimestamp()}));await assertFails(updateDoc(a.pRef,{activeDay:null,updatedAt:serverTimestamp()}));checks+=2;
  const initial=await raw(a),old=normalizeRun(initial),good=transitionPatch(initial,{type:'answer',choice:questionFor(old).answer},Date.now(),serverTimestamp);

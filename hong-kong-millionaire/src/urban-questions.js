@@ -68,7 +68,7 @@ export const URBAN_QUESTIONS=Object.freeze([
   hint:'附近冇門牌，都可以搵啲固定設施嘅編號，幫接線員搵到你。',
   sharePrompt:'街邊燈柱呢塊細細嘅編號牌，除咗維修，緊急時仲可以點樣幫到人？',
   source:{label:'消防處・社區應急先鋒訓練講義',url:'https://www.hkfsd.gov.hk/sc/education/FSDCER_Training_Notes.pdf'}},
- {id:'u12',tier:3,category:'生活・香港硬幣',art:'scalloped-coins',focus:{x:50,y:50},modes:['partial','original','text'],
+ {id:'u12',tier:2,category:'生活・香港硬幣',art:'scalloped-coins',focus:{x:50,y:50},modes:['partial','original','text'],
   question:'現行流通香港硬幣中，哪兩種面額的外形具有波浪形邊緣？',
   options:['2元及2毫','5元及5毫','1元及1毫','10元及2元'],answer:0,
   explanation:'2元與2毫硬幣的外形有波浪形邊緣。硬幣的大小、形狀和邊緣特徵有助觸覺辨識；波浪形輪廓不要與其他硬幣側邊的細槽紋混淆。插畫不含面額及官方幣面，避免直接提示答案。',

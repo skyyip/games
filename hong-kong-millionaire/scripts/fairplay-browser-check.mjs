@@ -1,8 +1,9 @@
+import {installContentAccount} from './content-account-fixture.mjs';
 // Built-page checks: contrast, clipboard boundaries, native copy, and normal gameplay.
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {newRun,act,hkDay,questionFor} from '../src/game.js';
-import {DAILY_KEY} from '../src/schema.js';
+const DAILY_KEY='qa.hkm.content-run';
 
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL||'http://127.0.0.1:5445/games/hong-kong-millionaire/';
@@ -31,6 +32,7 @@ async function clipboard(page,selector,type='copy'){
 try{
  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
  await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+ await installContentAccount(context,base);
  await context.addInitScript(now=>{
   globalThis.HK_MILLIONAIRE_FIREBASE_CONFIG=null;
   const Native=Date;
@@ -74,8 +76,8 @@ try{
  await page.locator('#options button').first().click();
  equal(await clipboard(page,'#answer-dialog-title'),{blocked:true,text:''});
  await page.locator('[data-close="answer-dialog"]').last().click();
- await page.locator('#account-open').click();await page.locator('#email').fill('test@example.test');
- for(const type of ['copy','cut','contextmenu'])equal(await page.locator('#email').evaluate((node,type)=>{
+ await page.locator('#account-open').click();await page.locator('#display-name').fill('測試街坊');
+ for(const type of ['copy','cut','contextmenu'])equal(await page.locator('#display-name').evaluate((node,type)=>{
   const event=new Event(type,{bubbles:true,cancelable:true});node.dispatchEvent(event);return event.defaultPrevented;
  },type),false);
  await page.locator('[data-close="account-dialog"]').last().click();

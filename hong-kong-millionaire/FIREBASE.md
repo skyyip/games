@@ -70,7 +70,7 @@ firebase deploy --project sky-playground-millionaire --only firestore:rules,fire
 3. 重新整理應續同一局；同帳戶另一裝置亦只可續局。
 4. 完成後檢查每日結果及兩個累積榜；同一局只結算一次。
 5. A 登出後 B 可進行 B 的當日挑戰；切回 A 仍恢復 A 的進度。
-6. 匿名進度不轉成帳戶排名；登出不會補發當日匿名機會。其他遊戲的資料不受影響。
+6. 匿名遊玩已移除；舊本機匿名資料不載入或匯入帳戶。登出後不能開局。其他遊戲的資料不受影響。
 
 ## 已修復的第一題 permission-denied
 
@@ -86,16 +86,16 @@ firebase emulators:exec --project demo-hk-millionaire --only firestore "node scr
 
 模擬器需要 Java 21 及可下載的 Firestore Emulator JAR。GitHub Actions 會在相關修改後自動執行。測試只使用 demo 專案，沒有部署正式 Firebase，也沒有執行真實 Google 帳戶授權；正式部署後仍須完成上述上線檢查。
 
-## 本機匿名測試
+## 登入限定測試
 
-瀏覽器開發者工具 → Application → Local Storage，只刪除 `sky.hk-millionaire.today.v1` 再重新整理。這只重置本機測試資料，不會刪除或重置帳戶在 Firestore 的今日挑戰，也不會登出 Google。不要清除整個網域，以免影響其他遊戲。
+以未登入、已登入、重新整理及切換帳戶測試。未登入只能開啟登入／註冊視窗；舊本機匿名局不會載入，也不影響帳戶從雲端取得自己的每日機會。不要清除整個網域，以免影響其他遊戲。
 
 日後修改題目、答案或抽題表時，須同步執行 `npm run rules:generate`、模擬器測試並發布規則及網站。
 
 
 ## 本地特色60題的發布次序（2026-11-26）
 
-題庫擴充至351題，難度池為104／154／93。請先Publish本資料夾**完整** `firestore.rules`，再上傳新網站；抽題表、答案及圖鑑上限須一致，不能只改一個總數。仍使用原本的單一題庫與 `hkm_` 集合，四個索引不變。
+題庫擴充至351題，難度池為104／206／41。請先Publish本資料夾**完整** `firestore.rules`，再上傳新網站；抽題表、答案及圖鑑上限須一致，不能只改一個總數。仍使用原本的單一題庫與 `hkm_` 集合，四個索引不變。
 
 只發布規則的指令：
 
@@ -118,3 +118,5 @@ firebase deploy --project sky-playground-millionaire --only firestore:rules
 ### 2026-11-22：30秒計時規則
 
 本版將每日／週末／再挑戰／房間的答題期限改為30秒，房間10題總時長325秒，斷線寬限後355秒。先發布完整`firestore.rules`，再上傳同版網站；舊25秒網站不應與新規則混用。四個複合索引保持不變，無需新增索引。不要為更新計時清除玩家進度或放寬為公開寫入。
+
+登入限定版同時拒絕 Firebase Anonymous Auth token 的個人及房間操作；Google／Email 註冊與現有帳戶仍可使用。第11–15題的新41題壓軸池與Firestore抽題表須同步發布，索引及資產不重置。

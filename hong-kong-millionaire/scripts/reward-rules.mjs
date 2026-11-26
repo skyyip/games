@@ -236,9 +236,9 @@ export function rewardRules(){
     rrPayment(v,o,id));
   }
   match /hkm_rooms/{id}{
-   allow get:if request.auth!=null;allow list:if request.auth!=null&&request.auth.uid in resource.data.players&&request.query.limit<=20;allow delete:if false;
-   allow create:if request.auth!=null&&rrCreate(request.resource.data,id);
-   allow update:if request.auth!=null&&rrUpdate(request.resource.data,resource.data,id);
+   allow get:if signedPlayer();allow list:if signedPlayer()&&request.auth.uid in resource.data.players&&request.query.limit<=20;allow delete:if false;
+   allow create:if signedPlayer()&&rrCreate(request.resource.data,id);
+   allow update:if signedPlayer()&&rrUpdate(request.resource.data,resource.data,id);
    match /sessions/{uid}{
     allow get:if owner(uid);allow list,delete:if false;
     allow create:if owner(uid)&&rsCreate(request.resource.data,uid,id,id);

@@ -13,7 +13,7 @@ const art=Object.fromEntries(Object.entries(manifest.assets).filter(([name])=>na
 const gamePath=fileURLToPath(new URL('../src/game.js',import.meta.url));
 const adapter=`
 import {newRun,act,hkDay,terminal,finish} from ${JSON.stringify(gamePath)};
-const q=globalThis.hkmAuthQA={uid:globalThis.HKM_INITIAL_AUTH_UID??null,nextUid:'google-player',runs:{},calls:[],holdClaim:false,failClaim:false,claimCommitThenFail:false,failCurrentRun:false,holdAccount:false,failAccount:!!globalThis.HKM_FAIL_ACCOUNT,failMove:false,delayInitialAuth:!!globalThis.HKM_DELAY_INITIAL_AUTH};
+const q=globalThis.hkmAuthQA={uid:globalThis.HKM_INITIAL_AUTH_UID??null,nextUid:'google-player',runs:globalThis.HKM_RESTORED_RUNS??{},calls:[],holdClaim:false,failClaim:false,claimCommitThenFail:false,failCurrentRun:false,holdAccount:false,failAccount:!!globalThis.HKM_FAIL_ACCOUNT,failMove:false,delayInitialAuth:!!globalThis.HKM_DELAY_INITIAL_AUTH};
 const profile=uid=>({uid,displayName:'街坊'+uid,total:0,bestPrize:0,games:0,titles:[],unlocked:[],wrong:[],favourites:[],activeDay:null});
 const copy=value=>value?JSON.parse(JSON.stringify(value)):null;
 const call=method=>{q.calls.push({method,uid:q.uid});return q.uid;};
@@ -61,97 +61,49 @@ async function open({guest=null,width=390,height=900,restoredUid=null,failAccoun
  await p.goto(base,{waitUntil:'networkidle'});await p.addScriptTag({type:'module',url:harness});if(delayInitialAuth)await p.waitForFunction(()=>globalThis.hkmAuthQA&&typeof hkmAuthQA.releaseInitialAuth==='function');else await p.waitForFunction(()=>!document.querySelector('#google-login').disabled);
  return {c,p};
 }
-async function login(p){await p.locator('#account-open').click();await p.locator('#google-login').click();await p.waitForFunction(()=>!!globalThis.hkmAuthQA.uid&&!document.querySelector('#logout').disabled);}
+async function login(p){if(!await p.locator('#account-dialog').isVisible())await p.locator('#account-open').click();await p.locator('#google-login').click();await p.waitForFunction(()=>!!globalThis.hkmAuthQA.uid&&!document.querySelector('#logout').disabled);}
 async function switchGoogle(p,uid){await p.locator('#account-open').click();await p.locator('#logout').click();await p.locator('[data-close="account-dialog"]').first().click();await p.evaluate(uid=>hkmAuthQA.nextUid=uid,uid);await login(p);await p.locator('[data-close="account-dialog"]').first().click();}
 const state=p=>p.evaluate(key=>JSON.parse(localStorage.getItem(key)),LEDGER_KEY);
 const noCloudGameWrites=async p=>{const calls=await p.evaluate(()=>hkmAuthQA.calls.map(c=>c.method));assert(!calls.some(method=>['resumeAccount','claimDaily','move','settle'].includes(method)));checks++;};
 try{
- // Finished and unfinished guest attempts win over an account's existing run after login.
- for(const phase of ['playing','finished']){
-  const guest=saved(phase),{c,p}=await open({guest});await p.locator('#start').click();
-  const accountRun=newRun(DAY,NOW,'google-player');await p.evaluate(run=>hkmAuthQA.runs['google-player']=run,accountRun);
-  await login(p);assert((await p.locator('#account-status').textContent()).includes('今日匿名局'));await p.locator('[data-close="account-dialog"]').first().click();
-  assert.equal((await state(p)).owner,'guest');assert.equal((await state(p)).token,guest.token);assert.equal((await state(p)).run.questionAt,guest.run.questionAt);
-  assert.equal(await p.locator('#retry-sync').isVisible(),false);assert.equal(await p.locator(phase==='finished'?'#result-screen':'#game-screen').isVisible(),true);
-  if(phase==='playing'){const q=questionFor(guest.run);await p.locator(`[data-choice="${q.answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#next-question').waitFor({state:'visible'});assert.equal((await state(p)).run.correct,1);}
-  await noCloudGameWrites(p);await p.locator('#account-open').click();await p.locator('#logout').click();await p.locator('[data-close="account-dialog"]').first().click();assert.equal((await state(p)).token,guest.token);
-  await p.reload({waitUntil:'networkidle'});await p.addScriptTag({type:'module',url:new URL('auth-qa.js',base).href});await p.waitForFunction(()=>!document.querySelector('#google-login').disabled);await p.locator('#start').click();assert.equal((await state(p)).owner,'guest');
-  await c.close();checks+=7;
+ // No unauthenticated entry, including legacy unfinished / finished guest saves.
+ for(const phase of [null,'playing','finished']){
+  const guest=phase?saved(phase):null,{c,p}=await open({guest});
+  assert.equal(await p.locator('#guest-start').count(),0);assert.equal(await p.locator('#sensory-dialog,.sensory-link,[data-practice]').count(),0);
+  await p.locator('#start').click();assert(await p.locator('#account-dialog').isVisible());assert(!await p.locator('#game-screen').isVisible());await noCloudGameWrites(p);
+  if(guest)assert.deepEqual(await state(p),guest);
+  await login(p);await p.locator('[data-close="account-dialog"]').first().click();await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  const run=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);assert.equal(run.uid,'google-player');assert.equal(run.index,0);
+  if(guest)assert.deepEqual(await state(p),guest);
+  await p.evaluate(()=>hkmAuthQA.setUser(null));assert(await p.locator('#lobby').isVisible());assert(!await p.locator('#game-screen').isVisible());
+  await p.locator('#start').click();assert(await p.locator('#account-dialog').isVisible());await c.close();checks+=8;
  }
- // Account profile failures cannot stop or turn an anonymous result into cloud-sync pending.
- {const {c,p}=await open({guest:saved('finished')});await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.failAccount=true);await login(p);assert((await p.locator('#account-status').textContent()).includes('今日匿名局仍可'));await p.locator('[data-close="account-dialog"]').first().click();assert(await p.locator('#result-screen').isVisible());await noCloudGameWrites(p);await c.close();checks+=2;}
- // The anonymous timer can finish while an account read is delayed, without a stale rollback.
- {const {c,p}=await open({guest:saved()});await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.holdAccount=true);await login(p);await p.evaluate(ms=>globalThis.__hkmQaNow+=ms,QUESTION_MS+1);await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key)).run.phase==='finished',LEDGER_KEY);await p.evaluate(()=>hkmAuthQA.releaseAccount());await p.waitForFunction(()=>document.querySelector('#account-status').textContent.includes('今日匿名局'));await p.locator('[data-close="account-dialog"]').first().click();assert(await p.locator('#result-screen').isVisible());assert.equal((await state(p)).run.reason,'timeout');await noCloudGameWrites(p);await c.close();checks+=2;}
+ // A delayed auth restoration cannot open an unauthenticated daily game.
+ {const {c,p}=await open({delayInitialAuth:true});await p.locator('#start').click();assert(await p.locator('#account-dialog').isVisible());assert(!await p.locator('#game-screen').isVisible());await p.evaluate(()=>hkmAuthQA.releaseInitialAuth());await noCloudGameWrites(p);await c.close();checks+=2;}
+ // A profile failure never creates an anonymous fallback.
+ {const {c,p}=await open({restoredUid:'cached-google-player',failAccount:true});await p.locator('#start').click();await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('未獲允許'));assert(!await p.locator('#game-screen').isVisible());assert.equal(await state(p),null);await c.close();checks+=2;}
+ // Reload after an answer resumes the account's original run and deadline.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  const run=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);await p.locator(`[data-choice="${questionFor(run).answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#next-question').waitFor({state:'visible'});
+  const saved=await p.evaluate(()=>hkmAuthQA.runs);await p.reload({waitUntil:'networkidle'});
+  await p.evaluate(saved=>globalThis.HKM_RESTORED_RUNS=saved,saved);await p.addScriptTag({type:'module',url:new URL('auth-qa.js',base).href});await p.waitForFunction(()=>!document.querySelector('#start').disabled);
+  await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal(await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid].correct),1);assert.equal(await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid].questionAt),run.questionAt);assert.equal(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='claimDaily').length),0);await c.close();checks+=3;
+ }
  // Without a guest attempt, cloud errors still show a retry and can recover normally.
  {const {c,p}=await open();await login(p);await p.locator('[data-close="account-dialog"]').first().click();await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.failMove=true);await p.locator('#life-half').click();await p.locator('#retry-sync').waitFor({state:'visible'});assert((await p.locator('#game-status').textContent()).includes('未獲允許'));await p.evaluate(()=>hkmAuthQA.failMove=false);await p.locator('#retry-sync').click();await p.locator('#retry-sync').waitFor({state:'hidden'});await p.locator('#life-half').click();await p.waitForFunction(()=>document.querySelectorAll('.is-removed').length===2);assert.equal((await state(p)).owner,'google-player');await c.close();checks+=3;}
  // A late rejected cloud action after logout cannot reopen the old pending-game screen.
  {const {c,p}=await open();await login(p);await p.locator('[data-close="account-dialog"]').first().click();await p.locator('#start').click();await p.evaluate(()=>hkmAuthQA.holdMove=true);await p.locator('#life-half').click();await p.waitForFunction(()=>typeof hkmAuthQA.releaseMove==='function');await p.evaluate(()=>hkmAuthQA.setUser(null));await p.evaluate(()=>hkmAuthQA.releaseMove());await p.waitForFunction(()=>!document.querySelector('#lobby').hidden);assert.equal(await p.locator('#retry-sync').isVisible(),false);await c.close();checks+=2;}
- // A delayed profile response cannot sign a player back in after they explicitly logged out.
- {const {c,p}=await open();await p.evaluate(()=>hkmAuthQA.holdAccount=true);await login(p);assert(await p.locator('#start').isDisabled());await p.locator('#logout').click();await p.evaluate(()=>hkmAuthQA.releaseAccount());await p.waitForFunction(()=>!document.querySelector('#signed-out').hidden);assert((await p.locator('#account-label').textContent()).includes('登入'));assert(await p.locator('#start').isEnabled());await p.locator('[data-close="account-dialog"]').first().click();await p.locator('#start').click();await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key))?.owner==='guest',LEDGER_KEY);assert.equal((await state(p)).owner,'guest');await c.close();checks+=4;}
- // A saved guest result remains accessible from the lobby during an account-profile read.
- {const {c,p}=await open({guest:saved('finished')});await p.evaluate(()=>hkmAuthQA.holdAccount=true);await login(p);await p.locator('[data-close="account-dialog"]').first().click();assert(await p.locator('#start').isEnabled());await p.locator('#start').click();await p.locator('#result-screen').waitFor({state:'visible'});await p.evaluate(()=>hkmAuthQA.releaseAccount());assert.equal((await state(p)).owner,'guest');await noCloudGameWrites(p);await c.close();checks+=3;}
- // Clearing today's local key does not sign Firebase out: explicit guest play still stays local.
- {const {c,p}=await open({restoredUid:'cached-google-player',failAccount:true});
-  await p.locator('#guest-start').waitFor({state:'visible'});await p.screenshot({path:'/tmp/hkm-anonymous-choice-390.png',fullPage:true});assert.equal((await state(p)),null);
-  assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);
-  await p.locator('#guest-start').click();await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key))?.owner==='guest',LEDGER_KEY);
-  const entry=await state(p);assert.equal(entry.run.uid,'guest');await p.locator('#life-half').click();await p.waitForFunction(()=>document.querySelectorAll('.is-removed').length===2);
-  const q=questionFor(entry.run);await p.locator(`[data-choice="${q.answer}"]`).click();await p.locator('#confirm-answer').click();await p.locator('#next-question').waitFor({state:'visible'});
-  assert.equal(await p.locator('#retry-sync').isVisible(),false);assert.equal((await state(p)).run.correct,1);assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);
-  await c.close();checks+=6;
- }
- // A late restored Google identity cannot switch an explicitly selected guest startup to cloud.
- {const {c,p}=await open({restoredUid:'cached-google-player',failAccount:true,delayInitialAuth:true});
-  assert(await p.locator('#start').isDisabled());assert(await p.locator('#guest-start').isEnabled());await p.locator('#guest-start').click();
-  await p.evaluate(()=>hkmAuthQA.releaseInitialAuth());await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key))?.owner==='guest',LEDGER_KEY);
-  assert.equal(await p.locator('#game-screen').isVisible(),true);assert.equal(await p.locator('#retry-sync').isVisible(),false);await noCloudGameWrites(p);assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);await c.close();checks+=4;
- }
- // Even if an explicitly requested account read is denied, the unused local guest route works.
- {const {c,p}=await open({restoredUid:'cached-google-player',failAccount:true});await p.locator('#start').click();await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('未獲允許'));
-  assert.equal(await state(p),null);await p.locator('#guest-start').click();await p.waitForFunction(key=>JSON.parse(localStorage.getItem(key))?.owner==='guest',LEDGER_KEY);assert(await p.locator('#game-screen').isVisible());assert.equal(await p.locator('#retry-sync').isVisible(),false);await c.close();checks+=3;
- }
- // An already consumed account day still cannot be replaced with a second anonymous attempt.
- {const marker={day:DAY,owner:'cached-google-player',token:'account-consumed',revision:1,run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});await p.locator('#guest-start').waitFor({state:'visible'});await p.locator('#guest-start').click();assert.equal((await state(p)).token,'account-consumed');assert((await p.locator('#lobby-status').textContent()).includes('今日已開始帳戶挑戰'));assert.equal(await p.locator('#game-screen').isVisible(),false);await c.close();checks+=3;}
- // A rejected current-version claim must not consume the local opportunity when the server confirms no run.
- {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>hkmAuthQA.failClaim=true);await p.locator('#start').click();
-  await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('已解除失敗標記'));
+ // A rejected start is released only after the server confirms absence; retry still requires the account.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>hkmAuthQA.failClaim=true);await p.locator('#start').click();await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('可重試帳戶挑戰'));
   assert.equal(await state(p),null);assert(await p.evaluate(()=>hkmAuthQA.calls.some(c=>c.method==='currentRun'&&c.server)));
-  await p.locator('#guest-start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'guest');await c.close();checks+=3;
+  await p.evaluate(()=>hkmAuthQA.failClaim=false);await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'cached-google-player');await c.close();checks+=3;
  }
- // Pending reservations can recover even if unrelated account-profile loading fails.
- {const marker={day:DAY,owner:'cached-google-player',token:'failed-start',revision:0,state:'pending',run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});
-  await p.waitForFunction(()=>!document.querySelector('#start').disabled);assert((await p.locator('#guest-start').textContent()).includes('核實'));
-  await p.locator('#guest-start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'guest');
-  assert(await p.evaluate(()=>hkmAuthQA.calls.some(c=>c.method==='currentRun'&&c.server)));await c.close();checks+=3;
- }
- // If server verification is denied, never use cached absence or clear the reservation.
- {const marker={day:DAY,owner:'cached-google-player',token:'unverified-start',revision:0,state:'pending',run:null},{c,p}=await open({guest:marker,restoredUid:'cached-google-player',failAccount:true});
-  await p.waitForFunction(()=>!document.querySelector('#start').disabled);await p.evaluate(()=>hkmAuthQA.failCurrentRun=true);await p.locator('#guest-start').click();
-  await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('未獲允許'));assert.equal((await state(p)).token,marker.token);assert.equal(await p.locator('#game-screen').isVisible(),false);
-  await p.evaluate(()=>hkmAuthQA.failCurrentRun=false);await p.locator('#guest-start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'guest');await c.close();checks+=3;
- }
- // A claim that actually exists must be confirmed, never released for another anonymous attempt.
- {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>hkmAuthQA.claimCommitThenFail=true);await p.locator('#start').click();
-  await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('未獲允許'));const marker=await state(p);assert.equal(marker.state,'confirmed');
-  await p.locator('#guest-start').click();assert.equal((await state(p)).token,marker.token);assert.equal(await p.locator('#game-screen').isVisible(),false);
-  await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).owner,'cached-google-player');await c.close();checks+=4;
- }
- // An ambiguous network failure keeps the reservation; no fresh absence check is assumed.
- {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>{hkmAuthQA.failClaim=true;hkmAuthQA.claimError='unavailable';});await p.locator('#start').click();
-  await p.waitForFunction(()=>document.querySelector('#lobby-status').textContent.includes('操作未完成'));const marker=await state(p);assert.equal(marker.state,'pending');
-  assert.equal(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='currentRun').length),0);
-  await p.evaluate(()=>hkmAuthQA.failClaim=false);await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).token,marker.token);assert.equal((await state(p)).state,'confirmed');await c.close();checks+=4;
- }
- // A second tab cannot release a reservation while the first tab's cloud claim is in flight.
- {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>{hkmAuthQA.holdClaim=true;hkmAuthQA.failClaim=true;});await p.locator('#start').click();
-  await p.waitForFunction(()=>typeof hkmAuthQA.releaseClaim==='function');const marker=await state(p);assert.equal(marker.state,'pending');
-  const second=await c.newPage();second.on('pageerror',error=>errors.push(error.message));await second.goto(base,{waitUntil:'networkidle'});await second.addScriptTag({type:'module',url:new URL('auth-qa.js',base).href});await second.waitForFunction(()=>!document.querySelector('#start').disabled);await second.locator('#guest-start').click();
-  await second.waitForFunction(async()=>{const locks=await navigator.locks.query();return locks.pending.some(lock=>lock.name==='hk-millionaire-cloud-start');});
-  assert.equal(await second.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='currentRun').length),0);assert.equal((await state(second)).token,marker.token);
-  await p.evaluate(()=>hkmAuthQA.releaseClaim());await second.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(second)).owner,'guest');assert.equal((await state(p)).owner,'guest');await c.close();checks+=5;
+ // Ambiguous claims remain reserved until a verified retry finds their cloud run.
+ {const {c,p}=await open({restoredUid:'cached-google-player'});await p.evaluate(()=>{hkmAuthQA.failClaim=true;hkmAuthQA.claimError='unavailable';});await p.locator('#start').click();await p.waitForFunction(()=>!document.querySelector('#start').disabled);
+  assert.equal((await state(p)).state,'pending');assert(!await p.locator('#game-screen').isVisible());await p.evaluate(()=>hkmAuthQA.failClaim=false);await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});assert.equal((await state(p)).state,'confirmed');await c.close();checks+=3;
  }
  // Hong Kong date / shared challenge label updates while the lobby stays open across midnight.
- {const {c,p}=await open();assert((await p.locator('#today-label').textContent()).includes('香港時間 11月15日'));assert((await p.locator('#challenge-label').textContent()).includes('每日題組 · 第 2 回'));
+ {const {c,p}=await open();assert((await p.locator('#today-label').textContent()).includes('11月15日'));assert((await p.locator('#challenge-label').textContent()).includes('第 2 回'));
   await p.evaluate(()=>globalThis.__hkmQaNow=Date.UTC(2026,10,15,16));await p.waitForFunction(()=>document.querySelector('#today-label').textContent.includes('11月16日'));
   assert((await p.locator('#challenge-label').textContent()).includes('第 3 回'));assert.deepEqual(await p.evaluate(()=>hkmAuthQA.calls),[]);await c.close();checks+=4;
  }
@@ -201,12 +153,24 @@ try{
   assert.equal(await p.locator('#retry-sync').isVisible(),false);assert.equal(await p.evaluate(()=>hkmAuthQA.runs['google-b'].correct),0);
   assert.equal(await p.evaluate(()=>hkmAuthQA.calls.filter(c=>c.method==='move'&&c.uid==='google-b').length),0);assert.equal((await state(p)).accounts['google-a'].state,'confirmed');await c.close();checks+=4;
  }
+ // Full authenticated prize ladder and both insurance payouts through the actual controls.
+ for(const count of [5,10,15]){
+  const {c,p}=await open({restoredUid:'ladder-player'});await p.locator('#start').click();await p.locator('#game-screen').waitFor({state:'visible'});
+  for(let i=0;i<count;i++){
+   const run=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]),q=questionFor(run);assert.equal(q.tier,Math.floor(i/5)+1);
+   await p.locator(`[data-choice="${q.answer}"]`).click();await p.locator('#confirm-answer').click();
+   if(i<14){await p.locator('#next-question').waitFor({state:'visible'});await p.locator('#next-question').click();await p.locator('#options button:not([disabled])').first().waitFor();}
+  }
+  if(count<15){const run=await p.evaluate(()=>hkmAuthQA.runs[hkmAuthQA.uid]);await p.locator(`[data-choice="${(questionFor(run).answer+1)%4}"]`).click();await p.locator('#confirm-answer').click();}
+  await p.locator('#result-screen').waitFor({state:'visible'});assert.equal(await p.locator('#result-prize').textContent(),count===5?'$8,000':count===10?'$60,000':'$1,000,000');checks+=count+1;
+  await c.close();console.log('Authenticated ladder: '+count+' correct answers verified.');
+ }
  // Measure actual icon / label rectangles at narrow, tablet, landscape and desktop widths.
  for(const [width,height]of [[320,850],[390,900],[621,900],[700,900],[812,375],[1280,900]]){
-  const {c,p}=await open({guest:saved(),width,height});await p.locator('#start').click();await p.evaluate(()=>document.fonts.ready);
+  const {c,p}=await open({restoredUid:'layout-player',width,height});await p.locator('#start').click();await p.evaluate(()=>document.fonts.ready);
   const overlaps=await p.locator('.lifelines>button').evaluateAll(buttons=>buttons.flatMap(button=>{const icon=button.querySelector('.hk-icon,b').getBoundingClientRect();return [...button.querySelectorAll('span,small')].filter(node=>{const text=node.getBoundingClientRect();return Math.min(icon.right,text.right)-Math.max(icon.left,text.left)>1&&Math.min(icon.bottom,text.bottom)-Math.max(icon.top,text.top)>1;}).map(node=>node.textContent);}));
   assert.deepEqual(overlaps,[],width+'px overlapping lifeline text');assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await p.locator('.lifelines').screenshot({path:`/tmp/hkm-lifelines-${width}.png`});await c.close();checks+=2;
  }
- assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,scenarios:25,viewports:6,pageErrors:0,mode:'local account adapter; no live Firebase'}));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,loginOnly:true,legacySavesPreserved:true,reload:true,viewports:6,pageErrors:0,mode:'local account adapter; no live Firebase'}));
 }finally{await browser.close();}

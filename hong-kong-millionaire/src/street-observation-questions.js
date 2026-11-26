@@ -642,7 +642,7 @@ const records=[
  {
   "id": "s16",
   "sourceNumber": 16,
-  "tier": 3,
+  "tier": 2,
   "category": "街道・標牌解碼",
   "question": "讀圖中H下方的數字，所示距離是多少米？",
   "options": [
@@ -1596,7 +1596,7 @@ const records=[
  {
   "id": "s40",
   "sourceNumber": 40,
-  "tier": 3,
+  "tier": 2,
   "category": "交通・尺寸考眼力",
   "question": "讀圖中三個尺寸，長闊高總和是多少？",
   "options": [
@@ -1863,7 +1863,7 @@ const records=[
  {
   "id": "s46",
   "sourceNumber": 46,
-  "tier": 3,
+  "tier": 2,
   "category": "道路・隱藏科技",
   "question": "這組封閉切線形狀，最可能藏着哪種設施？",
   "options": [
@@ -1947,7 +1947,7 @@ const records=[
  {
   "id": "s48",
   "sourceNumber": 48,
-  "tier": 3,
+  "tier": 2,
   "category": "道路・明暗適應",
   "question": "圖中洞口前這個結構，主要緩和甚麼變化？",
   "options": [
@@ -2425,7 +2425,7 @@ const records=[
  {
   "id": "s60",
   "sourceNumber": 60,
-  "tier": 3,
+  "tier": 2,
   "category": "生活・置業讀圖",
   "question": "看圖中戶門界線，哪個空間不應攤入單位實用面積？",
   "options": [

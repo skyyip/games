@@ -34,14 +34,7 @@ export const games = [
     steps:['Choose a movie and open three free, non-repeating character contracts. Select one as your active actor.', 'Earn two currencies through timed jobs and reaction or rhythm training. Collect the actor’s three props to awaken their portrait.', 'Claim a role, recruit local extras and fund the production. Invite a cross-movie guest before filming, then review three event reports, your box-office score and a downloadable poster.'],
     related:['beat-bad-luck','memory-trace'],
   },
-  {
-    slug: 'frogger-jump', guide:false, name: 'Frogger Jump 2.5D', zh: '蓄力連連跳', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game',
-    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, earn Frog Coins, unlock thirty-eight cute animals and leap across logs and water lilies while avoiding thorns and hungry river creatures.',
-    intro: 'A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins, collect thirty-eight animal friends, choose a themed animal ability. Firebase rankings activate after project setup.',
-    chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按蓄力，放手自動瞄準木樁或睡蓮；落地賺青蛙幣解鎖企鵝、兔子、猴子、水獺、小鴨、花貓、熊貓、狐狸、水豚、糯糯星鼠及小可愛、小八、烏薩奇與島嶼夥伴等漫畫角色，每 50 跳補充一次技能，最多保留2次。Firebase 設定完成後可保留唯一名字，參加顯示所用動物的世界前十名排行。',
-    steps: ['Enter a player name, choose an owned animal, then hold the screen, mouse button or Space and release to hop.', 'Read three wood or lily platforms ahead. Use your animal skill to clear obstacles or improve a landing; another use is earned every 50 successful landings, holding up to two.', 'Complete a run to earn Frog Coins and unlock more animals. When Firebase is configured, sign in for unique names, cross-device wallets and the public top ten; local practice stays unranked.'],
-    related: ['floating-balance', 'stone-skip'],
-  },
+
   {
     slug: 'beat-bad-luck', guide: false, name: 'Beat the Bad Luck', zh: '鵝頸橋下：小人退散！', genre: 'Casual', players: [1, 1],
     topic: 'Hong Kong Ritual Game',
@@ -50,6 +43,21 @@ export const games = [
     chinese: '以香港打小人習俗為靈感的單人小遊戲。跟著步驟上香、寫下煩惱、拍打紙小人、餵紙老虎，再布置葉師傅的小攤。',
     steps: ['Follow the ritual prompts to light incense and name a worry.', 'Tap the paper gremlin, feed the paper tiger and finish the ritual.', 'Use earned rewards to explore and decorate the stall.'],
     related: ['roach-rush', 'flick-force'],
+  },
+  {
+    slug:'hong-kong-millionaire',name:'Hong Kong Millionaire',zh:'香港百萬富翁',genre:'Quiz',players:[1,4],topic:'Daily Hong Kong Culture Quiz',guide:false,languages:['zh-Hant'],
+    description:'Play Hong Kong Millionaire, a Hong Kong street-comic quiz with Hong Kong culture, daily illustrated puzzles, three lifelines and a million-dollar prize ladder.',
+    intro:'A daily Traditional Chinese Hong Kong quiz. Answer 15 questions with 30 second clocks, three once-only lifelines and safety nets at questions five and ten. Sign in with Google or email before playing to save records and join rankings.',
+    chinese:'每日一次的香港文化問答。十五題四選一，每題30秒，以完整原創插畫輔助理解香港知識；第五及第十題為保險線，錦囊各用一次。須先登入或註冊，可累積虛擬獎金、稱號、錯題本及文化圖鑑。',
+    steps:['Sign in with Google or create an email account before starting the daily challenge.','Read the question, use optional lifelines, and confirm your final answer before time runs out.','Keep your earned virtual prize when walking away or timing out, then share a spoiler-free result and read the culture explanations.'],related:['memory-trace','frogger-jump']
+  },
+  {
+    slug: 'frogger-jump', guide:false, name: 'Frogger Jump 2.5D', zh: '蓄力連連跳', genre: 'Arcade', players: [1, 1], topic: 'Isometric Frog Jumping Game',
+    description: 'Play Frogger Jump 2.5D, a one-finger endless river jump. Hold to charge, release to hop, earn Frog Coins, unlock thirty-eight cute animals and leap across logs and water lilies while avoiding thorns and hungry river creatures.',
+    intro: 'A solo isometric jumping game with wood and lily platforms. Charge a tapered power meter, release to hop, earn golden Frog Coins, collect thirty-eight animal friends, choose a themed animal ability. Firebase rankings activate after project setup.',
+    chinese: '單指蓄力的 2.5D 無盡跳躍遊戲。長按蓄力，放手自動瞄準木樁或睡蓮；落地賺青蛙幣解鎖企鵝、兔子、猴子、水獺、小鴨、花貓、熊貓、狐狸、水豚、糯糯星鼠及小可愛、小八、烏薩奇與島嶼夥伴等漫畫角色，每 50 跳補充一次技能，最多保留2次。Firebase 設定完成後可保留唯一名字，參加顯示所用動物的世界前十名排行。',
+    steps: ['Enter a player name, choose an owned animal, then hold the screen, mouse button or Space and release to hop.', 'Read three wood or lily platforms ahead. Use your animal skill to clear obstacles or improve a landing; another use is earned every 50 successful landings, holding up to two.', 'Complete a run to earn Frog Coins and unlock more animals. When Firebase is configured, sign in for unique names, cross-device wallets and the public top ten; local practice stays unranked.'],
+    related: ['floating-balance', 'stone-skip'],
   },
   {
     slug: 'feet-up-cafe', name: 'Feet Up Café', zh: '茶記縮腳大亂鬥', genre: 'Arcade', players: [1, 1], topic: 'Hong Kong Café Action Game', listed: false,
@@ -201,11 +209,5 @@ export const games = [
     steps:['Choose a faction for a twelve-question run, or set five personal preferences for the local duo test.', 'Answer each 35-second question while protecting your 100 HP. Optional hints cost HP; active companion skills can be used once per run.', 'Review your incident poster, collect companion cards and earn cosmetic bond appearances. Signed-in SC and collection progress sync with Firebase; guest currency stays local.'],
     related:['memory-trace','line-up'],
   },
-  {
-    slug:'hong-kong-millionaire',name:'Hong Kong Millionaire',zh:'香港百萬富翁',genre:'Quiz',players:[1,4],topic:'Daily Hong Kong Culture Quiz',guide:false,languages:['zh-Hant'],
-    description:'Play Hong Kong Millionaire, a Hong Kong street-comic quiz with Hong Kong culture, daily illustrated puzzles, three lifelines and a million-dollar prize ladder.',
-    intro:'A daily Traditional Chinese Hong Kong quiz. Answer 15 questions with 30 second clocks, three once-only lifelines and safety nets at questions five and ten. Guest progress stays in this browser for today; signed-in players can save records and join rankings after Firebase setup.',
-    chinese:'每日一次的香港文化問答。十五題四選一，每題30秒，以完整原創插畫輔助理解香港知識；第五及第十題為保險線，錦囊各用一次。匿名只保留今日進度，登入可累積虛擬獎金、稱號、錯題本及文化圖鑑。',
-    steps:['Choose guest play or sign in before starting the daily challenge.','Read the question, use optional lifelines, and confirm your final answer before time runs out.','Keep your earned virtual prize when walking away or timing out, then share a spoiler-free result and read the culture explanations.'],related:['memory-trace','frogger-jump']
-  },
+
 ];
