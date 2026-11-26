@@ -2,7 +2,9 @@ import {installContentAccount} from './content-account-fixture.mjs';
 // Daily-quiz controls with a test-only authenticated account adapter; no production writes.
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
-import {LOCAL_QUESTIONS as bank} from '../src/local-questions.js';
+import {LOCAL_QUESTIONS} from '../src/local-questions.js';
+import {NEIGHBOURHOOD_QUESTIONS} from '../src/neighbourhood-questions.js';
+const bank=process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
 import {newRun,hkDay,questionId,act} from '../src/game.js';
 import {questionView} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));

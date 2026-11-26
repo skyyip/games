@@ -15,7 +15,7 @@ firebase deploy --project sky-playground-millionaire --only firestore:rules
 
 ## 單一題庫與固定資料集合
 
-把本遊戲視為首次推出，直接使用目前完整的 351 題，包括 67 題香港漫畫篇、60題日常細節及兩份附件新增的60題街角觀察及本地特色60題；唯一題庫標識為 `hk-2026-11`。
+把本遊戲視為首次推出，直接使用目前完整的 411 題，包括 67 題香港漫畫篇、60題日常細節及兩份附件新增的60題街角觀察及本地特色60題，以及街坊地膽篇60題；唯一題庫標識為 `hk-2026-11`。
 
 - 私人玩家：`hkm_players/{uid}`，每日題局放在其 `runs/{香港日數}`。
 - 每日榜：`hkm_results`；生涯榜：`hkm_rankings`；月榜：`hkm_seasons`。
@@ -95,7 +95,7 @@ firebase emulators:exec --project demo-hk-millionaire --only firestore "node scr
 
 ## 本地特色60題的發布次序（2026-11-26）
 
-題庫擴充至351題，難度池為104／206／41。請先Publish本資料夾**完整** `firestore.rules`，再上傳新網站；抽題表、答案及圖鑑上限須一致，不能只改一個總數。仍使用原本的單一題庫與 `hkm_` 集合，四個索引不變。
+題庫擴充至411題，難度池為124／226／61。請先Publish本資料夾**完整** `firestore.rules`，再上傳新網站；抽題表、答案及圖鑑上限須一致，不能只改一個總數。仍使用原本的單一題庫與 `hkm_` 集合，四個索引不變。
 
 只發布規則的指令：
 
@@ -119,4 +119,4 @@ firebase deploy --project sky-playground-millionaire --only firestore:rules
 
 本版將每日／週末／再挑戰／房間的答題期限改為30秒，房間10題總時長325秒，斷線寬限後355秒。先發布完整`firestore.rules`，再上傳同版網站；舊25秒網站不應與新規則混用。四個複合索引保持不變，無需新增索引。不要為更新計時清除玩家進度或放寬為公開寫入。
 
-登入限定版同時拒絕 Firebase Anonymous Auth token 的個人及房間操作；Google／Email 註冊與現有帳戶仍可使用。第11–15題的新41題壓軸池與Firestore抽題表須同步發布，索引及資產不重置。
+登入限定版同時拒絕 Firebase Anonymous Auth token 的個人及房間操作；Google／Email 註冊與現有帳戶仍可使用。第11–15題的新61題壓軸池與Firestore抽題表須同步發布，索引及資產不重置。
