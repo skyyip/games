@@ -1,16 +1,16 @@
 Latest combined website upload package
-Source: bf1c0c8532d8f5084411f2ebcfce655f95e01200
+Source: 7edb546a00fb3ee55010e6f2f588d82ea67f144a
 
-You Really Get Them: simplified collection and retired survival contracts.
-The gacha shop is expanded every time the collection opens. Removed the separate companion summary, character/skill search, home wallet summary and legacy local-SC label. Faction, ownership and rarity filters remain. Equip/unequip actions remain in card details. The equipped card uses a yellow highlight, dark outline, shadow and check-mark badge, equally across rarities.
-Removed contract selection, evaluation, stamp album, result stamps and poster stamps. Existing wallet balances, cards, bonds and legacy local save files are preserved. Old pending receipts no longer award stamps. Retired contract fields remain in the wire format (none/false, old stamp lists preserved) to match existing Firestore rules without migration. SC syncing, pending receipts, once-only payouts, 100-SC draws, 25-SC duplicate refunds, skills and rarity probabilities remain unchanged. Existing 817 bank entries and 180 cards are retained; all 44 N cards remain colored. Source offline cache is v64.
+You Really Get Them: 35-second questions and ten new illustrated scenarios.
+Removed the result-page rewardSyncStatus element and its DOM writes. SC transactions, pending offline rewards and lost-acknowledgement recovery remain functional. Pending status remains in the incident poster and bond results.
+All timed questions now start/reset at 35 seconds, including classic, picture, air, hybrid and message questions. Timeout damage remains 40 HP; companion pause remains five seconds; local duo preference questions remain untimed.
+Added two picture questions per faction, ten in total, each with new colored comic artwork, factual text descriptions and individual comic replies. Topics include focused work, cake photography, furniture assembly, headphones, walk requests, sleeping dogs, cardboard cat housing, window birdwatching, shared navigation and sofa entertainment. The original nine picture questions remain verbatim. There are now 19 picture questions, 827 stored bank entries and 818 actively playable prompts; the 28 authored story/message versions remain separate. Normal rounds still contain twelve questions with two pictures; duo rounds contain five preference questions with one picture now randomly selected from three. The new atlas is cached offline in source cache v65. Existing 180 cards, colored N artwork, gacha odds, wallet balances and skill power are preserved.
 
-Firestore: this release does not change rules, indexes or Functions. If the 180-card rules are already published, no Firebase update is needed. If not, publish the complete existing rules before uploading the website:
-https://github.com/skyyip/games/blob/bf1c0c8532d8f5084411f2ebcfce655f95e01200/you-really-get-them/firestore.rules
-Instructions:
-https://github.com/skyyip/games/blob/bf1c0c8532d8f5084411f2ebcfce655f95e01200/you-really-get-them/FIRESTORE-UPDATE.md
+Validation: 96 Node tests; source browser coverage of all 818 active bank prompts; all ten new snapshots checked at 320/390/1280px, with actual image decoding and crop boundaries, old/new failed-image text fallback, offline play and 35-second timeout boundaries. Source economy/recovery 92 checks, companions 124, stories 638; compiled questions 268, economy 51, incident/comic/poster/timeout 697. Browser cloud flows use SDK test doubles; physical iPhone and production OAuth are not verified. All 29 built pages passed SEO and release permissions. No test fixtures ship.
+
+This update does not change Firestore rules, indexes, Functions or wallet schema. Existing 180-card rules still apply; no new Firebase deployment is needed if those rules are already published. Existing complete rules and instructions:
+https://github.com/skyyip/games/blob/7edb546a00fb3ee55010e6f2f588d82ea67f144a/you-really-get-them/firestore.rules
+https://github.com/skyyip/games/blob/7edb546a00fb3ee55010e6f2f588d82ea67f144a/you-really-get-them/FIRESTORE-UPDATE.md
 The ZIP does not publish Firebase rules. No production website or Firebase deployment has been performed.
 
-Validation: 96 Node tests and 18 official local Firestore Emulator tests passed. Browser checks: 147 collection checks at 320/390/1280px, 92 source economy/recovery checks, 51 compiled economy checks, 848 gacha checks, 124 companion checks, and 37 auth checks. SDK test doubles are used for browser auth/cloud flows; real rules are tested independently against the official local emulator. Physical iPhone and production Google OAuth are not verified. All 29 built pages passed SEO and release permission checks. Compiled files were scanned for test fixtures.
-
-Extract the ZIP and upload the CONTENTS of its enclosing folder to public_html/games/, including .htaccess. Set directories to 755 and files to 644 after extraction if the upload tool does not preserve permissions. Other games and prior updates are retained.
+Extract the ZIP and upload the CONTENTS of its enclosing folder to public_html/games/, including .htaccess. Set directories to 755 and files to 644 after extraction if your upload tool does not preserve permissions. Other games and prior updates are retained.

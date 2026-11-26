@@ -1,7 +1,8 @@
 {
-  "version": "d3a564b2dae1c787",
-  "builtAt": 1795699080466,
+  "version": "4377afd568d95c18",
+  "builtAt": 1795699619746,
   "assets": {
+    "you-really-get-them/assets/illustrations/picture-stories-everyday.webp": "assets/picture-stories-everyday-8367e4d47303.webp",
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
     "beat-bad-luck/assets/icons/website-logo-512.png": "assets/website-logo-512-01020184b434.png",
@@ -379,7 +380,7 @@
     "pot-toss/src/app.js": "built/app-4WFSE2WA.js",
     "roach-rush/src/app.js": "built/app-KB33ZEKB.js",
     "stone-skip/src/app.js": "built/app-Z6BFZ5NR.js",
-    "you-really-get-them/src/app.js": "built/app-SPEO3VGA.js",
+    "you-really-get-them/src/app.js": "built/app-23J2BRU4.js",
     "your-dream-career/src/app.js": "built/app-OKS2TK65.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
     "hong-kong-millionaire/src/app.js": "built/app-3ZHUAXOV.js",
@@ -410,7 +411,7 @@
     "pot-toss/styles.css": "built/styles-SH7PW436.css",
     "roach-rush/styles.css": "built/styles-EMU7TNYL.css",
     "stone-skip/styles.css": "built/styles-TBA3T5NJ.css",
-    "you-really-get-them/styles.css": "built/styles-7QNM23CE.css",
+    "you-really-get-them/styles.css": "built/styles-RMFB67H2.css",
     "your-dream-career/styles.css": "built/styles-EPARVTUD.css",
     "your-dream-career/dream.css": "built/dream-LNLKTEYZ.css",
     "hong-kong-millionaire/mobile.css": "built/mobile-S5Q2IMBB.css",
