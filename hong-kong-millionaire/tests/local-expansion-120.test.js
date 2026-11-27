@@ -8,8 +8,8 @@ import {newRun,questionId,questionFor,act,QUESTION_PLANS,BANK_VERSION} from '../
 import {newSession,sessionQid,ROOM_POOLS} from '../src/session-engine.js';
 const bank=[...CITY_LIFE_EXTRA_QUESTIONS,...CULTURE_LIFE_EXTRA_QUESTIONS,...DISTRICT_NATURE_EXTRA_QUESTIONS],ids=new Set(bank.map(q=>q.id)),DAY=20783,horizon=Math.max(...QUESTION_PLANS[BANK_VERSION].map(p=>p.ids.length));
 test('120 fresh Hong Kong questions have distinct IDs, balanced tiers and plausible-size options',()=>{
- assert.equal(bank.length,120);assert.equal(ids.size,120);assert.deepEqual(QUESTIONS.slice(-120),bank);
- assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,771);assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,771);
+ assert.equal(bank.length,120);assert.equal(ids.size,120);assert.deepEqual(QUESTIONS.filter(q=>/^[pqr]\d{2}$/.test(q.id)),bank);
+ assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,891);assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,891);
  assert.deepEqual([1,2,3].map(t=>bank.filter(q=>q.tier===t).length),[40,40,40]);assert.deepEqual([0,1,2,3].map(a=>bank.filter(q=>q.answer===a).length),[30,30,30,30]);
  for(const [prefix,records]of [['p',CITY_LIFE_EXTRA_QUESTIONS],['q',CULTURE_LIFE_EXTRA_QUESTIONS],['r',DISTRICT_NATURE_EXTRA_QUESTIONS]]){
   assert.equal(records.length,40);assert.deepEqual([0,1,2,3].map(a=>records.filter(q=>q.answer===a).length),[10,10,10,10]);

@@ -59,6 +59,12 @@
  .arcade-playing .arcade-visual:not(:has(img)){height:96px;min-height:96px;flex:none}
 }
 
+/* Long questions must keep the exit button reachable in short desktop windows. */
+@media(min-width:701px) and (max-height:500px) and (pointer:fine){
+ .is-playing .question-panel{max-height:100%;overflow-y:auto}
+ .is-playing .visual-frame{max-width:100%}
+}
+
 /* Reserve the entire decorated avatar, including its frame, within each rank slot. */
 .board-list .rank-no{width:44px;height:44px;flex:0 0 44px;overflow:hidden;position:relative}
 .board-list .rank-no>.rank-avatar{width:30px;height:30px;margin:0;font-size:16px}

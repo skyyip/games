@@ -43,7 +43,7 @@ try{
   if(card.foil){const goldUid='gold-'+card.id,goldClient=await seed(goldUid);await ok(feature.wallet(goldClient,goldUid));await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',goldUid),{createdAt:sdk.Timestamp.fromMillis(FOIL_CARDS.indexOf(card.id))});});const gold=await ok(feature.shop(goldClient,goldUid,{type:'gold',requestId:crypto.randomUUID()}));assert.equal(gold.outcome,card.id);assert.equal(gold.balance,1000000-GOLD_PRICE);checks+=2;}
 
  }
- // All twelve cards, including every foil, are required by the independent rules.
+ // All fourteen cards, including every foil, are required by the independent rules.
  for(const series of SERIES){
   const uid='prefix-'+series.id,client=await seed(uid);await ok(feature.wallet(client,uid));
   const cards=CULTURE_CARDS.filter(card=>card.series===series.id),all=Object.fromEntries(cards.map(card=>[card.id,1]));
@@ -56,8 +56,8 @@ try{
   await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:all});});
   const entitled=await ok(feature.shop(client,uid,{type:'equip',slot:'prefix',id:series.id,requestId:crypto.randomUUID()}));assert.equal(entitled.wallet.prefix,series.id);assert.equal(entitled.balance,1000000);checks+=2;
   assert.equal((await ok(feature.wallet(client,uid))).wallet.prefix,series.id);checks++;
-  // A previously equipped six-card prefix is retired once, with assets unchanged.
-  const core=Object.fromEntries(cards.slice(0,6).map(card=>[card.id,1]));
+  // A previously equipped twelve-card prefix is retired once, with assets unchanged.
+  const core=Object.fromEntries(cards.slice(0,-2).map(card=>[card.id,1]));
   await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore();await sdk.updateDoc(sdk.doc(db,'hkm_wallets',uid),{cards:core,prefix:series.id});await sdk.setDoc(sdk.doc(db,'hkm_styles',uid),{uid,frame:'none',theme:'default',prefix:series.id,updatedAt:sdk.Timestamp.now()});});
   await no(sdk.setDoc(ref(client,'hkm_styles',uid),{uid,frame:'none',theme:'default',prefix:series.id,updatedAt:sdk.serverTimestamp()}));
   const retired=await ok(feature.wallet(client,uid));assert.equal(retired.wallet.prefix,'');assert.equal(retired.balance,entitled.balance);assert.deepEqual(retired.wallet.cards,core);assert.deepEqual(retired.wallet.owned,entitled.wallet.owned);checks+=4;

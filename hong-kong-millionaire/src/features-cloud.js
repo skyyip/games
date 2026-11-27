@@ -13,7 +13,7 @@ export const normalizeRoom=r=>r?{...r,...Object.fromEntries(['createdAt','starte
 export async function wallet(c,uid){
  const ref=walletRef(c,uid);let w=await c.getDoc(ref);
  if(!w.exists()){await c.runTransaction(c.db,async t=>{const [p,latest]=await Promise.all([t.get(player(c,uid)),t.get(ref)]);if(!p.exists())throw Error('login-required');if(!latest.exists())t.set(ref,emptyWallet(uid,c.serverTimestamp()));});w=await c.getDoc(ref);}
- // Retire a six-card-era prefix once, without changing cards, funds or other cosmetics.
+ // Retire a prefix made incomplete by a catalogue expansion once, without changing cards, funds or other cosmetics.
  if(w.data().prefix&&!unlockedPrefixes(w.data()).some(s=>s.id===w.data().prefix)){
   const requestId=crypto.randomUUID();
   await c.runTransaction(c.db,async t=>{

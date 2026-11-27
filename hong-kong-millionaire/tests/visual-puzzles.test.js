@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import {rea
 import {QUESTIONS} from '../src/questions.js';
 import {STREET_OBSERVATION_QUESTIONS as bank} from '../src/street-observation-questions.js';
 import {visualModes,visualSpec,questionView} from '../src/question-view.js';
-import {newRun,questionId,presentation,act,hkDay,questionFor} from '../src/game.js';
+import {newRun,questionId,presentation,act,hkDay,questionFor,QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
 import {newSession,sessionQuestion,sessionPresentation,sessionAct,ROOM_REVEAL_MS,ROOM_INTERVAL,ROOM_DURATION} from '../src/session-engine.js';
 const NOW=Date.UTC(2026,10,16,4),DAY=hkDay(NOW);
 test('both supplied drafts map every topic to one new, sourced, reachable question',()=>{
@@ -16,7 +16,7 @@ test('both supplied drafts map every topic to one new, sourced, reachable questi
  assert.deepEqual(counts,[15,15,15,15]);
 });
 test('all retained street topics remain reachable as complete illustrations or text',()=>{
- const seen=new Set();for(let day=DAY;day<DAY+180;day++)for(let index=0;index<15;index++){
+ const seen=new Set();for(let day=DAY;day<DAY+Math.max(...QUESTION_PLANS[BANK_VERSION].map(p=>p.ids.length));day++)for(let index=0;index<15;index++){
   const id=questionId(day,index);seen.add(id);assert(['original','text'].includes(presentation(day,index).mode));
  }
  for(const q of bank)assert(seen.has(q.id),q.id);

@@ -89,7 +89,21 @@ const cards=[
  ["yim-tin-tsai-chapel","villages","鹽田梓小堂",false,"鹽田梓聖若瑟小堂旁嘅村路，串起小島社區嘅記憶。沿住路慢慢行，先發現一個轉角都可以留低好耐。","https://www.gohk.gov.hk/en/spots/spot_detail.php?spot=Yim+Tin+Tsai",false],
  ["tung-ping-chau-foil","villages","東平洲層岩",true,"東平洲層層沉積岩，好似大自然翻開嘅一本厚書。行到海邊望真啲，先知石頭都可以咁有層次。","https://www.geopark.gov.hk/tc/discover/attractions/tung-ping-chau",false],
  ["bamboo-birdcage-maker","crafts","竹籠細作",false,"幼細竹絲經師傅削、屈、穿合，慢慢變成精巧竹籠。望落輕巧，做起上嚟就考眼力、手力同耐性。","https://www.heritagemuseum.gov.hk/tc/resources/e_materials/birdcage.html",false],
- ["man-wa-seal-foil","crafts","文華里刻印",true,"文華里圖章街嘅刻印手藝，將心思收進小小印面。字可以細，落刀嗰份專注就一啲都唔少。","https://www.hkcd.com.hk/hkcdweb/content/2022/08/20/content_1359958.html",false]
+ ["man-wa-seal-foil","crafts","文華里刻印",true,"文華里圖章街嘅刻印手藝，將心思收進小小印面。字可以細，落刀嗰份專注就一啲都唔少。","https://www.hkcd.com.hk/hkcdweb/content/2022/08/20/content_1359958.html",false],
+ ["red-taxi-corner","transport","轉角紅的",false,"紅色車身配銀頂，是不少街坊對市區的士的熟悉印象。平時話趕時間，坐低之後反而先諗起自己未食早餐。","https://www.td.gov.hk/tc/transport_in_hong_kong/public_transport/taxi/details_of_taxi_operating_areas_/",false],
+ ["ngong-ping-cabin-foil","transport","昂坪雲間行",true,"纜車連起東涌與昂坪，山巒與海面慢慢在腳下展開。平日開十個視窗都唔夠，今日一扇車窗已經望到唔想眨眼。","https://www.np360.com.hk/tc/cable-cars",false],
+ ["poon-choi-courtyard","heritage","圍村食盆",false,"盆菜逐層打好，街坊與族人圍坐同享，食物把一桌人聚埋一齊。話好每樣夾少少，個碗總係自己愈疊愈高。","https://www.icho.hk/tc/web/icho/representative_list_sek_pun.html",false],
+ ["tin-hau-procession-foil","heritage","天后誕旗海",true,"鼓鑼、旗幟與巡遊隊伍，連起香港不同社區的天后誕傳統。人未行到街口，熱鬧聲已經先同街坊打招呼。","https://www.icho.hk/tc/web/icho/representative_list_tin_hau.html",false],
+ ["tofu-pudding-stall","snacks","街坊豆腐花",false,"滑嫩豆腐花配上甜甜糖水，一碗就盛住熟悉的街頭甜品時光。話要慢慢食，匙羹就好似有自己嘅行程。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-traditional-hong-kong-desserts.html",false],
+ ["wife-cake-foil","snacks","老婆餅酥香",true,"層層酥皮包住冬蓉餡，元朗老婆餅的香氣由餅盤飄到街口。買來做手信之前，先同自己談判可唔可以試一件。","https://www.hangheung.com.hk/pages/hangheung-wife-cake",false],
+ ["tenement-mailboxes","streets","唐樓信箱",false,"一格格信箱排在唐樓入口，收藏每戶人家的生活消息。以為會收到遠方明信片，轉頭又係水電煤單。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-the-blue-house.html",false],
+ ["gas-lamp-steps-foil","streets","煤氣燈石階",true,"都爹利街石階旁的四盞煤氣路燈，替中環夜色留下一點暖光。行程可以趕，望到靚燈就想借多半分鐘。","https://www.amo.gov.hk/tc/historic-buildings/monuments/hong-kong-island/monuments_08/index.html",false],
+ ["noon-day-gun","harbour","銅鑼灣午炮",false,"告士打道海旁的午炮延續報時傳統，炮聲與港灣景色一起走進城市記憶。報時可以準，打工人幾時放飯就未必。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-noon-day-gun.html",false],
+ ["tsing-ma-bridge-foil","harbour","青馬橋暮色",true,"青馬大橋以懸索跨越海面，連接青衣與馬灣，橋影和船影一齊映進暮色。睇橋想慢慢，趕返工又希望快快。","https://www.hyd.gov.hk/tc/information_corner/trivia/longest_span_bridge/index.html",false],
+ ["lam-tsuen-wishes","villages","林村許願時光",false,"老樹旁的仿真許願樹與許願架，讓林村的掛願習俗繼續陪住街坊。願望可以好宏大，準時收工亦值得寫低。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-lam-tsuen-wishing-tree.html",false],
+ ["tung-chung-fort-foil","villages","東涌炮台舊影",true,"石牆與古炮記下東涌的清代海防故事，山影與海風替畫面留住舊時氣氛。平時最驚電話催交功課，昔日守城真係另一種責任。","https://www.amo.gov.hk/tc/historic-buildings/monuments/outlying-islands/monuments_07/index.html",false],
+ ["scales-workshop","crafts","秤號巧手",false,"一盤、一砣、一枝桿，師傅把手工與刻度慢慢磨準。問一件貨有幾多斤兩，靠工具，唔靠吹水。","https://zolimacitymag.com/forgotten-hong-kong-icon-handmade-traditional-chinese-scales/",false],
+ ["floral-button-foil","crafts","盤扣花韻",true,"布條在指尖盤成花形鈕扣，小小一粒，收起中式服裝的細緻手藝。你仲喺度解耳機線，師傅已經把線條盤成花。","https://www.icho.hk/tc/web/icho/past_event35.html",false]
 ];
 export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
 export const GEAR=Object.freeze([
