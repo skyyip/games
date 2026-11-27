@@ -1,21 +1,20 @@
-Latest website upload package — 2026-11-27
-Source: 228ed6f2f4f17ab34e0156c5dbf5dcff16646c64
-Release: 374557a9b347b5be
-Website base path: /games/
+香港百萬富翁：香港街坊生活新章
+Source commit: 2e79b2d76b9e47ad54425dbec2719806d7b81049
+Upload build base path: /games/
 
-Hong Kong Millionaire: available-prize text and highlighted balance align to the left on one line. The transport collection prefix is now 交通達人; its stored transport ID and earned entitlement are unchanged. The two gacha machines use general-purpose colour/gold capsule illustrations and stay side-by-side on mobile. Avatar frames display two per mobile row. Ten remaining vector card faces were redrawn as detailed Hong Kong comic illustrations, so all 70 collectible cards use raster comic art. Locked-card grayscale and confirmed ownership behaviour remain intact.
+新增120條本地題目，總771題；三個難度各新增40題。
+原有七個卡冊分類各新增一張文化卡及一張閃卡：新增14張，總84張（49文化卡、35閃卡），各類12張。
+原651題、70張卡及原六張核心卡的前綴資格保留；不清空錢包、卡片或造型。
+普通扭蛋10,000、閃卡扭蛋80,000；普通週期525/步距37、閃卡週期35/步距6。
 
-Typography: full unchanged official Chiron Hei HK variable fonts for body copy/questions/options/buttons, Chiron Sung HK for headings and card names. All 288 original Unicode font partitions are self-hosted; the browser fetches needed partitions and used fonts are runtime-cached. Font partitions are excluded from the Millionaire install precache. Original OFL licenses are included in assets/. Latin/numeric Fredoka styling is retained where already used.
+部署順序：先發布同版完整 Firestore rules，再上傳網站。詳見 FIREBASE-UPDATES.txt。
+解壓後，把最外層資料夾內的全部檔案（包括 .htaccess、assets、built）上傳至 public_html/games/。
+不要把 ZIP 的最外層資料夾再嵌套上傳。保留檔案644／資料夾755權限。
+此包包含完整網站及其他遊戲；請完整替換新版檔案，不只複製百萬富翁 HTML。
 
-All 29 pages and other games are retained. Question bank (651), card IDs/count (70), prices, wallet fields, answer timing and challenge/room rules are unchanged from the previous website source 7d68e556495ab7d439bf886fea2dc681a45a95cc.
+驗證：109單元測試；120新題1,080項瀏覽器檢查；收藏137項；商店／非即時對戰110項；離線7項。
+真正本機官方Firestore Emulator：每日99項、經濟／房間602項。
+瀏覽器使用測試帳戶與Chromium；未聲稱正式OAuth、Firebase或網站已部署。
 
-Firebase: this UI/artwork/font release requires NO changes to the matching 651-question/70-card Firestore rules, four indexes, Functions or player data. The committed rules/indexes/Firebase configuration are byte-identical to the previous release source. If the earlier expansion has not been deployed, publish the complete matching Firestore rules first; see FIREBASE-UPDATES.txt. This download does not deploy Firebase or upload your production website.
-
-Verification: 105 unit tests, 137 collection browser checks at 320/390/1280px, 7 actual Service Worker offline checks, four service-worker unit checks, actual-font CDP verification on mobile/desktop, and cached-font offline rendering. The final /games/ upload build additionally passed collection, actual-font and offline checks. Every packaged asset was compared with committed source. Production OAuth, Firebase and physical devices were not exercised by these local checks.
-
-Extract the ZIP and upload the CONTENTS of its enclosing folder to public_html/games/, including .htaccess, assets/ and built/. Keep directories at 755 and files at 644. The package already uses /games/ paths. Do not upload the ZIP itself as the website.
-
-Complete matching Firestore rules:
-https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/firestore.rules
-Deployment instructions:
-https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/FIREBASE.md
+新題與來源：https://github.com/skyyip/games/blob/2e79b2d76b9e47ad54425dbec2719806d7b81049/hong-kong-millionaire/QUESTION-BANK-LOCAL-EXPANSION-120.md
+完整驗證：https://github.com/skyyip/games/blob/2e79b2d76b9e47ad54425dbec2719806d7b81049/hong-kong-millionaire/VERIFICATION.md

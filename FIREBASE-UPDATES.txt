@@ -1,21 +1,21 @@
-Firebase update notes — Hong Kong Millionaire — 2026-11-27
-Source: 228ed6f2f4f17ab34e0156c5dbf5dcff16646c64
+本版必須更新 Firestore Rules
 Firebase project: sky-playground-millionaire
+Source commit: 2e79b2d76b9e47ad54425dbec2719806d7b81049
 
-This release changes presentation only. It does not change Firestore rules, indexes, Authentication settings, Functions, collections, saved wallet data or the stored transport prefix ID. No migration or data reset is required.
+本次新增120題及14張卡，題目ID／答案與抽卡白名單均有改動。
+請先發布同版完整規則，再上傳本網站；舊規則會拒絕新版題目結算或抽卡。
 
-If you already deployed the previous 651-question / 70-card version, no Firebase update is needed; upload the new website files only.
+完整規則（請整份使用）：
+https://github.com/skyyip/games/blob/2e79b2d76b9e47ad54425dbec2719806d7b81049/hong-kong-millionaire/firestore.rules
+設定說明：
+https://github.com/skyyip/games/blob/2e79b2d76b9e47ad54425dbec2719806d7b81049/hong-kong-millionaire/FIREBASE.md
 
-If your Firebase project still uses an older question/card version, deploy the COMPLETE matching rules before uploading the website. Use the existing independent project sky-playground-millionaire. Keep the existing four indexes. Coordinate the single-bank update when there are no unfinished challenges or rooms.
-
-Rules:
-https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/firestore.rules
-Indexes:
-https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/firestore.indexes.json
-Deployment instructions:
-https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/FIREBASE.md
-
-CLI from the source repository's hong-kong-millionaire directory:
+方式一：Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上整份規則並 Publish。
+方式二：下載同版原始碼，在 hong-kong-millionaire 資料夾執行：
 firebase deploy --project sky-playground-millionaire --only firestore:rules
 
-These files describe the required configuration; this package does not run Firebase deployment.
+四個 Firestore indexes 與 Cloud Functions 無變更；不用重新部署。
+無須手動新增題目文件、重建資料庫、清空錢包或遷移玩家資產；Google／Email登入設定不變。
+維持單一題庫 hk-2026-11。因抽題池擴充，請於沒有進行中題局／房間時安排同步更新，避免舊版未完成題組與新版規則不一致。
+
+此包只提供已測試的網站與部署說明；尚未代為部署正式 Firebase 或上傳正式網站。
