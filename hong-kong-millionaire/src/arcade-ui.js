@@ -133,7 +133,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   clock(false);
  }
  function home(list){
-  renderedDay=hkDay();const w=state?.wallet,blocked=!!pending||!state||!!purchasePending();list.append(el('p','可用獎金 '+(state?money(state.balance):'—'),'arcade-balance'));
+  renderedDay=hkDay();const w=state?.wallet,blocked=!!pending||!state||!!purchasePending(),balance=el('div','','wallet-summary arcade-balance');balance.append(el('span','可用獎金'),el('strong',state?money(state.balance):'—'));list.append(balance);
   if(w?.activeSession)list.append(button('繼續未完成挑戰',recover,false,'primary'));
   const grid=el('div','','arcade-entry-grid');for(const [to,title,copy,icon]of [['create','我來開房','24小時內各自作答，無須同時在線。','tram'],['join','輸入代號','8位代號就入到房。','lantern']]){const card=button('',()=>{view=to;render();},false,'arcade-entry');const picture=el('span','','arcade-entry-art');picture.dataset.icon=icon;card.append(picture,el('strong',title),el('small',copy));grid.append(card);}list.append(grid);
   const today=hkDay(),cost=retryPrice(today),retry=el('section','','weekend-compact retry-compact'),ready=w?.retryBoughtDay===today&&w?.retryUsedDay!==today,bought=w?.retryBoughtDay===today,price=el('div','','ticket-price');
