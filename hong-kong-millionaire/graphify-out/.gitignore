@@ -1,0 +1,5 @@
+/cache/
+/transcripts/
+/.graphify_*
+!/.graphify_labels.json
+/.needs_update

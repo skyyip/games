@@ -1,0 +1,1136 @@
+{
+  "code_inputs": [
+    "assets/generate_art.py",
+    "assets/generate_comic_art.py",
+    "assets/generate_daily_art.py",
+    "assets/generate_urban_art.py",
+    "docs/source-60-topics.json",
+    "docs/source-67-topics.json",
+    "docs/source-street-60-topics.json",
+    "firebase.json",
+    "firestore.indexes.json",
+    "package.json",
+    "scripts/auth-transition-check.mjs",
+    "scripts/browser-check.mjs",
+    "scripts/cloud-check.mjs",
+    "scripts/collection-browser-check.mjs",
+    "scripts/comic-browser-check.mjs",
+    "scripts/content-account-fixture.mjs",
+    "scripts/culture-120-browser-check.mjs",
+    "scripts/daily-design-browser-check.mjs",
+    "scripts/district-browser-check.mjs",
+    "scripts/fairplay-browser-check.mjs",
+    "scripts/familiar-browser-check.mjs",
+    "scripts/firebase-browser-check.mjs",
+    "scripts/firebase-deploy.mjs",
+    "scripts/firestore-check.mjs",
+    "scripts/generate-comic-review.mjs",
+    "scripts/generate-cosmetics.py",
+    "scripts/generate-culture-120-review.mjs",
+    "scripts/generate-daily-review.mjs",
+    "scripts/generate-district-review.mjs",
+    "scripts/generate-familiar-review.mjs",
+    "scripts/generate-local-frames.py",
+    "scripts/generate-local-review.mjs",
+    "scripts/generate-neighbourhood-review.mjs",
+    "scripts/generate-new-culture-art.py",
+    "scripts/generate-rules.mjs",
+    "scripts/generate-sensory-audio.py",
+    "scripts/generate-street-art.py",
+    "scripts/generate-street-review.mjs",
+    "scripts/live-smoke-check.mjs",
+    "scripts/local-browser-check.mjs",
+    "scripts/neighbourhood-browser-check.mjs",
+    "scripts/offline-browser-check.mjs",
+    "scripts/package-culture-art.mjs",
+    "scripts/publish-tested-tree.mjs",
+    "scripts/reward-rules.mjs",
+    "scripts/rewards-browser-check.mjs",
+    "scripts/rewards-firestore-check.mjs",
+    "scripts/room-browser-fixture.mjs",
+    "scripts/showtime-browser-check.mjs",
+    "scripts/street-observation-browser-check.mjs",
+    "scripts/urban-browser-check.mjs",
+    "src/app.js",
+    "src/arcade-ui.js",
+    "src/art.js",
+    "src/celebrations.js",
+    "src/choice-order.js",
+    "src/city-culture-questions.js",
+    "src/cloud-read.js",
+    "src/cloud-transition.js",
+    "src/cloud.js",
+    "src/collection-ui.js",
+    "src/comic-questions.js",
+    "src/daily-design-questions.js",
+    "src/district-questions.js",
+    "src/economy.js",
+    "src/familiar-questions.js",
+    "src/features-cloud.js",
+    "src/firebase-settings.js",
+    "src/game.js",
+    "src/hk-icons.js",
+    "src/interactive-visual.js",
+    "src/ledger.js",
+    "src/local-discovery-questions.js",
+    "src/local-questions.js",
+    "src/neighbourhood-questions.js",
+    "src/question-share.js",
+    "src/question-view.js",
+    "src/questions.js",
+    "src/reward-effects.js",
+    "src/schema.js",
+    "src/sensory-model.js",
+    "src/sensory-ui.js",
+    "src/session-clock.js",
+    "src/session-engine.js",
+    "src/showtime-model.js",
+    "src/showtime.js",
+    "src/street-observation-questions.js",
+    "src/transition-retry.js",
+    "src/urban-questions.js",
+    "src/visual-catalog.js",
+    "src/visual-effects.js",
+    "sw.js",
+    "tests/async-room.test.js",
+    "tests/choice-order.test.js",
+    "tests/cloud-read.test.js",
+    "tests/collection-art.test.js",
+    "tests/culture-120.test.js",
+    "tests/district-questions.test.js",
+    "tests/familiar-questions.test.js",
+    "tests/game.test.js",
+    "tests/ledger.test.js",
+    "tests/local-questions.test.js",
+    "tests/neighbourhood-questions.test.js",
+    "tests/rewards.test.js",
+    "tests/session-clock.test.js",
+    "tests/showtime.test.js",
+    "tests/simplification.test.js",
+    "tests/transition-retry.test.js",
+    "tests/visual-puzzles.test.js"
+  ],
+  "documents": {
+    "FIREBASE.md": {
+      "lines_read": 142,
+      "total_lines": 142
+    },
+    "QUESTION-BANK-60.md": {
+      "lines_read": 1145,
+      "total_lines": 1145
+    },
+    "QUESTION-BANK-67.md": {
+      "lines_read": 1278,
+      "total_lines": 1278
+    },
+    "QUESTION-BANK-CULTURE-120.md": {
+      "lines_read": 2525,
+      "total_lines": 2525
+    },
+    "QUESTION-BANK-DISTRICT-60.md": {
+      "lines_read": 1387,
+      "total_lines": 1387
+    },
+    "QUESTION-BANK-FAMILIAR-60.md": {
+      "lines_read": 1387,
+      "total_lines": 1387
+    },
+    "QUESTION-BANK-LOCAL-60.md": {
+      "lines_read": 1387,
+      "total_lines": 1387
+    },
+    "QUESTION-BANK-NEIGHBOURHOOD-60.md": {
+      "lines_read": 1387,
+      "total_lines": 1387
+    },
+    "QUESTION-BANK-STREET-60.md": {
+      "lines_read": 1469,
+      "total_lines": 1469
+    },
+    "README.md": {
+      "lines_read": 157,
+      "total_lines": 157
+    },
+    "REWARDS-AND-ROOMS.md": {
+      "lines_read": 44,
+      "total_lines": 44
+    },
+    "TASKS.md": {
+      "lines_read": 26,
+      "total_lines": 26
+    },
+    "VERIFICATION.md": {
+      "lines_read": 215,
+      "total_lines": 215
+    },
+    "assets/ASSETS.md": {
+      "lines_read": 73,
+      "total_lines": 73
+    },
+    "index.html": {
+      "lines_read": 124,
+      "total_lines": 124
+    }
+  },
+  "images": {
+    "assets/bun.svg": {
+      "visually_reviewed": true
+    },
+    "assets/buns.svg": {
+      "visually_reviewed": true
+    },
+    "assets/bus-route-sheet.svg": {
+      "visually_reviewed": true
+    },
+    "assets/calligraphy.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-bamboo-steamer.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-bamboo-steamer.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-cheung-chau-pier-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-cheung-chau-pier-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-cross-harbour-bus.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-dough-figurine-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-dough-figurine-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-eggroll-workshop.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-eggroll-workshop.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-flower-cannon.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-fruit-market-crates.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-hakka-unicorn-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-hungry-ghost-theatre.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-kai-tak-ferry-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-kat-hing-courtyard.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-kat-hing-courtyard.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-lai-chi-wo-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-lai-chi-wo-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-lamma-bay.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-lamma-bay.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-lei-yue-mun-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-letter-writer-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-light-rail-car.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-minibus-signwriting.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-mui-wo-silvermine-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-mui-wo-silvermine-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-neon-workshop.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-neon-workshop.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-night-dai-pai-dong-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-painted-porcelain-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-painted-porcelain-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-paper-lion-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-paper-lion-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-paper-windmill-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-peak-tram-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-peng-chau-lane.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-peng-chau-lane.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-pineapple-bun-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-po-toi-shore-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-red-bean-ice-foil.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-salt-crystals.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-salt-crystals.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-scissor-repair.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-scissor-repair.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-seafood-market.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-sha-tau-kok-lanterns.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-shoe-repair-stall.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-siu-mai-skewer.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-star-ferry-rope-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-sugar-onion-wrap.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-tai-o-bridge.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-tai-o-bridge.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-tsang-house.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-tsang-house.webp": {
+      "visually_reviewed": true
+    },
+    "assets/card-typhoon-shelter.svg": {
+      "visually_reviewed": true
+    },
+    "assets/card-wedding-embroidery-foil.webp": {
+      "visually_reviewed": true
+    },
+    "assets/clock.svg": {
+      "visually_reviewed": true
+    },
+    "assets/collection-heritage.webp": {
+      "visually_reviewed": true
+    },
+    "assets/collection-snacks.webp": {
+      "visually_reviewed": true
+    },
+    "assets/collection-streets-harbour.webp": {
+      "visually_reviewed": true
+    },
+    "assets/collection-transport.webp": {
+      "visually_reviewed": true
+    },
+    "assets/comic-01.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-02.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-03.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-04.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-05.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-06.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-07.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-08.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-09.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-10.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-11.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-12.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-13.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-14.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-15.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-16.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-17.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-18.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-19.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-20.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-21.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-22.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-23.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-24.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-25.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-26.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-27.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-28.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-29.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-30.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-31.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-32.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-33.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-34.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-35.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-36.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-37.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-38.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-39.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-40.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-41.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-42.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-43.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-44.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-45.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-46.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-47.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-48.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-49.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-50.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-51.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-52.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-53.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-54.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-55.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-56.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-57.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-58.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-59.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-60.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-61.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-62.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-63.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-64.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-65.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-66.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-67.svg": {
+      "visually_reviewed": true
+    },
+    "assets/comic-cover.webp": {
+      "visually_reviewed": true
+    },
+    "assets/cover.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-01.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-02.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-03.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-04.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-05.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-06.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-07.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-08.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-09.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-10.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-11.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-12.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-13.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-14.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-15.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-16.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-17.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-18.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-19.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-20.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-21.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-22.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-23.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-24.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-25.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-26.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-27.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-28.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-29.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-30.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-31.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-32.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-33.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-34.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-35.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-36.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-37.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-38.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-39.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-40.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-41.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-42.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-43.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-44.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-45.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-46.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-47.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-48.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-49.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-50.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-51.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-52.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-53.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-54.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-55.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-56.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-57.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-58.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-59.svg": {
+      "visually_reviewed": true
+    },
+    "assets/daily-60.svg": {
+      "visually_reviewed": true
+    },
+    "assets/dragon.svg": {
+      "visually_reviewed": true
+    },
+    "assets/escalator-brush.svg": {
+      "visually_reviewed": true
+    },
+    "assets/exit-redvan.webp": {
+      "visually_reviewed": true
+    },
+    "assets/ferry-bench.svg": {
+      "visually_reviewed": true
+    },
+    "assets/ferry.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-bamboo.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-bauhinia.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-dimsum.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-ferry.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-gold.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-harbour.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-jade.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-lantern.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-lion.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-minibus.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-neon.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-rwb.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-tile.svg": {
+      "visually_reviewed": true
+    },
+    "assets/frame-waffle.svg": {
+      "visually_reviewed": true
+    },
+    "assets/geopark.svg": {
+      "visually_reviewed": true
+    },
+    "assets/harbour.svg": {
+      "visually_reviewed": true
+    },
+    "assets/lamppost-number.svg": {
+      "visually_reviewed": true
+    },
+    "assets/lantern.svg": {
+      "visually_reviewed": true
+    },
+    "assets/lion.svg": {
+      "visually_reviewed": true
+    },
+    "assets/milk.svg": {
+      "visually_reviewed": true
+    },
+    "assets/moon.svg": {
+      "visually_reviewed": true
+    },
+    "assets/mountain.svg": {
+      "visually_reviewed": true
+    },
+    "assets/pawn-screen.svg": {
+      "visually_reviewed": true
+    },
+    "assets/peak.svg": {
+      "visually_reviewed": true
+    },
+    "assets/red-market-bag.svg": {
+      "visually_reviewed": true
+    },
+    "assets/river.svg": {
+      "visually_reviewed": true
+    },
+    "assets/scalloped-coins.svg": {
+      "visually_reviewed": true
+    },
+    "assets/seawater-flushing.svg": {
+      "visually_reviewed": true
+    },
+    "assets/sport.svg": {
+      "visually_reviewed": true
+    },
+    "assets/star.svg": {
+      "visually_reviewed": true
+    },
+    "assets/steel-seats.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-01.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-02.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-03.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-04.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-05.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-06.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-07.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-08.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-09.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-10.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-11.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-12.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-13.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-14.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-15.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-16.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-17.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-18.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-19.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-20.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-21.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-22.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-23.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-24.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-25.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-26.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-27.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-28.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-29.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-30.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-31.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-32.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-33.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-34.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-35.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-36.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-37.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-38.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-39.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-40.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-41.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-42.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-43.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-44.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-45.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-46.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-47.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-48.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-49.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-50.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-51.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-52.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-53.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-54.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-55.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-56.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-57.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-58.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-59.svg": {
+      "visually_reviewed": true
+    },
+    "assets/street-60.svg": {
+      "visually_reviewed": true
+    },
+    "assets/sun.svg": {
+      "visually_reviewed": true
+    },
+    "assets/taxi-light.svg": {
+      "visually_reviewed": true
+    },
+    "assets/temple.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-cafe.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-harbour.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-ink.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-island.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-island.webp": {
+      "visually_reviewed": true
+    },
+    "assets/theme-lantern.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-panels.webp": {
+      "visually_reviewed": true
+    },
+    "assets/theme-porcelain.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-tram.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-village.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-village.webp": {
+      "visually_reviewed": true
+    },
+    "assets/theme-workshop.svg": {
+      "visually_reviewed": true
+    },
+    "assets/theme-workshop.webp": {
+      "visually_reviewed": true
+    },
+    "assets/tong-lau-arcade.svg": {
+      "visually_reviewed": true
+    },
+    "assets/trail.svg": {
+      "visually_reviewed": true
+    },
+    "assets/tram-lifeguard.svg": {
+      "visually_reviewed": true
+    },
+    "assets/tram.svg": {
+      "visually_reviewed": true
+    },
+    "assets/tree.svg": {
+      "visually_reviewed": true
+    },
+    "assets/weep-holes.svg": {
+      "visually_reviewed": true
+    },
+    "assets/yellow-box.svg": {
+      "visually_reviewed": true
+    }
+  },
+  "audio_untranscribed": [
+    "assets/sound-bus.wav",
+    "assets/sound-cafe.wav",
+    "assets/sound-crossing.wav",
+    "assets/sound-ferry.wav",
+    "assets/sound-mahjong.wav",
+    "assets/sound-tram.wav"
+  ],
+  "unclassified": [
+    ".firebaserc",
+    ".gitignore",
+    "comic-theme.css",
+    "cosmetics.css",
+    "firestore.rules",
+    "manifest.webmanifest",
+    "mobile.css",
+    "rewards.css",
+    "showtime.css",
+    "styles.css"
+  ]
+}

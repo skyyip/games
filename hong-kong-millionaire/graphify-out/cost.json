@@ -1,0 +1,15 @@
+{
+  "runs": [
+    {
+      "date": "2026-11-27T01:22:14.122795+00:00",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "files": 443,
+      "measurement_status": "host_agent_token_usage_unavailable",
+      "metered_external_llm_api_calls": 0
+    }
+  ],
+  "total_input_tokens": 0,
+  "total_output_tokens": 0,
+  "measurement_note": "Numeric token fields are compatibility placeholders, not measured host-agent usage; this run made no metered external LLM API calls."
+}

@@ -1,0 +1,41 @@
+[graphify] MultiDiGraph edge-collapse diagnostic
+input: <in-memory>
+input_stage: provided JSON (normal graph.json is post-build)
+effective_directed: <direct-call>
+nodes: 1232
+unverified_code_nodes: 0
+raw_edges: 2748
+valid_candidate_edges: 2604
+missing_endpoint_edges: 0
+dangling_endpoint_edges: 42
+external_reference_edges: 102
+self_loop_edges: 3
+exact_duplicate_edges: 2
+directed_unique_endpoint_pairs: 2549
+directed_same_endpoint_collapsed_edges: 55
+undirected_unique_endpoint_pairs: 2545
+undirected_same_endpoint_collapsed_edges: 59
+same_endpoint_group_count: 49
+relation_variant_groups: 47
+source_file_variant_groups: 0
+source_location_variant_groups: 3
+context_variant_groups: 1
+post_build_graph_type: Graph
+post_build_edges: 2689
+producer_suppression_sites: 12
+producer_suppression_examples:
+  - L2059 seen_ids arity=unknown
+  - L2754 seen_ids arity=unknown
+  - L2756 seen_doc_refs arity=unknown
+  - L3382 seen_ids arity=unknown
+  - L3529 seen_ids arity=unknown
+  - L5424 seen_keys arity=unknown
+  - L5610 seen_keys arity=unknown
+  - L10478 seen_ids arity=unknown
+examples:
+  - scripts_firebase_browser_check_open -> scripts_firebase_browser_check_open_load edges=3 relations=['calls', 'contains', 'indirect_call'] locations=['L35', 'L36'] contexts=['', 'call', 'collection']
+  - src_arcade_ui_installarcade -> src_arcade_ui_installarcade_reconnectvisible edges=3 relations=['calls', 'contains', 'indirect_call'] locations=['L159', 'L160'] contexts=['', 'argument', 'call']
+  - src_cloud -> src_cloud_transition edges=3 relations=['imports_from', 're_exports'] locations=['L5', 'L6'] contexts=['export', 'import', 're-export']
+  - src_cloud -> firebase edges=3 relations=['dynamic_import'] locations=[''] contexts=['']
+  - src_collection_ui_installcollection -> src_collection_ui_installcollection_setidentity edges=3 relations=['calls', 'contains', 'indirect_call'] locations=['L64', 'L67'] contexts=['', 'call', 'collection']
+note: normal graph.json is post-build; raw producer loss must be measured earlier.
