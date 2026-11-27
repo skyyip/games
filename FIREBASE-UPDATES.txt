@@ -1,11 +1,11 @@
-本次手機雙列及字級微調沒有新增Firebase變更。
+本次錦囊使用後停用及調暗沒有新增Firebase變更。
 Firebase project: sky-playground-millionaire
-Source commit: a9c74388b2aeb2e9e077bbe6444c1a6c91c1f5aa
+Source commit: c6a6bae807854e347f5f36f8cdd829644e96d279
 
 Rules與上一版9256ef90相同。若已發布每類全部12款才解鎖前綴的完整Rules，本次只需更新網站。
 若尚未更新該版，先發布以下同版完整Rules，再上傳網站。
-完整規則：https://github.com/skyyip/games/blob/a9c74388b2aeb2e9e077bbe6444c1a6c91c1f5aa/hong-kong-millionaire/firestore.rules
-設定說明：https://github.com/skyyip/games/blob/a9c74388b2aeb2e9e077bbe6444c1a6c91c1f5aa/hong-kong-millionaire/FIREBASE.md
+完整規則：https://github.com/skyyip/games/blob/c6a6bae807854e347f5f36f8cdd829644e96d279/hong-kong-millionaire/firestore.rules
+設定說明：https://github.com/skyyip/games/blob/c6a6bae807854e347f5f36f8cdd829644e96d279/hong-kong-millionaire/FIREBASE.md
 
 需要更新時：Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上整份並Publish。
 亦可在同版原始碼hong-kong-millionaire資料夾執行：
