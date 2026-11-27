@@ -1,18 +1,19 @@
-香港百萬富翁：高亮前綴、貼地卡冊說明與頁底音效設定
-Source commit: 7e6bffa08ecbed85514d569334a48acc71d2f6db
+香港百萬富翁：全套收藏稱號與SSR風格閃卡
+Source commit: 9256ef9041f07d8b43961e2d17808c34c174064f
 Upload build base path: /games/
 
-稱號前綴在卡冊、個人造型、結算頁及排行榜顯示黃色高亮標籤。
-52張卡的聲明式文案改為香港日常小故事，延伸閱讀與卡片資料保留。
-手機版可用獎金數字按原大小增加10%，收藏與遊樂場保持同款；桌面不變。
-移除「街坊一齊考香港」；節目音效設定移到頁底，答題中隱藏，偏好刷新後保留。
+每類全部12款（包括閃卡）集齊才可使用收集稱號，前端、交易模型與Firestore同步驗證。
+舊版只有首6款而已使用的前綴，在新版載入錢包時以零費用交易取消；卡片、造型、獎金及歷史收據保留，已集齊者不變。
+已收藏閃卡參考You Really Get Them SSR：彩虹反光、游標／觸控光暈及輕微3D傾斜。
+未抽中保持灰階；減少動態設定停用漂移與傾斜，手機仍可捲動。
+卡冊頂部統一說明；前綴標籤行高1.1、左邊距2px，個人造型成就稱號亦高亮；頁底音效設定靠左。
 
-驗證：110項單元、167項收藏、37項節目音效／燈光／分享、四尺寸專項瀏覽器檢查及29頁全站建置通過。
-瀏覽器為Chromium與測試帳戶adapter；未聲稱實機iOS或正式OAuth已測試。
-完整紀錄：https://github.com/skyyip/games/blob/7e6bffa08ecbed85514d569334a48acc71d2f6db/hong-kong-millionaire/VERIFICATION.md
+本版必須先發布最新完整Firestore Rules，再上傳網站，詳見FIREBASE-UPDATES.txt。
+題庫771題／84卡，普通扭蛋20,000／金蛋80,000，其他遊戲及玩家資產保留。
+驗證：110項單元、189項收藏瀏覽器、37項音效檢查、三尺寸介面專項；官方Firestore Emulator經濟／收藏／房間887項及每日99項；29頁全站建置。
+瀏覽器採Chromium及本機帳戶adapter，未聲稱實機iOS或正式OAuth驗證。
+完整記錄：https://github.com/skyyip/games/blob/9256ef9041f07d8b43961e2d17808c34c174064f/hong-kong-millionaire/VERIFICATION.md
 
-本次為前端與文案更新，沿用先前普通文化扭蛋20,000的完整Firestore Rules，詳見FIREBASE-UPDATES.txt。
-題庫771題／卡片84張；現有玩家資產、票券及歷史收據保留，不需清空或遷移。
 解壓後把最外層資料夾內全部檔案（包括.htaccess、assets、built）上傳至public_html/games/。
 不要再嵌套ZIP最外層資料夾；檔案644／資料夾755，完整更新整個網站包。
 尚未代為部署正式網站或Firebase。
