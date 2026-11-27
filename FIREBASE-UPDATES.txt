@@ -1,17 +1,17 @@
-本次連結修正：無新增Firebase變更
+本版必須更新 Firestore Rules：普通文化扭蛋20,000
 Firebase project: sky-playground-millionaire
-Source commit: 173fe8bb58b5f57431a20c315ff962e4626df568
+Source commit: aee8edd4915c2883f4cfc7df07c5f956dda7999b
 
-只改延伸閱讀來源網址及相應標籤。Firestore Rules、四個索引、Functions、題目ID／答案、卡片ID／抽取表與交易邏輯完全不變。
-如果已部署771題／84卡版完整Rules，本次只需上傳新版網站，不用重新發布Rules。
-如果尚未部署該版，請先發布同版完整Rules，再上傳網站：
-https://github.com/skyyip/games/blob/173fe8bb58b5f57431a20c315ff962e4626df568/hong-kong-millionaire/firestore.rules
-設定說明：https://github.com/skyyip/games/blob/173fe8bb58b5f57431a20c315ff962e4626df568/hong-kong-millionaire/FIREBASE.md
+普通文化扭蛋從10,000改為20,000。前端及Rules必須同版；舊10,000扣款會遭新版Rules拒絕。
+請先發布同版完整Rules，再上傳網站；不要只局部貼上價格片段。
+完整規則：https://github.com/skyyip/games/blob/aee8edd4915c2883f4cfc7df07c5f956dda7999b/hong-kong-millionaire/firestore.rules
+設定說明：https://github.com/skyyip/games/blob/aee8edd4915c2883f4cfc7df07c5f956dda7999b/hong-kong-millionaire/FIREBASE.md
 
-Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上完整規則並 Publish。
-或下載同版原始碼，在 hong-kong-millionaire 執行：
+方式一：Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上整份規則並 Publish。
+方式二：下載同版原始碼，在 hong-kong-millionaire 資料夾執行：
 firebase deploy --project sky-playground-millionaire --only firestore:rules
 
-單一題庫仍為hk-2026-11；舊題庫升級請安排沒有未完成題局／房間時同步更新。
-無須重建資料庫、清空錢包、重設票券或遷移玩家資產；登入設定不變。
-本包未代為部署正式Firebase或正式網站。
+四個索引、Functions及資料格式沒有變更；市集未實作，不用新增交易集合或部署市集Functions。
+閃卡金蛋仍80,000；現有獎金、卡片、票券、歷史收據保留，不需清空或遷移。
+題庫仍771題／84卡、hk-2026-11；Google／Email登入設定不變。
+本次只提供已測試網站與規則，尚未代為部署正式Firebase或正式網站。
