@@ -1,5 +1,16 @@
 # Firebase 設定與部署
 
+## 普通文化扭蛋20,000更新（2026-11-27）
+
+本次把普通文化扭蛋從10,000改為20,000，**必須先發布本資料夾同版完整`firestore.rules`，再上傳新版網站**。規則獨立驗證扣款，舊前端的10,000交易會遭拒；閃卡金蛋仍為80,000。現有錢包、收藏、票券及已完成收據保留，不需清空或遷移。
+
+```bash
+cd hong-kong-millionaire
+firebase deploy --project sky-playground-millionaire --only firestore:rules
+```
+
+四個索引及Functions沒有變更。結算恢復、閃卡掃光及手機排版屬前端更新；本次沒有實作玩家卡片市集。
+
 ## 收藏及再挑戰券更新部署
 
 本次變更了抽卡價格、卡冊、造型白名單、週末五次上限及每日再挑戰券。請**先發布本資料夾最新完整`firestore.rules`，再上傳新版網站**，否則新購買與開局會被舊規則拒絕。無新增索引；沿用`firestore.indexes.json`。

@@ -83,6 +83,11 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .culture-card-dialog .culture-face{max-width:330px}
 .card-rarity{z-index:1;background:#fff7e9ed;box-shadow:0 1px 4px #4d342d22}
 .culture-face.foil::after{z-index:0;background:linear-gradient(125deg,transparent 10%,#bda1ed25 30%,#a8e0ce25 50%,#f2ce5930 70%,transparent);mix-blend-mode:soft-light}
+.culture-tile.owned .culture-face.foil,#culture-card-face .culture-face.foil:not(.is-locked){border-color:#9961b1;box-shadow:0 0 0 1px #c9a5dc,0 0 12px #b892d44d}
+.culture-tile.owned .culture-face.foil::after,#culture-card-face .culture-face.foil:not(.is-locked)::after{inset:-30%;background:linear-gradient(115deg,transparent 30%,#9deaff66 40%,#fffdebd9 48%,#e9abff88 54%,transparent 65%);mix-blend-mode:screen;transform:translateX(-110%);animation:culture-foil-shine 6s ease-in-out infinite;pointer-events:none}
+.card-rarity{z-index:1}
+@keyframes culture-foil-shine{0%,18%{transform:translateX(-110%)}65%,100%{transform:translateX(110%)}}
+@media(prefers-reduced-motion:reduce){.culture-tile.owned .culture-face.foil::after,#culture-card-face .culture-face.foil:not(.is-locked)::after{animation:none;transform:none;opacity:.35}}
 .gacha-machine{width:min(210px,100%);align-self:center;margin:0 auto 5px;filter:drop-shadow(0 7px 3px #51472a22)}
 .gacha-dome{padding:12px 12px 0;border:3px solid #304b3b;border-radius:70px 70px 12px 12px;background:linear-gradient(125deg,#fffdf1,#b2ccb7 65%,#fff5d3)}
 .gacha-cover{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:55px 55px 8px 8px;border:1px solid #718c70;box-shadow:inset 0 0 0 3px #fff7d7}

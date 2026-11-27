@@ -20,6 +20,8 @@ try{
  const pricing=await seed('pricing');let priceState=await ok(feature.wallet(pricing,'pricing'));
  const normalReceipt=crypto.randomUUID();priceState=await ok(feature.shop(pricing,'pricing',{type:'draw',requestId:normalReceipt}));
  assert.equal(priceState.balance,1000000-DRAW_PRICE);assert.equal(priceState.profile.total,1000000);checks+=2;
+ const underpaidId=crypto.randomUUID(),underpaid=walletAction(priceState.profile,priceState.wallet,{type:'draw',requestId:underpaidId},hkDay());underpaid.spent=priceState.wallet.spent+10000;
+ const underpaidBatch=sdk.writeBatch(pricing.db);underpaidBatch.set(ref(pricing,'hkm_wallets','pricing'),{...underpaid,updatedAt:sdk.serverTimestamp()});underpaidBatch.set(ref(pricing,'hkm_wallets','pricing','receipts',underpaidId),{uid:'pricing',op:'draw',item:underpaid.item,cost:10000,revision:underpaid.revision,createdAt:sdk.serverTimestamp()});await no(underpaidBatch.commit());
  const drawRevision=priceState.wallet.revision;priceState=await ok(feature.shop(pricing,'pricing',{type:'draw',requestId:normalReceipt}));assert.equal(priceState.wallet.revision,drawRevision);checks++;
  for(const [slot,id]of [['frame','frame-bamboo'],['theme','theme-island']]){
   await assert.rejects(feature.shop(pricing,'pricing',{type:'equip',slot,id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
@@ -74,6 +76,16 @@ try{
  const other=context('other');await no(sdk.getDoc(ref(other,'hkm_wallets','collector')));
  await assert.rejects(feature.shop(c,'collector',{type:'swap',requestId:crypto.randomUUID()}),/invalid-item/);checks++;
  await no(sdk.setDoc(ref(c,'hkm_assisted_results','removed'),{uid:'collector'}));
+ // An answer can commit while its following settlement fails: retry must finish, not advance.
+ for(const outcome of ['wrong','walk']){
+  const uid='interrupted-'+outcome,client=await seed(uid);await feature.wallet(client,uid);await feature.shop(client,uid,{type:'retry-ticket',requestId:crypto.randomUUID()});let r=await feature.startSession(client,uid,{kind:'retry'});
+  for(let i=0;i<5;i++){r=await feature.moveSession(client,uid,r,{type:'answer',choice:sessionQuestion(r).answer});r=await feature.moveSession(client,uid,r,{type:'next'});}
+  let transactions=0;const interrupted={...client,runTransaction:(db,fn)=>{if(++transactions===2)return Promise.reject(Object.assign(Error('unavailable'),{code:'unavailable'}));return sdk.runTransaction(db,fn);}};
+  const action=outcome==='walk'?{type:'walk'}:{type:'answer',choice:(sessionQuestion(r).answer+1)%4};
+  await assert.rejects(feature.moveSession(interrupted,uid,r,action),error=>error.stage==='settlement'&&error.run?.phase==='reveal'&&error.run.outcome===outcome);checks++;
+  const settled=await ok(feature.moveSession(client,uid,r,{type:'next'}));assert.equal(settled.phase,'finished');assert.equal(settled.reason,outcome);assert.equal(settled.payout,8000);const paid=await feature.wallet(client,uid);assert.equal(paid.wallet.activeSession,'');assert.equal(paid.balance,1000000-retryPrice(hkDay())+8000);checks+=5;
+  await ok(feature.moveSession(client,uid,r,{type:'next'}));assert.equal((await feature.wallet(client,uid)).wallet.bonus,paid.wallet.bonus);checks++;
+ }
  const practice=await seed('practice');await ok(feature.wallet(practice,'practice'));const practiceId='weekend_'+crypto.randomUUID();
  await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore(),stamp=sdk.Timestamp.now(),r=newSession({id:practiceId,uid:'practice',kind:'weekend',seed:hkDay()},Date.now());await sdk.setDoc(sdk.doc(db,'hkm_players','practice','sessions',practiceId),{...r,phase:'reveal',index:14,correct:15,outcome:'correct',choice:0,answerAt:stamp,startedAt:stamp,questionAt:stamp,updatedAt:stamp});await sdk.updateDoc(sdk.doc(db,'hkm_wallets','practice'),{activeSession:practiceId,activeKind:'weekend',passUses:3,practiceDay:hkDay(),practiceEarned:99500});});
  const practiceRun=await ok(feature.settleSession(practice,'practice',{id:practiceId,kind:'weekend',room:''}));assert.equal(practiceRun.credit,500);assert.equal((await feature.wallet(practice,'practice')).wallet.practiceEarned,100000);checks+=2;

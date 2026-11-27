@@ -4,6 +4,9 @@ import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARD
 import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,sessionReviewReady,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
 import {hkDay,dayEnd,questionId} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
+test('normal cultural draws cost 20000 and cannot use the former price',()=>{
+ assert.equal(DRAW_PRICE,20000);const wallet=emptyWallet('p',0);assert.throws(()=>walletAction({total:19999},wallet,{type:'draw'},DAY),/insufficient-balance/);assert.equal(wallet.spent,0);assert.equal(wallet.draws,0);assert.equal(walletAction({total:20000},wallet,{type:'draw'},DAY).spent,20000);
+});
 test('purchases spend an available balance without reducing career prize totals',()=>{
  const profile={total:1000000},old=emptyWallet('p',0),next=walletAction(profile,old,{type:'buy',id:'frame-rwb'},DAY);
  assert.equal(profile.total,1000000);assert.equal(next.spent,20000);assert.equal(walletBalance(profile,next),980000);assert.deepEqual(old.owned,[]);
