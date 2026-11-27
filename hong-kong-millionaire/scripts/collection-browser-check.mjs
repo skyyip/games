@@ -33,7 +33,7 @@ try{
 
   await page.locator('[data-tab=cards]').click();
   await page.locator('.culture-face img').evaluateAll(images=>Promise.all(images.map(i=>{i.loading='eager';return i.decode();})));
-  assert.equal(await page.locator('.culture-tile').count(),84);assert.equal(await page.locator('.card-series').count(),7);assert.deepEqual(await page.locator('.card-series .culture-grid').evaluateAll(nodes=>nodes.map(n=>n.children.length)),Array(7).fill(12));assert(await page.locator('.card-series button').filter({hasText:'使用【交通達人】前綴'}).isEnabled());checks+=4;
+  assert.equal(await page.locator('.culture-tile').count(),84);assert.equal(await page.locator('.card-series').count(),7);assert.deepEqual(await page.locator('.card-series .culture-grid').evaluateAll(nodes=>nodes.map(n=>n.children.length)),Array(7).fill(12));assert(await page.getByRole('button',{name:'使用【交通達人】前綴',exact:true}).isEnabled());checks+=4;
   assert.equal(await page.locator('.culture-tile.owned .culture-face.foil').first().evaluate(n=>getComputedStyle(n,'::after').animationName),'culture-foil-shine');assert.equal(await page.locator('.culture-tile.locked .culture-face.foil').first().evaluate(n=>getComputedStyle(n,'::after').animationName),'none');checks+=2;
   await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.culture-tile.owned .culture-face.foil').first().evaluate(n=>getComputedStyle(n,'::after').animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});checks++;
   await page.locator('.culture-tile.locked:has(.foil)').first().click();assert.equal(await page.locator('#culture-card-face .culture-face').evaluate(n=>getComputedStyle(n).filter),'grayscale(1)');await page.locator('.card-done').click();checks++;
