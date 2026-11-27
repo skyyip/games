@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {adapter,RoomFixture} from './room-browser-fixture.mjs';
-import {hkDay,newRun,questionId} from '../src/game.js';
+import {hkDay,newRun,questionId,questionFor} from '../src/game.js';
 import {newSession,sessionAct,sessionQuestion} from '../src/session-engine.js';
 const {build}=await import(process.env.BBL_ESBUILD_MODULE||'esbuild'),{chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL,built=process.env.HKM_BUILD_DIR,manifest=JSON.parse(await readFile(built+'/build-manifest.json','utf8'));
@@ -22,6 +22,23 @@ async function open(uid,width=390,height=844,entry=null,skew=0){
 async function tick(pages,value){qa.now=value;await Promise.all(pages.map(page=>page.evaluate(n=>{qaServerNow=n;testNow=n+(qaSkew??0);},value)));}
 async function answer(page,uid){const r=qa.sessions.get(qa.key(uid,qa.person(uid).w.activeSession)),choice=sessionQuestion(r).answer;await page.locator('.arcade-options [data-choice="'+choice+'"]').click();await page.getByRole('button',{name:'確定答案',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#arcade-retry').disabled);}
 try{
+ // Used lifelines keep their names, dim, and stop accepting clicks immediately.
+ for(const mode of ['daily','retry']){
+  const uid='lifelines-'+mode,id='retry_'+crypto.randomUUID();
+  if(mode==='retry'){qa.sessions.set(qa.key(uid,id),newSession({id,uid,kind:'retry',seed:12345},qa.now));qa.person(uid).w.activeSession=id;qa.person(uid).w.activeKind='retry';}
+  const {c,page,harness}=await open(uid);await page.locator(mode==='daily'?'#start':'#lobby-arcade').click();await page.locator(mode==='daily'?'#options button':'.arcade-options button').first().waitFor();
+  const buttons=mode==='daily'?page.locator('.lifelines>button'):page.locator('.arcade-lives>button'),names=await buttons.allTextContents();
+  for(const [index,kind]of ['half','phone','audience'].entries()){
+   await buttons.nth(index).click();
+   if(kind!=='half'){const dialog=mode==='daily'?'#'+kind+'-dialog':'#arcade-hint';await page.locator(dialog).waitFor({state:'visible'});assert((await page.locator(dialog).textContent()).length>10);checks++;await page.locator(mode==='daily'?'[data-close="'+kind+'-dialog"]':'#arcade-hint .close-button').last().click();}
+   await page.waitForFunction(({mode,index})=>document.querySelectorAll(mode==='daily'?'.lifelines>button':'.arcade-lives>button')[index].disabled,{mode,index});
+   assert.equal(await buttons.nth(index).textContent(),names[index]);assert(await buttons.nth(index).evaluate(n=>parseFloat(getComputedStyle(n).opacity)<.6));checks+=2;
+   await buttons.nth(index).evaluate(n=>n.click());assert.equal(await page.locator(mode==='daily'?'#phone-dialog[open],#audience-dialog[open]':'#arcade-hint[open]').count(),0);checks++;
+  }
+  const current=()=>mode==='daily'?qa.dailyRuns.get(uid):qa.sessions.get(qa.key(uid,id));assert(['halfFor','phoneFor','audienceFor'].every(key=>current()[key]===0));checks++;
+  await page.reload({waitUntil:'networkidle'});await page.addScriptTag({type:'module',url:harness});await page.locator(mode==='daily'?'#start':'#lobby-arcade').click();await page.locator(mode==='daily'?'#options button':'.arcade-options button').first().waitFor();assert(await buttons.evaluateAll(nodes=>nodes.every(n=>n.disabled)));assert.deepEqual(await buttons.allTextContents(),names);checks+=2;
+  const choice=(mode==='daily'?questionFor(current()):sessionQuestion(current())).answer;await page.locator((mode==='daily'?'#options':'.arcade-options')+' [data-choice="'+choice+'"]').click();await page.locator(mode==='daily'?'#confirm-answer':'.arcade-actions .primary').click();await page.locator(mode==='daily'?'#next-question':'.arcade-reveal .primary').click();await page.waitForFunction(({mode})=>mode==='daily'?document.querySelector('#question-number').textContent.includes('2／'):!!document.querySelector('.arcade-lives'),{mode});assert.equal(current().index,1);assert(await buttons.evaluateAll(nodes=>nodes.every(n=>n.disabled)));assert.deepEqual(await buttons.allTextContents(),names);checks+=3;await c.close();
+ }
  // A committed terminal reveal must finish without asking the player to reconnect.
  for(const [kind,outcome]of [['weekend','walk'],['retry','wrong'],['retry','complete']]){
   const uid='terminal-'+kind+'-'+outcome,id=kind+'_'+crypto.randomUUID(),p=qa.person(uid),initial=qa.state(uid).balance;
