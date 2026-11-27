@@ -1,17 +1,17 @@
-本次挑戰券整合：無新增Firebase變更
+本次樣式更新：無新增Firebase變更
 Firebase project: sky-playground-millionaire
-Source commit: 5ae64f43186cc313d381864c7be7aa788673d174
+Source commit: 5500eabbcec1226ea5ca9ad85f8ea47caec7e573
 
-與上一版2e79b2d的771題／84卡版本相比，Firestore Rules、四個索引、Functions及資料格式全部不變。
-如果已部署該版完整Rules，本次只需上傳新版網站，不用再次發布Rules。
+Firestore Rules、四個索引、Functions、資料格式及交易邏輯不變。
+如果已部署771題／84卡版本的完整Rules，本次只需上傳新版網站。
+如果尚未部署該版本，請先發布同版完整Rules，再上傳網站：
+https://github.com/skyyip/games/blob/5500eabbcec1226ea5ca9ad85f8ea47caec7e573/hong-kong-millionaire/firestore.rules
+設定說明：https://github.com/skyyip/games/blob/5500eabbcec1226ea5ca9ad85f8ea47caec7e573/hong-kong-millionaire/FIREBASE.md
 
-如果尚未部署771題／84卡版本，請先發布以下同版完整Rules，再上傳網站：
-https://github.com/skyyip/games/blob/5ae64f43186cc313d381864c7be7aa788673d174/hong-kong-millionaire/firestore.rules
-設定說明：https://github.com/skyyip/games/blob/5ae64f43186cc313d381864c7be7aa788673d174/hong-kong-millionaire/FIREBASE.md
 Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上完整規則並 Publish。
 或下載同版原始碼，在 hong-kong-millionaire 執行：
 firebase deploy --project sky-playground-millionaire --only firestore:rules
 
 單一題庫仍為hk-2026-11；舊題庫升級請安排沒有未完成題局／房間時同步更新。
-無須重建資料庫、清空錢包、重設票券或遷移玩家資產。Google／Email登入設定不變。
-此包未代為部署正式Firebase或正式網站。
+無須重建資料庫、清空錢包、重設票券或遷移玩家資產；登入設定不變。
+本包未代為部署正式Firebase或正式網站。

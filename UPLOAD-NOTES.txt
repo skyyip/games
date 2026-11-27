@@ -1,19 +1,17 @@
-香港百萬富翁：挑戰券整合街坊遊樂場
-Source commit: 5ae64f43186cc313d381864c7be7aa788673d174
+香港百萬富翁：獎金樣式及遊樂場間距
+Source commit: 5500eabbcec1226ea5ca9ad85f8ea47caec7e573
 Upload build base path: /games/
 
-挑戰券的購買確認、每日折扣、收據核對及開局已整合到街坊遊樂場。
-再挑戰一次排在週末狂熱之前；收藏商店只保留扭蛋、卡冊及造型。
-票價及使用限制保留；舊商店未確認的購票可在遊樂場接續處理。
-題庫771題、卡片84張（49文化卡、35閃卡）；原有錢包、收藏及造型保留。
+週末狂熱區塊下方間距20px。
+情懷收藏與商店的可用獎金數字縮小20%；街坊遊樂場共用相同字體、字級、黃色高亮及靠左排列。
+票券購買及開局維持整合於遊樂場；再挑戰一次在週末狂熱之前。
+題庫771題、卡片84張（49文化卡、35閃卡）、錢包及各項遊戲規則保留。
 
 解壓後，把最外層資料夾內全部檔案（包括 .htaccess、assets、built）上傳至 public_html/games/。
 不要再嵌套ZIP最外層資料夾；檔案644／資料夾755。請完整更新整個網站包。
-本次前端變更不須改Firestore Rules；前提是已部署771題／84卡版規則，詳見 FIREBASE-UPDATES.txt。
+本次不需更改Firebase；前提是已部署771題／84卡版完整Rules，詳見 FIREBASE-UPDATES.txt。
 
-驗證：109單元；收藏／購票155項瀏覽器檢查；商店／非即時對戰110項；離線7項。
-跨日報價、取消購買、低餘額、斷線刷新及舊收據接續均已核對。
-本機Chromium使用測試帳戶；未操作正式Firebase、OAuth或上傳正式網站。
-
-說明：https://github.com/skyyip/games/blob/5ae64f43186cc313d381864c7be7aa788673d174/hong-kong-millionaire/README.md
-驗證記錄：https://github.com/skyyip/games/blob/5ae64f43186cc313d381864c7be7aa788673d174/hong-kong-millionaire/VERIFICATION.md
+本次驗證：29頁建置及權限；320／390／1280px瀏覽器實際核對字級比率0.8、20px間距及兩處全部獎金數字樣式一致，無水平溢出或頁面例外。
+前版票券整合的109單元、收藏／購票155項、商店／對戰110項及離線7項完整驗證，見：
+https://github.com/skyyip/games/blob/5500eabbcec1226ea5ca9ad85f8ea47caec7e573/hong-kong-millionaire/VERIFICATION.md
+本次沒有重跑未變更的遊戲與交易測試。尚未操作正式Firebase、OAuth或上傳正式網站。
