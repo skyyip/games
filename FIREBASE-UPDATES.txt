@@ -1,11 +1,11 @@
-本次outline按鈕間距更新沒有新增Firebase變更。
+本次自然閃卡反光更新沒有新增Firebase變更。
 Firebase project: sky-playground-millionaire
-Source commit: 652cf3b9e2f539278064f80fdad2d6b0084e79a7
+Source commit: cf19f8cf1da78a4e5eea1bba201980b7a71c4edd
 
 Rules與上一版9256ef90相同。若已發布每類全部12款才解鎖前綴的完整Rules，本次只需更新網站。
 若尚未更新該版，先發布以下同版完整Rules，再上傳網站。
-完整規則：https://github.com/skyyip/games/blob/652cf3b9e2f539278064f80fdad2d6b0084e79a7/hong-kong-millionaire/firestore.rules
-設定說明：https://github.com/skyyip/games/blob/652cf3b9e2f539278064f80fdad2d6b0084e79a7/hong-kong-millionaire/FIREBASE.md
+完整規則：https://github.com/skyyip/games/blob/cf19f8cf1da78a4e5eea1bba201980b7a71c4edd/hong-kong-millionaire/firestore.rules
+設定說明：https://github.com/skyyip/games/blob/cf19f8cf1da78a4e5eea1bba201980b7a71c4edd/hong-kong-millionaire/FIREBASE.md
 
 需要更新時：Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上整份並Publish。
 亦可在同版原始碼hong-kong-millionaire資料夾執行：
