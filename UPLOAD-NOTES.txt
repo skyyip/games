@@ -1,18 +1,24 @@
-香港百萬富翁：自然閃卡反光
-Source commit: cf19f8cf1da78a4e5eea1bba201980b7a71c4edd
+香港百萬富翁：香港街坊新篇
+Source commit: aeaf18c690c28dcc8e2a9efdbd4d72d774df69ca
 Upload build base path: /games/
 
-卡框保持固定，移除整張卡的3D傾斜及強紫色光暈。
-淡彩soft-light與柔和亮面貼合原畫，光效限制在卡面圓角內，保留插畫細節。
-12秒緩慢來回反光，循環轉向連續；指標離開或觸控放開後，亮面在原位置淡出。
-未抽中卡片保持灰階；減少動態設定停用反光動畫及互動亮面，手機保留垂直捲動。
+新增120題，三個難度各40題；現共891題，難度池284／386／221。
+原有七類各增加1文化卡及1閃卡，新增14張獨立港式漫畫，共98張（56普通／42閃卡），每類14張。
+新卡包括紅的、昂坪纜車、盆菜、天后誕、豆腐花、老婆餅、唐樓信箱、煤氣燈石階、午炮、青馬橋、林村許願、東涌炮台、秤號及盤扣。
+原有771題及84卡的內容、ID、順序保留；自然閃卡反光、未持有灰階及手機兩列答案保留。
+低高度桌面題目面板可垂直捲動，長題目不再裁切離場按鈕或讓插圖遮住題字。
 
-驗證：189項收藏流程瀏覽器檢查、320／390／1280px圓角與邊界穩定／循環連續／觸控／減少動態專項檢查；前後圖片人工檢視；29頁全站建置。
-測試採Chromium及本機帳戶adapter，未聲稱實機iOS或正式OAuth驗證。
-完整記錄：https://github.com/skyyip/games/blob/cf19f8cf1da78a4e5eea1bba201980b7a71c4edd/hong-kong-millionaire/VERIFICATION.md
+重要：先發布同版完整Firestore Rules，再完整上傳網站；詳細步驟見FIREBASE-UPDATES.txt。
+沿用單一題庫，抽題對應會改變，選沒有未完成挑戰／房間的時段同步更新，避免舊前端與新Rules混用。
+每類集齊全部14張才可使用稱號；只持有舊12張的已套用前綴會於載入錢包時零成本取消，補齊後可重新套用。餘額、卡片、抽數、造型及收據保留。
+普通文化扭蛋20,000／閃卡金蛋80,000、每日券折扣、30秒題限、每日15題、24小時非即時房間保留。
 
-本次沒有新增Firebase變更，沿用每類全部12款才解鎖稱號的完整Rules。
-卡片圖片、題庫771題／84卡、普通扭蛋20,000／金蛋80,000、計分及玩家資產保留。
+驗證：114項單元測試、1,477項瀏覽器檢查、1,458項官方Firestore Emulator檢查通過，全站29頁建置。
+使用本機Chromium及測試帳戶adapter、demo Firestore，沒有正式玩家資料寫入，未聲稱實體iOS或正式OAuth驗證。
+驗證紀錄：https://github.com/skyyip/games/blob/aeaf18c690c28dcc8e2a9efdbd4d72d774df69ca/hong-kong-millionaire/VERIFICATION.md
+題目及來源：https://github.com/skyyip/games/blob/aeaf18c690c28dcc8e2a9efdbd4d72d774df69ca/hong-kong-millionaire/QUESTION-BANK-NEIGHBOURHOOD-CHAPTER-120.md
+新卡與圖稿：https://github.com/skyyip/games/blob/aeaf18c690c28dcc8e2a9efdbd4d72d774df69ca/hong-kong-millionaire/docs/neighbourhood-chapter-cards.md
+
 解壓後把最外層資料夾內全部檔案（包括.htaccess、assets、built）上傳至public_html/games/。
 不要再嵌套ZIP最外層資料夾；檔案644／資料夾755，完整更新整個網站包。
 尚未代為部署正式網站或Firebase。
