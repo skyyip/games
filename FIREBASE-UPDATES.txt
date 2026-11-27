@@ -1,0 +1,21 @@
+Firebase update notes — Hong Kong Millionaire — 2026-11-27
+Source: 228ed6f2f4f17ab34e0156c5dbf5dcff16646c64
+Firebase project: sky-playground-millionaire
+
+This release changes presentation only. It does not change Firestore rules, indexes, Authentication settings, Functions, collections, saved wallet data or the stored transport prefix ID. No migration or data reset is required.
+
+If you already deployed the previous 651-question / 70-card version, no Firebase update is needed; upload the new website files only.
+
+If your Firebase project still uses an older question/card version, deploy the COMPLETE matching rules before uploading the website. Use the existing independent project sky-playground-millionaire. Keep the existing four indexes. Coordinate the single-bank update when there are no unfinished challenges or rooms.
+
+Rules:
+https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/firestore.rules
+Indexes:
+https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/firestore.indexes.json
+Deployment instructions:
+https://github.com/skyyip/games/blob/228ed6f2f4f17ab34e0156c5dbf5dcff16646c64/hong-kong-millionaire/FIREBASE.md
+
+CLI from the source repository's hong-kong-millionaire directory:
+firebase deploy --project sky-playground-millionaire --only firestore:rules
+
+These files describe the required configuration; this package does not run Firebase deployment.
