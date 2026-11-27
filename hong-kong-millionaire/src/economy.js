@@ -4,7 +4,7 @@ export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'�
 // Shared date-derived offer: identical on every device; Firestore recomputes it.
 export function retryDiscount(day=hkDay()){const seed=(day*48271+1013904223)%2147483647;return 5+((seed*48271+1013904223)%2147483647)%5;}
 export const retryPrice=(day=hkDay())=>RETRY_PRICE/10*retryDiscount(day);
-const tourism='https://www.discoverhongkong.com/tc/explore.html',ich='https://www.icho.hk/tc/web/icho/home.html';
+const tourism='https://www.discoverhongkong.com/tc/culture.html',ich='https://www.icho.hk/tc/web/icho/home.html';
 const cards=[
  ['hotdog','transport','熱狗巴士',false,'「熱狗」是香港人對昔日沒有空調巴士的俗稱，記錄公共交通設備的變遷。',tourism],
  ['old-ferry','transport','昔日天星小輪',false,'維港渡輪連起兩岸日常生活；傳統雙頭船身及可翻轉椅背是經典設計。','https://www.starferry.com.hk/tc'],
@@ -37,18 +37,18 @@ const cards=[
  ['lighthouse-foil','harbour','燈塔與海風',true,'燈塔和助航設施為海上航行提供參考；插畫並非特定燈塔的工程或航海資料。','https://www.mardep.gov.hk/tc/'],
  ['harbour-night-foil','harbour','維港星夜',true,'維港夜景來自兩岸建築、船隻與水面倒影的交織，每次渡海都能發現不同風景。',tourism],
  ["peng-chau-lane","villages","坪洲小巷",false,"坪洲的街巷與海岸，保留島上生活和昔日工業的記憶。卡面是原創小島情境，不是特定街道實景。","https://www.gohk.gov.hk/tc/districts/is.php"],
- ["tai-o-bridge","villages","大澳橫水橋",false,"大澳橫水橋連接水道兩旁社區，來往街巷與棚屋一帶的步伐，寫下水鄉日常。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/tai-o.html"],
+ ["tai-o-bridge","villages","大澳橫水橋",false,"大澳橫水橋連接水道兩旁社區，來往街巷與棚屋一帶的步伐，寫下水鄉日常。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-tai-o-village.html"],
  ["lamma-bay","villages","榕樹灣日常",false,"榕樹灣是南丫島的重要聚落，街坊、碼頭與海邊食店交織成離島生活。圖中店舖並非特定商戶。","https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Lamma+Island"],
  ["tsang-house","villages","曾大屋青磚",false,"曾大屋是沙田著名的客家圍村建築，青磚、天井與圍牆留下宗族聚居的歷史。插畫不作建築測繪用途。","https://www.amo.gov.hk/tc/home/index.html"],
  ["lai-chi-wo-foil","villages","荔枝窩古樹",true,"荔枝窩的客家村落與周邊樹林，呈現人與自然相依的社區記憶。閃光只屬視覺效果，不增加答題能力。","https://www.gohk.gov.hk/tc/search/spot.php"],
  ["cheung-chau-pier-foil","villages","長洲碼頭夜航",true,"碼頭的船燈與街燈，連起長洲街坊出入市區的日常。卡面記錄海邊氣氛，並非即時航班資訊。","https://www.sunferry.com.hk/zh/"],
  ["bamboo-steamer","crafts","竹蒸籠手藝",false,"傳統蒸籠以竹材製作，兼顧透氣、保溫與蒸氣疏導。一籠點心上枱之前，器物早已默默做足後勤。","https://www.icho.hk/documents/Education/edu_booklet/edu_booklet_2.pdf"],
- ["salt-crystals","crafts","鹽田結晶",false,"西貢鹽田梓保留曬鹽的文化記憶。海水、陽光與工序，讓看似平凡的鹽粒多了一層地方故事。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/yim-tin-tsai.html"],
+ ["salt-crystals","crafts","鹽田結晶",false,"西貢鹽田梓保留曬鹽的文化記憶。海水、陽光與工序，讓看似平凡的鹽粒多了一層地方故事。","https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Yim+Tin+Tsai"],
  ["eggroll-workshop","crafts","手工蛋卷",false,"蛋漿烘成薄片後趁熱捲起，放涼後成為酥脆蛋卷。師傅手勢俐落，慢半拍就可能由蛋卷變碎餅。","https://www.wenweipo.com/a/202603/22/AP69bf4840e4b04d7d56d995d2.html"],
  ["neon-workshop","crafts","霓虹屈管",false,"霓虹光管製作及造型技藝，把玻璃管塑成街頭文字與圖案。欣賞光影，也記住招牌背後的匠人。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf"],
  ["paper-lion-foil","crafts","紙紮醒獅",true,"竹篾、紙張與彩繪組成傳統紮作的生動面貌。醒獅圖案是本遊戲原創演繹，不指特定派別或師傅作品。","https://www.icho.hk/tc/web/icho/home.html"],
  ["painted-porcelain-foil","crafts","廣彩瓷光",true,"廣彩在瓷器上繪飾彩色圖案，花鳥與金彩展現工藝心思；它不等同只用鈷藍線條裝飾的青花。","https://www.icho.hk/tc/web/icho/home.html"],
- ["light-rail-car","transport","輕鐵月台",false,"黃色車身、月台與架空電線，記錄新界西北居民的日常節奏。插畫不代表特定車型或即時班次。","https://www.mtr.com.hk/ch/customer/services/light_rail_index.html",false],
+ ["light-rail-car","transport","輕鐵月台",false,"黃色車身、月台與架空電線，記錄新界西北居民的日常節奏。插畫不代表特定車型或即時班次。","https://www.mtr.com.hk/ch/customer/services/lt_bus_index.html",false],
  ["peak-tram-foil","transport","山頂纜車斜陽",true,"斜坡上的纜車連起中環與山頂，自1888年起見證城市變化。卡面是原創情境，並非工程或車型圖。","https://www.thepeak.com.hk/zh-hant/heritage/history-of-the-peak-tram",false],
  ["flower-cannon","heritage","花炮祝願",false,"傳統花炮會以裝飾精巧的花炮寄託社區祝願，背後連繫街坊協作及廟會文化。卡面描繪紙藝裝飾，不提供燃放示範。","https://www.icho.hk/tc/web/icho/home.html",false],
  ["paper-windmill-foil","heritage","車公風車",true,"風車轉動的聲音，承載街坊祈求平安轉運的心意。閃光只是視覺效果，不保證運程或答題成功。","https://www.discoverhongkong.com/tc/explore/attractions/che-kung-temple.html",false],
@@ -72,7 +72,7 @@ const cards=[
  ["night-dai-pai-dong-foil","streets","大牌檔鑊氣",true,"爐火、鐵枱與一碟即炒小菜，留住大牌檔的熱鬧氣氛。畫中攤檔是原創，不代表特定店家的牌照或菜單。","https://www.discoverhongkong.com/tc/explore/dining.html",false],
  ["seafood-market","harbour","魚市場晨光",false,"清晨漁船靠岸，魚筐與忙碌身影接連海上與城市。插畫展現本地漁業生活，不提供食品處理或作業指引。","https://www.fmo.org.hk/",false],
  ["star-ferry-rope-foil","harbour","碼頭船繩",true,"纜繩、木柱與小輪的水花，讓一次平常渡海也像值得收藏的片段。卡面不是船舶操作或繫泊示意。","https://www.starferry.com.hk/tc",false],
- ["sha-tau-kok-lanterns","villages","沙頭角魚燈",false,"魚燈造型與街巷景色，記錄沙頭角社區的文化記憶。畫面為原創文化情境，不涉及邊境或開放安排。","https://www.discoverhongkong.com/tc/explore/neighbourhoods/sha-tau-kok.html",false],
+ ["sha-tau-kok-lanterns","villages","沙頭角魚燈",false,"魚燈造型與街巷景色，記錄沙頭角社區的文化記憶。畫面為原創文化情境，不涉及邊境或開放安排。","https://www.discoverhongkong.com/tc/neighbourhoods/sha-tau-kok.html",false],
  ["po-toi-shore-foil","villages","蒲台石岸",true,"花崗岩海岸、海浪與小小聚落，描繪蒲台島的海邊風景。欣賞景色亦要尊重居民與自然，圖案不作遠足路線指引。","https://www.discoverhongkong.com/tc/explore/great-outdoor/po-toi-island.html",false],
  ["minibus-signwriting","crafts","小巴水牌",false,"一筆一畫的目的地水牌，把日常交通變成街頭字藝。卡面採原創抽象筆畫，不冒充師傅真跡或真實路線。","https://www.icho.hk/tc/web/icho/home.html",false],
  ["wedding-embroidery-foil","crafts","裙褂金繡",true,"金銀線與紅色布面，縫出傳統裙褂的吉祥圖案。畫中繡工為原創演繹，不複製特定店家或匠人作品。","https://www.icho.hk/tc/web/icho/home.html",false],
@@ -80,14 +80,14 @@ const cards=[
  ["airport-express-foil","transport","機場快綫晨光",true,"機場快綫連接機場與市區，行李喼與車窗外晨光，裝起接送親友的香港回憶。卡面不作即時班次或車型指引。","https://www.mtr.com.hk/ch/customer/services/airport_express_index.html",false],
  ["rabbit-lantern","heritage","兔仔燈籠",false,"竹篾、紙材與一雙巧手，把中秋的期待紮成兔仔燈。呢隻兔唔使餵紅蘿蔔，最怕反而係落雨。","https://www.icho.hk/tc/web/icho/representative_list_paper_crafting.html",false],
  ["tai-o-dragonboat-foil","heritage","大澳龍舟遊涌",true,"大澳端午龍舟遊涌由漁業行會延續，以龍舟與神艇沿水道巡遊。畫面致意社區傳統，不以民間祝願保證任何效果。","https://www.icho.hk/tc/web/icho/representative_list_taio.html",false],
- ["cart-noodle-stall","snacks","車仔麵小攤",false,"配料逐樣揀、醬汁各有個性，一碗車仔麵裝得落街坊口味。平日選擇困難，去到麵檔卻忽然好有主見。","https://www.discoverhongkong.com/eng/travel-guide/qts/must-try-afternoon-teas-in-hong-kong.html",false],
- ["egg-tart-counter-foil","snacks","蛋撻出爐",true,"金黃蛋撻排滿餅盤，酥皮與蛋香寫下香港餅店的下午茶。袋住帶走之前，通常先同自己談判要買幾多個。","https://www.discoverhongkong.com/eng/neighbourhoods/wan-chai.html",false],
+ ["cart-noodle-stall","snacks","車仔麵小攤",false,"配料逐樣揀、醬汁各有個性，一碗車仔麵裝得落街坊口味。平日選擇困難，去到麵檔卻忽然好有主見。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-man-kee-cart-noodles.html",false],
+ ["egg-tart-counter-foil","snacks","蛋撻出爐",true,"金黃蛋撻排滿餅盤，酥皮與蛋香寫下香港餅店的下午茶。袋住帶走之前，通常先同自己談判要買幾多個。","https://hk.science.museum/tc/web/scm/online-explore/qkpost-roadshow-food/eggtart.html",false],
  ["newspaper-kiosk","streets","街角報紙檔",false,"報紙、雜誌與一聲早晨，讓小小報檔像街坊資訊站。卡面是原創街道情境，不描繪特定商戶或真實報章封面。","https://www.hkmemory.hk/",false],
- ["rainy-arcade-foil","streets","騎樓雨夜",true,"騎樓下的傘尖、水光與暖燈，替一場香港驟雨留個溫柔側面。趕路可以快，收遮記得唔好濺到隔籬位街坊。","https://www.discoverhongkong.com/tc/explore.html",false],
+ ["rainy-arcade-foil","streets","騎樓雨夜",true,"騎樓下的傘尖、水光與暖燈，替一場香港驟雨留個溫柔側面。趕路可以快，收遮記得唔好濺到隔籬位街坊。","https://www.discoverhongkong.com/tc/culture.html",false],
  ["container-port","harbour","貨櫃碼頭",false,"貨櫃、吊機與遠行船影，描繪香港港口物流的一面。看似積木疊疊樂，實際是專業團隊的工作，卡面不作操作指引。","https://www.mardep.gov.hk/tc/materials-and-publications/publications/hk-fact-sheet/index.html",false],
  ["stonecutters-bridge-foil","harbour","昂船洲橋影",true,"昂船洲大橋橫跨藍巴勒海峽，連起貨櫃碼頭一帶的城市輪廓。夜色與船影是原創演繹，不是工程測繪或航行資料。","https://hkie.org.hk/ea/tc/project/98",false],
  ["yim-tin-tsai-chapel","villages","鹽田梓小堂",false,"鹽田梓的聖若瑟小堂與村路，記錄小島社區的一頁。畫中建築為文化插畫，參觀時仍應尊重教堂與居民。","https://www.gohk.gov.hk/en/spots/spot_detail.php?spot=Yim+Tin+Tsai",false],
- ["tung-ping-chau-foil","villages","東平洲層岩",true,"東平洲層疊的沉積岩像大自然翻開的書頁；地層可以欣賞，唔代表真係可以揭走一頁。插畫不作路線或潮汐指引。","https://www.epd.gov.hk/epd/tc_chi/environmentinhk/water/hkwqrc/map/tungpingchau.html",false],
+ ["tung-ping-chau-foil","villages","東平洲層岩",true,"東平洲層疊的沉積岩像大自然翻開的書頁；地層可以欣賞，唔代表真係可以揭走一頁。插畫不作路線或潮汐指引。","https://www.geopark.gov.hk/tc/discover/attractions/tung-ping-chau",false],
  ["bamboo-birdcage-maker","crafts","竹籠細作",false,"纖細竹絲與籠圈經削、屈、穿合，留下本地鳥籠製作的手藝痕跡。畫面聚焦器物工藝，不以飼養動物作收藏條件。","https://www.heritagemuseum.gov.hk/tc/resources/e_materials/birdcage.html",false],
  ["man-wa-seal-foil","crafts","文華里刻印",true,"文華里圖章街的刻印手藝啟發這幅原創場景。小小印面放得落心思，畫中抽象印文不複製匠人真跡或私人印章。","https://www.hkcd.com.hk/hkcdweb/content/2022/08/20/content_1359958.html",false]
 ];

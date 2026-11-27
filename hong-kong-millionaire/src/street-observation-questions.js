@@ -17,8 +17,8 @@ const records=[
   "explanation": "圖中的金屬凸粒打斷原本連續的平滑石邊，屬防滑板磨滑裝置的常見形式。不是觸覺引路磚，亦不能把所有石邊金屬件都當成這種用途。",
   "hint": "留意凸粒有冇打斷一條可以滑行嘅直邊。",
   "source": {
-   "label": "屋宇署・暢通無阻的通道設計手冊",
-   "url": "https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf"
+   "label": "屋宇署・設計手冊及舊版本索引（暢通無阻的通道）",
+   "url": "https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html"
   },
   "art": "street-01",
   "modes": [
@@ -59,8 +59,8 @@ const records=[
   "explanation": "廁格門底空隙可方便地面清潔及空氣流通，也可能讓人察覺異常。各場地須兼顧私隱與無障礙設計，沒有一個適用所有公廁的統一高度，亦不應自行鑽門施救。",
   "hint": "睇清楚空位喺門頂、門邊定門底。",
   "source": {
-   "label": "屋宇署・暢通無阻的通道設計手冊",
-   "url": "https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf"
+   "label": "屋宇署・設計手冊及舊版本索引（暢通無阻的通道）",
+   "url": "https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html"
   },
   "art": "street-02",
   "modes": [
@@ -150,8 +150,8 @@ const records=[
   "explanation": "圓管頂部沒有寬闊的平面，物件較難穩妥擺放；但這不是所有欄杆的唯一設計動機。不要坐上欄杆或在高處擺放雜物。",
   "hint": "比較圓弧頂同平板頂可以放幾穩。",
   "source": {
-   "label": "屋宇署・暢通無阻的通道設計手冊",
-   "url": "https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf"
+   "label": "屋宇署・設計手冊及舊版本索引（暢通無阻的通道）",
+   "url": "https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html"
   },
   "art": "street-04",
   "modes": [

@@ -380,7 +380,7 @@
 
 核對範圍：2026-11-26依列明公開來源核對題材；藝術作品、歷史設施及地方用語按題目所限定的版本或情境作答。
 
-來源：[粵典・例湯](https://words.hk/zidin/例湯)
+來源：[粵典・例（例湯用法）](https://words.hk/zidin/例)
 
 ## k19 藝文・找對劇院
 
@@ -464,7 +464,7 @@
 
 核對範圍：2026-11-26依列明公開來源核對題材；藝術作品、歷史設施及地方用語按題目所限定的版本或情境作答。
 
-來源：[粵典・馬仔](https://words.hk/zidin/馬仔)
+來源：[粵典・薩其馬（馬仔）](https://words.hk/zidin/薩其馬)
 
 ## k23 糖水・沒有內餡的主角
 
@@ -611,7 +611,7 @@
 
 核對範圍：2026-11-26依列明公開來源核對題材；藝術作品、歷史設施及地方用語按題目所限定的版本或情境作答。
 
-來源：[粵典・水吧](https://words.hk/zidin/水吧)
+來源：[職業訓練局・飲食業職位（飲品調配員／水吧服務員）](https://manpower-survey.vtc.edu.hk/tc/industry/catering/jobs)
 
 ## k30 手藝・小小花鈕
 
@@ -758,7 +758,7 @@
 
 核對範圍：2026-11-26依列明公開來源核對題材；藝術作品、歷史設施及地方用語按題目所限定的版本或情境作答。
 
-來源：[旅發局・鹽田梓](https://www.discoverhongkong.com/tc/explore/neighbourhoods/yim-tin-tsai.html)
+來源：[民政事務總署・鹽田仔](https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Yim+Tin+Tsai)
 
 ## k37 藝文・舊戲院復修
 
@@ -779,7 +779,7 @@
 
 核對範圍：2026-11-26依列明公開來源核對題材；藝術作品、歷史設施及地方用語按題目所限定的版本或情境作答。
 
-來源：[康文署・油麻地戲院](https://www.lcsd.gov.hk/tc/ymt/theatre.html)
+來源：[康文署・油麻地戲院](https://www.lcsd.gov.hk/tc/ymtt/aboutus/introduction.html)
 
 ## k38 藝文・找路牌
 
@@ -1346,7 +1346,7 @@
 
 核對範圍：2026-11-26依列明公開來源核對題材；藝術作品、歷史設施及地方用語按題目所限定的版本或情境作答。
 
-來源：[香港海關・貨櫃碼頭倉庫資料](https://www.customs.gov.hk/hcms/filemanager/tc/share/pdf/DC_Warehouse_list.pdf)
+來源：[海事處・香港港口便覽](https://www.mardep.gov.hk/tc/materials-and-publications/publications/hk-fact-sheet/index.html)
 
 ## t05 濕地・識行的魚
 

@@ -97,7 +97,7 @@
 
 整合處理：保留主題，改成有完整線索及唯一正解的四選一。
 
-延伸閱讀：[香港聯合國教科文組織世界地質公園](https://www.geopark.gov.hk/zh-hant)
+延伸閱讀：[香港聯合國教科文組織世界地質公園](https://www.geopark.gov.hk/tc/)
 
 ## 6. 郊野公園邊界（c06）
 
@@ -154,7 +154,7 @@
 
 整合處理：把難以可靠辨認的草書，改成手寫菜牌加飲食知識。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 9. 象形文字（甲骨文/金文）猜現代字（c09）
 
@@ -325,7 +325,7 @@
 
 整合處理：只問一個常見暗號；不把不同店舖的206或打爛用法混成同一答案。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 18. 經典餐具與乳製品包裝（c18）
 
@@ -344,7 +344,7 @@
 
 整合處理：保留主題，改成有完整線索及唯一正解的四選一。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 19. 傳統酒樓點心紙（c19）
 
@@ -363,7 +363,7 @@
 
 整合處理：保留主題，改成有完整線索及唯一正解的四選一。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 20. 公共屋邨幾何天井（c20）
 
@@ -382,7 +382,7 @@
 
 整合處理：保留主題，改成有完整線索及唯一正解的四選一。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 21. 絕版「監獄體」路牌（c21）
 
@@ -401,7 +401,7 @@
 
 整合處理：不把俗稱當正式字體名稱，刪除過於絕對的製作年份。
 
-延伸閱讀：[懲教署・香港懲教博物館](https://www.csd.gov.hk/tc_chi/facility/facility_museum.html)
+延伸閱讀：[懲教署・香港懲教博物館](https://www.csd.gov.hk/emuseum/tc/museum.html)
 
 ## 22. 傳統當舖「蝠鼠吊金錢」（c22）
 
@@ -496,7 +496,7 @@
 
 整合處理：保留主題，改成有完整線索及唯一正解的四選一。
 
-延伸閱讀：[香港聯合國教科文組織世界地質公園](https://www.geopark.gov.hk/zh-hant)
+延伸閱讀：[香港聯合國教科文組織世界地質公園](https://www.geopark.gov.hk/tc/)
 
 ## 27. 水塘歷史建築細節（c27）
 
@@ -800,7 +800,7 @@
 
 整合處理：保留主題，改成有完整線索及唯一正解的四選一。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 43. 象形文字猜新界客家古村（c43）
 

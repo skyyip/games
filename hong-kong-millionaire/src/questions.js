@@ -970,7 +970,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "已婚警察宿舍",
@@ -994,7 +994,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "機場",
@@ -1042,7 +1042,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "南區",
@@ -1090,7 +1090,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "玉皇大帝與媽祖",
@@ -1740,7 +1740,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "clock",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "港鐵黃埔站",
@@ -1788,7 +1788,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "舊細菌學研究所附屬宿舍",
@@ -1812,7 +1812,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "龍躍頭文物徑",
@@ -1836,7 +1836,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "錦田",
@@ -1860,7 +1860,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "沙田",
@@ -1884,7 +1884,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "屯門",
@@ -1908,7 +1908,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "temple",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "options": [
       "唐代",
@@ -1932,7 +1932,7 @@ export const CORE_QUESTIONS=Object.freeze([
     "art": "calligraphy",
     "source": {
       "label": "古物古蹟辦事處",
-      "url": "https://www.amo.gov.hk/tc/"
+      "url": "https://www.amo.gov.hk/tc/home/"
     },
     "textOnly": true,
     "options": [

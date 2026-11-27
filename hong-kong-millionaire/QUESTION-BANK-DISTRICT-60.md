@@ -1108,7 +1108,7 @@ PMQ所在土地在成為已婚警察宿舍前，曾是哪所官立學校的校�
 
 核對範圍：2026-11-26按列明來源核對；歷史年份限定事件，用語限定情境，不以傳說或信仰作效果保證。
 
-來源：[康文署・香港島泳灘資料](https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk.html)
+來源：[康文署・香港島泳灘資料](https://www.lcsd.gov.hk/tc/beach/index/beach-location.html)
 
 ## v49 地區・南生圍
 

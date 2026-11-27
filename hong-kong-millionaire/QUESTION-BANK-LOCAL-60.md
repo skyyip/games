@@ -763,7 +763,7 @@
 
 核對範圍：2026-11-26核對來源；問法不依賴插畫辨認，保留做法、歷史與俗語的適用範圍。
 
-來源：[電影推廣服務科・佛誕](https://fpf.ccidahk.gov.hk/tc/location/detail.php?id=507)
+來源：[香港旅遊發展局・中華節慶與浴佛儀式](https://www.discoverhongkong.com/tc/culture/celebrate-with-these-time-honoured-chinese-festivities.html)
 
 ## l34 節慶・年宵花市
 

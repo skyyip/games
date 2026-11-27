@@ -170,7 +170,7 @@
 
 核對範圍：2026-11-27依列明官方或營辦機構資料核對；歷史題按指定年份，工程題按題目限定的設施或範圍作答。
 
-來源：[數碼港・個人資料收集聲明](https://www.cyberport.hk/zh-hk/personal_information_collection_statement/)
+來源：[數碼港・園區交通及地址](https://www.cyberport.hk/zh-hk/about_us/cyberport_campus/)
 
 ## p09 城市服務・一個號碼
 
@@ -1325,7 +1325,7 @@ T·PARK焚化污泥產生的熱能，主要透過哪個步驟轉成電力？
 
 核對範圍：2026-11-27核對所列一手資料；賽事、作品及傳統用語按題目所列年份或情境理解。
 
-來源：[香港話劇團・戲劇教育中心](https://www.hkrep.com/tc/Outreach-And-Education/Hkrepeducationhub.html)
+來源：[香港話劇團・劇團簡介](https://www.hkrep.com/tc/About-Us/About-Us.html)
 
 ## q24 金像獎・武打影后
 

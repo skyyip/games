@@ -211,7 +211,7 @@
 
 整合處理：保留題材，限定適用情境，避免把設計用途說成所有型號的統一規定。
 
-延伸閱讀：[港鐵・頭等服務](https://www.mtr.com.hk/ch/customer/services/firstclass_index.html)
+延伸閱讀：[港鐵・頭等服務](https://www.mtr.com.hk/ch/customer/tourist/firstclass_index.html)
 
 ## 12. 康文署公園長椅正中央的「金屬扶手」（d12）
 
@@ -230,7 +230,7 @@
 
 整合處理：保留題材，限定適用情境，避免把設計用途說成所有型號的統一規定。
 
-延伸閱讀：[屋宇署・暢通無阻的通道設計手冊（2024版本）](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸閱讀：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 13. 打風時玻璃窗貼「米」字膠紙的真正作用（d13）
 
@@ -401,7 +401,7 @@
 
 整合處理：保留題材，限定適用情境，避免把設計用途說成所有型號的統一規定。
 
-延伸閱讀：[屋宇署・暢通無阻的通道設計手冊（2024版本）](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸閱讀：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 22. 公眾泳池與泳灘更衣室的「L 型無門走廊」設計（d22）
 
@@ -420,7 +420,7 @@
 
 整合處理：改考轉折與視線的關係，移除所有更衣室一律無門、完全解決通風的絕對說法。
 
-延伸閱讀：[屋宇署・暢通無阻的通道設計手冊（2024版本）](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸閱讀：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 23. 舊式公共屋邨走廊的「鏤空通風花格磚」（d23）
 
@@ -534,7 +534,7 @@
 
 整合處理：保留卡位辨識，移除卡位英文詞源及刻意令客人擠迫以加快翻枱的推論。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 29. 香港住宅與商廈電梯跳過「4、13、14 樓」的現象（d29）
 
@@ -781,7 +781,7 @@
 
 整合處理：保留溫杯用途，不把餐前沖洗等同有效消毒，也不稱為香港獨有。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 42. 白布鞋「白飯魚」為何深受地盤與搭棚師傅喜愛？（d42）
 
@@ -819,7 +819,7 @@
 
 整合處理：保留題材，限定適用情境，避免把設計用途說成所有型號的統一規定。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 44. 三色分類回收桶「藍、黃、啡」的經典對應口訣（d44）
 
@@ -933,7 +933,7 @@
 
 整合處理：保留題材，限定適用情境，避免把設計用途說成所有型號的統一規定。
 
-延伸閱讀：[屋宇署・暢通無阻的通道設計手冊（2024版本）](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸閱讀：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 50. 港鐵月台圓柱上「重複印滿整條柱身」的站名大字（d50）
 
@@ -990,7 +990,7 @@
 
 整合處理：以實際示例牌文字出題，不把水牌紅藍配色當成一律相同的規則。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 53. 香港巴士路線編號後綴英文字母「X、P、N、S」的含義（d53）
 
@@ -1066,7 +1066,7 @@
 
 整合處理：保留暗號意思，把畫眉鳥故事限定為傳說而不以其作唯一正解。
 
-延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/explore.html)
+延伸閱讀：[香港旅遊發展局・本地文化](https://www.discoverhongkong.com/tc/culture.html)
 
 ## 57. 燒味舖脆皮燒肉表面密密麻麻「小針孔」的烹調秘密（d57）
 

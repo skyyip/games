@@ -27,7 +27,7 @@
 
 局部框（800×500來源像素）：{"x":260,"y":195,"width":280,"height":110}
 
-延伸參考：[屋宇署・暢通無阻的通道設計手冊](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸參考：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 1.2 公眾洗手間廁格門板「底部留空一大截」的標準設計（s02）
 
@@ -52,7 +52,7 @@
 
 局部框（800×500來源像素）：{"x":260,"y":195,"width":280,"height":110}
 
-延伸參考：[屋宇署・暢通無阻的通道設計手冊](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸參考：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 1.3 巴士站旁「黃色鋸齒線（巴士停車處）」的禁區鐵律（s03）
 
@@ -104,7 +104,7 @@
 
 局部框（800×500來源像素）：{"x":260,"y":195,"width":280,"height":110}
 
-延伸參考：[屋宇署・暢通無阻的通道設計手冊](https://www.bd.gov.hk/doc/tc/resources/codes-and-references/code-and-design-manuals/BFA2008_c.pdf)
+延伸參考：[屋宇署・設計手冊及舊版本索引（暢通無阻的通道）](https://www.bd.gov.hk/tc/resources/codes-and-references/codes-and-design-manuals/index.html)
 
 ## 1.5 商場與屋苑停車場入口「上下雙層八達通讀卡器」（s05）
 
