@@ -1,6 +1,6 @@
 {
-  "version": "b4590fc1794fa203",
-  "builtAt": 1795784947767,
+  "version": "18964d038955f85f",
+  "builtAt": 1795787449385,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -735,7 +735,7 @@
     "your-dream-career/src/social-ui.js": "built/chunk-6VGWABCC.js",
     "hong-kong-millionaire/node_modules/firebase/auth/dist/esm/index.esm.js": "built/chunk-L4T6I2L2.js",
     "hong-kong-millionaire/node_modules/firebase/firestore/dist/esm/index.esm.js": "built/chunk-CBGWJXQL.js",
-    "hong-kong-millionaire/src/features-cloud.js": "built/chunk-WTX6X7OI.js",
+    "hong-kong-millionaire/src/features-cloud.js": "built/chunk-YYOJR55L.js",
     "mo-lei-tau-studio/node_modules/html-to-image/es/index.js": "built/chunk-K3INGOKM.js",
     "your-dream-career/node_modules/firebase/app/dist/esm/index.esm.js": "built/chunk-ZSAOVEHU.js",
     "your-dream-career/node_modules/firebase/auth/dist/esm/index.esm.js": "built/chunk-NT4QEXAS.js",
@@ -767,7 +767,7 @@
     "you-really-get-them/src/app.js": "built/app-23J2BRU4.js",
     "your-dream-career/src/app.js": "built/app-OKS2TK65.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
-    "hong-kong-millionaire/src/app.js": "built/app-HVT7YGQX.js",
+    "hong-kong-millionaire/src/app.js": "built/app-3R5YFJO3.js",
     "grid-rush/src/landing.js": "built/landing-ELPNZG2H.js",
     "just-a-sec/src/app.js": "built/app-7Z7DOPUM.js",
     "line-up/src/app.js": "built/app-P6VI3CHR.js",

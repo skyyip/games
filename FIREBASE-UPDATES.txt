@@ -1,12 +1,12 @@
-本次樣式更新：無新增Firebase變更
+本次連結修正：無新增Firebase變更
 Firebase project: sky-playground-millionaire
-Source commit: 5500eabbcec1226ea5ca9ad85f8ea47caec7e573
+Source commit: 173fe8bb58b5f57431a20c315ff962e4626df568
 
-Firestore Rules、四個索引、Functions、資料格式及交易邏輯不變。
-如果已部署771題／84卡版本的完整Rules，本次只需上傳新版網站。
-如果尚未部署該版本，請先發布同版完整Rules，再上傳網站：
-https://github.com/skyyip/games/blob/5500eabbcec1226ea5ca9ad85f8ea47caec7e573/hong-kong-millionaire/firestore.rules
-設定說明：https://github.com/skyyip/games/blob/5500eabbcec1226ea5ca9ad85f8ea47caec7e573/hong-kong-millionaire/FIREBASE.md
+只改延伸閱讀來源網址及相應標籤。Firestore Rules、四個索引、Functions、題目ID／答案、卡片ID／抽取表與交易邏輯完全不變。
+如果已部署771題／84卡版完整Rules，本次只需上傳新版網站，不用重新發布Rules。
+如果尚未部署該版，請先發布同版完整Rules，再上傳網站：
+https://github.com/skyyip/games/blob/173fe8bb58b5f57431a20c315ff962e4626df568/hong-kong-millionaire/firestore.rules
+設定說明：https://github.com/skyyip/games/blob/173fe8bb58b5f57431a20c315ff962e4626df568/hong-kong-millionaire/FIREBASE.md
 
 Firebase Console → sky-playground-millionaire → Firestore Database → Rules，貼上完整規則並 Publish。
 或下載同版原始碼，在 hong-kong-millionaire 執行：
