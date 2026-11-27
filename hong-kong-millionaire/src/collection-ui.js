@@ -23,9 +23,9 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  function tile(title,copy=''){const box=el('article','','reward-tile');box.append(el('h3',title));if(copy)box.append(el('p',copy));return box;}
  function cardFace(c,owned=true){const box=el('div','','culture-face'+(c.foil?' foil':'')+(owned?'':' is-locked')),img=new Image();img.src=cultureCardImage(c);img.alt=c.name+'原創插畫';img.width=['streets','harbour'].includes(c.series)?1448:1024;img.height=['streets','harbour'].includes(c.series)?1086:1536;img.loading='lazy';img.decoding='async';const crop=cultureCardCrop(c);img.style.width=(crop.columns*100)+'%';img.style.height=(crop.rows*100)+'%';img.style.left=(-crop.column*100)+'%';img.style.top=(-crop.row*100)+'%';box.append(img,el('span',c.foil?'閃卡':'文化卡','card-rarity'));
   if(c.foil&&owned){
-   const reset=()=>{for(const key of ['--holo-x','--holo-y','--holo-rx','--holo-ry'])box.style.removeProperty(key);};
-   const follow=event=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches){reset();return;}const r=box.getBoundingClientRect(),x=Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(event.clientY-r.top)/r.height));box.style.setProperty('--holo-x',x*100+'%');box.style.setProperty('--holo-y',y*100+'%');box.style.setProperty('--holo-rx',(y-.5)*-12+'deg');box.style.setProperty('--holo-ry',(x-.5)*12+'deg');};
-   box.onpointermove=box.onpointerdown=follow;box.onpointerleave=box.onpointercancel=reset;
+   const reset=()=>box.style.removeProperty('--holo-strength');
+   const follow=event=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches){reset();return;}const r=box.getBoundingClientRect(),x=Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(event.clientY-r.top)/r.height));box.style.setProperty('--holo-x',x*100+'%');box.style.setProperty('--holo-y',y*100+'%');box.style.setProperty('--holo-strength','.55');};
+   box.onpointermove=box.onpointerdown=follow;box.onpointerleave=box.onpointercancel=reset;box.onpointerup=event=>{if(event.pointerType!=='mouse')reset();};
   }return box;}
  function showCard(c,owned=true){
   if(!c)return;reveal.querySelector('#culture-card-face').replaceChildren(cardFace(c,owned));reveal.querySelector('#culture-card-title').textContent=c.name;
