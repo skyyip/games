@@ -1,20 +1,19 @@
-香港百萬富翁：香港街坊生活新章
-Source commit: 2e79b2d76b9e47ad54425dbec2719806d7b81049
+香港百萬富翁：挑戰券整合街坊遊樂場
+Source commit: 5ae64f43186cc313d381864c7be7aa788673d174
 Upload build base path: /games/
 
-新增120條本地題目，總771題；三個難度各新增40題。
-原有七個卡冊分類各新增一張文化卡及一張閃卡：新增14張，總84張（49文化卡、35閃卡），各類12張。
-原651題、70張卡及原六張核心卡的前綴資格保留；不清空錢包、卡片或造型。
-普通扭蛋10,000、閃卡扭蛋80,000；普通週期525/步距37、閃卡週期35/步距6。
+挑戰券的購買確認、每日折扣、收據核對及開局已整合到街坊遊樂場。
+再挑戰一次排在週末狂熱之前；收藏商店只保留扭蛋、卡冊及造型。
+票價及使用限制保留；舊商店未確認的購票可在遊樂場接續處理。
+題庫771題、卡片84張（49文化卡、35閃卡）；原有錢包、收藏及造型保留。
 
-部署順序：先發布同版完整 Firestore rules，再上傳網站。詳見 FIREBASE-UPDATES.txt。
-解壓後，把最外層資料夾內的全部檔案（包括 .htaccess、assets、built）上傳至 public_html/games/。
-不要把 ZIP 的最外層資料夾再嵌套上傳。保留檔案644／資料夾755權限。
-此包包含完整網站及其他遊戲；請完整替換新版檔案，不只複製百萬富翁 HTML。
+解壓後，把最外層資料夾內全部檔案（包括 .htaccess、assets、built）上傳至 public_html/games/。
+不要再嵌套ZIP最外層資料夾；檔案644／資料夾755。請完整更新整個網站包。
+本次前端變更不須改Firestore Rules；前提是已部署771題／84卡版規則，詳見 FIREBASE-UPDATES.txt。
 
-驗證：109單元測試；120新題1,080項瀏覽器檢查；收藏137項；商店／非即時對戰110項；離線7項。
-真正本機官方Firestore Emulator：每日99項、經濟／房間602項。
-瀏覽器使用測試帳戶與Chromium；未聲稱正式OAuth、Firebase或網站已部署。
+驗證：109單元；收藏／購票155項瀏覽器檢查；商店／非即時對戰110項；離線7項。
+跨日報價、取消購買、低餘額、斷線刷新及舊收據接續均已核對。
+本機Chromium使用測試帳戶；未操作正式Firebase、OAuth或上傳正式網站。
 
-新題與來源：https://github.com/skyyip/games/blob/2e79b2d76b9e47ad54425dbec2719806d7b81049/hong-kong-millionaire/QUESTION-BANK-LOCAL-EXPANSION-120.md
-完整驗證：https://github.com/skyyip/games/blob/2e79b2d76b9e47ad54425dbec2719806d7b81049/hong-kong-millionaire/VERIFICATION.md
+說明：https://github.com/skyyip/games/blob/5ae64f43186cc313d381864c7be7aa788673d174/hong-kong-millionaire/README.md
+驗證記錄：https://github.com/skyyip/games/blob/5ae64f43186cc313d381864c7be7aa788673d174/hong-kong-millionaire/VERIFICATION.md
