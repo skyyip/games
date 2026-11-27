@@ -108,14 +108,18 @@ test('daily offers are shared, bounded and reject stale or forged confirmation p
  assert.equal(walletAction(profile,old,{type:'retry-ticket',day:DAY,price:retryPrice(DAY)},DAY).spent,retryPrice(DAY));
 });
 
-test('expanding each existing series preserves its original six-card prefix entitlement',()=>{
+test('every card in a series is required for its prefix, including all expansion foils',()=>{
  assert.equal(CULTURE_CARDS.length,84);assert.equal(SERIES.length,7);
  for(const series of SERIES){
-  const cards=CULTURE_CARDS.filter(c=>c.series===series.id),core=cards.filter(c=>c.prefixRequired!==false),extra=cards.filter(c=>c.prefixRequired===false);
-  assert.equal(cards.length,12);assert.equal(core.length,6);assert.equal(extra.length,6);assert.deepEqual(extra.map(c=>c.foil),[false,true,false,true,false,true]);
-  const wallet={...emptyWallet('p',0),cards:Object.fromEntries(core.map(c=>[c.id,1]))};
-  assert(unlockedPrefixes(wallet).some(s=>s.id===series.id));assert.equal(walletAction({total:0},wallet,{type:'equip',slot:'prefix',id:series.id},DAY).prefix,series.id);
-  const incomplete={...wallet,cards:{...wallet.cards,[core[0].id]:0,...Object.fromEntries(extra.map(c=>[c.id,1]))}};
-  assert(!unlockedPrefixes(incomplete).some(s=>s.id===series.id));
+  const cards=CULTURE_CARDS.filter(c=>c.series===series.id);assert.equal(cards.length,12);
+  const complete={...emptyWallet('p',0),cards:Object.fromEntries(cards.map(c=>[c.id,1]))};
+  for(const missing of cards){
+   const wallet={...complete,cards:{...complete.cards,[missing.id]:0}};
+   assert(!unlockedPrefixes(wallet).some(s=>s.id===series.id),missing.id);
+   assert.throws(()=>walletAction({total:0},wallet,{type:'equip',slot:'prefix',id:series.id},DAY),/not-owned/,missing.id);
+  }
+  assert(unlockedPrefixes(complete).some(s=>s.id===series.id));assert.equal(walletAction({total:0},complete,{type:'equip',slot:'prefix',id:series.id},DAY).prefix,series.id);
+  const six={...complete,cards:Object.fromEntries(cards.slice(0,6).map(c=>[c.id,9]))};assert(!unlockedPrefixes(six).some(s=>s.id===series.id));
+  assert.equal(walletAction({total:0},{...six,prefix:series.id},{type:'equip',slot:'prefix',id:''},DAY).prefix,'');
  }
 });

@@ -43,15 +43,27 @@ try{
   if(card.foil){const goldUid='gold-'+card.id,goldClient=await seed(goldUid);await ok(feature.wallet(goldClient,goldUid));await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',goldUid),{createdAt:sdk.Timestamp.fromMillis(FOIL_CARDS.indexOf(card.id))});});const gold=await ok(feature.shop(goldClient,goldUid,{type:'gold',requestId:crypto.randomUUID()}));assert.equal(gold.outcome,card.id);assert.equal(gold.balance,1000000-GOLD_PRICE);checks+=2;}
 
  }
- // Existing six-card entitlements remain equipable without expansion cards.
+ // All twelve cards, including every foil, are required by the independent rules.
  for(const series of SERIES){
   const uid='prefix-'+series.id,client=await seed(uid);await ok(feature.wallet(client,uid));
-  const core=CULTURE_CARDS.filter(card=>card.series===series.id&&card.prefixRequired!==false),cards=Object.fromEntries(core.map(card=>[card.id,1]));
-  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards});});
+  const cards=CULTURE_CARDS.filter(card=>card.series===series.id),all=Object.fromEntries(cards.map(card=>[card.id,1]));
+  for(const missing of cards){
+   await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:{...all,[missing.id]:0},prefix:''});});
+   await assert.rejects(feature.shop(client,uid,{type:'equip',slot:'prefix',id:series.id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
+   const old=(await sdk.getDoc(ref(client,'hkm_wallets',uid))).data(),id=crypto.randomUUID(),batch=sdk.writeBatch(client.db);
+   batch.update(ref(client,'hkm_wallets',uid),{prefix:series.id,revision:old.revision+1,op:'equip',item:'prefix',receipt:id,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',id),{uid,op:'equip',item:'prefix',cost:0,revision:old.revision+1,createdAt:sdk.serverTimestamp()});await no(batch.commit());
+  }
+  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:all});});
   const entitled=await ok(feature.shop(client,uid,{type:'equip',slot:'prefix',id:series.id,requestId:crypto.randomUUID()}));assert.equal(entitled.wallet.prefix,series.id);assert.equal(entitled.balance,1000000);checks+=2;
-  const extras=Object.fromEntries(CULTURE_CARDS.filter(card=>card.series===series.id&&card.prefixRequired===false).map(card=>[card.id,1]));
-  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:{...cards,...extras,[core[0].id]:0},prefix:''});});
-  const old=(await feature.wallet(client,uid)).wallet,id=crypto.randomUUID(),batch=sdk.writeBatch(client.db);batch.update(ref(client,'hkm_wallets',uid),{prefix:series.id,revision:old.revision+1,op:'equip',item:'prefix',receipt:id,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',id),{uid,op:'equip',item:'prefix',cost:0,revision:old.revision+1,createdAt:sdk.serverTimestamp()});await no(batch.commit());
+  assert.equal((await ok(feature.wallet(client,uid))).wallet.prefix,series.id);checks++;
+  // A previously equipped six-card prefix is retired once, with assets unchanged.
+  const core=Object.fromEntries(cards.slice(0,6).map(card=>[card.id,1]));
+  await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore();await sdk.updateDoc(sdk.doc(db,'hkm_wallets',uid),{cards:core,prefix:series.id});await sdk.setDoc(sdk.doc(db,'hkm_styles',uid),{uid,frame:'none',theme:'default',prefix:series.id,updatedAt:sdk.Timestamp.now()});});
+  await no(sdk.setDoc(ref(client,'hkm_styles',uid),{uid,frame:'none',theme:'default',prefix:series.id,updatedAt:sdk.serverTimestamp()}));
+  const retired=await ok(feature.wallet(client,uid));assert.equal(retired.wallet.prefix,'');assert.equal(retired.balance,entitled.balance);assert.deepEqual(retired.wallet.cards,core);assert.deepEqual(retired.wallet.owned,entitled.wallet.owned);checks+=4;
+  assert.equal((await ok(feature.publicStyles(client,[uid])))[uid].prefix,'');checks++;
+  const again=await ok(feature.wallet(client,uid));assert.equal(again.wallet.revision,retired.wallet.revision);assert.equal(again.wallet.receipt,retired.wallet.receipt);checks+=2;
+  assert.equal((await ok(sdk.getDoc(ref(client,'hkm_wallets',uid,'receipts',retired.wallet.receipt)))).data().cost,0);checks++;
  }
  // New Hong Kong frames use their published price and require ownership before equip.
  for(const id of ['frame-minibus','frame-dimsum','frame-bauhinia','frame-lion']){

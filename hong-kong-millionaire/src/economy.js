@@ -125,7 +125,7 @@ export const FOIL_CARDS=Object.freeze(CULTURE_CARDS.filter(c=>c.foil).map(c=>c.i
 export const cardById=id=>CULTURE_CARDS.find(c=>c.id===id);
 export const gearById=id=>GEAR.find(c=>c.id===id);
 export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wallet?.bonus??0)-(wallet?.spent??0));
-export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id&&c.prefixRequired!==false).every(c=>(wallet?.cards?.[c.id]??0)>0));
+export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
 export const isWeekend=(day=hkDay())=>[0,6].includes((day+4)%7);
 export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,retryBoughtDay:-1,retryUsedDay:-1,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
@@ -150,6 +150,6 @@ export function walletAction(profile,wallet,action,day=hkDay()){
  else throw Error('invalid-item');
  if(walletBalance(profile,wallet)<cost)throw Error('insufficient-balance');next.spent+=cost;return next;
 }
-export function prefixedTitle(wallet,title){const prefix=SERIES.find(s=>s.id===wallet?.prefix)?.prefix;return (prefix?'【'+prefix+'】':'')+title;}
+export function prefixedTitle(wallet,title){const prefix=unlockedPrefixes(wallet).find(s=>s.id===wallet?.prefix)?.prefix;return (prefix?'【'+prefix+'】':'')+title;}
 export const practiceReward=correct=>Math.min(5000,Math.max(0,correct)*500);
 export function randomSeed(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%1000000000;}

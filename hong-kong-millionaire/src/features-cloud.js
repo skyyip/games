@@ -1,7 +1,7 @@
 import {sessionClock} from './session-clock.js';
 import {readServer} from './cloud-read.js';
 import {COLLECTIONS} from './schema.js';
-import {emptyWallet,walletAction,walletBalance,weekendKey,isWeekend,practiceReward,randomSeed,WEEKEND_LIMIT} from './economy.js';
+import {emptyWallet,walletAction,walletBalance,unlockedPrefixes,weekendKey,isWeekend,practiceReward,randomSeed,WEEKEND_LIMIT} from './economy.js';
 import {newSession,sessionAct,sessionFinish,sessionTerminal,roomWinner,asyncRoom,ROOM_ASYNC_WINDOW,ROOM_INTERVAL,ROOM_FEE_RESERVE,ROOM_LIMIT,roomFeeShare,roomCanFinish,roomCode,roomEntry} from './session-engine.js';
 import {normalizeRun} from './cloud-transition.js';
 import {hkDay,QUESTION_MS} from './game.js';
@@ -13,6 +13,16 @@ export const normalizeRoom=r=>r?{...r,...Object.fromEntries(['createdAt','starte
 export async function wallet(c,uid){
  const ref=walletRef(c,uid);let w=await c.getDoc(ref);
  if(!w.exists()){await c.runTransaction(c.db,async t=>{const [p,latest]=await Promise.all([t.get(player(c,uid)),t.get(ref)]);if(!p.exists())throw Error('login-required');if(!latest.exists())t.set(ref,emptyWallet(uid,c.serverTimestamp()));});w=await c.getDoc(ref);}
+ // Retire a six-card-era prefix once, without changing cards, funds or other cosmetics.
+ if(w.data().prefix&&!unlockedPrefixes(w.data()).some(s=>s.id===w.data().prefix)){
+  const requestId=crypto.randomUUID();
+  await c.runTransaction(c.db,async t=>{
+   const latest=(await t.get(ref)).data();if(!latest.prefix||unlockedPrefixes(latest).some(s=>s.id===latest.prefix))return;
+   const next=walletAction({total:0},latest,{type:'equip',slot:'prefix',id:'',requestId}),stamp=c.serverTimestamp();
+   t.set(ref,{...next,updatedAt:stamp});t.set(c.doc(c.db,FEATURE_COLLECTIONS.wallets,uid,'receipts',requestId),{uid,op:'equip',item:'prefix',cost:0,revision:next.revision,createdAt:stamp});
+   t.set(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid),{uid,frame:next.frame,theme:next.theme,prefix:'',updatedAt:stamp});
+  });w=await c.getDoc(ref);
+ }
  const p=await c.getDoc(player(c,uid));return {profile:data(p),wallet:data(w),balance:walletBalance(data(p),data(w))};
 }
 export async function shop(c,uid,action){
