@@ -14,7 +14,7 @@ let tracked;try{tracked=execFileSync('git',['ls-files','--cached','--others','--
 // Registered new games must be previewable before their first commit.
 tracked=[...new Set([...tracked,...games.flatMap(game=>[game.slug+'/index.html',game.slug+'/manifest.webmanifest'])])];
 const pages=tracked.filter(n=>n==='index.html'||/^[^/]+\/index\.html$/.test(n));
-const assetFiles=tracked.filter(n=>/\.(png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|wav|mp3)$/i.test(n));
+const assetFiles=tracked.filter(n=>/\.(png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|wav|mp3)$/i.test(n)&&!n.startsWith('hong-kong-millionaire/assets/fonts/demo/'));
 // Also include newly introduced assets before their first commit.
 for(const n of ['grid-rush/assets/fonts/Iansui.woff2'])if(!assetFiles.includes(n))assetFiles.push(n);
 const assetMap=new Map();
