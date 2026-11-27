@@ -17,12 +17,12 @@ test('60 new familiar culture records preserve distinct topics, sources and bala
  }
 });
 test('all additions are reachable, retain their difficulty stage and grade both correct and wrong answers',()=>{
- const found=new Map();for(let day=DAY;day<DAY+306;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!found.has(id))found.set(id,{day,index});}
+ const found=new Map();for(let day=DAY;day<DAY+346;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!found.has(id))found.set(id,{day,index});}
  assert.equal(found.size,60);
  for(const q of bank){const {day,index}=found.get(q.id),now=day*86400000+3600000,run={...newRun(day,now),index,correct:index};assert.equal(questionFor(run).id,q.id);assert.equal(q.tier,Math.floor(index/5)+1);assert.equal(act(run,{type:'answer',choice:q.answer},now+1000).outcome,'correct');assert.equal(act(run,{type:'answer',choice:(q.answer+1)%4},now+1000).outcome,'wrong');}
 });
 test('the new bank is drawn by weekend, retry and comprehensive room sessions without repeats',()=>{
- for(const kind of ['weekend','retry','room']){const found=new Set();for(let offset=0;offset<5;offset++)for(let seed=0;seed<306;seed++){const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+offset)*86400000),seen=new Set();for(let i=0;i<run.count;i++){const id=sessionQid(run,i);assert(!seen.has(id));seen.add(id);if(ids.has(id))found.add(id);}}assert.equal(found.size,60,kind);}
+ for(const kind of ['weekend','retry','room']){const found=new Set();for(let offset=0;offset<5;offset++)for(let seed=0;seed<346;seed++){const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+offset)*86400000),seen=new Set();for(let i=0;i<run.count;i++){const id=sessionQid(run,i);assert(!seen.has(id));seen.add(id);if(ids.has(id))found.add(id);}}assert.equal(found.size,60,kind);}
 });
 test('similar years, related species and colloquial contexts retain one scoped answer',()=>{
  const byId=Object.fromEntries(bank.map(q=>[q.id,q]));

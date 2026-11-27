@@ -21,7 +21,7 @@ test('sixty local scenarios append unique, sourced, mobile-sized questions with 
 });
 test('every added question is reachable in the daily plan and its semantic answer grades correctly',()=>{
  const found=new Map();
- for(let day=DAY;day<DAY+306;day++)for(let index=0;index<15;index++){
+ for(let day=DAY;day<DAY+346;day++)for(let index=0;index<15;index++){
   const id=questionId(day,index);if(ids.has(id)&&!found.has(id))found.set(id,{day,index});
  }
  assert.equal(found.size,60);
@@ -35,7 +35,7 @@ test('every added question is reachable in the daily plan and its semantic answe
 test('new local knowledge reaches weekend, retry and comprehensive neighbour rooms through their actual pools',()=>{
  for(const kind of ['weekend','retry','room']){
   const found=new Set();
-  for(let offset=0;offset<5;offset++)for(let seed=0;seed<306;seed++){
+  for(let offset=0;offset<5;offset++)for(let seed=0;seed<346;seed++){
    const run=newSession({id:'coverage',uid:'test',kind,seed},(DAY+offset)*86400000);
    for(let index=0;index<run.count;index++){const id=sessionQid(run,index);if(ids.has(id))found.add(id)}
   }

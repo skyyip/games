@@ -1,3 +1,6 @@
+import {CITY_LIFE_EXTRA_QUESTIONS} from './city-life-extra-questions.js';
+import {CULTURE_LIFE_EXTRA_QUESTIONS} from './culture-life-extra-questions.js';
+import {DISTRICT_NATURE_EXTRA_QUESTIONS} from './district-nature-extra-questions.js';
 import {CITY_CULTURE_QUESTIONS} from './city-culture-questions.js';
 import {LOCAL_DISCOVERY_QUESTIONS} from './local-discovery-questions.js';
 import {FAMILIAR_QUESTIONS} from './familiar-questions.js';
@@ -2190,4 +2193,4 @@ export const CORE_QUESTIONS=Object.freeze([
   }
 ].map(q=>Object.freeze({...q,options:Object.freeze(q.options),source:Object.freeze(q.source),focus:Object.freeze(q.focus)})));
 
-export const QUESTIONS=Object.freeze([...CORE_QUESTIONS,...URBAN_QUESTIONS,...COMIC_QUESTIONS,...DAILY_DESIGN_QUESTIONS,...STREET_OBSERVATION_QUESTIONS,...LOCAL_QUESTIONS,...NEIGHBOURHOOD_QUESTIONS,...DISTRICT_QUESTIONS,...FAMILIAR_QUESTIONS,...CITY_CULTURE_QUESTIONS,...LOCAL_DISCOVERY_QUESTIONS]);
+export const QUESTIONS=Object.freeze([...CORE_QUESTIONS,...URBAN_QUESTIONS,...COMIC_QUESTIONS,...DAILY_DESIGN_QUESTIONS,...STREET_OBSERVATION_QUESTIONS,...LOCAL_QUESTIONS,...NEIGHBOURHOOD_QUESTIONS,...DISTRICT_QUESTIONS,...FAMILIAR_QUESTIONS,...CITY_CULTURE_QUESTIONS,...LOCAL_DISCOVERY_QUESTIONS,...CITY_LIFE_EXTRA_QUESTIONS,...CULTURE_LIFE_EXTRA_QUESTIONS,...DISTRICT_NATURE_EXTRA_QUESTIONS]);

@@ -1,3 +1,6 @@
+import {CITY_LIFE_EXTRA_QUESTIONS} from '../src/city-life-extra-questions.js';
+import {CULTURE_LIFE_EXTRA_QUESTIONS} from '../src/culture-life-extra-questions.js';
+import {DISTRICT_NATURE_EXTRA_QUESTIONS} from '../src/district-nature-extra-questions.js';
 import {CITY_CULTURE_QUESTIONS} from '../src/city-culture-questions.js';
 import {LOCAL_DISCOVERY_QUESTIONS} from '../src/local-discovery-questions.js';
 import {installContentAccount} from './content-account-fixture.mjs';
@@ -8,13 +11,13 @@ import {LOCAL_QUESTIONS} from '../src/local-questions.js';
 import {NEIGHBOURHOOD_QUESTIONS} from '../src/neighbourhood-questions.js';
 import {FAMILIAR_QUESTIONS} from '../src/familiar-questions.js';
 import {DISTRICT_QUESTIONS} from '../src/district-questions.js';
-const bank=process.env.HKM_QUESTION_PACK==='culture120'?[...CITY_CULTURE_QUESTIONS,...LOCAL_DISCOVERY_QUESTIONS]:process.env.HKM_QUESTION_PACK==='familiar'?FAMILIAR_QUESTIONS:process.env.HKM_QUESTION_PACK==='district'?DISTRICT_QUESTIONS:process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
-import {newRun,hkDay,questionId,act} from '../src/game.js';
+const bank=process.env.HKM_QUESTION_PACK==='extra120'?[...CITY_LIFE_EXTRA_QUESTIONS,...CULTURE_LIFE_EXTRA_QUESTIONS,...DISTRICT_NATURE_EXTRA_QUESTIONS]:process.env.HKM_QUESTION_PACK==='culture120'?[...CITY_CULTURE_QUESTIONS,...LOCAL_DISCOVERY_QUESTIONS]:process.env.HKM_QUESTION_PACK==='familiar'?FAMILIAR_QUESTIONS:process.env.HKM_QUESTION_PACK==='district'?DISTRICT_QUESTIONS:process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
+import {newRun,hkDay,questionId,act,QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
 import {questionView} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));
 const base=process.env.HKM_TEST_URL,KEY='qa.hkm.content-run',DAY=hkDay(Date.UTC(2026,10,26,4));
 const ids=new Set(bank.map(q=>q.id)),fixtures=new Map();
-for(let day=DAY;day<DAY+306;day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!fixtures.has(id))fixtures.set(id,{day,index})}
+for(let day=DAY;day<DAY+Math.max(...QUESTION_PLANS[BANK_VERSION].map(p=>p.ids.length));day++)for(let index=0;index<15;index++){const id=questionId(day,index);if(ids.has(id)&&!fixtures.has(id))fixtures.set(id,{day,index})}
 assert.equal(fixtures.size,bank.length);
 const browser=await chromium.launch({headless:true});let checks=0;const errors=[];
 try{

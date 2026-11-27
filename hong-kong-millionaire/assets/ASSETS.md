@@ -83,3 +83,9 @@
 內文、問題、選項、按鈕及表單採昭源黑體，標題與文化卡名採昭源宋體；數字專用Fredoka保留。正式版本使用未修改的`chiron-hei-hk-webfont@2.6.9`與`chiron-sung-hk-webfont@1.0.24`完整variable WOFF2分區，每款144個分區，字重200–900。`typography-fonts.css`保留上游Unicode ranges，以本機網址按實際用字載入，`font-display:swap`提供系統字體過渡。字體原始授權及SHA記錄保存在各字體目錄，建置版包含兩款OFL授權。
 
 字體分區不加入香港百萬富翁的安裝預快取；實際使用且已載入的內容雜湊字體由既有Service Worker即時快取。`assets/fonts/demo`仍只供固定文案的比較頁使用，不作正式遊戲字體。
+
+## 街坊生活新章14張卡（2026-11-27）
+
+原有七類各加1文化卡及1閃卡，新增14張獨立港式漫畫WebP，卡冊共84張。新卡題材為綠Van、機場快綫、兔仔燈籠、大澳龍舟遊涌、車仔麵、蛋撻、報紙檔、雨夜騎樓、貨櫃碼頭、昂船洲橋影、鹽田梓小堂、東平洲層岩、竹籠及刻印。以既有漫畫圖集作風格參照，圖像生成原稿保存在工作環境generated_images，未覆寫或刪除原圖。
+
+`scripts/package-local-expansion-art.mjs <city.png> <harbour.png> <crafts.png> <taio-correction.png> <bridge-correction.png>`從兩份2×3與一份2×1圖稿裁出獨立方形卡面，並套用兩張已檢視的單卡修正圖。大澳圖由一般競渡修正為龍舟牽引獨立神艇的遊涌情境；橋塔由雙柱門形修正為昂船洲大橋的獨柱式輪廓。卡面至少508px，去除格線後以91品質WebP儲存。所有畫面均為原創文化演繹，非地點照片、交通資訊、工程圖、宗教效用或匠人真跡的證據。
