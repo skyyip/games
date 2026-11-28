@@ -1,5 +1,6 @@
 import {marketRules} from './market-rules.mjs';
-import {GEAR,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,DRAW_COLUMNS,DRAW_ROWS,NORMAL_WEIGHT,FOIL_WEIGHT,GOLD_STRIDE,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
+import {GEAR,CULTURE_CARDS,STANDARD_CARDS,LEGEND_CARDS,NORMAL_CARDS,FOIL_CARDS,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,DRAW_COLUMNS,DRAW_ROWS,NORMAL_WEIGHT,FOIL_WEIGHT,GOLD_STRIDE,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
+import {LEGEND_COLLECTION_STEP,LEGEND_GAMES_STEP} from '../src/legend-cards.js';
 import {ROOM_POOLS,ROOM_ASYNC_WINDOW,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE} from '../src/session-engine.js';
 import {QUESTIONS} from '../src/questions.js';
 import {QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
@@ -14,6 +15,8 @@ export function rewardRules(){
   __GEAR_PRICE__:json(Object.fromEntries(GEAR.map(g=>[g.id,g.price]))),
   __COMMON__:json(NORMAL_CARDS),__FOIL__:json(FOIL_CARDS),
   __PREFIX_CHECK__:prefixCheck,
+  __LEGEND__:json(LEGEND_CARDS.map(c=>c.id)),__LEGEND_COMPLETE__:LEGEND_CARDS.map(c=>'w.cards.get('+json(c.id)+',0)>0').join('&&'),
+  __STANDARD_ZERO__:json(Object.fromEntries(STANDARD_CARDS.map(c=>[c.id,0]))),__LEGEND_COLLECTION_STEP__:String(LEGEND_COLLECTION_STEP),__LEGEND_GAMES_STEP__:String(LEGEND_GAMES_STEP),
   __FRAMES__:json(GEAR.filter(g=>g.kind==='frame').map(g=>g.id)),
   __THEMES__:json(GEAR.filter(g=>g.kind==='theme').map(g=>g.id)),
   __EXITS__:json(GEAR.filter(g=>g.kind==='exit').map(g=>g.id)),
@@ -34,10 +37,11 @@ export function rewardRules(){
   function rwWeekend(){let d=today();let n=(d+4)%7;return n==0?d-1:d+(6-n+7)%7;}
   function rwRetryPrice(day){let seed=(day*48271+1013904223)%2147483647;let bucket=((seed*48271+1013904223)%2147483647)%5;return __RETRY_UNIT__*(5+bucket);}
   function rwIsWeekend(){return (today()+4)%7 in [0,6];}
-  function rwOwned(w){return (w.frame=='none'||(w.frame in __FRAMES__&&w.frame in w.owned))&&(w.theme=='default'||(w.theme in __THEMES__&&w.theme in w.owned))&&(w.exit=='default'||(w.exit in __EXITS__&&w.exit in w.owned))&&(w.prefix==''||__PREFIX_CHECK__);}
+  function rwLegendComplete(w){return __LEGEND_COMPLETE__;}
+  function rwOwned(w){return (w.frame=='none'||(w.frame in __FRAMES__&&w.frame in w.owned))&&(w.theme=='default'||(w.theme=='theme-legend'&&rwLegendComplete(w))||(w.theme in __THEMES__&&w.theme in w.owned))&&(w.exit=='default'||(w.exit in __EXITS__&&w.exit in w.owned))&&(w.prefix==''||__PREFIX_CHECK__);}
   function rwCreate(w,uid){
-   return w.keys().hasOnly(['uid','spent','bonus','draws','normalDraws','cards','owned','frame','theme','exit','prefix','pass','passUses','retryBoughtDay','retryUsedDay','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
-    &&w.uid==uid&&w.spent is int&&w.spent==0&&w.bonus is int&&w.bonus==0&&w.draws is int&&w.draws==0&&w.get('normalDraws',0) is int&&w.get('normalDraws',0)==0&&w.cards=={}&&w.owned==[]
+   return w.keys().hasOnly(['uid','spent','bonus','draws','normalDraws','legendDraws','cards','owned','frame','theme','exit','prefix','pass','passUses','retryBoughtDay','retryUsedDay','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
+    &&w.uid==uid&&w.spent is int&&w.spent==0&&w.bonus is int&&w.bonus==0&&w.draws is int&&w.draws==0&&w.get('normalDraws',0) is int&&w.get('normalDraws',0)==0&&w.get('legendDraws',0) is int&&w.get('legendDraws',0)==0&&w.cards=={}&&w.owned==[]
     &&w.frame=='none'&&w.theme=='default'&&w.exit=='default'&&w.prefix==''&&w.pass is int&&w.pass==-1&&w.passUses is int&&w.passUses==0
     &&w.retryBoughtDay is int&&w.retryBoughtDay==-1&&w.retryUsedDay is int&&w.retryUsedDay==-1
     &&w.practiceDay is int&&w.practiceDay==-1&&w.practiceEarned is int&&w.practiceEarned==0&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
@@ -64,9 +68,18 @@ export function rewardRules(){
     &&w.cards.diff(o.cards).affectedKeys().hasOnly([id])&&w.cards[id] is int&&w.cards[id]==o.cards.get(id,0)+1;
   }
   function rwBuy(w,o){let price=__GEAR_PRICE__[w.item];return rwChanged(w,o,['spent','owned','receipt'])&&!(w.item in o.owned)&&w.owned==o.owned.concat([w.item])&&w.spent==o.spent+price;}
+  function rwLegend(w,o,uid){
+   let n=o.get('legendDraws',0);let id=__LEGEND__[(o.createdAt.toMillis()%20+(n%20)*7+int(n / 20)*3)%20];
+   // Existing card writes allow positive counts only. changedKeys excludes missing,
+   // zero and unknown keys, and never counts cards in the hidden collection.
+   let collected=o.cards.diff(__STANDARD_ZERO__).changedKeys().size();
+   let earned=int(collected / __LEGEND_COLLECTION_STEP__)+int(get(player(uid)).data.games / __LEGEND_GAMES_STEP__);
+   return rwChanged(w,o,['cards','legendDraws','receipt'])&&n is int&&n>=0&&n<earned&&w.legendDraws is int&&w.legendDraws==n+1&&w.item==id
+    &&w.cards.diff(o.cards).affectedKeys().hasOnly([id])&&w.cards[id] is int&&w.cards[id]==o.cards.get(id,0)+1;
+  }
   function rwShop(w,o,uid){
    return rwReceipt(w,o,uid)&&get(player(uid)).data.total+o.bonus-o.spent>=w.spent-o.spent&&(
-    w.op=='draw'?rwDraw(w,o,false):w.op=='gold'?rwDraw(w,o,true):w.op=='buy'?rwBuy(w,o):
+    w.op=='draw'?rwDraw(w,o,false):w.op=='gold'?rwDraw(w,o,true):w.op=='legend'?rwLegend(w,o,uid):w.op=='buy'?rwBuy(w,o):
     w.op=='equip'?(rwChanged(w,o,['frame','theme','exit','prefix','receipt'])&&w.spent==o.spent&&w.item in ['frame','theme','exit','prefix']&&rwOwned(w)):
     (w.op=='pass'&&rwChanged(w,o,['pass','passUses','spent','receipt'])&&o.pass!=rwWeekend()&&w.pass is int&&w.pass==rwWeekend()&&w.passUses==0&&w.spent==o.spent+__PASS_PRICE__)
     ||(w.op=='retry-ticket'&&rwChanged(w,o,['retryBoughtDay','spent','receipt'])&&o.get('retryBoughtDay',-1)!=today()&&w.retryBoughtDay is int&&w.retryBoughtDay==today()&&w.spent==o.spent+rwRetryPrice(today())));
@@ -105,7 +118,7 @@ export function rewardRules(){
   }
   function rwUpdate(w,o,uid){
    return w.updatedAt==request.time&&w.revision is int&&w.revision==o.revision+1&&w.spent is int&&w.spent>=0&&w.spent<=1000000000000&&w.bonus is int&&w.bonus>=0&&w.bonus<=1000000000000
-    &&(w.op in ['draw','gold','buy','equip','pass','retry-ticket']?rwShop(w,o,uid):w.op=='market-list'?mkWalletList(w,o,uid):w.op=='market-cancel'?mkWalletCancel(w,o,uid):w.op=='market-buy'?mkWalletBuy(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
+    &&(w.op in ['draw','gold','legend','buy','equip','pass','retry-ticket']?rwShop(w,o,uid):w.op=='market-list'?mkWalletList(w,o,uid):w.op=='market-cancel'?mkWalletCancel(w,o,uid):w.op=='market-buy'?mkWalletBuy(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
   }
   match /hkm_wallets/{uid}{
    allow get:if owner(uid);allow list,delete:if false;
@@ -116,7 +129,7 @@ export function rewardRules(){
     allow get:if owner(uid);allow list,update,delete:if false;
     allow create:if owner(uid)&&id.matches('^[a-f0-9-]{36}$')&&request.resource.data.keys().hasOnly(['uid','op','item','cost','revision','createdAt'])
      &&request.resource.data.createdAt==request.time&&request.resource.data.uid==uid
-     &&getAfter(rwPath(uid)).data.receipt==id&&getAfter(rwPath(uid)).data.op in ['draw','gold','buy','equip','pass','retry-ticket']
+     &&getAfter(rwPath(uid)).data.receipt==id&&getAfter(rwPath(uid)).data.op in ['draw','gold','legend','buy','equip','pass','retry-ticket']
      &&request.resource.data.op==getAfter(rwPath(uid)).data.op&&request.resource.data.item==getAfter(rwPath(uid)).data.item
      &&request.resource.data.revision==getAfter(rwPath(uid)).data.revision&&getAfter(rwPath(uid)).data.updatedAt==request.time
      &&request.resource.data.cost==getAfter(rwPath(uid)).data.spent-get(rwPath(uid)).data.spent;

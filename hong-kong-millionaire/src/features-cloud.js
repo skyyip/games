@@ -38,7 +38,7 @@ export async function shop(c,uid,action){
  });return {...await wallet(c,uid),outcome,requestId};
 }
 export async function purchaseStatus(c,uid,action){
- if(!['pass','retry-ticket','draw','gold','buy','equip'].includes(action?.type)||!/^[a-f0-9-]{36}$/.test(action.requestId))throw Error('invalid-item');
+ if(!['pass','retry-ticket','draw','gold','legend','buy','equip'].includes(action?.type)||!/^[a-f0-9-]{36}$/.test(action.requestId))throw Error('invalid-item');
  const [receipt,w,p]=await Promise.all([readServer(c,c.doc(c.db,FEATURE_COLLECTIONS.wallets,uid,'receipts',action.requestId)),readServer(c,walletRef(c,uid)),readServer(c,player(c,uid))]);
  const paid=data(receipt),saved=data(w),profile=data(p);if(!saved||!profile)throw Error('login-required');
  if(paid&&(paid.uid!==uid||paid.op!==action.type||action.type==='buy'&&paid.item!==action.id||action.type==='equip'&&paid.item!==action.slot))throw Error('receipt-mismatch');

@@ -47,6 +47,8 @@
     "test:purchase-recovery": "node scripts/purchase-recovery-browser-check.mjs",
     "test:market-rules": "node scripts/market-firestore-check.mjs",
     "test:market": "node scripts/market-browser-check.mjs",
+    "test:legend-rules": "node scripts/legend-firestore-check.mjs",
+    "test:legend": "node scripts/legend-browser-check.mjs",
     "test:draw-rules": "node scripts/draw-firestore-check.mjs"
   },
   "dependencies": {

@@ -1,5 +1,18 @@
 # Firebase 設定與部署
 
+## 香港傳說・隱藏典藏（2026-11-29）
+
+**先在 `sky-playground-millionaire` 發布本版完整 [firestore.rules](firestore.rules)，再完整上傳同版網站。** 本次 Rules 有變更，七個索引維持不變；適用 Spark，不需 Functions、Blaze、清空資料或批次遷移。下方「本次沒有 Rules 變更」屬歷史紀錄。
+
+- 新增獨立隱藏典藏 20 款，全冊合共 200 款；普通／金蛋仍使用原有 180 款，普通完整循環閃卡比例仍為 8%。
+- 每收藏 10 款不同的原有文化卡／閃卡得 1 券，每完成 5 次每日挑戰另得 1 券；既有進度計入。重複卡、隱藏卡、未知卡號及零張數不增加收藏里程碑。
+- `hkm_wallets/{uid}.legendDraws` 是已使用典藏券數，舊錢包缺少時視為 0。可用券數由原有卡片唯一款數及 `hkm_players/{uid}.games` 計算，不另存可任意修改的券餘額。每次 `op: 'legend'` 只增加一張指定典藏及一次券數，不扣獎金、不改 `draws`／`normalDraws`。
+- 獨立 20 張循環以建立時間及券數作可重現排列，每輪 20 次各不相同；不因市集已購得同款而改抽序。這是可預測的偽隨機排列，並非保密隨機。之後的循環可以取得重複卡，沿用市集最後一張保留及 5% 交易費規則。
+- 沿用 `hkm_wallets/{uid}/receipts/{requestId}` 防重收據。Rules 獨立驗證里程碑、卡號、恰好增加一次、零獎金成本及不可變欄位。跨裝置同時操作只會成功消耗實際可用券數；已確認收據不重抽。
+- 集齊 20 款解鎖 `prefix: 'legend'`（香江傳奇）及 `theme: 'theme-legend'`。主題不販售、不加入付費 `owned` 清單；Rules 以完整持卡核對套用和公開造型，不能假裝購買免費主題跳過收集。
+
+可於 Firestore Database → Rules 貼上完整規則並 Publish，或從此資料夾執行 `npm run rules:check`、`npm run firebase:check` 後，以已登入正確專案的 Firebase CLI 執行 `npm run firebase:deploy`。腳本只部署 Rules 及既有索引，不部署 Hosting／Functions。本次未代為部署正式 Firebase 或網站。
+
 ## 市集分頁及購買後顯示修正（2026-11-28）
 
 本次只改前端讀取、列表狀態及標籤CSS，**沒有Rules、索引、資料格式或交易寫入變更**。已部署前版8%普通抽與售賣記錄設定者，只需完整更新網站；尚未部署者仍按下方完整Rules及七個索引說明設定，無需Functions或Blaze。

@@ -20,7 +20,7 @@ test('draws are replay-stable and every gold draw is a foil',()=>{
 });
 test('normal draw distribution and set prefixes do not grant answer advantages',()=>{
  let wallet=emptyWallet('p',0),foils=0;for(let i=0;i<DRAW_SLOTS;i++){wallet=walletAction({total:DRAW_SLOTS*DRAW_PRICE},wallet,{type:'draw'},DAY);if(CULTURE_CARDS.find(c=>c.id===wallet.item).foil)foils++;}
- assert.equal(foils,FOIL_CARDS.length*FOIL_WEIGHT);assert.equal(foils/DRAW_SLOTS,.08);for(const id of NORMAL_CARDS)assert.equal(wallet.cards[id],NORMAL_WEIGHT);for(const id of FOIL_CARDS)assert.equal(wallet.cards[id],FOIL_WEIGHT);assert.equal(unlockedPrefixes(wallet).length,SERIES.length);
+ assert.equal(foils,FOIL_CARDS.length*FOIL_WEIGHT);assert.equal(foils/DRAW_SLOTS,.08);for(const id of NORMAL_CARDS)assert.equal(wallet.cards[id],NORMAL_WEIGHT);for(const id of FOIL_CARDS)assert.equal(wallet.cards[id],FOIL_WEIGHT);assert.equal(unlockedPrefixes(wallet).length,SERIES.length-1);
  const fresh=emptyWallet('p',0);assert.throws(()=>walletAction({total:1000000},fresh,{type:'equip',slot:'prefix',id:'snacks'},DAY),/not-owned/);
  assert.throws(()=>walletAction({total:1000000},fresh,{type:'equip',slot:'theme',id:'theme-cafe'},DAY),/not-owned/);
 });
@@ -109,7 +109,7 @@ test('daily offers are shared, bounded and reject stale or forged confirmation p
 });
 
 test('every card in a series is required for its prefix, including all expansion foils',()=>{
- assert.equal(CULTURE_CARDS.length,180);assert.equal(SERIES.length,8);
+ assert.equal(CULTURE_CARDS.length,200);assert.equal(SERIES.length,9);
  for(const series of SERIES){
   const cards=CULTURE_CARDS.filter(c=>c.series===series.id);assert.equal(cards.length,['snacks','adventure'].includes(series.id)?30:20);
   const complete={...emptyWallet('p',0),cards:Object.fromEntries(cards.map(c=>[c.id,1]))};

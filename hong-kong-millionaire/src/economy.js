@@ -1,6 +1,8 @@
 import {hkDay} from './game.js';
+import {LEGEND_CARDS,LEGEND_THEME,LEGEND_COLLECTION_STEP,LEGEND_GAMES_STEP,legendComplete} from './legend-cards.js';
+export {LEGEND_CARDS,LEGEND_THEME,legendComplete} from './legend-cards.js';
 export const DRAW_PRICE=10000,GOLD_PRICE=80000,WEEKEND_PASS_PRICE=80000,WEEKEND_LIMIT=5,RETRY_PRICE=100000;
-export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'交通達人'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'},{id:'villages',name:'圍村與離島',prefix:'村落地膽'},{id:'crafts',name:'匠人手作',prefix:'手藝收藏家'},{id:'adventure',name:'山水探險家',prefix:'山水探險家'}]);
+export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'交通達人'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'},{id:'villages',name:'圍村與離島',prefix:'村落地膽'},{id:'crafts',name:'匠人手作',prefix:'手藝收藏家'},{id:'adventure',name:'山水探險家',prefix:'山水探險家'},{id:'legend',name:'香港傳說・隱藏典藏',prefix:'香江傳奇'}]);
 // Shared date-derived offer: identical on every device; Firestore recomputes it.
 export function retryDiscount(day=hkDay()){const seed=(day*48271+1013904223)%2147483647;return 5+((seed*48271+1013904223)%2147483647)%5;}
 export const retryPrice=(day=hkDay())=>RETRY_PRICE/10*retryDiscount(day);
@@ -189,7 +191,8 @@ const cards=[
  ["butterfly-beach-foil","adventure","蝴蝶灣樹影",true,"屯門蝴蝶灣的海邊公園、樹蔭與沙岸，記下街坊散步望海的日常。唔使每次放假都追大場面，一張凳、一陣海風，已經可以坐得好認真。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-tm.html",false],
  ["turtle-cove-foil","adventure","龜背灣綠岸",true,"大潭一帶的龜背灣藏於港島南的綠色海岸，細小沙灣被山坡輕輕圍住。名字有龜，風景就請你慢慢睇；張卡唔會催你交功課。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false]
 ];
-export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
+export const STANDARD_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
+export const CULTURE_CARDS=Object.freeze([...STANDARD_CARDS,...LEGEND_CARDS]);
 export const GEAR=Object.freeze([
  {id:'frame-rwb',kind:'frame',name:'紅白藍膠袋框',price:20000,description:'紅白藍條紋，帶住街坊回憶上榜。'},
  {id:'frame-neon',kind:'frame',name:'霓虹燈招牌框',price:100000,description:'柔和霓虹光暈；減少動態效果設定下保持靜態。'},
@@ -227,16 +230,18 @@ export const GEAR=Object.freeze([
  {"id":"exit-gondola","kind":"exit","name":"纜車上山抖抖","price":90000,"description":"割禾青後，纜車沿斜索上山，安全帶走本局的收穫。"}
 ]);
 const gearKindOrder={frame:0,theme:1,exit:2};
-export const DISPLAY_GEAR=Object.freeze([...GEAR].sort((a,b)=>gearKindOrder[a.kind]-gearKindOrder[b.kind]||a.price-b.price));
-export const NORMAL_CARDS=Object.freeze(CULTURE_CARDS.filter(c=>!c.foil).map(c=>c.id));
-export const FOIL_CARDS=Object.freeze(CULTURE_CARDS.filter(c=>c.foil).map(c=>c.id));
+export const DISPLAY_GEAR=Object.freeze([...GEAR,LEGEND_THEME].sort((a,b)=>gearKindOrder[a.kind]-gearKindOrder[b.kind]||(a.price??0)-(b.price??0)));
+export const NORMAL_CARDS=Object.freeze(STANDARD_CARDS.filter(c=>!c.foil).map(c=>c.id));
+export const FOIL_CARDS=Object.freeze(STANDARD_CARDS.filter(c=>c.foil).map(c=>c.id));
 export const cardById=id=>CULTURE_CARDS.find(c=>c.id===id);
 export const gearById=id=>GEAR.find(c=>c.id===id);
 export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wallet?.bonus??0)-(wallet?.spent??0));
 export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
+export function legendTickets(profile,wallet){const collected=STANDARD_CARDS.filter(c=>(wallet?.cards?.[c.id]??0)>0).length,games=profile?.games??0,earned=Math.floor(collected/LEGEND_COLLECTION_STEP)+Math.floor(games/LEGEND_GAMES_STEP);return {collected,games,earned,available:Math.max(0,earned-(wallet?.legendDraws??0))};}
+export function drawnLegend(wallet){const n=wallet.legendDraws??0,seed=Math.floor(wallet.createdAt?.toMillis?.()??wallet.createdAt??0);return LEGEND_CARDS[(seed%20+(n%20)*7+Math.floor(n/20)*3)%20].id;}
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
 export const isWeekend=(day=hkDay())=>[0,6].includes((day+4)%7);
-export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,normalDraws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,retryBoughtDay:-1,retryUsedDay:-1,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
+export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,normalDraws:0,legendDraws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,retryBoughtDay:-1,retryUsedDay:-1,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const stride=n=>{let step=5;while(gcd(step,n)!==1)step++;return step;};
 // Equal weights within each rarity, with an exact 23:2 (92%:8%) ratio.
@@ -261,9 +266,10 @@ export function walletAction(profile,wallet,action,day=hkDay()){
  const next={...wallet,revision:wallet.revision+1,op:action.type,item:action.id??'',receipt:action.requestId??wallet.receipt};let cost=0;
  if(action.type==='buy'){const gear=gearById(action.id);if(!gear||wallet.owned.includes(gear.id))throw Error('already-owned');cost=gear.price;next.owned=[...wallet.owned,gear.id];}
  else if(action.type==='draw'||action.type==='gold'){cost=action.type==='gold'?GOLD_PRICE:DRAW_PRICE;next.item=drawnCard(wallet,action.type==='gold');next.cards={...wallet.cards,[next.item]:(wallet.cards[next.item]??0)+1};next.draws++;if(action.type==='draw')next.normalDraws=(wallet.normalDraws??0)+1;}
+ else if(action.type==='legend'){if(legendTickets(profile,wallet).available<1)throw Error('legend-ticket-required');next.item=drawnLegend(wallet);next.cards={...wallet.cards,[next.item]:(wallet.cards[next.item]??0)+1};next.legendDraws=(wallet.legendDraws??0)+1;}
  else if(action.type==='equip'){
   if(action.slot==='prefix'){if(action.id!==''&&!unlockedPrefixes(wallet).some(s=>s.id===action.id))throw Error('not-owned');next.prefix=action.id;}
-  else{if(!['frame','theme','exit'].includes(action.slot))throw Error('invalid-item');const reset=action.slot==='frame'?'none':'default';if(action.id!==reset&&(!wallet.owned.includes(action.id)||gearById(action.id)?.kind!==action.slot))throw Error('not-owned');next[action.slot]=action.id;}
+  else{if(!['frame','theme','exit'].includes(action.slot))throw Error('invalid-item');const reset=action.slot==='frame'?'none':'default',legendTheme=action.slot==='theme'&&action.id===LEGEND_THEME.id&&legendComplete(wallet);if(action.id!==reset&&!legendTheme&&(!wallet.owned.includes(action.id)||gearById(action.id)?.kind!==action.slot))throw Error('not-owned');next[action.slot]=action.id;}
   next.item=action.slot;
  }else if(action.type==='pass'){if(action.day!==undefined&&(!Number.isInteger(action.day)||weekendKey(action.day)!==weekendKey(day)))throw Error('quote-expired');if(wallet.pass===weekendKey(day))throw Error('already-owned');cost=WEEKEND_PASS_PRICE;next.pass=weekendKey(day);next.passUses=0;}
  else if(action.type==='retry-ticket'){if(wallet.retryBoughtDay===day)throw Error('retry-bought');if(action.day!==undefined&&action.day!==day)throw Error('quote-expired');cost=retryPrice(day);if(action.price!==undefined&&action.price!==cost)throw Error('quote-expired');next.retryBoughtDay=day;}

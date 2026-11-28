@@ -1,4 +1,10 @@
 export const ART=Object.freeze({
+ 'legend-atlas-0.webp':new URL('../assets/legend-atlas-0.webp',import.meta.url).href,
+ 'legend-atlas-1.webp':new URL('../assets/legend-atlas-1.webp',import.meta.url).href,
+ 'legend-atlas-2.webp':new URL('../assets/legend-atlas-2.webp',import.meta.url).href,
+ 'legend-atlas-3.webp':new URL('../assets/legend-atlas-3.webp',import.meta.url).href,
+ 'legend-atlas-4.webp':new URL('../assets/legend-atlas-4.webp',import.meta.url).href,
+
  'card-fried-squid-skewer.webp':new URL('../assets/card-fried-squid-skewer.webp',import.meta.url).href,
  'card-beef-offal-pot.webp':new URL('../assets/card-beef-offal-pot.webp',import.meta.url).href,
  'card-roasted-chestnut-cart.webp':new URL('../assets/card-roasted-chestnut-cart.webp',import.meta.url).href,
