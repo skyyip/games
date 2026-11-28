@@ -1,0 +1,350 @@
+{
+  "fontTools": "4.61.1",
+  "inputs": {
+    "index.html": "f35fe0771f7e9cc3a5c38b4bd8227eb2125287e3290cd78473ccb005af416dbf",
+    "src/app.js": "bb6bde05489da6f27bc7eaf6f568caa5133ca934a38e299bb0d335a52ed372fd",
+    "src/collection-ui.js": "03f8d9d08cf9455d2e27e9c96668f1112d93c9d67be05767568e73f09b6cdb7e",
+    "src/market-ui.js": "0372a220f283e7306c004aae6175359e23ffc48ea5865f50d05cf07ab04a31cb",
+    "src/arcade-ui.js": "abd1276c6abbe1177b9b01f77912343919347ef56b34f126c16e4a60815fb265",
+    "src/showtime.js": "336a92bcff7d2f798ae60436865707c43933814db8db240690256721f18f3c51"
+  },
+  "cssSha256": "56310672d506cdc6161acfa169ef06833839c6adc6822f40562f70bfba2eb250",
+  "fonts": [
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/lgc.woff2",
+      "sourceSha256": "7cfc09f3c655767af3a688fbc637de7384e9615472990cba6bbc488fec47969d",
+      "file": "assets/fonts/ui/hei-lgc.woff2",
+      "sha256": "1766679adb5f8a7e128f4b11b31c77f65eab93c426fb6111608bd7851ba9345d",
+      "glyphs": 106,
+      "bytes": 96448
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_90.woff2",
+      "sourceSha256": "a3daba384b2ffc5244db725c4730158d044bc5845287e02e0d03c020f779567c",
+      "file": "assets/fonts/ui/hei-gf_90.woff2",
+      "sha256": "49977a22641fec007710820bdffe3463e305839bc00027b82c5587a25409d8ca",
+      "glyphs": 3,
+      "bytes": 1944
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_101.woff2",
+      "sourceSha256": "1563e2854a7d1f479228480389cdaf09b05956b1eb8265e68f7f05dc4900a457",
+      "file": "assets/fonts/ui/hei-gf_101.woff2",
+      "sha256": "778a65a041202c7e48327718778628fc33ee64c383532f604115131eb9b11f63",
+      "glyphs": 2,
+      "bytes": 1900
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_102.woff2",
+      "sourceSha256": "b5cfc2d5e760992814c56213b357b15d14e5de22256a6b002f80b3ec26da3af2",
+      "file": "assets/fonts/ui/hei-gf_102.woff2",
+      "sha256": "72343827ededab1b5a2dbfc8fd8a41b1f39970a616da36fcb55cc279217ede73",
+      "glyphs": 2,
+      "bytes": 2320
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_103.woff2",
+      "sourceSha256": "0439c4218ab04ca8cdbc63e670010511d862ac4b9085a0d39b594639ac44c580",
+      "file": "assets/fonts/ui/hei-gf_103.woff2",
+      "sha256": "a199365736576e711d497dad8536b6426e5b2a71a7c6f7a6e4d16c26885119f5",
+      "glyphs": 3,
+      "bytes": 4284
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_104.woff2",
+      "sourceSha256": "8a4a68c290103a0b0bde6584ec1f0e24f62f2fba901e8f66a1e078d5af05d0e6",
+      "file": "assets/fonts/ui/hei-gf_104.woff2",
+      "sha256": "5a4d1981671ab11f86e3c1dcb7956ec9855194ba87b8056bace52f59bddf4fe0",
+      "glyphs": 1,
+      "bytes": 2500
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_105.woff2",
+      "sourceSha256": "ef5c88799a864af58c78d351b9c6111f35bfc7ab1c865a562e3483a1f27101af",
+      "file": "assets/fonts/ui/hei-gf_105.woff2",
+      "sha256": "8838d89c5dbc4f7646a662cfaaf1a969b5b80b6c98c19c5a890f84667331e091",
+      "glyphs": 2,
+      "bytes": 3036
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_106.woff2",
+      "sourceSha256": "393aef7ad1e3bdd60d3c583a44de9a8e7b8b2f2de9b8bf81c120598d126ea7af",
+      "file": "assets/fonts/ui/hei-gf_106.woff2",
+      "sha256": "9dd02e1fab49cd9fc6c9ee26cacca346be7ee83256ae348b2829321277a7a04c",
+      "glyphs": 3,
+      "bytes": 2524
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_107.woff2",
+      "sourceSha256": "1a6da831e362eda896bda05f39597ef2a131ea578c554df2bcc77a45efd444d9",
+      "file": "assets/fonts/ui/hei-gf_107.woff2",
+      "sha256": "d7158d863e6e44403803fab37eeaf8c250ec417f419e3e5e5a9a696483c1e4ae",
+      "glyphs": 4,
+      "bytes": 3804
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_108.woff2",
+      "sourceSha256": "e55eaabc82b653a68c919b91f856bea41feda36afe28ab6a08763a643e993264",
+      "file": "assets/fonts/ui/hei-gf_108.woff2",
+      "sha256": "8ca6d566eab56084f015fdcca900cd5b31ca07dfbe5c279b9364395ef9a307fc",
+      "glyphs": 5,
+      "bytes": 4220
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_109.woff2",
+      "sourceSha256": "a72867a7daeb2bda582c60083aeb27117be27ea31e016a2a3ca4afa270fd453d",
+      "file": "assets/fonts/ui/hei-gf_109.woff2",
+      "sha256": "c2192d3721c655ccedde6aa1b804dcc4f599a84ffe2dd968afcd13823a3e7b0b",
+      "glyphs": 8,
+      "bytes": 7200
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_110.woff2",
+      "sourceSha256": "aa83dba49bb86d766ec49fff6d00d1b9b90e4621080275a18b7201126f17f2f0",
+      "file": "assets/fonts/ui/hei-gf_110.woff2",
+      "sha256": "638d4e1f2d6f4f98ef9c7cb54979b899b619288c9d7cb0b0c08b8cea11f5254d",
+      "glyphs": 10,
+      "bytes": 6988
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_111.woff2",
+      "sourceSha256": "d322fcbbb206a11489daf69eed5d7b459eac0e53f9ca298133ccd809698daa8f",
+      "file": "assets/fonts/ui/hei-gf_111.woff2",
+      "sha256": "6246c8573dccce95de00199e01962c36f9367c5a3a863c37d09b80c66ea287c2",
+      "glyphs": 18,
+      "bytes": 11760
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_112.woff2",
+      "sourceSha256": "22ea7fdb65ea84ecf40083667d9c453dcebbd52d2810404bb2aaea77526621e4",
+      "file": "assets/fonts/ui/hei-gf_112.woff2",
+      "sha256": "be29a0a6a82cd56a74b85a7c8afbf2941e5ef9853530faea4aa5b46126e74255",
+      "glyphs": 19,
+      "bytes": 10792
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_113.woff2",
+      "sourceSha256": "c03a3619d3a8eb4aa681085efe8ffaa8698514b3393fd1ea40783518f16c3e24",
+      "file": "assets/fonts/ui/hei-gf_113.woff2",
+      "sha256": "126f66866a60a6a903918e6035dff353d1b3a803dd5f744c2892c53262918c5f",
+      "glyphs": 38,
+      "bytes": 23348
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_114.woff2",
+      "sourceSha256": "2417065cab07a79740f86053b74968ef9ecc5d30f4a23a6049152734c9c0fcb6",
+      "file": "assets/fonts/ui/hei-gf_114.woff2",
+      "sha256": "5644525fc49af31c59dd1b2ab072baef2f3e9d778c7b8a30f12c36d46be608b3",
+      "glyphs": 10,
+      "bytes": 7508
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_115.woff2",
+      "sourceSha256": "21ff036826340db30df29d61569dcaf1b0017f75aaf1ca94840c7b7f891d765a",
+      "file": "assets/fonts/ui/hei-gf_115.woff2",
+      "sha256": "254b8f8a3fcf3b0071106b98f603f0bf26ac4639e2a34297a03c27ac9b815043",
+      "glyphs": 57,
+      "bytes": 32752
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_116.woff2",
+      "sourceSha256": "f4199eb5803abda6c8bdfd1139d6e2d34a0543801f1e9d95bdbcac3e4a45ec2d",
+      "file": "assets/fonts/ui/hei-gf_116.woff2",
+      "sha256": "37b4a25fa28f1574e595d2800ec1c67fc93338576fbe4c8e919dddbaddc60ca0",
+      "glyphs": 88,
+      "bytes": 49140
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_117.woff2",
+      "sourceSha256": "cddf64b121dce2860f13d780f4de36f3f80b8db555415121708b05c8e1a884e1",
+      "file": "assets/fonts/ui/hei-gf_117.woff2",
+      "sha256": "f9ae0f9d1ea9b075096b8cf1305bd8d84a46d3ebc8265218f8665d12fae5f3a1",
+      "glyphs": 116,
+      "bytes": 53736
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_118.woff2",
+      "sourceSha256": "d1f028cd6b39eb88225d2bba6fe136f3b911dcd969dfdb78fe1fc90fd0b0bfb1",
+      "file": "assets/fonts/ui/hei-gf_118.woff2",
+      "sha256": "181effc32c51a68c9a6349ec838363e2d07924fe7232fbdd72de968a66903077",
+      "glyphs": 154,
+      "bytes": 68796
+    },
+    {
+      "source": "assets/fonts/chiron-hei-hk/woff2/vf/t0/gf_119.woff2",
+      "sourceSha256": "1b8670616674643f0089e856f6d1cec6a9be6031720550336596fe23d7303f71",
+      "file": "assets/fonts/ui/hei-gf_119.woff2",
+      "sha256": "7e11f067e89cc6c30680e31f35e9fa8e16e61338137380ac5a53e36f95325ef3",
+      "glyphs": 51,
+      "bytes": 18744
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/lgc.woff2",
+      "sourceSha256": "5af2210368365310cdad4b34fb6b7b49eaee3406d53b8958225d55c3ac8b6125",
+      "file": "assets/fonts/ui/sung-lgc.woff2",
+      "sha256": "22f2aa65ab32193923e25fe8bff438524293cfb2777f23f5d907443986d12073",
+      "glyphs": 106,
+      "bytes": 148332
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_90.woff2",
+      "sourceSha256": "12a20e5e141fe570607d4d2a87d99e71b709f214c8d4f7ac56653d39fe0af681",
+      "file": "assets/fonts/ui/sung-gf_90.woff2",
+      "sha256": "e5891e2737958ec301ded331abfe221c737520c91cfd11aec35989796cb12554",
+      "glyphs": 3,
+      "bytes": 1824
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_101.woff2",
+      "sourceSha256": "ca2b48b0f3f6ed72a420cb10b74a1f9c3da170658e54fde7058605354a82989a",
+      "file": "assets/fonts/ui/sung-gf_101.woff2",
+      "sha256": "f94ca60e4dacb2a153de173394a35bcdf719b30cb7e24b214726ac7dbf57d066",
+      "glyphs": 2,
+      "bytes": 2320
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_102.woff2",
+      "sourceSha256": "b865415adfd86fa8f56c8b1cf2dd94b68f571d4ab8674270f8f5b745fb121e76",
+      "file": "assets/fonts/ui/sung-gf_102.woff2",
+      "sha256": "962a9bb765d8ed95466c65632bc80d2f375f0d0e23a25eefbf158d3ca2b4d2ba",
+      "glyphs": 2,
+      "bytes": 2676
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_103.woff2",
+      "sourceSha256": "06e6aee94f6102c4cdc078b7f6dd18498b60074458bf5b9bc23963c1112d1eec",
+      "file": "assets/fonts/ui/sung-gf_103.woff2",
+      "sha256": "00539f3e16e846cb2650a4bfe321acd0572badf1efed5e06c78a917ed5d46014",
+      "glyphs": 3,
+      "bytes": 4468
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_104.woff2",
+      "sourceSha256": "961638f92572a3500588759ac39b2b46a44ebf58b6a192ba0f4691d9d431a730",
+      "file": "assets/fonts/ui/sung-gf_104.woff2",
+      "sha256": "197288c346fb08fd2727aaf741bc4130b72d688fd4a58ab3ca38d64d074a04af",
+      "glyphs": 1,
+      "bytes": 2640
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_105.woff2",
+      "sourceSha256": "c9da7749fcd4ee268d3fe48c6f0766f82598a255152ef5f848fb6ab332cc64b9",
+      "file": "assets/fonts/ui/sung-gf_105.woff2",
+      "sha256": "fa7a44909612ad12c100af79bff54a8593dc64bf1b420b4e378c3a8d29f5d6b5",
+      "glyphs": 2,
+      "bytes": 3352
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_106.woff2",
+      "sourceSha256": "08e73261ce5faf814b217190c2a84991f13c7e6f8e394a3409acb760c8613abb",
+      "file": "assets/fonts/ui/sung-gf_106.woff2",
+      "sha256": "b4e125ffd5bdd69716d115328e2998f619fe265d0923c1c97188959fd7b3367e",
+      "glyphs": 3,
+      "bytes": 2828
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_107.woff2",
+      "sourceSha256": "c1255226a9b74014b50a5ad78565c07681a71a3cbefa332da6c897e7244d4f65",
+      "file": "assets/fonts/ui/sung-gf_107.woff2",
+      "sha256": "10a7f7d8ba93be75e8d4d730edd1733f7932b1d71659b1b73d99fa73142cc31f",
+      "glyphs": 4,
+      "bytes": 3956
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_108.woff2",
+      "sourceSha256": "144368d7ff836ad91ec402f02b469c9379de864103c4e0ab9ddaa4cd3c8e8214",
+      "file": "assets/fonts/ui/sung-gf_108.woff2",
+      "sha256": "d063424dbae12851f6433b0a77496454ae9869d329a0af6ae53a482ac11f8f61",
+      "glyphs": 5,
+      "bytes": 5244
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_109.woff2",
+      "sourceSha256": "aa01baa903ac5e80d0aa6e7d81d7a16768863e01a59d9186605ecf9e135e4b55",
+      "file": "assets/fonts/ui/sung-gf_109.woff2",
+      "sha256": "05e97bbfcd4a0d2ddf9a4911a26809be1025a796030942f84f127d0ab8e29c48",
+      "glyphs": 8,
+      "bytes": 7756
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_110.woff2",
+      "sourceSha256": "56eeec79067c9c5acab89c0ee2819e5bc74cd3e84bbe19927e374385a082c4a3",
+      "file": "assets/fonts/ui/sung-gf_110.woff2",
+      "sha256": "d7b2e2ff48ad5da1c2f03888866d453f047cb43db051017ed67b9817e99b0a43",
+      "glyphs": 10,
+      "bytes": 8768
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_111.woff2",
+      "sourceSha256": "42b4c5d5a8de30b2ff0269c0bb9f4b4a6fe7eb788ace8c56358e43a9908d65d9",
+      "file": "assets/fonts/ui/sung-gf_111.woff2",
+      "sha256": "4722da2da902bf27932ded1476fe573462c8448dc37e711acbae1b4177dd82df",
+      "glyphs": 18,
+      "bytes": 13672
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_112.woff2",
+      "sourceSha256": "0e0ed5ad66232b4082115b7a85ea653f9ffe9e10334bf6bbe255fa9eda4ae7f3",
+      "file": "assets/fonts/ui/sung-gf_112.woff2",
+      "sha256": "77adfd3bb0e8a9960e051f16c3b84f42847012d21635e939b6fe821dfce1628c",
+      "glyphs": 19,
+      "bytes": 13620
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_113.woff2",
+      "sourceSha256": "9d215094c21f40072cfebb51f85d6caf0bfed7acc680b100f06b40841b62c270",
+      "file": "assets/fonts/ui/sung-gf_113.woff2",
+      "sha256": "8bf6d1cbbdadeaa3ac7e2689922090e263c8c36615860df893adda90614b1ef9",
+      "glyphs": 38,
+      "bytes": 29156
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_114.woff2",
+      "sourceSha256": "ae8fc488bd0b3389fd36f1445ca5eef1e2b7bed753d4203d7c8493ec4f6d6e87",
+      "file": "assets/fonts/ui/sung-gf_114.woff2",
+      "sha256": "3b2eba515fa894ff2d7b0f359ec346e1265247d7cbc02758f0b9539ce2c9d315",
+      "glyphs": 10,
+      "bytes": 8916
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_115.woff2",
+      "sourceSha256": "ae69214d776a6d3954c594f8aa541a1ef94f34e54016c3c83ff87aa921b04c3b",
+      "file": "assets/fonts/ui/sung-gf_115.woff2",
+      "sha256": "ed22db3ff81e0f224966bb3d5f2921489d742d25723e6a300013e42ce3e8dbdf",
+      "glyphs": 57,
+      "bytes": 39552
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_116.woff2",
+      "sourceSha256": "5cd77acaa70a651ee611d204e861f9764e29d4c4974d798bea66156862d988b1",
+      "file": "assets/fonts/ui/sung-gf_116.woff2",
+      "sha256": "5c69718864f04fb6b0e39999192db275bc9c21434994cd0082c2f7665fbc0e4b",
+      "glyphs": 88,
+      "bytes": 58740
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_117.woff2",
+      "sourceSha256": "5078fc553a2b151058491aa13d7dfb873c33b2ee56b41558d8d586169fa6d1ca",
+      "file": "assets/fonts/ui/sung-gf_117.woff2",
+      "sha256": "71737480ff6fd1e74a2d45e902381cc7f60044e6a991b8d0312612c66f5e94bf",
+      "glyphs": 116,
+      "bytes": 65116
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_118.woff2",
+      "sourceSha256": "8e8b0fef458cec57056b899bc55b747ba24f5a740bebb283f2702113c325ff86",
+      "file": "assets/fonts/ui/sung-gf_118.woff2",
+      "sha256": "817ee173b9022968ec3f5b1411c796c92c89959e04e584e7e8dc19c9124c578c",
+      "glyphs": 154,
+      "bytes": 85096
+    },
+    {
+      "source": "assets/fonts/chiron-sung-hk/woff2/vf/t0/gf_119.woff2",
+      "sourceSha256": "79c2495a50715714dd45d0499f7c4e6d43548e3c8f10411c8f6ecea258d1c376",
+      "file": "assets/fonts/ui/sung-gf_119.woff2",
+      "sha256": "1271ffc7b76f15d7dfbab3155f29069440a2600b1502e224f58692d9111241be",
+      "glyphs": 51,
+      "bytes": 22956
+    }
+  ]
+}

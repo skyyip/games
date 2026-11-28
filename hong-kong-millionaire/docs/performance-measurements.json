@@ -1,0 +1,404 @@
+{
+  "date": "2026-11-28",
+  "environment": {
+    "browser": "local Chromium",
+    "cpuThrottle": 4,
+    "server": "uncompressed loopback HTTP",
+    "serviceWorkers": "blocked for cold-load isolation",
+    "externalRequests": "blocked",
+    "coldRuns": 3,
+    "collectionRepaints": 5,
+    "collectionIdleSampleMs": 1000,
+    "coldViewport": [
+      390,
+      844
+    ],
+    "collectionViewport": [
+      390,
+      900
+    ]
+  },
+  "coldBefore": [
+    {
+      "dcl": 676.1999999955297,
+      "lcp": 492,
+      "resources": 44,
+      "bytes": 5016751,
+      "jsBytes": 1365780,
+      "fonts": 2583260,
+      "largest": [
+        [
+          "chunk-KGNT6YFT.js",
+          842788
+        ],
+        [
+          "comic-cover-408d849bfa60.webp",
+          541532
+        ],
+        [
+          "styles-ZRWXXUCH.css",
+          432639
+        ],
+        [
+          "lgc-7cfc09f3c655.woff2",
+          264748
+        ],
+        [
+          "chunk-Z5KF53AA.js",
+          186401
+        ],
+        [
+          "gf_114-2417065cab07.woff2",
+          176256
+        ]
+      ],
+      "scriptMs": 313.496,
+      "taskMs": 863.982
+    },
+    {
+      "dcl": 599.3999999985099,
+      "lcp": 392,
+      "resources": 44,
+      "bytes": 5016751,
+      "jsBytes": 1365780,
+      "fonts": 2583260,
+      "largest": [
+        [
+          "chunk-KGNT6YFT.js",
+          842788
+        ],
+        [
+          "comic-cover-408d849bfa60.webp",
+          541532
+        ],
+        [
+          "styles-ZRWXXUCH.css",
+          432639
+        ],
+        [
+          "lgc-7cfc09f3c655.woff2",
+          264748
+        ],
+        [
+          "chunk-Z5KF53AA.js",
+          186401
+        ],
+        [
+          "gf_114-2417065cab07.woff2",
+          176256
+        ]
+      ],
+      "scriptMs": 309.095,
+      "taskMs": 808.195
+    },
+    {
+      "dcl": 445.09999999403954,
+      "lcp": 340,
+      "resources": 44,
+      "bytes": 5016751,
+      "jsBytes": 1365780,
+      "fonts": 2583260,
+      "largest": [
+        [
+          "chunk-KGNT6YFT.js",
+          842788
+        ],
+        [
+          "comic-cover-408d849bfa60.webp",
+          541532
+        ],
+        [
+          "styles-ZRWXXUCH.css",
+          432639
+        ],
+        [
+          "lgc-7cfc09f3c655.woff2",
+          264748
+        ],
+        [
+          "chunk-Z5KF53AA.js",
+          186401
+        ],
+        [
+          "gf_114-2417065cab07.woff2",
+          176256
+        ]
+      ],
+      "scriptMs": 195.548,
+      "taskMs": 582.1429999999999
+    }
+  ],
+  "coldAfter": [
+    {
+      "dcl": 674.1999999955297,
+      "lcp": 512,
+      "resources": 44,
+      "bytes": 3247653,
+      "jsBytes": 1366154,
+      "fonts": 797064,
+      "largest": [
+        [
+          "chunk-KGNT6YFT.js",
+          842788
+        ],
+        [
+          "comic-cover-408d849bfa60.webp",
+          541532
+        ],
+        [
+          "styles-AF3SMRV2.css",
+          448861
+        ],
+        [
+          "chunk-Z5KF53AA.js",
+          186401
+        ],
+        [
+          "app-QEJQCRBF.js",
+          162333
+        ],
+        [
+          "chunk-L4T6I2L2.js",
+          128381
+        ]
+      ],
+      "scriptMs": 268.945,
+      "taskMs": 824.276
+    },
+    {
+      "dcl": 635.6000000014901,
+      "lcp": 428,
+      "resources": 44,
+      "bytes": 3247653,
+      "jsBytes": 1366154,
+      "fonts": 797064,
+      "largest": [
+        [
+          "chunk-KGNT6YFT.js",
+          842788
+        ],
+        [
+          "comic-cover-408d849bfa60.webp",
+          541532
+        ],
+        [
+          "styles-AF3SMRV2.css",
+          448861
+        ],
+        [
+          "chunk-Z5KF53AA.js",
+          186401
+        ],
+        [
+          "app-QEJQCRBF.js",
+          162333
+        ],
+        [
+          "chunk-L4T6I2L2.js",
+          128381
+        ]
+      ],
+      "scriptMs": 288.897,
+      "taskMs": 800.489
+    },
+    {
+      "dcl": 439.8999999985099,
+      "lcp": 332,
+      "resources": 44,
+      "bytes": 3247653,
+      "jsBytes": 1366154,
+      "fonts": 797064,
+      "largest": [
+        [
+          "chunk-KGNT6YFT.js",
+          842788
+        ],
+        [
+          "comic-cover-408d849bfa60.webp",
+          541532
+        ],
+        [
+          "styles-AF3SMRV2.css",
+          448861
+        ],
+        [
+          "chunk-Z5KF53AA.js",
+          186401
+        ],
+        [
+          "app-QEJQCRBF.js",
+          162333
+        ],
+        [
+          "chunk-L4T6I2L2.js",
+          128381
+        ]
+      ],
+      "scriptMs": 196.685,
+      "taskMs": 608.21
+    }
+  ],
+  "collectionBefore": {
+    "values": [
+      {
+        "handler": 24.899999998509884,
+        "paint": 418
+      },
+      {
+        "handler": 39.100000001490116,
+        "paint": 237
+      },
+      {
+        "handler": 39.80000000447035,
+        "paint": 291
+      },
+      {
+        "handler": 32.100000001490116,
+        "paint": 257.29999999701977
+      },
+      {
+        "handler": 37.19999999552965,
+        "paint": 268.8999999985099
+      }
+    ],
+    "animations": 90,
+    "running": 90,
+    "idleTaskMs": 644.5890000000003,
+    "idleRecalcMs": 107.655
+  },
+  "collectionAfter": {
+    "values": [
+      {
+        "handler": 32.399999998509884,
+        "paint": 592.2999999970198
+      },
+      {
+        "handler": 46.600000001490116,
+        "paint": 219.5
+      },
+      {
+        "handler": 22.200000002980232,
+        "paint": 134.10000000149012
+      },
+      {
+        "handler": 21.100000001490116,
+        "paint": 139.10000000149012
+      },
+      {
+        "handler": 19.5,
+        "paint": 127.79999999701977
+      }
+    ],
+    "animations": 90,
+    "running": 6,
+    "idleTaskMs": 266.53199999999975,
+    "idleRecalcMs": 14.821000000000002
+  },
+  "lobbyFontsBefore": [
+    {
+      "width": 320,
+      "sizes": {
+        "#start": 15,
+        "#lobby-arcade": 14,
+        "#lobby-collection": 14,
+        ".daily-ticket": 10,
+        "#lobby-status": 11
+      }
+    },
+    {
+      "width": 390,
+      "sizes": {
+        "#start": 15,
+        "#lobby-arcade": 14,
+        "#lobby-collection": 14,
+        ".daily-ticket": 11,
+        "#lobby-status": 11
+      }
+    },
+    {
+      "width": 620,
+      "sizes": {
+        "#start": 15,
+        "#lobby-arcade": 14,
+        "#lobby-collection": 14,
+        ".daily-ticket": 11,
+        "#lobby-status": 11
+      }
+    },
+    {
+      "width": 812,
+      "sizes": {
+        "#start": 15,
+        "#lobby-arcade": 14,
+        "#lobby-collection": 14,
+        ".daily-ticket": 12,
+        "#lobby-status": 12
+      }
+    },
+    {
+      "width": 1280,
+      "sizes": {
+        "#start": 15,
+        "#lobby-arcade": 14,
+        "#lobby-collection": 14,
+        ".daily-ticket": 12,
+        "#lobby-status": 12
+      }
+    }
+  ],
+  "lobbyFontsAfter": [
+    {
+      "width": 320,
+      "sizes": {
+        "#start": 17.25,
+        "#lobby-arcade": 16.1,
+        "#lobby-collection": 16.1,
+        ".daily-ticket": 11.5,
+        "#lobby-status": 12.65
+      }
+    },
+    {
+      "width": 390,
+      "sizes": {
+        "#start": 17.25,
+        "#lobby-arcade": 16.1,
+        "#lobby-collection": 16.1,
+        ".daily-ticket": 12.65,
+        "#lobby-status": 12.65
+      }
+    },
+    {
+      "width": 620,
+      "sizes": {
+        "#start": 17.25,
+        "#lobby-arcade": 16.1,
+        "#lobby-collection": 16.1,
+        ".daily-ticket": 12.65,
+        "#lobby-status": 12.65
+      }
+    },
+    {
+      "width": 812,
+      "sizes": {
+        "#start": 17.25,
+        "#lobby-arcade": 16.1,
+        "#lobby-collection": 16.1,
+        ".daily-ticket": 13.8,
+        "#lobby-status": 13.8
+      }
+    },
+    {
+      "width": 1280,
+      "sizes": {
+        "#start": 17.25,
+        "#lobby-arcade": 16.1,
+        "#lobby-collection": 16.1,
+        ".daily-ticket": 13.8,
+        "#lobby-status": 13.8
+      }
+    }
+  ],
+  "baselineSource": "54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0",
+  "baselineRelease": "733f427455706b6e",
+  "candidateRelease": "7b1e35e595cef929"
+}

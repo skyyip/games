@@ -34,6 +34,11 @@ try{
   await page.locator('[data-tab=cards]').click();
   assert.deepEqual(await page.locator('#shop-content>p').allTextContents(),['集齊每類全部卡片，解鎖相應收集稱號']);assert.equal(await page.locator('.card-series p').count(),0);checks+=2;
   await page.locator('.culture-face img').evaluateAll(images=>Promise.all(images.map(i=>{i.loading='eager';return i.decode();})));
+  await page.waitForFunction(()=>document.querySelector('.foil-deferred:not(.foil-visible)'));
+  const deferred=await page.locator('.foil-deferred:not(.foil-visible)').first().elementHandle(),scrollTop=await page.locator('#collection-dialog').evaluate(n=>n.scrollTop);
+  assert.equal(await deferred.evaluate(n=>getComputedStyle(n,'::after').animationPlayState),'paused');assert.equal(await deferred.evaluate(n=>getComputedStyle(n.querySelector('.foil-sparkles'),'::before').animationPlayState),'paused');checks+=2;
+  await deferred.evaluate(n=>n.scrollIntoView({block:'center'}));await page.waitForFunction(n=>n.classList.contains('foil-visible'),deferred);assert.equal(await deferred.evaluate(n=>getComputedStyle(n,'::after').animationPlayState),'running');checks++;
+  await page.locator('#collection-dialog').evaluate((n,top)=>n.scrollTop=top,scrollTop);
   assert.equal(await page.locator('.culture-tile').count(),180);assert.equal(await page.locator('.card-series').count(),8);assert.deepEqual(await page.locator('.card-series .culture-grid').evaluateAll(nodes=>nodes.map(n=>n.children.length)),[20,20,30,20,20,20,20,30]);assert(await page.getByRole('button',{name:'使用【交通達人】前綴',exact:true}).isEnabled());checks+=4;
   assert.equal(await page.locator('[data-filter-kind=cards]').count(),9);checks++;
   const beforeFilters=calls.filter(v=>v.name==='shop').length;
