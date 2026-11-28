@@ -1,15 +1,9 @@
-本次沒有新增Firestore Rules、索引或Functions變更。
+本版需要更新Firestore Rules
 
-沿用上一版完整規則：1,011題、112卡、34款造型、普通文化扭蛋10,000及各類16張收集稱號。
-若已部署該版，僅需完整上傳網站，再重新整理並開啟情懷收藏或遊樂場。
+1. 在 sky-playground-millionaire 專案的 Firestore Database → Rules，完整貼上及Publish同版firestore.rules：
+https://github.com/skyyip/games/blob/e28e87eeccacf02bd1709f4395b0847c22cee7d4/hong-kong-millionaire/firestore.rules
+2. 再完整上傳同版網站，完成後重新整理。
 
-新前端purchaseStatus只讀取同帳戶的原收據、錢包及玩家資料。
-確認已付款後清除對應本機待確認記錄，不重新扣款、不重抽、不重設票券次數。
-查核失敗或付款仍未確認時保留記錄，原收據可手動重試；同requestId不重複扣款。
-本次不需清空Firebase或瀏覽器資料。
-
-若尚未部署1,011題／112卡那版，仍須先依既有說明發布目前完整Rules：
-https://github.com/skyyip/games/blob/03ccb13c3d41aef189dae981fac9502b1b0d0f23/hong-kong-millionaire/firestore.rules
-部署說明：https://github.com/skyyip/games/blob/03ccb13c3d41aef189dae981fac9502b1b0d0f23/hong-kong-millionaire/FIREBASE.md
-Source: 03ccb13c3d41aef189dae981fac9502b1b0d0f23
-本次沒有代為部署正式Firebase。
+卡片白名單160張（89普通／71閃卡），普通抽961格／步長37，金蛋71款／步長5。八類各20張；adventure為山水探險家。每類全部20張才可使用前綴；未齊的舊稱號會沿用零成本取消流程。不要清空卡片、餘額、造型、票券、抽數或收據。
+沒有新增collection、索引或Functions；原四索引、1,011題及34款造型保持。不要拼貼舊規則片段或放寬公開寫入。
+官方demo Firestore Emulator每日99項、經濟／非即時對戰1,603項通過；正式Firebase未代為部署。
