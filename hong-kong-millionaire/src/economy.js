@@ -1,6 +1,6 @@
 import {hkDay} from './game.js';
 export const DRAW_PRICE=10000,GOLD_PRICE=80000,WEEKEND_PASS_PRICE=80000,WEEKEND_LIMIT=5,RETRY_PRICE=100000;
-export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'交通達人'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'},{id:'villages',name:'圍村與離島',prefix:'村落地膽'},{id:'crafts',name:'匠人手作',prefix:'手藝收藏家'}]);
+export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'交通達人'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'},{id:'villages',name:'圍村與離島',prefix:'村落地膽'},{id:'crafts',name:'匠人手作',prefix:'手藝收藏家'},{id:'adventure',name:'山水探險家',prefix:'山水探險家'}]);
 // Shared date-derived offer: identical on every device; Firestore recomputes it.
 export function retryDiscount(day=hkDay()){const seed=(day*48271+1013904223)%2147483647;return 5+((seed*48271+1013904223)%2147483647)%5;}
 export const retryPrice=(day=hkDay())=>RETRY_PRICE/10*retryDiscount(day);
@@ -117,7 +117,56 @@ const cards=[
  ["sam-tung-uk-courtyard","villages","三棟屋庭院",false,"青磚、天井與屋脊，留住荃灣三棟屋的客家村落記憶。窗外城市一路長高，庭院仍然替舊故事留住一片天。","https://www.amo.gov.hk/tc/historic-buildings/monuments/new-territories/monuments_10/index.html",false],
  ["fong-yuen-study-hall-foil","villages","芳園書室舊影",true,"馬灣芳園書室的歷史建築，記下島上教育的一段歲月。海風可以吹散暑氣，功課就算以前都唔會自己做完。","https://www.heritage.gov.hk/tc/revitalisation-scheme/batch-vi-of-revitalisation-scheme/virtual-tour-on-batch-vi-historic-buildings/fong-yuen-study-hall/index.html",false],
  ["gilded-woodcarving","crafts","金漆木雕",false,"花鳥紋樣在木面一刀一刀成形，再以金彩帶出層次。香港木雕手藝曾服務招牌與神像佛具，一塊木背後有好多耐性。","https://hkctp.com.hk/news/id/3192",false],
- ["opera-headdress-foil","crafts","盔頭珠光",true,"珠飾、絨球與細緻骨架，拼成戲台上的華麗盔頭。台前一轉身閃閃發光，台後原來有無數次細心穿針引線。","https://cantonese.edmundtai.com/資料庫首頁",false]
+ ["opera-headdress-foil","crafts","盔頭珠光",true,"珠飾、絨球與細緻骨架，拼成戲台上的華麗盔頭。台前一轉身閃閃發光，台後原來有無數次細心穿針引線。","https://cantonese.edmundtai.com/資料庫首頁",false],
+ // Twenty cards per collection; expansion cards retain stable IDs and require full-set ownership.
+ ["cross-harbour-tunnel-portal","transport","紅隧入口舊影",false,"紅隧連起紅磡與銅鑼灣，巴士同私家車一齊鑽過海底。張卡替昔日車流定格，唔使連塞車時間都收藏埋。","https://www.td.gov.hk/tc/transport_in_hong_kong/tunnels_and_bridges_n/intro/index.html",false],
+ ["airport-baggage-tractor","transport","機場行李車",false,"機場行李拖車細細架，拖住一串行李喺停機坪默默開工。你個篋比你早落機，原來仲有下一程接駁。","https://www.hongkongairport.com/tc/media-centre/news-stories-updates/AET",false],
+ ["mid-levels-escalator-foil","transport","半山扶梯流光",true,"中環至半山自動扶梯穿過斜路與街巷，將返工腳步同街角風景串埋一齊。雙腳終於可以短暫放工，對眼繼續沿途開工。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-central-mid-levels-escalator.html",false],
+ ["hung-hom-platform-foil","transport","紅磡月台舊影",true,"銀色車身、綠色腰線與長長月台，重拾昔日紅磡車站的鐵路記憶。以前趕車望住個鐘，今日睇張卡先捨得慢慢望。","https://www.mtr.com.hk/ch/customer/services/index.php",false],
+ ["pulling-milk-tea","heritage","港式拉茶手勢",false,"布袋濾茶、茶壺來回，港式奶茶嘅茶香藏喺師傅手勢入面。你話少奶少甜，水吧話收到，隻手照樣行雲流水。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf",false],
+ ["naam-yam-recital","heritage","南音說唱",false,"地水南音以粵語說唱道出人物與世情，琴弦伴住一句句故事。未有短片自動播放之前，街坊已經識得坐定定追劇情。","https://www.lcsd.gov.hk/CE/CulturalService/Programme/tc/music/programs_1291.html",false],
+ ["pixiu-dance-foil","heritage","舞貔貅彩陣",true,"舞貔貅以靈活步法、鑼鼓節奏與彩繪獸身，帶出新界鄉村的節慶熱鬧。佢同舞獅各有身段，唔好見到毛茸茸就亂認親戚。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf",false],
+ ["chiu-chow-gongs-foil","heritage","潮州鑼鼓",true,"潮州鑼鼓將大鼓、鑼、鈸與嗩吶等聲音交織，替節慶與社區活動添氣勢。未見到隊伍，對耳已經收到出場通知。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf",false],
+ ["curry-fishballs","snacks","咖喱魚蛋",false,"一鑊咖喱汁滾住魚蛋，竹籤一篤，街頭小食模式即刻啟動。明明話買幾粒過口癮，最後連醬汁都唔捨得放過。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-street-food-in-hong-kong.html",false],
+ ["roasted-sweet-potato","snacks","煨番薯暖意",false,"街角烤爐飄出番薯甜香，紙袋一接過手就有冬天嘅溫度。話買嚟暖手，通常暖唔夠兩分鐘已經食咗半個。","https://www.discoverhongkong.com/tc/food-and-drink.html",false],
+ ["stuffed-three-treasures-foil","snacks","煎釀三寶",true,"茄子、青椒、豆腐配上魚肉餡，煎出街頭小食嘅香氣。叫三寶唔代表只可以揀三件，選擇困難先係真正隱藏款。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-street-food-in-hong-kong.html",false],
+ ["sugared-egg-puff-foil","snacks","沙翁糖霜",true,"沙翁係炸得鬆身、外面沾糖嘅蛋香甜點，圓碌碌一個就勾起舊式餅店回憶。食完嘴角有糖，想扮冇偷食都幾難。","https://words.hk/zidin/%E6%B2%99%E7%BF%81",false],
+ ["estate-chess-corner","streets","屋邨棋局",false,"石枱一盤象棋，樹蔭下幾位街坊就有半日話題。落棋嗰位諗緊下一步，圍觀嗰幾位已經替佢諗到下星期。","https://www.discoverhongkong.com/tc/culture.html",false],
+ ["barber-pole-shop","streets","老式理髮舖",false,"旋轉燈柱、老椅與大鏡，留住香港老式理髮舖的熟悉模樣。你只係想剪短少少，師傅順便替你整理埋街坊近況。","https://www.discoverhongkong.com/tc/culture/henry-golding-hong-kong-itinerary.html",false],
+ ["shanghai-street-kitchenware-foil","streets","上海街廚具",true,"鑊、蒸籠與茶壺排滿上海街廚具舖，廚房裝備喺度一件件搵齊。行入去之前唔識煮飯，行出嚟至少識得欣賞一隻靚鑊。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-shanghai-street-kitchenware.html",false],
+ ["sham-shui-po-fabric-foil","streets","深水埗布街",true,"深水埗布料與衣飾配件店聚埋一區，基隆街一帶細細粒鈕扣都有好多選擇。諗住補粒鈕，最後連幻想中嗰件衫都設計埋。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-ki-lung-street.html",false],
+ ["central-public-pier","harbour","中環碼頭海風",false,"中環碼頭一帶，船聲、海風同等船的人拼出維港日常。平日嫌等人耐，望住海嗰陣又會話：唔急，慢慢嚟。","https://www.starferry.com.hk/tc",false],
+ ["western-cargo-pier","harbour","西環貨運碼頭舊影",false,"貨板、吊機與船隻，記下西區公眾貨物裝卸區的工作風景。相入面嘅海好靜，碼頭工友手上嘅工作就從來唔會自動暫停。","https://www.mardep.gov.hk/tc/public-services/port-services/pcwa/index.html",false],
+ ["kap-shui-mun-bridge-foil","harbour","汲水門橋晨光",true,"汲水門大橋以拉索托住橋面，跨過馬灣與大嶼山之間的海峽。返工望橋同放假望橋，明明同一道風景，心情可以差咁遠。","https://www.td.gov.hk/tc/transport_in_hong_kong/tunnels_and_bridges_n/location_map/index.html",false],
+ ["maritime-museum-model-foil","harbour","船模裡的海港",true,"精細船模將船身、桅杆與繩索縮入展櫃，讓香港航海故事有了立體模樣。海風吹唔到入嚟，想出海嘅心情反而吹得更大。","https://www.hkmaritimemuseum.org/plan-your-visit",false],
+ ["tsui-sing-lau","villages","聚星樓舊影",false,"屏山聚星樓以六角青磚塔身留住鄉村歷史，旁邊已經換過好多代街景。行得急只會見到座塔，慢慢望先會見到時間。","https://www.amo.gov.hk/tc/heritage-trails/ping-shan-heritage-trail/tsui-sing-lau-pagoda/index.html",false],
+ ["sheung-cheung-wai-gate","villages","上璋圍門樓",false,"上璋圍門樓連住屏山圍村的青磚屋與巷道，記下鄧氏族人的聚居故事。入到舊街巷，連講電話把聲都不自覺細咗。","https://www.amo.gov.hk/tc/heritage-trails/ping-shan-heritage-trail/index.html",false],
+ ["yi-tai-study-hall-foil","villages","二帝書院庭院",true,"錦田二帝書院的青磚、天井與屋瓦，留下鄉村重視教育的痕跡。以前讀書抬頭望見屋簷，今日返學抬頭多數先睇鐘。","https://www.amo.gov.hk/tc/historic-buildings/monuments/new-territories/monuments_47/index.html",false],
+ ["tap-mun-temple-foil","villages","塔門古廟",true,"塔門天后古廟與海傍村落相伴，寫下漁民生活和信仰的故事。落船聞到海味，行多幾步又撞見一段比船程更長的歷史。","https://cco.gov.hk/tc/project-sites/tap-mun",false],
+ ["shoemaking-last","crafts","皮鞋木楦",false,"木楦撐起鞋形，皮料經裁剪、縫合與修整，慢慢變成合腳的皮鞋。試鞋嗰陣你話爭少少，師傅就認真處理嗰少少。","https://www.leatherism.net/product-page/diy-course-shoes-brogues",false],
+ ["hand-painted-shop-sign","crafts","手繪招牌",false,"筆鋒、留白與店名，一筆筆寫出老店的門面。未識記街號之前，香港人早就識講：行到嗰塊靚招牌轉彎。","https://hkctp.com.hk/news/id/3200",false],
+ ["copperware-hammering-foil","crafts","手敲銅光",true,"昔日銅器工匠靠槌打與修整，將銅片慢慢敲成器物。張卡留住叮叮噹噹的手藝記憶，每一下都唔係按個復原掣就可以重做。","https://www.hkcd.com/hkcdweb/content/2022/12/30/content_1380058.html",false],
+ ["letterpress-typesetting-foil","crafts","活字墨香",true,"金屬活字逐粒排入版框，再沾墨壓印，紙上文字先有了重量。今日打錯字撳退格，以前排錯一粒，對手同對眼都要加班。","https://printart-contemp.org.hk/tc/visit/",false],
+ ["lion-rock","adventure","獅子山",false,"獅子山俯望九龍，岩峰輪廓好似一頭伏住的獅子。山腳每日趕住開工，山上嗰位就一直專心望住香港。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-lion-rock-country-park.html",false],
+ ["tai-mo-shan","adventure","大帽山雲海",false,"大帽山高處常見雲霧，山脊與雷達站構成香港熟悉的山頂輪廓。平日嫌返工睇唔到前景，呢度望住雲海反而捨不得走。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-tai-mo-shan.html",false],
+ ["kowloon-peak","adventure","飛鵝山",false,"飛鵝山又稱九龍峰，山勢與九龍東的城市樓群互相映襯。地面覺得高到不得了的大廈，喺山景入面都變成細格仔。","https://www.discoverhongkong.com/tc/attractions/hong-kong-after-dark.html",false],
+ ["high-junk-peak","adventure","釣魚翁",false,"清水灣一帶的釣魚翁以尖削山形引人注目，山海景色同場出現。名字似去釣魚，張卡真正釣住嘅係你個放假心情。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-high-junk-peak.html",false],
+ ["castle-peak","adventure","青山",false,"青山聳立屯門一帶，岩石山勢與山下城市砌成鮮明對比。英文叫Castle Peak，收藏嘅係香港山景，唔使喺圖入面搵城堡。","https://www.gohk.gov.hk/tc/spots/spot_detail.php?spot=Castle+Peak",false],
+ ["lantau-peak","adventure","鳳凰山",false,"鳳凰山的高峻山峰立於大嶼山，雲霧與晨光讓山線時隱時現。日出未必肯準時露面，但張卡會替你留住一抹金光。","https://www.hiking.gov.hk/promote/info/id/WTlaMHl6akpNYk9BRGViczlXaFZhQT09/map_type/1",false],
+ ["sunset-peak-foil","adventure","大東山芒海",true,"秋日大東山的芒草映住夕光，山間石屋替金色山坡添一點歲月感。風吹一下，成片山都識得自己做閃卡效果。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-sunset-peak.html",false],
+ ["ma-on-shan-foil","adventure","馬鞍山雙峰",true,"馬鞍山的雙峰與鞍形山脊，替新界東畫出一條有個性的天際線。平日只記得車站名，原來個名背後仲有真山做主角。","https://www.afcd.gov.hk/tc_chi/country/cou_vis/cou_vis_cou/cou_vis_cou_mos/cou_vis_cou_mos.html",false],
+ ["pat-sin-leng-foil","adventure","八仙嶺連峰",true,"八仙嶺連綿山峰俯望船灣淡水湖一帶，起伏山線好似一排靜靜排隊的朋友。仙人各有名字，張卡就先替你留低成幅山水。","https://www.afcd.gov.hk/tc_chi/country/cou_vis/cou_vis_cou/cou_vis_cou_psl/cou_vis_cou_psl.html",false],
+ ["dragons-back-foil","adventure","龍脊海天",true,"龍脊沿港島東南起伏伸展，石澳一帶的山與海同框。城市每日叫你條腰坐直，呢條山脊就彎得好有型。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-dragon-s-back.html",false],
+ ["repulse-bay","adventure","淺水灣",false,"淺水灣的弧形沙灘與背後山坡樓宇，拼出港島南熟悉的海岸風景。平日望手機望到攰，望一陣海先知對眼都想放假。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-repulse-bay.html",false],
+ ["stanley-main-beach","adventure","赤柱正灘",false,"赤柱正灘面向開揚海灣，岸邊水上活動器材替海景添上顏色。個人仲喺市區，張卡已經幫你個心預先去咗赤柱。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false],
+ ["big-wave-bay-hk-island","adventure","大浪灣（港島）",false,"港島大浪灣依住青綠山坡，沙灘同浪花構成另一種香港節奏。呢張收藏嘅係石澳附近嗰個大浪灣，唔好同西貢同名海灣認錯親戚。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-dragon-s-back-viewing-point.html",false],
+ ["cheung-sha-beach","adventure","長沙海岸",false,"大嶼山南岸長沙的沙灘沿海伸展，山坡、村屋與海浪一齊慢落嚟。平日嫌條隊太長，呢度條海岸線長就只會覺得正。","https://www.discoverhongkong.com/tc/outdoors/10-beaches-to-visit-in-hong-kong.html",false],
+ ["silverstrand-beach","adventure","銀線灣",false,"西貢銀線灣的小海灣被山坡與住宅圍住，沙灘留住一段近城市的海風。名字聽落好貴氣，張卡最想收藏嘅其實係一陣清閒。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-sk.html",false],
+ ["shek-o-beach","adventure","石澳泳灘",false,"石澳泳灘旁邊的低矮村屋與山坡，將香港海邊畫得格外有生活感。影完海景仲想望多兩眼彩色屋仔，記憶卡都想申請加班。","https://www.discoverhongkong.com/tc/outdoors/10-beaches-to-visit-in-hong-kong.html",false],
+ ["ham-tin-wan-foil","adventure","咸田灣海風",true,"咸田灣位於西貢大浪灣一帶，遠山、沙岸與浪花展現香港郊野另一面。平日訊息一浪接一浪，呢張卡只想畀你聽真正海浪。","https://www.discoverhongkong.com/tc/outdoors.html",false],
+ ["clear-water-bay-second-foil","adventure","清水灣第二灣",true,"清水灣第二灣的弧形沙岸依住山坡，碧綠海面替卡面添上通透層次。每日待辦清單好長，望住海嗰一秒就先清空個腦。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-sk.html",false],
+ ["hap-mun-bay-foil","adventure","橋咀廈門灣",true,"橋咀洲廈門灣又稱半月灣，彎彎沙岸配上山林與海水，收進卡裡都覺得開揚。個名有廈門，張卡收藏嘅仍然係香港西貢。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-sk.html",false],
+ ["chung-hom-kok-foil","adventure","舂坎角",true,"舂坎角泳灘藏於港島南的小海灣，山坡、沙岸與瞭望台砌成安靜一角。市區鐘聲催你趕，海浪就只係一下一下慢慢嚟。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false]
 ];
 export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
 export const GEAR=Object.freeze([
