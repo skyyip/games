@@ -1,19 +1,25 @@
-本次：我的卡冊單行橫向篩選
+本次必須更新：售賣記錄、已售掛單及改名期限
 
-本次Rules及索引沒有變更，已部署Spark市集者只需完整更新網站，不需更新Firebase，不需清空任何玩家資料。
+專案：sky-playground-millionaire（適用Spark，無Cloud Functions、無需Blaze）
+1. Firestore Database → Rules，完整貼上並Publish同版Rules：
+https://github.com/skyyip/games/blob/9e927c70b016501e3f9fa6b42ff88db01df532cb/hong-kong-millionaire/firestore.rules
+2. Firestore Database → Indexes → Composite，新增一個索引：
+Collection ID：hkm_market_trades
+Query scope：Collection
+sellerUid Ascending，createdAt Descending
+保留原六個索引，共七個。若尚未建立前版兩個市集索引，也要一併依完整索引檔建立。等待Enabled，再完整上傳網站並重新載入。
+完整索引檔：
+https://github.com/skyyip/games/blob/9e927c70b016501e3f9fa6b42ff88db01df532cb/hong-kong-millionaire/firestore.indexes.json
+完整部署說明（含CLI及Console方式）：
+https://github.com/skyyip/games/blob/9e927c70b016501e3f9fa6b42ff88db01df532cb/hong-kong-millionaire/FIREBASE.md
 
-若尚未部署前版Spark市集，在sky-playground-millionaire發布同版完整Rules及索引後，再上傳網站。無Cloud Functions、無需Blaze。
-完整Rules：
-https://github.com/skyyip/games/blob/735a474fe292a4ce2c22b92ecccadb7ac6d6f5dd/hong-kong-millionaire/firestore.rules
-索引檔（保留原四個，共六個）：
-https://github.com/skyyip/games/blob/735a474fe292a4ce2c22b92ecccadb7ac6d6f5dd/hong-kong-millionaire/firestore.indexes.json
-兩個市集索引collection ID均為hkm_market_listings，Query scope為Collection：
-- status Ascending，createdAt Descending
-- sellerUid Ascending，status Ascending，createdAt Descending
-等待Enabled後才上傳網站。不要只貼片段或放寬錢包權限。
-完整部署說明：
-https://github.com/skyyip/games/blob/735a474fe292a4ce2c22b92ecccadb7ac6d6f5dd/hong-kong-millionaire/FIREBASE.md
+已售掛單保留sold，賣家按移除才轉archived及寫removedAt；只隱藏掛單，不退卡、不重複入帳、不刪除成交。售賣記錄每頁24筆，僅本人可按sellerUid查詢；買賣雙方原有按ID讀取權限保留。
+新成交在hkm_market_trades記錄buyerName稱呼快照，Rules對照買家profile；原createdAt為成交時間，proceeds為扣5%費用後實收。舊交易沒有儲存稱呼，顯示稱呼未記錄，不補造歷史。
+hkm_players/{uid}.nameChangedAt在真正改名時寫伺服器時間。香港三個曆月後才可再改，月底按目標月份最後一天；不可提前改名、倒填／刪除時間或同名重設期限。舊玩家首次修改後開始計算，不以一般updatedAt推算過往改名。
 
-先前蓄力連連跳前50名仍包含在本網站，若尚未更新其Rules，請在獨立的sky-playground-3c5af專案發布該遊戲完整Rules：
-https://github.com/skyyip/games/blob/735a474fe292a4ce2c22b92ecccadb7ac6d6f5dd/frogger-jump/firestore.rules
-兩專案規則不可混貼。正式Firebase及網站未代為部署。
+舊前端不帶新成交／改名欄位會被新版Rules拒絕，請更新Rules與索引後同步完整網站。不要放寬權限或只拼貼片段。原卡片、獎金、抽數、造型、票券、收據及歷史成交不需清空。
+本機單元134項、官方Firestore規則1,976項、市集真實Auth／SDK瀏覽器116項及收藏432項通過。正式Firebase及網站未部署。
+
+先前蓄力連連跳前50名仍包含在本網站；若尚未更新，須在其獨立sky-playground-3c5af專案發布該遊戲完整Rules：
+https://github.com/skyyip/games/blob/9e927c70b016501e3f9fa6b42ff88db01df532cb/frogger-jump/firestore.rules
+兩專案規則不可混貼。
