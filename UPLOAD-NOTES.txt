@@ -1,12 +1,15 @@
-香港百萬富翁：彩色閃卡與小吃／山水各30張
-來源：5904b8a63983a59a7e692ceec4666ee29e06cb5a
-版本：70422c9121cf7e83
+香港百萬富翁：街坊市集（Firebase Spark）
+來源：b6172a3570abbb1fd6e8063f4bf0e9a8889898c5
+版本：3d172b9348ca1a98
 
-先發布sky-playground-millionaire專案的同版完整Firestore Rules，再把本資料夾全部內容上傳 /games/（包含隱藏 .htaccess）。完整網站29頁、1,100檔案644、31目錄755；不要只挑選某個遊戲資料夾。
+先在sky-playground-millionaire發布同版完整Rules及兩個新增市集索引，等待Enabled，詳見FIREBASE-UPDATES.txt。無Cloud Functions、無需Blaze。
 
-已持有閃卡以藍、紫、粉、金漸層突出，卡冊及詳情一併調整。未持有卡仍灰階，減少動態仍保留彩底。
-街頭小吃與山水探險家各新增10張，兩類各30，其他六類各20；全冊180張（99文化卡／81閃卡），20幅新港式漫畫。原160張卡、34造型及1,011題保留；獎金、抽數、票券與收據不清空。
-食神及山水探險家須集齊該類30張，其他稱號仍20張。普通抽10,000、金蛋80,000不變。
-完整規則：https://github.com/skyyip/games/blob/5904b8a63983a59a7e692ceec4666ee29e06cb5a/hong-kong-millionaire/firestore.rules
+再把本資料夾全部內容完整上傳至 /games/，包含隱藏 .htaccess；不要只挑選某個遊戲資料夾或多套一層目錄。完整網站29頁、1,100檔案644、31目錄755。
 
-包含先前蓄力連連跳世界前50名及精簡介面；其專案規則見FIREBASE-UPDATES.txt。測試通過，正式Firebase及網站未代為部署。
+情懷收藏與商店新增街坊市集：出售重複單卡、自訂價、取消未成交掛單、每款保留最後一張；成交收5%整枚向上取整，交易原子完成並以收據防重。先核對後重試，不自動重買。市集每頁24筆及手動更新，仍消耗Spark讀寫配額。
+
+原180卡、1,011題、34造型及其他遊戲完整保留；普通文化扭蛋10,000、金蛋80,000不變。不需清空卡片、獎金、票券或本機資料。
+完整部署說明：
+https://github.com/skyyip/games/blob/b6172a3570abbb1fd6e8063f4bf0e9a8889898c5/hong-kong-millionaire/FIREBASE.md
+
+本機驗證通過，正式Firebase及網站未代為部署。先前蓄力連連跳前50名及其獨立專案規則更新見FIREBASE-UPDATES.txt。

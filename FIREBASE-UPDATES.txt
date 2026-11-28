@@ -1,14 +1,28 @@
-本次必須更新：香港百萬富翁
+香港百萬富翁：街坊市集（Firebase Spark）
 
 專案：sky-playground-millionaire
-1. Firestore Database → Rules：完整貼上並Publish本版規則：
-https://github.com/skyyip/games/blob/5904b8a63983a59a7e692ceec4666ee29e06cb5a/hong-kong-millionaire/firestore.rules
-2. 再完整上傳同版網站並重新整理。
+先更新後端，再上傳網站；無需Cloud Functions或Blaze。
 
-白名單180張（99文化卡／81閃卡）；普通抽1,071格／步長37，金蛋81款／步長5。snacks及adventure各30張，其他六類各20張；每類全數持有才可用前綴。原只持有20張的食神／山水探險家稱號會沿用零成本取消流程，卡片、獎金、抽數、造型、票券與收據保留。不要清空資料或混貼舊規則片段。
-題庫1,011題、34造型及四個原索引維持，無新增Functions或collection；普通抽10,000、金蛋80,000。
-本機官方demo Emulator每日99項及經濟／對戰1,763項通過；正式Firebase未代為部署。
+1. Firestore Database → Rules：貼上並Publish同版完整規則：
+https://github.com/skyyip/games/blob/b6172a3570abbb1fd6e8063f4bf0e9a8889898c5/hong-kong-millionaire/firestore.rules
+2. Firestore Database → Indexes → Composite：新增以下兩個索引。
+Collection ID均為hkm_market_listings，Query scope均為Collection：
+- status Ascending，createdAt Descending
+- sellerUid Ascending，status Ascending，createdAt Descending
+保留原四個索引，共六個。等兩個新索引Enabled，再上傳網站。
+完整索引檔：
+https://github.com/skyyip/games/blob/b6172a3570abbb1fd6e8063f4bf0e9a8889898c5/hong-kong-millionaire/firestore.indexes.json
+
+亦可在原始碼hong-kong-millionaire資料夾登入Firebase CLI後，執行npm run firebase:deploy，只部署此專案Rules及indexes，不部署Hosting或Functions。
+完整說明：
+https://github.com/skyyip/games/blob/b6172a3570abbb1fd6e8063f4bf0e9a8889898c5/hong-kong-millionaire/FIREBASE.md
+
+只售重複單卡、自訂整數價1至1,000,000,000；掛單預留1張並保留最後1張，未成交可免費取消。成交收5%，整枚向上取整；例如101收6、賣家得95，確認前顯示實收。扣款、轉卡、賣家入帳與收據在同一Firestore transaction原子完成，由Rules獨立驗證，防止重複售出。收入只增加可用獎金，不增加排行榜成績。
+
+新增hkm_market_listings、hkm_market_trades及hkm_wallets/{uid}/marketReceipts。原玩家卡片、錢包、造型、票券、收據保留，不需清空或手動建立文件。180卡、34造型、1,011題、10,000普通抽及80,000金蛋不變。只用Spark既有Firestore／Authentication，仍消耗讀寫配額；市集每頁24筆、按需手動更新，沒有即時監聽。
+
+本機官方demo Emulator金融規則1,940項、真正Auth／Web SDK端到端55項通過。正式Firebase及網站未代為部署。
 
 先前蓄力連連跳前50名仍包含在本網站。若尚未更新，須在其自己的sky-playground-3c5af專案發布該遊戲完整Rules：
-https://github.com/skyyip/games/blob/5904b8a63983a59a7e692ceec4666ee29e06cb5a/frogger-jump/firestore.rules
-兩個遊戲屬不同專案，不可混貼。Google／Email電郵由Authentication → Users保存，該遊戲Firestore玩家及公開榜不另存email。
+https://github.com/skyyip/games/blob/b6172a3570abbb1fd6e8063f4bf0e9a8889898c5/frogger-jump/firestore.rules
+兩遊戲屬不同專案，不可混貼。該遊戲email在Authentication → Users保存，Firestore玩家及公開榜不另存email。
