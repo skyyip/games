@@ -75,6 +75,17 @@ try{
   const batch=sdk.writeBatch(client.db);batch.set(ref(client,'hkm_wallets',uid),{...next,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',receipt),{uid,op:'buy',item:id,cost:price-1,revision:next.revision,createdAt:sdk.serverTimestamp()});await no(batch.commit());
   await ok(feature.shop(client,uid,{type:'buy',id,requestId:crypto.randomUUID()}));const equipped=await ok(feature.shop(client,uid,{type:'equip',slot,id,requestId:crypto.randomUUID()}));assert.equal(equipped.wallet[slot],id);assert.equal(equipped.balance,1000000-price);assert.equal(equipped.profile.total,1000000);checks+=3;
  }
+ // Read-only reconciliation must resolve paid tickets and return original draw results.
+ const receiptClient=await seed('receipt-check');await ok(feature.wallet(receiptClient,'receipt-check'));
+ const passAction={type:'pass',day:hkDay(),requestId:crypto.randomUUID()};
+ assert.equal((await ok(feature.purchaseStatus(receiptClient,'receipt-check',passAction))).confirmed,false);checks++;
+ const paidPass=await ok(feature.shop(receiptClient,'receipt-check',passAction));
+ for(const action of [passAction,{...passAction,requestId:crypto.randomUUID()}]){
+  const verified=await ok(feature.purchaseStatus(receiptClient,'receipt-check',action));assert(verified.confirmed);assert.equal(verified.wallet.spent,paidPass.wallet.spent);checks+=2;
+ }
+ const drawAction={type:'draw',requestId:crypto.randomUUID()},paidDraw=await ok(feature.shop(receiptClient,'receipt-check',drawAction));
+ const drawn=await ok(feature.purchaseStatus(receiptClient,'receipt-check',drawAction));assert(drawn.confirmed);assert.equal(drawn.outcome,paidDraw.outcome);assert.equal(drawn.wallet.draws,paidDraw.wallet.draws);checks+=3;
+ await assert.rejects(feature.purchaseStatus(context('receipt-outsider'),'receipt-check',passAction));checks++;
  const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{cards:{'tram-foil':100},updatedAt:sdk.serverTimestamp()}));

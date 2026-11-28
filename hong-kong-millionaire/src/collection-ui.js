@@ -33,13 +33,13 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
   reveal.querySelector('#culture-card-story').textContent=owned?c.story:'仲差呢張！抽中之後，就可以睇埋背後嘅香港小故事。';
   const link=reveal.querySelector('#culture-card-source');link.href=c.source;link.hidden=!owned;reveal.showModal();
  }
- function request(action,title,cost=0){if(busy||!state)return;if(pending()){$('shop-status').textContent='請先核對上次操作，再開始新的購買。';return;}intent=action;confirm.querySelector('#shop-confirm-title').textContent=title;confirm.querySelector('#shop-confirm-copy').textContent=(cost?'將使用 '+money(cost)+' 獎金。':'這項設定不扣除獎金。')+' 目前可用 '+money(state.balance)+'。';confirm.showModal();}
+ async function request(action,title,cost=0){if(busy||!state)return;const actor=uid,epoch=version;if(pending()){if(!await load(true)||uid!==actor||version!==epoch)return;if(pending()){$('shop-status').textContent='請先核對上次操作，再開始新的購買。';return;}}intent=action;confirm.querySelector('#shop-confirm-title').textContent=title;confirm.querySelector('#shop-confirm-copy').textContent=(cost?'將使用 '+money(cost)+' 獎金。':'這項設定不扣除獎金。')+' 目前可用 '+money(state.balance)+'。';confirm.showModal();}
  confirm.querySelector('#shop-confirm-buy').onclick=()=>{const action=intent;confirm.close();intent=null;if(action)transact(action);};
  async function transact(action){
   if(busy||!uid)return;const actor=uid,epoch=version,requestId=action.requestId??crypto.randomUUID(),payload={...action,requestId};busy=true;
   try{localStorage.setItem(pendingKey(),JSON.stringify(payload));}catch{}$('shop-status').textContent='正在核對交易…';render();
   try{
-   const next=await cloud.shop(payload);if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;try{localStorage.removeItem(pendingKey());}catch{}
+   let next;try{next=await cloud.shop(payload);}catch(error){let checked;try{checked=await cloud.purchaseStatus(payload);}catch{}if(!checked?.confirmed)throw error;next=checked;}if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;try{localStorage.removeItem(pendingKey());}catch{}
    apply();$('shop-status').textContent=action.type==='draw'||action.type==='gold'?'已抽到「'+(cardById(next.outcome)?.name??'文化卡')+'」。':action.type==='equip'?'展示設定已保存。':'已解鎖收藏。';
    if((action.type==='draw'||action.type==='gold')&&dialog.open)showCard(cardById(next.outcome),true);
   }catch(error){if(uid===actor&&version===epoch){if(error.message==='quote-expired')try{localStorage.removeItem(pendingKey());}catch{}$('shop-status').textContent=cloud.errorText(error)+(error.message==='quote-expired'?'':' 可按「核對上次操作」確認；同一收據不會重複扣款。');}}
@@ -64,7 +64,16 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  }
  for(const b of dialog.querySelectorAll('[data-tab]'))b.onclick=()=>{tab=b.dataset.tab;render();};
  $('shop-recover').onclick=()=>{const action=pending();if(['pass','retry-ticket'].includes(action?.type)){dialog.close();onArcade();}else if(action)transact(action);};$('shop-refresh').onclick=()=>load(true);$('shop-arcade').onclick=()=>{dialog.close();onArcade();};
- async function load(force=false){if(!uid||typeof cloud.wallet!=='function'||loadingUid===uid)return;const actor=uid,epoch=version;loadingUid=uid;try{$('shop-status').textContent='正在讀取雲端收藏…';const next=await cloud.wallet();if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;apply();$('shop-status').textContent=pending()?'有一筆未確認操作，請核對上次結果。':'';render();}catch(error){if(uid===actor&&version===epoch){loadedUid=uid;$('shop-status').textContent=cloud.errorText(error);render();}}finally{if(version===epoch)loadingUid=null;}}
+ async function load(force=false){
+  if(!uid||typeof cloud.wallet!=='function'||loadingUid===uid)return false;const actor=uid,epoch=version;loadingUid=uid;
+  try{
+   $('shop-status').textContent='正在讀取雲端收藏…';let next=await cloud.wallet();if(uid!==actor||version!==epoch)return false;
+   const action=pending();let recovered=false;
+   if(action){const checked=await cloud.purchaseStatus(action);if(uid!==actor||version!==epoch)return false;if(checked.confirmed){next=checked;try{if(pending()?.requestId===action.requestId)localStorage.removeItem(pendingKey());}catch{}recovered=true;}}
+   state=next;loadedUid=uid;apply();$('shop-status').textContent=pending()?'有一筆未確認操作，請核對上次結果。':recovered?'上次操作已確認，餘額與收藏已同步。':'';render();
+   if(recovered&&['draw','gold'].includes(action.type)&&dialog.open&&!force)showCard(cardById(next.outcome),true);return true;
+  }catch(error){if(uid===actor&&version===epoch){loadedUid=uid;$('shop-status').textContent=cloud.errorText(error);render();}return false;}finally{if(version===epoch)loadingUid=null;}
+ }
  function setIdentity(next){if(uid!==next){uid=next;version++;state=null;loadedUid=null;loadingUid=null;busy=false;apply();dialog.close();reveal.close();confirm.close();}}
  async function open(nextTab=tab){setIdentity(getUser()?.uid??null);if(!uid){login();return;}tab=['draw','cards','gear'].includes(nextTab)?nextTab:'draw';dialog.showModal();render();await load();}
  return {open,setIdentity,restore:()=>{setIdentity(getUser()?.uid??null);if(uid&&loadedUid!==uid&&getProfile()?.uid===uid)load();},reload:()=>load(true),get wallet(){return state?.wallet??null;},get state(){return state;},soundEnabled};

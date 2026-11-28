@@ -36,6 +36,14 @@ export async function shop(c,uid,action){
   if(action.type==='equip')t.set(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid),{uid,frame:next.frame,theme:next.theme,prefix:next.prefix,updatedAt:stamp});
  });return {...await wallet(c,uid),outcome,requestId};
 }
+export async function purchaseStatus(c,uid,action){
+ if(!['pass','retry-ticket','draw','gold','buy','equip'].includes(action?.type)||!/^[a-f0-9-]{36}$/.test(action.requestId))throw Error('invalid-item');
+ const [receipt,w,p]=await Promise.all([readServer(c,c.doc(c.db,FEATURE_COLLECTIONS.wallets,uid,'receipts',action.requestId)),readServer(c,walletRef(c,uid)),readServer(c,player(c,uid))]);
+ const paid=data(receipt),saved=data(w),profile=data(p);if(!saved||!profile)throw Error('login-required');
+ if(paid&&(paid.uid!==uid||paid.op!==action.type||action.type==='buy'&&paid.item!==action.id||action.type==='equip'&&paid.item!==action.slot))throw Error('receipt-mismatch');
+ const day=Number.isInteger(action.day)?action.day:hkDay(),owned=action.type==='pass'?saved.pass===weekendKey(day):action.type==='retry-ticket'&&saved.retryBoughtDay===day;
+ return {profile,wallet:saved,balance:walletBalance(profile,saved),confirmed:!!paid||owned,outcome:paid?.item};
+}
 export async function publicStyles(c,uids){return Object.fromEntries(await Promise.all([...new Set(uids)].slice(0,20).map(async uid=>[uid,data(await c.getDoc(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid)))])));}
 export async function getSession(c,uid,descriptor){return normalizeRun(data(await readServer(c,sessionRef(c,uid,descriptor))));}
 export function watchSession(c,uid,descriptor,callback,onError){return c.onSnapshot(sessionRef(c,uid,descriptor),{includeMetadataChanges:true},snap=>{if(!snap.metadata.hasPendingWrites)callback(normalizeRun(data(snap)));},onError);}

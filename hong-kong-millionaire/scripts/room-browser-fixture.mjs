@@ -1,4 +1,4 @@
-import {emptyWallet,walletAction,walletBalance,practiceReward,WEEKEND_LIMIT} from '../src/economy.js';
+import {emptyWallet,walletAction,walletBalance,practiceReward,WEEKEND_LIMIT,weekendKey} from '../src/economy.js';
 import {newSession,sessionAct,sessionFinish,sessionTerminal,roomFeeShare,roomCanFinish,roomWinner,roomDeadline} from '../src/session-engine.js';
 import {hkDay,newRun,act} from '../src/game.js';
 export const adapter=String.raw`
@@ -7,7 +7,7 @@ export const sessionNow=()=>globalThis.qaServerNow??Date.now(),sessionSafeNow=se
 export const configured=true;export async function prepareAuth(){}export async function observeAuth(cb){await cb(uid?{uid,email:uid+'@example.test'}:null);return ()=>{};}
 export function googleLogin(){return {task:Promise.resolve(),popup:{dispose(){}}};}export async function logout(){}export async function emailLogin(){}export async function resetPassword(){}
 export const account=()=>call('account'),resumeAccount=()=>call('resumeAccount'),currentRun=()=>call('currentRun'),claimDaily=()=>call('claimDaily'),move=(day,a)=>call('dailyMove',a),settle=(day,reason)=>call('dailySettle',reason),saveName=account,favourite=account;
-export const wallet=()=>call('wallet'),shop=a=>call('shop',a),publicStyles=a=>call('publicStyles',a),leaderboard=()=>call('leaderboard'),history=()=>call('history');
+export const wallet=()=>call('wallet'),shop=a=>call('shop',a),purchaseStatus=a=>call('purchaseStatus',a),publicStyles=a=>call('publicStyles',a),leaderboard=()=>call('leaderboard'),history=()=>call('history');
 export const activeSession=()=>call('activeSession'),getSession=d=>call('getSession',d),syncSessionClock=d=>call('syncSessionClock',d),startSession=d=>call('startSession',d),moveSession=(d,a,o)=>call('moveSession',d,a,o),settleSession=d=>call('settleSession',d);
 export const createRoom=d=>call('createRoom',d),getRoom=id=>call('getRoom',id),joinRoom=id=>call('joinRoom',id),startRoom=id=>call('startRoom',id),cancelRoom=id=>call('cancelRoom',id),claimRoom=id=>call('claimRoom',id),finaliseRoom=id=>call('finaliseRoom',id),myRooms=()=>call('myRooms');
 globalThis.qaStreams={};let serial=0;const watch=async(type,d,cb)=>{const key=type+(++serial);qaStreams[key]=cb;await globalThis.qaWatch(type,key,d);return ()=>{delete qaStreams[key];};};
@@ -27,6 +27,7 @@ export class RoomFixture {
  if(name==='dailyMove'||name==='dailySettle'){const run=this.dailyRuns.get(uid),next=act(run,name==='dailyMove'?args[0]:{type:args[0]==='walk'?'walk':'finish'},now);this.dailyRuns.set(uid,next);return clone(next);}
  if(name==='account')return clone(p);if(name==='resumeAccount')return {profile:clone(p),run:clone(this.dailyRuns.get(uid)??null)};if(name==='currentRun')return clone(this.dailyRuns.get(uid)??null);if(name==='wallet')return this.state(uid);
  if(name==='shop'){const a=args[0];if(this.receipts.has(a.requestId))return {...this.state(uid),outcome:this.receipts.get(a.requestId)};person.w=walletAction(p,w,a,hkDay(now));this.receipts.set(a.requestId,person.w.item);if(this.failShop){this.failShop=false;throw Error('unavailable');}return {...this.state(uid),outcome:person.w.item};}
+ if(name==='purchaseStatus'){if(this.failPurchaseStatus)throw Error('unavailable');const a=args[0],day=a.day??hkDay(now);return {...this.state(uid),outcome:this.receipts.get(a.requestId),confirmed:this.receipts.has(a.requestId)||(a.type==='pass'?w.pass===weekendKey(day):a.type==='retry-ticket'&&w.retryBoughtDay===day)};}
  if(name==='publicStyles')return Object.fromEntries(args[0].map(u=>[u,{frame:this.person(u).w.frame,prefix:this.person(u).w.prefix}]));
  if(name==='leaderboard')return this.boardRows??[{uid,displayName:p.displayName,prize:1000000,timeMs:10000,lifelinesLeft:3,total:p.total,games:3}];
  if(name==='history')return [{...newRun(hkDay(now),now,uid),phase:'finished',correct:15,payout:1000000,reason:'complete',timeMs:12345,endedAt:now}];

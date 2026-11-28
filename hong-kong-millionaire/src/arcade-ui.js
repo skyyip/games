@@ -50,23 +50,33 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(intent.day!==hkDay()||intent.action.type==='retry-ticket'&&intent.action.price!==retryPrice()){status('今日折扣已更新，請重新確認價格。');render();return;}
   buyTicket(intent.action);
  };
+ function clearPurchase(key,requestId){try{if(JSON.parse(localStorage.getItem(key))?.requestId===requestId)localStorage.removeItem(key);}catch{}}
+ async function confirmPurchase(action,current){
+  const key=purchaseKey(),version=epoch,next=await cloud.purchaseStatus(action);if(!current()||epoch!==version||key!==purchaseKey())return false;
+  if(!state||next.wallet.revision>=state.wallet.revision){state=next;onChange(next);}
+  if(next.confirmed){clearPurchase(key,action.requestId);return true;}return false;
+ }
  async function buyTicket(action){
   if(pending||!uid||!isTicket(action))return;const saved=purchasePending();if(saved&&saved.requestId!==action.requestId){status('請先核對上次操作，再開始新的購買。');render();return;}
-  const key=purchaseKey(),version=epoch,payload={...action,requestId:action.requestId??crypto.randomUUID()};let quoteExpired=false;
-  const clearReceipt=()=>{try{if(JSON.parse(localStorage.getItem(key))?.requestId===payload.requestId)localStorage.removeItem(key);}catch{}};
+  const key=purchaseKey(),version=epoch,payload={...action,day:action.day??hkDay(),requestId:action.requestId??crypto.randomUUID()};let quoteExpired=false;
+  const clearReceipt=()=>clearPurchase(key,payload.requestId);
   const ok=await operation('ticket',async current=>{
    try{localStorage.setItem(key,JSON.stringify(payload));}catch{}
    try{const next=await cloud.shop(payload);if(current()){state=next;onChange(next);clearReceipt();}}
-   catch(error){if(current()&&String(error.code??error.message).replace(/^firestore\//,'')==='quote-expired'){quoteExpired=true;clearReceipt();}throw error;}
+   catch(error){if(current()){try{if(await confirmPurchase(payload,current))return;}catch{}if(current()&&String(error.code??error.message).replace(/^firestore\//,'')==='quote-expired'){quoteExpired=true;clearReceipt();}}throw error;}
   },'正在核對購票…');
   if(epoch===version&&key===purchaseKey()){
    if(ok)status(action.type==='pass'?'已購買本週末通行券，星期六、日可開始挑戰。':'已購買今天的再挑戰券，可以開始挑戰。');
-   else if(quoteExpired)status('今日折扣已更新，請重新確認價格。');
-   else if(purchasePending()?.requestId===payload.requestId)status('購票結果尚未確認，請按「核對上次購票」；同一收據不會重複扣款。');
+   else if(quoteExpired)status(action.type==='pass'?'週末通行券已換期，請重新確認本週末購票。':'今日折扣已更新，請重新確認價格。');
+   else if(purchasePending()?.requestId===payload.requestId)status($('arcade-status').textContent+' 購票結果仍未確認，請按「核對上次購票」；同一收據不會重複扣款。');
    render();
   }
  }
- function recoverPurchase(){const action=purchasePending();if(isTicket(action))buyTicket(action);else if(action){dialog.close();onShop();}}
+ async function recoverPurchase(){
+  const action=purchasePending(),actor=uid,version=epoch;if(!isTicket(action)){if(action){dialog.close();onShop();}return;}
+  let confirmed=false;const ok=await operation('receipt',async current=>{confirmed=await confirmPurchase(action,current);},'正在核對購票…');
+  if(!ok||uid!==actor||epoch!==version)return;if(confirmed){status('購票已確認，資格與剩餘次數已同步。');render();}else if(purchasePending()?.requestId===action.requestId)buyTicket(action);
+ }
  async function bindRun(value,{calibrate=true}={}){
   if(!value)return;const version=epoch;if(calibrate&&value.phase!=='finished'&&typeof cloud.syncSessionClock==='function')value=await (typeof cloud.resumeSession==='function'?cloud.resumeSession(descriptor(value)):cloud.syncSessionClock(descriptor(value)));if(version!==epoch)return;stopRun?.();stopRun=null;acceptRun(value);view='game';
   if(!asyncRoom(value)&&typeof cloud.watchSession==='function'){const stop=await cloud.watchSession(descriptor(value),next=>{if(epoch===version&&run?.id===value.id&&next?.id===value.id)acceptRun(next);},error=>{if(epoch===version){failed(error);status(cloud.errorText(error)+' 請重新連接。');}});if(version!==epoch)stop?.();else stopRun=stop;}
@@ -191,7 +201,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
   if(!allowAction||auto||pending||!automaticReady())return;const safeAt=cloud.sessionSafeNow?.()??clockAt,action=sessionTerminal(run,safeAt)&&(run.kind!=='room'||asyncRoom(run)||isRevealed())?{type:'finish'}:run.phase==='playing'&&sessionRemaining(run,safeAt)<=0?{type:'timeout'}:run.kind==='room'&&!asyncRoom(run)&&run.phase==='reveal'&&safeAt>=run.questionAt+ROOM_INTERVAL?{type:'next'}:null;if(action){const key=snapshotKey(run)+':'+action.type;if(transitionRetry.exhausted(key)){autoPaused=true;status('本題同步暫停；已提交的答案仍保留。請按「重新連接」核對。');return;}if(!transitionRetry.begin(key))return;auto=true;move(action,{automatic:true}).finally(()=>{auto=false;});}
  }
  async function recover(){if(pending)return;resetFailures();transitionRetry.reset();await operation('recover',async current=>{if(view==='room'&&room){await attach(room.id);return;}const next=view==='home'||!run?await cloud.activeSession():await cloud.getSession(descriptor(run));if(!current())return;if(next){await bindRun(next);if(next.kind==='room'&&room?.id!==next.room){await attach(next.room);view='game';}}else{let payload;try{payload=JSON.parse(localStorage.getItem('sky.hkm.pending-room.'+uid));}catch{}if(payload){const id=await cloud.createRoom(payload);if(current()){localStorage.removeItem('sky.hkm.pending-room.'+uid);await attach(id);}}}await wallet();});}
- async function open(){setIdentity(getUser()?.uid??null);if(!uid){login();return;}dialog.showModal();view='home';if(!pending){resetFailures();transitionRetry.reset();}render();const ticket=++loadId;await operation('open',async current=>{await wallet();if(!current()||!canStart())return;const next=await cloud.activeSession();if(!current()||ticket!==loadId)return;if(next){await bindRun(next);if(next.kind==='room'){await attach(next.room);view='game';}}});if(!canStart())status('請先完成目前的每日熱座。');else if(view==='home'&&purchasePending())status('有一筆未確認操作，請先核對上次結果。');}
+ async function open(){setIdentity(getUser()?.uid??null);if(!uid){login();return;}dialog.showModal();view='home';if(!pending){resetFailures();transitionRetry.reset();}render();const ticket=++loadId;const ok=await operation('open',async current=>{await wallet();if(!current())return;const action=purchasePending();if(isTicket(action))await confirmPurchase(action,current);if(!current()||!canStart())return;const next=await cloud.activeSession();if(!current()||ticket!==loadId)return;if(next){await bindRun(next);if(next.kind==='room'){await attach(next.room);view='game';}}});if(!ok)return;if(!canStart())status('請先完成目前的每日熱座。');else if(view==='home'&&purchasePending())status('有一筆未確認操作，請先核對上次結果。');}
  function reconnectVisible(){if(!document.hidden&&dialog.open&&view==='game'&&run?.phase!=='finished'&&!pending)recover();}
  document.addEventListener('visibilitychange',reconnectVisible);window.addEventListener('pageshow',event=>{if(event.persisted)reconnectVisible();});
  $('arcade-ticket-recover').onclick=recoverPurchase;$('arcade-retry').onclick=()=>view==='home'&&purchasePending()?recoverPurchase():recover();$('arcade-lobby').onclick=()=>{view='home';render();};dialog.addEventListener('close',()=>{hint.close();confirm.close();ticketIntent=null;visualObserver?.disconnect();visualAnimation?.cancel();visualObserver=visualAnimation=null;});setInterval(clock,150);
