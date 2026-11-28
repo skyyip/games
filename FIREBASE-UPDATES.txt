@@ -1,18 +1,22 @@
-本次：效能、首頁文字放大及隱藏掛單賣家名稱
+本次：香港傳說・隱藏典藏（20款）
 
-本次只改前端字型、動畫及介面，不需更新Firebase Rules或七個索引，無Cloud Functions。原抽卡8%循環、價格、題庫、卡片、獎金、票券及成交規則不變。
-已部署前版8%普通抽及售賣記錄設定者，只需完整更新網站，包含42個新字型子集。不清空任何玩家資料。
+需要更新完整Firestore Rules；七個索引沒有新增或刪除。先在sky-playground-millionaire發布同版完整Rules，再完整上傳網站及重新載入。
+典藏券：每收藏15款原有文化卡／閃卡得1券，每完成5次每日挑戰另得1券；舊進度計入，抽券不出售。
+適用Firebase Spark，無Cloud Functions、無需Blaze、無需資料清空／批次遷移。
 
-若尚未部署前版設定，仍須在sky-playground-millionaire發布完整Rules及七個索引後，再上傳網站：
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/firestore.rules
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/firestore.indexes.json
-部署說明：
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/FIREBASE.md
+完整Rules：
+https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/firestore.rules
+原有七個索引（已部署者不需變更）：
+https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/firestore.indexes.json
+部署與欄位說明：
+https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/FIREBASE.md
 
-本機單元140項、收藏441／真正Auth及SDK市集131／真實SW離線7／首頁及原生字型37項通過。正式Firebase及網站未代為部署。
-效能條件與原始數據：
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/docs/performance.md
+Firestore Database → Rules 貼上完整Rules並Publish，或在來源hong-kong-millionaire資料夾內，以已登入正確專案的CLI執行npm run rules:check、npm run firebase:check、npm run firebase:deploy。腳本只部署該專案的Rules及索引，不部署Hosting或Functions。
 
-先前蓄力連連跳前50名仍包含在本網站，若尚未更新其Rules，請在獨立sky-playground-3c5af專案發布：
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/frogger-jump/firestore.rules
+新hkm_wallets/{uid}.legendDraws僅代表已使用典藏券，舊錢包缺少時視為0。可用券由原有180卡的唯一款數及正式games計算，隱藏卡、重複／零／未知卡不增加收藏券。沿用receipts防重收據，Rules獨立核對資格、卡號及計數；不改普通／金蛋抽序或獎金。集齊全20款才能套用legend前綴及theme-legend主題；免費主題不能用購買繞過收集。原有餘額、卡片、造型、票券、排行及交易保留。
+
+驗證：單元144；本機官方Firestore新典藏432、普通抽212、獎勵1,822、市集114；瀏覽器新典藏114、原收藏456、真正Auth／SDK市集131、實際SW離線7。未測實體手機或正式Google OAuth；正式Firebase與網站未部署。
+
+先前蓄力連連跳前50名仍包含於網站；尚未更新者在獨立sky-playground-3c5af專案發布：
+https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/frogger-jump/firestore.rules
 兩專案規則不可混貼。

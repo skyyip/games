@@ -1,15 +1,13 @@
-香港百萬富翁：效能、首頁文字放大及隱藏掛單賣家名稱
-來源：e3dc11ffda967dc02d59864b716be5d019be1934
-版本：7b1e35e595cef929
+香港百萬富翁：香港傳說・隱藏典藏
+來源：d20eb6f869b3b4454fd95b837d48a6c54f5cde5d
+版本：a8b3c60e98a0d658
 
-完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess及42個新字型檔；不要多套一層資料夾或只選某個遊戲。全站29頁、1,142檔案644、31目錄755。
+完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess及所有字型／五幅典藏圖集；不要多套一層資料夾或只選某個遊戲。全站29頁、1,147檔案644、31目錄755。
 
-常用介面使用同一Chiron字型的輕量子集，原完整分區保留供生僻字／任意玩家稱呼按需使用。畫面外閃卡掃光及星芒暫停，捲入恢復；可見效果與資料保留。
-本機未壓縮HTTP測得首頁資源body bytes減35.3%、字型減69.1%；收藏冊閒置主執行緒工作量減58.7%。首屏時間有波動，沒有穩定DCL／LCP加速證據，數據不代表實體手機或生產網路保證。
+新增20款香港港漫隱藏典藏，全冊200款。典藏券：每收藏15款原有卡／完成5次每日挑戰，各得1券；舊進度計入。獨立20張循環，首輪各不相同；未取得只見剪影與線索，首次取得揭卡，集齊可用香江傳奇稱號及專屬主題。重複典藏沿用市集出售、保留最後一張及5%費用。
+指定的普通扭蛋說明段落已移除；原180卡、34款付費造型、1,011題、普通10,000／金蛋80,000、8%完整循環及玩家資產保留。原輕量字型及離屏閃卡動畫暫停機制保留。
 
-#start、#lobby-arcade、#lobby-collection、.daily-ticket、#lobby-status按原斷點字體增加15%。掛單卡片隱藏賣家稱呼，只改顯示，不刪除雲端賣家或交易資料。
-
-本次不需更新Firebase Rules或索引。未部署前版設定者仍須依FIREBASE-UPDATES.txt處理。原180卡、34造型、1,011題、8%普通抽及所有玩家資產保留；正式Firebase及網站未代為部署。
-完整效能及驗證：
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/docs/performance.md
-https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/VERIFICATION.md
+本次必須先在sky-playground-millionaire發布完整Firestore Rules，再上傳同版網站。索引沿用七個；仍適用Spark，不需Functions、Blaze或資料遷移。詳見FIREBASE-UPDATES.txt。正式Firebase及網站未代為部署。
+功能及驗證：
+https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/docs/legend-collection.md
+https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/VERIFICATION.md
