@@ -11,7 +11,7 @@ export function cultureCardImage(card){if(card.hidden)return ART['legend-atlas-'
 export function cultureCardCrop(card){if(card.hidden)return {column:card.panel%2,row:Math.floor(card.panel/2),columns:2,rows:2};if(ART['card-'+card.id+'.webp']||ART['card-'+card.id+'.svg'])return {column:0,row:0,columns:1,rows:1};const index=CULTURE_CARDS.filter(c=>c.series===card.series).findIndex(c=>c.id===card.id);const modern=['streets','harbour'].includes(card.series),slot=index+(card.series==='harbour'?6:0),columns=modern?4:2;return {column:slot%columns,row:Math.floor(slot/columns),columns,rows:3};}
 export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{},onArcade=()=>{}}){
  const dialog=document.createElement('dialog');dialog.id='collection-dialog';dialog.className='wide-dialog collection-dialog';dialog.setAttribute('aria-labelledby','collection-title');
- dialog.innerHTML='<button class="close-button" type="button" aria-label="關閉情懷收藏">×</button><h2 id="collection-title">情懷收藏與商店</h2><div class="wallet-summary"><span>可用獎金</span><strong id="wallet-balance">—</strong></div><nav class="reward-tabs" aria-label="收藏商店分類"><button type="button" data-tab="draw">文化扭蛋</button><button type="button" data-tab="cards">我的卡冊</button><button type="button" data-tab="gear">個人造型</button><button type="button" data-tab="market">街坊市集</button></nav><p id="shop-status" class="status" role="status"></p><button id="shop-recover" class="outline" type="button" hidden>核對上次操作</button><div id="shop-content"></div><div class="collection-footer"><label class="checkbox-label"><input id="reward-sound" type="checkbox">播放短音效及合成語音</label><button id="shop-refresh" class="text-button" type="button">重新讀取餘額</button><button id="shop-arcade" class="outline" type="button">前往街坊遊樂場 ↗</button></div>';
+ dialog.innerHTML='<button class="close-button" type="button" aria-label="關閉情懷收藏">×</button><h2 id="collection-title">情懷收藏與商店</h2><div class="wallet-summary"><span>可用獎金</span><strong id="wallet-balance">—</strong></div><nav class="reward-tabs" aria-label="收藏商店分類"><button type="button" data-tab="draw">文化扭蛋</button><button type="button" data-tab="cards">我的卡冊</button><button type="button" data-tab="gear">個人造型</button><button type="button" data-tab="market">街坊市集</button></nav><button id="shop-recover" class="outline" type="button" hidden>核對上次操作</button><div id="shop-content"></div><div class="collection-footer"><label class="checkbox-label"><input id="reward-sound" type="checkbox">播放短音效及合成語音</label><button id="shop-refresh" class="text-button" type="button">重新讀取餘額</button><button id="shop-arcade" class="outline" type="button">前往街坊遊樂場 ↗</button></div>';
  document.body.append(dialog);dialog.querySelector('.close-button').onclick=()=>dialog.close();const $=id=>dialog.querySelector('#'+id);
  const foilObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)entry.target.classList.toggle('foil-visible',entry.isIntersecting);},{root:dialog,rootMargin:'160px'}):null;
  dialog.addEventListener('close',()=>foilObserver?.disconnect());
@@ -42,16 +42,16 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  }
  async function refreshMarketWallet(){const actor=uid,epoch=version,next=await cloud.wallet();if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;apply();render();}
  const market=installMarket({cloud,getUid:()=>uid,getState:()=>state,getBusy:()=>busy,visible:()=>tab==='market'&&dialog.open,refreshWallet:refreshMarketWallet,cardFace,showCard:c=>showCard(c,true,true)});
- async function request(action,title,cost=0){if(busy||!state)return;const actor=uid,epoch=version;if(pending()){if(!await load(true)||uid!==actor||version!==epoch)return;if(pending()){$('shop-status').textContent='請先核對上次操作，再開始新的購買。';return;}}intent=action;confirm.querySelector('#shop-confirm-title').textContent=title;confirm.querySelector('#shop-confirm-copy').textContent=action.type==='legend'?'使用 1 張隱藏典藏券，餘下 '+(legendTickets(state.profile,state.wallet).available-1)+' 張。':(cost?'將使用 '+money(cost)+' 獎金。':'這項設定不扣除獎金。')+' 目前可用 '+money(state.balance)+'。';confirm.showModal();}
+ async function request(action,title,cost=0){if(busy||!state)return;const actor=uid,epoch=version;if(pending()){if(!await load(true)||uid!==actor||version!==epoch)return;if(pending()){$('shop-recover').focus();return;}}intent=action;confirm.querySelector('#shop-confirm-title').textContent=title;confirm.querySelector('#shop-confirm-copy').textContent=action.type==='legend'?'使用 1 張隱藏典藏券，餘下 '+(legendTickets(state.profile,state.wallet).available-1)+' 張。':(cost?'將使用 '+money(cost)+' 獎金。':'這項設定不扣除獎金。')+' 目前可用 '+money(state.balance)+'。';confirm.showModal();}
  confirm.querySelector('#shop-confirm-buy').onclick=()=>{const action=intent;confirm.close();intent=null;if(action)transact(action);};
  async function transact(action){
   if(busy||!uid)return;const actor=uid,epoch=version,requestId=action.requestId??crypto.randomUUID(),payload={...action,requestId};busy=true;
-  try{localStorage.setItem(pendingKey(),JSON.stringify(payload));}catch{}$('shop-status').textContent='正在核對交易…';render();
+  try{localStorage.setItem(pendingKey(),JSON.stringify(payload));}catch{}render();
   try{
    let next;try{next=await cloud.shop(payload);}catch(error){let checked;try{checked=await cloud.purchaseStatus(payload);}catch{}if(!checked?.confirmed){if(action.type==='legend'&&checked&&uid===actor&&version===epoch){state=checked;apply();}throw error;}next=checked;}if(uid!==actor||version!==epoch)return;state=next;loadedUid=uid;try{localStorage.removeItem(pendingKey());}catch{}
-   apply();$('shop-status').textContent=['draw','gold','legend'].includes(action.type)?'已抽到「'+(cardById(next.outcome)?.name??'文化卡')+'」。':action.type==='equip'?'展示設定已保存。':'已解鎖收藏。';
+   apply();
    if(['draw','gold','legend'].includes(action.type)&&dialog.open)showCard(cardById(next.outcome),true,false,action.type==='legend'&&next.wallet.cards[next.outcome]===1);
-  }catch(error){if(uid===actor&&version===epoch){if(['quote-expired','legend-ticket-required'].includes(error.message))try{localStorage.removeItem(pendingKey());}catch{}$('shop-status').textContent=cloud.errorText(error)+(['quote-expired','legend-ticket-required'].includes(error.message)?'':' 可按「核對上次操作」確認；同一收據不會重複扣款。');}}
+  }catch(error){if(uid===actor&&version===epoch){if(['quote-expired','legend-ticket-required'].includes(error.message))try{localStorage.removeItem(pendingKey());}catch{}}}
   finally{if(uid===actor&&version===epoch){busy=false;render();}}
  }
  function filters(kind,items,selected){
@@ -85,12 +85,12 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  async function load(force=false){
   if(!uid||typeof cloud.wallet!=='function'||loadingUid===uid)return false;const actor=uid,epoch=version;loadingUid=uid;
   try{
-   $('shop-status').textContent='正在讀取雲端收藏…';let next=await cloud.wallet();if(uid!==actor||version!==epoch)return false;
+   let next=await cloud.wallet();if(uid!==actor||version!==epoch)return false;
    const action=pending();let recovered=false;
    if(action){const checked=await cloud.purchaseStatus(action);if(uid!==actor||version!==epoch)return false;if(checked.confirmed){next=checked;try{if(pending()?.requestId===action.requestId)localStorage.removeItem(pendingKey());}catch{}recovered=true;}}
-   state=next;loadedUid=uid;apply();$('shop-status').textContent=pending()?'有一筆未確認操作，請核對上次結果。':recovered?'上次操作已確認，餘額與收藏已同步。':'';render();
+   state=next;loadedUid=uid;apply();render();
    if(recovered&&['draw','gold','legend'].includes(action.type)&&dialog.open&&!force)showCard(cardById(next.outcome),true,false,action.type==='legend'&&next.wallet.cards[next.outcome]===1);return true;
-  }catch(error){if(uid===actor&&version===epoch){loadedUid=uid;$('shop-status').textContent=cloud.errorText(error);render();}return false;}finally{if(version===epoch)loadingUid=null;}
+  }catch{if(uid===actor&&version===epoch){loadedUid=uid;render();}return false;}finally{if(version===epoch)loadingUid=null;}
  }
  function setIdentity(next){if(uid!==next){uid=next;version++;state=null;loadedUid=null;loadingUid=null;busy=false;cardFilter=gearFilter='all';market.reset();apply();dialog.close();reveal.close();confirm.close();}}
  async function open(nextTab=tab){setIdentity(getUser()?.uid??null);if(!uid){login();return;}tab=['draw','cards','gear','market'].includes(nextTab)?nextTab:'draw';dialog.showModal();render();await load();if(tab==='market')await market.load({refresh:false});}
