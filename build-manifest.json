@@ -1,6 +1,6 @@
 {
-  "version": "520a63a4a87401bc",
-  "builtAt": 1795885250055,
+  "version": "9947c12cc6b12b05",
+  "builtAt": 1795885475249,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -920,7 +920,7 @@
     "you-really-get-them/src/app.js": "built/app-23J2BRU4.js",
     "your-dream-career/src/app.js": "built/app-OKS2TK65.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
-    "hong-kong-millionaire/src/app.js": "built/app-DOKSD4CD.js",
+    "hong-kong-millionaire/src/app.js": "built/app-Q4H5SSZ2.js",
     "grid-rush/src/landing.js": "built/landing-ELPNZG2H.js",
     "just-a-sec/src/app.js": "built/app-7Z7DOPUM.js",
     "line-up/src/app.js": "built/app-P6VI3CHR.js",

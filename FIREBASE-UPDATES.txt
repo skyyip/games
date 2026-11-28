@@ -1,4 +1,4 @@
-本次移除商店狀態區塊：沒有Firestore Rules、索引或資料格式變更。已部署隱藏典藏版者不需更新Firebase；尚未部署者依下方處理。
+本次僅移除抽卡名稱提示：沒有Firestore Rules、索引或資料格式變更。已部署隱藏典藏版者不需更新Firebase；尚未部署者依下方處理。
 
 本次：香港傳說・隱藏典藏（20款）
 
@@ -7,11 +7,11 @@
 適用Firebase Spark，無Cloud Functions、無需Blaze、無需資料清空／批次遷移。
 
 完整Rules：
-https://github.com/skyyip/games/blob/e2ee5655a41c06bae3d18389494e64ef71d1aa1c/hong-kong-millionaire/firestore.rules
+https://github.com/skyyip/games/blob/ae838d963e300f9562cd7bdf24b142f53ef9c221/hong-kong-millionaire/firestore.rules
 原有七個索引（已部署者不需變更）：
-https://github.com/skyyip/games/blob/e2ee5655a41c06bae3d18389494e64ef71d1aa1c/hong-kong-millionaire/firestore.indexes.json
+https://github.com/skyyip/games/blob/ae838d963e300f9562cd7bdf24b142f53ef9c221/hong-kong-millionaire/firestore.indexes.json
 部署與欄位說明：
-https://github.com/skyyip/games/blob/e2ee5655a41c06bae3d18389494e64ef71d1aa1c/hong-kong-millionaire/FIREBASE.md
+https://github.com/skyyip/games/blob/ae838d963e300f9562cd7bdf24b142f53ef9c221/hong-kong-millionaire/FIREBASE.md
 
 Firestore Database → Rules 貼上完整Rules並Publish，或在來源hong-kong-millionaire資料夾內，以已登入正確專案的CLI執行npm run rules:check、npm run firebase:check、npm run firebase:deploy。腳本只部署該專案的Rules及索引，不部署Hosting或Functions。
 
@@ -20,5 +20,5 @@ Firestore Database → Rules 貼上完整Rules並Publish，或在來源hong-kong
 驗證：單元144；本機官方Firestore新典藏432、普通抽212、獎勵1,822、市集114；瀏覽器新典藏114、原收藏456、真正Auth／SDK市集131、實際SW離線7。未測實體手機或正式Google OAuth；正式Firebase與網站未部署。
 
 先前蓄力連連跳前50名仍包含於網站；尚未更新者在獨立sky-playground-3c5af專案發布：
-https://github.com/skyyip/games/blob/e2ee5655a41c06bae3d18389494e64ef71d1aa1c/frogger-jump/firestore.rules
+https://github.com/skyyip/games/blob/ae838d963e300f9562cd7bdf24b142f53ef9c221/frogger-jump/firestore.rules
 兩專案規則不可混貼。
