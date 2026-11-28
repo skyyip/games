@@ -42,7 +42,8 @@
     "review:winter": "node scripts/generate-winter-neighbourhood-review.mjs",
     "test:winter": "node scripts/winter-neighbourhood-browser-check.mjs",
     "test:winter-rules": "node scripts/winter-neighbourhood-firestore-check.mjs",
-    "test:winter-cosmetics": "node scripts/winter-cosmetics-browser-check.mjs"
+    "test:winter-cosmetics": "node scripts/winter-cosmetics-browser-check.mjs",
+    "test:weekend-devices": "node scripts/weekend-device-browser-check.mjs"
   },
   "dependencies": {
     "firebase": "^12.5.0"

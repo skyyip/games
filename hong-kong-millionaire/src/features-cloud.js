@@ -11,8 +11,8 @@ const sessionRef=(c,uid,s)=>s.kind==='room'?c.doc(c.db,FEATURE_COLLECTIONS.rooms
 const data=snap=>snap.exists()?snap.data():null,stampNum=value=>value?.toMillis?.()??value;
 export const normalizeRoom=r=>r?{...r,...Object.fromEntries(['createdAt','startedAt','updatedAt'].map(k=>[k,stampNum(r[k])]))}:null;
 export async function wallet(c,uid){
- const ref=walletRef(c,uid);let w=await c.getDoc(ref);
- if(!w.exists()){await c.runTransaction(c.db,async t=>{const [p,latest]=await Promise.all([t.get(player(c,uid)),t.get(ref)]);if(!p.exists())throw Error('login-required');if(!latest.exists())t.set(ref,emptyWallet(uid,c.serverTimestamp()));});w=await c.getDoc(ref);}
+ const ref=walletRef(c,uid);let w=await readServer(c,ref);
+ if(!w.exists()){await c.runTransaction(c.db,async t=>{const [p,latest]=await Promise.all([t.get(player(c,uid)),t.get(ref)]);if(!p.exists())throw Error('login-required');if(!latest.exists())t.set(ref,emptyWallet(uid,c.serverTimestamp()));});w=await readServer(c,ref);}
  // Retire a prefix made incomplete by a catalogue expansion once, without changing cards, funds or other cosmetics.
  if(w.data().prefix&&!unlockedPrefixes(w.data()).some(s=>s.id===w.data().prefix)){
   const requestId=crypto.randomUUID();
@@ -21,9 +21,9 @@ export async function wallet(c,uid){
    const next=walletAction({total:0},latest,{type:'equip',slot:'prefix',id:'',requestId}),stamp=c.serverTimestamp();
    t.set(ref,{...next,updatedAt:stamp});t.set(c.doc(c.db,FEATURE_COLLECTIONS.wallets,uid,'receipts',requestId),{uid,op:'equip',item:'prefix',cost:0,revision:next.revision,createdAt:stamp});
    t.set(c.doc(c.db,FEATURE_COLLECTIONS.styles,uid),{uid,frame:next.frame,theme:next.theme,prefix:'',updatedAt:stamp});
-  });w=await c.getDoc(ref);
+  });w=await readServer(c,ref);
  }
- const p=await c.getDoc(player(c,uid));return {profile:data(p),wallet:data(w),balance:walletBalance(data(p),data(w))};
+ const p=await readServer(c,player(c,uid));return {profile:data(p),wallet:data(w),balance:walletBalance(data(p),data(w))};
 }
 export async function shop(c,uid,action){
  await wallet(c,uid);const requestId=action.requestId??crypto.randomUUID();if(!/^[a-f0-9-]{36}$/.test(requestId))throw Error('invalid-item');

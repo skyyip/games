@@ -34,7 +34,18 @@ for (const [index, page] of pages.entries()) {
   if (game) {
     assert.equal(game.zh, messages[game.name], `${page}: Chinese name matches the game UI`);
     const entity = schema['@graph'].find(item => item['@type'] === 'VideoGame');
-    assert.equal(entity.name, game.name); assert.equal(entity.url, urls[index]);
+    assert.equal(entity.name, game.slug === 'hong-kong-millionaire' ? game.zh : game.name); assert.equal(entity.url, urls[index]);
+    if(game.slug === 'hong-kong-millionaire'){
+      assert.equal(entity.alternateName,game.name);
+      assert.equal(entity.description,game.chinese);
+      assert.ok(html.includes('<meta property="og:locale" content="zh_HK">'));
+      for(const key of ['og:title','og:description','twitter:title','twitter:description']){
+        const content=html.match(new RegExp('<meta (?:property|name)="'+key+'" content="([^"]+)"'))?.[1];
+        assert.ok(content&&/[\u3400-\u9fff]/u.test(content),`${page}: ${key} includes Chinese`);
+      }
+      assert.ok(schema['@graph'].find(item=>item['@type']==='WebPage').name.includes(game.zh));
+      assert.equal(schema['@graph'].find(item=>item['@type']==='BreadcrumbList').itemListElement[1].name,game.zh);
+    }
     assert.deepEqual([entity.numberOfPlayers.minValue, entity.numberOfPlayers.maxValue], game.players);
     if(game.guide!==false)assert.ok(html.includes(game.intro.replaceAll('&', '&amp;')), `${page}: game facts in static HTML`);
     if(game.guide!==false)assert.ok(html.includes(game.chinese), `${page}: Traditional Chinese guide in static HTML`);

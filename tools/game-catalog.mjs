@@ -48,7 +48,7 @@ export const games = [
     slug:'hong-kong-millionaire',name:'Hong Kong Millionaire',zh:'香港百萬富翁',genre:'Quiz',players:[1,4],topic:'Daily Hong Kong Culture Quiz',guide:false,languages:['zh-Hant'],
     description:'Play Hong Kong Millionaire, a Hong Kong street-comic quiz with Hong Kong culture, daily illustrated puzzles, three lifelines and a million-dollar prize ladder.',
     intro:'A daily Traditional Chinese Hong Kong quiz. Answer 15 questions with 30 second clocks, three once-only lifelines and safety nets at questions five and ten. Sign in with Google or email before playing to save records and join rankings.',
-    chinese:'每日一次的香港文化問答。十五題四選一，每題30秒，以完整原創插畫輔助理解香港知識；第五及第十題為保險線，錦囊各用一次。須先登入或註冊，可累積虛擬獎金、稱號、錯題本及文化圖鑑。',
+    chinese:'香港文化每日問答遊戲：十五題四選一、每題30秒，配三個答題錦囊及百萬虛擬獎金階梯。登入即可保存成績、收藏港式漫畫文化卡，參加週末挑戰及24小時非即時街坊對戰。',
     steps:['Sign in with Google or create an email account before starting the daily challenge.','Read the question, use optional lifelines, and confirm your final answer before time runs out.','Keep your earned virtual prize when walking away or timing out, then share a spoiler-free result and read the culture explanations.'],related:['memory-trace','frogger-jump']
   },
   {

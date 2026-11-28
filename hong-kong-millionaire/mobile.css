@@ -25,7 +25,7 @@
  .is-playing .question-value{display:block}
  .is-playing .question-copy h2{font-size:clamp(18px,5vw,22px);line-height:1.6;margin:4px 0}
  .is-playing .options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
- .is-playing .option{min-height:52px;padding:12px;gap:10px;font-size:clamp(14.4px,3.96vw,16.2px);line-height:1.55;overflow-wrap:anywhere}
+ .is-playing .option{min-height:52px;padding:12px;gap:10px;font-size:clamp(12.96px,3.564vw,14.58px);line-height:1.55;overflow-wrap:anywhere}
  .is-playing .option-letter{font-size:inherit}
  .is-playing .lifelines{gap:8px;margin:8px 0}
  .is-playing .lifelines>button{min-height:46px;padding:8px 5px}
@@ -42,7 +42,7 @@
  .arcade-playing .arcade-visual img{display:block;min-height:0;max-height:100%}
  .arcade-playing .arcade-question{font-size:clamp(18px,5vw,22px);line-height:1.6;margin:4px 0}
  .arcade-playing .arcade-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
- .arcade-playing .arcade-options button{min-height:52px;padding:12px;font-size:clamp(14.4px,3.96vw,16.2px);line-height:1.55;overflow-wrap:anywhere}
+ .arcade-playing .arcade-options button{min-height:52px;padding:12px;font-size:clamp(12.96px,3.564vw,14.58px);line-height:1.55;overflow-wrap:anywhere}
  .arcade-playing .arcade-actions{gap:10px;margin:4px 0}
  .arcade-playing .arcade-actions button{min-height:48px;padding:10px;font-size:16px}
  .arcade-playing .arcade-lives{gap:8px;margin:4px 0}

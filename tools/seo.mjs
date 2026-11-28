@@ -10,14 +10,15 @@ const block = (name, text) => `<!-- ${name}:start -->\n${text}\n<!-- ${name}:end
 const stripBlock = (source, name) => source.replace(new RegExp(`<!-- ${name}:start -->[\\s\\S]*?<!-- ${name}:end -->\\n?`, 'g'), '');
 const gameUrl = game => siteUrl + game.slug + '/';
 const imageUrl = siteUrl + 'grid-rush/assets/icons/icon-512.png';
-const playerLabel = game => game.players[1] === 1 ? '1 player' : game.players[0] === game.players[1] ? `${game.players[0]} players on one device` : `${game.players[0]}–${game.players[1]} players on one device`;
+const playerLabel = game => game.slug === 'hong-kong-millionaire' ? '1 player; 2–4 players in asynchronous online rooms' : game.players[1] === 1 ? '1 player' : game.players[0] === game.players[1] ? `${game.players[0]} players on one device` : `${game.players[0]}–${game.players[1]} players on one device`;
 
 function gameSchema(game) {
+  const hongKong = game.slug === 'hong-kong-millionaire';
   return {
-    '@type': 'VideoGame', '@id': gameUrl(game) + '#game', name: game.name, alternateName: game.zh,
-    url: gameUrl(game), description: game.intro, genre: game.genre,
+    '@type': 'VideoGame', '@id': gameUrl(game) + '#game', name: hongKong ? game.zh : game.name, alternateName: hongKong ? game.name : game.zh,
+    url: gameUrl(game), description: hongKong ? game.chinese : game.intro, genre: hongKong ? ['Quiz', '香港文化問答'] : game.genre,
     inLanguage: game.languages ?? ['en', 'zh-Hant'], gamePlatform: 'Web browser', applicationCategory: 'GameApplication',
-    operatingSystem: 'Any operating system with a modern web browser', isAccessibleForFree: true,
+    operatingSystem: hongKong ? '支援現代網頁瀏覽器的作業系統' : 'Any operating system with a modern web browser', isAccessibleForFree: true,
     playMode: game.players[1] === 1 ? 'https://schema.org/SinglePlayer' : 'https://schema.org/MultiPlayer',
     numberOfPlayers: { '@type': 'QuantitativeValue', minValue: game.players[0], maxValue: game.players[1] },
     author: { '@type': 'Person', name: 'Sky Yip' }, isPartOf: { '@id': siteUrl + '#collection' },
@@ -62,15 +63,16 @@ export function applySeo(source, page) {
   const game = page === 'index.html' ? null : games.find(item => page === `${item.slug}/index.html`);
   if (page !== 'index.html' && !game) throw Error(`Missing SEO catalog entry: ${page}`);
   const url = game ? gameUrl(game) : siteUrl;
-  const chineseLanding = game?.slug === 'you-really-get-them';
-  const title = chineseLanding ? `${game.zh}｜高血壓求生模擬器` : game ? `${game.name} — ${game.topic} | Sky Playground` : 'Free Browser Games & Local Party Games | Sky Playground';
+  const hongKong = game?.slug === 'hong-kong-millionaire';
+  const chineseLanding = hongKong || game?.slug === 'you-really-get-them';
+  const title = hongKong ? `${game.zh}｜香港文化每日問答 | Sky Playground` : chineseLanding ? `${game.zh}｜高血壓求生模擬器` : game ? `${game.name} — ${game.topic} | Sky Playground` : 'Free Browser Games & Local Party Games | Sky Playground';
   const description = chineseLanding ? game.chinese : game?.description ?? 'Play free browser games at Sky Playground: quick solo challenges, puzzles and local party games for 2–6 players. No app download needed.';
   const graph = game ? [
     { '@type': 'WebPage', '@id': url + '#page', url, name: title, description, inLanguage: game.languages ?? ['en', 'zh-Hant'], mainEntity: { '@id': url + '#game' }, breadcrumb: { '@id': url + '#breadcrumbs' } },
     gameSchema(game),
     { '@type': 'BreadcrumbList', '@id': url + '#breadcrumbs', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Sky Playground', item: siteUrl },
-      { '@type': 'ListItem', position: 2, name: game.name, item: url },
+      { '@type': 'ListItem', position: 2, name: hongKong ? game.zh : game.name, item: url },
     ] },
   ] : [
     { '@type': 'CollectionPage', '@id': siteUrl + '#collection', url: siteUrl, name: 'Sky Playground', description, inLanguage: ['en', 'zh-Hant'], mainEntity: { '@id': siteUrl + '#games' }, author: { '@type': 'Person', name: 'Sky Yip' } },
@@ -88,20 +90,20 @@ export function applySeo(source, page) {
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sky Playground">
-<meta property="og:locale" content="${chineseLanding ? 'zh_TW' : 'en_US'}">
-<meta property="og:locale:alternate" content="${chineseLanding ? 'en_US' : 'zh_TW'}">
+<meta property="og:locale" content="${hongKong ? 'zh_HK' : chineseLanding ? 'zh_TW' : 'en_US'}">
+${hongKong ? '' : `<meta property="og:locale:alternate" content="${chineseLanding ? 'en_US' : 'zh_TW'}">`}
 <meta property="og:title" content="${escape(title)}">
 <meta property="og:description" content="${escape(description)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${imageUrl}">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
-<meta property="og:image:alt" content="Sky Playground mascot">
+<meta property="og:image:alt" content="${hongKong ? 'Sky Playground 吉祥物' : 'Sky Playground mascot'}">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="${escape(title)}">
 <meta name="twitter:description" content="${escape(description)}">
 <meta name="twitter:image" content="${imageUrl}">
-<meta name="twitter:image:alt" content="Sky Playground mascot">
+<meta name="twitter:image:alt" content="${hongKong ? 'Sky Playground 吉祥物' : 'Sky Playground mascot'}">
 <script type="application/ld+json">${json({ '@context': 'https://schema.org', '@graph': graph })}</script>
 <style>${['career-365','your-dream-career'].includes(game?.slug) ? styles.replace(guideFocusStyles, '') : styles}</style>`;
   html = html.replace(/<\/head>/i, block('seo', metadata) + '\n</head>');
