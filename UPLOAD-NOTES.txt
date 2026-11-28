@@ -1,13 +1,15 @@
-香港百萬富翁：香港傳說・隱藏典藏
-來源：d20eb6f869b3b4454fd95b837d48a6c54f5cde5d
-版本：a8b3c60e98a0d658
+香港百萬富翁：揭開典藏按鈕對比度
+來源：c4cfec30f92bb0eeab75ff9a93ebcc0a69957835
+版本：a652d162197472ea
+
+本次僅調整揭開典藏按鈕的hover／active／focus背景與鍵盤聚焦外框；不改Firestore Rules、索引或資料。手機與桌面檢查文字對比5.11:1、狀態背景對比3.10:1，disabled保持原樣。
 
 完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess及所有字型／五幅典藏圖集；不要多套一層資料夾或只選某個遊戲。全站29頁、1,147檔案644、31目錄755。
 
 新增20款香港港漫隱藏典藏，全冊200款。典藏券：每收藏15款原有卡／完成5次每日挑戰，各得1券；舊進度計入。獨立20張循環，首輪各不相同；未取得只見剪影與線索，首次取得揭卡，集齊可用香江傳奇稱號及專屬主題。重複典藏沿用市集出售、保留最後一張及5%費用。
 指定的普通扭蛋說明段落已移除；原180卡、34款付費造型、1,011題、普通10,000／金蛋80,000、8%完整循環及玩家資產保留。原輕量字型及離屏閃卡動畫暫停機制保留。
 
-本次必須先在sky-playground-millionaire發布完整Firestore Rules，再上傳同版網站。索引沿用七個；仍適用Spark，不需Functions、Blaze或資料遷移。詳見FIREBASE-UPDATES.txt。正式Firebase及網站未代為部署。
+尚未部署隱藏典藏版者，必須先在sky-playground-millionaire發布完整Firestore Rules，再上傳同版網站。索引沿用七個；仍適用Spark，不需Functions、Blaze或資料遷移。詳見FIREBASE-UPDATES.txt。正式Firebase及網站未代為部署。
 功能及驗證：
-https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/docs/legend-collection.md
-https://github.com/skyyip/games/blob/d20eb6f869b3b4454fd95b837d48a6c54f5cde5d/hong-kong-millionaire/VERIFICATION.md
+https://github.com/skyyip/games/blob/c4cfec30f92bb0eeab75ff9a93ebcc0a69957835/hong-kong-millionaire/docs/legend-collection.md
+https://github.com/skyyip/games/blob/c4cfec30f92bb0eeab75ff9a93ebcc0a69957835/hong-kong-millionaire/VERIFICATION.md
