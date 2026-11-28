@@ -1,14 +1,13 @@
-香港百萬富翁：售賣記錄及三個月改名期限
-來源：9e927c70b016501e3f9fa6b42ff88db01df532cb
-版本：2e98735b180bf63b
+香港百萬富翁：普通扭蛋洗牌循環、閃卡8%
+來源：705818904d93f9fa210cc444b1c23c9dc4254e9c
+版本：5664e64cac39452f
 
-先在sky-playground-millionaire發布同版完整Rules及新增售賣記錄索引，等待Enabled，再上傳網站；詳見FIREBASE-UPDATES.txt。本版仍適用Spark，不需Cloud Functions或Blaze。
-
+先在sky-playground-millionaire發布本版完整Firestore Rules，再上傳網站；索引沿用七個，詳見FIREBASE-UPDATES.txt。適用Spark，不需Functions或Blaze。
 完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess；不要多套一層資料夾或只選某個遊戲。全站29頁、1,100檔案644、31目錄755。
 
-已售卡在我的掛單顯示已售出及移除按鈕，移除後只隱藏掛單，成交記錄保留。售賣記錄顯示縮圖、卡名、扣5%後實收、買家成交時稱呼及香港成交時間；每頁24筆。舊記錄沒有稱呼者會標示稱呼未記錄。
-稱呼每三個香港曆月可改一次，介面顯示下次日期並由Rules獨立執行；舊帳戶第一次實際修改後開始計時。
+普通扭蛋取代固定步長，每輪作可重現偽隨機洗牌。完整一輪閃卡佔8%，同稀有度每款等權；不是每抽獨立8%，亦不保證每100抽中8張。重新整理或重試不重抽，普通抽數獨立，金蛋不跳普通位置。
+舊錢包從新普通序列0開始，現有卡片、餘額、抽數總計、票券、造型及收據全部保留。舊已付款收據返回原卡，不再扣款。普通10,000、金蛋80,000及金蛋100%閃卡不變。
 
-180卡、34造型、1,011題、10,000普通抽及80,000金蛋保留，不清空卡片、獎金、造型、票券、抽數或歷史收據。正式Firebase及網站未代為部署。
+180卡、34造型、1,011題及其他遊戲完整保留。正式Firebase及網站未代為部署。
 完整部署說明：
-https://github.com/skyyip/games/blob/9e927c70b016501e3f9fa6b42ff88db01df532cb/hong-kong-millionaire/FIREBASE.md
+https://github.com/skyyip/games/blob/705818904d93f9fa210cc444b1c23c9dc4254e9c/hong-kong-millionaire/FIREBASE.md
