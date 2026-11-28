@@ -116,7 +116,8 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .answer-letter{flex:none;font-weight:700;line-height:inherit}.answer-text{min-width:0}.option>span:last-child{min-width:0}
 .collection-filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .collection-filters>button{width:auto;min-height:44px;flex:0 1 auto;margin:0;padding:7px 12px;font-size:12px;line-height:1.35}
-.collection-filters>button[aria-pressed=true]{background:#2f6048;border-color:#274b3b;color:#fff8df}
+.collection-dialog .collection-filters>button[aria-pressed=true]{background:#174e3a;border-color:#123d2e;color:#fff9e9}
+.collection-dialog .collection-filters>button:focus-visible{outline:3px solid #173d2f;outline-offset:3px;box-shadow:0 0 0 2px #fff9e9}
 #result-screen .result-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
 #result-screen .result-actions>button{margin:0;min-height:48px;align-self:stretch}
 
@@ -135,7 +136,7 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .prefix-label,.identity-preview .achievement-label{display:inline-block;vertical-align:middle;max-width:100%;padding:2px 7px;border:1px solid #ad8736;border-radius:5px;background:#ffe36b;color:#523019;font:700 14px/1.1 var(--body);margin-left:2px;letter-spacing:0;overflow-wrap:anywhere}
 
 /* Marketplace: clear actions and paired cards without exposing private wallet data. */
-.collection-dialog .reward-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.collection-dialog .reward-tabs{grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:16px;border-bottom:2px solid #6c7f5d}
 .market-controls,.market-recovery{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .market-controls>button,.market-recovery>button{width:auto;min-height:44px;margin:0;padding:8px 12px}
 .market-controls>#market-refresh{margin-left:auto}
