@@ -1,8 +1,8 @@
-香港百萬富翁：揭開典藏按鈕對比度
-來源：c4cfec30f92bb0eeab75ff9a93ebcc0a69957835
-版本：a652d162197472ea
+香港百萬富翁：移除商店狀態區塊
+來源：e2ee5655a41c06bae3d18389494e64ef71d1aa1c
+版本：520a63a4a87401bc
 
-本次僅調整揭開典藏按鈕的hover／active／focus背景與鍵盤聚焦外框；不改Firestore Rules、索引或資料。手機與桌面檢查文字對比5.11:1、狀態背景對比3.10:1，disabled保持原樣。
+本次移除#shop-status及相應程式寫入；抽卡揭卡、更新餘額、未確認交易核對與重試保留。既有收藏及隱藏典藏瀏覽器回歸檢查通過。本次不改Firestore Rules、索引或資料。
 
 完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess及所有字型／五幅典藏圖集；不要多套一層資料夾或只選某個遊戲。全站29頁、1,147檔案644、31目錄755。
 
@@ -11,5 +11,5 @@
 
 尚未部署隱藏典藏版者，必須先在sky-playground-millionaire發布完整Firestore Rules，再上傳同版網站。索引沿用七個；仍適用Spark，不需Functions、Blaze或資料遷移。詳見FIREBASE-UPDATES.txt。正式Firebase及網站未代為部署。
 功能及驗證：
-https://github.com/skyyip/games/blob/c4cfec30f92bb0eeab75ff9a93ebcc0a69957835/hong-kong-millionaire/docs/legend-collection.md
-https://github.com/skyyip/games/blob/c4cfec30f92bb0eeab75ff9a93ebcc0a69957835/hong-kong-millionaire/VERIFICATION.md
+https://github.com/skyyip/games/blob/e2ee5655a41c06bae3d18389494e64ef71d1aa1c/hong-kong-millionaire/docs/legend-collection.md
+https://github.com/skyyip/games/blob/e2ee5655a41c06bae3d18389494e64ef71d1aa1c/hong-kong-millionaire/VERIFICATION.md
