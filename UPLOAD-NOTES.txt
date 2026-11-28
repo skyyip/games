@@ -1,11 +1,15 @@
-香港百萬富翁：手機市集四按鈕同列與卡冊字體
-來源：54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0
-版本：733f427455706b6e
+香港百萬富翁：效能、首頁文字放大及隱藏掛單賣家名稱
+來源：e3dc11ffda967dc02d59864b716be5d019be1934
+版本：7b1e35e595cef929
 
-完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess；不要多套一層資料夾或只選某個遊戲。全站29頁、1,100檔案644、31目錄755。
+完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess及42個新字型檔；不要多套一層資料夾或只選某個遊戲。全站29頁、1,142檔案644、31目錄755。
 
-手機街坊市集的買卡／我的掛單／售賣記錄／更新市集保持同一行，保留44px點按高度；更新市集移除圖示。我的卡冊篩選由12px增加15%至13.8px，保留橫向捲動；個人造型字體不變。
+常用介面使用同一Chiron字型的輕量子集，原完整分區保留供生僻字／任意玩家稱呼按需使用。畫面外閃卡掃光及星芒暫停，捲入恢復；可見效果與資料保留。
+本機未壓縮HTTP測得首頁資源body bytes減35.3%、字型減69.1%；收藏冊閒置主執行緒工作量減58.7%。首屏時間有波動，沒有穩定DCL／LCP加速證據，數據不代表實體手機或生產網路保證。
 
-本次不需更新Firebase Rules或索引；尚未部署前版8%普通抽或售賣記錄者，仍須依FIREBASE-UPDATES.txt完成原設定。交易、抽法、資料、180卡、34造型、1,011題及其他遊戲保留。正式Firebase及網站未代為部署。
-驗證：
-https://github.com/skyyip/games/blob/54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0/hong-kong-millionaire/VERIFICATION.md
+#start、#lobby-arcade、#lobby-collection、.daily-ticket、#lobby-status按原斷點字體增加15%。掛單卡片隱藏賣家稱呼，只改顯示，不刪除雲端賣家或交易資料。
+
+本次不需更新Firebase Rules或索引。未部署前版設定者仍須依FIREBASE-UPDATES.txt處理。原180卡、34造型、1,011題、8%普通抽及所有玩家資產保留；正式Firebase及網站未代為部署。
+完整效能及驗證：
+https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/docs/performance.md
+https://github.com/skyyip/games/blob/e3dc11ffda967dc02d59864b716be5d019be1934/hong-kong-millionaire/VERIFICATION.md
