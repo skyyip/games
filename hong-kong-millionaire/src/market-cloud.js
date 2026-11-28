@@ -9,9 +9,17 @@ export async function marketStatus(c,uid,input){
 }
 export async function marketListings(c,uid,{mine=false,after=null}={}){
  const filters=mine?[c.where('sellerUid','==',uid),c.where('status','in',['active','sold']),c.orderBy('createdAt','desc')]:[c.where('status','==','active'),c.orderBy('createdAt','desc')];
- if(after){parseMarketAction({type:'cancel',requestId:after,listingId:after});const cursor=await c.getDocFromServer(listingRef(c,after));if(!cursor.exists())throw Error('market-listing-missing');filters.push(c.startAfter(cursor));}
- const rows=await c.getDocsFromServer(c.query(c.collection(c.db,'hkm_market_listings'),...filters,c.limit(24)));
- return {items:rows.docs.map(d=>numeric({id:d.id,...d.data()})).filter(l=>mine||l.sellerUid!==uid),cursor:rows.size===24?rows.docs.at(-1).id:null};
+ let cursor=null;const items=[];
+ if(after){parseMarketAction({type:'cancel',requestId:after,listingId:after});cursor=await c.getDocFromServer(listingRef(c,after));if(!cursor.exists())throw Error('market-listing-missing');}
+ while(true){
+  const rows=await c.getDocsFromServer(c.query(c.collection(c.db,'hkm_market_listings'),...filters,...(cursor?[c.startAfter(cursor)]:[]),c.limit(24)));
+  for(const [index,doc]of rows.docs.entries()){
+   cursor=doc;const listing=numeric({id:doc.id,...doc.data()});if(mine||listing.sellerUid!==uid)items.push(listing);
+   // Stop at the last consumed document; leave any unread tail for the next page.
+   if(items.length===24)return {items,cursor:index<rows.size-1||rows.size===24?doc.id:null};
+  }
+  if(rows.size<24)return {items,cursor:null};
+ }
 }
 export async function marketHistory(c,uid,{after=null}={}){
  const filters=[c.where('sellerUid','==',uid),c.orderBy('createdAt','desc')];

@@ -25,7 +25,7 @@ export function installMarket({cloud,getUid,getState,getBusy,visible,refreshWall
  }
  async function query(more){const page=await (view==='history'?cloud.marketHistory({after:more?cursor:null}):cloud.marketListings({mine:view==='mine',after:more?cursor:null}));return {items:more?[...new Map([...items,...page.items].map(i=>[i.id,i])).values()]:page.items,cursor:page.cursor};}
  async function load({more=false,refresh=true}={}){if(disabled()||!getUid())return;const uid=getUid(),version=epoch;loading=true;status='正在讀取市集…';render();
-  try{if(!more){if(refresh)await refreshWallet();if(!current(uid,version))return;status='';await checkPending(uid,version);}if(!current(uid,version))return;const next=await query(more);if(current(uid,version)){items=next.items;cursor=next.cursor;}}
+  try{if(!more){if(refresh)await refreshWallet();if(!current(uid,version))return;status='';await checkPending(uid,version);}if(!current(uid,version))return;const next=await query(more);if(current(uid,version)){items=next.items;cursor=next.cursor;if(status==='正在讀取市集…')status='';}}
   catch(error){if(current(uid,version))status=errorText(error);}finally{if(current(uid,version)){loading=false;render();}}
  }
  async function submit(input){if(disabled()||!getUid())return;const actions=Array.isArray(input)?input:[input],uid=getUid(),version=epoch,old=pending();let action=actions[0],completed=0;if(old&&old.requestId!==action.requestId)return;busy=true;status='正在核對交易…';render();
@@ -34,9 +34,9 @@ export function installMarket({cloud,getUid,getState,getBusy,visible,refreshWall
    if(!current(uid,version))return;
    try{const saved=JSON.stringify(action);localStorage.setItem(key(uid),saved);if(localStorage.getItem(key(uid))!==saved)throw Error('storage-unavailable');}catch{throw Error('market-storage-unavailable');}
    let result;try{result=await cloud.marketAction(action);}catch(error){let checked;try{checked=await cloud.marketStatus(action);}catch{}if(!checked?.confirmed)throw error;result=checked.result;}
-   if(!current(uid,version))return;clear(uid,action.requestId);completed++;status=result.type==='buy'?'已購入「'+(cardById(result.cardId)?.name??'文化卡')+'」。':result.type==='cancel'?'掛單已取消，卡片已退回。':'已掛出'+completed+'張。';
+   if(!current(uid,version))return;clear(uid,action.requestId);completed++;if(view==='browse'&&result.type==='buy')items=items.filter(i=>i.id!==result.listingId);status=result.type==='buy'?'已購入「'+(cardById(result.cardId)?.name??'文化卡')+'」。':result.type==='cancel'?'掛單已取消，卡片已退回。':'已掛出'+completed+'張。';
    }
-   try{await refreshWallet();if(!current(uid,version))return;const next=await query(false);if(current(uid,version)){items=next.items;cursor=next.cursor;}}catch{if(current(uid,version))status+=' 請更新餘額及市集。';}
+   try{await refreshWallet();if(!current(uid,version))return;const keep=view==='browse'&&action.type==='buy';if(!keep||!items.length&&cursor){const next=await query(keep);if(current(uid,version)){items=next.items;cursor=next.cursor;}}}catch{if(current(uid,version))status+=' 請更新餘額及市集。';}
   }catch(error){if(current(uid,version)){if(messages[error.message]&&!['market-request-mismatch','market-wallet-not-ready'].includes(error.message))clear(uid,action.requestId);status=(actions.length>1?'已確認掛出'+completed+'/'+actions.length+'張，後續已停止。':'')+(error.message==='market-storage-unavailable'?'瀏覽器未能保留交易記錄，請允許本機儲存後再試。':errorText(error))+(pending()?' 可核對或重試上次操作。':'');if(!pending()){if(action.listingId&&['market-listing-unavailable','market-listing-missing'].includes(error.message))items=items.filter(i=>i.id!==action.listingId);try{await refreshWallet();if(current(uid,version)){const next=await query(false);items=next.items;cursor=next.cursor;}}catch{}}}}
   finally{if(current(uid,version)){busy=false;render();}}
  }
