@@ -1,8 +1,8 @@
-香港百萬富翁：個人造型篩選文字放大20%
-來源：13644710dcc217fc852c43f9a14a5b2019a87973
-版本：e2cd2a8f63564151
+香港百萬富翁：個人造型篩選橫向捲動
+來源：e48d88e01c6154ab6592a39dafdb804ecb0a2b27
+版本：4137d6f7b3673c76
 
-本次僅將個人造型四個篩選按鈕（全部／頭像邊框／香港主題／離場動畫）文字由12px放大20%至14.4px，卡冊篩選文字保持13.8px。已檢查320／390／1280px排版與篩選操作。本次不改Firestore Rules、索引或資料。
+個人造型四個篩選按鈕保持同一行；超出寬度時提供原生水平捲軸及左右滑動。選擇分類後保留捲動位置，字體維持14.4px。已檢查320／390／1280px、水平捲動、鍵盤聚焦及分類內容，卡冊的單行捲動與13.8px字體保留。本次不改Firestore Rules、索引或資料。
 
 完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess及所有字型／五幅典藏圖集；不要多套一層資料夾或只選某個遊戲。全站29頁、1,147檔案644、31目錄755。
 
@@ -11,5 +11,5 @@
 
 尚未部署隱藏典藏版者，必須先在sky-playground-millionaire發布完整Firestore Rules，再上傳同版網站。索引沿用七個；仍適用Spark，不需Functions、Blaze或資料遷移。詳見FIREBASE-UPDATES.txt。正式Firebase及網站未代為部署。
 功能及驗證：
-https://github.com/skyyip/games/blob/13644710dcc217fc852c43f9a14a5b2019a87973/hong-kong-millionaire/docs/legend-collection.md
-https://github.com/skyyip/games/blob/13644710dcc217fc852c43f9a14a5b2019a87973/hong-kong-millionaire/VERIFICATION.md
+https://github.com/skyyip/games/blob/e48d88e01c6154ab6592a39dafdb804ecb0a2b27/hong-kong-millionaire/docs/legend-collection.md
+https://github.com/skyyip/games/blob/e48d88e01c6154ab6592a39dafdb804ecb0a2b27/hong-kong-millionaire/VERIFICATION.md
