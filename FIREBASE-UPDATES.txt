@@ -1,22 +1,19 @@
-本次必須更新：普通文化扭蛋洗牌循環及8%閃卡
+本次：市集空頁、載入狀態及購買後列表修正
 
-專案：sky-playground-millionaire（適用Spark，無Cloud Functions、無需Blaze）
-先在Firestore Database → Rules完整貼上並Publish同版Rules，再完整上傳網站並重新載入：
-https://github.com/skyyip/games/blob/705818904d93f9fa210cc444b1c23c9dc4254e9c/hong-kong-millionaire/firestore.rules
-本次沒有新增索引，沿用現有七個。若尚未部署前版市集及售賣記錄，仍須依完整索引檔建立七個並等待Enabled：
-https://github.com/skyyip/games/blob/705818904d93f9fa210cc444b1c23c9dc4254e9c/hong-kong-millionaire/firestore.indexes.json
-完整部署說明：
-https://github.com/skyyip/games/blob/705818904d93f9fa210cc444b1c23c9dc4254e9c/hong-kong-millionaire/FIREBASE.md
+本次沒有修改Firebase Rules、索引、資料格式或交易寫入。已部署前版8%普通抽及售賣記錄設定者，只需完整上傳網站，不需更新Firebase。
 
-普通抽改偽隨機洗牌，每輪22,275格：99文化卡各207格，81閃卡各22格，閃卡1,782格，精確8%。8%是完整循環比例，非每抽獨立機率，不保證每100抽中8張。
-以錢包建立時的伺服器時間及輪數作種子，每輪重新排列；這是可重現、可預測的偽隨機，不是保密後端或密碼學亂數。Rules獨立驗證預定卡片、價格、計數、卡數及收據，不能直接指定結果或免費跳過普通抽序。
+買卡自動略過自有掛單，填滿24張街坊掛單或真正到底；每個底層查詢仍最多24筆，可能讀多批。載入更多成功清除讀取文字，買到卡後只移除該張，保留其他已載入項目與游標。已售出標籤移至右上角及改黃色底。
 
-新增hkm_wallets/{uid}.normalDraws普通抽數。新錢包初始0；舊錢包缺欄位視0，下一次真正付費普通抽寫成1。原draws總計、餘額、卡片、造型、票券、收據及歷史成交均保留，不需批次清空或遷移。金蛋及其他購買不更改normalDraws；金蛋抽法及100%閃卡維持。
-舊已付款收據重試仍返回原卡，不套新公式或再扣款。同一新收據重試也不推進序列。普通價格10,000、金蛋80,000不變。
+若尚未部署前版設定，在sky-playground-millionaire發布同版完整Rules及七個索引後，再上傳網站。適用Spark，無Cloud Functions、無需Blaze。
+完整Rules：
+https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/hong-kong-millionaire/firestore.rules
+完整索引（保留七個）：
+https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/hong-kong-millionaire/firestore.indexes.json
+部署說明：
+https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/hong-kong-millionaire/FIREBASE.md
 
-舊前端不會更新普通計數，將被新Rules拒絕，請同步更新完整網站，不要只改比例或放寬寫入權限。正式Firebase及網站未代為部署。
-本機單元136項、官方Firestore規則2,188項（含新抽卡212項）、市集116／收藏432／購買恢復39項瀏覽器檢查通過。
+本次單元140、官方Firestore市集／改名114、真實Auth／SDK市集瀏覽器129及收藏432項通過。不清空任何卡片、獎金、造型、票券、收據或歷史成交，正式Firebase及網站未代為部署。
 
 先前蓄力連連跳前50名仍包含在本網站，若尚未更新其Rules，請在獨立sky-playground-3c5af專案發布：
-https://github.com/skyyip/games/blob/705818904d93f9fa210cc444b1c23c9dc4254e9c/frogger-jump/firestore.rules
+https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/frogger-jump/firestore.rules
 兩專案規則不可混貼。
