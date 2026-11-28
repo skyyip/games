@@ -11,7 +11,7 @@ export async function marketListings(c,uid,{mine=false,after=null}={}){
  const filters=[...(mine?[c.where('sellerUid','==',uid)]:[]),c.where('status','==','active'),c.orderBy('createdAt','desc')];
  if(after){parseMarketAction({type:'cancel',requestId:after,listingId:after});const cursor=await c.getDocFromServer(listingRef(c,after));if(!cursor.exists())throw Error('market-listing-missing');filters.push(c.startAfter(cursor));}
  const rows=await c.getDocsFromServer(c.query(c.collection(c.db,'hkm_market_listings'),...filters,c.limit(24)));
- return {items:rows.docs.map(d=>numeric({id:d.id,...d.data()})),cursor:rows.size===24?rows.docs.at(-1).id:null};
+ return {items:rows.docs.map(d=>numeric({id:d.id,...d.data()})).filter(l=>mine||l.sellerUid!==uid),cursor:rows.size===24?rows.docs.at(-1).id:null};
 }
 export async function marketAction(c,uid,input){
  const action=parseMarketAction(input),id=action.type==='list'?action.requestId:action.listingId,ref=listingRef(c,id),own=walletRef(c,uid),receipt=receiptRef(c,uid,action.requestId);
