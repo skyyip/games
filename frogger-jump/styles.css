@@ -99,3 +99,6 @@ body.is-playing #play-hint{position:absolute;width:1px;height:1px;min-height:0;m
 .river-notes .friends-intro{font-size:12px;line-height:1.8;color:var(--muted);margin:10px 0}
 #river-friends-list{columns:2;column-gap:32px}#river-friends-list li{break-inside:avoid}
 @media(max-width:650px){#river-friends-list{columns:1}.river-notes{margin-top:20px}.river-notes .guide-card{padding:16px}}
+
+#board-status:empty{display:none}
+@media(max-width:650px){.hud{gap:6px}.hud .route-pill{display:none}.score-stat span,.best-stat span{white-space:nowrap}}

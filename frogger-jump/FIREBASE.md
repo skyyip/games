@@ -1,8 +1,18 @@
-# Firebase · cross-device river accounts and top ten
+# Firebase · cross-device river accounts and top fifty
+
+## 2026-11-28：世界前50名與Email儲存位置
+
+本版**須先發布完整`frogger-jump/firestore.rules`，再上傳同版網站**。公開排行榜查詢上限由10增至50，按最高連跳遞減、達成時間遞增；同分同時間仍依文件ID排序。第11–50名顯示數字，前10名保留獎盃／徽章。原複合索引及資料結構不變，不需新增Functions、索引或搬移資料。已登入玩家的全榜名次仍用伺服器aggregate計算，並不限制在50名。
+
+- Google及Email／密碼註冊的電郵由Firebase Authentication保存：Firebase Console → `sky-playground-3c5af` → Authentication → Users。匿名帳戶在綁定Google或Email之前沒有email；本機試玩不需要email。
+- Firestore的`frogger_players/{uid}`保存名字、青蛙幣、動物與最佳成績等；目前不另存email。公開`frogger_leaderboard/{uid}`僅有`uid/name/score/animal/at`，不公開email。以Auth UID對應玩家文件ID即可查找同一帳戶。
+- 本次不增加任何email蒐集或儲存欄位。Rules仍拒絕玩家文件及公開成績攜帶額外email欄位；私人錢包只有本人可讀。公開列表最多50筆，未登入的51筆或無上限查詢仍拒絕；登入者既有全榜排名aggregate權限保留。
+- 客戶端仍按需讀取及保留10秒刷新節流。從10筆增為50筆會提高每次成功完整查詢的文件讀取量上限，沒有新增即時榜單監聽或定時輪詢。
+- 只以demo Emulator、SDK替身及本機瀏覽器驗證；未存取正式玩家資料、寄出真實電郵或部署正式Firebase。
 
 ## Current state
 
-The application integration, Google, anonymous and email/password Auth flows, unique-name transactions, wallet transactions, run receipts, top-ten query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable authentication providers, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
+The application integration, Google, anonymous and email/password Auth flows, unique-name transactions, wallet transactions, run receipts, top-fifty query, rules and composite index are implemented. **The supplied Firebase web configuration now targets `sky-playground-3c5af`.** The client enables cloud sign-in and the leaderboard query. This does not itself create a Firestore database, enable authentication providers, deploy rules/indexes, or verify a live account flow. Those service settings must exist in Firebase Console. Local practice remains separately labelled and unranked; there are no fake global players.
 
 ## Activate after creating the project
 
@@ -26,15 +36,15 @@ This command is a reference, **not an action performed by this task**. This game
 - `frogger_names/{normalizedName}` stores `{uid,name}`. Creation is transactional with the owner's profile; names cannot be listed, overwritten or stolen. Names are immutable after reservation. Normalization is NFKC plus lowercase Latin; Chinese/ASCII input restrictions keep the key check enforceable by rules.
 - `frogger_players/{uid}` stores the owner's wallet, unlocked/selected animal, personal best, timestamps and active/settled run IDs. Only that signed-in UID can read it. Email/password stay in Firebase Auth and are not written into public profile documents.
 - `frogger_players/{uid}/runs/{id}` stores a server-timestamped start and immutable animal. Finishing changes status once, records the score/reward and updates the wallet atomically. Starting another run atomically abandons the old active run for the same account.
-- `frogger_leaderboard/{uid}` exposes only UID, reserved name, best score, animal used and achievement timestamp. Query: score descending, timestamp ascending, limit 10. One row per user; a lower/equal later run does not replace the record.
+- `frogger_leaderboard/{uid}` exposes only UID, reserved name, best score, animal used and achievement timestamp. Query: score descending, timestamp ascending, limit 50. One row per user; a lower/equal later run does not replace the record.
 
 Coins use the same deterministic formula on client and in rules, including bounded integer platform bonuses (lotus centre +2, shell centre +3). Publish the updated `firestore.rules` before deploying this bonus-enabled build. Existing receipts without a bonus field default to zero. Purchases deduct the exact species price, grant one new owned animal and never charge again when switching an owned animal. Transaction conflicts retry against the latest balance. Clients cannot write someone else's wallet or record, forge name ownership, add a paid animal for free or settle an already completed run again.
 
 A disconnected finished run is retained under `frogger-jump.pending.v1` and can be retried. It remains unranked/unpaid until accepted by Firebase. Retrying the same finished receipt is idempotent. A run superseded by a different device is not paid twice; its stale pending receipt is cleared. No local guest wallet/score is promoted into a cloud account.
 
-The public leaderboard reads at most ten documents on demand, with a ten-second refresh cooldown. Identity restoration reads the signed-in player's profile. Wallets refresh on returning to the page. There are no per-frame or per-second database writes, global listeners, or high-frequency leaderboard polling.
+The public leaderboard reads at most fifty documents on demand, with a ten-second refresh cooldown. Identity restoration reads the signed-in player's profile. Wallets refresh on returning to the page. There are no per-frame or per-second database writes, global listeners, or high-frequency leaderboard polling.
 
-Signed-in players also see their own world rank, including positions outside the top ten. This reads their public leaderboard document from the server, then uses one `getCountFromServer` aggregate over the rows before its snapshot cursor. Ordering is score descending, achievement time ascending, then document ID ascending, matching the top-ten query's implicit final tie-break. No other players' records are downloaded to compute the count. The existing composite index supports this ordering; its final document-ID order is ascending.
+Signed-in players also see their own world rank, including positions outside the top fifty. This reads their public leaderboard document from the server, then uses one `getCountFromServer` aggregate over the rows before its snapshot cursor. Ordering is score descending, achievement time ascending, then document ID ascending, matching the top-fifty query's implicit final tie-break. No other players' records are downloaded to compute the count. The existing composite index supports this ordering; its final document-ID order is ascending.
 
 **Publish the updated `firestore.rules` before enabling personal ranks.** Authenticated users may query the public scores collection for the aggregate; anonymous queries remain limited to ten records. Firestore rules cannot distinguish aggregate counts from ordinary collection queries, so this permits authenticated queries over the public leaderboard generally. Private wallets, names registry enumeration and run receipts retain their existing restrictions. Signing in, returning to the page or rendering the wallet reuses a rank for up to one minute; a new personal best or explicit leaderboard refresh requests an update. Missing/zero-score records show unranked; network/rules failures show a retry control. There is no rank polling or extra write.
 
@@ -64,7 +74,7 @@ For full Auth-emulator browser testing, run the configured Auth/Firestore emulat
 2. Under **Authentication → Settings → Authorized domains**, include `skyyip.github.io` and `sky-playground.com` (plus any actual alternate hosting domain). For development, add `localhost` only if testing there.
 3. Publish this folder's updated Firestore rules for platform bonuses. No leaderboard index change is required.
 4. On the deployed game, choose **Player / sign in → Continue with Google**. A new account reserves a unique river name; returning users load their existing UID wallet. Canceling or blocking the popup leaves the current local wallet intact. If Firebase reports an account using another credential, the UI asks the player to use the original method instead of creating a replacement save.
-5. Verify a real Google login and top-ten update after configuration. This environment's browser checks cover the UI with a mock Auth adapter and do not certify live Google OAuth or deployed rules.
+5. Verify a real Google login and top-fifty update after configuration. This environment's browser checks cover the UI with a mock Auth adapter and do not certify live Google OAuth or deployed rules.
 
 ## Password reset and the disabled-Google-provider error
 
