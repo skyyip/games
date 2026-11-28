@@ -1,6 +1,6 @@
 {
-  "version": "2f719e2d5eab89d4",
-  "builtAt": 1795858388681,
+  "version": "bac09de91817775d",
+  "builtAt": 1795859314237,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -864,7 +864,7 @@
     "feet-up-cafe/src/app.js": "built/app-G54JHL6F.js",
     "flick-force/src/app.js": "built/app-GJ5YNLPO.js",
     "floating-balance/src/app.js": "built/app-ZOMZT6XU.js",
-    "frogger-jump/src/app.js": "built/app-V4TOCFKL.js",
+    "frogger-jump/src/app.js": "built/app-ZCT6O4A4.js",
     "grid-rush-in-order/src/app.js": "built/app-WEWTACRI.js",
     "grid-rush-in-order/src/pwa.js": "built/pwa-7AFLM7W4.js",
     "grid-rush/src/app.js": "built/app-AGX2BYH2.js",
@@ -892,7 +892,7 @@
     "memory-trace/styles.css": "built/styles-66DO4KXD.css",
     "mo-lei-tau-studio/src/utilities.css": "built/utilities-FICM2PHZ.css",
     "mo-lei-tau-studio/styles.css": "built/styles-6X5XJXIG.css",
-    "frogger-jump/styles.css": "built/styles-LNN75WM5.css",
+    "frogger-jump/styles.css": "built/styles-WQY2F6M6.css",
     "grid-rush-in-order/styles.css": "built/styles-VZI7CKHG.css",
     "grid-rush/styles.css": "built/styles-D2JKHIEI.css",
     "hong-kong-millionaire/styles.css": "built/styles-ZRWXXUCH.css",

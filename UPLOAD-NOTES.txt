@@ -1,10 +1,12 @@
-香港百萬富翁：八類各20張收藏、山水探險家及分類篩選
-來源提交：e28e87eeccacf02bd1709f4395b0847c22cee7d4
-完整上傳版本：2f719e2d5eab89d4
+蓄力連連跳：世界前50名及精簡介面
+來源：ca6627e6e6e0c4ef6ff24040d2a9e289c16afed1
+版本：bac09de91817775d
 
-先在Firebase發布本版完整firestore.rules，再將本資料夾全部內容上傳網站的 /games/，包括隱藏的 .htaccess；不要只挑選某個遊戲資料夾。
-160張卡（89文化卡／71閃卡），八類各20張；新增48幅獨立港式漫畫。山水探險家含10山嶺、10海灘。我的卡冊及個人造型新增分類篩選。成績按鈕兩欄及同行等高。
-題庫仍1,011題，造型34款；普通文化扭蛋10,000、金蛋80,000。原卡、獎金、票券、抽數及收據保留。
-29頁；1,080檔案644，31目錄755（ZIP內含本三份說明）。
-完整規則：https://github.com/skyyip/games/blob/e28e87eeccacf02bd1709f4395b0847c22cee7d4/hong-kong-millionaire/firestore.rules
-未部署正式Firebase或正式網站。
+先發布蓄力連連跳同版完整Firestore Rules，再把本資料夾全部內容上傳 /games/（包含 .htaccess）。完整網站29頁、1,080檔案644、31目錄755。不要只挑選單個遊戲資料夾。
+
+排行榜實際查詢前50名；11–50名有數字，前10名保留徽章。精簡重複副標籤、口號與榜單一般說明；保留操作、技能與錯誤資訊。手機HUD清楚顯示連跳／最佳。
+Google／Email帳戶的電郵由Firebase Authentication → Users保存；Firestore玩家及公開榜不另存email。匿名綁定前及本機試玩無email。
+規則：https://github.com/skyyip/games/blob/ca6627e6e6e0c4ef6ff24040d2a9e289c16afed1/frogger-jump/firestore.rules
+
+同時包含先前香港百萬富翁8類160卡版本，原玩家資料保留；若未更新該遊戲Rules，參閱FIREBASE-UPDATES.txt。
+測試已通過；未代為部署正式Firebase或正式網站。
