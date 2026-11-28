@@ -84,12 +84,17 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .card-rarity{z-index:1;background:#fff7e9ed;box-shadow:0 1px 4px #4d342d22}
 .culture-face.foil::after{z-index:0;background:linear-gradient(125deg,transparent 10%,#bda1ed25 30%,#a8e0ce25 50%,#f2ce5930 70%,transparent);mix-blend-mode:soft-light}
 /* A restrained foil finish stays inside a stable, rounded card face. */
-.culture-tile.owned .culture-face.foil,#culture-card-face .culture-face.foil:not(.is-locked){border-color:#ab9270;background:#fff3d1;box-shadow:0 0 0 1px #c4b8ce66,0 2px 7px #65546e26;touch-action:pan-y;isolation:isolate}
+.culture-tile.owned .culture-face.foil,#culture-card-face .culture-face.foil:not(.is-locked){border-color:transparent;background:linear-gradient(#fff3d1,#fff3d1) padding-box,linear-gradient(125deg,#c8a65c,#80b7b4 30%,#ba95c8 62%,#d0a75c) border-box;box-shadow:0 0 0 1px #c4b8ce66,0 2px 7px #65546e26;touch-action:pan-y;isolation:isolate}
 .culture-tile.owned .culture-face.foil::before,#culture-card-face .culture-face.foil:not(.is-locked)::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:2;pointer-events:none;background:radial-gradient(ellipse at var(--holo-x,50%) var(--holo-y,40%),#ffffff52 0,transparent 62%);mix-blend-mode:screen;opacity:var(--holo-strength,0);transition:opacity .35s ease}
-.culture-tile.owned .culture-face.foil::after,#culture-card-face .culture-face.foil:not(.is-locked)::after{inset:0;border-radius:inherit;z-index:1;background:linear-gradient(115deg,transparent 12%,#8ec5ed2b 30%,#d8c8f44d 44%,#ffffff38 49%,#e6c67e38 56%,#b5ded02b 66%,transparent 86%);background-size:240% 240%;mix-blend-mode:soft-light;opacity:.65;animation:culture-holo-drift 12s ease-in-out infinite alternate;pointer-events:none}
+.culture-tile.owned .culture-face.foil::after,#culture-card-face .culture-face.foil:not(.is-locked)::after{inset:0;border-radius:inherit;z-index:1;background:linear-gradient(115deg,transparent 12%,#8ec5ed52 30%,#d8c8f480 44%,#ffffffb3 49%,#e6c67e80 56%,#b5ded052 66%,transparent 86%);background-size:240% 240%;mix-blend-mode:soft-light;opacity:.85;animation:culture-holo-drift 12s ease-in-out infinite alternate;pointer-events:none}
+.foil-sparkles{position:absolute;inset:0;z-index:2;border-radius:inherit;pointer-events:none}
+.foil-sparkles::before,.foil-sparkles::after{content:"";position:absolute;width:11px;height:11px;left:16%;top:19%;background:#fff8d9;filter:drop-shadow(0 0 1px #80613e);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:culture-foil-glint 5.6s ease-in-out infinite}
+.foil-sparkles::after{width:8px;height:8px;left:79%;top:64%;animation-delay:-2.8s}
+@keyframes culture-foil-glint{0%,30%,70%,100%{opacity:.12;transform:scale(.7)}50%{opacity:.9;transform:scale(1)}}
 .card-rarity{z-index:3}
 @keyframes culture-holo-drift{from{background-position:0% 50%}to{background-position:100% 50%}}
 @media(prefers-reduced-motion:reduce){.culture-tile.owned .culture-face.foil::before,#culture-card-face .culture-face.foil:not(.is-locked)::before{opacity:0;transition:none}.culture-tile.owned .culture-face.foil::after,#culture-card-face .culture-face.foil:not(.is-locked)::after{animation:none;opacity:.3}}
+@media(prefers-reduced-motion:reduce){.foil-sparkles::before,.foil-sparkles::after{animation:none;opacity:.35;transform:none}}
 .gacha-machine{width:min(210px,100%);align-self:center;margin:0 auto 5px;filter:drop-shadow(0 7px 3px #51472a22)}
 .gacha-dome{padding:12px 12px 0;border:3px solid #304b3b;border-radius:70px 70px 12px 12px;background:linear-gradient(125deg,#fffdf1,#b2ccb7 65%,#fff5d3)}
 .gacha-cover{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:55px 55px 8px 8px;border:1px solid #718c70;box-shadow:inset 0 0 0 3px #fff7d7}

@@ -23,6 +23,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
  function tile(title,copy=''){const box=el('article','','reward-tile');box.append(el('h3',title));if(copy)box.append(el('p',copy));return box;}
  function cardFace(c,owned=true){const box=el('div','','culture-face'+(c.foil?' foil':'')+(owned?'':' is-locked')),img=new Image();img.src=cultureCardImage(c);img.alt=c.name+'原創插畫';img.width=['streets','harbour'].includes(c.series)?1448:1024;img.height=['streets','harbour'].includes(c.series)?1086:1536;img.loading='lazy';img.decoding='async';const crop=cultureCardCrop(c);img.style.width=(crop.columns*100)+'%';img.style.height=(crop.rows*100)+'%';img.style.left=(-crop.column*100)+'%';img.style.top=(-crop.row*100)+'%';box.append(img,el('span',c.foil?'閃卡':'文化卡','card-rarity'));
   if(c.foil&&owned){
+   const sparkles=el('span','','foil-sparkles');sparkles.setAttribute('aria-hidden','true');box.append(sparkles);
    const reset=()=>box.style.removeProperty('--holo-strength');
    const follow=event=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches){reset();return;}const r=box.getBoundingClientRect(),x=Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(event.clientY-r.top)/r.height));box.style.setProperty('--holo-x',x*100+'%');box.style.setProperty('--holo-y',y*100+'%');box.style.setProperty('--holo-strength','.55');};
    box.onpointermove=box.onpointerdown=follow;box.onpointerleave=box.onpointercancel=reset;box.onpointerup=event=>{if(event.pointerType!=='mouse')reset();};
@@ -54,7 +55,7 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
   }else if(tab==='cards'){
    list.append(el('p','集齊每類全部卡片，解鎖相應收集稱號','quiet'));
    for(const series of SERIES){const cards=CULTURE_CARDS.filter(c=>c.series===series.id),owned=cards.filter(c=>(w.cards[c.id]??0)>0),section=el('section','','card-series');section.append(el('h3',series.name+' · '+owned.length+'／'+cards.length));
-    const grid=el('div','','culture-grid');for(const c of cards){const n=w.cards[c.id]??0,b=el('button','','culture-tile'+(n?' owned':' locked'));b.type='button';b.append(cardFace(c),el('b',c.name),el('small',n?'已收藏 ×'+n:'未抽到'));b.onclick=()=>showCard(c,n>0);grid.append(b);}section.append(grid);
+    const grid=el('div','','culture-grid');for(const c of cards){const n=w.cards[c.id]??0,b=el('button','','culture-tile'+(n?' owned':' locked'));b.type='button';b.append(cardFace(c,n>0),el('b',c.name),el('small',n?'已收藏 ×'+n:'未抽到'));b.onclick=()=>showCard(c,n>0);grid.append(b);}section.append(grid);
     const complete=unlockedPrefixes(w).some(s=>s.id===series.id);const active=w.prefix===series.id,equip=button('',()=>request({type:'equip',slot:'prefix',id:active?'':series.id},'更新稱號前綴？'),!complete&&!active);equip.setAttribute('aria-label',active?'已使用前綴，按此還原':'使用【'+series.prefix+'】前綴');equip.append(prefixLabel(series.id),document.createTextNode(active?' 使用中 · 還原':' 使用前綴'));section.append(equip);list.append(section);}
   }else if(tab==='gear'){
    const preview=el('div','','identity-preview'),avatar=el('span',(getProfile()?.displayName??'香港')[0],'profile-avatar '+w.frame);const title=el('strong');renderPrefixedTitle(title,w,titleFor(getProfile()?.bestPrize??0).name);preview.append(avatar,title);list.append(preview);
