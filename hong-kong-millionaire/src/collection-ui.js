@@ -49,18 +49,18 @@ export function installCollection({cloud,getUser,getProfile,login,onChange=()=>{
   finally{if(uid===actor&&version===epoch){busy=false;render();}}
  }
  function filters(kind,items,selected){
-  const nav=el('div','','collection-filters');nav.setAttribute('role','group');nav.setAttribute('aria-label',kind==='cards'?'卡冊分類':'造型分類');
+  const nav=el('div','','collection-filters'+(kind==='cards'?' card-filters':''));nav.setAttribute('role','group');nav.setAttribute('aria-label',kind==='cards'?'卡冊分類':'造型分類');
   for(const item of [{id:'all',name:'全部'},...items]){const b=button(item.name,()=>{if(kind==='cards')cardFilter=item.id;else gearFilter=item.id;render();dialog.querySelector('[data-filter-kind="'+kind+'"][data-filter="'+item.id+'"]')?.focus({preventScroll:true});});b.setAttribute('data-no-icon','');b.dataset.filterKind=kind;b.dataset.filter=item.id;b.setAttribute('aria-pressed',String(selected===item.id));nav.append(b);}return nav;
  }
  function render(){
   for(const b of dialog.querySelectorAll('[data-tab]'))b.setAttribute('aria-pressed',String(b.dataset.tab===tab));
   $('wallet-balance').textContent=state?money(state.balance):'—';$('shop-recover').hidden=!pending();$('shop-recover').disabled=busy;$('shop-refresh').disabled=busy;
-  const list=$('shop-content');list.replaceChildren();if(!state){list.append(el('p','登入後讀取你的可用餘額及收藏。','empty-book'));return;}const w=state.wallet;
+  const list=$('shop-content'),filterScroll=list.querySelector('.card-filters')?.scrollLeft??0;list.replaceChildren();if(!state){list.append(el('p','登入後讀取你的可用餘額及收藏。','empty-book'));return;}const w=state.wallet;
   if(tab==='draw'){
    const grid=el('div','','reward-grid gacha-grid');
    for(const gold of [false,true]){const cost=gold?GOLD_PRICE:DRAW_PRICE,box=tile(gold?'閃卡金蛋':'普通文化扭蛋');const machine=el('figure','','gacha-machine'+(gold?' gold-machine':'')),dome=el('div','','gacha-dome'),cover=new Image();cover.className='gacha-cover';cover.src=ART[gold?'gacha-gold.webp':'gacha-colour.webp'];cover.alt='';cover.width=512;cover.height=512;cover.decoding='async';dome.append(cover);const base=el('div','','gacha-base');base.append(el('span','','gacha-knob'),el('span','','gacha-slot'));machine.append(dome,base);machine.setAttribute('aria-hidden','true');box.prepend(machine);const label=gold?'抽一顆閃卡金蛋':'抽一張文化卡',draw=button(label,()=>request({type:gold?'gold':'draw'},gold?'抽閃卡金蛋？':'抽普通文化卡？',cost),state.balance<cost);draw.classList.add('gacha-draw');draw.setAttribute('aria-label',label);draw.replaceChildren(el('span',gold?'抽一顆':'抽一張'),el('span',gold?'閃卡金蛋':'文化卡'));box.append(el('strong',money(cost),'reward-price'),draw);grid.append(box);}list.append(grid,el('p','重複卡會保留數量。抽取序號會保存，重新連線不會重抽；所有卡片只作收藏，不提供答題加成。','quiet'));
   }else if(tab==='cards'){
-   list.append(el('p','集齊每類全部卡片，解鎖相應收集稱號','quiet'),filters('cards',SERIES,cardFilter));
+   list.append(el('p','集齊每類全部卡片，解鎖相應收集稱號','quiet'),filters('cards',SERIES,cardFilter));list.querySelector('.card-filters').scrollLeft=filterScroll;
    for(const series of SERIES.filter(s=>cardFilter==='all'||s.id===cardFilter)){const cards=CULTURE_CARDS.filter(c=>c.series===series.id),owned=cards.filter(c=>(w.cards[c.id]??0)>0),section=el('section','','card-series');section.dataset.series=series.id;section.append(el('h3',series.name+' · '+owned.length+'／'+cards.length));
     const grid=el('div','','culture-grid');for(const c of cards){const n=w.cards[c.id]??0,b=el('button','','culture-tile'+(n?' owned':' locked'));b.type='button';b.append(cardFace(c,n>0),el('b',c.name),el('small',n?'已收藏 ×'+n:'未抽到'));b.onclick=()=>showCard(c,n>0);grid.append(b);}section.append(grid);
     const complete=unlockedPrefixes(w).some(s=>s.id===series.id);const active=w.prefix===series.id,equip=button('',()=>request({type:'equip',slot:'prefix',id:active?'':series.id},'更新稱號前綴？'),!complete&&!active);equip.setAttribute('aria-label',active?'已使用前綴，按此還原':'使用【'+series.prefix+'】前綴');equip.append(prefixLabel(series.id),document.createTextNode(active?' 使用中 · 還原':' 使用前綴'));section.append(equip);list.append(section);}
