@@ -1,8 +1,8 @@
 香港百萬富翁：街坊市集（Firebase Spark）
-來源：b6172a3570abbb1fd6e8063f4bf0e9a8889898c5
-版本：3d172b9348ca1a98
+來源：737f3d401135c0b2c74d628c3694d9588ee3065b
+版本：781890840faa4916
 
-先在sky-playground-millionaire發布同版完整Rules及兩個新增市集索引，等待Enabled，詳見FIREBASE-UPDATES.txt。無Cloud Functions、無需Blaze。
+若已部署上一版Spark市集Rules及兩個索引，本次只需完整更新網站；尚未部署者先完成FIREBASE-UPDATES.txt的設定。無Cloud Functions、無需Blaze。
 
 再把本資料夾全部內容完整上傳至 /games/，包含隱藏 .htaccess；不要只挑選某個遊戲資料夾或多套一層目錄。完整網站29頁、1,100檔案644、31目錄755。
 
@@ -10,6 +10,8 @@
 
 原180卡、1,011題、34造型及其他遊戲完整保留；普通文化扭蛋10,000、金蛋80,000不變。不需清空卡片、獎金、票券或本機資料。
 完整部署說明：
-https://github.com/skyyip/games/blob/b6172a3570abbb1fd6e8063f4bf0e9a8889898c5/hong-kong-millionaire/FIREBASE.md
+https://github.com/skyyip/games/blob/737f3d401135c0b2c74d628c3694d9588ee3065b/hong-kong-millionaire/FIREBASE.md
 
 本機驗證通過，正式Firebase及網站未代為部署。先前蓄力連連跳前50名及其獨立專案規則更新見FIREBASE-UPDATES.txt。
+
+本次售卡按八個類別分組，標明文化卡／閃卡及可售數；售賣張數預設1，多張按每張單價獨立掛出。買卡只顯示其他玩家，已擁有的卡右上角有標籤；更新市集靠右。
