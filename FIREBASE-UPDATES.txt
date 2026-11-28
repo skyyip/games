@@ -1,12 +1,15 @@
 本次沒有新增Firestore Rules、索引或Functions變更。
 
-沿用上一版完整規則：1,011題、112張卡、34款造型、普通文化扭蛋10,000、各類全部16張收集稱號。
-若該版Rules已發布，本次只需完整更新網站，重新載入瀏覽器。
-若仍在使用更早版本，請於沒有未完成挑戰／房間的時段，先Publish目前完整Rules，再完整上傳網站：
-https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/firestore.rules
+沿用上一版完整規則：1,011題、112卡、34款造型、普通文化扭蛋10,000及各類16張收集稱號。
+若已部署該版，僅需完整上傳網站，再重新整理並開啟情懷收藏或遊樂場。
 
-本次只改前端讀取方式，錢包與週末券以伺服器資料為準；購買、五次使用配額、獎金及收據規則保留。
-不需清空Firebase玩家資料、卡片、票券、餘額或本機資料。
-詳情：https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/FIREBASE.md
-Source: 2ded01bb2ecf41b4439c7731b3ad3a22de9bf315
+新前端purchaseStatus只讀取同帳戶的原收據、錢包及玩家資料。
+確認已付款後清除對應本機待確認記錄，不重新扣款、不重抽、不重設票券次數。
+查核失敗或付款仍未確認時保留記錄，原收據可手動重試；同requestId不重複扣款。
+本次不需清空Firebase或瀏覽器資料。
+
+若尚未部署1,011題／112卡那版，仍須先依既有說明發布目前完整Rules：
+https://github.com/skyyip/games/blob/03ccb13c3d41aef189dae981fac9502b1b0d0f23/hong-kong-millionaire/firestore.rules
+部署說明：https://github.com/skyyip/games/blob/03ccb13c3d41aef189dae981fac9502b1b0d0f23/hong-kong-millionaire/FIREBASE.md
+Source: 03ccb13c3d41aef189dae981fac9502b1b0d0f23
 本次沒有代為部署正式Firebase。

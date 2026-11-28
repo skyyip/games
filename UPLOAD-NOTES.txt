@@ -1,20 +1,22 @@
-香港百萬富翁：閃卡、中文SEO與跨裝置週末券（2026-11-28）
-Source: 2ded01bb2ecf41b4439c7731b3ad3a22de9bf315
-Build: 6474d809488751a0
+香港百萬富翁：購票及商店待確認記錄修正（2026-11-28）
+Source: 03ccb13c3d41aef189dae981fac9502b1b0d0f23
+Build: 85f0a43e99f78432
 
-完整網站上傳版，共29頁。將解壓根目錄內全部內容（包括.htaccess、assets、build-manifest.json及各遊戲資料夾）上傳至 public_html/games/。
+完整網站上傳版，共29頁。
+將解壓根目錄內全部內容（包括.htaccess、assets、build-manifest.json及各遊戲資料夾）上傳至 public_html/games/。
 不要把ZIP的外層目錄再套一層。檔案644、資料夾755。
 
-本次：
-- 已收藏閃卡預設金彩卡框、金色標記及常駐亮面，更明顯的掃光與星芒；保留減少動態、未持有灰階及固定卡框。
-- 香港百萬富翁的title、description、OG、Twitter與JSON-LD中文化；SEO產生器同步，OG語系zh_HK。
-- 週末券與餘額從Firestore伺服器讀取，重新連接等候最新錢包並更新按鈕；首頁恢復時查帳戶目前的未完成局。
-- 每日及遊樂場選項字級縮小10%，手機保留兩列及點按高度。
+本次修正：
+- 開啟遊樂場或情懷收藏時，自動查核原收據及對應日期／週末的已購入票券。
+- 確認已付款後，清除對應本機待確認記錄，解除已付款操作對新購買／開局的阻擋。
+- 付款回應遺失可唯讀恢復結果，抽卡保留原卡與抽數，票券保留剩餘次數。
+- 自動查核不提交未付款操作；新的購買仍須確認。新的週末券記錄保存日期，避免未付款請求跨週末重播。
 
-本次無新增Firebase Rules／索引／Functions變更。若已部署上一版1,011題／112卡完整規則，僅需完整上傳網站；若未部署，請先依FIREBASE-UPDATES.txt發布目前完整Rules。
-票券、卡片、餘額及資料不需清空或遷移；普通文化扭蛋仍10,000。
+完整上傳後重新整理，開啟情懷收藏或街坊遊樂場即可查核。
+本次無Firestore Rules、索引或Functions變更；若已發布上一版完整規則，僅需更新網站。
+請保留Firebase及本機資料，不需清空票券、餘額或收藏。
 
-驗證：120項單元測試、412項本機Chromium檢查、1,192項官方Firestore Emulator檢查；29個原始及29個建置頁SEO檢查通過。
-部署說明：https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/FIREBASE.md
-驗證紀錄：https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/VERIFICATION.md
+驗證：129項單元測試、451項本機Chromium檢查、1,208項官方Firestore Emulator檢查；29個建置頁SEO檢查通過。
+部署說明：https://github.com/skyyip/games/blob/03ccb13c3d41aef189dae981fac9502b1b0d0f23/hong-kong-millionaire/FIREBASE.md
+驗證紀錄：https://github.com/skyyip/games/blob/03ccb13c3d41aef189dae981fac9502b1b0d0f23/hong-kong-millionaire/VERIFICATION.md
 本次沒有代為部署正式Firebase或正式網站。
