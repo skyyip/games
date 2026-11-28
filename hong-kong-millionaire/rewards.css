@@ -133,3 +133,21 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .gacha-draw{display:flex;align-items:center;justify-content:center;gap:0}@media(max-width:560px){.gacha-draw{display:grid;justify-items:center;align-content:center;gap:0}.gacha-draw>.hk-icon{display:none}.gacha-draw>span{white-space:nowrap}}
 
 .prefix-label,.identity-preview .achievement-label{display:inline-block;vertical-align:middle;max-width:100%;padding:2px 7px;border:1px solid #ad8736;border-radius:5px;background:#ffe36b;color:#523019;font:700 14px/1.1 var(--body);margin-left:2px;letter-spacing:0;overflow-wrap:anywhere}
+
+/* Marketplace: clear actions and paired cards without exposing private wallet data. */
+.collection-dialog .reward-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.market-controls,.market-recovery{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.market-controls>button,.market-recovery>button{width:auto;min-height:44px;margin:0;padding:8px 12px}
+.collection-dialog .market-controls>button[aria-pressed=true]{background:#285d49;color:#fff;border-color:#285d49}
+#market-status:empty{display:none}
+.market-sell{display:grid;gap:8px;margin:16px 0 22px;padding:16px;background:#e8efdc;border:1px solid #93aa83;border-radius:10px}
+.market-sell label{font-weight:700}.market-sell input,.market-sell select{width:100%;min-width:0;min-height:44px;font-size:16px}
+.market-sell>button{margin:0}.market-quote{margin:5px 0;color:#3d5137;font-weight:700;font-size:14px;line-height:1.7}
+.market-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.market-offer{align-content:start}.market-offer small{overflow-wrap:anywhere}.market-offer>.outline{margin:0;min-height:44px;align-self:end}
+.market-preview{display:grid;gap:8px;width:100%;min-width:0;padding:0;border:0;background:none;box-shadow:none;text-align:left;color:inherit}
+.market-preview b{line-height:1.5}.market-preview:active{transform:none}.market-preview .culture-face{width:100%}
+#market-confirm p{font-size:16px;line-height:1.8}
+@media(max-width:620px){.collection-dialog .reward-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.market-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.market-sell{padding:12px}}
+
+.market-offer .reward-price{font-size:clamp(14px,3.7vw,20px);overflow-wrap:anywhere}

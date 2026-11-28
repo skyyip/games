@@ -44,7 +44,9 @@
     "test:winter-rules": "node scripts/winter-neighbourhood-firestore-check.mjs",
     "test:winter-cosmetics": "node scripts/winter-cosmetics-browser-check.mjs",
     "test:weekend-devices": "node scripts/weekend-device-browser-check.mjs",
-    "test:purchase-recovery": "node scripts/purchase-recovery-browser-check.mjs"
+    "test:purchase-recovery": "node scripts/purchase-recovery-browser-check.mjs",
+    "test:market-rules": "node scripts/market-firestore-check.mjs",
+    "test:market": "node scripts/market-browser-check.mjs"
   },
   "dependencies": {
     "firebase": "^12.5.0"

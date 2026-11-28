@@ -1,5 +1,42 @@
 # Firebase 設定與部署
 
+## 本版：街坊市集，適用 Spark（2026-11-28）
+
+**先發布本版完整[firestore.rules](firestore.rules)及[firestore.indexes.json](firestore.indexes.json)，等待兩個新增索引啟用，再完整上傳同版網站。** 下方「四個索引不變／沒有新增collection」為舊版紀錄，不適用本版市集。無需Cloud Functions、Admin SDK或Blaze；既有玩家資料不需遷移或清空。
+
+在此資料夾登入Firebase CLI後執行：
+
+```sh
+npm run rules:check
+npm run firebase:check
+npm run firebase:deploy
+```
+
+部署腳本只更新 `sky-playground-millionaire` 的 `firestore:rules,firestore:indexes`，不部署Hosting或Functions。也可在Firebase Console選同一專案：Firestore Database → Rules，貼上完整Rules並Publish；在Indexes → Composite新增以下兩個索引，Query scope均為 **Collection**，collection ID均為 `hkm_market_listings`：
+
+| 用途 | 欄位與排序 |
+| --- | --- |
+| 買卡 | `status` Ascending、`createdAt` Descending |
+| 我的掛單 | `sellerUid` Ascending、`status` Ascending、`createdAt` Descending |
+
+保留原有四個索引；本版檔案共六個。索引狀態須為Enabled。不要刪除原索引、只貼市集規則片段，或把寫入權限放寬為所有登入者可任意改錢包。
+
+### 交易及資料位置
+
+- `hkm_market_listings/{listingId}`：登入玩家可讀的掛單，含賣家稱呼／UID、卡片ID、售價、狀態、時間；不含email。狀態只可由active轉sold或cancelled，不可改價；欲改價須先取消再掛出。
+- `hkm_market_trades/{listingId}`：不可修改的成交紀錄，只限買賣雙方按ID讀取。
+- `hkm_wallets/{uid}/marketReceipts/{requestId}`：該玩家的私有防重收據，不可修改或刪除。
+- `hkm_wallets/{uid}.cards`：掛單時預留一張重複卡，取消才退回；最後一張不出售，收藏稱號資格保留。
+- 買方 `spent` 增加售價；賣方 `bonus` 增加售價減5%費用。整枚費用向上取整，例如101收6、賣家得95；售價1收1、賣家得0，介面確認前顯示實收。可用獎金仍為 `hkm_players/{uid}.total + bonus - spent`，不改排行榜。
+
+每筆掛單／取消／成交均由瀏覽器提交Firestore transaction，Security Rules獨立核對卡數、扣款、費用、入帳、狀態及收據，任何一項不符全筆拒絕。成交同時寫買方錢包、賣方錢包、掛單、成交紀錄及買方收據；兩人搶買只允許一次成交。買家不需讀取賣方私有錢包。
+
+回應遺失後先讀原收據，刷新不會自動重買；明確重試沿用原requestId。本機無法保存恢復記錄時不提交。市集一次最多讀24筆，按需更新及分頁，不設即時監聽；仍會使用Spark的Firestore讀寫配額，配額用盡會影響服務，無需因此預先啟用付費方案。
+
+保留180卡、34造型、1,011題、10,000普通抽、80,000金蛋與現有稱號門檻。這次只在本機官方Auth／Firestore Emulator驗證，**沒有代為部署正式Firebase或網站**。
+
+以下為歷史紀錄，部署要求以本節為準。
+
 ## 本版：180卡與兩類30張門檻（2026-11-28）
 
 **必須先在sky-playground-millionaire專案發布本版完整[`firestore.rules`](firestore.rules)，再完整上傳同版網站。** 下方160卡／各類20張屬歷史紀錄，不適用本版的街頭小吃及山水探險家。

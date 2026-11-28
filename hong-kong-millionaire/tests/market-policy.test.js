@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {marketFee,parseMarketAction,sameMarketAction} from '../src/market-policy.js';
+const id='12345678-1234-1234-1234-123456789abc';
+test('market fees round up whole prize units without floating point drift',()=>{for(const [price,fee]of [[1,1],[19,1],[20,1],[21,2],[100,5],[101,6],[1000000000,50000000]])assert.equal(marketFee(price),fee);for(const price of [0,-1,1.5,Infinity,NaN,1000000001,'100'])assert.throws(()=>marketFee(price));});
+test('market requests reject injected fields, invalid document IDs and prices',()=>{const a={type:'list',requestId:id,cardId:'hotdog',price:101};assert.deepEqual(parseMarketAction(a),a);for(const bad of [{...a,sellerUid:'victim'},{...a,fee:0},{...a,price:0},{...a,requestId:'../victim'},{...a,type:'sale'},null,[],{type:'cancel',requestId:id,listingId:'../../wallet'}])assert.throws(()=>parseMarketAction(bad));});
+test('one receipt cannot be reused for another card, price or operation',()=>{const a={type:'list',requestId:id,cardId:'hotdog',price:101};assert(sameMarketAction(a,{price:101,cardId:'hotdog',requestId:id,type:'list'}));assert(!sameMarketAction(a,{...a,price:102}));assert(!sameMarketAction(a,{...a,cardId:'tram-foil'}));assert(!sameMarketAction(a,{type:'cancel',requestId:id,listingId:id}));});

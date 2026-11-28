@@ -1,3 +1,4 @@
+import {marketRules} from './market-rules.mjs';
 import {GEAR,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,GOLD_STRIDE,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
 import {ROOM_POOLS,ROOM_ASYNC_WINDOW,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE} from '../src/session-engine.js';
 import {QUESTIONS} from '../src/questions.js';
@@ -21,7 +22,7 @@ export function rewardRules(){
   __SPORT_STRIDE__:String(ROOM_POOLS.sport.stride),__PLACE_STRIDE__:String(ROOM_POOLS.places.stride),
   __ASYNC_SECONDS__:String(ROOM_ASYNC_WINDOW/1000),__BANK__:BANK_VERSION,__ROOM_INTERVAL__:String(ROOM_INTERVAL),__ROOM_DURATION__:String(ROOM_DURATION/1000),__ROOM_DEADLINE__:String((ROOM_DURATION+ROOM_GRACE)/1000)
  };
- let body=String.raw`
+ let body=marketRules()+String.raw`
   // Spendable funds are independent of the immutable pure-daily prize totals.
   function rwPath(uid){return /databases/$(database)/documents/hkm_wallets/$(uid);}
   function rrPath(id){return /databases/$(database)/documents/hkm_rooms/$(id);}
@@ -94,12 +95,13 @@ export function rewardRules(){
   }
   function rwUpdate(w,o,uid){
    return w.updatedAt==request.time&&w.revision is int&&w.revision==o.revision+1&&w.spent is int&&w.spent>=0&&w.spent<=1000000000000&&w.bonus is int&&w.bonus>=0&&w.bonus<=1000000000000
-    &&(w.op in ['draw','gold','buy','equip','pass','retry-ticket']?rwShop(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
+    &&(w.op in ['draw','gold','buy','equip','pass','retry-ticket']?rwShop(w,o,uid):w.op=='market-list'?mkWalletList(w,o,uid):w.op=='market-cancel'?mkWalletCancel(w,o,uid):w.op=='market-buy'?mkWalletBuy(w,o,uid):w.op=='start-session'?rwStart(w,o,uid):w.op=='settle-session'?rwSettle(w,o,uid):w.op=='retire-extra'?rwRetire(w,o,uid):w.op in ['create-room','join-room']?rwRoomDebit(w,o,uid):w.op in ['room-prize','room-refund','room-rebate']?rwRoomCredit(w,o,uid):false);
   }
   match /hkm_wallets/{uid}{
    allow get:if owner(uid);allow list,delete:if false;
    allow create:if owner(uid)&&rwCreate(request.resource.data,uid);
-   allow update:if owner(uid)&&rwUpdate(request.resource.data,resource.data,uid);
+   allow update:if (owner(uid)&&rwUpdate(request.resource.data,resource.data,uid))||(signedPlayer()&&mkSale(request.resource.data,resource.data,uid));
+   match /marketReceipts/{id}{allow get:if owner(uid);allow create:if owner(uid)&&mkReceiptCreate(request.resource.data,uid,id);allow list,update,delete:if false;}
    match /receipts/{id}{
     allow get:if owner(uid);allow list,update,delete:if false;
     allow create:if owner(uid)&&id.matches('^[a-f0-9-]{36}$')&&request.resource.data.keys().hasOnly(['uid','op','item','cost','revision','createdAt'])
