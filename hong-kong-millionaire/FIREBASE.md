@@ -1,5 +1,34 @@
 # Firebase 設定與部署
 
+## 本版：售賣記錄及三個月改名（2026-11-28）
+
+**必須先更新完整[firestore.rules](firestore.rules)及[firestore.indexes.json](firestore.indexes.json)，等新增索引Enabled，再完整上傳同版網站。** 下方「本次不需更新Firebase／六個索引」是歷史紀錄，不適用本版。仍適用Spark，不需Cloud Functions、Blaze或資料清空。
+
+```sh
+npm run rules:check
+npm run firebase:check
+npm run firebase:deploy
+```
+
+腳本僅部署 `sky-playground-millionaire` 的 `firestore:rules,firestore:indexes`，不部署Hosting或Functions。在Console手動設定亦可：發布同版完整Rules，於Firestore Database → Indexes → Composite新增一個索引：
+
+| Collection ID | Query scope | 欄位與排序 |
+| --- | --- | --- |
+| `hkm_market_trades` | Collection | `sellerUid` Ascending、`createdAt` Descending |
+
+保留原六個索引，共七個。原 `hkm_market_listings` 的賣家／狀態／時間索引繼續供我的掛單active／sold查詢使用。不要只貼規則片段、刪除舊索引或放寬錢包權限。新版要求成交保存買家稱呼、改名保存伺服器時間，舊前端不帶新欄位會被拒絕，請在更新Rules後同步上傳完整網站並重新載入。
+
+### 新資料與限制
+
+- `hkm_market_listings/{id}`：成交後保留sold；賣家按移除才轉archived，增加 `removedAt`。只容許本人移除已售掛單，不容許改價、重新上架或刪除。操作不寫錢包、卡片或成交紀錄，重試不會重複入帳。
+- `hkm_market_trades/{id}.buyerName`：新交易保存買家當時稱呼，由Rules對照買家profile；成交時間沿用 `createdAt`，實收沿用 `proceeds`。成交文件不可更改或刪除。賣家可依自身sellerUid每頁最多24筆讀取，其他玩家不可列出你的交易；買賣雙方原有按ID讀取權限保留。舊記錄沒有稱呼，介面顯示「稱呼未記錄」，不偽造歷史資料。
+- `hkm_players/{uid}.nameChangedAt`：改稱呼時寫入serverTimestamp。Rules以香港時間加三個曆月，月底夾至目標月份最後一天；例如1月31日→4月30日、11月28日→翌年2月28日。到期前不可改名，也不可刪除、回填或單獨重設該時間。介面顯示下次可改日期；同名儲存不重寫時間。
+- 舊玩家沒有改名時間，第一次實際修改即可建立期限；無法由一般updatedAt推算過往改名時間，所以不以舊updatedAt鎖定玩家。最愛、答題、結算及錢包操作不重設期限。
+
+原有180卡、34造型、1,011題、10,000普通抽、80,000金蛋、5%向上取整費用及排行榜計分不變。沒有即時監聽，仍按需查詢，會使用Spark讀寫配額。本次只在本機官方demo Emulators驗證，**正式Firebase及網站未代為部署**。
+
+以下為歷史紀錄，以本節為準。
+
 ## 市集介面更新（2026-11-28）
 
 本次沒有Rules、索引、Functions或資料結構變更。若已部署下方Spark市集版完整Rules及兩個索引，**只需完整上傳網站**。尚未部署市集者仍須先發布下方完整Rules及索引；不要使用更舊的非市集版規則。

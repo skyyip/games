@@ -35,6 +35,15 @@ service cloud.firestore {
   function elapsed(r) { let ms=r.answerAt.toMillis()-r.questionAt.toMillis(); return ms>cap(r.index)?cap(r.index):ms; }
   function lifeLeft(r) { return (r.halfFor==-1?1:0)+(r.phoneFor==-1?1:0)+(r.audienceFor==-1?1:0); }
   function nameValid(name) { return name is string && name.size()>=2 && name.size()<=20; }
+  function nameNext(t) {
+   let hk=t+duration.value(8,'h');let y=hk.year()+int((hk.month()+2) / 12);let m=(hk.month()+2)%12+1;
+   let last=timestamp.date(m==12?y+1:y,m==12?1:m+1,1)-duration.value(1,'d');let d=hk.day()<last.day()?hk.day():last.day();
+   return timestamp.date(y,m,d)+hk.time()-duration.value(8,'h');
+  }
+  function nameChange(p,o) {
+   return p.displayName==o.displayName?p.diff(o).affectedKeys().hasOnly(['favourites','updatedAt']):
+    (nameValid(p.displayName)&&(o.get('nameChangedAt',null)==null||request.time>=nameNext(o.nameChangedAt))&&p.nameChangedAt==request.time);
+  }
   function profileCreate(p,uid) {
    return p.keys().hasOnly(['uid','displayName','total','bestPrize','games','titles','unlocked','wrong','favourites','activeDay','activeKind','lastSettledDay','createdAt','updatedAt'])
     && p.uid==uid && p.get('activeKind','daily')=='daily' && nameValid(p.displayName) && p.total is int && p.total==0 && p.bestPrize is int && p.bestPrize==0 && p.games is int && p.games==0
@@ -101,7 +110,7 @@ service cloud.firestore {
   function profileUpdate(p,o,uid) {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
-    changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
+    changed.hasOnly(['displayName','nameChangedAt','favourites','updatedAt'])?(nameChange(p,o) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
     :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
     :(retireExtraProfile(p,o,uid)||profileFinish(p,o,uid)));
   }

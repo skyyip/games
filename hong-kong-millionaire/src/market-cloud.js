@@ -8,10 +8,20 @@ export async function marketStatus(c,uid,input){
  return {confirmed:true,result:receipt.result};
 }
 export async function marketListings(c,uid,{mine=false,after=null}={}){
- const filters=[...(mine?[c.where('sellerUid','==',uid)]:[]),c.where('status','==','active'),c.orderBy('createdAt','desc')];
+ const filters=mine?[c.where('sellerUid','==',uid),c.where('status','in',['active','sold']),c.orderBy('createdAt','desc')]:[c.where('status','==','active'),c.orderBy('createdAt','desc')];
  if(after){parseMarketAction({type:'cancel',requestId:after,listingId:after});const cursor=await c.getDocFromServer(listingRef(c,after));if(!cursor.exists())throw Error('market-listing-missing');filters.push(c.startAfter(cursor));}
  const rows=await c.getDocsFromServer(c.query(c.collection(c.db,'hkm_market_listings'),...filters,c.limit(24)));
  return {items:rows.docs.map(d=>numeric({id:d.id,...d.data()})).filter(l=>mine||l.sellerUid!==uid),cursor:rows.size===24?rows.docs.at(-1).id:null};
+}
+export async function marketHistory(c,uid,{after=null}={}){
+ const filters=[c.where('sellerUid','==',uid),c.orderBy('createdAt','desc')];
+ if(after){parseMarketAction({type:'cancel',requestId:after,listingId:after});const cursor=await c.getDocFromServer(c.doc(c.db,'hkm_market_trades',after));if(!cursor.exists())throw Error('market-listing-missing');filters.push(c.startAfter(cursor));}
+ const rows=await c.getDocsFromServer(c.query(c.collection(c.db,'hkm_market_trades'),...filters,c.limit(24)));
+ return {items:rows.docs.map(d=>numeric({id:d.id,...d.data()})),cursor:rows.size===24?rows.docs.at(-1).id:null};
+}
+export async function marketRemove(c,uid,id){
+ parseMarketAction({type:'cancel',requestId:id,listingId:id});const ref=listingRef(c,id);
+ await c.runTransaction(c.db,async t=>{const snap=await t.get(ref);if(!snap.exists())throw Error('market-listing-missing');const l=snap.data();if(l.sellerUid!==uid)throw Error('market-not-seller');if(l.status==='archived')return;if(l.status!=='sold')throw Error('market-not-sold');const stamp=c.serverTimestamp();t.update(ref,{status:'archived',updatedAt:stamp,removedAt:stamp});});
 }
 export async function marketAction(c,uid,input){
  const action=parseMarketAction(input),id=action.type==='list'?action.requestId:action.listingId,ref=listingRef(c,id),own=walletRef(c,uid),receipt=receiptRef(c,uid,action.requestId);
@@ -38,7 +48,7 @@ export async function marketAction(c,uid,input){
     // Blind increments preserve the seller's private wallet and concurrent quiz rewards.
     t.update(walletRef(c,listing.sellerUid),{bonus:c.increment(result.proceeds),revision:c.increment(1),op:'market-sale',item:id,updatedAt:stamp});
     t.update(ref,{status:'sold',updatedAt:stamp,soldAt:stamp});
-    t.set(c.doc(c.db,'hkm_market_trades',id),{listingId:id,buyerUid:uid,sellerUid:listing.sellerUid,cardId:listing.cardId,price:listing.price,fee:result.fee,proceeds:result.proceeds,requestId:action.requestId,createdAt:stamp});
+    t.set(c.doc(c.db,'hkm_market_trades',id),{listingId:id,buyerUid:uid,buyerName:profileSnap.data().displayName,sellerUid:listing.sellerUid,cardId:listing.cardId,price:listing.price,fee:result.fee,proceeds:result.proceeds,requestId:action.requestId,createdAt:stamp});
    }
    result??=marketResult(action,listing);
   }

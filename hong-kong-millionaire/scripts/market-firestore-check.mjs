@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertSucceeds,assertFails} from '@firebase/rules-unit-testing';
 import * as sdk from 'firebase/firestore';
-import {marketAction,marketStatus,marketListings} from '../src/market-cloud.js';
+import {marketAction,marketStatus,marketListings,marketHistory,marketRemove} from '../src/market-cloud.js';
 import {marketResult} from '../src/market-policy.js';
 import {emptyWallet,CULTURE_CARDS,walletBalance} from '../src/economy.js';
 import {shop} from '../src/features-cloud.js';
@@ -19,7 +19,7 @@ async function forgedBuy(c,uid,id,tweak={}){
  if(!tweak.skipBuyer)batch.update(wallet(c,uid),{spent:w.spent+(tweak.paid??l.price),cards:{...w.cards,[l.cardId]:(w.cards[l.cardId]??0)+(tweak.cards??1)},revision:w.revision+1,op:'market-buy',item:id,receipt:a.requestId,updatedAt:stamp});
  if(!tweak.skipSeller)batch.update(wallet(c,l.sellerUid),{bonus:sdk.increment(proceeds),revision:sdk.increment(1),op:'market-sale',item:id,updatedAt:stamp});
  if(!tweak.skipListing)batch.update(listing(c,id),{status:'sold',updatedAt:stamp,soldAt:stamp});
- if(!tweak.skipTrade)batch.set(ref(c,'hkm_market_trades',id),{listingId:id,buyerUid:uid,sellerUid:l.sellerUid,cardId:l.cardId,price:l.price,fee,proceeds,requestId:a.requestId,createdAt:stamp});
+ if(!tweak.skipTrade)batch.set(ref(c,'hkm_market_trades',id),{listingId:id,buyerUid:uid,buyerName:tweak.buyerName??(await sdk.getDoc(ref(c,'hkm_players',uid))).data().displayName,sellerUid:l.sellerUid,cardId:l.cardId,price:l.price,fee,proceeds,requestId:a.requestId,createdAt:stamp});
  if(!tweak.skipReceipt)batch.set(ref(c,'hkm_wallets',uid,'marketReceipts',a.requestId),{uid,action:a,result:{...r,fee,proceeds},createdAt:stamp});
  return batch.commit();
 }
@@ -34,7 +34,7 @@ try{
  const rev=(await state(seller,'seller')).w.revision;assert((await ok(marketAction(seller,'seller',offer))).replayed);assert.equal((await state(seller,'seller')).w.revision,rev);checks+=2;
  await assert.rejects(marketAction(seller,'seller',{...offer,price:102}),/market-request-mismatch/);checks++;
  for(const [c,uid,op]of [[a,'buyer-a',action('cancel',{listingId:listed.listingId})],[seller,'seller',action('buy',{listingId:listed.listingId,price:101})],[poor,'poor',action('buy',{listingId:listed.listingId,price:101})],[a,'buyer-a',action('buy',{listingId:listed.listingId,price:102})]]){await assert.rejects(marketAction(c,uid,op));checks++;}
- for(const tweak of [{paid:100},{cards:2},{fee:0,proceeds:101},{fee:1,proceeds:100},{skipBuyer:true},{skipSeller:true},{skipListing:true},{skipTrade:true},{skipReceipt:true}])await no(forgedBuy(a,'buyer-a',listed.listingId,tweak));
+ for(const tweak of [{paid:100},{cards:2},{fee:0,proceeds:101},{fee:1,proceeds:100},{skipBuyer:true},{skipSeller:true},{skipListing:true},{skipTrade:true},{skipReceipt:true},{buyerName:'假冒買家'}])await no(forgedBuy(a,'buyer-a',listed.listingId,tweak));
  assert.equal((await sdk.getDoc(listing(a,listed.listingId))).data().status,'active');assert.equal((await state(a,'buyer-a')).w.spent,0);assert.equal((await state(seller,'seller')).w.bonus,0);checks+=3;
  await no(sdk.updateDoc(listing(seller,listed.listingId),{price:1,updatedAt:sdk.serverTimestamp()}));await no(forgedList(seller,'seller','hotdog',100,'假的賣家'));
  const last=await seed('last',1000,{hotdog:1}),fake=await seed('fake',1000,{'unknown-card':2});await no(forgedList(last,'last','hotdog'));await no(forgedList(fake,'fake','unknown-card'));
@@ -61,5 +61,28 @@ try{
  console.log('Concurrent draw complete: '+checks);
  for(const price of [1,21,1000000000]){const u='edge-'+price,c=await seed(u,2000000000,{hotdog:2}),v='pay-'+price,d=await seed(v,2000000000),l=await marketAction(c,u,action('list',{cardId:'hotdog',price})),paid=await ok(marketAction(d,v,action('buy',{listingId:l.listingId,price})));assert.equal(paid.fee,Math.ceil(price/20));assert.equal((await state(c,u)).w.bonus,price-Math.ceil(price/20));checks+=2;}
  const publicDb=env.unauthenticatedContext().firestore(),anon=env.authenticatedContext('anon',{firebase:{sign_in_provider:'anonymous'}}).firestore();await no(sdk.getDoc(sdk.doc(publicDb,'hkm_market_listings',listed.listingId)));await no(sdk.getDoc(sdk.doc(anon,'hkm_market_listings',listed.listingId)));await no(sdk.getDocs(sdk.collection(a.db,'hkm_market_listings')));await no(sdk.getDocs(sdk.query(sdk.collection(a.db,'hkm_market_listings'),sdk.limit(25))));await ok(marketListings(a,'buyer-a'));await ok(marketListings(seller,'seller',{mine:true}));
+ // Sold offers remain visible until their seller archives them; trades stay immutable.
+ assert.equal(trade.data().buyerName,'街坊'+win.uid);checks++;
+ const history=await ok(marketHistory(seller,'seller'));assert(history.items.some(x=>x.id===listed.listingId&&x.proceeds===95));checks++;
+ await no(marketHistory(lose.c,'seller'));await no(sdk.getDocs(sdk.query(sdk.collection(seller.db,'hkm_market_trades'),sdk.limit(24))));await no(sdk.getDocs(sdk.query(sdk.collection(seller.db,'hkm_market_trades'),sdk.where('sellerUid','==','seller'),sdk.orderBy('createdAt','desc'),sdk.limit(25))));
+ const active=await marketAction(mix,'mix',action('list',{cardId:'hotdog',price:10}));await assert.rejects(marketRemove(mix,'mix',active.listingId),/market-not-sold/);checks++;await no(sdk.updateDoc(listing(mix,active.listingId),{status:'archived',removedAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()}));
+ await assert.rejects(marketRemove(win.c,win.uid,listed.listingId),/market-not-seller/);checks++;
+ await no(sdk.updateDoc(listing(win.c,listed.listingId),{status:'archived',updatedAt:sdk.serverTimestamp(),removedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(listing(seller,listed.listingId),{status:'archived',price:1,updatedAt:sdk.serverTimestamp(),removedAt:sdk.serverTimestamp()}));
+ const beforeRemove=await state(seller,'seller');assert((await marketListings(seller,'seller',{mine:true})).items.some(x=>x.id===listed.listingId&&x.status==='sold'));checks++;
+ await ok(marketRemove(seller,'seller',listed.listingId));await ok(marketRemove(seller,'seller',listed.listingId));assert.deepEqual(await state(seller,'seller'),beforeRemove);assert(!(await marketListings(seller,'seller',{mine:true})).items.some(x=>x.id===listed.listingId));assert((await marketHistory(seller,'seller')).items.some(x=>x.id===listed.listingId));assert.deepEqual((await sdk.getDoc(ref(seller,'hkm_market_trades',listed.listingId))).data(),trade.data());checks+=4;
+ await no(sdk.updateDoc(listing(seller,listed.listingId),{status:'active',updatedAt:sdk.serverTimestamp()}));const buyerArchived=await state(win.c,win.uid);await ok(marketAction(win.c,win.uid,win.op));assert.deepEqual(await state(win.c,win.uid),buyerArchived);assert.deepEqual(await state(seller,'seller'),beforeRemove);checks+=2;
+ // First save for a legacy profile starts the server-enforced calendar cooldown.
+ const names=await seed('names'),nameRef=ref(names,'hkm_players','names'),rename=displayName=>sdk.updateDoc(nameRef,{displayName,nameChangedAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()});
+ await ok(rename('第一個稱呼'));await no(rename('太快再改'));
+ await no(sdk.updateDoc(nameRef,{displayName:'偽造過去',nameChangedAt:sdk.Timestamp.fromMillis(0),updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(nameRef,{nameChangedAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(nameRef,{nameChangedAt:sdk.deleteField(),updatedAt:sdk.serverTimestamp()}));
+ await no(sdk.updateDoc(nameRef,{displayName:'漏寫時間',updatedAt:sdk.serverTimestamp()}));
+ await ok(sdk.updateDoc(nameRef,{favourites:[],updatedAt:sdk.serverTimestamp()}));
+ const dueDate=new Date(Date.now()+3600000);dueDate.setUTCMonth(dueDate.getUTCMonth()-3);await env.withSecurityRulesDisabled(ctx=>sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','names'),{nameChangedAt:sdk.Timestamp.fromDate(dueDate)}));await no(rename('還差一小時'));dueDate.setTime(dueDate.getTime()-7200000);await env.withSecurityRulesDisabled(ctx=>sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','names'),{nameChangedAt:sdk.Timestamp.fromDate(dueDate)}));await ok(rename('期限已過一小時'));
+ const oldDate=new Date();oldDate.setUTCMonth(oldDate.getUTCMonth()-4);await env.withSecurityRulesDisabled(ctx=>sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','names'),{nameChangedAt:sdk.Timestamp.fromDate(oldDate)}));await ok(rename('三月已過可以改'));
+ await env.withSecurityRulesDisabled(ctx=>sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_players','names'),{nameChangedAt:sdk.Timestamp.fromDate(oldDate)}));const renames=await Promise.allSettled([rename('同時改名一'),rename('同時改名二')]);assert.equal(renames.filter(x=>x.status==='fulfilled').length,1);checks++;
+ await ok(sdk.updateDoc(ref(win.c,'hkm_players',win.uid),{displayName:'買家改新名',nameChangedAt:sdk.serverTimestamp(),updatedAt:sdk.serverTimestamp()}));assert.equal((await marketHistory(seller,'seller')).items.find(x=>x.id===listed.listingId).buyerName,trade.data().buyerName);checks++;
  console.log('Marketplace Firestore: '+checks+' checks passed; escrow, one remaining card, exact fees, hostile batches, private wallets, idempotency and concurrent buyers/cancellation/draws.');
 }catch(error){console.error('Failure after '+checks+' checks',error);throw error;}finally{await env.cleanup();}

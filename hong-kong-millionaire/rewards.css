@@ -157,3 +157,7 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 @media(max-width:620px){.collection-dialog .reward-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.market-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.market-sell{padding:12px}}
 
 .market-offer .reward-price{font-size:clamp(14px,3.7vw,20px);overflow-wrap:anywhere}
+
+.market-sold{justify-self:start;padding:3px 8px;border-radius:5px;background:#285d49;color:#fff9e9;font-weight:700;font-size:13px}
+.market-history{display:grid;gap:12px}.market-sale{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:start;gap:14px;padding:14px;border:1px solid #93aa83;border-radius:10px;background:#fffdf5}
+.market-sale-copy{display:grid;gap:5px;min-width:0;overflow-wrap:anywhere}.market-proceeds{color:#174e3a;font-size:20px}.market-sale-copy>span,.market-sale-copy>time{color:#40513b;font-size:13px}.market-sale .market-preview{min-height:44px}

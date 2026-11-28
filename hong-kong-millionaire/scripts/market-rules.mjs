@@ -44,14 +44,14 @@ export function marketRules(){return String.raw`
     &&l.cardId in __MARKET_IDS__&&mkPrice(l.price)&&l.status=='active'&&l.createdAt==request.time&&l.updatedAt==request.time&&w.op=='market-list'&&w.item==id&&w.receipt==id&&w.revision==get(rwPath(request.auth.uid)).data.revision+1;
   }
   function mkListingUpdate(l,o,id){
-   return o.status=='active'&&l.updatedAt==request.time&&(
+   return l.updatedAt==request.time&&(o.status=='sold'?(request.auth.uid==o.sellerUid&&l.status=='archived'&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','removedAt'])&&l.removedAt==request.time):o.status=='active'&&(
     l.status=='cancelled'?(request.auth.uid==o.sellerUid&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','cancelledAt'])&&l.cancelledAt==request.time
      &&getAfter(rwPath(request.auth.uid)).data.op=='market-cancel'&&getAfter(rwPath(request.auth.uid)).data.item==id&&getAfter(rwPath(request.auth.uid)).data.revision==get(rwPath(request.auth.uid)).data.revision+1):
-    (l.status=='sold'&&request.auth.uid!=o.sellerUid&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','soldAt'])&&l.soldAt==request.time&&mkBuyerLink(id,getAfter(mkTrade(id)).data.requestId)));
+    (l.status=='sold'&&request.auth.uid!=o.sellerUid&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','soldAt'])&&l.soldAt==request.time&&mkBuyerLink(id,getAfter(mkTrade(id)).data.requestId))));
   }
   function mkTradeCreate(t,id){
    let l=get(mkListing(id)).data;let a=getAfter(mkListing(id)).data;let s=get(rwPath(l.sellerUid)).data;let w=getAfter(rwPath(l.sellerUid)).data;
-   return t.keys().hasOnly(['listingId','buyerUid','sellerUid','cardId','price','fee','proceeds','requestId','createdAt'])&&t.listingId==id&&t.buyerUid==request.auth.uid&&t.sellerUid==l.sellerUid&&t.buyerUid!=t.sellerUid
+   return t.keys().hasOnly(['listingId','buyerUid','buyerName','sellerUid','cardId','price','fee','proceeds','requestId','createdAt'])&&t.listingId==id&&t.buyerUid==request.auth.uid&&t.buyerName==get(player(request.auth.uid)).data.displayName&&t.sellerUid==l.sellerUid&&t.buyerUid!=t.sellerUid
     &&l.status=='active'&&a.status=='sold'&&a.updatedAt==request.time&&t.cardId==l.cardId&&t.price==l.price&&t.fee==mkFee(l.price)&&t.proceeds==l.price-t.fee&&t.createdAt==request.time
     &&mkBuyerLink(id,t.requestId)&&w.op=='market-sale'&&w.item==id&&w.revision==s.revision+1&&w.updatedAt==request.time;
   }
@@ -70,6 +70,7 @@ export function marketRules(){return String.raw`
   }
   match /hkm_market_trades/{id}{
    allow get:if signedPlayer()&&(resource.data.buyerUid==request.auth.uid||resource.data.sellerUid==request.auth.uid);
-   allow create:if signedPlayer()&&mkTradeCreate(request.resource.data,id);allow list,update,delete:if false;
+   allow list:if signedPlayer()&&resource.data.sellerUid==request.auth.uid&&request.query.limit!=null&&request.query.limit<=24;
+   allow create:if signedPlayer()&&mkTradeCreate(request.resource.data,id);allow update,delete:if false;
   }
 `.replace('__MARKET_IDS__',JSON.stringify(CULTURE_CARDS.map(c=>c.id)));}

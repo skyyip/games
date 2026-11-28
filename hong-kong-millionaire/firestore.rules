@@ -26,6 +26,15 @@ service cloud.firestore {
   function elapsed(r) { let ms=r.answerAt.toMillis()-r.questionAt.toMillis(); return ms>cap(r.index)?cap(r.index):ms; }
   function lifeLeft(r) { return (r.halfFor==-1?1:0)+(r.phoneFor==-1?1:0)+(r.audienceFor==-1?1:0); }
   function nameValid(name) { return name is string && name.size()>=2 && name.size()<=20; }
+  function nameNext(t) {
+   let hk=t+duration.value(8,'h');let y=hk.year()+int((hk.month()+2) / 12);let m=(hk.month()+2)%12+1;
+   let last=timestamp.date(m==12?y+1:y,m==12?1:m+1,1)-duration.value(1,'d');let d=hk.day()<last.day()?hk.day():last.day();
+   return timestamp.date(y,m,d)+hk.time()-duration.value(8,'h');
+  }
+  function nameChange(p,o) {
+   return p.displayName==o.displayName?p.diff(o).affectedKeys().hasOnly(['favourites','updatedAt']):
+    (nameValid(p.displayName)&&(o.get('nameChangedAt',null)==null||request.time>=nameNext(o.nameChangedAt))&&p.nameChangedAt==request.time);
+  }
   function profileCreate(p,uid) {
    return p.keys().hasOnly(['uid','displayName','total','bestPrize','games','titles','unlocked','wrong','favourites','activeDay','activeKind','lastSettledDay','createdAt','updatedAt'])
     && p.uid==uid && p.get('activeKind','daily')=='daily' && nameValid(p.displayName) && p.total is int && p.total==0 && p.bestPrize is int && p.bestPrize==0 && p.games is int && p.games==0
@@ -92,7 +101,7 @@ service cloud.firestore {
   function profileUpdate(p,o,uid) {
    let changed=p.diff(o).affectedKeys();
    return p.updatedAt==request.time && (
-    changed.hasOnly(['displayName','favourites','updatedAt'])?(nameValid(p.displayName) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
+    changed.hasOnly(['displayName','nameChangedAt','favourites','updatedAt'])?(nameChange(p,o) && p.favourites is list && p.favourites.toSet().size()==p.favourites.size() && p.favourites.hasOnly(o.unlocked))
     :changed.hasOnly(['activeDay','activeKind','updatedAt'])?(o.activeDay==null && o.lastSettledDay!=today() && p.get('activeKind','daily')=='daily' && p.activeDay is int && p.activeDay==today() && getAfter(run(uid,today())).data.phase=='playing')
     :(retireExtraProfile(p,o,uid)||profileFinish(p,o,uid)));
   }
@@ -178,14 +187,14 @@ service cloud.firestore {
     &&l.cardId in ["hotdog","old-ferry","new-ferry","first-metro","whiteplate-foil","tram-foil","bun-tower","fire-dragon","mahjong-carving","bamboo-theatre","flower-foil","floating-colour-foil","rice-roll","egg-waffle","dog-noodle","bowl-pudding","milk-tea-foil","lemon-tea-foil","postbox","stationery","folding-gate","birdcage","pawn-neon-foil","enamel-mug-foil","island-pier","harbour-tram","sampan","junk-sunset","lighthouse-foil","harbour-night-foil","peng-chau-lane","tai-o-bridge","lamma-bay","tsang-house","lai-chi-wo-foil","cheung-chau-pier-foil","bamboo-steamer","salt-crystals","eggroll-workshop","neon-workshop","paper-lion-foil","painted-porcelain-foil","light-rail-car","peak-tram-foil","flower-cannon","paper-windmill-foil","siu-mai-skewer","red-bean-ice-foil","shoe-repair-stall","letter-writer-foil","typhoon-shelter","lei-yue-mun-foil","kat-hing-courtyard","mui-wo-silvermine-foil","scissor-repair","dough-figurine-foil","cross-harbour-bus","kai-tak-ferry-foil","hungry-ghost-theatre","hakka-unicorn-foil","sugar-onion-wrap","pineapple-bun-foil","fruit-market-crates","night-dai-pai-dong-foil","seafood-market","star-ferry-rope-foil","sha-tau-kok-lanterns","po-toi-shore-foil","minibus-signwriting","wedding-embroidery-foil","green-minibus-corner","airport-express-foil","rabbit-lantern","tai-o-dragonboat-foil","cart-noodle-stall","egg-tart-counter-foil","newspaper-kiosk","rainy-arcade-foil","container-port","stonecutters-bridge-foil","yim-tin-tsai-chapel","tung-ping-chau-foil","bamboo-birdcage-maker","man-wa-seal-foil","red-taxi-corner","ngong-ping-cabin-foil","poon-choi-courtyard","tin-hau-procession-foil","tofu-pudding-stall","wife-cake-foil","tenement-mailboxes","gas-lamp-steps-foil","noon-day-gun","tsing-ma-bridge-foil","lam-tsuen-wishes","tung-chung-fort-foil","scales-workshop","floral-button-foil","hong-kong-rickshaw","whitty-tram-depot-foil","hakka-mountain-song","cantonese-opera-dan-foil","imitation-fin-soup","grid-waffle-foil","estate-laundry","staircase-locksmith-foil","shau-kei-wan-slipway","blake-pier-foil","sam-tung-uk-courtyard","fong-yuen-study-hall-foil","gilded-woodcarving","opera-headdress-foil","cross-harbour-tunnel-portal","airport-baggage-tractor","mid-levels-escalator-foil","hung-hom-platform-foil","pulling-milk-tea","naam-yam-recital","pixiu-dance-foil","chiu-chow-gongs-foil","curry-fishballs","roasted-sweet-potato","stuffed-three-treasures-foil","sugared-egg-puff-foil","estate-chess-corner","barber-pole-shop","shanghai-street-kitchenware-foil","sham-shui-po-fabric-foil","central-public-pier","western-cargo-pier","kap-shui-mun-bridge-foil","maritime-museum-model-foil","tsui-sing-lau","sheung-cheung-wai-gate","yi-tai-study-hall-foil","tap-mun-temple-foil","shoemaking-last","hand-painted-shop-sign","copperware-hammering-foil","letterpress-typesetting-foil","lion-rock","tai-mo-shan","kowloon-peak","high-junk-peak","castle-peak","lantau-peak","sunset-peak-foil","ma-on-shan-foil","pat-sin-leng-foil","dragons-back-foil","repulse-bay","stanley-main-beach","big-wave-bay-hk-island","cheung-sha-beach","silverstrand-beach","shek-o-beach","ham-tin-wan-foil","clear-water-bay-second-foil","hap-mun-bay-foil","chung-hom-kok-foil","fried-squid-skewer","beef-offal-pot","roasted-chestnut-cart","peanut-sesame-candy","white-sugar-sponge-cake","dragon-beard-candy-foil","mango-pomelo-sago-foil","hong-kong-egg-sandwich-foil","deep-fried-stinky-tofu-foil","fried-sesame-ball-foil","sharp-peak","mount-parker","tates-cairn","kau-nga-ling-foil","tai-to-yan-foil","silvermine-bay","golden-beach","deep-water-bay-foil","butterfly-beach-foil","turtle-cove-foil"]&&mkPrice(l.price)&&l.status=='active'&&l.createdAt==request.time&&l.updatedAt==request.time&&w.op=='market-list'&&w.item==id&&w.receipt==id&&w.revision==get(rwPath(request.auth.uid)).data.revision+1;
   }
   function mkListingUpdate(l,o,id){
-   return o.status=='active'&&l.updatedAt==request.time&&(
+   return l.updatedAt==request.time&&(o.status=='sold'?(request.auth.uid==o.sellerUid&&l.status=='archived'&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','removedAt'])&&l.removedAt==request.time):o.status=='active'&&(
     l.status=='cancelled'?(request.auth.uid==o.sellerUid&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','cancelledAt'])&&l.cancelledAt==request.time
      &&getAfter(rwPath(request.auth.uid)).data.op=='market-cancel'&&getAfter(rwPath(request.auth.uid)).data.item==id&&getAfter(rwPath(request.auth.uid)).data.revision==get(rwPath(request.auth.uid)).data.revision+1):
-    (l.status=='sold'&&request.auth.uid!=o.sellerUid&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','soldAt'])&&l.soldAt==request.time&&mkBuyerLink(id,getAfter(mkTrade(id)).data.requestId)));
+    (l.status=='sold'&&request.auth.uid!=o.sellerUid&&l.diff(o).affectedKeys().hasOnly(['status','updatedAt','soldAt'])&&l.soldAt==request.time&&mkBuyerLink(id,getAfter(mkTrade(id)).data.requestId))));
   }
   function mkTradeCreate(t,id){
    let l=get(mkListing(id)).data;let a=getAfter(mkListing(id)).data;let s=get(rwPath(l.sellerUid)).data;let w=getAfter(rwPath(l.sellerUid)).data;
-   return t.keys().hasOnly(['listingId','buyerUid','sellerUid','cardId','price','fee','proceeds','requestId','createdAt'])&&t.listingId==id&&t.buyerUid==request.auth.uid&&t.sellerUid==l.sellerUid&&t.buyerUid!=t.sellerUid
+   return t.keys().hasOnly(['listingId','buyerUid','buyerName','sellerUid','cardId','price','fee','proceeds','requestId','createdAt'])&&t.listingId==id&&t.buyerUid==request.auth.uid&&t.buyerName==get(player(request.auth.uid)).data.displayName&&t.sellerUid==l.sellerUid&&t.buyerUid!=t.sellerUid
     &&l.status=='active'&&a.status=='sold'&&a.updatedAt==request.time&&t.cardId==l.cardId&&t.price==l.price&&t.fee==mkFee(l.price)&&t.proceeds==l.price-t.fee&&t.createdAt==request.time
     &&mkBuyerLink(id,t.requestId)&&w.op=='market-sale'&&w.item==id&&w.revision==s.revision+1&&w.updatedAt==request.time;
   }
@@ -204,7 +213,8 @@ service cloud.firestore {
   }
   match /hkm_market_trades/{id}{
    allow get:if signedPlayer()&&(resource.data.buyerUid==request.auth.uid||resource.data.sellerUid==request.auth.uid);
-   allow create:if signedPlayer()&&mkTradeCreate(request.resource.data,id);allow list,update,delete:if false;
+   allow list:if signedPlayer()&&resource.data.sellerUid==request.auth.uid&&request.query.limit!=null&&request.query.limit<=24;
+   allow create:if signedPlayer()&&mkTradeCreate(request.resource.data,id);allow update,delete:if false;
   }
 
   // Spendable funds are independent of the immutable pure-daily prize totals.
