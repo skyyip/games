@@ -116,6 +116,7 @@ button.close-button>.hk-icon{display:block;flex:none;margin:0;transform:none}
 .answer-letter{flex:none;font-weight:700;line-height:inherit}.answer-text{min-width:0}.option>span:last-child{min-width:0}
 .collection-filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .collection-filters>button{width:auto;min-height:44px;flex:0 1 auto;margin:0;padding:7px 12px;font-size:12px;line-height:1.35}
+.collection-filters>button[data-filter-kind=gear]{font-size:14.4px}
 .card-filters{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:6px 6px 12px;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#285d49 #e8edda}
 .card-filters>button{flex:0 0 auto;white-space:nowrap;font-size:13.8px}
 .card-filters::-webkit-scrollbar{height:8px}.card-filters::-webkit-scrollbar-track{background:#e8edda;border-radius:4px}.card-filters::-webkit-scrollbar-thumb{background:#285d49;border-radius:4px}
