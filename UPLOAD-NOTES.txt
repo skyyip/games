@@ -1,19 +1,20 @@
-香港百萬富翁冬日擴充（2026-11-28）
-Source: a7c79393741a6e82afea0f26b8a366f6b4703cf3
-Build: 3ceccac4261c9450
+香港百萬富翁：閃卡、中文SEO與跨裝置週末券（2026-11-28）
+Source: 2ded01bb2ecf41b4439c7731b3ad3a22de9bf315
+Build: 6474d809488751a0
 
-完整網站上傳版，共29頁。
-先在沒有未完成挑戰／房間的時段，Publish本版完整Firestore Rules，再完整上傳本包全部內容至 public_html/games/。
-包括 .htaccess、assets、build-manifest.json、各遊戲資料夾。請上傳解壓後根目錄內的內容，不要把ZIP外層資料夾再套一層。
-全部檔案644、資料夾755；請保留既有遊戲資料及Firebase玩家資產。
+完整網站上傳版，共29頁。將解壓根目錄內全部內容（包括.htaccess、assets、build-manifest.json及各遊戲資料夾）上傳至 public_html/games/。
+不要把ZIP的外層目錄再套一層。檔案644、資料夾755。
 
-新增120題（現1,011題）、14張港式漫畫卡（現112卡）、3香港主題、4頭像框、3離場動畫。
-商店圖片最大尺寸提升20%，手機按可用空間縮放。普通文化扭蛋改為10,000；金蛋80,000。
-每類須全部16張才可用收集稱號；舊14張未補齊時會零成本取消前綴，卡片與餘額保留。
-30秒答題、每日15題、24小時非即時街坊對戰及登入限制保留。
+本次：
+- 已收藏閃卡預設金彩卡框、金色標記及常駐亮面，更明顯的掃光與星芒；保留減少動態、未持有灰階及固定卡框。
+- 香港百萬富翁的title、description、OG、Twitter與JSON-LD中文化；SEO產生器同步，OG語系zh_HK。
+- 週末券與餘額從Firestore伺服器讀取，重新連接等候最新錢包並更新按鈕；首頁恢復時查帳戶目前的未完成局。
+- 每日及遊樂場選項字級縮小10%，手機保留兩列及點按高度。
 
-完整Rules：https://github.com/skyyip/games/blob/a7c79393741a6e82afea0f26b8a366f6b4703cf3/hong-kong-millionaire/firestore.rules
-部署詳情： https://github.com/skyyip/games/blob/a7c79393741a6e82afea0f26b8a366f6b4703cf3/hong-kong-millionaire/FIREBASE.md
-驗證紀錄： https://github.com/skyyip/games/blob/a7c79393741a6e82afea0f26b8a366f6b4703cf3/hong-kong-millionaire/VERIFICATION.md
-已通過118項單元測試、1,583項本機Chromium檢查及1,651項官方Firestore Emulator檢查。
-本包並未代為部署正式Firebase或正式網站。
+本次無新增Firebase Rules／索引／Functions變更。若已部署上一版1,011題／112卡完整規則，僅需完整上傳網站；若未部署，請先依FIREBASE-UPDATES.txt發布目前完整Rules。
+票券、卡片、餘額及資料不需清空或遷移；普通文化扭蛋仍10,000。
+
+驗證：120項單元測試、412項本機Chromium檢查、1,192項官方Firestore Emulator檢查；29個原始及29個建置頁SEO檢查通過。
+部署說明：https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/FIREBASE.md
+驗證紀錄：https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/VERIFICATION.md
+本次沒有代為部署正式Firebase或正式網站。

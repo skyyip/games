@@ -1,15 +1,12 @@
-本版需要更新Firebase Firestore Rules。
+本次沒有新增Firestore Rules、索引或Functions變更。
 
-1. 選沒有未完成每日／再挑戰／週末題局或街坊房間的時段。
-2. 在Firestore Database > Rules，以本版完整firestore.rules取代舊規則並Publish：
-https://github.com/skyyip/games/blob/a7c79393741a6e82afea0f26b8a366f6b4703cf3/hong-kong-millionaire/firestore.rules
-3. 再完整上傳同版網站；讓玩家載入新前端，避免舊版抽題或20,000價格配新規則。
+沿用上一版完整規則：1,011題、112張卡、34款造型、普通文化扭蛋10,000、各類全部16張收集稱號。
+若該版Rules已發布，本次只需完整更新網站，重新載入瀏覽器。
+若仍在使用更早版本，請於沒有未完成挑戰／房間的時段，先Publish目前完整Rules，再完整上傳網站：
+https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/firestore.rules
 
-完整規則包含1,011題及三池324／426／261、112卡、七類各16張收藏門檻、34款造型及普通文化扭蛋10,000。
-普通抽679格／步長37；金蛋49款／步長5，價格80,000。
-新造型價格、購買及持有資格由Rules獨立驗證；錯誤收費與重複收據不能繞過限制。
-舊版14張已套用前綴會零成本取消，補齊後可重新套用。
-四個索引及Functions不變，玩家錢包、收藏、抽數、造型、票券與歷史收據不需清空或遷移。
-
-Source: a7c79393741a6e82afea0f26b8a366f6b4703cf3
+本次只改前端讀取方式，錢包與週末券以伺服器資料為準；購買、五次使用配額、獎金及收據規則保留。
+不需清空Firebase玩家資料、卡片、票券、餘額或本機資料。
+詳情：https://github.com/skyyip/games/blob/2ded01bb2ecf41b4439c7731b3ad3a22de9bf315/hong-kong-millionaire/FIREBASE.md
+Source: 2ded01bb2ecf41b4439c7731b3ad3a22de9bf315
 本次沒有代為部署正式Firebase。
