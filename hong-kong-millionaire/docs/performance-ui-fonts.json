@@ -3,7 +3,7 @@
   "inputs": {
     "index.html": "f35fe0771f7e9cc3a5c38b4bd8227eb2125287e3290cd78473ccb005af416dbf",
     "src/app.js": "bb6bde05489da6f27bc7eaf6f568caa5133ca934a38e299bb0d335a52ed372fd",
-    "src/collection-ui.js": "974f7819a1f631a82c86e63233a00b4b57daa7b2a0acedf57b80355fc975e948",
+    "src/collection-ui.js": "2ac4289bb353ea574d17ebe7644e459d749451769a99765d71bb5b8b5cf25ecf",
     "src/market-ui.js": "6bed4984a67b008dc0641ce2c575330df5e0abe721754bda1eac2b5018a40b43",
     "src/arcade-ui.js": "abd1276c6abbe1177b9b01f77912343919347ef56b34f126c16e4a60815fb265",
     "src/showtime.js": "336a92bcff7d2f798ae60436865707c43933814db8db240690256721f18f3c51"
