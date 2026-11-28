@@ -1,5 +1,5 @@
 import {marketRules} from './market-rules.mjs';
-import {GEAR,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,GOLD_STRIDE,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
+import {GEAR,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,DRAW_COLUMNS,DRAW_ROWS,NORMAL_WEIGHT,FOIL_WEIGHT,GOLD_STRIDE,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE} from '../src/economy.js';
 import {ROOM_POOLS,ROOM_ASYNC_WINDOW,ROOM_INTERVAL,ROOM_DURATION,ROOM_GRACE} from '../src/session-engine.js';
 import {QUESTIONS} from '../src/questions.js';
 import {QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
@@ -8,7 +8,7 @@ export function rewardRules(){
  const prefixes=CULTURE_CARDS.reduce((out,c)=>{(out[c.series]??=[]).push(c.id);return out;},{});
  const prefixCheck=Object.entries(prefixes).map(([id,ids])=>'(w.prefix=='+json(id)+'&&'+ids.map(key=>'w.cards.get('+json(key)+',0)>0').join('&&')+')').join('||');
  const placeholders={
-  __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*10),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_UNIT__:String(RETRY_PRICE/10),
+  __RETRY_DAYSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.dayStep)),__RETRY_SLOTSTEP__:json(QUESTION_PLANS[BANK_VERSION].map(p=>p.slotStep)),__DRAW_PRICE__:String(DRAW_PRICE),__GOLD_PRICE__:String(GOLD_PRICE),__DRAW_SLOTS__:String(DRAW_SLOTS),__GOLD_STRIDE__:String(GOLD_STRIDE),__NORMAL_SLOTS__:String(NORMAL_CARDS.length*NORMAL_WEIGHT),__NORMAL_WEIGHT__:String(NORMAL_WEIGHT),__FOIL_WEIGHT__:String(FOIL_WEIGHT),__DRAW_COLUMNS__:String(DRAW_COLUMNS),__DRAW_ROWS__:String(DRAW_ROWS),__FOIL_COUNT__:String(FOIL_CARDS.length),__PASS_PRICE__:String(WEEKEND_PASS_PRICE),__PASS_LIMIT__:String(WEEKEND_LIMIT),__RETRY_UNIT__:String(RETRY_PRICE/10),
   __RETRY_POOL_IDS__: [1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids)).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
   __RETRY_POOL_KEYS__:[1,2,3].map((_,i)=>JSON.stringify(QUESTION_PLANS[BANK_VERSION][i].ids.map(id=>keys.get(id)).join(','))).reduceRight((tail,ids,i)=>i===2?ids:'tier=='+i+'?'+ids+':'+tail,''),
   __GEAR_PRICE__:json(Object.fromEntries(GEAR.map(g=>[g.id,g.price]))),
@@ -36,8 +36,8 @@ export function rewardRules(){
   function rwIsWeekend(){return (today()+4)%7 in [0,6];}
   function rwOwned(w){return (w.frame=='none'||(w.frame in __FRAMES__&&w.frame in w.owned))&&(w.theme=='default'||(w.theme in __THEMES__&&w.theme in w.owned))&&(w.exit=='default'||(w.exit in __EXITS__&&w.exit in w.owned))&&(w.prefix==''||__PREFIX_CHECK__);}
   function rwCreate(w,uid){
-   return w.keys().hasOnly(['uid','spent','bonus','draws','cards','owned','frame','theme','exit','prefix','pass','passUses','retryBoughtDay','retryUsedDay','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
-    &&w.uid==uid&&w.spent is int&&w.spent==0&&w.bonus is int&&w.bonus==0&&w.draws is int&&w.draws==0&&w.cards=={}&&w.owned==[]
+   return w.keys().hasOnly(['uid','spent','bonus','draws','normalDraws','cards','owned','frame','theme','exit','prefix','pass','passUses','retryBoughtDay','retryUsedDay','practiceDay','practiceEarned','activeSession','activeKind','activeRoom','revision','op','item','receipt','createdAt','updatedAt'])
+    &&w.uid==uid&&w.spent is int&&w.spent==0&&w.bonus is int&&w.bonus==0&&w.draws is int&&w.draws==0&&w.get('normalDraws',0) is int&&w.get('normalDraws',0)==0&&w.cards=={}&&w.owned==[]
     &&w.frame=='none'&&w.theme=='default'&&w.exit=='default'&&w.prefix==''&&w.pass is int&&w.pass==-1&&w.passUses is int&&w.passUses==0
     &&w.retryBoughtDay is int&&w.retryBoughtDay==-1&&w.retryUsedDay is int&&w.retryUsedDay==-1
     &&w.practiceDay is int&&w.practiceDay==-1&&w.practiceEarned is int&&w.practiceEarned==0&&w.activeSession==''&&w.activeKind==''&&w.activeRoom==''
@@ -47,10 +47,20 @@ export function rewardRules(){
    let r=getAfter(rwReceiptPath(uid,w.receipt)).data;
    return w.receipt is string&&w.receipt.matches('^[a-f0-9-]{36}$')&&r.uid==uid&&r.op==w.op&&r.item==w.item&&r.revision==w.revision&&r.cost==w.spent-o.spent&&r.createdAt==request.time;
   }
+  function rwDrawMix(n,key){return ((((n*n+1)*48271+key)%2147483647)*48271+1013904223)%2147483647;}
+  function rwDrawSlot(o){
+   let n=o.get('normalDraws',0);let key=(o.createdAt.toMillis()%2147483647+int(n / __DRAW_SLOTS__)*104729)%2147483647;
+   let x0=n%__DRAW_COLUMNS__;let y0=int((n%__DRAW_SLOTS__) / __DRAW_COLUMNS__);
+   let x1=(x0+rwDrawMix(y0,key+17))%__DRAW_COLUMNS__;let y1=(y0+rwDrawMix(x1,key+101))%__DRAW_ROWS__;
+   let x2=(x1+rwDrawMix(y1,key+307))%__DRAW_COLUMNS__;let y2=(y1+rwDrawMix(x2,key+701))%__DRAW_ROWS__;
+   let x3=(x2+rwDrawMix(y2,key+1201))%__DRAW_COLUMNS__;let y3=(y2+rwDrawMix(x3,key+1999))%__DRAW_ROWS__;
+   return y3*__DRAW_COLUMNS__+x3;
+  }
   function rwDraw(w,o,gold){
-   let seed=o.createdAt.toMillis();let slot=(seed+o.draws*37)%__DRAW_SLOTS__;
-   let id=gold?__FOIL__[(seed+o.draws*__GOLD_STRIDE__)%__FOIL_COUNT__]:(slot<__NORMAL_SLOTS__?__COMMON__[int(slot / 10)]:__FOIL__[slot-__NORMAL_SLOTS__]);
-   return rwChanged(w,o,['spent','draws','cards','receipt'])&&w.item==id&&w.spent==o.spent+(gold?__GOLD_PRICE__:__DRAW_PRICE__)&&w.draws is int&&w.draws==o.draws+1
+   let seed=o.createdAt.toMillis();let slot=gold?0:rwDrawSlot(o);
+   let id=gold?__FOIL__[(seed+o.draws*__GOLD_STRIDE__)%__FOIL_COUNT__]:(slot<__NORMAL_SLOTS__?__COMMON__[int(slot / __NORMAL_WEIGHT__)]:__FOIL__[int((slot-__NORMAL_SLOTS__) / __FOIL_WEIGHT__)]);
+   return rwChanged(w,o,['spent','draws','cards','receipt'].concat(gold?[]:['normalDraws']))&&w.item==id&&w.spent==o.spent+(gold?__GOLD_PRICE__:__DRAW_PRICE__)&&w.draws is int&&w.draws==o.draws+1
+    &&(gold||(w.normalDraws is int&&w.normalDraws==o.get('normalDraws',0)+1))
     &&w.cards.diff(o.cards).affectedKeys().hasOnly([id])&&w.cards[id] is int&&w.cards[id]==o.cards.get(id,0)+1;
   }
   function rwBuy(w,o){let price=__GEAR_PRICE__[w.item];return rwChanged(w,o,['spent','owned','receipt'])&&!(w.item in o.owned)&&w.owned==o.owned.concat([w.item])&&w.spent==o.spent+price;}

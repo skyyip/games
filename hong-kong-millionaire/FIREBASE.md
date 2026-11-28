@@ -1,5 +1,29 @@
 # Firebase 設定與部署
 
+## 本版：普通扭蛋洗牌與8%比例（2026-11-28）
+
+**先在sky-playground-millionaire發布本版完整[firestore.rules](firestore.rules)，再完整上傳網站並重新載入。** 此次沒有新增索引，沿用現有七個；尚未部署前版市集／售賣記錄者，仍須依完整[索引檔](firestore.indexes.json)建立七個索引。無Cloud Functions、無需Blaze，適用Spark。
+
+```sh
+npm run rules:check
+npm run firebase:check
+npm run firebase:deploy
+```
+
+腳本只部署同專案Rules及索引，不部署Hosting或Functions；也可於Firestore Database → Rules完整貼上同版Rules並Publish。不要只改比例數字或放寬寫入權限。新舊前端抽卡欄位不同，舊前端提交普通抽會被新Rules拒絕，請同步更新完整網站。
+
+### 普通抽序及銜接
+
+`hkm_wallets/{uid}.normalDraws`是新版普通抽數，初始0，每次付費普通抽必須恰好增加1；金蛋、購物、市集及其他操作不能更改它。原`draws`繼續記錄全部普通／金蛋抽數，新舊收據、金蛋抽序及資產均保留。舊錢包缺normalDraws時視作0，只在下一次真正付費普通抽時寫成1；不需批次清空或遷移。
+
+目前99款文化卡各207格、81款閃卡各22格，完整22,275格，閃卡1,782格，正好8%。權重由卡數及23:2比例計算，確保同稀有度每款等權。以帳戶建立時伺服器時間createdAt及輪數為種子，用可逆模運算將完整格數作一對一排列；每輪重新排列，不儲存巨大牌堆，不新增Firestore讀寫。規則獨立核對種子、普通抽數、卡片、價格、卡數及防重收據；不能指定卡片、修改seed、跳過／刪除／倒轉普通抽數。
+
+這是可重現、可預測的偽隨機洗牌，不是保密後端或密碼學隨機。8%是完整循環比例，不是每抽獨立機率，也不保證每100抽恰中8張。若日後要求不可預知的獨立隨機，須另行設計可信任後端，不能以瀏覽器random()及寬鬆Rules代替。
+
+已付款舊收據查到後直接返回原卡，不套新公式或再次扣款；新版同requestId亦不推進普通抽數。玩家卡片、餘額、造型、票券、抽數總計及歷史紀錄保留。普通10,000、金蛋80,000及金蛋100%閃卡不變。正式Firebase及網站未部署。
+
+以下為歷史紀錄，以本節為準。
+
 ## 本版：售賣記錄及三個月改名（2026-11-28）
 
 **必須先更新完整[firestore.rules](firestore.rules)及[firestore.indexes.json](firestore.indexes.json)，等新增索引Enabled，再完整上傳同版網站。** 下方「本次不需更新Firebase／六個索引」是歷史紀錄，不適用本版。仍適用Spark，不需Cloud Functions、Blaze或資料清空。

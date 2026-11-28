@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARDS,unlockedPrefixes,weekendKey,isWeekend,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,SERIES,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE,retryPrice,retryDiscount} from '../src/economy.js';
+import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARDS,unlockedPrefixes,weekendKey,isWeekend,DRAW_PRICE,GOLD_PRICE,DRAW_SLOTS,NORMAL_CARDS,NORMAL_WEIGHT,FOIL_WEIGHT,normalDrawSlot,SERIES,WEEKEND_PASS_PRICE,WEEKEND_LIMIT,RETRY_PRICE,retryPrice,retryDiscount} from '../src/economy.js';
 import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,sessionReviewReady,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
 import {hkDay,dayEnd,questionId} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
@@ -19,8 +19,8 @@ test('draws are replay-stable and every gold draw is a foil',()=>{
  assert.equal(foils.size,FOIL_CARDS.length);assert.equal(wallet.draws,FOIL_CARDS.length);assert.equal(wallet.spent,FOIL_CARDS.length*GOLD_PRICE);
 });
 test('normal draw distribution and set prefixes do not grant answer advantages',()=>{
- let wallet=emptyWallet('p',0),foils=0;for(let i=0;i<DRAW_SLOTS;i++){wallet=walletAction({total:100000000},wallet,{type:'draw'},DAY);if(CULTURE_CARDS.find(c=>c.id===wallet.item).foil)foils++;}
- assert.equal(foils,FOIL_CARDS.length);assert.equal(unlockedPrefixes(wallet).length,SERIES.length);
+ let wallet=emptyWallet('p',0),foils=0;for(let i=0;i<DRAW_SLOTS;i++){wallet=walletAction({total:DRAW_SLOTS*DRAW_PRICE},wallet,{type:'draw'},DAY);if(CULTURE_CARDS.find(c=>c.id===wallet.item).foil)foils++;}
+ assert.equal(foils,FOIL_CARDS.length*FOIL_WEIGHT);assert.equal(foils/DRAW_SLOTS,.08);for(const id of NORMAL_CARDS)assert.equal(wallet.cards[id],NORMAL_WEIGHT);for(const id of FOIL_CARDS)assert.equal(wallet.cards[id],FOIL_WEIGHT);assert.equal(unlockedPrefixes(wallet).length,SERIES.length);
  const fresh=emptyWallet('p',0);assert.throws(()=>walletAction({total:1000000},fresh,{type:'equip',slot:'prefix',id:'snacks'},DAY),/not-owned/);
  assert.throws(()=>walletAction({total:1000000},fresh,{type:'equip',slot:'theme',id:'theme-cafe'},DAY),/not-owned/);
 });
@@ -123,3 +123,6 @@ test('every card in a series is required for its prefix, including all expansion
   assert.equal(walletAction({total:0},{...six,prefix:series.id},{type:'equip',slot:'prefix',id:''},DAY).prefix,'');
  }
 });
+
+test('normal weighted decks are bijections, reshuffle each cycle, and preserve retry results',()=>{for(const createdAt of [0,1001,Date.UTC(2026,10,28)])for(const cycle of [0,1,17]){const slots=new Set();for(let i=0;i<DRAW_SLOTS;i++)slots.add(normalDrawSlot({createdAt,normalDraws:cycle*DRAW_SLOTS+i}));assert.equal(slots.size,DRAW_SLOTS);assert.equal(Math.min(...slots),0);assert.equal(Math.max(...slots),DRAW_SLOTS-1);}const first=Array.from({length:64},(_,i)=>drawnCard({createdAt:1001,normalDraws:i})),next=Array.from({length:64},(_,i)=>drawnCard({createdAt:1001,normalDraws:DRAW_SLOTS+i}));assert.notDeepEqual(first,next);assert.deepEqual(first,Array.from({length:64},(_,i)=>drawnCard({createdAt:1001,normalDraws:i})));});
+test('gold and unrelated purchases cannot skip normal draw positions; legacy wallets start at zero',()=>{const old=emptyWallet('p',1001);delete old.normalDraws;old.draws=87;const expected=drawnCard(old),paid=walletAction({total:1000000},old,{type:'draw'});assert.equal(paid.item,expected);assert.equal(paid.normalDraws,1);assert.equal(paid.draws,88);const gold=walletAction({total:1000000},old,{type:'gold'});assert.equal(gold.normalDraws,undefined);assert.equal(drawnCard(gold),expected);assert.equal(old.normalDraws,undefined);});

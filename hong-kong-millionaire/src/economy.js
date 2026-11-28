@@ -236,19 +236,31 @@ export const walletBalance=(profile,wallet)=>Math.max(0,(profile?.total??0)+(wal
 export const unlockedPrefixes=wallet=>SERIES.filter(s=>CULTURE_CARDS.filter(c=>c.series===s.id).every(c=>(wallet?.cards?.[c.id]??0)>0));
 export function weekendKey(day=hkDay()){const weekday=(day+4)%7;return weekday===0?day-1:day+(6-weekday+7)%7;}
 export const isWeekend=(day=hkDay())=>[0,6].includes((day+4)%7);
-export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,retryBoughtDay:-1,retryUsedDay:-1,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
+export function emptyWallet(uid,stamp){return {uid,spent:0,bonus:0,draws:0,normalDraws:0,cards:{},owned:[],frame:'none',theme:'default',exit:'default',prefix:'',pass:-1,passUses:0,retryBoughtDay:-1,retryUsedDay:-1,practiceDay:-1,practiceEarned:0,activeSession:'',activeKind:'',activeRoom:'',revision:0,op:'create',item:'',receipt:'',createdAt:stamp,updatedAt:stamp};}
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const stride=n=>{let step=5;while(gcd(step,n)!==1)step++;return step;};
-export const GOLD_STRIDE=stride(FOIL_CARDS.length),DRAW_SLOTS=NORMAL_CARDS.length*10+FOIL_CARDS.length;
+// Equal weights within each rarity, with an exact 23:2 (92%:8%) ratio.
+const drawDivisor=gcd(23*FOIL_CARDS.length,2*NORMAL_CARDS.length);
+export const NORMAL_WEIGHT=23*FOIL_CARDS.length/drawDivisor,FOIL_WEIGHT=2*NORMAL_CARDS.length/drawDivisor;
+export const GOLD_STRIDE=stride(FOIL_CARDS.length),DRAW_SLOTS=NORMAL_CARDS.length*NORMAL_WEIGHT+FOIL_CARDS.length*FOIL_WEIGHT,DRAW_COLUMNS=25,DRAW_ROWS=DRAW_SLOTS/DRAW_COLUMNS;
+const drawMix=(n,key)=>((((n*n+1)*48271+key)%2147483647)*48271+1013904223)%2147483647;
+// Reversible modular rounds shuffle the entire weighted deck without a stored array.
+// This is reproducible pseudorandomness, not a secret or cryptographic RNG.
+export function normalDrawSlot(wallet){
+ const count=wallet.normalDraws??0,stamp=Math.floor(wallet.createdAt?.toMillis?.()??wallet.createdAt??0),key=(stamp%2147483647+Math.floor(count/DRAW_SLOTS)*104729)%2147483647;
+ let left=count%DRAW_COLUMNS,right=Math.floor(count%DRAW_SLOTS/DRAW_COLUMNS);
+ for(const [a,b]of [[17,101],[307,701],[1201,1999]]){left=(left+drawMix(right,key+a))%DRAW_COLUMNS;right=(right+drawMix(left,key+b))%DRAW_ROWS;}
+ return right*DRAW_COLUMNS+left;
+}
 export function drawnCard(wallet,gold=false){
  const seed=Math.floor(wallet.createdAt?.toMillis?.()??wallet.createdAt??0);
  if(gold)return FOIL_CARDS[(seed+wallet.draws*GOLD_STRIDE)%FOIL_CARDS.length];
- const slot=(seed+wallet.draws*37)%DRAW_SLOTS;return slot<NORMAL_CARDS.length*10?NORMAL_CARDS[Math.floor(slot/10)]:FOIL_CARDS[slot-NORMAL_CARDS.length*10];
+ const slot=normalDrawSlot(wallet),common=NORMAL_CARDS.length*NORMAL_WEIGHT;return slot<common?NORMAL_CARDS[Math.floor(slot/NORMAL_WEIGHT)]:FOIL_CARDS[Math.floor((slot-common)/FOIL_WEIGHT)];
 }
 export function walletAction(profile,wallet,action,day=hkDay()){
  const next={...wallet,revision:wallet.revision+1,op:action.type,item:action.id??'',receipt:action.requestId??wallet.receipt};let cost=0;
  if(action.type==='buy'){const gear=gearById(action.id);if(!gear||wallet.owned.includes(gear.id))throw Error('already-owned');cost=gear.price;next.owned=[...wallet.owned,gear.id];}
- else if(action.type==='draw'||action.type==='gold'){cost=action.type==='gold'?GOLD_PRICE:DRAW_PRICE;next.item=drawnCard(wallet,action.type==='gold');next.cards={...wallet.cards,[next.item]:(wallet.cards[next.item]??0)+1};next.draws++;}
+ else if(action.type==='draw'||action.type==='gold'){cost=action.type==='gold'?GOLD_PRICE:DRAW_PRICE;next.item=drawnCard(wallet,action.type==='gold');next.cards={...wallet.cards,[next.item]:(wallet.cards[next.item]??0)+1};next.draws++;if(action.type==='draw')next.normalDraws=(wallet.normalDraws??0)+1;}
  else if(action.type==='equip'){
   if(action.slot==='prefix'){if(action.id!==''&&!unlockedPrefixes(wallet).some(s=>s.id===action.id))throw Error('not-owned');next.prefix=action.id;}
   else{if(!['frame','theme','exit'].includes(action.slot))throw Error('invalid-item');const reset=action.slot==='frame'?'none':'default';if(action.id!==reset&&(!wallet.owned.includes(action.id)||gearById(action.id)?.kind!==action.slot))throw Error('not-owned');next[action.slot]=action.id;}

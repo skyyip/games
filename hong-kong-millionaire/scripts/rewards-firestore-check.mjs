@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import * as sdk from 'firebase/firestore';
 import * as feature from '../src/features-cloud.js';
-import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,GOLD_PRICE,walletAction,CULTURE_CARDS,SERIES,NORMAL_CARDS,FOIL_CARDS,GEAR} from '../src/economy.js';
+import {emptyWallet,isWeekend,WEEKEND_LIMIT,retryPrice,DRAW_PRICE,GOLD_PRICE,walletAction,CULTURE_CARDS,SERIES,NORMAL_CARDS,FOIL_CARDS,GEAR,drawnCard,DRAW_SLOTS} from '../src/economy.js';
 import {newSession,sessionQuestion,ROOM_INTERVAL} from '../src/session-engine.js';
 import {hkDay} from '../src/game.js';
 import {sessionClock} from '../src/session-clock.js';
@@ -36,11 +36,12 @@ try{
  const forgedBatch=sdk.writeBatch(pricing.db);forgedBatch.update(ref(pricing,'hkm_wallets','pricing'),{...forged,updatedAt:sdk.serverTimestamp()});forgedBatch.set(ref(pricing,'hkm_wallets','pricing','receipts',forgedId),{uid:'pricing',op:forged.op,item:forged.item,cost:retryPrice(hkDay())-1,revision:forged.revision,createdAt:sdk.serverTimestamp()});await no(forgedBatch.commit());
  const validTicket=crypto.randomUUID(),beforeTicket=priceState.balance;priceState=await ok(feature.shop(pricing,'pricing',{type:'retry-ticket',day:hkDay(),price:retryPrice(hkDay()),requestId:validTicket}));assert.equal(priceState.balance,beforeTicket-retryPrice(hkDay()));checks++;
  priceState=await ok(feature.shop(pricing,'pricing',{type:'retry-ticket',day:hkDay()-1,price:1,requestId:validTicket}));assert.equal(priceState.balance,beforeTicket-retryPrice(hkDay()));checks++;
+ // Locate representative positions; the emulator independently checks each actual draw.
+ const firstPositions=new Map();for(let normalDraws=0;normalDraws<DRAW_SLOTS;normalDraws++){const id=drawnCard({createdAt:0,normalDraws});if(!firstPositions.has(id))firstPositions.set(id,normalDraws);}
  // Every expansion card is recognised by the independent server draw tables.
  for(const card of CULTURE_CARDS.filter(card=>card.prefixRequired===false)){
   const uid='card-'+card.id,cardsClient=await seed(uid);await ok(feature.wallet(cardsClient,uid));
-  const slot=card.foil?NORMAL_CARDS.length*10+FOIL_CARDS.indexOf(card.id):NORMAL_CARDS.indexOf(card.id)*10;
-  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{createdAt:sdk.Timestamp.fromMillis(slot)});});
+  await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{createdAt:sdk.Timestamp.fromMillis(0),normalDraws:firstPositions.get(card.id)});});
   const drawn=await ok(feature.shop(cardsClient,uid,{type:'draw',requestId:crypto.randomUUID()}));assert.equal(drawn.outcome,card.id);assert.equal(drawn.balance,1000000-DRAW_PRICE);checks+=2;
   if(card.foil){const goldUid='gold-'+card.id,goldClient=await seed(goldUid);await ok(feature.wallet(goldClient,goldUid));await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',goldUid),{createdAt:sdk.Timestamp.fromMillis(FOIL_CARDS.indexOf(card.id))});});const gold=await ok(feature.shop(goldClient,goldUid,{type:'gold',requestId:crypto.randomUUID()}));assert.equal(gold.outcome,card.id);assert.equal(gold.balance,1000000-GOLD_PRICE);checks+=2;}
 

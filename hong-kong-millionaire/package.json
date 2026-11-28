@@ -46,7 +46,8 @@
     "test:weekend-devices": "node scripts/weekend-device-browser-check.mjs",
     "test:purchase-recovery": "node scripts/purchase-recovery-browser-check.mjs",
     "test:market-rules": "node scripts/market-firestore-check.mjs",
-    "test:market": "node scripts/market-browser-check.mjs"
+    "test:market": "node scripts/market-browser-check.mjs",
+    "test:draw-rules": "node scripts/draw-firestore-check.mjs"
   },
   "dependencies": {
     "firebase": "^12.5.0"
