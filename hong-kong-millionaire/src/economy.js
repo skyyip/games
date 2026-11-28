@@ -118,7 +118,7 @@ const cards=[
  ["fong-yuen-study-hall-foil","villages","芳園書室舊影",true,"馬灣芳園書室的歷史建築，記下島上教育的一段歲月。海風可以吹散暑氣，功課就算以前都唔會自己做完。","https://www.heritage.gov.hk/tc/revitalisation-scheme/batch-vi-of-revitalisation-scheme/virtual-tour-on-batch-vi-historic-buildings/fong-yuen-study-hall/index.html",false],
  ["gilded-woodcarving","crafts","金漆木雕",false,"花鳥紋樣在木面一刀一刀成形，再以金彩帶出層次。香港木雕手藝曾服務招牌與神像佛具，一塊木背後有好多耐性。","https://hkctp.com.hk/news/id/3192",false],
  ["opera-headdress-foil","crafts","盔頭珠光",true,"珠飾、絨球與細緻骨架，拼成戲台上的華麗盔頭。台前一轉身閃閃發光，台後原來有無數次細心穿針引線。","https://cantonese.edmundtai.com/資料庫首頁",false],
- // Twenty cards per collection; expansion cards retain stable IDs and require full-set ownership.
+ // Collection expansion; cards retain stable IDs and require full-set ownership.
  ["cross-harbour-tunnel-portal","transport","紅隧入口舊影",false,"紅隧連起紅磡與銅鑼灣，巴士同私家車一齊鑽過海底。張卡替昔日車流定格，唔使連塞車時間都收藏埋。","https://www.td.gov.hk/tc/transport_in_hong_kong/tunnels_and_bridges_n/intro/index.html",false],
  ["airport-baggage-tractor","transport","機場行李車",false,"機場行李拖車細細架，拖住一串行李喺停機坪默默開工。你個篋比你早落機，原來仲有下一程接駁。","https://www.hongkongairport.com/tc/media-centre/news-stories-updates/AET",false],
  ["mid-levels-escalator-foil","transport","半山扶梯流光",true,"中環至半山自動扶梯穿過斜路與街巷，將返工腳步同街角風景串埋一齊。雙腳終於可以短暫放工，對眼繼續沿途開工。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-central-mid-levels-escalator.html",false],
@@ -166,7 +166,28 @@ const cards=[
  ["ham-tin-wan-foil","adventure","咸田灣海風",true,"咸田灣位於西貢大浪灣一帶，遠山、沙岸與浪花展現香港郊野另一面。平日訊息一浪接一浪，呢張卡只想畀你聽真正海浪。","https://www.discoverhongkong.com/tc/outdoors.html",false],
  ["clear-water-bay-second-foil","adventure","清水灣第二灣",true,"清水灣第二灣的弧形沙岸依住山坡，碧綠海面替卡面添上通透層次。每日待辦清單好長，望住海嗰一秒就先清空個腦。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-sk.html",false],
  ["hap-mun-bay-foil","adventure","橋咀廈門灣",true,"橋咀洲廈門灣又稱半月灣，彎彎沙岸配上山林與海水，收進卡裡都覺得開揚。個名有廈門，張卡收藏嘅仍然係香港西貢。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-sk.html",false],
- ["chung-hom-kok-foil","adventure","舂坎角",true,"舂坎角泳灘藏於港島南的小海灣，山坡、沙岸與瞭望台砌成安靜一角。市區鐘聲催你趕，海浪就只係一下一下慢慢嚟。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false]
+ ["chung-hom-kok-foil","adventure","舂坎角",true,"舂坎角泳灘藏於港島南的小海灣，山坡、沙岸與瞭望台砌成安靜一角。市區鐘聲催你趕，海浪就只係一下一下慢慢嚟。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false],
+ // Snack and nature additions; full-category ownership still gates each prefix.
+ ["fried-squid-skewer","snacks","炸魷魚鬚",false,"炸到金黃的魷魚鬚，配竹籤與紙袋，就係香港街頭熟悉的香口誘惑。你話買嚟一路行一路食，通常未行到街口已經食完。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-street-food-in-hong-kong.html",false],
+ ["beef-offal-pot","snacks","柱侯牛雜",false,"牛雜與蘿蔔喺濃香醬汁裡慢慢炆，細細碗都裝得落街角的暖意。原本話只係買蘿蔔，聞到香味之後，預算就自然有彈性。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-street-food-in-hong-kong.html",false],
+ ["roasted-chestnut-cart","snacks","糖炒栗子",false,"大鐵鑊裡栗子翻滾，熱氣同甜香搶先替小販打招呼。冬天最難嘅選擇：係先剝栗子，定係繼續攬住個暖紙袋。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-street-food-in-hong-kong.html",false],
+ ["peanut-sesame-candy","snacks","花生芝麻糖",false,"花生、芝麻與糖漿壓成一塊塊脆糖，切開就係舊式糖果舖的香氣。話好只食一小塊，塊糖碎開咗，又多咗幾個合理藉口。","https://www.discoverhongkong.com/tc/food-and-drink.html",false],
+ ["white-sugar-sponge-cake","snacks","白糖糕",false,"白糖糕由米漿發酵蒸成，雪白糕身藏住細密孔洞，是香港懷舊糕點之一。外表好似好低調，咬落先知佢有自己一套甜蜜說服力。","https://guide.michelin.com/hk/zh_HK/article/features/must-eat-traditional-desserts-hong-kong",false],
+ ["dragon-beard-candy-foil","snacks","龍鬚糖雪絲",true,"糖絲拉到幼如龍鬚，再裹入花生等餡料，小小一件就係手藝。食之前驚整散，食之後先發現嘴角已經自帶白色鬍鬚。","https://www.icho.hk/tc/web/icho/2024_meet_the_masters.html",false],
+ ["mango-pomelo-sago-foil","snacks","楊枝甘露",true,"芒果、柚肉與西米配上香滑湯底，砌成香港甜品店熟悉的楊枝甘露。明明正餐話飽到行唔郁，甜品一到，個胃又識得自行擴建。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-traditional-hong-kong-desserts.html",false],
+ ["hong-kong-egg-sandwich-foil","snacks","滑蛋三文治",true,"鬆軟白麵包夾住香滑炒蛋，茶餐廳的簡單配搭一樣令人掛住。諗住叫份輕食，結果第一啖就開始計劃下次早餐。","https://www.discoverhongkong.com/tc/food-and-drink.html",false],
+ ["deep-fried-stinky-tofu-foil","snacks","臭豆腐小檔",true,"臭豆腐炸出香脆外層，再點上醬汁，是香港街頭小吃的鮮明角色。未見到檔口，個鼻已經幫你導航；有人即刻行快兩步，有人即刻排隊。","https://www.discoverhongkong.com/tc/food-and-drink/must-try-street-food-in-hong-kong.html",false],
+ ["fried-sesame-ball-foil","snacks","煎堆芝麻香",true,"金黃煎堆外面裹住芝麻，糯米皮炸得香脆，餡料配搭各有特色。圓碌碌一粒唔算大，點知咬落去，開心可以膨脹咁多。","https://hkccda.org/2022/04/13/26foodcul/",false],
+ ["sharp-peak","adventure","蚺蛇尖",false,"西貢蚺蛇尖的尖削輪廓，從層層綠嶺間突圍而出，山海同框格外有氣勢。名字有條蛇，張卡收藏嘅就係自然山線，唔使驚佢突然郁。","https://www.hiking.gov.hk/content/fatal_detail/id/13",false],
+ ["mount-parker","adventure","柏架山",false,"柏架山位於港島東，綠色山坡與鰂魚涌一帶樓群互相映襯。樓下講效率，山上講風景；同一個香港，原來可以有兩種節奏。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-mount-parker.html",false],
+ ["tates-cairn","adventure","大老山天際",false,"大老山的天氣雷達在山頂觀察雨區，白色圓罩成為山線上的熟悉記號。你出門先問落唔落雨，佢已經默默幫香港望咗好耐。","https://www.hko.gov.hk/tc/aviat/amt/tc_radar.htm",false],
+ ["kau-nga-ling-foil","adventure","狗牙嶺山線",true,"大嶼山狗牙嶺的岩脊起伏尖峭，像鋸齒般伸向綠色山谷。名字聽落好惡，遠遠欣賞山線，已經夠有霸氣。","https://www.landsd.gov.hk/doc/en/mapping/ehkg/MapPages/GeoPDF/SS09_LantauIsland.pdf",false],
+ ["tai-to-yan-foil","adventure","大刀屻青脊",true,"新界大刀屻以狹長起伏的山脊見稱，青山與鄉郊谷地在兩旁鋪開。名字有刀，張卡最鋒利嘅功能就係一眼切走少少返工壓力。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-tai-to-yan.html",false],
+ ["silvermine-bay","adventure","銀礦灣晨光",false,"銀礦灣位於大嶼山梅窩，弧形沙岸、村屋與青山一齊迎接海風。平日鬧鐘叫極唔起，見到呢幅晨光，個心已經偷偷早起咗。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-is.html",false],
+ ["golden-beach","adventure","黃金泳灘",false,"屯門黃金泳灘的沙岸連住海濱景色，陽光將海面照出一點金色。名字好似好富貴，張卡收藏嘅其實係唔使睇時間的放假心情。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-tm.html",false],
+ ["deep-water-bay-foil","adventure","深水灣海色",true,"深水灣位於港島南，彎彎沙岸背靠綠色山坡，替繁忙城市留出一片海。手機裡啲訊息仲喺度排隊，對眼就想先俾海景插個隊。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false],
+ ["butterfly-beach-foil","adventure","蝴蝶灣樹影",true,"屯門蝴蝶灣的海邊公園、樹蔭與沙岸，記下街坊散步望海的日常。唔使每次放假都追大場面，一張凳、一陣海風，已經可以坐得好認真。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-nt/beach-address-tm.html",false],
+ ["turtle-cove-foil","adventure","龜背灣綠岸",true,"大潭一帶的龜背灣藏於港島南的綠色海岸，細小沙灣被山坡輕輕圍住。名字有龜，風景就請你慢慢睇；張卡唔會催你交功課。","https://www.lcsd.gov.hk/tc/beach/index/beach-location-hk/beach-address-south.html",false]
 ];
 export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
 export const GEAR=Object.freeze([

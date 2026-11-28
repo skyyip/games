@@ -3,7 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {CULTURE_CARDS} from '../src/economy.js';
-const inputs=process.argv.slice(2),cards=CULTURE_CARDS.slice(112),assets=fileURLToPath(new URL('../assets/',import.meta.url));
+const inputs=process.argv.slice(2),cards=CULTURE_CARDS.slice(112,160),assets=fileURLToPath(new URL('../assets/',import.meta.url));
 if(inputs.length!==10||cards.length!==48)throw Error('Usage: node scripts/package-adventure-art.mjs <A.png> ... <H.png> <tunnel-correction.png> <lion-rock-correction.png>');
 for(const [i,input]of inputs.entries()){
  const path=resolve(input),[w,h]=execFileSync('magick',['identify','-format','%w %h',path],{encoding:'utf8'}).trim().split(' ').map(Number);

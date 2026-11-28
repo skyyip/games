@@ -109,9 +109,9 @@ test('daily offers are shared, bounded and reject stale or forged confirmation p
 });
 
 test('every card in a series is required for its prefix, including all expansion foils',()=>{
- assert.equal(CULTURE_CARDS.length,160);assert.equal(SERIES.length,8);
+ assert.equal(CULTURE_CARDS.length,180);assert.equal(SERIES.length,8);
  for(const series of SERIES){
-  const cards=CULTURE_CARDS.filter(c=>c.series===series.id);assert.equal(cards.length,20);
+  const cards=CULTURE_CARDS.filter(c=>c.series===series.id);assert.equal(cards.length,['snacks','adventure'].includes(series.id)?30:20);
   const complete={...emptyWallet('p',0),cards:Object.fromEntries(cards.map(c=>[c.id,1]))};
   for(const missing of cards){
    const wallet={...complete,cards:{...complete.cards,[missing.id]:0}};
