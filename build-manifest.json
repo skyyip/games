@@ -1,6 +1,6 @@
 {
-  "version": "135440a6324b7af2",
-  "builtAt": 1795872259929,
+  "version": "110b6fe5e741809a",
+  "builtAt": 1795872723242,
   "assets": {
     "beat-bad-luck/assets/icons/website-logo-180.png": "assets/website-logo-180-81135a437255.png",
     "beat-bad-luck/assets/icons/website-logo-192.png": "assets/website-logo-192-509952c410ca.png",
@@ -873,7 +873,7 @@
     "you-really-get-them/src/app.js": "built/app-23J2BRU4.js",
     "your-dream-career/src/app.js": "built/app-OKS2TK65.js",
     "grid-rush/src/pwa.js": "built/pwa-53JDBOEY.js",
-    "hong-kong-millionaire/src/app.js": "built/app-VTXQZHV6.js",
+    "hong-kong-millionaire/src/app.js": "built/app-CMCSYW2X.js",
     "grid-rush/src/landing.js": "built/landing-ELPNZG2H.js",
     "just-a-sec/src/app.js": "built/app-7Z7DOPUM.js",
     "line-up/src/app.js": "built/app-P6VI3CHR.js",
@@ -917,7 +917,7 @@
     "grid-rush/styles.css": "built/styles-D2JKHIEI.css",
     "hong-kong-millionaire/styles.css": "built/styles-ZRWXXUCH.css",
     "hong-kong-millionaire/comic-theme.css": "built/comic-theme-M55NFFG2.css",
-    "hong-kong-millionaire/rewards.css": "built/rewards-OL2I3GX6.css",
+    "hong-kong-millionaire/rewards.css": "built/rewards-QC263OZ2.css",
     "hong-kong-millionaire/showtime.css": "built/showtime-GGNZWEV3.css",
     "hong-kong-millionaire/cosmetics.css": "built/cosmetics-RBDSMY4Y.css",
     "cha-chaan-mop/styles.css": "built/styles-WM6YPHLZ.css",

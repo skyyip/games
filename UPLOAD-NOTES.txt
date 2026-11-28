@@ -1,12 +1,13 @@
-香港百萬富翁：收藏篩選對比與分頁分隔線
-來源：29df18cc54b8ce5c4a0180b8b617030de9a6aadf
-版本：135440a6324b7af2
+香港百萬富翁：我的卡冊單行橫向篩選
+來源：735a474fe292a4ce2c22b92ecccadb7ac6d6f5dd
+版本：110b6fe5e741809a
 
-完整上傳本資料夾全部內容至 /games/，包含隱藏.htaccess；不要多套一層資料夾或只選某個遊戲。全站29頁、1,100檔案644、31目錄755。
+把本資料夾全部內容完整上傳至 /games/，包含隱藏.htaccess；不要多套一層資料夾或只選某個遊戲。全站29頁、1,100檔案644、31目錄755。
 
-卡冊及造型篩選選中時使用深綠底米白字，hover保持高對比；鍵盤聚焦加入獨立外框。收藏商店主分頁下方新增分隔線及留白。320／390／1280px檢查及既有收藏共444項通過。
+我的卡冊分類按鈕保持單行，超出時可左右捲動並有細捲動條；按鈕文字不縮窄。點選分類或重讀餘額後保留橫向位置，原選中及鍵盤聚焦樣式保留。個人造型的篩選仍可換行。
 
-本次不需更新Firebase Rules或索引，不改計分、獎金、卡片、票券及交易。若尚未部署前版Spark市集，仍須依FIREBASE-UPDATES.txt完成原設定。正式Firebase及網站未代為部署。
+320／390／1280px檢查及既有收藏共457項通過。題庫、卡片、獎金、票券及交易規則均不改動。
+本次不需更新Firebase；尚未部署前版Spark市集者，請先依FIREBASE-UPDATES.txt完成原市集設定。正式Firebase及網站未代為部署。
 
-來源與驗證：
-https://github.com/skyyip/games/blob/29df18cc54b8ce5c4a0180b8b617030de9a6aadf/hong-kong-millionaire/VERIFICATION.md
+來源及驗證：
+https://github.com/skyyip/games/blob/735a474fe292a4ce2c22b92ecccadb7ac6d6f5dd/hong-kong-millionaire/VERIFICATION.md
