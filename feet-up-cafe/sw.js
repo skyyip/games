@@ -1,2 +1,2 @@
 // Upgrade bridge for previously installed service workers. Application assets use content hashes.
-importScripts('./sw-882fa9327df9.js');self.addEventListener('install',()=>self.skipWaiting());
+importScripts('./sw-ebf62fc28d1d.js');self.addEventListener('install',()=>self.skipWaiting());
