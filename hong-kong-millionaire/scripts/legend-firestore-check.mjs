@@ -10,20 +10,20 @@ async function forge(c,uid,mutate,kind='legend'){const w=(await sdk.getDoc(ref(c
 try{
  await env.clearFirestore();
  for(const stamp of [0,1001,Date.UTC(2026,10,29)]){
-  const uid='cycle-'+stamp,c=await seed(uid,{stamp,games:10,cards:Object.fromEntries(STANDARD_CARDS.map(card=>[card.id,1])),legacy:true}),seen=new Set();
+  const uid='cycle-'+stamp,c=await seed(uid,{stamp,games:40,cards:Object.fromEntries(STANDARD_CARDS.map(card=>[card.id,1])),legacy:true}),seen=new Set();
   for(let i=0;i<20;i++){const before=(await wallet(c,uid)).wallet,id=crypto.randomUUID(),action={type:'legend',requestId:id},result=await ok(shop(c,uid,action));assert.equal(result.outcome,drawnLegend(before));assert.equal(result.wallet.legendDraws,i+1);assert.equal(result.wallet.spent,0);assert.equal(result.wallet.draws,0);assert.equal(result.wallet.normalDraws,0);seen.add(result.outcome);checks+=5;
    if(i===0){const again=await ok(shop(c,uid,action));assert.deepEqual(again.wallet,result.wallet);const recovered=await ok(purchaseStatus(c,uid,action));assert(recovered.confirmed);assert.equal(recovered.outcome,result.outcome);checks+=3;}
   }
-  assert.equal(seen.size,20);assert.equal(legendTickets({games:10},(await wallet(c,uid)).wallet).available,0);checks+=2;
+  assert.equal(seen.size,20);assert.equal(legendTickets({games:40},(await wallet(c,uid)).wallet).available,0);checks+=2;
   await assert.rejects(shop(c,uid,{type:'legend',requestId:crypto.randomUUID()}),/legend-ticket-required/);checks++;
   const themed=await ok(shop(c,uid,{type:'equip',slot:'theme',id:'theme-legend',requestId:crypto.randomUUID()}));assert.equal(themed.wallet.theme,'theme-legend');checks++;
   const titled=await ok(shop(c,uid,{type:'equip',slot:'prefix',id:'legend',requestId:crypto.randomUUID()}));assert.equal(titled.wallet.prefix,'legend');checks++;
  }
  console.log('cycles and set rewards passed');
- const duplicateCards=Object.fromEntries(STANDARD_CARDS.slice(0,9).map(card=>[card.id,100]));duplicateCards[STANDARD_CARDS[9].id]=0;duplicateCards.unknown=100;Object.assign(duplicateCards,Object.fromEntries(LEGEND_CARDS.map(c=>[c.id,100])));
+ const duplicateCards=Object.fromEntries(STANDARD_CARDS.slice(0,14).map(card=>[card.id,100]));duplicateCards[STANDARD_CARDS[14].id]=0;duplicateCards.unknown=100;Object.assign(duplicateCards,Object.fromEntries(LEGEND_CARDS.map(c=>[c.id,100])));
  const poor=await seed('no-ticket',{cards:duplicateCards,games:4});await no(forge(poor,'no-ticket',()=>{}));
  // Reaching either independently verified milestone grants a ticket.
- for(const [uid,cards,games]of [['cards-ticket',Object.fromEntries(STANDARD_CARDS.slice(0,10).map(card=>[card.id,1])),0],['games-ticket',{},5]]){const c=await seed(uid,{cards,games});await ok(shop(c,uid,{type:'legend',requestId:crypto.randomUUID()}));await no(forge(c,uid,()=>{}));}
+ for(const [uid,cards,games]of [['cards-ticket',Object.fromEntries(STANDARD_CARDS.slice(0,15).map(card=>[card.id,1])),0],['games-ticket',{},5]]){const c=await seed(uid,{cards,games});await ok(shop(c,uid,{type:'legend',requestId:crypto.randomUUID()}));await no(forge(c,uid,()=>{}));}
  console.log('milestones passed');
  const uid='forged',c=await seed(uid,{games:100});
  for(const mutate of [(w,o)=>w.legendDraws++,w=>w.legendDraws=0,w=>delete w.legendDraws,(w,o)=>{const id=LEGEND_CARDS.find(c=>c.id!==w.item).id;w.cards={...o.cards,[id]:1};w.item=id;},w=>w.cards[w.item]++,w=>w.spent=1,w=>w.normalDraws++,w=>w.draws++,w=>w.bonus++,w=>w.createdAt=sdk.Timestamp.fromMillis(999),w=>w.theme='theme-legend',w=>w.prefix='legend',w=>w.cards[STANDARD_CARDS[0].id]=1])await no(forge(c,uid,mutate));

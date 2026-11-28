@@ -23,5 +23,5 @@ const scenes=[
 ];
 export const LEGEND_CARDS=Object.freeze(scenes.map(([id,name,clue,story,article],index)=>Object.freeze({id:'legend-'+id,series:'legend',name,clue,story,source:'https://zh.wikipedia.org/wiki/'+encodeURIComponent(article),hidden:true,foil:true,atlas:Math.floor(index/4),panel:index%4})));
 export const LEGEND_THEME=Object.freeze({id:'theme-legend',kind:'theme',name:'香江傳奇',description:'墨黑、朱紅與鎏金，留住一城光影。',unlockOnly:true});
-export const LEGEND_COLLECTION_STEP=10,LEGEND_GAMES_STEP=5;
+export const LEGEND_COLLECTION_STEP=15,LEGEND_GAMES_STEP=5;
 export const legendComplete=wallet=>LEGEND_CARDS.every(c=>(wallet?.cards?.[c.id]??0)>0);

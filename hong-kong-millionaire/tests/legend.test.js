@@ -2,8 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {emptyWallet,walletAction,legendTickets,drawnLegend,legendComplete,LEGEND_CARDS,LEGEND_THEME,STANDARD_CARDS,CULTURE_CARDS,NORMAL_CARDS,FOIL_CARDS,unlockedPrefixes,drawnCard} from '../src/economy.js';
 test('hidden tickets count original unique cards and completed daily games, including old progress',()=>{
  const wallet=emptyWallet('u',1001);assert.deepEqual(legendTickets({games:4},wallet),{collected:0,games:4,earned:0,available:0});
- wallet.cards=Object.fromEntries(STANDARD_CARDS.slice(0,19).map(c=>[c.id,99]));Object.assign(wallet.cards,{unknown:99,[LEGEND_CARDS[0].id]:99,[STANDARD_CARDS[19].id]:0});
- delete wallet.legendDraws;assert.deepEqual(legendTickets({games:9},wallet),{collected:19,games:9,earned:2,available:2});
+ wallet.cards=Object.fromEntries(STANDARD_CARDS.slice(0,29).map(c=>[c.id,99]));Object.assign(wallet.cards,{unknown:99,[LEGEND_CARDS[0].id]:99,[STANDARD_CARDS[29].id]:0});
+ delete wallet.legendDraws;assert.deepEqual(legendTickets({games:9},wallet),{collected:29,games:9,earned:2,available:2});
  wallet.legendDraws=1;assert.equal(legendTickets({games:10},wallet).available,2);assert.equal(legendTickets({games:0},wallet).available,0);
 });
 test('hidden tickets have an independent repeat-safe sequence, with 20 different cards per cycle',()=>{
