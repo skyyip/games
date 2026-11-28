@@ -1,19 +1,17 @@
-本次：市集空頁、載入狀態及購買後列表修正
+本次：手機市集四按鈕同列、移除更新圖示、卡冊字體加15%
 
-本次沒有修改Firebase Rules、索引、資料格式或交易寫入。已部署前版8%普通抽及售賣記錄設定者，只需完整上傳網站，不需更新Firebase。
+本次只改介面CSS與按鈕屬性，不需更新Firebase Rules或索引。已部署前版8%普通抽及售賣記錄設定者，只需完整更新網站。不清空卡片、獎金、造型、票券、收據或成交記錄。
 
-買卡自動略過自有掛單，填滿24張街坊掛單或真正到底；每個底層查詢仍最多24筆，可能讀多批。載入更多成功清除讀取文字，買到卡後只移除該張，保留其他已載入項目與游標。已售出標籤移至右上角及改黃色底。
-
-若尚未部署前版設定，在sky-playground-millionaire發布同版完整Rules及七個索引後，再上傳網站。適用Spark，無Cloud Functions、無需Blaze。
+尚未部署前版設定者，請在sky-playground-millionaire發布同版完整Rules及七個索引，再上傳網站。適用Spark，無Cloud Functions、無需Blaze。
 完整Rules：
-https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/hong-kong-millionaire/firestore.rules
-完整索引（保留七個）：
-https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/hong-kong-millionaire/firestore.indexes.json
+https://github.com/skyyip/games/blob/54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0/hong-kong-millionaire/firestore.rules
+完整索引：
+https://github.com/skyyip/games/blob/54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0/hong-kong-millionaire/firestore.indexes.json
 部署說明：
-https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/hong-kong-millionaire/FIREBASE.md
+https://github.com/skyyip/games/blob/54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0/hong-kong-millionaire/FIREBASE.md
 
-本次單元140、官方Firestore市集／改名114、真實Auth／SDK市集瀏覽器129及收藏432項通過。不清空任何卡片、獎金、造型、票券、收據或歷史成交，正式Firebase及網站未代為部署。
+本次470項本機瀏覽器檢查通過；此次市場空列表使用只讀stub作布局驗證，未聲稱正式金融交易或實體手機測試。正式Firebase及網站未代為部署。
 
 先前蓄力連連跳前50名仍包含在本網站，若尚未更新其Rules，請在獨立sky-playground-3c5af專案發布：
-https://github.com/skyyip/games/blob/552a3aecf1e8c739a0807d1bbe66653d2bd1e0c3/frogger-jump/firestore.rules
+https://github.com/skyyip/games/blob/54c4e05bc1214f9b24c7e8a87769d0b9391dfdd0/frogger-jump/firestore.rules
 兩專案規則不可混貼。
