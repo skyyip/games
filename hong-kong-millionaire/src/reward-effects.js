@@ -2,15 +2,25 @@ import {ART} from './art.js';
 import {prefixedTitle} from './economy.js';
 import {titleFor} from './game.js';
 const seen=new Set();
-export function playRedVan(run,sound=false){
+const exits=Object.freeze({
+ 'exit-redvan':{title:'落車啦唔該！',copy:'識得收手，街坊下次再嚟。'},
+ 'exit-tram':{title:'叮叮，下一程再挑戰！',copy:'到站先抖抖，獎金跟你走。'},
+ 'exit-ferry':{title:'坐穩，慢慢返去！',copy:'吹陣海風，下次再考香港。'},
+ 'exit-gondola':{title:'上山抖抖，下次再嚟！',copy:'識得收手，今次帶住收穫上山。'}
+});
+export function playExit(run,id,sound=false){
+ if(!Object.hasOwn(exits,id)||run.reason!=='walk')return;
+ const effect=exits[id];
+ // Keep the existing per-run key so changing styles cannot replay a completed exit.
  const key='sky.hkm.redvan.'+(run.id??run.uid+':'+run.day);if(seen.has(key))return;try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1');}catch{}seen.add(key);
- const layer=document.createElement('div');layer.className='redvan-exit';layer.setAttribute('role','status');layer.innerHTML='<div class="redvan-road"></div><div class="redvan-car" aria-hidden="true"><img src="'+ART['exit-redvan.webp']+'" alt="" width="230" height="150"></div><strong>落車啦唔該！</strong><span>識得收手，街坊下次再嚟。</span>';document.body.append(layer);
- if(sound&&'speechSynthesis'in window){const voice=new SpeechSynthesisUtterance('落車啦唔該');voice.lang='zh-HK';voice.rate=.95;speechSynthesis.speak(voice);}setTimeout(()=>layer.remove(),matchMedia('(prefers-reduced-motion: reduce)').matches?2200:3400);
+ const vehicle='<div class="redvan-car" aria-hidden="true"><img src="'+ART[id+'.webp']+'" alt="" width="230" height="150"></div>',scene=id==='exit-gondola'?'<div class="redvan-road">'+vehicle+'</div>':'<div class="redvan-road"></div>'+vehicle;
+ const layer=document.createElement('div');layer.className='redvan-exit '+id;layer.setAttribute('role','status');layer.innerHTML=scene+'<strong>'+effect.title+'</strong><span>'+effect.copy+'</span>';document.body.append(layer);
+ if(sound&&'speechSynthesis'in window){const voice=new SpeechSynthesisUtterance(effect.title);voice.lang='zh-HK';voice.rate=.95;speechSynthesis.speak(voice);}setTimeout(()=>layer.remove(),matchMedia('(prefers-reduced-motion: reduce)').matches?2200:3400);
 }
 export async function downloadResultCard({run,name,wallet,badge=''}){
  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1080;const c=canvas.getContext('2d');if(!c)throw Error('canvas');
  c.fillStyle=wallet?.theme==='theme-ink'?'#e7e3d5':'#fff2cc';c.fillRect(0,0,1080,1080);
- const illustrations=await Promise.all([wallet?.theme,wallet?.frame].map(async id=>{const url=id?.startsWith('theme-')?(ART[id+'.webp']??ART['theme-panels.webp']):ART[id+'.svg'];if(!url)return null;const image=new Image();image.src=url;try{await image.decode();return image;}catch{return null;}}));if(illustrations[0]){c.globalAlpha=.12;const index=['theme-cafe','theme-ink','theme-harbour','theme-tram','theme-lantern','theme-porcelain'].indexOf(wallet.theme),image=illustrations[0],w=image.naturalWidth/(index<0?1:2),h=image.naturalHeight/(index<0?1:3),slot=Math.max(0,index);c.drawImage(image,slot%2*w,Math.floor(slot/2)*h,w,h,0,0,1080,1080);c.globalAlpha=1;}
+ const illustrations=await Promise.all([wallet?.theme,wallet?.frame].map(async id=>{const url=id?.startsWith('theme-')?(ART[id+'.webp']??ART['theme-panels.webp']):(ART[id+'.webp']??ART[id+'.svg']);if(!url)return null;const image=new Image();image.src=url;try{await image.decode();return image;}catch{return null;}}));if(illustrations[0]){c.globalAlpha=.12;const index=['theme-cafe','theme-ink','theme-harbour','theme-tram','theme-lantern','theme-porcelain'].indexOf(wallet.theme),image=illustrations[0],w=image.naturalWidth/(index<0?1:2),h=image.naturalHeight/(index<0?1:3),slot=Math.max(0,index);c.drawImage(image,slot%2*w,Math.floor(slot/2)*h,w,h,0,0,1080,1080);c.globalAlpha=1;}
  const extraColors={'frame-jade':['#315e48','#d9bc73','#7a9f81'],'frame-harbour':['#365d7b','#ddc68f','#8fbec3'],'frame-lantern':['#ad4e39','#e8c374','#80483a']};
  const colors=extraColors[wallet?.frame]??(wallet?.frame==='frame-rwb'?['#c64039','#faf7e6','#23619b']:wallet?.frame==='frame-neon'?['#793ea0','#e35070','#376e58']:['#a6762c','#e6ba55','#846322']);
  for(let i=0;i<3;i++){c.strokeStyle=colors[i];c.lineWidth=13;c.strokeRect(27+i*17,27+i*17,1026-i*34,1026-i*34);}

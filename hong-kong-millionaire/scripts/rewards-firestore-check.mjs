@@ -20,8 +20,10 @@ try{
  const pricing=await seed('pricing');let priceState=await ok(feature.wallet(pricing,'pricing'));
  const normalReceipt=crypto.randomUUID();priceState=await ok(feature.shop(pricing,'pricing',{type:'draw',requestId:normalReceipt}));
  assert.equal(priceState.balance,1000000-DRAW_PRICE);assert.equal(priceState.profile.total,1000000);checks+=2;
- const underpaidId=crypto.randomUUID(),underpaid=walletAction(priceState.profile,priceState.wallet,{type:'draw',requestId:underpaidId},hkDay());underpaid.spent=priceState.wallet.spent+10000;
- const underpaidBatch=sdk.writeBatch(pricing.db);underpaidBatch.set(ref(pricing,'hkm_wallets','pricing'),{...underpaid,updatedAt:sdk.serverTimestamp()});underpaidBatch.set(ref(pricing,'hkm_wallets','pricing','receipts',underpaidId),{uid:'pricing',op:'draw',item:underpaid.item,cost:10000,revision:underpaid.revision,createdAt:sdk.serverTimestamp()});await no(underpaidBatch.commit());
+ for(const forgedCost of [5000,20000]){
+  const underpaidId=crypto.randomUUID(),underpaid=walletAction(priceState.profile,priceState.wallet,{type:'draw',requestId:underpaidId},hkDay());underpaid.spent=priceState.wallet.spent+forgedCost;
+  const underpaidBatch=sdk.writeBatch(pricing.db);underpaidBatch.set(ref(pricing,'hkm_wallets','pricing'),{...underpaid,updatedAt:sdk.serverTimestamp()});underpaidBatch.set(ref(pricing,'hkm_wallets','pricing','receipts',underpaidId),{uid:'pricing',op:'draw',item:underpaid.item,cost:forgedCost,revision:underpaid.revision,createdAt:sdk.serverTimestamp()});await no(underpaidBatch.commit());
+ }
  const drawRevision=priceState.wallet.revision;priceState=await ok(feature.shop(pricing,'pricing',{type:'draw',requestId:normalReceipt}));assert.equal(priceState.wallet.revision,drawRevision);checks++;
  for(const [slot,id]of [['frame','frame-bamboo'],['theme','theme-island']]){
   await assert.rejects(feature.shop(pricing,'pricing',{type:'equip',slot,id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
@@ -43,7 +45,7 @@ try{
   if(card.foil){const goldUid='gold-'+card.id,goldClient=await seed(goldUid);await ok(feature.wallet(goldClient,goldUid));await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',goldUid),{createdAt:sdk.Timestamp.fromMillis(FOIL_CARDS.indexOf(card.id))});});const gold=await ok(feature.shop(goldClient,goldUid,{type:'gold',requestId:crypto.randomUUID()}));assert.equal(gold.outcome,card.id);assert.equal(gold.balance,1000000-GOLD_PRICE);checks+=2;}
 
  }
- // All fourteen cards, including every foil, are required by the independent rules.
+ // All sixteen cards, including every foil, are required by the independent rules.
  for(const series of SERIES){
   const uid='prefix-'+series.id,client=await seed(uid);await ok(feature.wallet(client,uid));
   const cards=CULTURE_CARDS.filter(card=>card.series===series.id),all=Object.fromEntries(cards.map(card=>[card.id,1]));
@@ -56,7 +58,7 @@ try{
   await env.withSecurityRulesDisabled(async ctx=>{await sdk.updateDoc(sdk.doc(ctx.firestore(),'hkm_wallets',uid),{cards:all});});
   const entitled=await ok(feature.shop(client,uid,{type:'equip',slot:'prefix',id:series.id,requestId:crypto.randomUUID()}));assert.equal(entitled.wallet.prefix,series.id);assert.equal(entitled.balance,1000000);checks+=2;
   assert.equal((await ok(feature.wallet(client,uid))).wallet.prefix,series.id);checks++;
-  // A previously equipped twelve-card prefix is retired once, with assets unchanged.
+  // A previously equipped fourteen-card prefix is retired once, with assets unchanged.
   const core=Object.fromEntries(cards.slice(0,-2).map(card=>[card.id,1]));
   await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore();await sdk.updateDoc(sdk.doc(db,'hkm_wallets',uid),{cards:core,prefix:series.id});await sdk.setDoc(sdk.doc(db,'hkm_styles',uid),{uid,frame:'none',theme:'default',prefix:series.id,updatedAt:sdk.Timestamp.now()});});
   await no(sdk.setDoc(ref(client,'hkm_styles',uid),{uid,frame:'none',theme:'default',prefix:series.id,updatedAt:sdk.serverTimestamp()}));
@@ -65,13 +67,13 @@ try{
   const again=await ok(feature.wallet(client,uid));assert.equal(again.wallet.revision,retired.wallet.revision);assert.equal(again.wallet.receipt,retired.wallet.receipt);checks+=2;
   assert.equal((await ok(sdk.getDoc(ref(client,'hkm_wallets',uid,'receipts',retired.wallet.receipt)))).data().cost,0);checks++;
  }
- // New Hong Kong frames use their published price and require ownership before equip.
- for(const id of ['frame-minibus','frame-dimsum','frame-bauhinia','frame-lion']){
+ // New Hong Kong cosmetics use their published price and require ownership before equip.
+ for(const {id,kind:slot} of GEAR.filter(g=>['frame-minibus','frame-dimsum','frame-bauhinia','frame-lion','frame-rooster-bowl','frame-mahjong','frame-bus-stop','frame-flower-window','theme-neon-rain','theme-estate','theme-teahouse','exit-tram','exit-ferry','exit-gondola'].includes(g.id))){
   const uid='new-'+id,client=await seed(uid),initial=await ok(feature.wallet(client,uid)),price=GEAR.find(g=>g.id===id).price;
-  await assert.rejects(feature.shop(client,uid,{type:'equip',slot:'frame',id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
+  await assert.rejects(feature.shop(client,uid,{type:'equip',slot,id,requestId:crypto.randomUUID()}),/not-owned/);checks++;
   const receipt=crypto.randomUUID(),next=walletAction(initial.profile,initial.wallet,{type:'buy',id,requestId:receipt});next.spent--;
   const batch=sdk.writeBatch(client.db);batch.set(ref(client,'hkm_wallets',uid),{...next,updatedAt:sdk.serverTimestamp()});batch.set(ref(client,'hkm_wallets',uid,'receipts',receipt),{uid,op:'buy',item:id,cost:price-1,revision:next.revision,createdAt:sdk.serverTimestamp()});await no(batch.commit());
-  await ok(feature.shop(client,uid,{type:'buy',id,requestId:crypto.randomUUID()}));const equipped=await ok(feature.shop(client,uid,{type:'equip',slot:'frame',id,requestId:crypto.randomUUID()}));assert.equal(equipped.wallet.frame,id);assert.equal(equipped.balance,1000000-price);assert.equal(equipped.profile.total,1000000);checks+=3;
+  await ok(feature.shop(client,uid,{type:'buy',id,requestId:crypto.randomUUID()}));const equipped=await ok(feature.shop(client,uid,{type:'equip',slot,id,requestId:crypto.randomUUID()}));assert.equal(equipped.wallet[slot],id);assert.equal(equipped.balance,1000000-price);assert.equal(equipped.profile.total,1000000);checks+=3;
  }
  const c=await seed('collector');let result=await ok(feature.wallet(c,'collector'));assert.equal(result.balance,1000000);
  await no(sdk.updateDoc(ref(c,'hkm_wallets','collector'),{bonus:999999,updatedAt:sdk.serverTimestamp()}));

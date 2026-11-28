@@ -1,5 +1,5 @@
 import {hkDay} from './game.js';
-export const DRAW_PRICE=20000,GOLD_PRICE=80000,WEEKEND_PASS_PRICE=80000,WEEKEND_LIMIT=5,RETRY_PRICE=100000;
+export const DRAW_PRICE=10000,GOLD_PRICE=80000,WEEKEND_PASS_PRICE=80000,WEEKEND_LIMIT=5,RETRY_PRICE=100000;
 export const SERIES=Object.freeze([{id:'transport',name:'交通工具',prefix:'交通達人'},{id:'heritage',name:'非物質文化遺產',prefix:'非遺守護者'},{id:'snacks',name:'街頭小吃',prefix:'食神'},{id:'streets',name:'老街日常',prefix:'老街收藏家'},{id:'harbour',name:'海港遊蹤',prefix:'海港漫遊者'},{id:'villages',name:'圍村與離島',prefix:'村落地膽'},{id:'crafts',name:'匠人手作',prefix:'手藝收藏家'}]);
 // Shared date-derived offer: identical on every device; Firestore recomputes it.
 export function retryDiscount(day=hkDay()){const seed=(day*48271+1013904223)%2147483647;return 5+((seed*48271+1013904223)%2147483647)%5;}
@@ -103,7 +103,21 @@ const cards=[
  ["lam-tsuen-wishes","villages","林村許願時光",false,"老樹旁的仿真許願樹與許願架，讓林村的掛願習俗繼續陪住街坊。願望可以好宏大，準時收工亦值得寫低。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-lam-tsuen-wishing-tree.html",false],
  ["tung-chung-fort-foil","villages","東涌炮台舊影",true,"石牆與古炮記下東涌的清代海防故事，山影與海風替畫面留住舊時氣氛。平時最驚電話催交功課，昔日守城真係另一種責任。","https://www.amo.gov.hk/tc/historic-buildings/monuments/outlying-islands/monuments_07/index.html",false],
  ["scales-workshop","crafts","秤號巧手",false,"一盤、一砣、一枝桿，師傅把手工與刻度慢慢磨準。問一件貨有幾多斤兩，靠工具，唔靠吹水。","https://zolimacitymag.com/forgotten-hong-kong-icon-handmade-traditional-chinese-scales/",false],
- ["floral-button-foil","crafts","盤扣花韻",true,"布條在指尖盤成花形鈕扣，小小一粒，收起中式服裝的細緻手藝。你仲喺度解耳機線，師傅已經把線條盤成花。","https://www.icho.hk/tc/web/icho/past_event35.html",false]
+ ["floral-button-foil","crafts","盤扣花韻",true,"布條在指尖盤成花形鈕扣，小小一粒，收起中式服裝的細緻手藝。你仲喺度解耳機線，師傅已經把線條盤成花。","https://www.icho.hk/tc/web/icho/past_event35.html",false],
+ ["hong-kong-rickshaw","transport","人力車街頭舊影",false,"木輪、車篷與街道身影，畫出香港昔日人力車的生活記憶。今日叫車靠手機，舊時一程路，背後是另一種勞動與城市節奏。","https://www.hkmemory.hk/tc/collections-ecexperience-early_motion_pictures-lives_of_residents.html",false],
+ ["whitty-tram-depot-foil","transport","屈地街車廠",true,"電車、路軌與架空電線在屈地街車廠交織。叮叮陪街坊出門，返到車廠，原來都有一班人替佢準備下一程。","https://www.hktramways.com/tc/contact-us",false],
+ ["hakka-mountain-song","heritage","客家山歌",false,"客家山歌在村落聚會與節慶中傳唱，對答之間留住地方語言。你仲喺度諗下一句，對面街坊已經唱埋個押韻。","https://www.lcsd.gov.hk/CE/CulturalService/Programme/tc/music/programs_1291.html",false],
+ ["cantonese-opera-dan-foil","heritage","粵劇水袖",true,"水袖一揚，台上眉眼已經講緊故事；唱腔、身段與戲服一同構成粵劇的舞台語言。觀眾未睇晒節目單，心情已經入咗戲。","https://www.icho.hk/documents/Intangible-Cultural-Heritage-Inventory/2024/ich_inventory_2024_cn.pdf#page=5",false],
+ ["imitation-fin-soup","snacks","街角碗仔翅",false,"粉絲、菇絲與湯羹盛滿一小碗，是街角熟悉的碗仔翅。明明話只買嚟醫肚，食完又開始望隔籬檔。","https://www.library.gov.mo/uploads/attachment/2026-01/16753696757e5656e7.pdf",false],
+ ["grid-waffle-foil","snacks","格仔餅小確幸",true,"圓餅烘出格紋，夾住牛油、花生醬與煉奶等熟悉配搭。個餅一對摺，減肥計劃都跟住摺埋一陣。","https://www.daydaycook.com/zh-Hant/recipe/walffle",false],
+ ["estate-laundry","streets","屋邨晾衫日常",false,"彩色窗格、晾衫架與樓下街坊，砌出屋邨生活的一頁。天晴最先開會的，可能係一家人的衫。","https://www.housingauthority.gov.hk/tc/common/pdf/about-us/housing-authority/ha-paper-library/SHC6-14.pdf",false],
+ ["staircase-locksmith-foil","streets","樓梯舖配匙",true,"鎖匙胚、夾具與手上的銼刀，留住配匙檔的細心工夫。平時最想搵匙開門，今日先慢慢望清楚師傅怎樣配好一條匙。","https://www.dotdotnews.com/a/202611/25/AP6b051318e4b091a65a30872f.html",false],
+ ["shau-kei-wan-slipway","harbour","筲箕灣修船排",false,"船排上的木船、工具與工匠，把海港故事接回岸上。海面看起來風平浪靜，岸邊師傅早已開工整好下一程。","https://www.cache.org.hk/download/cpg_tt7_shaukeiwalker_A6.pdf",false],
+ ["blake-pier-foil","harbour","赤柱卜公碼頭",true,"綠色鐵柱與長屋頂，沿海邊留住卜公碼頭的歷史意境。坐低吹陣海風，連平日催你趕路的時間都好似慢咗。","https://www.discoverhongkong.com/tc/place-to-go/travel.guide-stanley-blake-pier.html",false],
+ ["sam-tung-uk-courtyard","villages","三棟屋庭院",false,"青磚、天井與屋脊，留住荃灣三棟屋的客家村落記憶。窗外城市一路長高，庭院仍然替舊故事留住一片天。","https://www.amo.gov.hk/tc/historic-buildings/monuments/new-territories/monuments_10/index.html",false],
+ ["fong-yuen-study-hall-foil","villages","芳園書室舊影",true,"馬灣芳園書室的歷史建築，記下島上教育的一段歲月。海風可以吹散暑氣，功課就算以前都唔會自己做完。","https://www.heritage.gov.hk/tc/revitalisation-scheme/batch-vi-of-revitalisation-scheme/virtual-tour-on-batch-vi-historic-buildings/fong-yuen-study-hall/index.html",false],
+ ["gilded-woodcarving","crafts","金漆木雕",false,"花鳥紋樣在木面一刀一刀成形，再以金彩帶出層次。香港木雕手藝曾服務招牌與神像佛具，一塊木背後有好多耐性。","https://hkctp.com.hk/news/id/3192",false],
+ ["opera-headdress-foil","crafts","盔頭珠光",true,"珠飾、絨球與細緻骨架，拼成戲台上的華麗盔頭。台前一轉身閃閃發光，台後原來有無數次細心穿針引線。","https://cantonese.edmundtai.com/資料庫首頁",false]
 ];
 export const CULTURE_CARDS=Object.freeze(cards.map(([id,series,name,foil,story,source,prefixRequired=true])=>Object.freeze({id,series,name,foil,story,source,...(prefixRequired?{}:{prefixRequired:false})})));
 export const GEAR=Object.freeze([
@@ -130,7 +144,17 @@ export const GEAR=Object.freeze([
  {"id":"frame-minibus","kind":"frame","name":"小巴水牌框","price":38000,"description":"紅綠水牌、窗角與手寫筆觸，帶住街坊節奏出場。"},
  {"id":"frame-dimsum","kind":"frame","name":"茶樓蒸籠框","price":52000,"description":"竹蒸籠編紋與熱騰騰點心，把一盅兩件戴上頭像。"},
  {"id":"frame-bauhinia","kind":"frame","name":"洋紫荊花框","price":75000,"description":"紫紅花瓣與葉脈環繞，留住香港街角的春色。"},
- {"id":"frame-lion","kind":"frame","name":"醒獅彩繡框","price":110000,"description":"彩獅眉眼、繡紋與金線，醒目上榜但不增加答題能力。"}
+ {"id":"frame-lion","kind":"frame","name":"醒獅彩繡框","price":110000,"description":"彩獅眉眼、繡紋與金線，醒目上榜但不增加答題能力。"},
+ {"id":"frame-rooster-bowl","kind":"frame","name":"雞公碗彩瓷框","price":45000,"description":"紅冠雞、綠葉與青花瓷邊，框住一份港式餐桌記憶。"},
+ {"id":"frame-mahjong","kind":"frame","name":"麻雀開枱框","price":58000,"description":"筒子與索子圍成一圈，牌面熱鬧，答題照樣靠自己。"},
+ {"id":"frame-bus-stop","kind":"frame","name":"巴士站牌框","price":76000,"description":"紅黃站牌色、金屬鉚釘與迷你巴士，街坊身份隨時到站。"},
+ {"id":"frame-flower-window","kind":"frame","name":"唐樓鐵窗框","price":98000,"description":"墨綠鐵花與暖金細節，將舊唐樓窗邊的風景戴上頭像。"},
+ {"id":"theme-neon-rain","kind":"theme","name":"雨夜霓虹街","price":110000,"description":"雨傘、騎樓與霓虹倒影，答題區保留清晰淺色紙面。"},
+ {"id":"theme-estate","kind":"theme","name":"屋邨晨光","price":150000,"description":"彩色窗格、街場與樹蔭，把街坊的早晨放進背景。"},
+ {"id":"theme-teahouse","kind":"theme","name":"一盅兩件","price":190000,"description":"蒸籠、茶壺與茶樓暖光，替今日挑戰留一席街坊位。"},
+ {"id":"exit-tram","kind":"exit","name":"叮叮載你走","price":60000,"description":"割禾青後，叮叮停站接你離場；放低緊張，下一程再嚟。"},
+ {"id":"exit-ferry","kind":"exit","name":"小輪慢慢走","price":70000,"description":"割禾青後，小輪隨水波輕晃離岸，帶住獎金吹陣海風。"},
+ {"id":"exit-gondola","kind":"exit","name":"纜車上山抖抖","price":90000,"description":"割禾青後，纜車沿斜索上山，安全帶走本局的收穫。"}
 ]);
 const gearKindOrder={frame:0,theme:1,exit:2};
 export const DISPLAY_GEAR=Object.freeze([...GEAR].sort((a,b)=>gearKindOrder[a.kind]-gearKindOrder[b.kind]||a.price-b.price));

@@ -7,7 +7,7 @@ import {titleFor,PRIZES,MODE_NAMES,questionById,QUESTION_MS,hkDay} from './game.
 import {isWeekend,weekendKey,WEEKEND_LIMIT,WEEKEND_PASS_PRICE,RETRY_PRICE,retryPrice,retryDiscount} from './economy.js';
 import {TOPICS,asyncRoom,roomDeadline,sessionQuestion,sessionRemaining,sessionRemoved,sessionVotes,sessionPresentation,sessionReviewReady,sessionTerminal,ROOM_INTERVAL,ROOM_DURATION,ROOM_FEE_RESERVE,roomCode,roomFeeShare,roomCanFinish} from './session-engine.js';
 import {celebrateMillion} from './celebrations.js';
-import {playRedVan} from './reward-effects.js';
+import {playExit} from './reward-effects.js';
 const money=n=>'$'+Number(n).toLocaleString('en-HK'),el=(tag,text='',cls='')=>{const n=document.createElement(tag);n.textContent=text;n.className=cls;return n;};
 const snapshotKey=r=>r?[r.id,r.index,r.phase,r.questionAt,r.halfFor,r.phoneFor,r.audienceFor,r.correct,r.credited].join(':'):'';
 export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onChange=()=>{},canStart=()=>true,soundEnabled=()=>false,showtime=null}){
@@ -116,7 +116,7 @@ export function installArcade({cloud,getUser,getProfile,login,onShop=()=>{},onCh
    const review=button('查看本局解說',()=>{if(!reviewReady())return;hint.querySelector('h2').textContent='本局香港故事';const body=hint.querySelector('#arcade-hint-body');body.replaceChildren();for(const a of Object.values(run.answers)){const question=questionById(a.qid);if(question){const item=el('article','','arcade-review');item.append(el('h3',questionView(question).question),el('p','答案：'+question.options[question.answer]),el('p',question.explanation));body.append(item);}}hint.showModal();},!reviewReady());review.id='arcade-review-open';result.append(review);
    if(run.kind==='room'){const note=el('small',asyncRoom(run)?'全員交卷或房間結算後，即可查看解說。':'本題揭曉或全員交卷後，即可查看解說。');note.id='arcade-review-wait';result.append(note);}
    if(run.kind==='room'){result.append(button('查看房間及結算',()=>operation('room',()=>attach(run.room)),false,'primary'));const live=el('p');live.id='room-live';result.append(live);}
-   else result.append(button('返回遊樂場',()=>{view='home';render();}));list.append(result);updateRoomProgress();celebrateMillion(run);if(state?.wallet?.exit==='exit-redvan'&&run.reason==='walk')playRedVan(run,soundEnabled());return;
+   else result.append(button('返回遊樂場',()=>{view='home';render();}));list.append(result);updateRoomProgress();celebrateMillion(run);if(run.reason==='walk')playExit(run,state?.wallet?.exit,soundEnabled());return;
   }
   const timer=el('div','','arcade-timer');timer.id='arcade-clock';timer.setAttribute('role','timer');list.append(timer);
   const p=sessionPresentation(run,now()),shown=questionView(q,p.mode),visual=el('div','','arcade-visual');let image=null;

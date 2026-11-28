@@ -19,7 +19,7 @@
     "test:auth-transition": "node scripts/auth-transition-check.mjs",
     "test:comic": "node scripts/comic-browser-check.mjs",
     "review:generate": "node scripts/generate-comic-review.mjs",
-    "review:check": "node scripts/generate-comic-review.mjs --check && node scripts/generate-daily-review.mjs --check && node scripts/generate-street-review.mjs --check && python3 scripts/generate-street-art.py --check && node scripts/generate-local-review.mjs --check && node scripts/generate-neighbourhood-review.mjs --check && node scripts/generate-district-review.mjs --check && node scripts/generate-familiar-review.mjs --check && node scripts/generate-culture-120-review.mjs --check && node scripts/generate-local-expansion-120-review.mjs --check && node scripts/generate-neighbourhood-chapter-review.mjs --check",
+    "review:check": "node scripts/generate-comic-review.mjs --check && node scripts/generate-daily-review.mjs --check && node scripts/generate-street-review.mjs --check && python3 scripts/generate-street-art.py --check && node scripts/generate-local-review.mjs --check && node scripts/generate-neighbourhood-review.mjs --check && node scripts/generate-district-review.mjs --check && node scripts/generate-familiar-review.mjs --check && node scripts/generate-culture-120-review.mjs --check && node scripts/generate-local-expansion-120-review.mjs --check && node scripts/generate-neighbourhood-chapter-review.mjs --check && node scripts/generate-winter-neighbourhood-review.mjs --check",
     "review:daily": "node scripts/generate-daily-review.mjs",
     "test:daily-design": "node scripts/daily-design-browser-check.mjs",
     "test:street-observation": "node scripts/street-observation-browser-check.mjs",
@@ -38,7 +38,11 @@
     "test:expansion": "node scripts/local-expansion-120-browser-check.mjs",
     "review:chapter": "node scripts/generate-neighbourhood-chapter-review.mjs",
     "test:chapter": "node scripts/neighbourhood-chapter-browser-check.mjs",
-    "test:chapter-rules": "node scripts/neighbourhood-chapter-firestore-check.mjs"
+    "test:chapter-rules": "node scripts/neighbourhood-chapter-firestore-check.mjs",
+    "review:winter": "node scripts/generate-winter-neighbourhood-review.mjs",
+    "test:winter": "node scripts/winter-neighbourhood-browser-check.mjs",
+    "test:winter-rules": "node scripts/winter-neighbourhood-firestore-check.mjs",
+    "test:winter-cosmetics": "node scripts/winter-cosmetics-browser-check.mjs"
   },
   "dependencies": {
     "firebase": "^12.5.0"

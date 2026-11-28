@@ -5,6 +5,6 @@ test('all collectible scenes have unique atlas cells or distinct original illust
  assert.equal(slots.size,CULTURE_CARDS.length);
 });
 test('village and craft cards use distinct detailed raster scenes instead of the simplified vectors',()=>{
- const cards=CULTURE_CARDS.filter(c=>['villages','crafts'].includes(c.series));assert.equal(cards.length,28);
+ const cards=CULTURE_CARDS.filter(c=>['villages','crafts'].includes(c.series));assert.equal(cards.length,32);
  for(const card of cards){const url=cultureCardImage(card);assert(url.endsWith('.webp'),card.id);assert(url.includes('/card-'+card.id+'.webp'));assert.deepEqual(cultureCardCrop(card),{column:0,row:0,columns:1,rows:1});}
 });

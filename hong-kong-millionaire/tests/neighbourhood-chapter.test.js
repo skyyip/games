@@ -7,7 +7,7 @@ import {newSession,sessionQid,ROOM_POOLS} from '../src/session-engine.js';
 const ids=new Set(bank.map(q=>q.id)),DAY=20783,horizon=Math.max(...QUESTION_PLANS[BANK_VERSION].map(p=>p.ids.length));
 test('120 neighbourhood chapter questions have distinct IDs, balanced tiers and plausible-size options',()=>{
  assert.equal(bank.length,120);assert.equal(ids.size,120);assert.deepEqual(QUESTIONS.filter(q=>/^(aa|bb|cc)\d{2}$/.test(q.id)),bank);
- assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,891);assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,891);
+ assert.equal(new Set(QUESTIONS.map(q=>q.id)).size,1011);assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,1011);
  assert.deepEqual([1,2,3].map(t=>bank.filter(q=>q.tier===t).length),[40,40,40]);assert.deepEqual([0,1,2,3].map(a=>bank.filter(q=>q.answer===a).length),[30,30,30,30]);
  for(const [prefix,records]of [['aa',bank.filter(q=>q.tier===1)],['bb',bank.filter(q=>q.tier===2)],['cc',bank.filter(q=>q.tier===3)]]){
   assert.equal(records.length,40);assert.deepEqual([0,1,2,3].map(a=>records.filter(q=>q.answer===a).length),[10,10,10,10]);

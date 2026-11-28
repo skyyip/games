@@ -4,8 +4,8 @@ import {emptyWallet,walletBalance,walletAction,drawnCard,CULTURE_CARDS,FOIL_CARD
 import {newSession,sessionQid,sessionQuestion,sessionAct,sessionFinish,sessionReviewReady,ROOM_POOLS,roomWinner,ROOM_INTERVAL,roomFeeShare,roomCanFinish,roomCode,roomEntry} from '../src/session-engine.js';
 import {hkDay,dayEnd,questionId} from '../src/game.js';
 const NOW=Date.UTC(2026,10,14,4),DAY=hkDay(NOW);
-test('normal cultural draws cost 20000 and cannot use the former price',()=>{
- assert.equal(DRAW_PRICE,20000);const wallet=emptyWallet('p',0);assert.throws(()=>walletAction({total:19999},wallet,{type:'draw'},DAY),/insufficient-balance/);assert.equal(wallet.spent,0);assert.equal(wallet.draws,0);assert.equal(walletAction({total:20000},wallet,{type:'draw'},DAY).spent,20000);
+test('normal cultural draws cost 10000 and enforce sufficient balance',()=>{
+ assert.equal(DRAW_PRICE,10000);const wallet=emptyWallet('p',0);assert.throws(()=>walletAction({total:9999},wallet,{type:'draw'},DAY),/insufficient-balance/);assert.equal(wallet.spent,0);assert.equal(wallet.draws,0);assert.equal(walletAction({total:10000},wallet,{type:'draw'},DAY).spent,10000);
 });
 test('purchases spend an available balance without reducing career prize totals',()=>{
  const profile={total:1000000},old=emptyWallet('p',0),next=walletAction(profile,old,{type:'buy',id:'frame-rwb'},DAY);
@@ -109,9 +109,9 @@ test('daily offers are shared, bounded and reject stale or forged confirmation p
 });
 
 test('every card in a series is required for its prefix, including all expansion foils',()=>{
- assert.equal(CULTURE_CARDS.length,98);assert.equal(SERIES.length,7);
+ assert.equal(CULTURE_CARDS.length,112);assert.equal(SERIES.length,7);
  for(const series of SERIES){
-  const cards=CULTURE_CARDS.filter(c=>c.series===series.id);assert.equal(cards.length,14);
+  const cards=CULTURE_CARDS.filter(c=>c.series===series.id);assert.equal(cards.length,16);
   const complete={...emptyWallet('p',0),cards:Object.fromEntries(cards.map(c=>[c.id,1]))};
   for(const missing of cards){
    const wallet={...complete,cards:{...complete.cards,[missing.id]:0}};

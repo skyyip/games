@@ -1,3 +1,4 @@
+import {WINTER_NEIGHBOURHOOD_QUESTIONS} from '../src/winter-neighbourhood-questions.js';
 import {NEIGHBOURHOOD_CHAPTER_QUESTIONS} from '../src/neighbourhood-chapter-questions.js';
 import {CITY_LIFE_EXTRA_QUESTIONS} from '../src/city-life-extra-questions.js';
 import {CULTURE_LIFE_EXTRA_QUESTIONS} from '../src/culture-life-extra-questions.js';
@@ -12,7 +13,7 @@ import {LOCAL_QUESTIONS} from '../src/local-questions.js';
 import {NEIGHBOURHOOD_QUESTIONS} from '../src/neighbourhood-questions.js';
 import {FAMILIAR_QUESTIONS} from '../src/familiar-questions.js';
 import {DISTRICT_QUESTIONS} from '../src/district-questions.js';
-const bank=process.env.HKM_QUESTION_PACK==='chapter120'?NEIGHBOURHOOD_CHAPTER_QUESTIONS:process.env.HKM_QUESTION_PACK==='extra120'?[...CITY_LIFE_EXTRA_QUESTIONS,...CULTURE_LIFE_EXTRA_QUESTIONS,...DISTRICT_NATURE_EXTRA_QUESTIONS]:process.env.HKM_QUESTION_PACK==='culture120'?[...CITY_CULTURE_QUESTIONS,...LOCAL_DISCOVERY_QUESTIONS]:process.env.HKM_QUESTION_PACK==='familiar'?FAMILIAR_QUESTIONS:process.env.HKM_QUESTION_PACK==='district'?DISTRICT_QUESTIONS:process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
+const bank=process.env.HKM_QUESTION_PACK==='winter120'?WINTER_NEIGHBOURHOOD_QUESTIONS:process.env.HKM_QUESTION_PACK==='chapter120'?NEIGHBOURHOOD_CHAPTER_QUESTIONS:process.env.HKM_QUESTION_PACK==='extra120'?[...CITY_LIFE_EXTRA_QUESTIONS,...CULTURE_LIFE_EXTRA_QUESTIONS,...DISTRICT_NATURE_EXTRA_QUESTIONS]:process.env.HKM_QUESTION_PACK==='culture120'?[...CITY_CULTURE_QUESTIONS,...LOCAL_DISCOVERY_QUESTIONS]:process.env.HKM_QUESTION_PACK==='familiar'?FAMILIAR_QUESTIONS:process.env.HKM_QUESTION_PACK==='district'?DISTRICT_QUESTIONS:process.env.HKM_QUESTION_PACK==='neighbourhood'?NEIGHBOURHOOD_QUESTIONS:LOCAL_QUESTIONS;
 import {newRun,hkDay,questionId,act,QUESTION_PLANS,BANK_VERSION} from '../src/game.js';
 import {questionView} from '../src/question-view.js';
 const {chromium}=await import(pathToFileURL(process.env.GRID_RUSH_PLAYWRIGHT_MODULE));

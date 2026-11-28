@@ -40,3 +40,39 @@ html[data-hkm-theme=theme-workshop] body{background-color:#eadbc0;background-ima
 .profile-avatar.frame-lion::after{background-image:url('./assets/frame-lion.svg')}
 
 .theme-preview.theme-single{aspect-ratio:1}.theme-preview.theme-single>img{width:100%;height:100%;object-fit:cover}
+
+/* Larger shop illustrations remain bounded by the available viewport. */
+.collection-dialog{width:min(1020px,calc(100% - 24px))}
+.culture-card-dialog{width:min(516px,calc(100% - 28px))}
+.culture-card-dialog .culture-face{max-width:396px}
+.gacha-machine{width:min(252px,100%)}
+.gear-preview.profile-avatar{width:110.4px;height:110.4px;font-size:46.8px}
+.theme-preview>img{height:204px}
+.theme-preview[class*="exit-"]>img{height:216px;object-fit:contain;padding:6px}
+@media(max-width:560px){.gear-grid .gear-preview.profile-avatar{width:clamp(74.4px,23.5vw,96px);height:clamp(74.4px,23.5vw,96px);font-size:clamp(36px,10.8vw,43.2px)}.theme-preview>img{height:216px}}
+.profile-avatar.frame-rooster-bowl::after{background-image:url('./assets/frame-rooster-bowl.webp')}
+.profile-avatar.frame-mahjong::after{background-image:url('./assets/frame-mahjong.webp')}
+.profile-avatar.frame-bus-stop::after{background-image:url('./assets/frame-bus-stop.webp')}
+.profile-avatar.frame-flower-window::after{background-image:url('./assets/frame-flower-window.webp')}
+html[data-hkm-theme=theme-neon-rain] body{background-color:#cfdbdb;background-image:linear-gradient(#edf1e9de,#edf1e9de),url('./assets/theme-neon-rain.webp');background-size:auto,500px 500px}
+html[data-hkm-theme=theme-neon-rain] :is(.question-panel,dialog){border-color:#3d646b;box-shadow:5px 6px 0 #99b6b7}
+html[data-hkm-theme=theme-neon-rain] body::after{background-image:url('./assets/theme-neon-rain.webp');background-size:500px 500px;background-repeat:repeat;opacity:.08}
+html[data-hkm-theme=theme-estate] body{background-color:#e3e6cc;background-image:linear-gradient(#fff9e5de,#fff9e5de),url('./assets/theme-estate.webp');background-size:auto,500px 500px}
+html[data-hkm-theme=theme-estate] :is(.question-panel,dialog){border-color:#617653;box-shadow:5px 6px 0 #c4cda7}
+html[data-hkm-theme=theme-estate] body::after{background-image:url('./assets/theme-estate.webp');background-size:500px 500px;background-repeat:repeat;opacity:.08}
+html[data-hkm-theme=theme-teahouse] body{background-color:#ead8ba;background-image:linear-gradient(#fff5e0de,#fff5e0de),url('./assets/theme-teahouse.webp');background-size:auto,500px 500px}
+html[data-hkm-theme=theme-teahouse] :is(.question-panel,dialog){border-color:#8d6241;box-shadow:5px 6px 0 #cfac7f}
+html[data-hkm-theme=theme-teahouse] body::after{background-image:url('./assets/theme-teahouse.webp');background-size:500px 500px;background-repeat:repeat;opacity:.08}
+.exit-tram .redvan-road{height:18px;background:repeating-linear-gradient(#6b756a 0 4px,#b7b8a3 5px 7px,#6b756a 8px 12px)}
+.exit-tram .redvan-car{left:50%;animation:tram-depart 3.2s ease-in-out both}
+@keyframes tram-depart{0%{transform:translateX(-170%)}42%,64%{transform:translateX(-50%)}100%{transform:translateX(170%)}}
+.redvan-exit.exit-ferry{background:#e8f3ed}
+.exit-ferry .redvan-road{height:32px;background:repeating-linear-gradient(170deg,#477b85 0 8px,#c0d9d0 9px 12px,#6b9fa6 13px 22px);border-color:#496e76}
+.exit-ferry .redvan-car{left:50%;bottom:9px;animation:ferry-depart 3.2s ease-in-out both}
+@keyframes ferry-depart{0%{transform:translate(-170%,0) rotate(-1deg)}35%,62%{transform:translate(-50%,0) rotate(-1deg)}48%{transform:translate(-50%,-4px) rotate(1deg)}100%{transform:translate(170%,-3px) rotate(1deg)}}
+.redvan-exit.exit-gondola{background:#e5edd6}
+.exit-gondola .redvan-road{top:85px;bottom:auto;left:-20%;right:auto;width:140%;height:2px;border:0;background:#4c6255;transform:rotate(-14deg);transform-origin:center}
+.exit-gondola .redvan-car{top:-7px;bottom:auto;left:calc(50% - 50px);width:100px;transform:rotate(14deg);transform-origin:50px 7px;animation:gondola-depart 3.2s ease-in-out both}
+.exit-gondola .redvan-car img{width:100px;height:100px}
+@keyframes gondola-depart{0%{left:-30%}42%,64%{left:calc(50% - 50px)}100%{left:120%}}
+@media(prefers-reduced-motion:reduce){.exit-tram .redvan-car,.exit-ferry .redvan-car{animation:none;left:50%;transform:translateX(-50%)}.exit-gondola .redvan-car{animation:none;left:calc(50% - 50px)}}

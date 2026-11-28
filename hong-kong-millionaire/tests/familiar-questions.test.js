@@ -6,7 +6,7 @@ import {newRun,questionId,questionFor,act} from '../src/game.js';
 import {newSession,sessionQid} from '../src/session-engine.js';
 const DAY=20783,ids=new Set(bank.map(q=>q.id));
 test('60 new familiar culture records preserve distinct topics, sources and balanced progression',()=>{
- assert.equal(bank.length,60);assert.deepEqual(QUESTIONS.filter(q=>q.id.startsWith('f')),bank);
+ assert.equal(bank.length,60);assert.deepEqual(QUESTIONS.filter(q=>/^f\d{2}$/.test(q.id)),bank);
  assert.equal(new Set(QUESTIONS.map(q=>q.question)).size,QUESTIONS.length);
  assert.deepEqual([1,2,3].map(t=>bank.filter(q=>q.tier===t).length),[20,20,20]);
  assert.deepEqual([0,1,2,3].map(a=>bank.filter(q=>q.answer===a).length),[15,15,15,15]);
